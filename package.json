@@ -1,5 +1,5 @@
 {
-  "workspaces": ["src"],
+  "workspaces": ["src", "test"],
   "private": true,
   "author": "Pimlico",
   "type": "module",
