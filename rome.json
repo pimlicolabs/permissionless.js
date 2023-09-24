@@ -1,0 +1,41 @@
+{
+    "$schema": "./node_modules/rome/configuration_schema.json",
+    "files": {
+        "ignore": [
+            "node_modules",
+            "**/node_modules",
+            "cache",
+            "coverage",
+            "tsconfig.json",
+            "tsconfig.*.json"
+        ]
+    },
+    "organizeImports": {
+        "enabled": true
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "suspicious": {
+                "noExplicitAny": "warn"
+            },
+            "style": {
+                "noUnusedTemplateLiteral": "warn"
+            }
+        }
+    },
+    "formatter": {
+        "enabled": true,
+        "formatWithErrors": true,
+        "lineWidth": 120,
+        "indentSize": 4,
+        "indentStyle": "space"
+    },
+    "javascript": {
+        "formatter": {
+            "semicolons": "asNeeded",
+            "trailingComma": "none"
+        }
+    }
+}
