@@ -10,7 +10,8 @@
             "tsconfig.*.json",
             "_cjs",
             "_esm",
-            "_types"
+            "_types",
+            "bun.lockb"
         ]
     },
     "organizeImports": {
