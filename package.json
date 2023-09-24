@@ -5,8 +5,12 @@
   "type": "module",
   "sideEffects": false,
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.8",
+    "@changesets/cli": "^2.26.2",
+    "bun-types": "^1.0.3",
     "rimraf": "^5.0.1",
     "rome": "^12.1.3",
+    "simple-git-hooks": "^2.9.0",
     "tslib": "^2.6.2",
     "typescript": "^5.2.2"
   },
@@ -18,6 +22,12 @@
     "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./src/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./src/_cjs/package.json",
     "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./src/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./src/_esm/package.json",
     "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./src/_types --emitDeclarationOnly --declaration --declarationMap",
-    "clean": "rimraf src/_esm src/_cjs src/_types"
+    "clean": "rimraf src/_esm src/_cjs src/_types",
+    "changeset": "changeset",
+    "changeset:release": "bun run build && changeset publish",
+    "changeset:version": "changeset version && bun install --lockfile-only"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run format && bun run lint:fix"
   }
 }
