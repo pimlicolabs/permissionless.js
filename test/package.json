@@ -1,5 +1,9 @@
 {
     "name": "test",
     "private": true,
-    "type": "module"
+    "type": "module",
+    "dependencies": {
+        "dotenv": "^16.3.1",
+        "viem": "^1.12.2"
+    }
 }

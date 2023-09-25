@@ -1,1 +1,3 @@
-export { bundlerActions } from "./actions/bundler"
+import bundlerActions from "./actions/bundler"
+
+export { bundlerActions }
