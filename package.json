@@ -1,8 +1,7 @@
 {
     "workspaces": [
         "src",
-        "test",
-        "configs"
+        "test"
     ],
     "private": true,
     "author": "Pimlico",
