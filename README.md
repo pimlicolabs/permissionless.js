@@ -13,7 +13,6 @@ For a full explanation of Permissionless.js, please visit our [docs page](https:
 Start using permissionless.js with:
 ```bash
 bun install permissionless
-./alto
 ```
 
 ## License
