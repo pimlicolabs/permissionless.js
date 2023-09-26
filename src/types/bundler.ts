@@ -1,6 +1,8 @@
-import type { Address, Hash, Hex } from "viem"
+import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
+
+export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema>
 
 export type BundlerRpcSchema = [
     {
