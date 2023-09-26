@@ -177,9 +177,9 @@ const main = async () => {
         transport: http(process.env.RPC_URL as string)
     })
 
-    const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
+    // const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
-    if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
+    // if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
 
     const accountAddress = await getAccountAddress(factoryAddress, eoaWalletClient)
 

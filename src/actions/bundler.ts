@@ -1,7 +1,7 @@
 import type { Address } from "abitype"
-import { type Account, type Chain, type Client, type Hash, type Hex, type Transport } from "viem"
+import { type Account, type Chain, type Client, type Hash, type Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { UserOperation } from "./types"
+import type { BundlerRpcSchema, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "./types"
 import { deepHexlify } from "./utils"
 
 export type sendUserOperationParameters = {
@@ -14,172 +14,87 @@ export type estimateUserOperationGasParameters = {
     entryPoint: Address
 }
 
-type UserOperationReceipt = {
-    userOpHash: Hash
-    sender: Address
-    nonce: bigint
-    actualGasUsed: bigint
-    actualGasCost: bigint
-    success: boolean
-    receipt: {
-        transactionHash: Hex
-        transactionIndex: bigint
-        blockHash: Hash
-        blockNumber: bigint
-        from: Address
-        to: Address | null
-        cumulativeGasUsed: bigint
-        status: bigint | null
-        gasUsed: bigint
-        contractAddress: Address | null
-        logsBloom: string
-        effectiveGasPrice: bigint
-    }
-    logs: {
-        data: Hex
-        blockNumber: bigint
-        blockHash: Hash
-        transactionHash: Hash
-        logIndex: bigint
-        transactionIndex: bigint
-        address: Address
-        topics: Hex[]
-    }[]
-}
-
-type BundlerRpcSchema = [
-    {
-        Method: "eth_sendUserOperation"
-        Parameters: [userOperation: UserOperation, entryPoint: Address]
-        ReturnType: Hash
-    },
-    {
-        Method: "eth_estimateUserOperationGas"
-        Parameters: [
-            userOperation: PartialBy<UserOperation, "callGasLimit" | "preVerificationGas" | "verificationGasLimit">,
-            entryPoint: Address
-        ]
-        ReturnType: {
-            preVerificationGas: bigint
-            verificationGasLimit: bigint
-            callGasLimit: bigint
-        }
-    },
-    {
-        Method: "eth_supportedEntryPoints"
-        Parameters: []
-        ReturnType: Address[]
-    },
-    {
-        Method: "eth_chainId"
-        Parameters: []
-        ReturnType: bigint
-    },
-    {
-        Method: "eth_getUserOperationByHash"
-        Parameters: [hash: Hash]
-        ReturnType: {
-            userOperation: UserOperation
-            entryPoint: Address
-            transactionHash: Hash
-            blockHash: Hash
-            blockNumber: bigint
-        }
-    },
-    {
-        Method: "eth_getUserOperationReceipt"
-        Parameters: [hash: Hash]
-        ReturnType: UserOperationReceipt
-    }
-]
-
 export type BundlerClient = Client<Transport, Chain, Account, BundlerRpcSchema>
 
-export const sendUserOperation = (client: BundlerClient, args: sendUserOperationParameters) => {
+export const sendUserOperation = async (client: BundlerClient, args: sendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
-    const params: [UserOperation, Address] = [deepHexlify(userOperation) as UserOperation, entryPoint]
+    const supportedEntryPointsByClient = await supportedEntryPoints(client)
+
+    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
 
     return client.request({
         method: "eth_sendUserOperation",
-        params
+        params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
     })
 }
 
 export const estimateUserOperationGas = async (client: BundlerClient, args: estimateUserOperationGasParameters) => {
     const { userOperation, entryPoint } = args
 
-    const params: [UserOperation, Address] = [deepHexlify(userOperation) as UserOperation, entryPoint]
+    const supportedEntryPointsByClient = await supportedEntryPoints(client)
 
-    const response: {
-        preVerificationGas: Hex
-        verificationGasLimit: Hex
-        callGasLimit: Hex
-    } = await client.request({
+    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
+
+    const response = await client.request({
         method: "eth_estimateUserOperationGas",
-        params
+        params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
     })
 
     return {
-        preVerificationGas: BigInt(response.preVerificationGas),
-        verificationGasLimit: BigInt(response.verificationGasLimit),
-        callGasLimit: BigInt(response.callGasLimit)
+        preVerificationGas: BigInt(response.preVerificationGas || 0n),
+        verificationGasLimit: BigInt(response.verificationGasLimit || 0n),
+        callGasLimit: BigInt(response.callGasLimit || 0n)
     }
 }
 
-export const supportedEntryPoints = async (client: BundlerClient) => {
-    const params: [] = []
-
-    const response: Address[] = await client.request({
+export const supportedEntryPoints = async (client: BundlerClient): Promise<Address[]> => {
+    return client.request({
         method: "eth_supportedEntryPoints",
-        params
+        params: []
     })
-
-    return response
 }
 
 export const chainId = async (client: BundlerClient) => {
-    const params: [] = []
-
-    const response: bigint = BigInt(
+    return BigInt(
         await client.request({
             method: "eth_chainId",
-            params
+            params: []
         })
     )
-
-    return response
 }
 
-export const getUserOperationByHash = async (client: BundlerClient, hash: Hash) => {
+export const getUserOperationByHash = async (
+    client: BundlerClient,
+    hash: Hash
+): Promise<{
+    userOperation: UserOperation
+    entryPoint: Address
+    transactionHash: Hash
+    blockHash: Hash
+    blockNumber: bigint
+} | null> => {
     const params: [Hash] = [hash]
 
-    const {
-        userOperation,
-        entryPoint,
-        transactionHash,
-        blockHash,
-        blockNumber
-    }: {
-        userOperation: UserOperation
-        entryPoint: Address
-        transactionHash: Hash
-        blockHash: Hash
-        blockNumber: Hex
-    } = await client.request({
+    const response = await client.request({
         method: "eth_getUserOperationByHash",
         params
     })
 
-    userOperation.nonce = BigInt(userOperation.nonce)
-    userOperation.callGasLimit = BigInt(userOperation.callGasLimit)
-    userOperation.verificationGasLimit = BigInt(userOperation.verificationGasLimit)
-    userOperation.preVerificationGas = BigInt(userOperation.preVerificationGas)
-    userOperation.maxFeePerGas = BigInt(userOperation.maxFeePerGas)
-    userOperation.maxPriorityFeePerGas = BigInt(userOperation.maxPriorityFeePerGas)
+    if (!response) return null
+
+    const { userOperation, entryPoint, transactionHash, blockHash, blockNumber } = response
 
     return {
-        userOperation,
+        userOperation: {
+            ...userOperation,
+            nonce: BigInt(userOperation.nonce),
+            callGasLimit: BigInt(userOperation.callGasLimit),
+            verificationGasLimit: BigInt(userOperation.verificationGasLimit),
+            preVerificationGas: BigInt(userOperation.preVerificationGas),
+            maxFeePerGas: BigInt(userOperation.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(userOperation.maxPriorityFeePerGas)
+        } as UserOperation,
         entryPoint: entryPoint,
         transactionHash: transactionHash,
         blockHash: blockHash,
@@ -195,25 +110,42 @@ const getUserOperationReceipt = async (client: BundlerClient, hash: Hash) => {
         params
     })
 
-    console.log(response)
+    if (!response) return null
 
-    response.nonce = BigInt(response.nonce)
-    response.actualGasUsed = BigInt(response.actualGasUsed)
-    response.actualGasCost = BigInt(response.actualGasCost)
-    response.receipt.transactionIndex = BigInt(response.receipt.transactionIndex)
-    response.receipt.blockNumber = BigInt(response.receipt.blockNumber)
-    response.receipt.cumulativeGasUsed = BigInt(response.receipt.cumulativeGasUsed)
-    response.receipt.status = response.receipt.status ? BigInt(response.receipt.status) : null
-    response.receipt.gasUsed = BigInt(response.receipt.gasUsed)
-    response.receipt.effectiveGasPrice = BigInt(response.receipt.effectiveGasPrice)
+    const userOperationReceipt: UserOperationReceipt = {
+        userOpHash: response.userOpHash,
+        sender: response.sender,
+        nonce: BigInt(response.nonce),
+        actualGasUsed: BigInt(response.actualGasUsed),
+        actualGasCost: BigInt(response.actualGasCost),
+        success: response.success,
+        receipt: {
+            transactionHash: response.receipt.transactionHash,
+            transactionIndex: BigInt(response.receipt.transactionIndex),
+            blockHash: response.receipt.blockHash,
+            blockNumber: BigInt(response.receipt.blockNumber),
+            from: response.receipt.from,
+            to: response.receipt.to,
+            cumulativeGasUsed: BigInt(response.receipt.cumulativeGasUsed),
+            status: response.receipt.status ? BigInt(response.receipt.status) : null,
+            gasUsed: BigInt(response.receipt.gasUsed),
+            contractAddress: response.receipt.contractAddress,
+            logsBloom: response.receipt.logsBloom,
+            effectiveGasPrice: BigInt(response.receipt.effectiveGasPrice)
+        },
+        logs: response.logs.map((log) => ({
+            data: log.data,
+            blockNumber: BigInt(log.blockNumber),
+            blockHash: log.blockHash,
+            transactionHash: log.transactionHash,
+            logIndex: BigInt(log.logIndex),
+            transactionIndex: BigInt(log.transactionIndex),
+            address: log.address,
+            topics: log.topics
+        }))
+    }
 
-    response.logs.map((log) => {
-        log.blockNumber = BigInt(log.blockNumber)
-        log.logIndex = BigInt(log.logIndex)
-        log.transactionIndex = BigInt(log.transactionIndex)
-    })
-
-    return response
+    return userOperationReceipt
 }
 
 export default (client: Client) => ({
