@@ -14,8 +14,42 @@ export type estimateUserOperationGasParameters = {
     entryPoint: Address
 }
 
+export type estimateUserOperationGasReturnType = {
+    preVerificationGas: bigint
+    verificationGasLimit: bigint
+    callGasLimit: bigint
+}
+
 export type BundlerClient = Client<Transport, Chain, Account, BundlerRpcSchema>
 
+/**
+ * Sends user operation to the bundler
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param args {@link sendUserOperationParameters}.
+ * @returns UserOpHash that you can use to track user operation as {@link Hash}.
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * const userOpHash = sendUserOperation(bundlerClient, {
+ *      userOperation: signedUserOperation,
+ *      entryPoint: entryPoint
+ * })
+ *
+ * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
+ *
+ */
 export const sendUserOperation = async (client: BundlerClient, args: sendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
@@ -29,7 +63,38 @@ export const sendUserOperation = async (client: BundlerClient, args: sendUserOpe
     })
 }
 
-export const estimateUserOperationGas = async (client: BundlerClient, args: estimateUserOperationGasParameters) => {
+/**
+ * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param args {@link estimateUserOperationGasParameters}
+ * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link estimateUserOperationGasReturnType}
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * const gasParameters = estimateUserOperationGas(bundlerClient, {
+ *      serOperation: signedUserOperation,
+ *      entryPoint: entryPoint
+ * })
+ *
+ * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
+ *
+ */
+export const estimateUserOperationGas = async (
+    client: BundlerClient,
+    args: estimateUserOperationGasParameters
+): Promise<estimateUserOperationGasReturnType> => {
     const { userOperation, entryPoint } = args
 
     const supportedEntryPointsByClient = await supportedEntryPoints(client)
@@ -48,6 +113,29 @@ export const estimateUserOperationGas = async (client: BundlerClient, args: esti
     }
 }
 
+/**
+ * Returns the supported entrypoints by the bundler service
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @returns Supported entryPoints
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * const entryPointsSupported = supportedEntryPoints(bundlerClient)
+ * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
+ *
+ */
 export const supportedEntryPoints = async (client: BundlerClient): Promise<Address[]> => {
     return client.request({
         method: "eth_supportedEntryPoints",
@@ -55,6 +143,29 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
     })
 }
 
+/**
+ * Returns the supported chain id by the bundler service
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @returns Supported chain id
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * const chainId = chainId(bundlerClient)
+ * // Return 5n for Goerli
+ *
+ */
 export const chainId = async (client: BundlerClient) => {
     return BigInt(
         await client.request({
@@ -64,6 +175,29 @@ export const chainId = async (client: BundlerClient) => {
     )
 }
 
+/**
+ * Returns the user operation from userOpHash
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * getUserOperationByHash(bundlerClient, userOpHash)
+ *
+ */
 export const getUserOperationByHash = async (
     client: BundlerClient,
     hash: Hash
@@ -102,6 +236,29 @@ export const getUserOperationByHash = async (
     }
 }
 
+/**
+ * Returns the user operation receipt from userOpHash
+ *
+ * - Docs: [TODO://add link]
+ * - Example: [TODO://add link]
+ *
+ * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @returns user operation receipt {@link UserOperationReceipt} if found or null
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { sendUserOperation } from "permissionless/actions"
+ *
+ * const bundlerClient = createClient({
+ *      chain: goerli,
+ *      transport: http(BUNDLER_URL)
+ * })
+ *
+ * getUserOperationReceipt(bundlerClient, userOpHash)
+ *
+ */
 const getUserOperationReceipt = async (client: BundlerClient, hash: Hash) => {
     const params: [Hash] = [hash]
 
@@ -149,11 +306,151 @@ const getUserOperationReceipt = async (client: BundlerClient, hash: Hash) => {
 }
 
 export default (client: Client) => ({
-    sendUserOperation: (args: sendUserOperationParameters) => sendUserOperation(client as BundlerClient, args),
+    /**
+     *
+     * Sends user operation to the bundler
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @param args {@link sendUserOperationParameters}.
+     * @returns UserOpHash that you can use to track user operation as {@link Hash}.
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * const userOpHash = await bundlerClient.sendUserOperation({
+     *      userOperation: signedUserOperation,
+     *      entryPoint: entryPoint
+     * })
+     *
+     * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
+     */
+    sendUserOperation: async (args: sendUserOperationParameters): Promise<Hash> =>
+        sendUserOperation(client as BundlerClient, args),
+    /**
+     *
+     * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @param args {@link estimateUserOperationGasParameters}
+     * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link estimateUserOperationGasReturnType}
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * const gasParameters = await bundlerClient.estimateUserOperationGas({
+     *     userOperation: signedUserOperation,
+     *    entryPoint: entryPoint
+     * })
+     *
+     * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
+     */
     estimateUserOperationGas: (args: estimateUserOperationGasParameters) =>
         estimateUserOperationGas(client as BundlerClient, args),
+    /**
+     *
+     * Returns the supported entrypoints by the bundler service
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @returns Supported entryPoints
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
+     *
+     * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
+     */
     supportedEntryPoints: () => supportedEntryPoints(client as BundlerClient),
+    /**
+     *
+     * Returns the supported chain id by the bundler service
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @returns Supported chain id
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * const chainId = await bundlerClient.chainId()
+     * // Return 5n for Goerli
+     */
     chainId: () => chainId(client as BundlerClient),
+    /**
+     *
+     * Returns the user operation from userOpHash
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * await bundlerClient.getUserOperationByHash(userOpHash)
+     *
+     */
     getUserOperationByHash: (hash: Hash) => getUserOperationByHash(client as BundlerClient, hash),
+    /**
+     *
+     * Returns the user operation receipt from userOpHash
+     *
+     * - Docs: [TODO://add link]
+     * - Example: [TODO://add link]
+     *
+     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @returns user operation receipt {@link UserOperationReceipt} if found or null
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { bundlerActions } from "permissionless"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http(BUNDLER_URL)
+     * }).extend(bundlerActions)
+     *
+     * await bundlerClient.getUserOperationReceipt(userOpHash)
+     *
+     */
     getUserOperationReceipt: (hash: Hash) => getUserOperationReceipt(client as BundlerClient, hash)
 })

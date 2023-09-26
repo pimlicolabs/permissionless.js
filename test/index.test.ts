@@ -177,9 +177,9 @@ const main = async () => {
         transport: http(process.env.RPC_URL as string)
     })
 
-    // const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
+    const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
-    // if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
+    if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
 
     const accountAddress = await getAccountAddress(factoryAddress, eoaWalletClient)
 
@@ -205,14 +205,14 @@ const main = async () => {
 
     if (chainId !== BigInt(goerli.id)) throw new Error("Chain ID not supported")
 
-    const gasParaneters = await bundlerClient.estimateUserOperationGas({
+    const gasParameters = await bundlerClient.estimateUserOperationGas({
         userOperation,
         entryPoint: entryPoint as Address
     })
 
-    userOperation.callGasLimit = gasParaneters.callGasLimit
-    userOperation.verificationGasLimit = gasParaneters.verificationGasLimit
-    userOperation.preVerificationGas = gasParaneters.preVerificationGas
+    userOperation.callGasLimit = gasParameters.callGasLimit
+    userOperation.verificationGasLimit = gasParameters.verificationGasLimit
+    userOperation.preVerificationGas = gasParameters.preVerificationGas
 
     const signedUserOperation: UserOperation = {
         ...userOperation,
