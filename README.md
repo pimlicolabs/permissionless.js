@@ -8,7 +8,7 @@ Permissionless.js is a Typescript library built on top of [viem](https://viem.sh
 
 ## Getting started
 
-For a full explanation of Permissionless.js, please visit our [docs page](https://docs.pimlico.io/)
+For a full explanation of Permissionless.js, please visit our [docs page](https://docs.pimlico.io/permissionless)
 
 Start using permissionless.js with:
 ```bash
