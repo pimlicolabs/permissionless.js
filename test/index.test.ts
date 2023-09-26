@@ -1,11 +1,9 @@
-import { EntryPointAbi } from "./abis/EntryPoint"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
 import type { Address } from "abitype"
 import dotenv from "dotenv"
 import { bundlerActions } from "permissionless"
 import { UserOperation } from "permissionless/actions/types"
 import {
+    http,
     Account,
     Chain,
     Hex,
@@ -19,12 +17,14 @@ import {
     encodeAbiParameters,
     encodeFunctionData,
     getContract,
-    http,
     keccak256,
     zeroAddress
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { goerli } from "viem/chains"
+import { EntryPointAbi } from "./abis/EntryPoint"
+import { SimpleAccountAbi } from "./abis/SimpleAccount"
+import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
 
 // Load environment variables from .env file
 dotenv.config()
@@ -166,11 +166,20 @@ const main = async () => {
     const account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Address)
     const factoryAddress = "0x9406Cc6185a346906296840746125a0E44976454"
 
+    const bundlerClient = createClient({
+        chain: goerli,
+        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
+    }).extend(bundlerActions)
+
     const eoaWalletClient = createWalletClient({
         account,
         chain: goerli,
         transport: http(process.env.RPC_URL as string)
     })
+
+    const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
+
+    if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
 
     const accountAddress = await getAccountAddress(factoryAddress, eoaWalletClient)
 
@@ -191,15 +200,6 @@ const main = async () => {
         preVerificationGas: 0n,
         signature: getDummySignature()
     }
-
-    const bundlerClient = createClient({
-        chain: goerli,
-        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    }).extend(bundlerActions)
-
-    const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
-
-    if (!supportedEntryPoints.includes(entryPoint)) throw new Error("Entry point not supported")
 
     const chainId = await bundlerClient.chainId()
 
