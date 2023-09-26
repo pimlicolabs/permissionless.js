@@ -1,26 +1,24 @@
 import type { Address } from "abitype"
-import { type Account, type Chain, type Client, type Hash, type Transport } from "viem"
+import { type Client, type Hash } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerRpcSchema, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "../types"
+import type { BundlerClient, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "../types"
 import { deepHexlify } from "./utils"
 
-export type sendUserOperationParameters = {
+export type SendUserOperationParameters = {
     userOperation: UserOperation
     entryPoint: Address
 }
 
-export type estimateUserOperationGasParameters = {
+export type EstimateUserOperationGasParameters = {
     userOperation: PartialBy<UserOperation, "callGasLimit" | "preVerificationGas" | "verificationGasLimit">
     entryPoint: Address
 }
 
-export type estimateUserOperationGasReturnType = {
+export type EstimateUserOperationGasReturnType = {
     preVerificationGas: bigint
     verificationGasLimit: bigint
     callGasLimit: bigint
 }
-
-export type BundlerClient = Client<Transport, Chain, Account, BundlerRpcSchema>
 
 /**
  * Sends user operation to the bundler
@@ -29,7 +27,7 @@ export type BundlerClient = Client<Transport, Chain, Account, BundlerRpcSchema>
  * - Example: [TODO://add link]
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param args {@link sendUserOperationParameters}.
+ * @param args {@link SendUserOperationParameters}.
  * @returns UserOpHash that you can use to track user operation as {@link Hash}.
  *
  *
@@ -50,7 +48,7 @@ export type BundlerClient = Client<Transport, Chain, Account, BundlerRpcSchema>
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
  *
  */
-export const sendUserOperation = async (client: BundlerClient, args: sendUserOperationParameters): Promise<Hash> => {
+export const sendUserOperation = async (client: BundlerClient, args: SendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
     const supportedEntryPointsByClient = await supportedEntryPoints(client)
@@ -70,8 +68,8 @@ export const sendUserOperation = async (client: BundlerClient, args: sendUserOpe
  * - Example: [TODO://add link]
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param args {@link estimateUserOperationGasParameters}
- * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link estimateUserOperationGasReturnType}
+ * @param args {@link EstimateUserOperationGasParameters}
+ * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link EstimateUserOperationGasReturnType}
  *
  *
  * @example
@@ -93,8 +91,8 @@ export const sendUserOperation = async (client: BundlerClient, args: sendUserOpe
  */
 export const estimateUserOperationGas = async (
     client: BundlerClient,
-    args: estimateUserOperationGasParameters
-): Promise<estimateUserOperationGasReturnType> => {
+    args: EstimateUserOperationGasParameters
+): Promise<EstimateUserOperationGasReturnType> => {
     const { userOperation, entryPoint } = args
 
     const supportedEntryPointsByClient = await supportedEntryPoints(client)
@@ -313,7 +311,7 @@ const bundlerActions = (client: Client) => ({
      * - Docs: [TODO://add link]
      * - Example: [TODO://add link]
      *
-     * @param args {@link sendUserOperationParameters}.
+     * @param args {@link SendUserOperationParameters}.
      * @returns UserOpHash that you can use to track user operation as {@link Hash}.
      *
      * @example
@@ -322,7 +320,7 @@ const bundlerActions = (client: Client) => ({
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http(BUNDLER_URL)
+     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
      * }).extend(bundlerActions)
      *
      * const userOpHash = await bundlerClient.sendUserOperation({
@@ -332,7 +330,7 @@ const bundlerActions = (client: Client) => ({
      *
      * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
      */
-    sendUserOperation: async (args: sendUserOperationParameters): Promise<Hash> =>
+    sendUserOperation: async (args: SendUserOperationParameters): Promise<Hash> =>
         sendUserOperation(client as BundlerClient, args),
     /**
      *
@@ -341,8 +339,8 @@ const bundlerActions = (client: Client) => ({
      * - Docs: [TODO://add link]
      * - Example: [TODO://add link]
      *
-     * @param args {@link estimateUserOperationGasParameters}
-     * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link estimateUserOperationGasReturnType}
+     * @param args {@link EstimateUserOperationGasParameters}
+     * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link EstimateUserOperationGasReturnType}
      *
      * @example
      * import { createClient } from "viem"
@@ -360,7 +358,7 @@ const bundlerActions = (client: Client) => ({
      *
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
-    estimateUserOperationGas: (args: estimateUserOperationGasParameters) =>
+    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) =>
         estimateUserOperationGas(client as BundlerClient, args),
     /**
      *

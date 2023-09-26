@@ -1,6 +1,6 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { type UserOperation, bundlerActions } from "permissionless"
+import { type UserOperation, bundlerActions, pimlicoActions } from "permissionless"
 import {
     http,
     Account,
@@ -27,6 +27,7 @@ import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
 
 // GOAL
 // import { bundlerActions, pimlicoActions, pimlicoBundlerActions, pimlicoPaymasterActions } from "permissionless"
+// import { pimlicoActions } from "permissionless/actions"
 // clientInformation.extend(pim)
 
 // Load environment variables from .env file
@@ -172,7 +173,9 @@ const main = async () => {
     const bundlerClient = createClient({
         chain: goerli,
         transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    }).extend(bundlerActions)
+    })
+        .extend(bundlerActions)
+        .extend(pimlicoActions)
 
     const eoaWalletClient = createWalletClient({
         account,
@@ -189,6 +192,10 @@ const main = async () => {
     if (!accountAddress) throw new Error("Account address not found")
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+    const gasPrices = await bundlerClient.getUserOperationGasPrice()
+
+    console.log("gasPrices", gasPrices)
 
     const userOperation = {
         sender: accountAddress,
