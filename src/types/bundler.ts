@@ -1,5 +1,5 @@
-import type { Address } from "abitype"
-import type { Hash, Hex } from "viem"
+import type { Hash, Address, Hex } from "viem"
+import type { UserOperationWithBigIntAsHex } from "./userOperation"
 import type { PartialBy } from "viem/types/utils"
 
 export type BundlerRpcSchema = [
@@ -50,34 +50,6 @@ export type BundlerRpcSchema = [
         ReturnType: UserOperationReceiptWithBigIntAsHex
     }
 ]
-
-export type UserOperationWithBigIntAsHex = {
-    sender: Address
-    nonce: Hex
-    initCode: Hex
-    callData: Hex
-    callGasLimit: Hex
-    verificationGasLimit: Hex
-    preVerificationGas: Hex
-    maxFeePerGas: Hex
-    maxPriorityFeePerGas: Hex
-    paymasterAndData: Hex
-    signature: Hex
-}
-
-export type UserOperation = {
-    sender: Address
-    nonce: bigint
-    initCode: Hex
-    callData: Hex
-    callGasLimit: bigint
-    verificationGasLimit: bigint
-    preVerificationGas: bigint
-    maxFeePerGas: bigint
-    maxPriorityFeePerGas: bigint
-    paymasterAndData: Hex
-    signature: Hex
-}
 
 export type UserOperationReceipt = {
     userOpHash: Hash

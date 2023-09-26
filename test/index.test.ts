@@ -1,7 +1,6 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { bundlerActions } from "permissionless"
-import { UserOperation } from "permissionless/actions/types"
+import { bundlerActions, type UserOperation } from "permissionless"
 import {
     http,
     Account,
@@ -25,6 +24,10 @@ import { goerli } from "viem/chains"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { SimpleAccountAbi } from "./abis/SimpleAccount"
 import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
+
+// GOAL
+// import { bundlerActions, pimlicoActions, pimlicoBundlerActions, pimlicoPaymasterActions } from "permissionless"
+// clientInformation.extend(pim)
 
 // Load environment variables from .env file
 dotenv.config()
