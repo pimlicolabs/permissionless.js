@@ -1,8 +1,8 @@
 import type { Address } from "abitype"
 import { type Account, type Chain, type Client, type Hash, type Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import { deepHexlify } from "./utils"
 import type { BundlerRpcSchema, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "../types"
+import { deepHexlify } from "./utils"
 
 export type sendUserOperationParameters = {
     userOperation: UserOperation

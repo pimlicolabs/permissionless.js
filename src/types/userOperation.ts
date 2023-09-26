@@ -1,5 +1,5 @@
 import type { Address } from "abitype"
-import type {  Hex } from "viem"
+import type { Hex } from "viem"
 
 export type UserOperationWithBigIntAsHex = {
     sender: Address

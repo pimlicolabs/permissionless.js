@@ -1,6 +1,6 @@
-import type { Hash, Address, Hex } from "viem"
-import type { UserOperationWithBigIntAsHex } from "./userOperation"
+import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 export type BundlerRpcSchema = [
     {

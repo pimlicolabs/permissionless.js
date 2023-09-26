@@ -1,6 +1,6 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { bundlerActions, type UserOperation } from "permissionless"
+import { type UserOperation, bundlerActions } from "permissionless"
 import {
     http,
     Account,
