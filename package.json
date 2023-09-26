@@ -34,11 +34,5 @@
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"
-    },
-    "size-limit": [
-        {
-            "path": "src/_esm/index.js",
-            "limit": "10 kB"
-        }
-    ]
+    }
 }
