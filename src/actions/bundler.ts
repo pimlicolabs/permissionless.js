@@ -1,7 +1,9 @@
 import type { Address } from "abitype"
 import type { Client, Hash } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "../types"
+import type { UserOperation, UserOperationReceipt } from "../types"
+import type { BundlerClient } from "../types/bundler"
+import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
 import { deepHexlify } from "./utils"
 
 export type SendUserOperationParameters = {
@@ -18,6 +20,14 @@ export type EstimateUserOperationGasReturnType = {
     preVerificationGas: bigint
     verificationGasLimit: bigint
     callGasLimit: bigint
+}
+
+export type GetUserOperationByHash = {
+    hash: Hash
+}
+
+export type GetUserOperationReceipt = {
+    hash: Hash
 }
 
 /**
@@ -180,7 +190,7 @@ export const chainId = async (client: BundlerClient) => {
  * - Example: [TODO://add link]
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @param args {@link GetUserOperationByHash} UserOpHash that was returned by {@link sendUserOperation}
  * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
  *
  *
@@ -193,12 +203,12 @@ export const chainId = async (client: BundlerClient) => {
  *      transport: http(BUNDLER_URL)
  * })
  *
- * getUserOperationByHash(bundlerClient, userOpHash)
+ * getUserOperationByHash(bundlerClient, {hash: userOpHash})
  *
  */
 export const getUserOperationByHash = async (
     client: BundlerClient,
-    hash: Hash
+    { hash }: GetUserOperationByHash
 ): Promise<{
     userOperation: UserOperation
     entryPoint: Address
@@ -241,7 +251,7 @@ export const getUserOperationByHash = async (
  * - Example: [TODO://add link]
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
  * @returns user operation receipt {@link UserOperationReceipt} if found or null
  *
  *
@@ -254,10 +264,10 @@ export const getUserOperationByHash = async (
  *      transport: http(BUNDLER_URL)
  * })
  *
- * getUserOperationReceipt(bundlerClient, userOpHash)
+ * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-const getUserOperationReceipt = async (client: BundlerClient, hash: Hash) => {
+const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceipt) => {
     const params: [Hash] = [hash]
 
     const response: UserOperationReceipt = await client.request({
@@ -412,7 +422,7 @@ const bundlerActions = (client: Client) => ({
      * - Docs: [TODO://add link]
      * - Example: [TODO://add link]
      *
-     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @param args {@link GetUserOperationByHash} UserOpHash that was returned by {@link sendUserOperation}
      * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
      *
      * @example
@@ -427,7 +437,7 @@ const bundlerActions = (client: Client) => ({
      * await bundlerClient.getUserOperationByHash(userOpHash)
      *
      */
-    getUserOperationByHash: (hash: Hash) => getUserOperationByHash(client as BundlerClient, hash),
+    getUserOperationByHash: (args: GetUserOperationByHash) => getUserOperationByHash(client as BundlerClient, args),
     /**
      *
      * Returns the user operation receipt from userOpHash
@@ -435,7 +445,7 @@ const bundlerActions = (client: Client) => ({
      * - Docs: [TODO://add link]
      * - Example: [TODO://add link]
      *
-     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
      * @returns user operation receipt {@link UserOperationReceipt} if found or null
      *
      * @example
@@ -447,10 +457,10 @@ const bundlerActions = (client: Client) => ({
      *      transport: http(BUNDLER_URL)
      * }).extend(bundlerActions)
      *
-     * await bundlerClient.getUserOperationReceipt(userOpHash)
+     * await bundlerClient.getUserOperationReceipt({hash: userOpHash})
      *
      */
-    getUserOperationReceipt: (hash: Hash) => getUserOperationReceipt(client as BundlerClient, hash)
+    getUserOperationReceipt: (args: GetUserOperationReceipt) => getUserOperationReceipt(client as BundlerClient, args)
 })
 
 export default bundlerActions
