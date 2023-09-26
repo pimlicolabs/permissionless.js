@@ -61,10 +61,6 @@ export type GetUserOperationReceipt = {
 export const sendUserOperation = async (client: BundlerClient, args: SendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
-    const supportedEntryPointsByClient = await supportedEntryPoints(client)
-
-    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
-
     return client.request({
         method: "eth_sendUserOperation",
         params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
@@ -104,10 +100,6 @@ export const estimateUserOperationGas = async (
     args: EstimateUserOperationGasParameters
 ): Promise<EstimateUserOperationGasReturnType> => {
     const { userOperation, entryPoint } = args
-
-    const supportedEntryPointsByClient = await supportedEntryPoints(client)
-
-    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
 
     const response = await client.request({
         method: "eth_estimateUserOperationGas",
