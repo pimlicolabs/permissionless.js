@@ -12,15 +12,18 @@
     "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
     "exports": {
-      ".": {
-        "types": "./_types/index.d.ts",
-        "import": "./_esm/index.js",
-        "default": "./_cjs/index.js"
-      },
-      "./actions": {
-        "types": "./_types/actions/index.d.ts",
-        "import": "./_esm/actions/index.js",
-        "default": "./_cjs/actions/index.js"
-      }
+        ".": {
+            "types": "./_types/index.d.ts",
+            "import": "./_esm/index.js",
+            "default": "./_cjs/index.js"
+        },
+        "./actions": {
+            "types": "./_types/actions/index.d.ts",
+            "import": "./_esm/actions/index.js",
+            "default": "./_cjs/actions/index.js"
+        }
+    },
+    "dependencies": {
+        "viem": "^1.12.2"
     }
-  }
+}
