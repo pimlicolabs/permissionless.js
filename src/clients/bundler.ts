@@ -1,8 +1,10 @@
-import type { Chain, PublicClientConfig, Transport } from "viem"
+import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
 import { createClient } from "viem"
 import { bundlerActions } from "../actions"
-import type { BundlerClient } from "../actions"
+import type { BundlerActions } from "../actions/bundler"
+import type { BundlerRpcSchema } from "../types/bundler"
 
+export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema, BundlerActions>
 /**
  * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
  *

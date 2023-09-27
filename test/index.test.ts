@@ -1,16 +1,8 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import {
-    BundlerClient,
-    PimlicoBundlerClient,
-    type UserOperation,
-    bundlerActions,
-    createBundlerClient,
-    createPimlicoBundlerClient,
-    createPimlicoPaymasterClient,
-    pimlicoBundlerActions,
-    pimlicoPaymasterActions
-} from "permissionless"
+import { BundlerClient, type UserOperation, bundlerActions, createBundlerClient } from "permissionless"
+import { PimlicoBundlerClient } from "permissionless/actions/pimlico"
+import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import {
     http,
     Account,
@@ -318,7 +310,7 @@ const testPimlicoPaymasterActions = async () => {
     const pimlicoPaymasterClient = createPimlicoPaymasterClient({
         chain: goerli,
         transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    }).extend(pimlicoPaymasterActions)
+    })
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
 

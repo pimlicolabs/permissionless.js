@@ -1,8 +1,8 @@
 import type { Address } from "abitype"
-import type { Account, Chain, Client, Hash, Hex, Transport } from "viem"
+import type { Client, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { BundlerClient } from "../clients/bundler"
 import type { UserOperation } from "../types"
-import type { BundlerRpcSchema } from "../types/bundler"
 import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
 import { deepHexlify } from "./utils"
 
@@ -481,8 +481,6 @@ export type BundlerActions = {
      */
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) => Promise<GetUserOperationReceiptReturnType>
 }
-
-export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema, BundlerActions>
 
 const bundlerActions = (client: Client): BundlerActions => ({
     sendUserOperation: async (args: SendUserOperationParameters): Promise<Hash> =>

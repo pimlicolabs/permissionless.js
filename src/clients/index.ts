@@ -1,4 +1,3 @@
-import { createBundlerClient } from "./bundler"
-import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from "./pimlico"
+import { type BundlerClient, createBundlerClient } from "./bundler"
 
-export { createBundlerClient, createPimlicoBundlerClient, createPimlicoPaymasterClient }
+export { createBundlerClient, type BundlerClient }

@@ -1,7 +1,30 @@
-import type { Chain, PublicClientConfig, Transport } from "viem"
+import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
 import { createClient } from "viem"
-import { pimlicoBundlerActions, pimlicoPaymasterActions } from "../actions"
-import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../actions"
+import { bundlerActions } from "../actions"
+import type { BundlerActions } from "../actions/bundler"
+import {
+    type PimlicoBundlerActions,
+    type PimlicoPaymasterClientActions,
+    pimlicoBundlerActions,
+    pimlicoPaymasterActions
+} from "../actions/pimlico"
+import type { PimlicoBundlerRpcSchema, PimlicoPaymasterRpcSchema } from "../types/pimlico"
+
+export type PimlicoBundlerClient = Client<
+    Transport,
+    Chain | undefined,
+    Account | undefined,
+    PimlicoBundlerRpcSchema,
+    PimlicoBundlerActions & BundlerActions
+>
+
+export type PimlicoPaymasterClient = Client<
+    Transport,
+    Chain | undefined,
+    Account | undefined,
+    PimlicoPaymasterRpcSchema,
+    PimlicoPaymasterClientActions
+>
 
 /**
  * Creates a pimlico specific Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
@@ -33,7 +56,7 @@ export const createPimlicoBundlerClient = <transport extends Transport, chain ex
         name,
         type: "pimlicoBundlerClient"
     })
-    return client.extend(pimlicoBundlerActions)
+    return client.extend(bundlerActions).extend(pimlicoBundlerActions)
 }
 
 /**

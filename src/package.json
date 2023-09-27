@@ -21,6 +21,11 @@
             "types": "./_types/actions/index.d.ts",
             "import": "./_esm/actions/index.js",
             "default": "./_cjs/actions/index.js"
+        },
+        "./clients": {
+            "types": "./_types/clients/index.d.ts",
+            "import": "./_esm/clients/index.js",
+            "default": "./_cjs/clients/index.js"
         }
     },
     "peerDependencies": {

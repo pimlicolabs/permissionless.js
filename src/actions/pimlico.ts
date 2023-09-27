@@ -1,24 +1,9 @@
-import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
+import type { Address, Client, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { PimlicoBundlerRpcSchema, PimlicoPaymasterRpcSchema, PimlicoUserOperationStatus } from "../types/pimlico"
+import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../clients/pimlico"
+import type { PimlicoUserOperationStatus } from "../types/pimlico"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../types/userOperation"
 import { deepHexlify } from "./utils"
-
-export type PimlicoBundlerClient = Client<
-    Transport,
-    Chain | undefined,
-    Account | undefined,
-    PimlicoBundlerRpcSchema,
-    PimlicoBundlerClientActions
->
-
-export type PimlicoPaymasterClient = Client<
-    Transport,
-    Chain | undefined,
-    Account | undefined,
-    PimlicoPaymasterRpcSchema,
-    PimlicoPaymasterClientActions
->
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
@@ -135,7 +120,7 @@ export const getUserOperationStatus = async (
     })
 }
 
-export type PimlicoBundlerClientActions = {
+export type PimlicoBundlerActions = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
      *
@@ -180,7 +165,7 @@ export type PimlicoBundlerClientActions = {
     getUserOperationStatus: (args: GetUserOperationStatusParameters) => Promise<GetUserOperationStatusReturnType>
 }
 
-export const pimlicoBundlerActions = (client: Client): PimlicoBundlerClientActions => ({
+export const pimlicoBundlerActions = (client: Client): PimlicoBundlerActions => ({
     getUserOperationGasPrice: async () => getUserOperationGasPrice(client as PimlicoBundlerClient),
     getUserOperationStatus: async (args: GetUserOperationStatusParameters) =>
         getUserOperationStatus(client as PimlicoBundlerClient, args)

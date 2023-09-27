@@ -1,5 +1,4 @@
 import type {
-    BundlerClient,
     EstimateUserOperationGasParameters,
     EstimateUserOperationGasReturnType,
     GetUserOperationByHashParameters,
@@ -18,24 +17,6 @@ import bundlerActions, {
     supportedEntryPoints
 } from "./bundler"
 
-import type {
-    GetUserOperationGasPriceReturnType,
-    GetUserOperationStatusParameters,
-    GetUserOperationStatusReturnType,
-    PimlicoBundlerClient,
-    PimlicoPaymasterClient,
-    SponsorUserOperationParameters,
-    SponsorUserOperationReturnType
-} from "./pimlico"
-
-import {
-    getUserOperationGasPrice,
-    getUserOperationStatus,
-    pimlicoBundlerActions,
-    pimlicoPaymasterActions,
-    sponsorUserOperation
-} from "./pimlico"
-
 export type {
     SendUserOperationParameters,
     EstimateUserOperationGasParameters,
@@ -43,15 +24,7 @@ export type {
     GetUserOperationByHashParameters,
     GetUserOperationByHashReturnType,
     GetUserOperationReceiptParameters,
-    SponsorUserOperationParameters,
-    SponsorUserOperationReturnType,
-    GetUserOperationReceiptReturnType,
-    GetUserOperationGasPriceReturnType,
-    GetUserOperationStatusReturnType,
-    BundlerClient,
-    PimlicoBundlerClient,
-    PimlicoPaymasterClient,
-    GetUserOperationStatusParameters
+    GetUserOperationReceiptReturnType
 }
 
 export {
@@ -61,10 +34,5 @@ export {
     supportedEntryPoints,
     chainId,
     getUserOperationByHash,
-    getUserOperationReceipt,
-    pimlicoBundlerActions,
-    getUserOperationGasPrice,
-    getUserOperationStatus,
-    sponsorUserOperation,
-    pimlicoPaymasterActions
+    getUserOperationReceipt
 }
