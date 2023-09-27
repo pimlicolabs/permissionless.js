@@ -1,7 +1,9 @@
 import type { Address } from "abitype"
-import { type Client, type Hash } from "viem"
+import type { Client, Hash } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient, UserOperation, UserOperationReceipt, UserOperationWithBigIntAsHex } from "../types"
+import type { UserOperation, UserOperationReceipt } from "../types"
+import type { BundlerClient } from "../types/bundler"
+import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
 import { deepHexlify } from "./utils"
 
 export type SendUserOperationParameters = {
@@ -20,11 +22,18 @@ export type EstimateUserOperationGasReturnType = {
     callGasLimit: bigint
 }
 
+export type GetUserOperationByHash = {
+    hash: Hash
+}
+
+export type GetUserOperationReceipt = {
+    hash: Hash
+}
+
 /**
  * Sends user operation to the bundler
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/sendUserOperation
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
  * @param args {@link SendUserOperationParameters}.
@@ -51,10 +60,6 @@ export type EstimateUserOperationGasReturnType = {
 export const sendUserOperation = async (client: BundlerClient, args: SendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
-    const supportedEntryPointsByClient = await supportedEntryPoints(client)
-
-    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
-
     return client.request({
         method: "eth_sendUserOperation",
         params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
@@ -64,8 +69,7 @@ export const sendUserOperation = async (client: BundlerClient, args: SendUserOpe
 /**
  * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/estimateUserOperationGas
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
  * @param args {@link EstimateUserOperationGasParameters}
@@ -95,10 +99,6 @@ export const estimateUserOperationGas = async (
 ): Promise<EstimateUserOperationGasReturnType> => {
     const { userOperation, entryPoint } = args
 
-    const supportedEntryPointsByClient = await supportedEntryPoints(client)
-
-    if (!supportedEntryPointsByClient.includes(entryPoint)) throw new Error("Entry point not supported")
-
     const response = await client.request({
         method: "eth_estimateUserOperationGas",
         params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
@@ -114,8 +114,7 @@ export const estimateUserOperationGas = async (
 /**
  * Returns the supported entrypoints by the bundler service
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/supportedEntryPoints
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
  * @returns Supported entryPoints
@@ -144,8 +143,7 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
 /**
  * Returns the supported chain id by the bundler service
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/chainId
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
  * @returns Supported chain id
@@ -176,11 +174,10 @@ export const chainId = async (client: BundlerClient) => {
 /**
  * Returns the user operation from userOpHash
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationByHash
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @param args {@link GetUserOperationByHash} UserOpHash that was returned by {@link sendUserOperation}
  * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
  *
  *
@@ -193,12 +190,12 @@ export const chainId = async (client: BundlerClient) => {
  *      transport: http(BUNDLER_URL)
  * })
  *
- * getUserOperationByHash(bundlerClient, userOpHash)
+ * getUserOperationByHash(bundlerClient, {hash: userOpHash})
  *
  */
 export const getUserOperationByHash = async (
     client: BundlerClient,
-    hash: Hash
+    { hash }: GetUserOperationByHash
 ): Promise<{
     userOperation: UserOperation
     entryPoint: Address
@@ -237,11 +234,10 @@ export const getUserOperationByHash = async (
 /**
  * Returns the user operation receipt from userOpHash
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+ * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
  * @returns user operation receipt {@link UserOperationReceipt} if found or null
  *
  *
@@ -254,10 +250,10 @@ export const getUserOperationByHash = async (
  *      transport: http(BUNDLER_URL)
  * })
  *
- * getUserOperationReceipt(bundlerClient, userOpHash)
+ * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-const getUserOperationReceipt = async (client: BundlerClient, hash: Hash) => {
+const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceipt) => {
     const params: [Hash] = [hash]
 
     const response: UserOperationReceipt = await client.request({
@@ -308,8 +304,7 @@ const bundlerActions = (client: Client) => ({
      *
      * Sends user operation to the bundler
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/sendUserOperation
      *
      * @param args {@link SendUserOperationParameters}.
      * @returns UserOpHash that you can use to track user operation as {@link Hash}.
@@ -336,8 +331,7 @@ const bundlerActions = (client: Client) => ({
      *
      * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/estimateUserOperationGas
      *
      * @param args {@link EstimateUserOperationGasParameters}
      * @returns preVerificationGas, verificationGasLimit and callGasLimit as {@link EstimateUserOperationGasReturnType}
@@ -364,8 +358,7 @@ const bundlerActions = (client: Client) => ({
      *
      * Returns the supported entrypoints by the bundler service
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/supportedEntryPoints
      *
      * @returns Supported entryPoints
      *
@@ -387,8 +380,7 @@ const bundlerActions = (client: Client) => ({
      *
      * Returns the supported chain id by the bundler service
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/chainId
      *
      * @returns Supported chain id
      *
@@ -409,10 +401,9 @@ const bundlerActions = (client: Client) => ({
      *
      * Returns the user operation from userOpHash
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationByHash
      *
-     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @param args {@link GetUserOperationByHash} UserOpHash that was returned by {@link sendUserOperation}
      * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
      *
      * @example
@@ -427,15 +418,14 @@ const bundlerActions = (client: Client) => ({
      * await bundlerClient.getUserOperationByHash(userOpHash)
      *
      */
-    getUserOperationByHash: (hash: Hash) => getUserOperationByHash(client as BundlerClient, hash),
+    getUserOperationByHash: (args: GetUserOperationByHash) => getUserOperationByHash(client as BundlerClient, args),
     /**
      *
      * Returns the user operation receipt from userOpHash
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt
      *
-     * @param hash {@link Hash} UserOpHash that was returned by {@link sendUserOperation}
+     * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
      * @returns user operation receipt {@link UserOperationReceipt} if found or null
      *
      * @example
@@ -447,10 +437,10 @@ const bundlerActions = (client: Client) => ({
      *      transport: http(BUNDLER_URL)
      * }).extend(bundlerActions)
      *
-     * await bundlerClient.getUserOperationReceipt(userOpHash)
+     * await bundlerClient.getUserOperationReceipt({hash: userOpHash})
      *
      */
-    getUserOperationReceipt: (hash: Hash) => getUserOperationReceipt(client as BundlerClient, hash)
+    getUserOperationReceipt: (args: GetUserOperationReceipt) => getUserOperationReceipt(client as BundlerClient, args)
 })
 
 export default bundlerActions

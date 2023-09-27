@@ -4,7 +4,7 @@ import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema>
 
-export type BundlerRpcSchema = [
+type BundlerRpcSchema = [
     {
         Method: "eth_sendUserOperation"
         Parameters: [userOperation: UserOperationWithBigIntAsHex, entryPoint: Address]

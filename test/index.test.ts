@@ -240,11 +240,11 @@ const main = async () => {
 
     const userOpHash = "0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34"
 
-    const userOperationFromUserOpHash = await bundlerClient.getUserOperationByHash(userOpHash)
+    const userOperationFromUserOpHash = await bundlerClient.getUserOperationByHash({ hash: userOpHash })
 
     console.log("userOperationFromUserOpHash", userOperationFromUserOpHash)
 
-    const userOperationReceiptFromUserOpHash = await bundlerClient.getUserOperationReceipt(userOpHash)
+    const userOperationReceiptFromUserOpHash = await bundlerClient.getUserOperationReceipt({ hash: userOpHash })
 
     console.log("userOperationReceiptFromUserOpHash", userOperationReceiptFromUserOpHash)
 }
