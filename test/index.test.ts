@@ -5,6 +5,9 @@ import {
     PimlicoBundlerClient,
     type UserOperation,
     bundlerActions,
+    createBundlerClient,
+    createPimlicoBundlerClient,
+    createPimlicoPaymasterClient,
     pimlicoBundlerActions,
     pimlicoPaymasterActions
 } from "permissionless"
@@ -215,10 +218,10 @@ const testBundlerActions = async () => {
         transport: http(process.env.RPC_URL as string)
     })
 
-    const bundlerClient = createClient({
+    const bundlerClient = createBundlerClient({
         chain: goerli,
         transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    }).extend(bundlerActions)
+    })
 
     console.log("======= TESTING SUPPORTED ENTRY POINTS =======")
     await testSupportedEntryPoints(bundlerClient)
@@ -291,10 +294,10 @@ const testFetUserOperationStatus = async (pimlicoBundlerClient: PimlicoBundlerCl
 const testPimlicoBundlerActions = async () => {
     console.log("======= TESTING PIMLICO BUNDLER ACTIONS =======")
 
-    const pimlicoBundlerClient = createClient({
+    const pimlicoBundlerClient = createPimlicoBundlerClient({
         chain: goerli,
         transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    }).extend(pimlicoBundlerActions)
+    })
 
     console.log("======= TESTING PIMLICO GET USER OPERATION GAS PRICE =======")
 
@@ -312,7 +315,7 @@ const testPimlicoPaymasterActions = async () => {
         transport: http(process.env.RPC_URL as string)
     })
 
-    const pimlicoPaymasterClient = createClient({
+    const pimlicoPaymasterClient = createPimlicoPaymasterClient({
         chain: goerli,
         transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${pimlicoApiKey}`)
     }).extend(pimlicoPaymasterActions)
