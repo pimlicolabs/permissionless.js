@@ -18,7 +18,7 @@ type PimlicoUserOperationGasPriceWithBigIntAsHex = {
 }
 
 export type PimlicoUserOperationStatus = {
-    status: "not_found" | "submitted" | "included"
+    status: "not_found" | "not_submitted" | "submitted" | "rejected" | "reverted" | "included" | "failed"
     transactionHash: Hash | null
 }
 

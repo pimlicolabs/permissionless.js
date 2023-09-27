@@ -107,7 +107,7 @@ export const getUserOperationGasPrice = async (
  *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
- * await getUserOperationStatus(bundlerClient, userOpHash)
+ * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
  *
  */
 export const getUserOperationStatus = async (
@@ -160,7 +160,7 @@ export type PimlicoBundlerActions = {
      *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
      * }).extend(pimlicoBundlerActions)
      *
-     * await bundlerClient.getUserOperationStatus(userOpHash)
+     * await bundlerClient.getUserOperationStatus({ hash: userOpHash })
      */
     getUserOperationStatus: (args: GetUserOperationStatusParameters) => Promise<GetUserOperationStatusReturnType>
 }
