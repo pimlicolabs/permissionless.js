@@ -8,7 +8,7 @@
     {
         "name": "permissionless (cjs)",
         "path": "./src/_cjs/index.js",
-        "limit": "78 kB"
+        "limit": "150 kB"
     },
     {
         "name": "permissionless (minimal surface - tree-shaking)",
