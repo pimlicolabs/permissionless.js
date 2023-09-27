@@ -3,8 +3,8 @@ import type { Client, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../clients/bundler"
 import type { UserOperation } from "../types"
-import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
-import { deepHexlify } from "./utils"
+import type { TStatus, UserOperationWithBigIntAsHex } from "../types/userOperation"
+import { deepHexlify, transactionReceiptStatus } from "./utils"
 
 export type SendUserOperationParameters = {
     userOperation: UserOperation
@@ -53,10 +53,10 @@ export type GetUserOperationReceiptReturnType = {
         from: Address
         to: Address | null
         cumulativeGasUsed: bigint
-        status: bigint | null
+        status: TStatus
         gasUsed: bigint
         contractAddress: Address | null
-        logsBloom: string
+        logsBloom: Hex
         effectiveGasPrice: bigint
     }
     logs: {
@@ -319,7 +319,7 @@ export const getUserOperationReceipt = async (client: BundlerClient, { hash }: G
             from: response.receipt.from,
             to: response.receipt.to,
             cumulativeGasUsed: BigInt(response.receipt.cumulativeGasUsed),
-            status: response.receipt.status ? BigInt(response.receipt.status) : null,
+            status: transactionReceiptStatus[response.receipt.status],
             gasUsed: BigInt(response.receipt.gasUsed),
             contractAddress: response.receipt.contractAddress,
             logsBloom: response.receipt.logsBloom,

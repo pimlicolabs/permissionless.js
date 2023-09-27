@@ -1,5 +1,10 @@
 import { toHex } from "viem"
 
+export const transactionReceiptStatus = {
+    "0x0": "reverted",
+    "0x1": "success"
+} as const
+
 // biome-ignore lint/suspicious/noExplicitAny: it's a recursive function, so it's hard to type
 export function deepHexlify(obj: any): any {
     if (typeof obj === "function") {

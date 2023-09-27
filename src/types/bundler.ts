@@ -66,10 +66,10 @@ type UserOperationReceiptWithBigIntAsHex = {
         from: Address
         to: Address | null
         cumulativeGasUsed: Hex
-        status: Hex | null
+        status: "0x0" | "0x1"
         gasUsed: Hex
         contractAddress: Address | null
-        logsBloom: string
+        logsBloom: Hex
         effectiveGasPrice: Hex
     }
     logs: {
