@@ -1,6 +1,6 @@
-import type { Account, Chain, Client, Hash, Hex, Transport } from "viem"
-
-export type PimlicoBundlerClient = Client<Transport, Chain | undefined, Account | undefined, PimlicoBundlerRpcSchema>
+import type { Address, Hash, Hex } from "viem"
+import type { PartialBy } from "viem/types/utils"
+import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {
@@ -22,22 +22,7 @@ export type PimlicoUserOperationStatus = {
     transactionHash: Hash | null
 }
 
-export type PimlicoUserOperationGasPrice = {
-    slow: {
-        maxFeePerGas: bigint
-        maxPriorityFeePerGas: bigint
-    }
-    standard: {
-        maxFeePerGas: bigint
-        maxPriorityFeePerGas: bigint
-    }
-    fast: {
-        maxFeePerGas: bigint
-        maxPriorityFeePerGas: bigint
-    }
-}
-
-type PimlicoBundlerRpcSchema = [
+export type PimlicoBundlerRpcSchema = [
     {
         Method: "pimlico_getUserOperationGasPrice"
         Parameters: []
@@ -47,5 +32,24 @@ type PimlicoBundlerRpcSchema = [
         Method: "pimlico_getUserOperationStatus"
         Parameters: [hash: Hash]
         ReturnType: PimlicoUserOperationStatus
+    }
+]
+
+export type PimlicoPaymasterRpcSchema = [
+    {
+        Method: "pm_sponsorUserOperation"
+        Parameters: [
+            userOperation: PartialBy<
+                UserOperationWithBigIntAsHex,
+                "callGasLimit" | "preVerificationGas" | "verificationGasLimit" | "paymasterAndData"
+            >,
+            entryPoint: Address
+        ]
+        ReturnType: {
+            paymasterAndData: Hex
+            preVerificationGas: Hex
+            verificationGasLimit: Hex
+            callGasLimit: Hex
+        }
     }
 ]

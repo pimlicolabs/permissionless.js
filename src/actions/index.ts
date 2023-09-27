@@ -1,9 +1,15 @@
+import type {
+    BundlerClient,
+    EstimateUserOperationGasParameters,
+    EstimateUserOperationGasReturnType,
+    GetUserOperationByHashParameters,
+    GetUserOperationByHashReturnType,
+    GetUserOperationReceiptParameters,
+    GetUserOperationReceiptReturnType,
+    SendUserOperationParameters
+} from "./bundler"
+
 import bundlerActions, {
-    type EstimateUserOperationGasParameters,
-    type EstimateUserOperationGasReturnType,
-    type GetUserOperationByHash,
-    type GetUserOperationReceipt,
-    type SendUserOperationParameters,
     chainId,
     estimateUserOperationGas,
     getUserOperationByHash,
@@ -12,21 +18,53 @@ import bundlerActions, {
     supportedEntryPoints
 } from "./bundler"
 
-import { pimlicoActions, pimlicoBundlerActions } from "./pimlico"
+import type {
+    GetUserOperationGasPriceReturnType,
+    GetUserOperationStatusParameters,
+    GetUserOperationStatusReturnType,
+    PimlicoBundlerClient,
+    PimlicoPaymasterClient,
+    SponsorUserOperationParameters,
+    SponsorUserOperationReturnType
+} from "./pimlico"
+
+import {
+    getUserOperationGasPrice,
+    getUserOperationStatus,
+    pimlicoBundlerActions,
+    pimlicoPaymasterActions,
+    sponsorUserOperation
+} from "./pimlico"
+
+export type {
+    SendUserOperationParameters,
+    EstimateUserOperationGasParameters,
+    EstimateUserOperationGasReturnType,
+    GetUserOperationByHashParameters,
+    GetUserOperationByHashReturnType,
+    GetUserOperationReceiptParameters,
+    SponsorUserOperationParameters,
+    SponsorUserOperationReturnType,
+    GetUserOperationReceiptReturnType,
+    GetUserOperationGasPriceReturnType,
+    GetUserOperationStatusReturnType,
+    BundlerClient,
+    PimlicoBundlerClient,
+    PimlicoPaymasterClient,
+    GetUserOperationStatusParameters
+}
 
 export {
     bundlerActions,
-    type SendUserOperationParameters,
-    type EstimateUserOperationGasParameters,
-    type EstimateUserOperationGasReturnType,
-    type GetUserOperationByHash,
-    type GetUserOperationReceipt,
     sendUserOperation,
     estimateUserOperationGas,
     supportedEntryPoints,
     chainId,
     getUserOperationByHash,
     getUserOperationReceipt,
-    pimlicoActions,
-    pimlicoBundlerActions
+    pimlicoBundlerActions,
+    getUserOperationGasPrice,
+    getUserOperationStatus,
+    sponsorUserOperation,
+    pimlicoPaymasterActions
 }
