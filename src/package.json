@@ -22,10 +22,20 @@
             "import": "./_esm/actions/index.js",
             "default": "./_cjs/actions/index.js"
         },
+        "./actions/pimlico": {
+            "types": "./_types/actions/pimlico.d.ts",
+            "import": "./_esm/actions/pimlico.js",
+            "default": "./_cjs/actions/pimlico.js"
+        },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
             "import": "./_esm/clients/index.js",
             "default": "./_cjs/clients/index.js"
+        },
+        "./clients/pimlico": {
+            "types": "./_types/clients/pimlico.d.ts",
+            "import": "./_esm/clients/pimlico.js",
+            "default": "./_cjs/clients/pimlico.js"
         }
     },
     "peerDependencies": {

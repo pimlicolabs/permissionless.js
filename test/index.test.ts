@@ -1,20 +1,18 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { BundlerClient, type UserOperation, bundlerActions, createBundlerClient } from "permissionless"
-import { PimlicoBundlerClient } from "permissionless/actions/pimlico"
-import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
+import { BundlerClient, type UserOperation, createBundlerClient } from "permissionless"
+import {
+    PimlicoBundlerClient,
+    PimlicoPaymasterClient,
+    createPimlicoBundlerClient,
+    createPimlicoPaymasterClient
+} from "permissionless/clients/pimlico"
 import {
     http,
-    Account,
-    Chain,
-    Client,
     Hex,
     HttpTransport,
-    ParseAccount,
-    Transport,
     WalletClient,
     concatHex,
-    createClient,
     createPublicClient,
     createWalletClient,
     encodeAbiParameters,
@@ -29,7 +27,6 @@ import { PartialBy } from "viem/types/utils"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { SimpleAccountAbi } from "./abis/SimpleAccount"
 import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
-import { test } from "bun:test"
 
 // GOAL
 // import { bundlerActions, pimlicoBundlerActions, pimlicoBundlerActions, pimlicoPaymasterActions } from "permissionless"
@@ -201,18 +198,13 @@ const buildUserOp = async (eoaWalletClient: WalletClient) => {
     return userOperation
 }
 
-const testBundlerActions = async () => {
+const testBundlerActions = async (bundlerClient: BundlerClient) => {
     console.log("======= TESTING BUNDLER ACTIONS =======")
 
     const eoaWalletClient = createWalletClient({
         account,
         chain: goerli,
         transport: http(process.env.RPC_URL as string)
-    })
-
-    const bundlerClient = createBundlerClient({
-        chain: goerli,
-        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
     })
 
     console.log("======= TESTING SUPPORTED ENTRY POINTS =======")
@@ -283,13 +275,8 @@ const testFetUserOperationStatus = async (pimlicoBundlerClient: PimlicoBundlerCl
     console.log(userOperationStatus)
 }
 
-const testPimlicoBundlerActions = async () => {
+const testPimlicoBundlerActions = async (pimlicoBundlerClient: PimlicoBundlerClient) => {
     console.log("======= TESTING PIMLICO BUNDLER ACTIONS =======")
-
-    const pimlicoBundlerClient = createPimlicoBundlerClient({
-        chain: goerli,
-        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
-    })
 
     console.log("======= TESTING PIMLICO GET USER OPERATION GAS PRICE =======")
 
@@ -298,18 +285,13 @@ const testPimlicoBundlerActions = async () => {
     testFetUserOperationStatus(pimlicoBundlerClient)
 }
 
-const testPimlicoPaymasterActions = async () => {
+const testPimlicoPaymasterActions = async (pimlicoPaymasterClient: PimlicoPaymasterClient) => {
     console.log("======= TESTING PIMLICO PAYMASTER ACTIONS =======")
 
     const eoaWalletClient = createWalletClient({
         account,
         chain: goerli,
         transport: http(process.env.RPC_URL as string)
-    })
-
-    const pimlicoPaymasterClient = createPimlicoPaymasterClient({
-        chain: goerli,
-        transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${pimlicoApiKey}`)
     })
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
@@ -332,11 +314,24 @@ const testPimlicoPaymasterActions = async () => {
 }
 
 const main = async () => {
-    await testBundlerActions()
+    const bundlerClient = createBundlerClient({
+        chain: goerli,
+        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
+    })
 
-    await testPimlicoBundlerActions()
+    await testBundlerActions(bundlerClient)
 
-    await testPimlicoPaymasterActions()
+    const pimlicoBundlerClient = createPimlicoBundlerClient({
+        chain: goerli,
+        transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${pimlicoApiKey}`)
+    })
+    await testPimlicoBundlerActions(pimlicoBundlerClient)
+
+    const pimlicoPaymasterClient = createPimlicoPaymasterClient({
+        chain: goerli,
+        transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${pimlicoApiKey}`)
+    })
+    await testPimlicoPaymasterActions(pimlicoPaymasterClient)
 }
 
 main()
