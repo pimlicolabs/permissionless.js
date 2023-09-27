@@ -9,13 +9,7 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": [
-        "ethereum",
-        "erc-4337",
-        "eip-4337",
-        "paymaster",
-        "bundler"
-    ],
+    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
     "exports": {
         ".": {
@@ -29,7 +23,7 @@
             "default": "./_cjs/actions/index.js"
         }
     },
-    "dependencies": {
-        "viem": "^1.12.2"
+    "peerDependencies": {
+        "viem": "^1.2.0"
     }
 }

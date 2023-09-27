@@ -1,9 +1,9 @@
 import type { Address } from "abitype"
 import type { Client, Hash } from "viem"
-import type { PartialBy } from "viem/types/utils"
 import type { UserOperation, UserOperationReceipt } from "../types"
 import type { BundlerClient } from "../types/bundler"
 import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
+import type { PartialBy } from "../types/utils"
 import { deepHexlify } from "./utils"
 
 export type SendUserOperationParameters = {
@@ -158,7 +158,7 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
  *      transport: http(BUNDLER_URL)
  * })
  *
- * const chainId = chainId(bundlerClient)
+ * const bundlerChainId = chainId(bundlerClient)
  * // Return 5n for Goerli
  *
  */
