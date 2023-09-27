@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Fix JSDoc for Bundler Actions and export getUserOperationReceipt
+Fix JSDoc for Bundler Actions, move viem to peerDependencies, and export getUserOperationReceipt
