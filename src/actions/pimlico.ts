@@ -7,17 +7,17 @@ import type { PimlicoBundlerClient, PimlicoUserOperationGasPrice, PimlicoUserOpe
  * - Docs: [TODO://add link]
  * - Example: [TODO://add link]
  *
- * @param client {@link PimlicoBundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
  *
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { getUserOperationGasPrice } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
- *      transport: http(BUNDLER_URL)
+ *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
  * await getUserOperationGasPrice(bundlerClient)
@@ -51,18 +51,18 @@ const getUserOperationGasPrice = async (client: PimlicoBundlerClient): Promise<P
  * - Docs: [TODO://add link]
  * - Example: [TODO://add link]
  *
- * @param client {@link PimlicoBundlerClient} that you created using viem's createClient and extended it with bundlerActions.
+ * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
  * @returns status & transaction hash if included {@link PimlicoUserOperationStatus}
  *
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { getUserOperationStatus } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
- *      transport: http(BUNDLER_URL)
+ *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
  * await getUserOperationStatus(bundlerClient, userOpHash)
@@ -87,12 +87,12 @@ export const pimlicoBundlerActions = (client: Client) => ({
      * @example
      *
      * import { createClient } from "viem"
-     * import { sendUserOperation } from "permissionless/actions"
+     * import { pimlicoActions, pimlicoBundlerActions } from "permissionless/actions"
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http(BUNDLER_URL)
-     * }).extend(pimlicoActions || pimlicoBundlerActions)
+     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+     * }).extend(pimlicoActions) // .extend(pimlicoBundlerActions)
      *
      * await bundlerClient.getUserOperationGasPrice()
      */
@@ -109,12 +109,12 @@ export const pimlicoBundlerActions = (client: Client) => ({
      *
      * @example
      * import { createClient } from "viem"
-     * import { sendUserOperation } from "permissionless/actions"
+     * import { pimlicoActions, pimlicoBundlerActions } from "permissionless/actions"
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http(BUNDLER_URL)
-     * }).extend(pimlicoActions || pimlicoBundlerActions)
+     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+     * }).extend(pimlicoActions) // .extend(pimlicoBundlerActions)
      *
      * await bundlerClient.getUserOperationStatus(userOpHash)
      */

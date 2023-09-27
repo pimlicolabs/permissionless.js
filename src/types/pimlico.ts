@@ -1,5 +1,4 @@
 import type { Account, Chain, Client, Hash, Hex, Transport } from "viem"
-// import type { BundlerRpcSchema } from "./bundler"
 
 export type PimlicoBundlerClient = Client<Transport, Chain | undefined, Account | undefined, PimlicoBundlerRpcSchema>
 
@@ -38,8 +37,7 @@ export type PimlicoUserOperationGasPrice = {
     }
 }
 
-export type PimlicoBundlerRpcSchema = [
-    // ...BundlerRpcSchema,
+type PimlicoBundlerRpcSchema = [
     {
         Method: "pimlico_getUserOperationGasPrice"
         Parameters: []

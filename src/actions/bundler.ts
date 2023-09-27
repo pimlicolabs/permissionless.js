@@ -158,7 +158,7 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
  *      transport: http(BUNDLER_URL)
  * })
  *
- * const chainId = chainId(bundlerClient)
+ * const bundlerChainId = chainId(bundlerClient)
  * // Return 5n for Goerli
  *
  */

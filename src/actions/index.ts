@@ -12,6 +12,8 @@ import bundlerActions, {
     supportedEntryPoints
 } from "./bundler"
 
+import { pimlicoActions, pimlicoBundlerActions } from "./pimlico"
+
 export {
     bundlerActions,
     type SendUserOperationParameters,
@@ -24,5 +26,7 @@ export {
     supportedEntryPoints,
     chainId,
     getUserOperationByHash,
-    getUserOperationReceipt
+    getUserOperationReceipt,
+    pimlicoActions,
+    pimlicoBundlerActions
 }
