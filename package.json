@@ -1,38 +1,39 @@
 {
-    "workspaces": ["src", "test"],
-    "private": true,
-    "author": "Pimlico",
-    "type": "module",
-    "sideEffects": false,
-    "devDependencies": {
-        "@biomejs/biome": "^1.0.0",
-        "@changesets/changelog-github": "^0.4.8",
-        "@changesets/cli": "^2.26.2",
-        "bun-types": "^1.0.3",
-        "rimraf": "^5.0.1",
-        "simple-git-hooks": "^2.9.0",
-        "size-limit": "^9.0.0",
-        "tslib": "^2.6.2",
-        "@size-limit/preset-small-lib": "^9.0.0",
-        "typescript": "^5.2.2"
-    },
-    "description": "",
-    "keywords": [],
-    "license": "MIT",
-    "scripts": {
-        "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
-        "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./src/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./src/_cjs/package.json",
-        "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./src/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./src/_esm/package.json",
-        "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./src/_types --emitDeclarationOnly --declaration --declarationMap",
-        "clean": "rimraf src/_esm src/_cjs src/_types",
-        "changeset": "changeset",
-        "changeset:release": "bun run build && changeset publish",
-        "changeset:version": "changeset version && bun install --lockfile-only",
-        "format": "biome format . --write",
-        "lint": "biome check .",
-        "lint:fix": "bun run lint --apply"
-    },
-    "simple-git-hooks": {
-        "pre-commit": "bun run format && bun run lint:fix"
-    }
+  "workspaces": ["src", "test"],
+  "private": true,
+  "author": "Pimlico",
+  "type": "module",
+  "sideEffects": false,
+  "devDependencies": {
+    "@biomejs/biome": "^1.0.0",
+    "@changesets/changelog-git": "^0.1.14",
+    "@changesets/changelog-github": "^0.4.8",
+    "@changesets/cli": "^2.26.2",
+    "@size-limit/preset-small-lib": "^9.0.0",
+    "bun-types": "^1.0.3",
+    "rimraf": "^5.0.1",
+    "simple-git-hooks": "^2.9.0",
+    "size-limit": "^9.0.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "scripts": {
+    "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
+    "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./src/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./src/_cjs/package.json",
+    "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./src/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./src/_esm/package.json",
+    "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./src/_types --emitDeclarationOnly --declaration --declarationMap",
+    "clean": "rimraf src/_esm src/_cjs src/_types",
+    "changeset": "changeset",
+    "changeset:release": "bun run build && changeset publish",
+    "changeset:version": "changeset version && bun install --lockfile-only",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "lint:fix": "bun run lint --apply"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run format && bun run lint:fix"
+  }
 }

@@ -1,11 +1,6 @@
 {
     "$schema": "https://unpkg.com/@changesets/config@2.1.0/schema.json",
-    "changelog": [
-        "@changesets/changelog-github",
-        {
-            "repo": "pimlicolabs/permissionless"
-        }
-    ],
+    "changelog": "@changesets/changelog-git",
     "commit": false,
     "access": "public",
     "baseBranch": "main",
