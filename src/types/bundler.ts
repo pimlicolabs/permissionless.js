@@ -1,10 +1,8 @@
-import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
+import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
-export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema>
-
-type BundlerRpcSchema = [
+export type BundlerRpcSchema = [
     {
         Method: "eth_sendUserOperation"
         Parameters: [userOperation: UserOperationWithBigIntAsHex, entryPoint: Address]
@@ -53,39 +51,6 @@ type BundlerRpcSchema = [
     }
 ]
 
-export type UserOperationReceipt = {
-    userOpHash: Hash
-    sender: Address
-    nonce: bigint
-    actualGasUsed: bigint
-    actualGasCost: bigint
-    success: boolean
-    receipt: {
-        transactionHash: Hex
-        transactionIndex: bigint
-        blockHash: Hash
-        blockNumber: bigint
-        from: Address
-        to: Address | null
-        cumulativeGasUsed: bigint
-        status: bigint | null
-        gasUsed: bigint
-        contractAddress: Address | null
-        logsBloom: string
-        effectiveGasPrice: bigint
-    }
-    logs: {
-        data: Hex
-        blockNumber: bigint
-        blockHash: Hash
-        transactionHash: Hash
-        logIndex: bigint
-        transactionIndex: bigint
-        address: Address
-        topics: Hex[]
-    }[]
-}
-
 type UserOperationReceiptWithBigIntAsHex = {
     userOpHash: Hash
     sender: Address
@@ -101,10 +66,10 @@ type UserOperationReceiptWithBigIntAsHex = {
         from: Address
         to: Address | null
         cumulativeGasUsed: Hex
-        status: Hex | null
+        status: "0x0" | "0x1"
         gasUsed: Hex
         contractAddress: Address | null
-        logsBloom: string
+        logsBloom: Hex
         effectiveGasPrice: Hex
     }
     logs: {

@@ -1,6 +1,8 @@
 import type { Address } from "abitype"
 import type { Hex } from "viem"
 
+export type TStatus = "success" | "reverted"
+
 export type UserOperationWithBigIntAsHex = {
     sender: Address
     nonce: Hex

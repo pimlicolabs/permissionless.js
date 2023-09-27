@@ -1,9 +1,14 @@
+import type {
+    EstimateUserOperationGasParameters,
+    EstimateUserOperationGasReturnType,
+    GetUserOperationByHashParameters,
+    GetUserOperationByHashReturnType,
+    GetUserOperationReceiptParameters,
+    GetUserOperationReceiptReturnType,
+    SendUserOperationParameters
+} from "./bundler"
+
 import bundlerActions, {
-    type EstimateUserOperationGasParameters,
-    type EstimateUserOperationGasReturnType,
-    type GetUserOperationByHash,
-    type GetUserOperationReceipt,
-    type SendUserOperationParameters,
     chainId,
     estimateUserOperationGas,
     getUserOperationByHash,
@@ -12,13 +17,18 @@ import bundlerActions, {
     supportedEntryPoints
 } from "./bundler"
 
+export type {
+    SendUserOperationParameters,
+    EstimateUserOperationGasParameters,
+    EstimateUserOperationGasReturnType,
+    GetUserOperationByHashParameters,
+    GetUserOperationByHashReturnType,
+    GetUserOperationReceiptParameters,
+    GetUserOperationReceiptReturnType
+}
+
 export {
     bundlerActions,
-    type SendUserOperationParameters,
-    type EstimateUserOperationGasParameters,
-    type EstimateUserOperationGasReturnType,
-    type GetUserOperationByHash,
-    type GetUserOperationReceipt,
     sendUserOperation,
     estimateUserOperationGas,
     supportedEntryPoints,

@@ -1,10 +1,10 @@
 import type { Address } from "abitype"
-import type { Client, Hash } from "viem"
+import type { Client, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { UserOperation, UserOperationReceipt } from "../types"
-import type { BundlerClient } from "../types/bundler"
-import type { UserOperationWithBigIntAsHex } from "../types/userOperation"
-import { deepHexlify } from "./utils"
+import type { BundlerClient } from "../clients/bundler"
+import type { UserOperation } from "../types"
+import type { TStatus, UserOperationWithBigIntAsHex } from "../types/userOperation"
+import { deepHexlify, transactionReceiptStatus } from "./utils"
 
 export type SendUserOperationParameters = {
     userOperation: UserOperation
@@ -22,13 +22,54 @@ export type EstimateUserOperationGasReturnType = {
     callGasLimit: bigint
 }
 
-export type GetUserOperationByHash = {
+export type GetUserOperationByHashParameters = {
     hash: Hash
 }
 
-export type GetUserOperationReceipt = {
+export type GetUserOperationByHashReturnType = {
+    userOperation: UserOperation
+    entryPoint: Address
+    transactionHash: Hash
+    blockHash: Hash
+    blockNumber: bigint
+} | null
+
+export type GetUserOperationReceiptParameters = {
     hash: Hash
 }
+
+export type GetUserOperationReceiptReturnType = {
+    userOpHash: Hash
+    sender: Address
+    nonce: bigint
+    actualGasUsed: bigint
+    actualGasCost: bigint
+    success: boolean
+    receipt: {
+        transactionHash: Hex
+        transactionIndex: bigint
+        blockHash: Hash
+        blockNumber: bigint
+        from: Address
+        to: Address | null
+        cumulativeGasUsed: bigint
+        status: TStatus
+        gasUsed: bigint
+        contractAddress: Address | null
+        logsBloom: Hex
+        effectiveGasPrice: bigint
+    }
+    logs: {
+        data: Hex
+        blockNumber: bigint
+        blockHash: Hash
+        transactionHash: Hash
+        logIndex: bigint
+        transactionIndex: bigint
+        address: Address
+        topics: Hex[]
+    }[]
+} | null
 
 /**
  * Sends user operation to the bundler
@@ -177,7 +218,7 @@ export const chainId = async (client: BundlerClient) => {
  * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationByHash
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param args {@link GetUserOperationByHash} UserOpHash that was returned by {@link sendUserOperation}
+ * @param args {@link GetUserOperationByHashParameters} UserOpHash that was returned by {@link sendUserOperation}
  * @returns userOperation along with entryPoint, transactionHash, blockHash, blockNumber if found or null
  *
  *
@@ -195,7 +236,7 @@ export const chainId = async (client: BundlerClient) => {
  */
 export const getUserOperationByHash = async (
     client: BundlerClient,
-    { hash }: GetUserOperationByHash
+    { hash }: GetUserOperationByHashParameters
 ): Promise<{
     userOperation: UserOperation
     entryPoint: Address
@@ -237,8 +278,8 @@ export const getUserOperationByHash = async (
  * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt
  *
  * @param client {@link BundlerClient} that you created using viem's createClient and extended it with bundlerActions.
- * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
- * @returns user operation receipt {@link UserOperationReceipt} if found or null
+ * @param args {@link GetUserOperationReceiptParameters} UserOpHash that was returned by {@link sendUserOperation}
+ * @returns user operation receipt {@link GetUserOperationReceiptReturnType} if found or null
  *
  *
  * @example
@@ -253,17 +294,17 @@ export const getUserOperationByHash = async (
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceipt) => {
+export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceiptParameters) => {
     const params: [Hash] = [hash]
 
-    const response: UserOperationReceipt = await client.request({
+    const response = await client.request({
         method: "eth_getUserOperationReceipt",
         params
     })
 
     if (!response) return null
 
-    const userOperationReceipt: UserOperationReceipt = {
+    const userOperationReceipt: GetUserOperationReceiptReturnType = {
         userOpHash: response.userOpHash,
         sender: response.sender,
         nonce: BigInt(response.nonce),
@@ -278,7 +319,7 @@ export const getUserOperationReceipt = async (client: BundlerClient, { hash }: G
             from: response.receipt.from,
             to: response.receipt.to,
             cumulativeGasUsed: BigInt(response.receipt.cumulativeGasUsed),
-            status: response.receipt.status ? BigInt(response.receipt.status) : null,
+            status: transactionReceiptStatus[response.receipt.status],
             gasUsed: BigInt(response.receipt.gasUsed),
             contractAddress: response.receipt.contractAddress,
             logsBloom: response.receipt.logsBloom,
@@ -299,7 +340,7 @@ export const getUserOperationReceipt = async (client: BundlerClient, { hash }: G
     return userOperationReceipt
 }
 
-const bundlerActions = (client: Client) => ({
+export type BundlerActions = {
     /**
      *
      * Sends user operation to the bundler
@@ -315,7 +356,7 @@ const bundlerActions = (client: Client) => ({
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http(BUNDLER_URL)
+     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
      * }).extend(bundlerActions)
      *
      * const userOpHash = await bundlerClient.sendUserOperation({
@@ -325,8 +366,7 @@ const bundlerActions = (client: Client) => ({
      *
      * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
      */
-    sendUserOperation: async (args: SendUserOperationParameters): Promise<Hash> =>
-        sendUserOperation(client as BundlerClient, args),
+    sendUserOperation: (args: SendUserOperationParameters) => Promise<Hash>
     /**
      *
      * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -352,8 +392,7 @@ const bundlerActions = (client: Client) => ({
      *
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
-    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) =>
-        estimateUserOperationGas(client as BundlerClient, args),
+    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) => Promise<EstimateUserOperationGasReturnType>
     /**
      *
      * Returns the supported entrypoints by the bundler service
@@ -375,7 +414,7 @@ const bundlerActions = (client: Client) => ({
      *
      * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
      */
-    supportedEntryPoints: (): Promise<Address[]> => supportedEntryPoints(client as BundlerClient),
+    supportedEntryPoints: () => Promise<Address[]>
     /**
      *
      * Returns the supported chain id by the bundler service
@@ -396,7 +435,7 @@ const bundlerActions = (client: Client) => ({
      * const chainId = await bundlerClient.chainId()
      * // Return 5n for Goerli
      */
-    chainId: () => chainId(client as BundlerClient),
+    chainId: () => Promise<bigint>
     /**
      *
      * Returns the user operation from userOpHash
@@ -418,15 +457,15 @@ const bundlerActions = (client: Client) => ({
      * await bundlerClient.getUserOperationByHash(userOpHash)
      *
      */
-    getUserOperationByHash: (args: GetUserOperationByHash) => getUserOperationByHash(client as BundlerClient, args),
+    getUserOperationByHash: (args: GetUserOperationByHashParameters) => Promise<GetUserOperationByHashReturnType>
     /**
      *
      * Returns the user operation receipt from userOpHash
      *
      * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt
      *
-     * @param args {@link GetUserOperationReceipt} UserOpHash that was returned by {@link sendUserOperation}
-     * @returns user operation receipt {@link UserOperationReceipt} if found or null
+     * @param args {@link GetUserOperationReceiptParameters} UserOpHash that was returned by {@link sendUserOperation}
+     * @returns user operation receipt {@link GetUserOperationReceiptReturnType} if found or null
      *
      * @example
      * import { createClient } from "viem"
@@ -440,7 +479,20 @@ const bundlerActions = (client: Client) => ({
      * await bundlerClient.getUserOperationReceipt({hash: userOpHash})
      *
      */
-    getUserOperationReceipt: (args: GetUserOperationReceipt) => getUserOperationReceipt(client as BundlerClient, args)
+    getUserOperationReceipt: (args: GetUserOperationReceiptParameters) => Promise<GetUserOperationReceiptReturnType>
+}
+
+const bundlerActions = (client: Client): BundlerActions => ({
+    sendUserOperation: async (args: SendUserOperationParameters): Promise<Hash> =>
+        sendUserOperation(client as BundlerClient, args),
+    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) =>
+        estimateUserOperationGas(client as BundlerClient, args),
+    supportedEntryPoints: (): Promise<Address[]> => supportedEntryPoints(client as BundlerClient),
+    chainId: () => chainId(client as BundlerClient),
+    getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
+        getUserOperationByHash(client as BundlerClient, args),
+    getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
+        getUserOperationReceipt(client as BundlerClient, args)
 })
 
 export default bundlerActions
