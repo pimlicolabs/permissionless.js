@@ -80,7 +80,7 @@ export const sendUserOperation = async (client: BundlerClient, args: SendUserOpe
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { estimateUserOperationGas } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -125,7 +125,7 @@ export const estimateUserOperationGas = async (
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { supportedEntryPoints } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -155,7 +155,7 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { chainId } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -188,7 +188,7 @@ export const chainId = async (client: BundlerClient) => {
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { getUserOperationByHash } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -249,7 +249,7 @@ export const getUserOperationByHash = async (
  *
  * @example
  * import { createClient } from "viem"
- * import { sendUserOperation } from "permissionless/actions"
+ * import { getUserOperationReceipt } from "permissionless/actions"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -259,7 +259,7 @@ export const getUserOperationByHash = async (
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceipt) => {
+export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceipt) => {
     const params: [Hash] = [hash]
 
     const response: UserOperationReceipt = await client.request({
