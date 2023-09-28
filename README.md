@@ -6,11 +6,52 @@
 
 Permissionless.js is a Typescript library built on top of [viem](https://viem.sh) for interacting with [ERC-4337 bundlers](https://eips.ethereum.org/EIPS/eip-4337) and paymasters.
 
-## Getting started
+## Features
+
+- **Full ERC-4337 Support**: We support all bundler actions following [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
+- **Gas Sponsorship**: We support paymaster actions to allow you to easily sponsor gas fees.
+- **Built on & for Viem**: We provide convenient helper functions like `createBundlerClient` to easily create Viem clients.
+- More to come soon...
+
+## Overview
+
+## Installation
+
+Install [viem](https://viem.sh) as a peer dependency
+
+```bash
+npm install viem permissionless
+```
+
+## Quick start
+
+Create a bundler client, and start sending user operations!
+
+```typescript
+
+import { createBundlerClient } from "permissionless/clients/pimlico"
+import { goerli } from "viem/chains"
+import { http } from "viem"
+
+const bundlerClient = createBundlerClient({
+    chain: goerli,
+    transport: http(`https://api.pimlico.io/v1/goerli/rpc?apikey=${pimlicoApiKey}`) // Use any bundler url
+})
+
+const userOpHash = await bundlerClient.sendUserOperation({
+    userOperation: signedUserOperation,
+    entryPoint: entryPoint
+})
+```
+
+For detailed documentation visit our [docs page](https://docs.pimlico.io/permissionless).
+
+
+## Contributors
 
 For a full explanation of Permissionless.js, please visit our [docs page](https://docs.pimlico.io/permissionless)
 
-Start using permissionless.js with:
+Build permissionless.js locally with:
 ```bash
 bun install permissionless
 ```
