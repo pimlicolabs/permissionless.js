@@ -10,10 +10,8 @@ Permissionless.js is a Typescript library built on top of [viem](https://viem.sh
 
 - **Full ERC-4337 Support**: We support all bundler actions following [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
 - **Gas Sponsorship**: We support paymaster actions to allow you to easily sponsor gas fees.
-- **Built on & for Viem**: We provide convenient helper functions like `createBundlerClient` to easily create Viem clients.
+- **Built on & for viem**: We provide convenient helper functions like `createBundlerClient` to easily create viem clients.
 - More to come soon...
-
-## Overview
 
 ## Installation
 
@@ -21,6 +19,14 @@ Install [viem](https://viem.sh) as a peer dependency
 
 ```bash
 npm install viem permissionless
+```
+
+```bash
+bun install viem permissionless
+```
+
+```bash
+yarn add viem permissionless
 ```
 
 ## Quick start
@@ -53,7 +59,7 @@ For a full explanation of Permissionless.js, please visit our [docs page](https:
 
 Build permissionless.js locally with:
 ```bash
-bun install permissionless
+bun run build
 ```
 
 ## License
