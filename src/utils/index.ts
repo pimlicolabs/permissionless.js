@@ -41,6 +41,8 @@ export type GetUserOperationHashParams = { userOperation: UserOperation; entryPo
  *
  * Returns user operation hash that is a unique identifier of the user operation.
  *
+ * - Docs: https://docs.pimlico.io/permissionless/reference/utils/getUserOperationHash
+ *
  * @param args: userOperation, entryPoint, chainId as {@link GetUserOperationHashParams}
  * @returns userOperationHash as {@link Hash}
  *
