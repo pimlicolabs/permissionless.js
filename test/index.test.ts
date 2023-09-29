@@ -1,6 +1,6 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { BundlerClient, type UserOperation, createBundlerClient } from "permissionless"
+import { BundlerClient, type UserOperation, createBundlerClient, getUserOperationHash } from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient,
@@ -15,10 +15,8 @@ import {
     concatHex,
     createPublicClient,
     createWalletClient,
-    encodeAbiParameters,
     encodeFunctionData,
     getContract,
-    keccak256,
     zeroAddress
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -117,48 +115,6 @@ const getDummySignature = (): Hex => {
     return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
 }
 
-function packUserOp(userOperation: UserOperation): Hex {
-    const hashedInitCode = keccak256(userOperation.initCode)
-    const hashedCallData = keccak256(userOperation.callData)
-    const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData)
-
-    return encodeAbiParameters(
-        [
-            { type: "address" },
-            { type: "uint256" },
-            { type: "bytes32" },
-            { type: "bytes32" },
-            { type: "uint256" },
-            { type: "uint256" },
-            { type: "uint256" },
-            { type: "uint256" },
-            { type: "uint256" },
-            { type: "bytes32" }
-        ],
-        [
-            userOperation.sender as Address,
-            userOperation.nonce,
-            hashedInitCode,
-            hashedCallData,
-            userOperation.callGasLimit,
-            userOperation.verificationGasLimit,
-            userOperation.preVerificationGas,
-            userOperation.maxFeePerGas,
-            userOperation.maxPriorityFeePerGas,
-            hashedPaymasterAndData
-        ]
-    )
-}
-
-const getUserOperationHash = (userOperation: UserOperation, entryPointAddress: Address, chainId: bigint) => {
-    const encoded = encodeAbiParameters(
-        [{ type: "bytes32" }, { type: "address" }, { type: "uint256" }],
-        [keccak256(packUserOp(userOperation)), entryPointAddress, chainId]
-    ) as `0x${string}`
-
-    return keccak256(encoded)
-}
-
 const getNonce = async (accountAddress: Address): Promise<bigint> => {
     if (!(await isAccountDeployed(accountAddress))) {
         return 0n
@@ -175,7 +131,7 @@ const testSupportedEntryPoints = async (bundlerClient: BundlerClient) => {
 const testChainId = async (bundlerClient: BundlerClient) => {
     const chainId = await bundlerClient.chainId()
 
-    if (chainId !== BigInt(goerli.id)) throw new Error("Chain ID not supported")
+    if (chainId !== goerli.id) throw new Error("Chain ID not supported")
 }
 
 const buildUserOp = async (eoaWalletClient: WalletClient) => {
@@ -239,7 +195,7 @@ const testBundlerActions = async (bundlerClient: BundlerClient) => {
         ...userOperation,
         signature: await eoaWalletClient.signMessage({
             account: eoaWalletClient.account,
-            message: { raw: getUserOperationHash(userOperation, entryPoint, BigInt(goerli.id)) }
+            message: { raw: getUserOperationHash({ userOperation, entryPoint, chainId: goerli.id }) }
         })
     }
 
