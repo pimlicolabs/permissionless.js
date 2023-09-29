@@ -797,7 +797,7 @@ export const EntryPointAbi = [
                     }
                 ],
                 internalType: "struct UserOperation",
-                name: "userOp",
+                name: "UserOperation",
                 type: "tuple"
             }
         ],
@@ -1255,7 +1255,7 @@ export const EntryPointAbi = [
                     }
                 ],
                 internalType: "struct UserOperation",
-                name: "userOp",
+                name: "UserOperation",
                 type: "tuple"
             }
         ],

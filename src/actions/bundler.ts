@@ -495,4 +495,4 @@ const bundlerActions = (client: Client): BundlerActions => ({
         getUserOperationReceipt(client as BundlerClient, args)
 })
 
-export default bundlerActions
+export { bundlerActions }

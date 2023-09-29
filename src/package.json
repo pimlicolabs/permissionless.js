@@ -9,13 +9,7 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": [
-        "ethereum",
-        "erc-4337",
-        "eip-4337",
-        "paymaster",
-        "bundler"
-    ],
+    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
     "exports": {
         ".": {
@@ -42,6 +36,11 @@
             "types": "./_types/clients/pimlico.d.ts",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
+        },
+        "./utils": {
+            "types": "./_types/utils/index.d.ts",
+            "import": "./_esm/utils/index.js",
+            "default": "./_cjs/utils/index.js"
         }
     },
     "peerDependencies": {
