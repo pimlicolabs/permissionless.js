@@ -36,11 +36,12 @@
             "types": "./_types/clients/pimlico.d.ts",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
-        },"./utils": {
+        },
+        "./utils": {
             "types": "./_types/utils/index.d.ts",
             "import": "./_esm/utils/index.js",
             "default": "./_cjs/utils/index.js"
-        },
+        }
     },
     "peerDependencies": {
         "viem": "^1.10.10"
