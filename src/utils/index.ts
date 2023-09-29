@@ -1,4 +1,5 @@
-import { type Address, type Hash, type Hex, encodeAbiParameters, keccak256 } from "viem"
+import type { Address, Hash, Hex } from "viem"
+import { encodeAbiParameters, keccak256 } from "viem"
 import type { UserOperation } from "../types"
 
 function packUserOp({ userOperation }: { userOperation: UserOperation }): Hex {

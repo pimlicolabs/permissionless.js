@@ -9,6 +9,7 @@
         "@changesets/changelog-git": "^0.1.14",
         "@changesets/changelog-github": "^0.4.8",
         "@changesets/cli": "^2.26.2",
+        "@size-limit/esbuild-why": "^9.0.0",
         "@size-limit/preset-small-lib": "^9.0.0",
         "bun-types": "^1.0.3",
         "rimraf": "^5.0.1",
