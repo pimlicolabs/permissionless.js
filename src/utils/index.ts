@@ -35,7 +35,7 @@ function packUserOp({ userOperation }: { userOperation: UserOperation }): Hex {
     )
 }
 
-export type GetUserOperationHashParams = { userOperation: UserOperation; entryPoint: Address; chainId: bigint }
+export type GetUserOperationHashParams = { userOperation: UserOperation; entryPoint: Address; chainId: number }
 
 /**
  *
@@ -59,7 +59,7 @@ export type GetUserOperationHashParams = { userOperation: UserOperation; entryPo
 const getUserOperationHash = ({ userOperation, entryPoint, chainId }: GetUserOperationHashParams): Hash => {
     const encoded = encodeAbiParameters(
         [{ type: "bytes32" }, { type: "address" }, { type: "uint256" }],
-        [keccak256(packUserOp({ userOperation })), entryPoint, chainId]
+        [keccak256(packUserOp({ userOperation })), entryPoint, BigInt(chainId)]
     ) as `0x${string}`
 
     return keccak256(encoded)

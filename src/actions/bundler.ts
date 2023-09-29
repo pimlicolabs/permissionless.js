@@ -204,7 +204,7 @@ export const supportedEntryPoints = async (client: BundlerClient): Promise<Addre
  *
  */
 export const chainId = async (client: BundlerClient) => {
-    return BigInt(
+    return Number(
         await client.request({
             method: "eth_chainId",
             params: []
@@ -435,7 +435,7 @@ export type BundlerActions = {
      * const chainId = await bundlerClient.chainId()
      * // Return 5n for Goerli
      */
-    chainId: () => Promise<bigint>
+    chainId: () => Promise<number>
     /**
      *
      * Returns the user operation from userOpHash
