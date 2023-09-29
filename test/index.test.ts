@@ -45,7 +45,7 @@ const pimlicoApiKey = process.env.PIMLICO_API_KEY
 const entryPoint: Address = process.env.ENTRYPOINT_ADDRESS as Address
 
 const chain = "goerli"
-const account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Address)
+const account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 const factoryAddress = "0x9406Cc6185a346906296840746125a0E44976454" as Address
 
 const publicClient = createPublicClient<HttpTransport, typeof goerli>({
@@ -265,7 +265,7 @@ const getUserOperationGasPriceFromPimlicoBundler = async (pimlicoBundlerClient: 
     return pimlicoBundlerClient.getUserOperationGasPrice()
 }
 
-const testFetUserOperationStatus = async (pimlicoBundlerClient: PimlicoBundlerClient) => {
+const testFetchUserOperationStatus = async (pimlicoBundlerClient: PimlicoBundlerClient) => {
     const userOpHashOld = "0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34"
 
     const userOperationStatus = await pimlicoBundlerClient.getUserOperationStatus({
@@ -282,7 +282,7 @@ const testPimlicoBundlerActions = async (pimlicoBundlerClient: PimlicoBundlerCli
 
     await getUserOperationGasPriceFromPimlicoBundler(pimlicoBundlerClient)
 
-    testFetUserOperationStatus(pimlicoBundlerClient)
+    testFetchUserOperationStatus(pimlicoBundlerClient)
 }
 
 const testPimlicoPaymasterActions = async (pimlicoPaymasterClient: PimlicoPaymasterClient) => {

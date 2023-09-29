@@ -474,7 +474,7 @@ export const SimpleAccountAbi = [
                     }
                 ],
                 internalType: "struct UserOperation",
-                name: "userOp",
+                name: "UserOperation",
                 type: "tuple"
             },
             {

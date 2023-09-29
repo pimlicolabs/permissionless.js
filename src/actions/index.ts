@@ -8,7 +8,8 @@ import type {
     SendUserOperationParameters
 } from "./bundler"
 
-import bundlerActions, {
+import {
+    bundlerActions,
     chainId,
     estimateUserOperationGas,
     getUserOperationByHash,
