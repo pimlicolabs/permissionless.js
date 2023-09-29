@@ -44,8 +44,7 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
 /**
  * Returns the live gas prices that you can use to send a user operation.
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationGasPrice
  *
  * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
@@ -90,8 +89,7 @@ export const getUserOperationGasPrice = async (
 /**
  * Returns the status of the userOperation that is pending in the mempool.
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
  *
  * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
@@ -124,8 +122,7 @@ export type PimlicoBundlerActions = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationGasPrice
      *
      * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas {@link GetUserOperationGasPriceReturnType}
      *
@@ -145,8 +142,7 @@ export type PimlicoBundlerActions = {
     /**
      * Returns the status of the userOperation that is pending in the mempool.
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
      *
      * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
      * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
@@ -174,8 +170,7 @@ export const pimlicoBundlerActions = (client: Client): PimlicoBundlerActions => 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
  *
  * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @param args {@link sponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
@@ -218,8 +213,7 @@ export type PimlicoPaymasterClientActions = {
     /**
      * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
      *
-     * - Docs: [TODO://add link]
-     * - Example: [TODO://add link]
+     * https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
      *
      * @param args {@link SponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
      * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}

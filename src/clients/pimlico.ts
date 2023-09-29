@@ -29,8 +29,7 @@ export type PimlicoPaymasterClient = Client<
 /**
  * Creates a pimlico specific Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/clients/pimlicoBundlerClient
  *
  * A Pimlico Client is an interface to "pimlico endpoints" [JSON-RPC API](https://docs.pimlico.io/reference/bundler/endpoints) methods such as getting current blockchain gas prices, getting user operation status, etc through [Pimlico Bundler Actions](TODO://Add bundler action documentation link).
  *
@@ -62,10 +61,9 @@ export const createPimlicoBundlerClient = <transport extends Transport, chain ex
 /**
  * Creates a pimlico specific Paymaster Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
  *
- * - Docs: [TODO://add link]
- * - Example: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/clients/pimlicoPaymasterClient
  *
- * A Pimlico Paymaster Client is an interface to "pimlico paymaster endpoints" [JSON-RPC API](https://docs.pimlico.io/reference/verifying-paymaster/endpoints) methods such as sponsoring user operation, etc through [Pimlico Paymaster Actions](TODO://Add bundler action documentation link).
+ * A Pimlico Paymaster Client is an interface to "pimlico paymaster endpoints" [JSON-RPC API](https://docs.pimlico.io/reference/verifying-paymaster/endpoints) methods such as sponsoring user operation, etc through Pimlico Paymaster Actions.
  *
  * @param config - {@link PublicClientConfig}
  * @returns A Pimlico Paymaster Client. {@link PimlicoPaymasterClient}
