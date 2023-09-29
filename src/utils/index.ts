@@ -1,7 +1,7 @@
 import { type Address, type Hex, encodeAbiParameters, keccak256 } from "viem"
 import type { UserOperation } from "../types"
 
-function packUserOp(userOperation: UserOperation): Hex {
+function packUserOp({ userOperation }: { userOperation: UserOperation }): Hex {
     const hashedInitCode = keccak256(userOperation.initCode)
     const hashedCallData = keccak256(userOperation.callData)
     const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData)
@@ -34,10 +34,14 @@ function packUserOp(userOperation: UserOperation): Hex {
     )
 }
 
-const getUserOperationHash = (userOperation: UserOperation, entryPointAddress: Address, chainId: bigint) => {
+const getUserOperationHash = ({
+    userOperation,
+    entryPoint,
+    chainId
+}: { userOperation: UserOperation; entryPoint: Address; chainId: bigint }) => {
     const encoded = encodeAbiParameters(
         [{ type: "bytes32" }, { type: "address" }, { type: "uint256" }],
-        [keccak256(packUserOp(userOperation)), entryPointAddress, chainId]
+        [keccak256(packUserOp({ userOperation })), entryPoint, chainId]
     ) as `0x${string}`
 
     return keccak256(encoded)
