@@ -3,6 +3,32 @@ import { BaseError, ContractFunctionRevertedError } from "viem"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 
+/**
+ * Returns the address of the account that will be deployed with the given init code.
+ *
+ * - Docs: [TODO://add link]
+ *
+ *
+ * @param publicClient {@link PublicClient} that you created using viem's createPublicClient.
+ * @param args {@link GetSenderAddressParams}
+ * @returns Address
+ *
+ * @example
+ * import { createPublicClient } from "viem"
+ * import { getSenderAddress } from "permissionless/actions"
+ *
+ * const publicClient = createPublicClient({
+ *      chain: goerli,
+ *      transport: http("https://goerli.infura.io/v3/your-infura-key")
+ * })
+ *
+ * const senderAddress = await getSenderAddress(publicClient, {
+ *      initCode,
+ *      entryPoint
+ * })
+ *
+ * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
+ */
 export const getSenderAddress = async <
     TPublicClient extends PublicClient<Transport, Chain | undefined> = PublicClient<Transport, Chain | undefined>
 >(
