@@ -18,6 +18,10 @@ import {
     supportedEntryPoints
 } from "./bundler"
 
+import type { GetSenderAddressParams } from "./public"
+
+import { getSenderAddress } from "./public"
+
 export type {
     SendUserOperationParameters,
     EstimateUserOperationGasParameters,
@@ -25,7 +29,8 @@ export type {
     GetUserOperationByHashParameters,
     GetUserOperationByHashReturnType,
     GetUserOperationReceiptParameters,
-    GetUserOperationReceiptReturnType
+    GetUserOperationReceiptReturnType,
+    GetSenderAddressParams
 }
 
 export {
@@ -35,5 +40,6 @@ export {
     supportedEntryPoints,
     chainId,
     getUserOperationByHash,
-    getUserOperationReceipt
+    getUserOperationReceipt,
+    getSenderAddress
 }
