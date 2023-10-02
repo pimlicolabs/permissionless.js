@@ -16,7 +16,6 @@ import {
 import {
     http,
     Hex,
-    HttpTransport,
     WalletClient,
     concatHex,
     createPublicClient,
@@ -52,7 +51,7 @@ const chain = "goerli"
 const account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 const factoryAddress = "0x9406Cc6185a346906296840746125a0E44976454" as Address
 
-const publicClient = createPublicClient<HttpTransport, typeof goerli>({
+const publicClient = createPublicClient({
     chain: goerli,
     transport: http(process.env.RPC_URL as string)
 })

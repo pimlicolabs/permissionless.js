@@ -1,11 +1,9 @@
 import type {
     Address,
-    Chain,
     ContractFunctionExecutionErrorType,
     ContractFunctionRevertedErrorType,
     Hex,
-    PublicClient,
-    Transport
+    PublicClient
 } from "viem"
 import { BaseError } from "viem"
 
@@ -52,10 +50,8 @@ export class InvalidEntryPointError extends BaseError {
  *
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
-export const getSenderAddress = async <
-    TPublicClient extends PublicClient<Transport, Chain | undefined> = PublicClient<Transport, Chain | undefined>
->(
-    publicClient: TPublicClient,
+export const getSenderAddress = async (
+    publicClient: PublicClient,
     { initCode, entryPoint }: GetSenderAddressParams
 ): Promise<Address> => {
     try {
