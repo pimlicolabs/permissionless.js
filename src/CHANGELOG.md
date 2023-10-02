@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.0.4
+
+### Patch Changes
+
+- 7b3da2d: fix JSDoc links to documentation for actions and getUserOperationHash
+- 77e133d: Added `getUserOperationHash`
+- e02ebbb: Converted getChainId return type from BigInt to Number
+
 ## 0.0.3
 
 ### Patch Changes
