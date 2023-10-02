@@ -1,6 +1,12 @@
 import type { Address } from "abitype"
 import dotenv from "dotenv"
-import { BundlerClient, type UserOperation, createBundlerClient, getUserOperationHash } from "permissionless"
+import {
+    BundlerClient,
+    type UserOperation,
+    createBundlerClient,
+    getSenderAddress,
+    getUserOperationHash
+} from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient,
@@ -93,14 +99,10 @@ const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
 const getAccountAddress = async (factoryAddress: Address, owner: WalletClient): Promise<Address | null> => {
     const initCode = await getAccountInitCode(factoryAddress, owner)
 
-    try {
-        await entryPointContract.simulate.getSenderAddress([initCode])
-    } catch (err) {
-        if (err.cause?.data?.errorName === "SenderAddressResult") {
-            return err.cause.data.args[0] as Address
-        }
-    }
-    return null
+    return getSenderAddress(publicClient, {
+        initCode,
+        entryPoint
+    })
 }
 
 const encodeExecute = async (target: Hex, value: bigint, data: Hex): Promise<`0x${string}`> => {
@@ -139,6 +141,7 @@ const buildUserOp = async (eoaWalletClient: WalletClient) => {
 
     if (!accountAddress) throw new Error("Account address not found")
 
+    console.log("accountAddress", accountAddress)
     const userOperation: PartialBy<
         UserOperation,
         "maxFeePerGas" | "maxPriorityFeePerGas" | "callGasLimit" | "verificationGasLimit" | "preVerificationGas"
