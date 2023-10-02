@@ -1,7 +1,21 @@
-import type { Address, Chain, Client, Hex, PublicClient, Transport } from "viem"
-import { BaseError, ContractFunctionRevertedError } from "viem"
+import {
+    type Address,
+    BaseError,
+    type Chain,
+    type ContractFunctionExecutionErrorType,
+    type ContractFunctionRevertedErrorType,
+    type Hex,
+    type PublicClient,
+    type Transport
+} from "viem"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
+
+class InvalidEntryPointError extends BaseError {
+    constructor() {
+        super("Invalid Entry Point")
+    }
+}
 
 /**
  * Returns the address of the account that will be deployed with the given init code.
@@ -67,27 +81,19 @@ export const getSenderAddress = async <
             functionName: "getSenderAddress",
             args: [initCode]
         })
-    } catch (err) {
-        if (err instanceof BaseError) {
-            const revertError = err.walk((err) => err instanceof ContractFunctionRevertedError)
-            if (revertError instanceof ContractFunctionRevertedError) {
-                const errorName = revertError.data?.errorName ?? ""
-                if (errorName === "SenderAddressResult" && revertError.data?.args && revertError.data?.args[0]) {
-                    return revertError.data?.args[0] as Address
-                }
+    } catch (e) {
+        const err = e as ContractFunctionExecutionErrorType
+
+        if (err.cause.name === "ContractFunctionRevertedError") {
+            const revertError = err.cause as ContractFunctionRevertedErrorType
+            const errorName = revertError.data?.errorName ?? ""
+            if (errorName === "SenderAddressResult" && revertError.data?.args && revertError.data?.args[0]) {
+                return revertError.data?.args[0] as Address
             }
         }
-        throw err
+
+        throw e
     }
 
-    throw new Error("Invalid Entry Point")
+    throw new InvalidEntryPointError()
 }
-
-export type PublicClientExtendedActions = {
-    getSenderAddress: (args: GetSenderAddressParams) => Promise<Address>
-}
-
-export const publicClientExtendedActions = (client: Client): PublicClientExtendedActions => ({
-    getSenderAddress: async (args: GetSenderAddressParams): Promise<Address> =>
-        getSenderAddress(client as PublicClient, args)
-})

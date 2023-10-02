@@ -141,6 +141,7 @@ const buildUserOp = async (eoaWalletClient: WalletClient) => {
 
     if (!accountAddress) throw new Error("Account address not found")
 
+    console.log("accountAddress", accountAddress)
     const userOperation: PartialBy<
         UserOperation,
         "maxFeePerGas" | "maxPriorityFeePerGas" | "callGasLimit" | "verificationGasLimit" | "preVerificationGas"
