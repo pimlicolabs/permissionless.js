@@ -80,7 +80,7 @@ export const getSenderAddress = async <
         throw err
     }
 
-    throw new Error("must handle revert")
+    throw new Error("Invalid Entry Point")
 }
 
 export type PublicClientExtendedActions = {
