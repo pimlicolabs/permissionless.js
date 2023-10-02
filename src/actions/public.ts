@@ -1,19 +1,28 @@
-import {
-    type Address,
-    BaseError,
-    type Chain,
-    type ContractFunctionExecutionErrorType,
-    type ContractFunctionRevertedErrorType,
-    type Hex,
-    type PublicClient,
-    type Transport
+import type {
+    Address,
+    Chain,
+    ContractFunctionExecutionErrorType,
+    ContractFunctionRevertedErrorType,
+    Hex,
+    PublicClient,
+    Transport
 } from "viem"
+import { BaseError } from "viem"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 
-class InvalidEntryPointError extends BaseError {
-    constructor() {
-        super("Invalid Entry Point")
+export class InvalidEntryPointError extends BaseError {
+    override name = "InvalidEntryPointError"
+
+    constructor({ cause, entryPoint }: { cause?: BaseError; entryPoint?: Address } = {}) {
+        super(
+            `The entry point address (\`entryPoint\`${
+                entryPoint ? ` = ${entryPoint}` : ""
+            }) is not a valid entry point. getSenderAddress did not revert with a SenderAddressResult error.`,
+            {
+                cause
+            }
+        )
     }
 }
 
@@ -95,5 +104,5 @@ export const getSenderAddress = async <
         throw e
     }
 
-    throw new InvalidEntryPointError()
+    throw new InvalidEntryPointError({ entryPoint })
 }
