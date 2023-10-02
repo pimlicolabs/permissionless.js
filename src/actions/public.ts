@@ -29,7 +29,7 @@ export class InvalidEntryPointError extends BaseError {
 /**
  * Returns the address of the account that will be deployed with the given init code.
  *
- * - Docs: [TODO://add link]
+ * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getSenderAddress
  *
  *
  * @param publicClient {@link PublicClient} that you created using viem's createPublicClient.
