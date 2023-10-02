@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.5
+
+### Patch Changes
+
+- 8df3fbd: Added getSenderAddress function
+
 ## 0.0.4
 
 ### Patch Changes
