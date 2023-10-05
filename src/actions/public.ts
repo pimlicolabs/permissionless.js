@@ -134,43 +134,35 @@ export const getAccountNonce = async (
     publicClient: PublicClient,
     { address, entryPoint, key = 0n }: GetAccountNonceParams
 ): Promise<bigint> => {
-    const contractCode = await publicClient.getBytecode({
-        address: address
+    return await publicClient.readContract({
+        address: entryPoint,
+        abi: [
+            {
+                inputs: [
+                    {
+                        internalType: "address",
+                        name: "sender",
+                        type: "address"
+                    },
+                    {
+                        internalType: "uint192",
+                        name: "key",
+                        type: "uint192"
+                    }
+                ],
+                name: "getNonce",
+                outputs: [
+                    {
+                        internalType: "uint256",
+                        name: "nonce",
+                        type: "uint256"
+                    }
+                ],
+                stateMutability: "view",
+                type: "function"
+            }
+        ],
+        functionName: "getNonce",
+        args: [address, key]
     })
-
-    if ((contractCode?.length ?? 0) > 2) {
-        return await publicClient.readContract({
-            address: entryPoint,
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "address",
-                            name: "sender",
-                            type: "address"
-                        },
-                        {
-                            internalType: "uint192",
-                            name: "key",
-                            type: "uint192"
-                        }
-                    ],
-                    name: "getNonce",
-                    outputs: [
-                        {
-                            internalType: "uint256",
-                            name: "nonce",
-                            type: "uint256"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                }
-            ],
-            functionName: "getNonce",
-            args: [address, key]
-        })
-    }
-
-    return 0n
 }
