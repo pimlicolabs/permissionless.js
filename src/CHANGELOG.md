@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.6
+
+### Patch Changes
+
+- 4b625b5: Added getAccountNonce
+
 ## 0.0.5
 
 ### Patch Changes
