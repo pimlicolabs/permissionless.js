@@ -7,6 +7,7 @@ import {
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
+import { getAccountNonce } from "permissionless/actions"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient,
@@ -30,7 +31,6 @@ import { PartialBy } from "viem/types/utils"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { SimpleAccountAbi } from "./abis/SimpleAccount"
 import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
-import { getAccountNonce } from "permissionless/actions"
 
 // GOAL
 // import { bundlerActions, pimlicoBundlerActions, pimlicoBundlerActions, pimlicoPaymasterActions } from "permissionless"

@@ -20,7 +20,7 @@ import {
 
 import type { GetSenderAddressParams } from "./public"
 
-import { getSenderAddress, getAccountNonce } from "./public"
+import { getAccountNonce, getSenderAddress } from "./public"
 
 export type {
     SendUserOperationParameters,
