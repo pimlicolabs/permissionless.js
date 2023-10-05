@@ -20,7 +20,7 @@ import {
 
 import type { GetSenderAddressParams } from "./public"
 
-import { getSenderAddress } from "./public"
+import { getSenderAddress, getAccountNonce } from "./public"
 
 export type {
     SendUserOperationParameters,
@@ -41,5 +41,6 @@ export {
     chainId,
     getUserOperationByHash,
     getUserOperationReceipt,
-    getSenderAddress
+    getSenderAddress,
+    getAccountNonce
 }
