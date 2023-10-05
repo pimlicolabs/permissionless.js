@@ -7,6 +7,7 @@ import {
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
+import { getAccountNonce } from "permissionless/actions"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient,
@@ -116,13 +117,6 @@ const getDummySignature = (): Hex => {
     return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
 }
 
-const getNonce = async (accountAddress: Address): Promise<bigint> => {
-    if (!(await isAccountDeployed(accountAddress))) {
-        return 0n
-    }
-    return entryPointContract.read.getNonce([accountAddress, BigInt(0)])
-}
-
 const testSupportedEntryPoints = async (bundlerClient: BundlerClient) => {
     const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
@@ -141,12 +135,27 @@ const buildUserOp = async (eoaWalletClient: WalletClient) => {
     if (!accountAddress) throw new Error("Account address not found")
 
     console.log("accountAddress", accountAddress)
+
+    const nonce = await getAccountNonce(publicClient, {
+        address: accountAddress,
+        entryPoint: entryPoint
+    })
+
+    console.log("nonce", nonce)
+
+    const oldNonce = await getAccountNonce(publicClient, {
+        address: "0xc1020c634b737e177249ff4b2236e58c661e037f",
+        entryPoint: entryPoint
+    })
+
+    console.log("old account nonce", oldNonce)
+
     const userOperation: PartialBy<
         UserOperation,
         "maxFeePerGas" | "maxPriorityFeePerGas" | "callGasLimit" | "verificationGasLimit" | "preVerificationGas"
     > = {
         sender: accountAddress,
-        nonce: await getNonce(accountAddress),
+        nonce: nonce,
         initCode: await getInitCode(factoryAddress, eoaWalletClient),
         callData: await encodeExecute(zeroAddress as Hex, 0n, "0x" as Hex),
         paymasterAndData: "0x" as Hex,
