@@ -9,13 +9,7 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": [
-        "ethereum",
-        "erc-4337",
-        "eip-4337",
-        "paymaster",
-        "bundler"
-    ],
+    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
     "exports": {
         ".": {
@@ -33,6 +27,11 @@
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
+        "./actions/stackup": {
+            "types": "./_types/actions/stackup.d.ts",
+            "import": "./_esm/actions/stackup.js",
+            "default": "./_cjs/actions/stackup.js"
+        },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
             "import": "./_esm/clients/index.js",
@@ -42,6 +41,11 @@
             "types": "./_types/clients/pimlico.d.ts",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
+        },
+        "./clients/stackup": {
+            "types": "./_types/clients/stackup.d.ts",
+            "import": "./_esm/clients/stackup.js",
+            "default": "./_cjs/clients/stackup.js"
         },
         "./utils": {
             "types": "./_types/utils/index.d.ts",

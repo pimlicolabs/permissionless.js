@@ -52,7 +52,7 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  * @example
  * import { createClient } from "viem"
- * import { getUserOperationGasPrice } from "permissionless/actions"
+ * import { getUserOperationGasPrice } from "permissionless/actions/pimlico"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -98,7 +98,7 @@ export const getUserOperationGasPrice = async (
  *
  * @example
  * import { createClient } from "viem"
- * import { getUserOperationStatus } from "permissionless/actions"
+ * import { getUserOperationStatus } from "permissionless/actions/pimlico"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -129,7 +129,7 @@ export type PimlicoBundlerActions = {
      * @example
      *
      * import { createClient } from "viem"
-     * import { pimlicoBundlerActions } from "permissionless/actions"
+     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
@@ -149,7 +149,7 @@ export type PimlicoBundlerActions = {
      *
      * @example
      * import { createClient } from "viem"
-     * import { pimlicoBundlerActions } from "permissionless/actions"
+     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
@@ -179,7 +179,7 @@ export const pimlicoBundlerActions = (client: Client): PimlicoBundlerActions => 
  *
  * @example
  * import { createClient } from "viem"
- * import { sponsorUserOperation } from "permissionless/actions"
+ * import { sponsorUserOperation } from "permissionless/actions/pimlico"
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
@@ -220,7 +220,7 @@ export type PimlicoPaymasterClientActions = {
      *
      * @example
      * import { createClient } from "viem"
-     * import { sponsorUserOperation } from "permissionless/actions"
+     * import { sponsorUserOperation } from "permissionless/actions/pimlico"
      *
      * const bundlerClient = createClient({
      *      chain: goerli,

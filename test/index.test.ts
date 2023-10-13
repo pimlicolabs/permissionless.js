@@ -14,6 +14,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { StackupPaymasterClient, createStackupPaymasterClient } from "permissionless/clients/stackup"
 import {
     http,
     Hex,
@@ -46,6 +47,7 @@ if (!process.env.TEST_PRIVATE_KEY) throw new Error("TEST_PRIVATE_KEY environment
 if (!process.env.RPC_URL) throw new Error("RPC_URL environment variable not set")
 
 const pimlicoApiKey = process.env.PIMLICO_API_KEY
+const stackupApiKey = process.env.STACKUP_API_KEY
 const entryPoint: Address = process.env.ENTRYPOINT_ADDRESS as Address
 
 const chain = "goerli"
@@ -252,7 +254,10 @@ const testPimlicoBundlerActions = async (pimlicoBundlerClient: PimlicoBundlerCli
     testFetchUserOperationStatus(pimlicoBundlerClient)
 }
 
-const testPimlicoPaymasterActions = async (pimlicoPaymasterClient: PimlicoPaymasterClient) => {
+const testPimlicoPaymasterActions = async (
+    pimlicoPaymasterClient: PimlicoPaymasterClient,
+    bundlerClient: BundlerClient
+) => {
     console.log("======= TESTING PIMLICO PAYMASTER ACTIONS =======")
 
     const eoaWalletClient = createWalletClient({
@@ -278,6 +283,95 @@ const testPimlicoPaymasterActions = async (pimlicoPaymasterClient: PimlicoPaymas
         entryPoint: entryPoint as Address
     })
     console.log("sponsorUserOperationPaymasterAndData", sponsorUserOperationPaymasterAndData)
+
+    userOperation.paymasterAndData = sponsorUserOperationPaymasterAndData.paymasterAndData
+    userOperation.callGasLimit = sponsorUserOperationPaymasterAndData.callGasLimit
+    userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
+    userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
+
+    console.log(userOperation, "============= USER OPERATION =============")
+
+    const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: goerli.id })
+
+    console.log(userOperationHash, "============= USER OPERATION HASH =============")
+
+    const signedUserOperation: UserOperation = {
+        ...userOperation,
+        signature: await eoaWalletClient.signMessage({
+            account: eoaWalletClient.account,
+            message: { raw: userOperationHash }
+        })
+    }
+    console.log(signedUserOperation, "============= SIGNED USER OPERATION HASH =============")
+
+    const userOpHash = await bundlerClient.sendUserOperation({
+        userOperation: signedUserOperation,
+        entryPoint: entryPoint as Address
+    })
+
+    console.log("userOpHash", userOpHash)
+}
+
+const testStackupBundlerActions = async (
+    stackupBundlerClient: StackupPaymasterClient,
+    bundlerClient: BundlerClient
+) => {
+    console.log("======= TESTING STACKUP PAYMASTER ACTIONS =======")
+    const supportedPaymasters = await stackupBundlerClient.accounts({ entryPoint })
+    console.log("PAYMASTER ADDRESSES: ", supportedPaymasters)
+
+    const eoaWalletClient = createWalletClient({
+        account,
+        chain: goerli,
+        transport: http(process.env.RPC_URL as string)
+    })
+
+    const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+    const userOperation: UserOperation = {
+        ...(await buildUserOp(eoaWalletClient)),
+        maxFeePerGas: maxFeePerGas || 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+        paymasterAndData: "0x",
+        callGasLimit: 0n,
+        verificationGasLimit: 0n,
+        preVerificationGas: 0n
+    }
+
+    const sponsorUserOperationPaymasterAndData = await stackupBundlerClient.sponsorUserOperation({
+        userOperation: userOperation,
+        entryPoint: entryPoint as Address,
+        context: {
+            type: "payg"
+        }
+    })
+
+    userOperation.paymasterAndData = sponsorUserOperationPaymasterAndData.paymasterAndData
+    userOperation.callGasLimit = sponsorUserOperationPaymasterAndData.callGasLimit
+    userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
+    userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
+
+    console.log(userOperation, "============= USER OPERATION =============")
+
+    const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: goerli.id })
+
+    console.log(userOperationHash, "============= USER OPERATION HASH =============")
+
+    const signedUserOperation: UserOperation = {
+        ...userOperation,
+        signature: await eoaWalletClient.signMessage({
+            account: eoaWalletClient.account,
+            message: { raw: userOperationHash }
+        })
+    }
+    console.log(signedUserOperation, "============= SIGNED USER OPERATION HASH =============")
+
+    const userOpHash = await bundlerClient.sendUserOperation({
+        userOperation: signedUserOperation,
+        entryPoint: entryPoint as Address
+    })
+
+    console.log("userOpHash", userOpHash)
 }
 
 const main = async () => {
@@ -298,7 +392,14 @@ const main = async () => {
         chain: goerli,
         transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${pimlicoApiKey}`)
     })
-    await testPimlicoPaymasterActions(pimlicoPaymasterClient)
+    await testPimlicoPaymasterActions(pimlicoPaymasterClient, bundlerClient)
+
+    const stackupBundlerClient = createStackupPaymasterClient({
+        chain: goerli,
+        transport: http(`https://api.stackup.sh/v1/paymaster/${stackupApiKey}`)
+    })
+
+    await testStackupBundlerActions(stackupBundlerClient, bundlerClient)
 }
 
 main()
