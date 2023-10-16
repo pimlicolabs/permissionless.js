@@ -1,4 +1,5 @@
-import { BundlerClient, UserOperation, getUserOperationHash } from "permissionless"
+import { BundlerClient, UserOperation } from "permissionless"
+import { getUserOperationHash } from "permissionless/utils"
 import { Address, Hex } from "viem"
 import { buildUserOp } from "./userOp"
 import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"

@@ -1,16 +1,10 @@
-import { BundlerClient, UserOperation, getUserOperationHash } from "permissionless"
+import { BundlerClient, UserOperation } from "permissionless"
 import { PimlicoBundlerClient, PimlicoPaymasterClient } from "permissionless/clients/pimlico"
-import { http, Address, createWalletClient } from "viem"
+import { getUserOperationHash } from "permissionless/utils"
+import { Address } from "viem"
 import { fetchUserOperationReceipt } from "./bundlerActions.test"
 import { buildUserOp } from "./userOp"
-import {
-    getEntryPoint,
-    getEoaWalletClient,
-    getOldUserOpHash,
-    getPrivateKeyAccount,
-    getPublicClient,
-    getTestingChain
-} from "./utils"
+import { getEntryPoint, getEoaWalletClient, getOldUserOpHash, getPublicClient, getTestingChain } from "./utils"
 
 const getUserOperationGasPriceFromPimlicoBundler = async (pimlicoBundlerClient: PimlicoBundlerClient) => {
     return pimlicoBundlerClient.getUserOperationGasPrice()

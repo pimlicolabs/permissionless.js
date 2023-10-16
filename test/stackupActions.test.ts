@@ -1,5 +1,6 @@
-import { BundlerClient, UserOperation, getUserOperationHash } from "permissionless"
+import { BundlerClient, UserOperation } from "permissionless"
 import { StackupPaymasterClient } from "permissionless/clients/stackup"
+import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
 import { fetchUserOperationReceipt } from "./bundlerActions.test"
 import { buildUserOp } from "./userOp"
