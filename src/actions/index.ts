@@ -1,26 +1,26 @@
 import type {
     EstimateUserOperationGasParameters,
     EstimateUserOperationGasReturnType
-} from "./bundler/estimateUserOperationGas"
-import type { GetUserOperationByHashParameters } from "./bundler/getUserOperationByHash"
-import type { GetUserOperationByHashReturnType } from "./bundler/getUserOperationByHash"
+} from "./bundler/estimateUserOperationGas.js"
+import type { GetUserOperationByHashParameters } from "./bundler/getUserOperationByHash.js"
+import type { GetUserOperationByHashReturnType } from "./bundler/getUserOperationByHash.js"
 import type {
     GetUserOperationReceiptParameters,
     GetUserOperationReceiptReturnType
-} from "./bundler/getUserOperationReceipt"
-import type { SendUserOperationParameters } from "./bundler/sendUserOperation"
+} from "./bundler/getUserOperationReceipt.js"
+import type { SendUserOperationParameters } from "./bundler/sendUserOperation.js"
 
-import type { GetSenderAddressParams } from "./public/getSenderAddress"
-import { InvalidEntryPointError, getSenderAddress } from "./public/getSenderAddress"
+import type { GetSenderAddressParams } from "./public/getSenderAddress.js"
+import { InvalidEntryPointError, getSenderAddress } from "./public/getSenderAddress.js"
 
-import { chainId } from "./bundler/chainId"
-import { estimateUserOperationGas } from "./bundler/estimateUserOperationGas"
-import { getUserOperationByHash } from "./bundler/getUserOperationByHash"
-import { getUserOperationReceipt } from "./bundler/getUserOperationReceipt"
-import { sendUserOperation } from "./bundler/sendUserOperation"
-import { supportedEntryPoints } from "./bundler/supportedEntryPoints"
-import type { GetAccountNonceParams } from "./public/getAccountNonce"
-import { getAccountNonce } from "./public/getAccountNonce"
+import { chainId } from "./bundler/chainId.js"
+import { estimateUserOperationGas } from "./bundler/estimateUserOperationGas.js"
+import { getUserOperationByHash } from "./bundler/getUserOperationByHash.js"
+import { getUserOperationReceipt } from "./bundler/getUserOperationReceipt.js"
+import { sendUserOperation } from "./bundler/sendUserOperation.js"
+import { supportedEntryPoints } from "./bundler/supportedEntryPoints.js"
+import type { GetAccountNonceParams } from "./public/getAccountNonce.js"
+import { getAccountNonce } from "./public/getAccountNonce.js"
 
 export type {
     SendUserOperationParameters,

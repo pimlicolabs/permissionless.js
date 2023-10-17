@@ -1,3 +1,3 @@
-import type { UserOperation } from "./userOperation"
+import type { UserOperation } from "./userOperation.js"
 
 export type { UserOperation }

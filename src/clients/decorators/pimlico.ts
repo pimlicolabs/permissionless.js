@@ -2,18 +2,18 @@ import type { Client, Hash } from "viem"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
-} from "../../actions/pimlico/getUserOperationGasPrice"
+} from "../../actions/pimlico/getUserOperationGasPrice.js"
 import {
     type GetUserOperationStatusParameters,
     type GetUserOperationStatusReturnType,
     getUserOperationStatus
-} from "../../actions/pimlico/getUserOperationStatus"
+} from "../../actions/pimlico/getUserOperationStatus.js"
 import {
     type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "../../actions/pimlico/sponsorUserOperation"
-import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
+} from "../../actions/pimlico/sponsorUserOperation.js"
+import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico.js"
 
 export type PimlicoBundlerActions = {
     /**

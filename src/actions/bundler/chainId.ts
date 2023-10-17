@@ -1,4 +1,4 @@
-import type { BundlerClient } from "../../clients/bundler"
+import type { BundlerClient } from "../../clients/bundler.js"
 
 /**
  * Returns the supported chain id by the bundler service

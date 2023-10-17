@@ -1,11 +1,11 @@
-import type { StackupPaymasterClientActions } from "../clients/decorators/stackup"
-import { stackupPaymasterActions } from "../clients/decorators/stackup"
-import { type AccountsParameters, accounts } from "./stackup/accounts"
+import type { StackupPaymasterClientActions } from "../clients/decorators/stackup.js"
+import { stackupPaymasterActions } from "../clients/decorators/stackup.js"
+import { type AccountsParameters, accounts } from "./stackup/accounts.js"
 import {
     type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "./stackup/sponsorUserOperation"
+} from "./stackup/sponsorUserOperation.js"
 
 export type {
     SponsorUserOperationParameters,

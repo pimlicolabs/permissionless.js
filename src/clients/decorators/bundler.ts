@@ -1,24 +1,24 @@
 import type { Address } from "abitype"
 import type { Client, Hash } from "viem"
-import { chainId } from "../../actions/bundler/chainId"
+import { chainId } from "../../actions/bundler/chainId.js"
 import {
     type EstimateUserOperationGasParameters,
     type EstimateUserOperationGasReturnType,
     estimateUserOperationGas
-} from "../../actions/bundler/estimateUserOperationGas"
+} from "../../actions/bundler/estimateUserOperationGas.js"
 import {
     type GetUserOperationByHashParameters,
     type GetUserOperationByHashReturnType,
     getUserOperationByHash
-} from "../../actions/bundler/getUserOperationByHash"
+} from "../../actions/bundler/getUserOperationByHash.js"
 import {
     type GetUserOperationReceiptParameters,
     type GetUserOperationReceiptReturnType,
     getUserOperationReceipt
-} from "../../actions/bundler/getUserOperationReceipt"
-import { type SendUserOperationParameters, sendUserOperation } from "../../actions/bundler/sendUserOperation"
-import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints"
-import type { BundlerClient } from "../bundler"
+} from "../../actions/bundler/getUserOperationReceipt.js"
+import { type SendUserOperationParameters, sendUserOperation } from "../../actions/bundler/sendUserOperation.js"
+import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints.js"
+import type { BundlerClient } from "../bundler.js"
 
 export type BundlerActions = {
     /**

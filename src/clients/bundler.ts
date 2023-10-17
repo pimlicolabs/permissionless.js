@@ -1,7 +1,7 @@
 import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
 import { createClient } from "viem"
-import type { BundlerRpcSchema } from "../types/bundler"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler"
+import type { BundlerRpcSchema } from "../types/bundler.js"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
 
 export type BundlerClient = Client<Transport, Chain | undefined, Account | undefined, BundlerRpcSchema, BundlerActions>
 /**
