@@ -30,7 +30,7 @@ export type GetAccountNonceParams = { address: Address; entryPoint: Address; key
  */
 export const getAccountNonce = async (
     publicClient: PublicClient,
-    { address, entryPoint, key = 0n }: GetAccountNonceParams
+    { address, entryPoint, key = BigInt(0) }: GetAccountNonceParams
 ): Promise<bigint> => {
     return await publicClient.readContract({
         address: entryPoint,

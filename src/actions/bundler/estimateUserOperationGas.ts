@@ -55,8 +55,8 @@ export const estimateUserOperationGas = async (
     })
 
     return {
-        preVerificationGas: BigInt(response.preVerificationGas || 0n),
-        verificationGasLimit: BigInt(response.verificationGasLimit || 0n),
-        callGasLimit: BigInt(response.callGasLimit || 0n)
+        preVerificationGas: BigInt(response.preVerificationGas || 0),
+        verificationGasLimit: BigInt(response.verificationGasLimit || 0),
+        callGasLimit: BigInt(response.callGasLimit || 0)
     }
 }
