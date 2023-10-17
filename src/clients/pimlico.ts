@@ -1,13 +1,13 @@
 import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
 import { createClient } from "viem"
-import type { PimlicoBundlerRpcSchema, PimlicoPaymasterRpcSchema } from "../types/pimlico"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler"
+import type { PimlicoBundlerRpcSchema, PimlicoPaymasterRpcSchema } from "../types/pimlico.js"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
 import {
     type PimlicoBundlerActions,
     type PimlicoPaymasterClientActions,
     pimlicoBundlerActions,
     pimlicoPaymasterActions
-} from "./decorators/pimlico"
+} from "./decorators/pimlico.js"
 
 export type PimlicoBundlerClient = Client<
     Transport,

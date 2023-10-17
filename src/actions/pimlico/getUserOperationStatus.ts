@@ -1,6 +1,6 @@
 import type { Hash } from "viem"
-import type { PimlicoBundlerClient } from "../../clients/pimlico"
-import type { PimlicoUserOperationStatus } from "../../types/pimlico"
+import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
+import type { PimlicoUserOperationStatus } from "../../types/pimlico.js"
 
 export type GetUserOperationStatusParameters = {
     hash: Hash

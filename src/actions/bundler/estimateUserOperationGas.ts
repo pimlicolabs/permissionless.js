@@ -1,9 +1,9 @@
 import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient } from "../../clients/bundler"
-import type { UserOperation } from "../../types/userOperation"
-import type { UserOperationWithBigIntAsHex } from "../../types/userOperation"
-import { deepHexlify } from "../utils"
+import type { BundlerClient } from "../../clients/bundler.js"
+import type { UserOperation } from "../../types/userOperation.js"
+import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
+import { deepHexlify } from "../utils.js"
 
 export type EstimateUserOperationGasParameters = {
     userOperation: PartialBy<UserOperation, "callGasLimit" | "preVerificationGas" | "verificationGasLimit">

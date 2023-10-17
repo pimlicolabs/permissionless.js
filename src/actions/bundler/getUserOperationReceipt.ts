@@ -1,7 +1,7 @@
 import type { Address, Hash, Hex } from "viem"
-import type { BundlerClient } from "../../clients/bundler"
-import type { TStatus } from "../../types/userOperation"
-import { transactionReceiptStatus } from "../utils"
+import type { BundlerClient } from "../../clients/bundler.js"
+import type { TStatus } from "../../types/userOperation.js"
+import { transactionReceiptStatus } from "../utils.js"
 
 export type GetUserOperationReceiptParameters = {
     hash: Hash

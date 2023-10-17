@@ -1,6 +1,6 @@
 import type { Address, Hash } from "viem"
-import type { BundlerClient } from "../../clients/bundler"
-import type { UserOperation } from "../../types/userOperation"
+import type { BundlerClient } from "../../clients/bundler.js"
+import type { UserOperation } from "../../types/userOperation.js"
 
 export type GetUserOperationByHashParameters = {
     hash: Hash

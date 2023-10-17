@@ -1,4 +1,4 @@
-import type { PimlicoBundlerClient } from "../../clients/pimlico"
+import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
 
 export type GetUserOperationGasPriceReturnType = {
     slow: {
