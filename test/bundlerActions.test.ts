@@ -21,28 +21,14 @@ const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
 describe("BUNDLER ACTIONS", () => {
     let bundlerClient: BundlerClient
-    let userOperation: UserOperation
 
     beforeEach(async () => {
-        const eoaWalletClient = getEoaWalletClient()
         const chain = getTestingChain()
-        const publicClient = await getPublicClient()
 
         bundlerClient = createBundlerClient({
             chain: chain,
             transport: http(`https://api.pimlico.io/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
         })
-
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
-
-        userOperation = {
-            ...(await buildUserOp(eoaWalletClient)),
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
     })
 
     test("Supported entry points request", async () => {
@@ -63,6 +49,19 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Estimate user operation gas", async () => {
+        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+        const userOperation = {
+            ...(await buildUserOp(eoaWalletClient)),
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
         const gasParameters = await bundlerClient.estimateUserOperationGas({
             userOperation,
             entryPoint: getEntryPoint()
@@ -75,6 +74,18 @@ describe("BUNDLER ACTIONS", () => {
 
     test("Sending user operation", async () => {
         const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+        const userOperation = {
+            ...(await buildUserOp(eoaWalletClient)),
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()
 

@@ -14,7 +14,7 @@ const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     return getAccountInitCode(factoryAddress, owner)
 }
 
-const getAccountInitCode = async (factoryAddress: Address, owner: WalletClient, index = 0n): Promise<Hex> => {
+export const getAccountInitCode = async (factoryAddress: Address, owner: WalletClient, index = 0n): Promise<Hex> => {
     if (!owner.account) throw new Error("Owner account not found")
     return concatHex([
         factoryAddress,
@@ -46,6 +46,13 @@ const encodeExecute = async (target: Hex, value: bigint, data: Hex): Promise<`0x
 }
 
 export const buildUserOp = async (eoaWalletClient: WalletClient) => {
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            // wait for prev user op to be added to make sure ew get correct nonce
+            resolve(0)
+        }, 1000)
+    })
+
     const factoryAddress = getFactoryAddress()
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()

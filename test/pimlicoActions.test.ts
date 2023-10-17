@@ -29,12 +29,9 @@ const pimlicoApiKey = process.env.PIMLICO_API_KEY
 describe("Pimlico Actions tests", () => {
     let pimlicoBundlerClient: PimlicoBundlerClient
     let pimlicoPaymasterClient: PimlicoPaymasterClient
-    let userOperation: UserOperation
 
     beforeEach(async () => {
-        const eoaWalletClient = getEoaWalletClient()
         const chain = getTestingChain()
-        const publicClient = await getPublicClient()
 
         pimlicoBundlerClient = createPimlicoBundlerClient({
             chain: chain,
@@ -45,17 +42,6 @@ describe("Pimlico Actions tests", () => {
             chain: chain,
             transport: http(`https://api.pimlico.io/v2/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
         })
-
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
-
-        userOperation = {
-            ...(await buildUserOp(eoaWalletClient)),
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
     })
 
     describe("Pimlico Bundler actions", () => {
@@ -98,6 +84,19 @@ describe("Pimlico Actions tests", () => {
 
     describe("Pimlico paymaster actions ", () => {
         test("Fetching paymaster and data", async () => {
+            const eoaWalletClient = getEoaWalletClient()
+            const publicClient = await getPublicClient()
+            const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+            const userOperation = {
+                ...(await buildUserOp(eoaWalletClient)),
+                maxFeePerGas: maxFeePerGas || 0n,
+                maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+                callGasLimit: 0n,
+                verificationGasLimit: 0n,
+                preVerificationGas: 0n
+            }
+
             const entryPoint = getEntryPoint()
 
             const sponsorUserOperationPaymasterAndData = await pimlicoPaymasterClient.sponsorUserOperation({
@@ -126,6 +125,18 @@ describe("Pimlico Actions tests", () => {
             const entryPoint = getEntryPoint()
             const eoaWalletClient = getEoaWalletClient()
             const chain = getTestingChain()
+
+            const publicClient = await getPublicClient()
+            const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+            const userOperation = {
+                ...(await buildUserOp(eoaWalletClient)),
+                maxFeePerGas: maxFeePerGas || 0n,
+                maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+                callGasLimit: 0n,
+                verificationGasLimit: 0n,
+                preVerificationGas: 0n
+            }
 
             const sponsorUserOperationPaymasterAndData = await pimlicoPaymasterClient.sponsorUserOperation({
                 userOperation: userOperation,
