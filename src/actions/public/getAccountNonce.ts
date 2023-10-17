@@ -1,6 +1,6 @@
 import type { Address, PublicClient } from "viem"
 
-export type GetAccountNonceParams = { address: Address; entryPoint: Address; key?: bigint }
+export type GetAccountNonceParams = { sender: Address; entryPoint: Address; key?: bigint }
 
 /**
  * Returns the nonce of the account with the entry point.
@@ -30,7 +30,7 @@ export type GetAccountNonceParams = { address: Address; entryPoint: Address; key
  */
 export const getAccountNonce = async (
     publicClient: PublicClient,
-    { address, entryPoint, key = BigInt(0) }: GetAccountNonceParams
+    { sender, entryPoint, key = BigInt(0) }: GetAccountNonceParams
 ): Promise<bigint> => {
     return await publicClient.readContract({
         address: entryPoint,
@@ -58,6 +58,6 @@ export const getAccountNonce = async (
             }
         ],
         functionName: "getNonce",
-        args: [address, key]
+        args: [sender, key]
     })
 }

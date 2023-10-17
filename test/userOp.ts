@@ -54,21 +54,10 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
 
     if (!accountAddress) throw new Error("Account address not found")
 
-    console.log("accountAddress", accountAddress)
-
     const nonce = await getAccountNonce(publicClient, {
-        address: accountAddress,
+        sender: accountAddress,
         entryPoint: entryPoint
     })
-
-    console.log("nonce", nonce)
-
-    const oldNonce = await getAccountNonce(publicClient, {
-        address: "0xc1020c634b737e177249ff4b2236e58c661e037f",
-        entryPoint: entryPoint
-    })
-
-    console.log("old account nonce", oldNonce)
 
     const userOperation: PartialBy<
         UserOperation,
