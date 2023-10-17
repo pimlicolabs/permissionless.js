@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.0.7
+
+### Patch Changes
+
+- 6f868d8: Added stackup paymaster actions
+- 37d2171: Made esm build compatible with Node
+
 ## 0.0.6
 
 ### Patch Changes
