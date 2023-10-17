@@ -1,26 +1,26 @@
 import type {
     EstimateUserOperationGasParameters,
-    EstimateUserOperationGasReturnType,
-    GetUserOperationByHashParameters,
-    GetUserOperationByHashReturnType,
+    EstimateUserOperationGasReturnType
+} from "./bundler/estimateUserOperationGas"
+import type { GetUserOperationByHashParameters } from "./bundler/getUserOperationByHash"
+import type { GetUserOperationByHashReturnType } from "./bundler/getUserOperationByHash"
+import type {
     GetUserOperationReceiptParameters,
-    GetUserOperationReceiptReturnType,
-    SendUserOperationParameters
-} from "./bundler"
+    GetUserOperationReceiptReturnType
+} from "./bundler/getUserOperationReceipt"
+import type { SendUserOperationParameters } from "./bundler/sendUserOperation"
 
-import {
-    bundlerActions,
-    chainId,
-    estimateUserOperationGas,
-    getUserOperationByHash,
-    getUserOperationReceipt,
-    sendUserOperation,
-    supportedEntryPoints
-} from "./bundler"
+import type { GetSenderAddressParams } from "./public/getSenderAddress"
+import { InvalidEntryPointError, getSenderAddress } from "./public/getSenderAddress"
 
-import type { GetSenderAddressParams } from "./public"
-
-import { getAccountNonce, getSenderAddress } from "./public"
+import { chainId } from "./bundler/chainId"
+import { estimateUserOperationGas } from "./bundler/estimateUserOperationGas"
+import { getUserOperationByHash } from "./bundler/getUserOperationByHash"
+import { getUserOperationReceipt } from "./bundler/getUserOperationReceipt"
+import { sendUserOperation } from "./bundler/sendUserOperation"
+import { supportedEntryPoints } from "./bundler/supportedEntryPoints"
+import type { GetAccountNonceParams } from "./public/getAccountNonce"
+import { getAccountNonce } from "./public/getAccountNonce"
 
 export type {
     SendUserOperationParameters,
@@ -30,11 +30,11 @@ export type {
     GetUserOperationByHashReturnType,
     GetUserOperationReceiptParameters,
     GetUserOperationReceiptReturnType,
-    GetSenderAddressParams
+    GetSenderAddressParams,
+    GetAccountNonceParams
 }
 
 export {
-    bundlerActions,
     sendUserOperation,
     estimateUserOperationGas,
     supportedEntryPoints,
@@ -42,5 +42,6 @@ export {
     getUserOperationByHash,
     getUserOperationReceipt,
     getSenderAddress,
-    getAccountNonce
+    getAccountNonce,
+    InvalidEntryPointError
 }

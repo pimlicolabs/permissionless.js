@@ -1,13 +1,14 @@
 import { type Account, type Chain, type Client, type PublicClientConfig, type Transport, createClient } from "viem"
-import { type StackupPaymasterClientActions, stackupPaymasterActions } from "../actions/stackup"
 import type { StackupPaymasterRpcSchema } from "../types/stackup"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
+import { type StackupPaymasterClientActions, stackupPaymasterActions } from "./decorators/stackup"
 
 export type StackupPaymasterClient = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
     StackupPaymasterRpcSchema,
-    StackupPaymasterClientActions
+    StackupPaymasterClientActions & BundlerActions
 >
 
 /**
@@ -39,5 +40,5 @@ export const createStackupPaymasterClient = <transport extends Transport, chain 
         name,
         type: "stackupPaymasterClient"
     })
-    return client.extend(stackupPaymasterActions)
+    return client.extend(bundlerActions).extend(stackupPaymasterActions)
 }
