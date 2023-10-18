@@ -1,5 +1,6 @@
 import dotenv from "dotenv"
 import { createBundlerClient, getSenderAddress, getUserOperationHash } from "permissionless"
+import { InvalidEntryPointError } from "permissionless/actions"
 import { http } from "viem"
 import { buildUserOp, getAccountInitCode } from "./userOp"
 import { getEntryPoint, getEoaWalletClient, getFactoryAddress, getPublicClient, getTestingChain } from "./utils"
@@ -35,6 +36,22 @@ describe("test public actions and utils", () => {
         expect(sender).not.toBeUndefined()
         expect(sender).not.toBeEmpty()
         expect(sender).toStartWith("0x")
+    })
+
+    test("get sender address with invalid entry point", async () => {
+        const eoaWalletClient = getEoaWalletClient()
+        const factoryAddress = getFactoryAddress()
+
+        const initCode = await getAccountInitCode(factoryAddress, eoaWalletClient)
+        const publicClient = await getPublicClient()
+        const entryPoint = "0x0000000"
+
+        await expect(async () => {
+            await getSenderAddress(publicClient, {
+                initCode,
+                entryPoint
+            })
+        }).toThrow()
     })
 
     test("getUserOperationHash", async () => {

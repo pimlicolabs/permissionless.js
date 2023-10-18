@@ -1,10 +1,10 @@
 import type { Address, Hash, Hex } from "viem"
 import type { BundlerClient } from "../../clients/bundler.js"
 import type { TStatus } from "../../types/userOperation.js"
-import { transactionReceiptStatus } from "../utils.js"
+import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 
 export type GetUserOperationReceiptParameters = {
-    hash: Hash
+    userOperationHash: Hash
 }
 
 export type GetUserOperationReceiptReturnType = {
@@ -62,8 +62,11 @@ export type GetUserOperationReceiptReturnType = {
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceiptParameters) => {
-    const params: [Hash] = [hash]
+export const getUserOperationReceipt = async (
+    client: BundlerClient,
+    { userOperationHash }: GetUserOperationReceiptParameters
+) => {
+    const params: [Hash] = [userOperationHash]
 
     const response = await client.request({
         method: "eth_getUserOperationReceipt",

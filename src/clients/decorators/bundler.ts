@@ -18,6 +18,10 @@ import {
 } from "../../actions/bundler/getUserOperationReceipt.js"
 import { type SendUserOperationParameters, sendUserOperation } from "../../actions/bundler/sendUserOperation.js"
 import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints.js"
+import {
+    type WaitForUserOperationReceiptParameters,
+    waitForUserOperationReceipt
+} from "../../actions/bundler/waitForUserOperationReceipt.js"
 import type { BundlerClient } from "../bundler.js"
 
 export type BundlerActions = {
@@ -160,6 +164,9 @@ export type BundlerActions = {
      *
      */
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) => Promise<GetUserOperationReceiptReturnType>
+    waitForUserOperationReceipt: (
+        args: WaitForUserOperationReceiptParameters
+    ) => Promise<GetUserOperationReceiptReturnType>
 }
 
 const bundlerActions = (client: Client): BundlerActions => ({
@@ -172,7 +179,9 @@ const bundlerActions = (client: Client): BundlerActions => ({
     getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
         getUserOperationByHash(client as BundlerClient, args),
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
-        getUserOperationReceipt(client as BundlerClient, args)
+        getUserOperationReceipt(client as BundlerClient, args),
+    waitForUserOperationReceipt: (args: WaitForUserOperationReceiptParameters) =>
+        waitForUserOperationReceipt(client as BundlerClient, args)
 })
 
 export { bundlerActions }

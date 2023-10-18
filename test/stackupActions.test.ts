@@ -2,14 +2,10 @@ import { BundlerClient, UserOperation } from "permissionless"
 import { StackupPaymasterClient } from "permissionless/clients/stackup"
 import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
-import { fetchUserOperationReceipt } from "./bundlerActions.test"
 import { buildUserOp } from "./userOp"
 import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
 
-export const testStackupBundlerActions = async (
-    stackupBundlerClient: StackupPaymasterClient,
-    bundlerClient: BundlerClient
-) => {
+export const testStackupBundlerActions = async (stackupBundlerClient: StackupPaymasterClient) => {
     const entryPoint = getEntryPoint()
     const chain = getTestingChain()
 
@@ -60,11 +56,13 @@ export const testStackupBundlerActions = async (
     }
     console.log(signedUserOperation, "STACKUP ACTIONS:: ============= SIGNED USER OPERATION HASH =============")
 
-    const userOpHash = await bundlerClient.sendUserOperation({
+    const userOpHash = await stackupBundlerClient.sendUserOperation({
         userOperation: signedUserOperation,
         entryPoint: entryPoint as Address
     })
 
     console.log("userOpHash", userOpHash)
-    await fetchUserOperationReceipt(bundlerClient, userOpHash)
+    await stackupBundlerClient.waitForUserOperationReceipt({
+        userOperationHash: userOpHash
+    })
 }

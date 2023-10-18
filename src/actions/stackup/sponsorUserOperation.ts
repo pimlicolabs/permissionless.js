@@ -3,7 +3,7 @@ import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup.js"
 import type { StackupPaymasterContext } from "../../types/stackup.js"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
-import { deepHexlify } from "../utils.js"
+import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
