@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.8
+
+### Patch Changes
+
+- 09d693d: Added waitForUserOperationReceipt
+
 ## 0.0.7
 
 ### Patch Changes
