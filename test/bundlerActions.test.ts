@@ -117,7 +117,7 @@ describe("BUNDLER ACTIONS", () => {
         expect(userOpHash).toBeString()
         expect(userOpHash).toStartWith("0x")
 
-        const userOperationReceipt = await bundlerClient.waitForUserOperationReceipt({ userOperationHash: userOpHash })
+        const userOperationReceipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash })
 
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
@@ -165,7 +165,7 @@ describe("BUNDLER ACTIONS", () => {
         const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
 
         await expect(async () => {
-            await bundlerClient.waitForUserOperationReceipt({ userOperationHash: userOpHash, timeout: 100 })
-        }).toThrow(new WaitForUserOperationReceiptTimeoutError({ userOperationHash: userOpHash }))
+            await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash, timeout: 100 })
+        }).toThrow(new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash }))
     })
 })

@@ -63,6 +63,6 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
 
     console.log("userOpHash", userOpHash)
     await stackupBundlerClient.waitForUserOperationReceipt({
-        userOperationHash: userOpHash
+        hash: userOpHash
     })
 }

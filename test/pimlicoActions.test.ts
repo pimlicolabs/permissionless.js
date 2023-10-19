@@ -162,7 +162,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOpHash).toStartWith("0x")
 
             const userOperationReceipt = await pimlicoBundlerClient.waitForUserOperationReceipt({
-                userOperationHash: userOpHash
+                hash: userOpHash
             })
 
             expect(userOperationReceipt).not.toBeNull()
