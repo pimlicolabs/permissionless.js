@@ -4,7 +4,7 @@ import type { TStatus } from "../../types/userOperation.js"
 import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 
 export type GetUserOperationReceiptParameters = {
-    userOperationHash: Hash
+    hash: Hash
 }
 
 export type GetUserOperationReceiptReturnType = {
@@ -62,11 +62,8 @@ export type GetUserOperationReceiptReturnType = {
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationReceipt = async (
-    client: BundlerClient,
-    { userOperationHash }: GetUserOperationReceiptParameters
-) => {
-    const params: [Hash] = [userOperationHash]
+export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceiptParameters) => {
+    const params: [Hash] = [hash]
 
     const response = await client.request({
         method: "eth_getUserOperationReceipt",

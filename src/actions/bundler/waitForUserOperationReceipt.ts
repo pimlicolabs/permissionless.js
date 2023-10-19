@@ -5,14 +5,14 @@ import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from 
 
 export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"
-    constructor({ userOperationHash }: { userOperationHash: Hash }) {
-        super(`Timed out while waiting for transaction with hash "${userOperationHash}" to be confirmed.`)
+    constructor({ hash }: { hash: Hash }) {
+        super(`Timed out while waiting for transaction with hash "${hash}" to be confirmed.`)
     }
 }
 
 export type WaitForUserOperationReceiptParameters = {
     /** The hash of the transaction. */
-    userOperationHash: Hash
+    hash: Hash
     /**
      * Polling frequency (in ms). Defaults to the client's pollingInterval config.
      * @default client.pollingInterval
@@ -40,24 +40,20 @@ export type WaitForUserOperationReceiptParameters = {
  *   transport: http(),
  * })
  * const userOperationReceipt = await waitForUserOperationReceipt(client, {
- *   userOperationHash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d',
+ *   hash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d',
  * })
  */
 export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
     bundlerClient: BundlerClient<TChain>,
-    {
-        userOperationHash,
-        pollingInterval = bundlerClient.pollingInterval,
-        timeout
-    }: WaitForUserOperationReceiptParameters
+    { hash, pollingInterval = bundlerClient.pollingInterval, timeout }: WaitForUserOperationReceiptParameters
 ): Promise<GetUserOperationReceiptReturnType> => {
-    const observerId = stringify(["waitForUserOperationReceipt", bundlerClient.uid, userOperationHash])
+    const observerId = stringify(["waitForUserOperationReceipt", bundlerClient.uid, hash])
 
     let userOperationReceipt: GetUserOperationReceiptReturnType
 
     return new Promise((resolve, reject) => {
         if (timeout) {
-            setTimeout(() => reject(new WaitForUserOperationReceiptTimeoutError({ userOperationHash })), timeout)
+            setTimeout(() => reject(new WaitForUserOperationReceiptTimeoutError({ hash })), timeout)
         }
 
         const _unobserve = observe(observerId, { resolve, reject }, async (emit) => {
@@ -73,7 +69,7 @@ export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
                     return
                 }
 
-                userOperationReceipt = await getUserOperationReceipt(bundlerClient, { userOperationHash })
+                userOperationReceipt = await getUserOperationReceipt(bundlerClient, { hash })
 
                 if (!userOperationReceipt) return
             }, pollingInterval)
