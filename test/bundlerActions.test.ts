@@ -2,7 +2,6 @@ import dotenv from "dotenv"
 import {
     BundlerClient,
     GetUserOperationReceiptReturnType,
-    UserOperation,
     WaitForUserOperationReceiptTimeoutError,
     createBundlerClient
 } from "permissionless"

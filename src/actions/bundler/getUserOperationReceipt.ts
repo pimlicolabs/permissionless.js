@@ -38,7 +38,7 @@ export type GetUserOperationReceiptReturnType = {
         address: Address
         topics: Hex[]
     }[]
-} | null
+}
 
 /**
  * Returns the user operation receipt from userOpHash
@@ -62,7 +62,10 @@ export type GetUserOperationReceiptReturnType = {
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationReceipt = async (client: BundlerClient, { hash }: GetUserOperationReceiptParameters) => {
+export const getUserOperationReceipt = async (
+    client: BundlerClient,
+    { hash }: GetUserOperationReceiptParameters
+): Promise<GetUserOperationReceiptReturnType | null> => {
     const params: [Hash] = [hash]
 
     const response = await client.request({

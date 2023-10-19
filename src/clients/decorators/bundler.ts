@@ -163,7 +163,9 @@ export type BundlerActions = {
      * await bundlerClient.getUserOperationReceipt({hash: userOpHash})
      *
      */
-    getUserOperationReceipt: (args: GetUserOperationReceiptParameters) => Promise<GetUserOperationReceiptReturnType>
+    getUserOperationReceipt: (
+        args: GetUserOperationReceiptParameters
+    ) => Promise<GetUserOperationReceiptReturnType | null>
 
     /**
      * Waits for the User Operation to be included on a [Block](https://viem.sh/docs/glossary/terms.html#block) (one confirmation), and then returns the [User Operation Receipt](https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt).

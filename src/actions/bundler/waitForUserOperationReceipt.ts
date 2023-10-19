@@ -64,14 +64,16 @@ export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
                     _unobserve()
                 }
 
+                const _userOperationReceipt = await getUserOperationReceipt(bundlerClient, { hash })
+
+                if (_userOperationReceipt !== null) {
+                    userOperationReceipt = _userOperationReceipt
+                }
+
                 if (userOperationReceipt) {
                     done(() => emit.resolve(userOperationReceipt))
                     return
                 }
-
-                userOperationReceipt = await getUserOperationReceipt(bundlerClient, { hash })
-
-                if (!userOperationReceipt) return
             }, pollingInterval)
         })
     })
