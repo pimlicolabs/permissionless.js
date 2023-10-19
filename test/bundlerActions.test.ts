@@ -1,5 +1,11 @@
 import dotenv from "dotenv"
-import { BundlerClient, GetUserOperationReceiptReturnType, UserOperation, createBundlerClient } from "permissionless"
+import {
+    BundlerClient,
+    GetUserOperationReceiptReturnType,
+    UserOperation,
+    WaitForUserOperationReceiptTimeoutError,
+    createBundlerClient
+} from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, Hex } from "viem"
 import { buildUserOp } from "./userOp"
@@ -111,7 +117,7 @@ describe("BUNDLER ACTIONS", () => {
         expect(userOpHash).toBeString()
         expect(userOpHash).toStartWith("0x")
 
-        const userOperationReceipt = await fetchUserOperationReceipt(bundlerClient, userOpHash)
+        const userOperationReceipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash })
 
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
@@ -129,21 +135,37 @@ describe("BUNDLER ACTIONS", () => {
             expect(userOperationFromUserOpHash?.userOperation[key]).toBe(userOperation[key])
         }
     }, 100000)
-})
 
-export const fetchUserOperationReceipt = async (
-    bundlerClient: BundlerClient,
-    userOpHash: Hex
-): Promise<GetUserOperationReceiptReturnType> => {
-    return new Promise((resolve) => {
-        const interval = setInterval(async () => {
-            console.log("fetching user operation receipt")
-            const userOperationReceipt = await bundlerClient.getUserOperationReceipt({ hash: userOpHash })
+    test("wait for user operation receipt fail", async () => {
+        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
 
-            if (userOperationReceipt) {
-                clearInterval(interval)
-                resolve(userOperationReceipt)
-            }
-        }, 5000)
+        const userOperation = {
+            ...(await buildUserOp(eoaWalletClient)),
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
+        const entryPoint = getEntryPoint()
+        const chain = getTestingChain()
+
+        const gasParameters = await bundlerClient.estimateUserOperationGas({
+            userOperation,
+            entryPoint: getEntryPoint()
+        })
+
+        userOperation.callGasLimit = gasParameters.callGasLimit
+        userOperation.verificationGasLimit = gasParameters.verificationGasLimit
+        userOperation.preVerificationGas = gasParameters.preVerificationGas
+
+        const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+
+        await expect(async () => {
+            await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash, timeout: 100 })
+        }).toThrow(new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash }))
     })
-}
+})

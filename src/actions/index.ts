@@ -19,6 +19,11 @@ import { getUserOperationByHash } from "./bundler/getUserOperationByHash.js"
 import { getUserOperationReceipt } from "./bundler/getUserOperationReceipt.js"
 import { sendUserOperation } from "./bundler/sendUserOperation.js"
 import { supportedEntryPoints } from "./bundler/supportedEntryPoints.js"
+import { waitForUserOperationReceipt } from "./bundler/waitForUserOperationReceipt.js"
+import {
+    type WaitForUserOperationReceiptParameters,
+    WaitForUserOperationReceiptTimeoutError
+} from "./bundler/waitForUserOperationReceipt.js"
 import type { GetAccountNonceParams } from "./public/getAccountNonce.js"
 import { getAccountNonce } from "./public/getAccountNonce.js"
 
@@ -31,7 +36,8 @@ export type {
     GetUserOperationReceiptParameters,
     GetUserOperationReceiptReturnType,
     GetSenderAddressParams,
-    GetAccountNonceParams
+    GetAccountNonceParams,
+    WaitForUserOperationReceiptParameters
 }
 
 export {
@@ -43,5 +49,7 @@ export {
     getUserOperationReceipt,
     getSenderAddress,
     getAccountNonce,
-    InvalidEntryPointError
+    InvalidEntryPointError,
+    waitForUserOperationReceipt,
+    WaitForUserOperationReceiptTimeoutError
 }

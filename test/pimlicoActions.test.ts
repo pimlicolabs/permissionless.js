@@ -1,5 +1,4 @@
 import dotenv from "dotenv"
-import { BundlerClient, UserOperation, createBundlerClient } from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient,
@@ -7,10 +6,9 @@ import {
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
 import { getUserOperationHash } from "permissionless/utils"
-import { http, Address } from "viem"
-import { fetchUserOperationReceipt } from "./bundlerActions.test"
+import { http } from "viem"
 import { buildUserOp } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getOldUserOpHash, getPublicClient, getTestingChain } from "./utils"
+import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 
 dotenv.config()
@@ -163,7 +161,9 @@ describe("Pimlico Actions tests", () => {
             expect(userOpHash).toBeString()
             expect(userOpHash).toStartWith("0x")
 
-            const userOperationReceipt = await fetchUserOperationReceipt(pimlicoBundlerClient, userOpHash)
+            const userOperationReceipt = await pimlicoBundlerClient.waitForUserOperationReceipt({
+                hash: userOpHash
+            })
 
             expect(userOperationReceipt).not.toBeNull()
             expect(userOperationReceipt?.userOpHash).toBe(userOpHash)

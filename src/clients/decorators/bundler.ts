@@ -18,6 +18,10 @@ import {
 } from "../../actions/bundler/getUserOperationReceipt.js"
 import { type SendUserOperationParameters, sendUserOperation } from "../../actions/bundler/sendUserOperation.js"
 import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints.js"
+import {
+    type WaitForUserOperationReceiptParameters,
+    waitForUserOperationReceipt
+} from "../../actions/bundler/waitForUserOperationReceipt.js"
 import type { BundlerClient } from "../bundler.js"
 
 export type BundlerActions = {
@@ -160,6 +164,31 @@ export type BundlerActions = {
      *
      */
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) => Promise<GetUserOperationReceiptReturnType>
+
+    /**
+     * Waits for the User Operation to be included on a [Block](https://viem.sh/docs/glossary/terms.html#block) (one confirmation), and then returns the [User Operation Receipt](https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt).
+     *
+     * - Docs: https://docs.pimlico.io/permissionless/reference/bundler-actions/waitForUserOperationReceipt
+     *
+     * @param client - Bundler Client to use
+     * @param parameters - {@link WaitForUserOperationReceiptParameters}
+     * @returns The transaction receipt. {@link GetUserOperationReceiptReturnType}
+     *
+     * @example
+     * import { createBundlerClient, waitForUserOperationReceipt, http } from 'viem'
+     * import { mainnet } from 'viem/chains'
+     *
+     * const bundlerClient = createBundlerClient({
+     *   chain: mainnet,
+     *   transport: http(),
+     * })
+     * const userOperationReceipt = await bundlerClient.waitForUserOperationReceipt({
+     *   hash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d',
+     * })
+     */
+    waitForUserOperationReceipt: (
+        args: WaitForUserOperationReceiptParameters
+    ) => Promise<GetUserOperationReceiptReturnType>
 }
 
 const bundlerActions = (client: Client): BundlerActions => ({
@@ -172,7 +201,9 @@ const bundlerActions = (client: Client): BundlerActions => ({
     getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
         getUserOperationByHash(client as BundlerClient, args),
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
-        getUserOperationReceipt(client as BundlerClient, args)
+        getUserOperationReceipt(client as BundlerClient, args),
+    waitForUserOperationReceipt: (args: WaitForUserOperationReceiptParameters) =>
+        waitForUserOperationReceipt(client as BundlerClient, args)
 })
 
 export { bundlerActions }

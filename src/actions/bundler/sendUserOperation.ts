@@ -1,7 +1,7 @@
 import type { Address, Hash } from "viem"
 import type { BundlerClient } from "../../clients/bundler.js"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
-import { deepHexlify } from "../utils.js"
+import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type SendUserOperationParameters = {
     userOperation: UserOperation

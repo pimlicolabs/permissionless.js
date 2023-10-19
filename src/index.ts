@@ -19,6 +19,11 @@ import { getUserOperationByHash } from "./actions/bundler/getUserOperationByHash
 import { getUserOperationReceipt } from "./actions/bundler/getUserOperationReceipt.js"
 import { sendUserOperation } from "./actions/bundler/sendUserOperation.js"
 import { supportedEntryPoints } from "./actions/bundler/supportedEntryPoints.js"
+import { waitForUserOperationReceipt } from "./actions/bundler/waitForUserOperationReceipt.js"
+import {
+    type WaitForUserOperationReceiptParameters,
+    WaitForUserOperationReceiptTimeoutError
+} from "./actions/bundler/waitForUserOperationReceipt.js"
 import type { GetAccountNonceParams } from "./actions/public/getAccountNonce.js"
 import { getAccountNonce } from "./actions/public/getAccountNonce.js"
 import { type BundlerClient, createBundlerClient } from "./clients/bundler.js"
@@ -36,7 +41,8 @@ export type {
     GetSenderAddressParams,
     GetAccountNonceParams,
     BundlerClient,
-    BundlerActions
+    BundlerActions,
+    WaitForUserOperationReceiptParameters
 }
 
 export {
@@ -48,8 +54,10 @@ export {
     getUserOperationReceipt,
     getSenderAddress,
     getAccountNonce,
+    waitForUserOperationReceipt,
     createBundlerClient,
-    bundlerActions
+    bundlerActions,
+    WaitForUserOperationReceiptTimeoutError
 }
 import type { UserOperation } from "./types/userOperation.js"
 

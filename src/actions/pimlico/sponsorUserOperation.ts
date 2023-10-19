@@ -2,7 +2,7 @@ import type { Address, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { PimlicoPaymasterClient } from "../../clients/pimlico.js"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
-import { deepHexlify } from "../utils.js"
+import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
