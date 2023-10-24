@@ -1,10 +1,5 @@
 import dotenv from "dotenv"
-import {
-    BundlerClient,
-    GetUserOperationReceiptReturnType,
-    WaitForUserOperationReceiptTimeoutError,
-    createBundlerClient
-} from "permissionless"
+import { BundlerClient, WaitForUserOperationReceiptTimeoutError, createBundlerClient } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, Hex } from "viem"
 import { buildUserOp } from "./userOp"

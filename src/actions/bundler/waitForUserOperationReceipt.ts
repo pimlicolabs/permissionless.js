@@ -1,7 +1,7 @@
 import { BaseError, type Chain, type Hash, stringify } from "viem"
-import { type BundlerClient } from "../../clients/bundler"
-import { observe } from "../../utils/observe"
-import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from "./getUserOperationReceipt"
+import type { BundlerClient } from "../../clients/bundler.js"
+import { observe } from "../../utils/observe.js"
+import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from "./getUserOperationReceipt.js"
 
 export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"
