@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.9
+
+### Patch Changes
+
+- 86bd5c1: Fixed support for ESM
+
 ## 0.0.8
 
 ### Patch Changes
