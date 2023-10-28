@@ -8,7 +8,14 @@ import {
 import { getUserOperationHash } from "permissionless/utils"
 import { http } from "viem"
 import { buildUserOp } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
+import {
+    getEntryPoint,
+    getEoaWalletClient,
+    getPimlicoBundlerClient,
+    getPimlicoPaymasterClient,
+    getPublicClient,
+    getTestingChain
+} from "./utils"
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 
 dotenv.config()
@@ -29,17 +36,8 @@ describe("Pimlico Actions tests", () => {
     let pimlicoPaymasterClient: PimlicoPaymasterClient
 
     beforeEach(async () => {
-        const chain = getTestingChain()
-
-        pimlicoBundlerClient = createPimlicoBundlerClient({
-            chain: chain,
-            transport: http(`https://api.pimlico.io/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
-        })
-
-        pimlicoPaymasterClient = createPimlicoPaymasterClient({
-            chain: chain,
-            transport: http(`https://api.pimlico.io/v2/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
-        })
+        pimlicoBundlerClient = getPimlicoBundlerClient()
+        pimlicoPaymasterClient = getPimlicoPaymasterClient()
     })
 
     describe("Pimlico Bundler actions", () => {

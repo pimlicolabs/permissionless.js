@@ -1,9 +1,17 @@
 import dotenv from "dotenv"
 import { createBundlerClient, getSenderAddress, getUserOperationHash } from "permissionless"
+import { signUserOperationHashWithECDSA } from "permissionless"
 import { InvalidEntryPointError } from "permissionless/actions"
 import { http } from "viem"
 import { buildUserOp, getAccountInitCode } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getFactoryAddress, getPublicClient, getTestingChain } from "./utils"
+import {
+    getBundlerClient,
+    getEntryPoint,
+    getEoaWalletClient,
+    getFactoryAddress,
+    getPublicClient,
+    getTestingChain
+} from "./utils"
 import { beforeAll, describe, expect, test } from "bun:test"
 
 dotenv.config()
@@ -59,11 +67,7 @@ describe("test public actions and utils", () => {
         const publicClient = await getPublicClient()
         const chain = getTestingChain()
         const entryPoint = getEntryPoint()
-
-        const bundlerClient = createBundlerClient({
-            chain: chain,
-            transport: http(`https://api.pimlico.io/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
-        })
+        const bundlerClient = getBundlerClient()
 
         const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
 
@@ -89,5 +93,53 @@ describe("test public actions and utils", () => {
 
         expect(userOpHash).toBeString()
         expect(userOpHash).toStartWith("0x")
+    })
+
+    test("signUserOperationHashWithECDSA", async () => {
+        const bundlerClient = getBundlerClient()
+        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+
+        const userOperation = {
+            ...(await buildUserOp(eoaWalletClient)),
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
+        const entryPoint = getEntryPoint()
+        const chain = getTestingChain()
+
+        const gasParameters = await bundlerClient.estimateUserOperationGas({
+            userOperation,
+            entryPoint: getEntryPoint()
+        })
+
+        userOperation.callGasLimit = gasParameters.callGasLimit
+        userOperation.verificationGasLimit = gasParameters.verificationGasLimit
+        userOperation.preVerificationGas = gasParameters.preVerificationGas
+
+        const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+
+        userOperation.signature = await signUserOperationHashWithECDSA(eoaWalletClient, {
+            userOperation,
+            entryPoint: entryPoint,
+            chainId: chain.id
+        })
+
+        expect(userOperation.signature).not.toBeEmpty()
+        expect(userOperation.signature).toBeString()
+        expect(userOperation.signature).toStartWith("0x")
+
+        const signature = await signUserOperationHashWithECDSA(eoaWalletClient, userOpHash)
+
+        expect(signature).not.toBeEmpty()
+        expect(signature).toBeString()
+        expect(signature).toStartWith("0x")
+
+        expect(signature).toEqual(userOperation.signature)
     })
 })
