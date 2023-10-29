@@ -1,5 +1,28 @@
-import type { Account, Chain, Hash, Hex, Transport, WalletClient } from "viem"
-import { type GetUserOperationHashParams, getUserOperationHash } from "./getUserOperationHash.js"
+import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
+import { parseAccount } from "viem/accounts"
+import type { UserOperation } from "../types/userOperation.js"
+import { getUserOperationHash } from "./getUserOperationHash.js"
+
+type IsUndefined<T> = [undefined] extends [T] ? true : false
+
+type GetAccountParameter<TAccount extends Account | undefined = Account | undefined,> =
+    IsUndefined<TAccount> extends true ? { account: Account | Address } : { account?: Account | Address }
+
+export type signUserOperationHashWithECDSAParams<TAccount extends Account = Account> = GetAccountParameter<TAccount> &
+    (
+        | {
+              hash: Hash
+              userOperation?: undefined
+              entryPoint?: undefined
+              chainId?: undefined
+          }
+        | {
+              hash?: undefined
+              userOperation: UserOperation
+              entryPoint: Address
+              chainId: number
+          }
+    )
 
 /**
  *
@@ -8,7 +31,8 @@ import { type GetUserOperationHashParams, getUserOperationHash } from "./getUser
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/utils/signUserOperationHashWithECDSA
  *
- * @param args: userOperation, entryPoint, chainId as {@link GetUserOperationHashParams} | hash to sign
+ * @param signer: owner as {@link Client<Transport, TChain, TAccount>}
+ * @param params: account & (userOperation, entryPoint, chainId)  | hash to sign
  * @returns signature as {@link Hash}
  *
  * @example
@@ -28,22 +52,34 @@ export const signUserOperationHashWithECDSA = async <
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account = Account
 >(
-    owner: WalletClient<TTransport, TChain, TAccount>,
-    params: GetUserOperationHashParams | Hash
+    signer: Client<TTransport, TChain, TAccount>,
+    {
+        account: account_ = signer.account,
+        hash,
+        userOperation,
+        chainId,
+        entryPoint
+    }: signUserOperationHashWithECDSAParams<TAccount>
 ): Promise<Hex> => {
     let userOperationHash: Hash
 
-    if (typeof params === "string") {
-        userOperationHash = params
+    if (hash) {
+        userOperationHash = hash
     } else {
-        const { userOperation, chainId, entryPoint } = params
         userOperationHash = getUserOperationHash({ userOperation, chainId, entryPoint })
     }
 
-    return owner.signMessage({
-        account: owner.account,
-        message: {
-            raw: userOperationHash
-        }
+    const account = parseAccount(account_)
+
+    if (account.type === "local")
+        return account.signMessage({
+            message: {
+                raw: userOperationHash
+            }
+        })
+
+    return signer.request({
+        method: "personal_sign",
+        params: [userOperationHash, account.address]
     })
 }

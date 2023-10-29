@@ -134,7 +134,7 @@ describe("test public actions and utils", () => {
         expect(userOperation.signature).toBeString()
         expect(userOperation.signature).toStartWith("0x")
 
-        const signature = await signUserOperationHashWithECDSA(eoaWalletClient, userOpHash)
+        const signature = await signUserOperationHashWithECDSA(eoaWalletClient, { hash: userOpHash })
 
         expect(signature).not.toBeEmpty()
         expect(signature).toBeString()
