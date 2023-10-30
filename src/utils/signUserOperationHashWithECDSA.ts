@@ -1,5 +1,13 @@
-import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
-import { AccountNotFoundError } from "viem/errors/account"
+import {
+    type Account,
+    type Address,
+    BaseError,
+    type Chain,
+    type Client,
+    type Hash,
+    type Hex,
+    type Transport
+} from "viem"
 import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
 
@@ -29,6 +37,22 @@ export type signUserOperationHashWithECDSAParams<TAccount extends Account | unde
                   chainId: number
               }
         )
+
+export class AccountNotFoundError extends BaseError {
+    override name = "AccountNotFoundError"
+    constructor({ docsPath }: { docsPath?: string } = {}) {
+        super(
+            [
+                "Could not find an Account to execute with this Action.",
+                "Please provide an Account with the `account` argument on the Action, or by supplying an `account` to the WalletClient."
+            ].join("\n"),
+            {
+                docsPath,
+                docsSlug: "account"
+            }
+        )
+    }
+}
 
 /**
  *
