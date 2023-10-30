@@ -18,28 +18,36 @@ function parseAccount(account: Address | Account): Account {
 
 type IsUndefined<T> = [undefined] extends [T] ? true : false
 
-type GetAccountParameter<TAccount extends Account | undefined = Account | undefined,> =
-    IsUndefined<TAccount> extends true ? { account: Account | Address } : { account?: Account | Address }
+type GetAccountParameter<
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+> = IsUndefined<TAccount> extends true
+    ? { account: Account; client?: undefined }
+    : { client: Client<TTransport, TChain, TAccount>; account?: undefined }
 
-export type signUserOperationHashWithECDSAParams<TAccount extends Account | undefined = Account | undefined> =
-    GetAccountParameter<TAccount> &
-        (
-            | {
-                  hash: Hash
-                  userOperation?: undefined
-                  entryPoint?: undefined
-                  chainId?: undefined
-              }
-            | {
-                  hash?: undefined
-                  userOperation: UserOperation
-                  entryPoint: Address
-                  chainId: number
-              }
-        )
+export type signUserOperationHashWithECDSAParams<
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+> = GetAccountParameter<TTransport, TChain, TAccount> &
+    (
+        | {
+              hash: Hash
+              userOperation?: undefined
+              entryPoint?: undefined
+              chainId?: undefined
+          }
+        | {
+              hash?: undefined
+              userOperation: UserOperation
+              entryPoint: Address
+              chainId: number
+          }
+    )
 
-export class AccountNotFoundError extends BaseError {
-    override name = "AccountNotFoundError"
+export class AccountOrClientNotFoundError extends BaseError {
+    override name = "AccountOrClientNotFoundError"
     constructor({ docsPath }: { docsPath?: string } = {}) {
         super(
             [
@@ -81,18 +89,16 @@ export const signUserOperationHashWithECDSA = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
->(
-    signer: Client<TTransport, TChain, TAccount>,
-    {
-        account: account_ = signer.account,
-        hash,
-        userOperation,
-        chainId,
-        entryPoint
-    }: signUserOperationHashWithECDSAParams<TAccount>
-): Promise<Hex> => {
+>({
+    client,
+    account: account_ = client?.account,
+    hash,
+    userOperation,
+    chainId,
+    entryPoint
+}: signUserOperationHashWithECDSAParams<TTransport, TChain, TAccount>): Promise<Hex> => {
     if (!account_)
-        throw new AccountNotFoundError({
+        throw new AccountOrClientNotFoundError({
             docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
         })
 
@@ -113,7 +119,12 @@ export const signUserOperationHashWithECDSA = async <
             }
         })
 
-    return signer.request({
+    if (!client)
+        throw new AccountOrClientNotFoundError({
+            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+        })
+
+    return client.request({
         method: "personal_sign",
         params: [userOperationHash, account.address]
     })

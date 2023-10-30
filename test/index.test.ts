@@ -9,6 +9,7 @@ import {
     getEntryPoint,
     getEoaWalletClient,
     getFactoryAddress,
+    getPrivateKeyAccount,
     getPublicClient,
     getTestingChain
 } from "./utils"
@@ -124,7 +125,8 @@ describe("test public actions and utils", () => {
 
         const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
 
-        userOperation.signature = await signUserOperationHashWithECDSA(eoaWalletClient, {
+        userOperation.signature = await signUserOperationHashWithECDSA({
+            client: eoaWalletClient,
             userOperation,
             entryPoint: entryPoint,
             chainId: chain.id
@@ -134,7 +136,23 @@ describe("test public actions and utils", () => {
         expect(userOperation.signature).toBeString()
         expect(userOperation.signature).toStartWith("0x")
 
-        const signature = await signUserOperationHashWithECDSA(eoaWalletClient, { hash: userOpHash })
+        const signature = await signUserOperationHashWithECDSA({ client: eoaWalletClient, hash: userOpHash })
+
+        await signUserOperationHashWithECDSA({ account: eoaWalletClient.account, hash: userOpHash })
+
+        await signUserOperationHashWithECDSA({
+            account: eoaWalletClient.account,
+            userOperation,
+            entryPoint: entryPoint,
+            chainId: chain.id
+        })
+
+        await signUserOperationHashWithECDSA({
+            account: getPrivateKeyAccount(),
+            userOperation,
+            entryPoint: entryPoint,
+            chainId: chain.id
+        })
 
         expect(signature).not.toBeEmpty()
         expect(signature).toBeString()
