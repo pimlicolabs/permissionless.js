@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.10
+
+### Patch Changes
+
+- 565ea3f: Added signUserOperationHashWithECDSA to permissionless utilities
+
 ## 0.0.9
 
 ### Patch Changes
