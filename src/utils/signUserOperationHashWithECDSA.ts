@@ -1,4 +1,5 @@
 import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
+import { AccountNotFoundError } from "viem/errors/account"
 import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
 
@@ -12,21 +13,22 @@ type IsUndefined<T> = [undefined] extends [T] ? true : false
 type GetAccountParameter<TAccount extends Account | undefined = Account | undefined,> =
     IsUndefined<TAccount> extends true ? { account: Account | Address } : { account?: Account | Address }
 
-export type signUserOperationHashWithECDSAParams<TAccount extends Account = Account> = GetAccountParameter<TAccount> &
-    (
-        | {
-              hash: Hash
-              userOperation?: undefined
-              entryPoint?: undefined
-              chainId?: undefined
-          }
-        | {
-              hash?: undefined
-              userOperation: UserOperation
-              entryPoint: Address
-              chainId: number
-          }
-    )
+export type signUserOperationHashWithECDSAParams<TAccount extends Account | undefined = Account | undefined> =
+    GetAccountParameter<TAccount> &
+        (
+            | {
+                  hash: Hash
+                  userOperation?: undefined
+                  entryPoint?: undefined
+                  chainId?: undefined
+              }
+            | {
+                  hash?: undefined
+                  userOperation: UserOperation
+                  entryPoint: Address
+                  chainId: number
+              }
+        )
 
 /**
  *
@@ -54,7 +56,7 @@ export type signUserOperationHashWithECDSAParams<TAccount extends Account = Acco
 export const signUserOperationHashWithECDSA = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account = Account
+    TAccount extends Account | undefined = Account | undefined
 >(
     signer: Client<TTransport, TChain, TAccount>,
     {
@@ -65,6 +67,11 @@ export const signUserOperationHashWithECDSA = async <
         entryPoint
     }: signUserOperationHashWithECDSAParams<TAccount>
 ): Promise<Hex> => {
+    if (!account_)
+        throw new AccountNotFoundError({
+            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+        })
+
     let userOperationHash: Hash
 
     if (hash) {

@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import { createBundlerClient, getSenderAddress, getUserOperationHash } from "permissionless"
+import { UserOperation, createBundlerClient, getSenderAddress, getUserOperationHash } from "permissionless"
 import { signUserOperationHashWithECDSA } from "permissionless"
 import { InvalidEntryPointError } from "permissionless/actions"
 import { http } from "viem"
@@ -101,7 +101,7 @@ describe("test public actions and utils", () => {
         const publicClient = await getPublicClient()
         const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
 
-        const userOperation = {
+        const userOperation: UserOperation = {
             ...(await buildUserOp(eoaWalletClient)),
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
