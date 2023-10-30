@@ -1,3 +1,5 @@
+import { createBundlerClient } from "permissionless"
+import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import { http, Address, Hex, createPublicClient, createWalletClient } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { goerli } from "viem/chains"
@@ -41,6 +43,51 @@ export const getPublicClient = async () => {
     if (chainId !== getTestingChain().id) throw new Error("Testing Chain ID not supported by RPC URL")
 
     return publicClient
+}
+
+export const getBundlerClient = () => {
+    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
+    if (!process.env.PIMLICO_BUNDLER_RPC_HOST) throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
+    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+
+    const chain = getTestingChain()
+
+    return createBundlerClient({
+        chain: chain,
+        transport: http(
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+        )
+    })
+}
+
+export const getPimlicoBundlerClient = () => {
+    if (!process.env.PIMLICO_BUNDLER_RPC_HOST) throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
+    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
+    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+
+    const chain = getTestingChain()
+
+    return createPimlicoBundlerClient({
+        chain: chain,
+        transport: http(
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+        )
+    })
+}
+
+export const getPimlicoPaymasterClient = () => {
+    if (!process.env.PIMLICO_BUNDLER_RPC_HOST) throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
+    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
+    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+
+    const chain = getTestingChain()
+
+    return createPimlicoPaymasterClient({
+        chain: chain,
+        transport: http(
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/v2/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+        )
+    })
 }
 
 export const isAccountDeployed = async (accountAddress: Address) => {

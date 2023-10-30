@@ -1,9 +1,9 @@
 import dotenv from "dotenv"
-import { BundlerClient, WaitForUserOperationReceiptTimeoutError, createBundlerClient } from "permissionless"
+import { BundlerClient, WaitForUserOperationReceiptTimeoutError } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, Hex } from "viem"
 import { buildUserOp } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
+import { getBundlerClient, getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 
 dotenv.config()
@@ -17,18 +17,11 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
 
-const pimlicoApiKey = process.env.PIMLICO_API_KEY
-
 describe("BUNDLER ACTIONS", () => {
     let bundlerClient: BundlerClient
 
     beforeEach(async () => {
-        const chain = getTestingChain()
-
-        bundlerClient = createBundlerClient({
-            chain: chain,
-            transport: http(`https://api.pimlico.io/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`)
-        })
+        bundlerClient = getBundlerClient()
     })
 
     test("Supported entry points request", async () => {
