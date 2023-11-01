@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.11
+
+### Patch Changes
+
+- 5e990c1: Allow using raw accounts with `signUserOperationHashWithECDSA`
+
 ## 0.0.10
 
 ### Patch Changes
