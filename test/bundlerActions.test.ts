@@ -151,7 +151,7 @@ describe("BUNDLER ACTIONS", () => {
 
         const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
 
-        await expect(async () => {
+        expect(async () => {
             await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash, timeout: 100 })
         }).toThrow(new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash }))
     })

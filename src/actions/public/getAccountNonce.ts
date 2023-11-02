@@ -1,4 +1,4 @@
-import type { Address, PublicClient } from "viem"
+import type { Address, Chain, PublicClient, Transport } from "viem"
 
 export type GetAccountNonceParams = { sender: Address; entryPoint: Address; key?: bigint }
 
@@ -28,8 +28,11 @@ export type GetAccountNonceParams = { sender: Address; entryPoint: Address; key?
  *
  * // Return 0n
  */
-export const getAccountNonce = async (
-    publicClient: PublicClient,
+export const getAccountNonce = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
+>(
+    publicClient: PublicClient<TTransport, TChain>,
     { sender, entryPoint, key = BigInt(0) }: GetAccountNonceParams
 ): Promise<bigint> => {
     return await publicClient.readContract({

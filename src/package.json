@@ -9,19 +9,18 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": [
-        "ethereum",
-        "erc-4337",
-        "eip-4337",
-        "paymaster",
-        "bundler"
-    ],
+    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
     "exports": {
         ".": {
             "types": "./_types/index.d.ts",
             "import": "./_esm/index.js",
             "default": "./_cjs/index.js"
+        },
+        "./accounts": {
+            "types": "./_types/accounts/index.d.ts",
+            "import": "./_esm/accounts/index.js",
+            "default": "./_cjs/accounts/index.js"
         },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
@@ -60,6 +59,6 @@
         }
     },
     "peerDependencies": {
-        "viem": "^1.14.0"
+        "viem": "^1.17.0"
     }
 }

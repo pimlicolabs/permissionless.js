@@ -1,5 +1,5 @@
 import type { Address, Hash, Hex } from "viem"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { TStatus } from "../../types/userOperation.js"
 import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 

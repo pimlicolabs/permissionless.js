@@ -1,5 +1,5 @@
 import type { Address } from "viem"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 
 /**
  * Returns the supported entrypoints by the bundler service

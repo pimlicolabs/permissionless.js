@@ -11,7 +11,7 @@
         "@changesets/cli": "^2.26.2",
         "@size-limit/esbuild-why": "^9.0.0",
         "@size-limit/preset-small-lib": "^9.0.0",
-        "bun-types": "^1.0.3",
+        "bun-types": "^1.0.7",
         "rimraf": "^5.0.1",
         "simple-git-hooks": "^2.9.0",
         "size-limit": "^9.0.0",

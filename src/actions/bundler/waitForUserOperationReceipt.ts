@@ -1,5 +1,5 @@
 import { BaseError, type Chain, type Hash, stringify } from "viem"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import { observe } from "../../utils/observe.js"
 import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from "./getUserOperationReceipt.js"
 

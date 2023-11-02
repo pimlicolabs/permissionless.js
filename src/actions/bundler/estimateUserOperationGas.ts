@@ -1,6 +1,6 @@
 import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"

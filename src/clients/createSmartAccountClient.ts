@@ -1,0 +1,62 @@
+import type { Chain, Client, ClientConfig, ParseAccount, Transport, WalletClientConfig } from "viem"
+import { createClient } from "viem"
+import { type SmartAccount } from "../accounts/types"
+import type { Prettify } from "../types"
+import { type BundlerRpcSchema } from "../types/bundler"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
+import { type SmartAccountActions, smartAccountActions } from "./decorators/smartAccount"
+
+export type SmartAccountClient<
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain | undefined,
+    account extends SmartAccount | undefined = SmartAccount | undefined
+> = Prettify<Client<transport, chain, account, BundlerRpcSchema, BundlerActions & SmartAccountActions<chain, account>>>
+
+export type SmartAccountClientConfig<
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain | undefined,
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+> = Prettify<
+    Pick<
+        ClientConfig<transport, chain, TAccount>,
+        "account" | "cacheTime" | "chain" | "key" | "name" | "pollingInterval" | "transport"
+    >
+>
+
+/**
+ * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
+ *
+ * - Docs: https://docs.pimlico.io/permissionless/reference/clients/smartAccountClient
+ *
+ * A Bundler Client is an interface to "erc 4337" [JSON-RPC API](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace) methods such as sending user operation, estimating gas for a user operation, get user operation receipt, etc through Bundler Actions.
+ *
+ * @param config - {@link WalletClientConfig}
+ * @returns A Bundler Client. {@link SmartAccountClient}
+ *
+ * @example
+ * import { createPublicClient, http } from 'viem'
+ * import { mainnet } from 'viem/chains'
+ *
+ * const smartAccountClient = createSmartAccountClient({
+ *   chain: mainnet,
+ *   transport: http(BUNDLER_URL),
+ * })
+ */
+export const createSmartAccountClient = <
+    TTransport extends Transport,
+    TChain extends Chain | undefined = undefined,
+    TSmartAccount extends SmartAccount | undefined = undefined
+>(
+    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
+): SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>> => {
+    const { key = "Account", name = "Smart Account Client", transport } = parameters
+    const client = createClient({
+        ...parameters,
+        key,
+        name,
+        transport: (opts) => transport({ ...opts, retryCount: 0 }),
+        type: "smartAccountClient"
+    }).extend(bundlerActions)
+
+    return client.extend(smartAccountActions)
+}

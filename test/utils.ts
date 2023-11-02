@@ -1,4 +1,5 @@
-import { createBundlerClient } from "permissionless"
+import { createBundlerClient, createSmartAccountClient } from "permissionless"
+import { privateKeyToSimpleSmartAccount } from "permissionless/accounts"
 import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import { http, Address, Hex, createPublicClient, createWalletClient } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -17,6 +18,33 @@ export const getPrivateKeyAccount = () => {
 
 export const getTestingChain = () => {
     return goerli
+}
+
+export const getPrivateKeyToSimpleSmartAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY) throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+
+    return await privateKeyToSimpleSmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        factoryAddress: getFactoryAddress(),
+        privateKey: process.env.TEST_PRIVATE_KEY as Hex
+    })
+}
+
+export const getSmartAccountClient = async () => {
+    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
+    if (!process.env.PIMLICO_BUNDLER_RPC_HOST) throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
+    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+    const chain = getTestingChain()
+
+    return createSmartAccountClient({
+        account: await getPrivateKeyToSimpleSmartAccount(),
+        chain,
+        transport: http(
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+        )
+    })
 }
 
 export const getEoaWalletClient = () => {

@@ -10,11 +10,7 @@ import {
 } from "viem"
 import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
-
-function parseAccount(account: Address | Account): Account {
-    if (typeof account === "string") return { address: account, type: "json-rpc" }
-    return account
-}
+import { parseAccount } from "./index.js"
 
 type IsUndefined<T> = [undefined] extends [T] ? true : false
 

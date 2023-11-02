@@ -22,7 +22,7 @@ import {
     type WaitForUserOperationReceiptParameters,
     waitForUserOperationReceipt
 } from "../../actions/bundler/waitForUserOperationReceipt.js"
-import type { BundlerClient } from "../bundler.js"
+import type { BundlerClient } from "../createBundlerClient.js"
 
 export type BundlerActions = {
     /**
