@@ -7,7 +7,7 @@ type Callbacks = Record<string, Callback>
 export const listenersCache = /*#__PURE__*/ new Map<string, { id: number; fns: Callbacks }[]>()
 export const cleanupCache = /*#__PURE__*/ new Map<string, () => void>()
 
-type EmitFunction<TCallbacks extends Callbacks> = (emit: TCallbacks) => MaybePromise<void | (() => void)>
+type EmitFunction<TCallbacks extends Callbacks> = (emit: TCallbacks) => MaybePromise<undefined | (() => void)>
 
 let callbackCount = 0
 
@@ -50,7 +50,9 @@ export function observe<TCallbacks extends Callbacks>(
         emit[key] = ((...args: Parameters<NonNullable<TCallbacks[keyof TCallbacks]>>) => {
             const listeners = getListeners()
             if (listeners.length === 0) return
-            listeners.forEach((listener) => listener.fns[key]?.(...args))
+            for (const listener of listeners) {
+                listener.fns[key]?.(...args)
+            }
         }) as TCallbacks[Extract<keyof TCallbacks, string>]
     }
 

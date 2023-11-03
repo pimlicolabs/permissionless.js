@@ -9,11 +9,9 @@ import {
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount, toAccount } from "viem/accounts"
-import { getAccountNonce } from "../actions/public/getAccountNonce"
-import { getSenderAddress } from "../actions/public/getSenderAddress"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleSmartAccountFactoryAbi } from "./abis/SimpleSmartAccountFactory"
-import { type SmartAccount } from "./types"
+import { getAccountNonce } from "../actions/public/getAccountNonce.js"
+import { getSenderAddress } from "../actions/public/getSenderAddress.js"
+import { type SmartAccount } from "./types.js"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
     override name = "SignTransactionNotSupportedBySmartAccount"
@@ -31,7 +29,10 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
     }
 }
 
-export type PrivateKeySimpleSmartAccount = SmartAccount<"privateKeySimpleSmartAccount">
+export type PrivateKeySimpleSmartAccount<
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain | undefined
+> = SmartAccount<"privateKeySimpleSmartAccount", transport, chain>
 
 const getAccountInitCode = async (factoryAddress: Address, owner: Address, index = 0n): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
@@ -39,7 +40,32 @@ const getAccountInitCode = async (factoryAddress: Address, owner: Address, index
     return concatHex([
         factoryAddress,
         encodeFunctionData({
-            abi: SimpleSmartAccountFactoryAbi,
+            abi: [
+                {
+                    inputs: [
+                        {
+                            internalType: "address",
+                            name: "owner",
+                            type: "address"
+                        },
+                        {
+                            internalType: "uint256",
+                            name: "salt",
+                            type: "uint256"
+                        }
+                    ],
+                    name: "createAccount",
+                    outputs: [
+                        {
+                            internalType: "contract SimpleAccount",
+                            name: "ret",
+                            type: "address"
+                        }
+                    ],
+                    stateMutability: "nonpayable",
+                    type: "function"
+                }
+            ],
             functionName: "createAccount",
             args: [owner, index]
         }) as Hex
@@ -87,7 +113,7 @@ export async function privateKeyToSimpleSmartAccount<
         factoryAddress: Address
         entryPoint: Address
     }
-): Promise<PrivateKeySimpleSmartAccount> {
+): Promise<PrivateKeySimpleSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
@@ -114,6 +140,7 @@ export async function privateKeyToSimpleSmartAccount<
 
     return {
         ...account,
+        publicCLient: publicClient,
         publicKey: accountAddress,
         entryPoint: entryPoint,
         source: "privateKeySimpleSmartAccount",
@@ -134,7 +161,31 @@ export async function privateKeyToSimpleSmartAccount<
         },
         async encodeCallData({ to, value, data }) {
             return encodeFunctionData({
-                abi: SimpleAccountAbi,
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "dest",
+                                type: "address"
+                            },
+                            {
+                                internalType: "uint256",
+                                name: "value",
+                                type: "uint256"
+                            },
+                            {
+                                internalType: "bytes",
+                                name: "func",
+                                type: "bytes"
+                            }
+                        ],
+                        name: "execute",
+                        outputs: [],
+                        stateMutability: "nonpayable",
+                        type: "function"
+                    }
+                ],
                 functionName: "execute",
                 args: [to, value, data]
             })

@@ -1,3 +1,4 @@
+import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     PimlicoBundlerClient,
@@ -16,7 +17,6 @@ import {
     getPublicClient,
     getTestingChain
 } from "./utils"
-import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 
 dotenv.config()
 

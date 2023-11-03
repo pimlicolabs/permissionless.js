@@ -1,6 +1,13 @@
-import type { Address, Hex, LocalAccount } from "viem"
+import type { Address, Hex, LocalAccount, PublicClient } from "viem"
+import { Chain } from "viem"
+import { Transport } from "viem"
 
-export type SmartAccount<Name extends string = string> = LocalAccount<Name> & {
+export type SmartAccount<
+    Name extends string = string,
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain | undefined
+> = LocalAccount<Name> & {
+    publicCLient: PublicClient<transport, chain>
     entryPoint: Address
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>

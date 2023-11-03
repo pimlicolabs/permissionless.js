@@ -1,10 +1,10 @@
 import type { Chain, Client, SendTransactionParameters, SendTransactionReturnType, Transport } from "viem"
 import { type Hex } from "viem"
-import { type SmartAccount } from "../../accounts/types"
-import { type BundlerActions } from "../../clients/decorators/bundler"
-import { type UserOperation } from "../../types"
-import { type BundlerRpcSchema } from "../../types/bundler"
-import { AccountOrClientNotFoundError, getUserOperationHash, parseAccount } from "../../utils"
+import { type SmartAccount } from "../../accounts/types.js"
+import { type BundlerActions } from "../../clients/decorators/bundler.js"
+import { type BundlerRpcSchema } from "../../types/bundler.js"
+import { type UserOperation } from "../../types/index.js"
+import { AccountOrClientNotFoundError, getUserOperationHash, parseAccount } from "../../utils/index.js"
 
 export async function sendTransaction<
     TChain extends Chain | undefined,
@@ -16,10 +16,11 @@ export async function sendTransaction<
 ): Promise<SendTransactionReturnType> {
     const { account: account_ = client.account, data, maxFeePerGas, maxPriorityFeePerGas, to, value } = args
 
-    if (!account_)
+    if (!account_) {
         throw new AccountOrClientNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
+    }
 
     const account = parseAccount(account_) as SmartAccount
 
@@ -28,6 +29,8 @@ export async function sendTransaction<
     if (account.type !== "local") {
         throw new Error("RPC account type not supported")
     }
+
+    const gasEstimation = await account.publicCLient.estimateFeesPerGas()
 
     const userOperation: UserOperation = {
         sender: account.address,
@@ -40,8 +43,8 @@ export async function sendTransaction<
         }),
         paymasterAndData: "0x" as Hex,
         signature: await account.getDummySignature(),
-        maxFeePerGas: maxFeePerGas || 0n,
-        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+        maxFeePerGas: maxFeePerGas || gasEstimation.maxFeePerGas || 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas || gasEstimation.maxPriorityFeePerGas || 0n,
         callGasLimit: 0n,
         verificationGasLimit: 0n,
         preVerificationGas: 0n
@@ -71,7 +74,9 @@ export async function sendTransaction<
         entryPoint: account.entryPoint
     })
 
-    const userOperationReceipt = await client.waitForUserOperationReceipt({ hash: userOpHash })
+    const userOperationReceipt = await client.waitForUserOperationReceipt({
+        hash: userOpHash
+    })
 
     return userOperationReceipt?.receipt.transactionHash
 }

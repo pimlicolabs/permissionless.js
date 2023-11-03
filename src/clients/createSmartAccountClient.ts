@@ -1,10 +1,10 @@
 import type { Chain, Client, ClientConfig, ParseAccount, Transport, WalletClientConfig } from "viem"
 import { createClient } from "viem"
-import { type SmartAccount } from "../accounts/types"
-import type { Prettify } from "../types"
-import { type BundlerRpcSchema } from "../types/bundler"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler"
-import { type SmartAccountActions, smartAccountActions } from "./decorators/smartAccount"
+import { type SmartAccount } from "../accounts/types.js"
+import { type BundlerRpcSchema } from "../types/bundler.js"
+import type { Prettify } from "../types/index.js"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
+import { type SmartAccountActions, smartAccountActions } from "./decorators/smartAccount.js"
 
 export type SmartAccountClient<
     transport extends Transport = Transport,

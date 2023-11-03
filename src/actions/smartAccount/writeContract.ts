@@ -9,10 +9,10 @@ import {
     type WriteContractReturnType,
     encodeFunctionData
 } from "viem"
-import { type SmartAccount } from "../../accounts/types"
-import { type BundlerActions } from "../../clients/decorators/bundler"
-import { type BundlerRpcSchema } from "../../types/bundler"
-import { sendTransaction } from "./sendTransaction"
+import { type SmartAccount } from "../../accounts/types.js"
+import { type BundlerActions } from "../../clients/decorators/bundler.js"
+import { type BundlerRpcSchema } from "../../types/bundler.js"
+import { sendTransaction } from "./sendTransaction.js"
 
 export async function writeContract<
     TChain extends Chain | undefined,

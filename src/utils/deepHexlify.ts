@@ -20,11 +20,8 @@ export function deepHexlify(obj: any): any {
     if (Array.isArray(obj)) {
         return obj.map((member) => deepHexlify(member))
     }
-    return Object.keys(obj).reduce(
-        (set, key) => ({
-            ...set,
-            [key]: deepHexlify(obj[key])
-        }),
-        {}
-    )
+    return Object.keys(obj).reduce((set, key) => {
+        set[key] = deepHexlify(obj[key])
+        return set
+    }, {})
 }

@@ -1,6 +1,6 @@
+import { beforeAll, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { deepHexlify } from "./deepHexlify.js"
-import { beforeAll, expect, test } from "bun:test"
 
 dotenv.config()
 

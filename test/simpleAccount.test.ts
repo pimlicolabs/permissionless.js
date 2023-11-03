@@ -1,8 +1,8 @@
+import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, zeroAddress } from "viem"
 import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils"
-import { beforeAll, describe, expect, test } from "bun:test"
 
 dotenv.config()
 
@@ -93,16 +93,10 @@ describe("Simple Account", () => {
     test("Smart account client", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
-        const publicClient = await getPublicClient()
-
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
-
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
-            data: "0x",
-            maxFeePerGas,
-            maxPriorityFeePerGas
+            data: "0x"
         })
 
         console.log(response)
