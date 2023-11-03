@@ -2,12 +2,14 @@ import {
     type Address,
     BaseError,
     type Chain,
+    type Client,
     type ContractFunctionExecutionErrorType,
     type ContractFunctionRevertedErrorType,
     type Hex,
-    type PublicClient,
     type Transport
 } from "viem"
+
+import { simulateContract } from "viem/actions"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 
@@ -31,8 +33,7 @@ export class InvalidEntryPointError extends BaseError {
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getSenderAddress
  *
- *
- * @param publicClient {@link PublicClient} that you created using viem's createPublicClient.
+ * @param client {@link Client} that you created using viem's createPublicClient.
  * @param args {@link GetSenderAddressParams} initCode & entryPoint
  * @returns Sender's Address
  *
@@ -56,11 +57,11 @@ export const getSenderAddress = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
-    publicClient: PublicClient<TTransport, TChain>,
+    client: Client<TTransport, TChain>,
     { initCode, entryPoint }: GetSenderAddressParams
 ): Promise<Address> => {
     try {
-        await publicClient.simulateContract({
+        await simulateContract(client, {
             address: entryPoint,
             abi: [
                 {

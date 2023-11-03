@@ -7,7 +7,8 @@ type Callbacks = Record<string, Callback>
 export const listenersCache = /*#__PURE__*/ new Map<string, { id: number; fns: Callbacks }[]>()
 export const cleanupCache = /*#__PURE__*/ new Map<string, () => void>()
 
-type EmitFunction<TCallbacks extends Callbacks> = (emit: TCallbacks) => MaybePromise<undefined | (() => void)>
+// biome-ignore lint/suspicious/noConfusingVoidType: it's a recursive function, so it's hard to type
+type EmitFunction<TCallbacks extends Callbacks> = (emit: TCallbacks) => MaybePromise<void | (() => void)>
 
 let callbackCount = 0
 

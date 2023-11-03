@@ -2,13 +2,14 @@ import {
     type Address,
     BaseError,
     type Chain,
+    type Client,
     type Hex,
-    type PublicClient,
     type Transport,
     concatHex,
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount, toAccount } from "viem/accounts"
+import { getBytecode } from "viem/actions"
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../actions/public/getSenderAddress.js"
 import { type SmartAccount } from "./types.js"
@@ -76,19 +77,19 @@ const getAccountAddress = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
-    publicClient,
+    client,
     factoryAddress,
     entryPoint,
     owner
 }: {
-    publicClient: PublicClient<TTransport, TChain>
+    client: Client<TTransport, TChain>
     factoryAddress: Address
     owner: Address
     entryPoint: Address
 }): Promise<Address> => {
     const initCode = await getAccountInitCode(factoryAddress, owner)
 
-    return getSenderAddress(publicClient, {
+    return getSenderAddress(client, {
         initCode,
         entryPoint
     })
@@ -103,7 +104,7 @@ export async function privateKeyToSimpleSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
-    publicClient: PublicClient<TTransport, TChain>,
+    client: Client<TTransport, TChain>,
     {
         privateKey,
         factoryAddress,
@@ -117,7 +118,7 @@ export async function privateKeyToSimpleSmartAccount<
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
-        publicClient,
+        client,
         factoryAddress,
         entryPoint,
         owner: privateKeyAccount.address
@@ -140,18 +141,18 @@ export async function privateKeyToSimpleSmartAccount<
 
     return {
         ...account,
-        publicCLient: publicClient,
+        client: client,
         publicKey: accountAddress,
         entryPoint: entryPoint,
         source: "privateKeySimpleSmartAccount",
         async getNonce() {
-            return getAccountNonce(publicClient, {
+            return getAccountNonce(client, {
                 sender: accountAddress,
                 entryPoint: entryPoint
             })
         },
         async getInitCode() {
-            const contractCode = await publicClient.getBytecode({
+            const contractCode = await getBytecode(client, {
                 address: accountAddress
             })
 

@@ -1,5 +1,6 @@
 import type { Chain, Client, SendTransactionParameters, SendTransactionReturnType, Transport } from "viem"
 import { type Hex } from "viem"
+import { estimateFeesPerGas } from "viem/actions"
 import { type SmartAccount } from "../../accounts/types.js"
 import { type BundlerActions } from "../../clients/decorators/bundler.js"
 import { type BundlerRpcSchema } from "../../types/bundler.js"
@@ -30,7 +31,7 @@ export async function sendTransaction<
         throw new Error("RPC account type not supported")
     }
 
-    const gasEstimation = await account.publicCLient.estimateFeesPerGas()
+    const gasEstimation = await estimateFeesPerGas(account.client)
 
     const userOperation: UserOperation = {
         sender: account.address,
