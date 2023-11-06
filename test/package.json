@@ -4,6 +4,6 @@
     "type": "module",
     "dependencies": {
         "dotenv": "^16.3.1",
-        "viem": "1.17.0"
+        "viem": "1.18.4"
     }
 }
