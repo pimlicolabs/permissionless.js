@@ -1,10 +1,10 @@
 import type { Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
-import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter, PartialBy, UserOperation } from "../../types"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils"
-import { getAction } from "../../utils/getAction"
-import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
+import type { SmartAccount } from "../../accounts/types.js"
+import type { GetAccountParameter, PartialBy, UserOperation } from "../../types/index.js"
+import { getAction } from "../../utils/getAction.js"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
+import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
 
 export type PrepareUserOperationRequestParameters<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined

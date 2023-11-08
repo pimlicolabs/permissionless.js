@@ -2,8 +2,8 @@ import { BundlerClient, UserOperation } from "permissionless"
 import { StackupPaymasterClient } from "permissionless/clients/stackup"
 import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
-import { buildUserOp } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
+import { buildUserOp } from "./userOp.js"
+import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils.js"
 
 export const testStackupBundlerActions = async (stackupBundlerClient: StackupPaymasterClient) => {
     const entryPoint = getEntryPoint()

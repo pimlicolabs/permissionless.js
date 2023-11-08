@@ -3,8 +3,8 @@ import dotenv from "dotenv"
 import { BundlerClient, WaitForUserOperationReceiptTimeoutError } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, Hex } from "viem"
-import { buildUserOp } from "./userOp"
-import { getBundlerClient, getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
+import { buildUserOp } from "./userOp.js"
+import { getBundlerClient, getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils.js"
 
 dotenv.config()
 

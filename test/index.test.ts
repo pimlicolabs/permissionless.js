@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { UserOperation, getSenderAddress, getUserOperationHash } from "permissionless"
 import { signUserOperationHashWithECDSA } from "permissionless/utils"
-import { buildUserOp, getAccountInitCode } from "./userOp"
+import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -11,7 +11,7 @@ import {
     getPrivateKeyAccount,
     getPublicClient,
     getTestingChain
-} from "./utils"
+} from "./utils.js"
 
 dotenv.config()
 const pimlicoApiKey = process.env.PIMLICO_API_KEY

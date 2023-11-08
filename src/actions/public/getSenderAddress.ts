@@ -10,7 +10,7 @@ import {
 } from "viem"
 
 import { simulateContract } from "viem/actions"
-import { getAction } from "../../utils/getAction"
+import { getAction } from "../../utils/getAction.js"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 

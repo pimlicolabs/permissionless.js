@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, getContract, zeroAddress } from "viem"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
-import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils"
+import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
+import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils.js"
 
 dotenv.config()
 

@@ -8,7 +8,7 @@ import {
 } from "permissionless/clients/pimlico"
 import { getUserOperationHash } from "permissionless/utils"
 import { http } from "viem"
-import { buildUserOp } from "./userOp"
+import { buildUserOp } from "./userOp.js"
 import {
     getEntryPoint,
     getEoaWalletClient,
@@ -16,7 +16,7 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getTestingChain
-} from "./utils"
+} from "./utils.js"
 
 dotenv.config()
 

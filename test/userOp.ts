@@ -1,9 +1,9 @@
 import { UserOperation, getAccountNonce, getSenderAddress } from "permissionless"
 import { Address, Hex, WalletClient, concatHex, encodeFunctionData, zeroAddress } from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
-import { getDummySignature, getEntryPoint, getFactoryAddress, getPublicClient, isAccountDeployed } from "./utils"
+import { SimpleAccountAbi } from "./abis/SimpleAccount.js"
+import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory.js"
+import { getDummySignature, getEntryPoint, getFactoryAddress, getPublicClient, isAccountDeployed } from "./utils.js"
 
 const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     const accountAddress = await getAccountAddress(factoryAddress, owner)

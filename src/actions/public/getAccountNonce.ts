@@ -1,6 +1,6 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { readContract } from "viem/actions"
-import { getAction } from "../../utils/getAction"
+import { getAction } from "../../utils/getAction.js"
 
 export type GetAccountNonceParams = {
     sender: Address

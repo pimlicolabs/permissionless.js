@@ -1,6 +1,6 @@
 import type { Abi, Address, Client, GetConstructorArgs, Hex, LocalAccount } from "viem"
 import type { Chain, Transport } from "viem"
-import { type UserOperation } from "../types"
+import { type UserOperation } from "../types/index.js"
 
 export type SmartAccount<
     Name extends string = string,
