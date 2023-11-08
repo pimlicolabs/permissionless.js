@@ -1,8 +1,8 @@
 import type { Account, Address, Chain, Client, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
-import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<

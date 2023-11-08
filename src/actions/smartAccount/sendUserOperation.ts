@@ -2,9 +2,9 @@ import type { Chain, Client, Hex, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, PartialBy, UserOperation } from "../../types"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils"
-import { prepareUserOperationRequest } from "./prepareUserOperationRequest"
 import { getAction } from "../../utils/getAction"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
+import { prepareUserOperationRequest } from "./prepareUserOperationRequest"
 
 export type SendUserOperationParameters<TAccount extends SmartAccount | undefined = SmartAccount | undefined> = {
     userOperation: PartialBy<

@@ -10,8 +10,8 @@ import {
     encodeFunctionData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
-import { sendTransaction } from "./sendTransaction.js"
 import { getAction } from "../../utils/getAction.js"
+import { sendTransaction } from "./sendTransaction.js"
 
 export async function writeContract<
     TChain extends Chain | undefined,
