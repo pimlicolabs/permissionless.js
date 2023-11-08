@@ -1,8 +1,8 @@
-import type { Address, Hex } from "viem"
+import type { Account, Address, Chain, Client, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { PimlicoPaymasterClient } from "../../clients/pimlico.js"
 import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
+import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
@@ -44,8 +44,12 @@ export type SponsorUserOperationReturnType = {
  * }})
  *
  */
-export const sponsorUserOperation = async (
-    client: PimlicoPaymasterClient,
+export const sponsorUserOperation = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
     args: SponsorUserOperationParameters
 ): Promise<SponsorUserOperationReturnType> => {
     const response = await client.request({

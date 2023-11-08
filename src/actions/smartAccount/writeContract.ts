@@ -10,9 +10,8 @@ import {
     encodeFunctionData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
-import { type BundlerActions } from "../../clients/decorators/bundler.js"
-import { type BundlerRpcSchema } from "../../types/bundler.js"
 import { sendTransaction } from "./sendTransaction.js"
+import { getAction } from "../../utils/getAction.js"
 
 export async function writeContract<
     TChain extends Chain | undefined,
@@ -21,7 +20,7 @@ export async function writeContract<
     TFunctionName extends string,
     TChainOverride extends Chain | undefined = undefined
 >(
-    client: Client<Transport, TChain, TAccount, BundlerRpcSchema, BundlerActions>,
+    client: Client<Transport, TChain, TAccount>,
     {
         abi,
         address,
@@ -36,7 +35,10 @@ export async function writeContract<
         args,
         functionName
     } as unknown as EncodeFunctionDataParameters<TAbi, TFunctionName>)
-    const hash = await sendTransaction<TChain, TAccount, TChainOverride>(client, {
+    const hash = await getAction(
+        client,
+        sendTransaction<TChain, TAccount, TChainOverride>
+    )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request

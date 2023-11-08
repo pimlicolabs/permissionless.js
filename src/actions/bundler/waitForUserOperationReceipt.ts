@@ -2,6 +2,7 @@ import { BaseError, type Chain, type Hash, stringify } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import { observe } from "../../utils/observe.js"
 import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from "./getUserOperationReceipt.js"
+import { getAction } from "../../utils/getAction.js"
 
 export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"
@@ -64,7 +65,7 @@ export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
                     _unobserve()
                 }
 
-                const _userOperationReceipt = await getUserOperationReceipt(bundlerClient, { hash })
+                const _userOperationReceipt = await getAction(bundlerClient, getUserOperationReceipt)({ hash })
 
                 if (_userOperationReceipt !== null) {
                     userOperationReceipt = _userOperationReceipt

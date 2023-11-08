@@ -10,6 +10,7 @@ import {
 } from "viem"
 
 import { simulateContract } from "viem/actions"
+import { getAction } from "../../utils/getAction"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 
@@ -61,7 +62,10 @@ export const getSenderAddress = async <
     { initCode, entryPoint }: GetSenderAddressParams
 ): Promise<Address> => {
     try {
-        await simulateContract(client, {
+        await getAction(
+            client,
+            simulateContract
+        )({
             address: entryPoint,
             abi: [
                 {

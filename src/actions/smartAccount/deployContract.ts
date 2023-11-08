@@ -7,11 +7,11 @@ import {
     type Transport
 } from "viem"
 import type { SmartAccount } from "../../accounts/types.js"
-import type { BundlerActions } from "../../clients/decorators/bundler.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
 import { parseAccount } from "../../utils/index.js"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
 import { sendUserOperation } from "./sendUserOperation.js"
+import { getAction } from "../../utils/getAction.js"
+import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
 
 export async function deployContract<
     const TAbi extends Abi | readonly unknown[],
@@ -19,7 +19,7 @@ export async function deployContract<
     TAccount extends SmartAccount | undefined,
     TChainOverride extends Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount, BundlerRpcSchema, BundlerActions>,
+    client: Client<Transport, TChain, TAccount>,
     { abi, args, bytecode, ...request }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride>
 ): Promise<DeployContractReturnType> {
     const { account: account_ = client.account } = request
@@ -32,7 +32,10 @@ export async function deployContract<
 
     const account = parseAccount(account_) as SmartAccount
 
-    const userOpHash = await sendUserOperation(client, {
+    const userOpHash = await getAction(
+        client,
+        sendUserOperation
+    )({
         userOperation: {
             sender: account.address,
             paymasterAndData: "0x",
@@ -47,7 +50,10 @@ export async function deployContract<
         account: account
     })
 
-    const userOperationReceipt = await client.waitForUserOperationReceipt({
+    const userOperationReceipt = await getAction(
+        client,
+        waitForUserOperationReceipt
+    )({
         hash: userOpHash
     })
 

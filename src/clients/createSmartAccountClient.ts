@@ -3,14 +3,13 @@ import { createClient } from "viem"
 import { type SmartAccount } from "../accounts/types.js"
 import { type BundlerRpcSchema } from "../types/bundler.js"
 import type { Prettify } from "../types/index.js"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
 import { type SmartAccountActions, smartAccountActions } from "./decorators/smartAccount.js"
 
 export type SmartAccountClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined
-> = Prettify<Client<transport, chain, account, BundlerRpcSchema, BundlerActions & SmartAccountActions<chain, account>>>
+> = Prettify<Client<transport, chain, account, BundlerRpcSchema, SmartAccountActions<chain, account>>>
 
 export type SmartAccountClientConfig<
     transport extends Transport = Transport,
@@ -56,7 +55,7 @@ export const createSmartAccountClient = <
         name,
         transport: (opts) => transport({ ...opts, retryCount: 0 }),
         type: "smartAccountClient"
-    }).extend(bundlerActions)
+    })
 
     return client.extend(smartAccountActions)
 }

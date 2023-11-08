@@ -1,5 +1,6 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { readContract } from "viem/actions"
+import { getAction } from "../../utils/getAction"
 
 export type GetAccountNonceParams = {
     sender: Address
@@ -40,7 +41,10 @@ export const getAccountNonce = async <
     client: Client<TTransport, TChain>,
     { sender, entryPoint, key = BigInt(0) }: GetAccountNonceParams
 ): Promise<bigint> => {
-    return await readContract(client, {
+    return await getAction(
+        client,
+        readContract
+    )({
         address: entryPoint,
         abi: [
             {

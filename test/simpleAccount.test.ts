@@ -1,9 +1,9 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, zeroAddress } from "viem"
+import { Address, Hex, getContract, zeroAddress } from "viem"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
-import { getPrivateKeyToSimpleSmartAccount, getSmartAccountClient, getTestingChain } from "./utils"
+import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils"
 
 dotenv.config()
 
@@ -27,6 +27,10 @@ beforeAll(() => {
         throw new Error("RPC_URL environment variable not set")
     }
     if (!process.env.ENTRYPOINT_ADDRESS) {
+        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
+    }
+
+    if (!process.env.GREETER_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
     testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
@@ -103,7 +107,7 @@ describe("Simple Account", () => {
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
 
-    test("smart account client write & deploy contract", async () => {
+    test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
         expect(async () => {
@@ -113,6 +117,26 @@ describe("Simple Account", () => {
             })
         }).toThrow("Simple account doesn't support account deployment")
     })
+
+    test("Smart account write contract", async () => {
+        const greeterContract = getContract({
+            abi: GreeterAbi,
+            address: process.env.GREETER_ADDRESS as Address,
+            publicClient: await getPublicClient(),
+            walletClient: await getSmartAccountClient()
+        })
+
+        const oldGreet = await greeterContract.read.greet()
+
+        expect(oldGreet).toBeString()
+
+        const txHash = await greeterContract.write.setGreeting(["hello world"])
+
+        const newGreet = await greeterContract.read.greet()
+
+        expect(newGreet).toBeString()
+        expect(newGreet).toEqual("hello world")
+    }, 1000000)
 
     test("Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient()

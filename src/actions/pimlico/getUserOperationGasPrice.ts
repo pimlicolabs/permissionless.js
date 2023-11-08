@@ -1,4 +1,5 @@
-import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
+import type { Account, Chain, Client, Transport } from "viem"
+import type { PimlicoBundlerRpcSchema } from "../../types/pimlico"
 
 export type GetUserOperationGasPriceReturnType = {
     slow: {
@@ -20,7 +21,7 @@ export type GetUserOperationGasPriceReturnType = {
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationGasPrice
  *
- * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
  *
  *
@@ -36,8 +37,12 @@ export type GetUserOperationGasPriceReturnType = {
  * await getUserOperationGasPrice(bundlerClient)
  *
  */
-export const getUserOperationGasPrice = async (
-    client: PimlicoBundlerClient
+export const getUserOperationGasPrice = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>
 ): Promise<GetUserOperationGasPriceReturnType> => {
     const gasPrices = await client.request({
         method: "pimlico_getUserOperationGasPrice",

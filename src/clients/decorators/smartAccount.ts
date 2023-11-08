@@ -6,8 +6,6 @@ import { sendTransaction } from "../../actions/smartAccount/sendTransaction.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
 import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
 import { writeContract } from "../../actions/smartAccount/writeContract.js"
-import { type BundlerRpcSchema } from "../../types/bundler.js"
-import { type BundlerActions } from "./bundler.js"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,
@@ -40,7 +38,7 @@ export const smartAccountActions = <
     TChain extends Chain | undefined = Chain | undefined,
     TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TSmartAccount, BundlerRpcSchema, BundlerActions>
+    client: Client<TTransport, TChain, TSmartAccount>
 ): SmartAccountActions<TChain, TSmartAccount> => ({
     deployContract: (args) => deployContract(client, args),
     getChainId: () => getChainId(client),

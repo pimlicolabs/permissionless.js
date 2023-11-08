@@ -1,10 +1,10 @@
 import type { Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types"
-import type { BundlerActions } from "../../clients/decorators/bundler"
 import type { GetAccountParameter, PartialBy, UserOperation } from "../../types"
-import type { BundlerRpcSchema } from "../../types/bundler"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils"
+import { getAction } from "../../utils/getAction"
+import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
 export type PrepareUserOperationRequestParameters<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
@@ -31,7 +31,7 @@ export async function prepareUserOperationRequest<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema, BundlerActions>,
+    client: Client<TTransport, TChain, TAccount>,
     args: PrepareUserOperationRequestParameters<TAccount>
 ): Promise<PrepareUserOperationRequestReturnType> {
     const { account: account_ = client.account, userOperation: partialUserOperation } = args
@@ -66,7 +66,10 @@ export async function prepareUserOperationRequest<
     }
 
     if (!userOperation.callGasLimit || !userOperation.verificationGasLimit || !userOperation.preVerificationGas) {
-        const gasParameters = await client.estimateUserOperationGas({
+        const gasParameters = await getAction(
+            client,
+            estimateUserOperationGas
+        )({
             userOperation,
             entryPoint: account.entryPoint
         })

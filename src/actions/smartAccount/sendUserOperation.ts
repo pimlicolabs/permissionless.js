@@ -1,10 +1,10 @@
 import type { Chain, Client, Hex, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types"
-import type { BundlerActions } from "../../clients/decorators/bundler"
 import type { GetAccountParameter, PartialBy, UserOperation } from "../../types"
-import type { BundlerRpcSchema } from "../../types/bundler"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils"
 import { prepareUserOperationRequest } from "./prepareUserOperationRequest"
+import { getAction } from "../../utils/getAction"
+import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 
 export type SendUserOperationParameters<TAccount extends SmartAccount | undefined = SmartAccount | undefined> = {
     userOperation: PartialBy<
@@ -29,7 +29,7 @@ export async function sendUserOperation<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema, BundlerActions>,
+    client: Client<TTransport, TChain, TAccount>,
     args: SendUserOperationParameters<TAccount>
 ): Promise<SendUserOperationReturnType> {
     const { account: account_ = client.account } = args
@@ -37,11 +37,15 @@ export async function sendUserOperation<
 
     const account = parseAccount(account_) as SmartAccount
 
-    const userOperation = await prepareUserOperationRequest(client, args)
+    const userOperation = await getAction(client, prepareUserOperationRequest)(args)
 
     userOperation.signature = await account.signUserOperation(userOperation)
 
-    const userOpHash = await client.sendUserOperation({
+    const userOpHash = await getAction(
+        client,
+        sendUserOperationBundler,
+        "sendUserOperation"
+    )({
         userOperation: userOperation,
         entryPoint: account.entryPoint
     })

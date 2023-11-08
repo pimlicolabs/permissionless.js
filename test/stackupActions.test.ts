@@ -9,9 +9,7 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
     const entryPoint = getEntryPoint()
     const chain = getTestingChain()
 
-    console.log("STACKUP ACTIONS:: ======= TESTING STACKUP PAYMASTER ACTIONS =======")
     const supportedPaymasters = await stackupBundlerClient.accounts({ entryPoint })
-    console.log("PAYMASTER ADDRESSES: ", supportedPaymasters)
 
     const eoaWalletClient = getEoaWalletClient()
     const publicClient = await getPublicClient()
@@ -41,11 +39,7 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
     userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
     userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
 
-    console.log(userOperation, "STACKUP ACTIONS:: ============= USER OPERATION =============")
-
     const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
-
-    console.log(userOperationHash, "STACKUP ACTIONS:: ============= USER OPERATION HASH =============")
 
     const signedUserOperation: UserOperation = {
         ...userOperation,
@@ -54,14 +48,12 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
             message: { raw: userOperationHash }
         })
     }
-    console.log(signedUserOperation, "STACKUP ACTIONS:: ============= SIGNED USER OPERATION HASH =============")
 
     const userOpHash = await stackupBundlerClient.sendUserOperation({
         userOperation: signedUserOperation,
         entryPoint: entryPoint as Address
     })
 
-    console.log("userOpHash", userOpHash)
     await stackupBundlerClient.waitForUserOperationReceipt({
         hash: userOpHash
     })
