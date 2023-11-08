@@ -1,6 +1,21 @@
+import type { Account, Chain, Client, Transport } from "viem"
+import type { SmartAccount } from "../accounts/types.js"
 import type { UserOperation } from "./userOperation.js"
 
 export type { UserOperation }
+
+type IsUndefined<T> = [undefined] extends [T] ? true : false
+
+export type GetAccountParameterWithClient<
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+> = IsUndefined<TAccount> extends true
+    ? { account: Account; client?: Client<TTransport, TChain, TAccount> }
+    : { client: Client<TTransport, TChain, TAccount>; account?: Account }
+
+export type GetAccountParameter<TAccount extends SmartAccount | undefined = SmartAccount | undefined> =
+    IsUndefined<TAccount> extends true ? { account: SmartAccount } : { account?: SmartAccount }
 
 export type Prettify<T> = {
     [K in keyof T]: T[K]

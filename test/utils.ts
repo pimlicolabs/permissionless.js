@@ -62,6 +62,7 @@ export const getEntryPoint = () => {
 
 export const getPublicClient = async () => {
     if (!process.env.RPC_URL) throw new Error("RPC_URL environment variable not set")
+
     const publicClient = createPublicClient({
         transport: http(process.env.RPC_URL as string)
     })

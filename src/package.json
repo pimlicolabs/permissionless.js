@@ -59,6 +59,6 @@
         }
     },
     "peerDependencies": {
-        "viem": "^1.18.4"
+        "viem": "0.0.0-jxom-fix-extract-chain-params.20231106T094653"
     }
 }

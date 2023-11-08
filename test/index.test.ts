@@ -1,9 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { UserOperation, createBundlerClient, getSenderAddress, getUserOperationHash } from "permissionless"
-import { signUserOperationHashWithECDSA } from "permissionless"
-import { InvalidEntryPointError } from "permissionless/actions"
-import { http } from "viem"
+import { UserOperation, getSenderAddress, getUserOperationHash } from "permissionless"
+import { signUserOperationHashWithECDSA } from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp"
 import {
     getBundlerClient,
@@ -90,7 +88,11 @@ describe("test public actions and utils", () => {
         userOperation.verificationGasLimit = gasParameters.verificationGasLimit
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
-        const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+        const userOpHash = getUserOperationHash({
+            userOperation,
+            entryPoint,
+            chainId: chain.id
+        })
 
         expect(userOpHash).toBeString()
         expect(userOpHash).toStartWith("0x")
@@ -123,7 +125,11 @@ describe("test public actions and utils", () => {
         userOperation.verificationGasLimit = gasParameters.verificationGasLimit
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
-        const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+        const userOpHash = getUserOperationHash({
+            userOperation,
+            entryPoint,
+            chainId: chain.id
+        })
 
         userOperation.signature = await signUserOperationHashWithECDSA({
             client: eoaWalletClient,
@@ -136,9 +142,15 @@ describe("test public actions and utils", () => {
         expect(userOperation.signature).toBeString()
         expect(userOperation.signature).toStartWith("0x")
 
-        const signature = await signUserOperationHashWithECDSA({ client: eoaWalletClient, hash: userOpHash })
+        const signature = await signUserOperationHashWithECDSA({
+            client: eoaWalletClient,
+            hash: userOpHash
+        })
 
-        await signUserOperationHashWithECDSA({ account: eoaWalletClient.account, hash: userOpHash })
+        await signUserOperationHashWithECDSA({
+            account: eoaWalletClient.account,
+            hash: userOpHash
+        })
 
         await signUserOperationHashWithECDSA({
             account: eoaWalletClient.account,

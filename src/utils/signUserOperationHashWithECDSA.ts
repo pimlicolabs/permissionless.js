@@ -8,25 +8,16 @@ import {
     type Hex,
     type Transport
 } from "viem"
+import { type GetAccountParameterWithClient } from "../types/index.js"
 import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
 import { parseAccount } from "./index.js"
-
-type IsUndefined<T> = [undefined] extends [T] ? true : false
-
-type GetAccountParameter<
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
-> = IsUndefined<TAccount> extends true
-    ? { account: Account; client?: undefined }
-    : { client: Client<TTransport, TChain, TAccount>; account?: undefined }
 
 export type signUserOperationHashWithECDSAParams<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
-> = GetAccountParameter<TTransport, TChain, TAccount> &
+> = GetAccountParameterWithClient<TTransport, TChain, TAccount> &
     (
         | {
               hash: Hash
@@ -103,7 +94,11 @@ export const signUserOperationHashWithECDSA = async <
     if (hash) {
         userOperationHash = hash
     } else {
-        userOperationHash = getUserOperationHash({ userOperation, chainId, entryPoint })
+        userOperationHash = getUserOperationHash({
+            userOperation,
+            chainId,
+            entryPoint
+        })
     }
 
     const account = parseAccount(account_)

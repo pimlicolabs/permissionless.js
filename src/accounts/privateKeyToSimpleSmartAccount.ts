@@ -9,9 +9,10 @@ import {
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount, toAccount } from "viem/accounts"
-import { getBytecode } from "viem/actions"
+import { getBytecode, getChainId } from "viem/actions"
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../actions/public/getSenderAddress.js"
+import { getUserOperationHash } from "../utils/getUserOperationHash.js"
 import { type SmartAccount } from "./types.js"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
@@ -117,12 +118,15 @@ export async function privateKeyToSimpleSmartAccount<
 ): Promise<PrivateKeySimpleSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
-    const accountAddress = await getAccountAddress<TTransport, TChain>({
-        client,
-        factoryAddress,
-        entryPoint,
-        owner: privateKeyAccount.address
-    })
+    const [accountAddress, chainId] = await Promise.all([
+        getAccountAddress<TTransport, TChain>({
+            client,
+            factoryAddress,
+            entryPoint,
+            owner: privateKeyAccount.address
+        }),
+        getChainId(client)
+    ])
 
     if (!accountAddress) throw new Error("Account address not found")
 
@@ -151,6 +155,17 @@ export async function privateKeyToSimpleSmartAccount<
                 entryPoint: entryPoint
             })
         },
+        async signUserOperation(userOperation) {
+            return account.signMessage({
+                message: {
+                    raw: getUserOperationHash({
+                        userOperation,
+                        entryPoint: entryPoint,
+                        chainId: chainId
+                    })
+                }
+            })
+        },
         async getInitCode() {
             const contractCode = await getBytecode(client, {
                 address: accountAddress
@@ -159,6 +174,9 @@ export async function privateKeyToSimpleSmartAccount<
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
             return getAccountInitCode(factoryAddress, privateKeyAccount.address)
+        },
+        async encodeDeployCallData(_) {
+            throw new Error("Simple account doesn't support account deployment")
         },
         async encodeCallData({ to, value, data }) {
             return encodeFunctionData({

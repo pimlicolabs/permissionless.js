@@ -2,7 +2,8 @@ import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, zeroAddress } from "viem"
-import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils"
+import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
+import { getPrivateKeyToSimpleSmartAccount, getSmartAccountClient, getTestingChain } from "./utils"
 
 dotenv.config()
 
@@ -10,12 +11,24 @@ let testPrivateKey: Hex
 let factoryAddress: Address
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
-    if (!process.env.STACKUP_API_KEY) throw new Error("STACKUP_API_KEY environment variable not set")
-    if (!process.env.FACTORY_ADDRESS) throw new Error("FACTORY_ADDRESS environment variable not set")
-    if (!process.env.TEST_PRIVATE_KEY) throw new Error("TEST_PRIVATE_KEY environment variable not set")
-    if (!process.env.RPC_URL) throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS) throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
+    if (!process.env.PIMLICO_API_KEY) {
+        throw new Error("PIMLICO_API_KEY environment variable not set")
+    }
+    if (!process.env.STACKUP_API_KEY) {
+        throw new Error("STACKUP_API_KEY environment variable not set")
+    }
+    if (!process.env.FACTORY_ADDRESS) {
+        throw new Error("FACTORY_ADDRESS environment variable not set")
+    }
+    if (!process.env.TEST_PRIVATE_KEY) {
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+    }
+    if (!process.env.RPC_URL) {
+        throw new Error("RPC_URL environment variable not set")
+    }
+    if (!process.env.ENTRYPOINT_ADDRESS) {
+        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
+    }
     testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
     factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
@@ -90,15 +103,24 @@ describe("Simple Account", () => {
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
 
-    test("Smart account client send transaction", async () => {
+    test("smart account client write & deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
+        expect(async () => {
+            await smartAccountClient.deployContract({
+                abi: GreeterAbi,
+                bytecode: GreeterBytecode
+            })
+        }).toThrow("Simple account doesn't support account deployment")
+    })
+
+    test("Smart account client send transaction", async () => {
+        const smartAccountClient = await getSmartAccountClient()
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
             data: "0x"
         })
-
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)

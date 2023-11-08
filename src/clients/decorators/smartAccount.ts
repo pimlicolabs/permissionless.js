@@ -42,20 +42,10 @@ export const smartAccountActions = <
 >(
     client: Client<TTransport, TChain, TSmartAccount, BundlerRpcSchema, BundlerActions>
 ): SmartAccountActions<TChain, TSmartAccount> => ({
-    // addChain: (args) => addChain(client, args),
     deployContract: (args) => deployContract(client, args),
-    // getAddresses: () => getAddresses(client),
     getChainId: () => getChainId(client),
-    // getPermissions: () => getPermissions(client),
-    // prepareTransactionRequest: (args) => prepareTransactionRequest(client as any, args as any),
-    // requestAddresses: () => requestAddresses(client),
-    // requestPermissions: (args) => requestPermissions(client, args),
-    // sendRawTransaction: (args) => sendRawTransaction(client, args),
     sendTransaction: (args) => sendTransaction(client, args),
     signMessage: (args) => signMessage(client, args),
-    // signTransaction: (args) => signTransaction(client, args),
     signTypedData: (args) => signTypedData(client, args),
-    // switchChain: (args) => switchChain(client, args),
-    // watchAsset: (args) => watchAsset(client, args),
     writeContract: (args) => writeContract(client, args)
 })

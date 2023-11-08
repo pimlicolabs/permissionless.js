@@ -17,7 +17,6 @@ export type SendUserOperationParameters = {
  * @param args {@link SendUserOperationParameters}.
  * @returns UserOpHash that you can use to track user operation as {@link Hash}.
  *
- *
  * @example
  * import { createClient } from "viem"
  * import { sendUserOperation } from "permissionless/actions"
@@ -33,7 +32,6 @@ export type SendUserOperationParameters = {
  * })
  *
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
- *
  */
 export const sendUserOperation = async (client: BundlerClient, args: SendUserOperationParameters): Promise<Hash> => {
     const { userOperation, entryPoint } = args
