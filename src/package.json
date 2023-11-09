@@ -37,6 +37,12 @@
             "import": "./_esm/actions/stackup.js",
             "default": "./_cjs/actions/stackup.js"
         },
+
+        "./actions/smartAccount": {
+            "types": "./_types/actions/smartAccount.d.ts",
+            "import": "./_esm/actions/smartAccount.js",
+            "default": "./_cjs/actions/smartAccount.js"
+        },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
             "import": "./_esm/clients/index.js",

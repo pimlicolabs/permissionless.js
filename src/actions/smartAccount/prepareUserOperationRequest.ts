@@ -4,10 +4,10 @@ import type { SmartAccount } from "../../accounts/types.js"
 import type { GetAccountParameter, PartialBy, UserOperation } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
-import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
+import { sponsorUserOperation } from "./sponsorUserOperation.js"
 
 export type PrepareUserOperationRequestParameters<
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
 > = {
     userOperation: PartialBy<
         UserOperation,
@@ -39,13 +39,12 @@ export async function prepareUserOperationRequest<
 
     const account = parseAccount(account_) as SmartAccount
 
-    const [sender, nonce, initCode, signature, callData, paymasterAndData, gasEstimation] = await Promise.all([
+    const [sender, nonce, initCode, signature, callData, gasEstimation] = await Promise.all([
         partialUserOperation.sender || account.address,
         partialUserOperation.nonce || account.getNonce(),
         partialUserOperation.initCode || account.getInitCode(),
         partialUserOperation.signature || account.getDummySignature(),
         partialUserOperation.callData,
-        partialUserOperation.paymasterAndData || "0x",
         !partialUserOperation.maxFeePerGas || !partialUserOperation.maxPriorityFeePerGas
             ? estimateFeesPerGas(account.client)
             : undefined
@@ -57,7 +56,7 @@ export async function prepareUserOperationRequest<
         initCode,
         signature,
         callData,
-        paymasterAndData,
+        paymasterAndData: "0x",
         maxFeePerGas: partialUserOperation.maxFeePerGas || gasEstimation?.maxFeePerGas || 0n,
         maxPriorityFeePerGas: partialUserOperation.maxPriorityFeePerGas || gasEstimation?.maxPriorityFeePerGas || 0n,
         callGasLimit: partialUserOperation.callGasLimit || 0n,
@@ -65,19 +64,18 @@ export async function prepareUserOperationRequest<
         preVerificationGas: partialUserOperation.preVerificationGas || 0n
     }
 
-    if (!userOperation.callGasLimit || !userOperation.verificationGasLimit || !userOperation.preVerificationGas) {
-        const gasParameters = await getAction(
-            client,
-            estimateUserOperationGas
-        )({
-            userOperation,
-            entryPoint: account.entryPoint
-        })
+    const { paymasterAndData, callGasLimit, verificationGasLimit, preVerificationGas } = await getAction(
+        client,
+        sponsorUserOperation
+    )({
+        userOperation: userOperation,
+        account: account
+    })
 
-        userOperation.callGasLimit = userOperation.callGasLimit || gasParameters.callGasLimit
-        userOperation.verificationGasLimit = userOperation.verificationGasLimit || gasParameters.verificationGasLimit
-        userOperation.preVerificationGas = userOperation.preVerificationGas || gasParameters.preVerificationGas
-    }
+    userOperation.paymasterAndData = paymasterAndData
+    userOperation.callGasLimit = callGasLimit
+    userOperation.verificationGasLimit = verificationGasLimit
+    userOperation.preVerificationGas = preVerificationGas
 
     return userOperation
 }

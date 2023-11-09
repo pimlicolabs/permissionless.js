@@ -4,4 +4,11 @@ import {
     privateKeyToSimpleSmartAccount
 } from "./privateKeyToSimpleSmartAccount.js"
 
-export { SignTransactionNotSupportedBySmartAccount, type PrivateKeySimpleSmartAccount, privateKeyToSimpleSmartAccount }
+import { type SmartAccount } from "./types.js"
+
+export {
+    SignTransactionNotSupportedBySmartAccount,
+    type PrivateKeySimpleSmartAccount,
+    privateKeyToSimpleSmartAccount,
+    type SmartAccount
+}

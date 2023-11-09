@@ -1,9 +1,17 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, getContract, zeroAddress } from "viem"
+import { SponsorUserOperationParameters, SponsorUserOperationReturnType } from "permissionless/actions/smartAccount.js"
+import { Address, Client, Hex, Transport, getContract, zeroAddress } from "viem"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
-import { getPrivateKeyToSimpleSmartAccount, getPublicClient, getSmartAccountClient, getTestingChain } from "./utils.js"
+import {
+    getEntryPoint,
+    getPimlicoPaymasterClient,
+    getPrivateKeyToSimpleSmartAccount,
+    getPublicClient,
+    getSmartAccountClient,
+    getTestingChain
+} from "./utils.js"
 
 dotenv.config()
 
@@ -145,6 +153,30 @@ describe("Simple Account", () => {
             value: 0n,
             data: "0x"
         })
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+    }, 1000000)
+
+    test("smart account client send Transaction with paymaster", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        smartAccountClient.extend((_: Client) => ({
+            sponsorUserOperation: async (
+                args: SponsorUserOperationParameters
+            ): Promise<SponsorUserOperationReturnType> => {
+                const pimlicoPaymaster = getPimlicoPaymasterClient()
+                const { userOperation } = args
+                return pimlicoPaymaster.sponsorUserOperation({ userOperation, entryPoint: getEntryPoint() })
+            }
+        }))
+
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
