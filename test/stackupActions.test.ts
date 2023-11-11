@@ -9,9 +9,7 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
     const entryPoint = getEntryPoint()
     const chain = getTestingChain()
 
-    const supportedPaymasters = await stackupBundlerClient.accounts({
-        entryPoint
-    })
+    const supportedPaymasters = await stackupBundlerClient.accounts({ entryPoint })
 
     const eoaWalletClient = getEoaWalletClient()
     const publicClient = await getPublicClient()
@@ -41,11 +39,7 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
     userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
     userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
 
-    const userOperationHash = getUserOperationHash({
-        userOperation,
-        entryPoint,
-        chainId: chain.id
-    })
+    const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
 
     const signedUserOperation: UserOperation = {
         ...userOperation,

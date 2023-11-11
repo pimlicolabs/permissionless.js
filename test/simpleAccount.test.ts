@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { SponsorUserOperationParameters, SponsorUserOperationReturnType } from "permissionless/actions/smartAccount.js"
-import { Address, Client, getContract, zeroAddress } from "viem"
+import { Address, Client, Hex, Transport, getContract, zeroAddress } from "viem"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     getEntryPoint,
@@ -15,6 +15,9 @@ import {
 
 dotenv.config()
 
+let testPrivateKey: Hex
+let factoryAddress: Address
+
 beforeAll(() => {
     if (!process.env.PIMLICO_API_KEY) {
         throw new Error("PIMLICO_API_KEY environment variable not set")
@@ -24,6 +27,9 @@ beforeAll(() => {
     }
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
+    }
+    if (!process.env.TEST_PRIVATE_KEY) {
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
     }
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
@@ -35,6 +41,8 @@ beforeAll(() => {
     if (!process.env.GREETER_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
+    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
+    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
 describe("Simple Account", () => {
@@ -118,33 +126,6 @@ describe("Simple Account", () => {
         }).toThrow("Simple account doesn't support account deployment")
     })
 
-    test("smart account client send Transaction with paymaster", async () => {
-        const smartAccountClient = await getSmartAccountClient()
-
-        const smartAccountClientNew = smartAccountClient.extend((_: Client) => ({
-            sponsorUserOperation: async (
-                args: SponsorUserOperationParameters
-            ): Promise<SponsorUserOperationReturnType> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                const { userOperation } = args
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
-            }
-        }))
-
-        const response = await smartAccountClientNew.sendTransaction({
-            to: zeroAddress,
-            value: 0n,
-            data: "0x"
-        })
-
-        expect(response).toBeString()
-        expect(response).toHaveLength(66)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-    }, 1000000)
-
     test("Smart account write contract", async () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
@@ -172,6 +153,30 @@ describe("Simple Account", () => {
             value: 0n,
             data: "0x"
         })
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+    }, 1000000)
+
+    test("smart account client send Transaction with paymaster", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        smartAccountClient.extend((_: Client) => ({
+            sponsorUserOperation: async (
+                args: SponsorUserOperationParameters
+            ): Promise<SponsorUserOperationReturnType> => {
+                const pimlicoPaymaster = getPimlicoPaymasterClient()
+                const { userOperation } = args
+                return pimlicoPaymaster.sponsorUserOperation({ userOperation, entryPoint: getEntryPoint() })
+            }
+        }))
+
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
