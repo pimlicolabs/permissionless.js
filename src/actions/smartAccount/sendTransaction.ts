@@ -1,9 +1,26 @@
-import type { Chain, Client, SendTransactionParameters, SendTransactionReturnType, Transport } from "viem"
+import type {
+    Chain,
+    Client,
+    SendTransactionParameters,
+    SendTransactionReturnType,
+    Transport
+} from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
 import { getAction } from "../../utils/getAction.js"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
+import {
+    AccountOrClientNotFoundError,
+    parseAccount
+} from "../../utils/index.js"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
 import { sendUserOperation } from "./sendUserOperation.js"
+
+export type SendTransactionWithPaymasterParameters<
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TChainOverride extends Chain | undefined = Chain | undefined
+> = SendTransactionParameters<TChain, TAccount, TChainOverride> &
+    SponsorUserOperationMiddleware
 
 export async function sendTransaction<
     TChain extends Chain | undefined,
@@ -11,9 +28,23 @@ export async function sendTransaction<
     TChainOverride extends Chain | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: SendTransactionParameters<TChain, TAccount, TChainOverride>
+    args: SendTransactionWithPaymasterParameters<
+        TChain,
+        TAccount,
+        TChainOverride
+    >
 ): Promise<SendTransactionReturnType> {
-    const { account: account_ = client.account, data, maxFeePerGas, maxPriorityFeePerGas, to, value } = args
+    const {
+        account: account_ = client.account,
+        data,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        to,
+        value,
+        sponsorUserOperation
+    } = args
+
+    console.log(sponsorUserOperation, "sponsorUserOperation")
 
     if (!account_) {
         throw new AccountOrClientNotFoundError({
@@ -46,7 +77,8 @@ export async function sendTransaction<
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
             callData: callData
         },
-        account: account
+        account: account,
+        sponsorUserOperation
     })
 
     const userOperationReceipt = await getAction(

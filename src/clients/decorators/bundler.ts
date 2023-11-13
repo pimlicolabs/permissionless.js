@@ -16,7 +16,10 @@ import {
     type GetUserOperationReceiptReturnType,
     getUserOperationReceipt
 } from "../../actions/bundler/getUserOperationReceipt.js"
-import { type SendUserOperationParameters, sendUserOperation } from "../../actions/bundler/sendUserOperation.js"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "../../actions/bundler/sendUserOperation.js"
 import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints.js"
 import {
     type WaitForUserOperationReceiptParameters,
@@ -76,7 +79,9 @@ export type BundlerActions = {
      *
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
-    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) => Promise<EstimateUserOperationGasReturnType>
+    estimateUserOperationGas: (
+        args: EstimateUserOperationGasParameters
+    ) => Promise<EstimateUserOperationGasReturnType>
     /**
      *
      * Returns the supported entrypoints by the bundler service
@@ -141,7 +146,9 @@ export type BundlerActions = {
      * await bundlerClient.getUserOperationByHash(userOpHash)
      *
      */
-    getUserOperationByHash: (args: GetUserOperationByHashParameters) => Promise<GetUserOperationByHashReturnType>
+    getUserOperationByHash: (
+        args: GetUserOperationByHashParameters
+    ) => Promise<GetUserOperationByHashReturnType>
     /**
      *
      * Returns the user operation receipt from userOpHash
@@ -194,18 +201,21 @@ export type BundlerActions = {
 }
 
 const bundlerActions = (client: Client): BundlerActions => ({
-    sendUserOperation: async (args: SendUserOperationParameters): Promise<Hash> =>
-        sendUserOperation(client as BundlerClient, args),
+    sendUserOperation: async (
+        args: SendUserOperationParameters
+    ): Promise<Hash> => sendUserOperation(client as BundlerClient, args),
     estimateUserOperationGas: (args: EstimateUserOperationGasParameters) =>
         estimateUserOperationGas(client as BundlerClient, args),
-    supportedEntryPoints: (): Promise<Address[]> => supportedEntryPoints(client as BundlerClient),
+    supportedEntryPoints: (): Promise<Address[]> =>
+        supportedEntryPoints(client as BundlerClient),
     chainId: () => chainId(client as BundlerClient),
     getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
         getUserOperationByHash(client as BundlerClient, args),
     getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
         getUserOperationReceipt(client as BundlerClient, args),
-    waitForUserOperationReceipt: (args: WaitForUserOperationReceiptParameters) =>
-        waitForUserOperationReceipt(client as BundlerClient, args)
+    waitForUserOperationReceipt: (
+        args: WaitForUserOperationReceiptParameters
+    ) => waitForUserOperationReceipt(client as BundlerClient, args)
 })
 
 export { bundlerActions }

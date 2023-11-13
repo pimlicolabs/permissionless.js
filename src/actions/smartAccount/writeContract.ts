@@ -3,7 +3,6 @@ import {
     type Chain,
     type Client,
     type EncodeFunctionDataParameters,
-    type SendTransactionParameters,
     type Transport,
     type WriteContractParameters,
     type WriteContractReturnType,
@@ -11,7 +10,26 @@ import {
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
 import { getAction } from "../../utils/getAction.js"
-import { sendTransaction } from "./sendTransaction.js"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
+import {
+    type SendTransactionWithPaymasterParameters,
+    sendTransaction
+} from "./sendTransaction.js"
+
+export type WriteContractWithPaymasterParameters<
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+    TFunctionName extends string = string,
+    TChainOverride extends Chain | undefined = undefined
+> = WriteContractParameters<
+    TAbi,
+    TFunctionName,
+    TChain,
+    TAccount,
+    TChainOverride
+> &
+    SponsorUserOperationMiddleware
 
 export async function writeContract<
     TChain extends Chain | undefined,
@@ -28,7 +46,13 @@ export async function writeContract<
         dataSuffix,
         functionName,
         ...request
-    }: WriteContractParameters<TAbi, TFunctionName, TChain, TAccount, TChainOverride>
+    }: WriteContractWithPaymasterParameters<
+        TChain,
+        TAccount,
+        TAbi,
+        TFunctionName,
+        TChainOverride
+    >
 ): Promise<WriteContractReturnType> {
     const data = encodeFunctionData({
         abi,
@@ -42,6 +66,10 @@ export async function writeContract<
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request
-    } as unknown as SendTransactionParameters<TChain, TAccount, TChainOverride>)
+    } as SendTransactionWithPaymasterParameters<
+        TChain,
+        TAccount,
+        TChainOverride
+    >)
     return hash
 }

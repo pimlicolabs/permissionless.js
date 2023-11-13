@@ -83,10 +83,15 @@ export const signUserOperationHashWithECDSA = async <
     userOperation,
     chainId,
     entryPoint
-}: signUserOperationHashWithECDSAParams<TTransport, TChain, TAccount>): Promise<Hex> => {
+}: signUserOperationHashWithECDSAParams<
+    TTransport,
+    TChain,
+    TAccount
+>): Promise<Hex> => {
     if (!account_)
         throw new AccountOrClientNotFoundError({
-            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+            docsPath:
+                "/permissionless/reference/utils/signUserOperationHashWithECDSA"
         })
 
     let userOperationHash: Hash
@@ -112,7 +117,8 @@ export const signUserOperationHashWithECDSA = async <
 
     if (!client)
         throw new AccountOrClientNotFoundError({
-            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+            docsPath:
+                "/permissionless/reference/utils/signUserOperationHashWithECDSA"
         })
 
     return client.request({

@@ -1,20 +1,35 @@
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { BundlerClient, WaitForUserOperationReceiptTimeoutError } from "permissionless"
+import {
+    BundlerClient,
+    WaitForUserOperationReceiptTimeoutError
+} from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, Hex } from "viem"
 import { buildUserOp } from "./userOp.js"
-import { getBundlerClient, getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils.js"
+import {
+    getBundlerClient,
+    getEntryPoint,
+    getEoaWalletClient,
+    getPublicClient,
+    getTestingChain
+} from "./utils.js"
 
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
-    if (!process.env.STACKUP_API_KEY) throw new Error("STACKUP_API_KEY environment variable not set")
-    if (!process.env.FACTORY_ADDRESS) throw new Error("FACTORY_ADDRESS environment variable not set")
-    if (!process.env.TEST_PRIVATE_KEY) throw new Error("TEST_PRIVATE_KEY environment variable not set")
-    if (!process.env.RPC_URL) throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS) throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
+    if (!process.env.PIMLICO_API_KEY)
+        throw new Error("PIMLICO_API_KEY environment variable not set")
+    if (!process.env.STACKUP_API_KEY)
+        throw new Error("STACKUP_API_KEY environment variable not set")
+    if (!process.env.FACTORY_ADDRESS)
+        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+    if (!process.env.RPC_URL)
+        throw new Error("RPC_URL environment variable not set")
+    if (!process.env.ENTRYPOINT_ADDRESS)
+        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
 
 describe("BUNDLER ACTIONS", () => {
@@ -44,7 +59,8 @@ describe("BUNDLER ACTIONS", () => {
     test("Estimate user operation gas", async () => {
         const eoaWalletClient = getEoaWalletClient()
         const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
 
         const userOperation = {
             ...(await buildUserOp(eoaWalletClient)),
@@ -68,7 +84,8 @@ describe("BUNDLER ACTIONS", () => {
     test("Sending user operation", async () => {
         const eoaWalletClient = getEoaWalletClient()
         const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
 
         const userOperation = {
             ...(await buildUserOp(eoaWalletClient)),
@@ -93,7 +110,13 @@ describe("BUNDLER ACTIONS", () => {
 
         userOperation.signature = await eoaWalletClient.signMessage({
             account: eoaWalletClient.account,
-            message: { raw: getUserOperationHash({ userOperation, entryPoint, chainId: chain.id }) }
+            message: {
+                raw: getUserOperationHash({
+                    userOperation,
+                    entryPoint,
+                    chainId: chain.id
+                })
+            }
         })
 
         const userOpHash = await bundlerClient.sendUserOperation({
@@ -104,29 +127,40 @@ describe("BUNDLER ACTIONS", () => {
         expect(userOpHash).toBeString()
         expect(userOpHash).toStartWith("0x")
 
-        const userOperationReceipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash })
+        const userOperationReceipt =
+            await bundlerClient.waitForUserOperationReceipt({
+                hash: userOpHash
+            })
 
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
         expect(userOperationReceipt?.receipt.transactionHash).not.toBeEmpty()
         expect(userOperationReceipt?.receipt.transactionHash).not.toBeNull()
-        expect(userOperationReceipt?.receipt.transactionHash).not.toBeUndefined()
+        expect(
+            userOperationReceipt?.receipt.transactionHash
+        ).not.toBeUndefined()
 
-        const userOperationFromUserOpHash = await bundlerClient.getUserOperationByHash({ hash: userOpHash })
+        const userOperationFromUserOpHash =
+            await bundlerClient.getUserOperationByHash({ hash: userOpHash })
 
         expect(userOperationFromUserOpHash).not.toBeNull()
         expect(userOperationFromUserOpHash?.entryPoint).toBe(entryPoint)
-        expect(userOperationFromUserOpHash?.transactionHash).toBe(userOperationReceipt?.receipt.transactionHash)
+        expect(userOperationFromUserOpHash?.transactionHash).toBe(
+            userOperationReceipt?.receipt.transactionHash
+        )
 
         for (const key in userOperationFromUserOpHash?.userOperation) {
-            expect(userOperationFromUserOpHash?.userOperation[key]).toBe(userOperation[key])
+            expect(userOperationFromUserOpHash?.userOperation[key]).toBe(
+                userOperation[key]
+            )
         }
     }, 100000)
 
     test("wait for user operation receipt fail", async () => {
         const eoaWalletClient = getEoaWalletClient()
         const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
 
         const userOperation = {
             ...(await buildUserOp(eoaWalletClient)),
@@ -149,10 +183,19 @@ describe("BUNDLER ACTIONS", () => {
         userOperation.verificationGasLimit = gasParameters.verificationGasLimit
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
-        const userOpHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+        const userOpHash = getUserOperationHash({
+            userOperation,
+            entryPoint,
+            chainId: chain.id
+        })
 
         expect(async () => {
-            await bundlerClient.waitForUserOperationReceipt({ hash: userOpHash, timeout: 100 })
-        }).toThrow(new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash }))
+            await bundlerClient.waitForUserOperationReceipt({
+                hash: userOpHash,
+                timeout: 100
+            })
+        }).toThrow(
+            new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash })
+        )
     })
 })

@@ -2,13 +2,19 @@ import type { Address, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup.js"
 import type { StackupPaymasterContext } from "../../types/stackup.js"
-import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
+import type {
+    UserOperation,
+    UserOperationWithBigIntAsHex
+} from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
         UserOperation,
-        "callGasLimit" | "preVerificationGas" | "verificationGasLimit" | "paymasterAndData"
+        | "callGasLimit"
+        | "preVerificationGas"
+        | "verificationGasLimit"
+        | "paymasterAndData"
     >
     entryPoint: Address
     context: StackupPaymasterContext
@@ -52,7 +58,11 @@ export const sponsorUserOperation = async (
 ): Promise<SponsorUserOperationReturnType> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: [deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex, args.entryPoint, args.context]
+        params: [
+            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex,
+            args.entryPoint,
+            args.context
+        ]
     })
 
     return {

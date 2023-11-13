@@ -1,9 +1,17 @@
-import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
+import type {
+    Account,
+    Chain,
+    Client,
+    PublicClientConfig,
+    Transport
+} from "viem"
 import { createClient } from "viem"
 import type { BundlerRpcSchema } from "../types/bundler.js"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
 
-export type BundlerClient<TChain extends Chain | undefined = Chain | undefined> = Client<
+export type BundlerClient<
+    TChain extends Chain | undefined = Chain | undefined
+> = Client<
     Transport,
     TChain,
     Account | undefined,
@@ -29,7 +37,10 @@ export type BundlerClient<TChain extends Chain | undefined = Chain | undefined> 
  *   transport: http(BUNDLER_URL),
  * })
  */
-export const createBundlerClient = <transport extends Transport, chain extends Chain | undefined = undefined>(
+export const createBundlerClient = <
+    transport extends Transport,
+    chain extends Chain | undefined = undefined
+>(
     parameters: PublicClientConfig<transport, chain>
 ): BundlerClient => {
     const { key = "public", name = "Bundler Client" } = parameters

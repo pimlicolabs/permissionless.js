@@ -56,7 +56,9 @@ export const getUserOperationGasPrice = async <
         },
         standard: {
             maxFeePerGas: BigInt(gasPrices.standard.maxFeePerGas),
-            maxPriorityFeePerGas: BigInt(gasPrices.standard.maxPriorityFeePerGas)
+            maxPriorityFeePerGas: BigInt(
+                gasPrices.standard.maxPriorityFeePerGas
+            )
         },
         fast: {
             maxFeePerGas: BigInt(gasPrices.fast.maxFeePerGas),

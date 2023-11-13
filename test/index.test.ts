@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { UserOperation, getSenderAddress, getUserOperationHash } from "permissionless"
+import {
+    UserOperation,
+    getSenderAddress,
+    getUserOperationHash
+} from "permissionless"
 import { signUserOperationHashWithECDSA } from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
@@ -17,12 +21,18 @@ dotenv.config()
 const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY) throw new Error("PIMLICO_API_KEY environment variable not set")
-    if (!process.env.STACKUP_API_KEY) throw new Error("STACKUP_API_KEY environment variable not set")
-    if (!process.env.FACTORY_ADDRESS) throw new Error("FACTORY_ADDRESS environment variable not set")
-    if (!process.env.TEST_PRIVATE_KEY) throw new Error("TEST_PRIVATE_KEY environment variable not set")
-    if (!process.env.RPC_URL) throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS) throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
+    if (!process.env.PIMLICO_API_KEY)
+        throw new Error("PIMLICO_API_KEY environment variable not set")
+    if (!process.env.STACKUP_API_KEY)
+        throw new Error("STACKUP_API_KEY environment variable not set")
+    if (!process.env.FACTORY_ADDRESS)
+        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+    if (!process.env.RPC_URL)
+        throw new Error("RPC_URL environment variable not set")
+    if (!process.env.ENTRYPOINT_ADDRESS)
+        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
 
 describe("test public actions and utils", () => {
@@ -30,7 +40,10 @@ describe("test public actions and utils", () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()
 
-        const initCode = await getAccountInitCode(factoryAddress, eoaWalletClient)
+        const initCode = await getAccountInitCode(
+            factoryAddress,
+            eoaWalletClient
+        )
         const publicClient = await getPublicClient()
         const entryPoint = getEntryPoint()
 
@@ -49,7 +62,10 @@ describe("test public actions and utils", () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()
 
-        const initCode = await getAccountInitCode(factoryAddress, eoaWalletClient)
+        const initCode = await getAccountInitCode(
+            factoryAddress,
+            eoaWalletClient
+        )
         const publicClient = await getPublicClient()
         const entryPoint = "0x0000000"
 
@@ -68,7 +84,8 @@ describe("test public actions and utils", () => {
         const entryPoint = getEntryPoint()
         const bundlerClient = getBundlerClient()
 
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
 
         const userOperation = {
             ...(await buildUserOp(eoaWalletClient)),
@@ -102,7 +119,8 @@ describe("test public actions and utils", () => {
         const bundlerClient = getBundlerClient()
         const eoaWalletClient = getEoaWalletClient()
         const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
 
         const userOperation: UserOperation = {
             ...(await buildUserOp(eoaWalletClient)),

@@ -10,7 +10,10 @@ import {
     validateTypedData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
+import {
+    AccountOrClientNotFoundError,
+    parseAccount
+} from "../../utils/index.js"
 
 export async function signTypedData<
     const TTypedData extends TypedData | { [key: string]: unknown },

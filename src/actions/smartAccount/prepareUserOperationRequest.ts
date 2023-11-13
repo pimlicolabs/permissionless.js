@@ -1,10 +1,26 @@
-import type { Chain, Client, Transport } from "viem"
+import type { Chain, Client, Hex, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types.js"
-import type { GetAccountParameter, PartialBy, UserOperation } from "../../types/index.js"
+import type {
+    GetAccountParameter,
+    PartialBy,
+    UserOperation
+} from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
-import { sponsorUserOperation } from "./sponsorUserOperation.js"
+import {
+    AccountOrClientNotFoundError,
+    parseAccount
+} from "../../utils/index.js"
+import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
+
+export type SponsorUserOperationMiddleware = {
+    sponsorUserOperation?: (userOperation: UserOperation) => Promise<{
+        paymasterAndData: Hex
+        preVerificationGas: bigint
+        verificationGasLimit: bigint
+        callGasLimit: bigint
+    }>
+}
 
 export type PrepareUserOperationRequestParameters<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined,
@@ -22,7 +38,8 @@ export type PrepareUserOperationRequestParameters<
         | "paymasterAndData"
         | "signature"
     >
-} & GetAccountParameter<TAccount>
+} & GetAccountParameter<TAccount> &
+    SponsorUserOperationMiddleware
 
 export type PrepareUserOperationRequestReturnType = UserOperation
 
@@ -34,21 +51,27 @@ export async function prepareUserOperationRequest<
     client: Client<TTransport, TChain, TAccount>,
     args: PrepareUserOperationRequestParameters<TAccount>
 ): Promise<PrepareUserOperationRequestReturnType> {
-    const { account: account_ = client.account, userOperation: partialUserOperation } = args
+    const {
+        account: account_ = client.account,
+        userOperation: partialUserOperation,
+        sponsorUserOperation
+    } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
     const account = parseAccount(account_) as SmartAccount
 
-    const [sender, nonce, initCode, signature, callData, gasEstimation] = await Promise.all([
-        partialUserOperation.sender || account.address,
-        partialUserOperation.nonce || account.getNonce(),
-        partialUserOperation.initCode || account.getInitCode(),
-        partialUserOperation.signature || account.getDummySignature(),
-        partialUserOperation.callData,
-        !partialUserOperation.maxFeePerGas || !partialUserOperation.maxPriorityFeePerGas
-            ? estimateFeesPerGas(account.client)
-            : undefined
-    ])
+    const [sender, nonce, initCode, signature, callData, gasEstimation] =
+        await Promise.all([
+            partialUserOperation.sender || account.address,
+            partialUserOperation.nonce || account.getNonce(),
+            partialUserOperation.initCode || account.getInitCode(),
+            partialUserOperation.signature || account.getDummySignature(),
+            partialUserOperation.callData,
+            !partialUserOperation.maxFeePerGas ||
+            !partialUserOperation.maxPriorityFeePerGas
+                ? estimateFeesPerGas(account.client)
+                : undefined
+        ])
 
     const userOperation: UserOperation = {
         sender,
@@ -57,25 +80,53 @@ export async function prepareUserOperationRequest<
         signature,
         callData,
         paymasterAndData: "0x",
-        maxFeePerGas: partialUserOperation.maxFeePerGas || gasEstimation?.maxFeePerGas || 0n,
-        maxPriorityFeePerGas: partialUserOperation.maxPriorityFeePerGas || gasEstimation?.maxPriorityFeePerGas || 0n,
+        maxFeePerGas:
+            partialUserOperation.maxFeePerGas ||
+            gasEstimation?.maxFeePerGas ||
+            0n,
+        maxPriorityFeePerGas:
+            partialUserOperation.maxPriorityFeePerGas ||
+            gasEstimation?.maxPriorityFeePerGas ||
+            0n,
         callGasLimit: partialUserOperation.callGasLimit || 0n,
         verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
         preVerificationGas: partialUserOperation.preVerificationGas || 0n
     }
 
-    const { paymasterAndData, callGasLimit, verificationGasLimit, preVerificationGas } = await getAction(
-        client,
-        sponsorUserOperation
-    )({
-        userOperation: userOperation,
-        account: account
-    })
+    if (sponsorUserOperation) {
+        const {
+            callGasLimit,
+            verificationGasLimit,
+            preVerificationGas,
+            paymasterAndData
+        } = await sponsorUserOperation(userOperation)
+        userOperation.paymasterAndData = paymasterAndData
+        userOperation.callGasLimit = userOperation.callGasLimit || callGasLimit
+        userOperation.verificationGasLimit =
+            userOperation.verificationGasLimit || verificationGasLimit
+        userOperation.preVerificationGas =
+            userOperation.preVerificationGas || preVerificationGas
+    } else if (
+        !userOperation.callGasLimit ||
+        !userOperation.verificationGasLimit ||
+        !userOperation.preVerificationGas
+    ) {
+        const gasParameters = await getAction(
+            client,
+            estimateUserOperationGas
+        )({
+            userOperation,
+            entryPoint: account.entryPoint
+        })
 
-    userOperation.paymasterAndData = paymasterAndData
-    userOperation.callGasLimit = callGasLimit
-    userOperation.verificationGasLimit = verificationGasLimit
-    userOperation.preVerificationGas = preVerificationGas
+        userOperation.callGasLimit =
+            userOperation.callGasLimit || gasParameters.callGasLimit
+        userOperation.verificationGasLimit =
+            userOperation.verificationGasLimit ||
+            gasParameters.verificationGasLimit
+        userOperation.preVerificationGas =
+            userOperation.preVerificationGas || gasParameters.preVerificationGas
+    }
 
     return userOperation
 }

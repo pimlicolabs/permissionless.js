@@ -1,9 +1,26 @@
-import { UserOperation, getAccountNonce, getSenderAddress } from "permissionless"
-import { Address, Hex, WalletClient, concatHex, encodeFunctionData, zeroAddress } from "viem"
+import {
+    UserOperation,
+    getAccountNonce,
+    getSenderAddress
+} from "permissionless"
+import {
+    Address,
+    Hex,
+    WalletClient,
+    concatHex,
+    encodeFunctionData,
+    zeroAddress
+} from "viem"
 import { PartialBy } from "viem/types/utils"
 import { SimpleAccountAbi } from "./abis/SimpleAccount.js"
 import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory.js"
-import { getDummySignature, getEntryPoint, getFactoryAddress, getPublicClient, isAccountDeployed } from "./utils.js"
+import {
+    getDummySignature,
+    getEntryPoint,
+    getFactoryAddress,
+    getPublicClient,
+    isAccountDeployed
+} from "./utils.js"
 
 const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     const accountAddress = await getAccountAddress(factoryAddress, owner)
@@ -14,7 +31,11 @@ const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     return getAccountInitCode(factoryAddress, owner)
 }
 
-export const getAccountInitCode = async (factoryAddress: Address, owner: WalletClient, index = 0n): Promise<Hex> => {
+export const getAccountInitCode = async (
+    factoryAddress: Address,
+    owner: WalletClient,
+    index = 0n
+): Promise<Hex> => {
     if (!owner.account) throw new Error("Owner account not found")
     return concatHex([
         factoryAddress,
@@ -26,7 +47,10 @@ export const getAccountInitCode = async (factoryAddress: Address, owner: WalletC
     ])
 }
 
-const getAccountAddress = async (factoryAddress: Address, owner: WalletClient): Promise<Address | null> => {
+const getAccountAddress = async (
+    factoryAddress: Address,
+    owner: WalletClient
+): Promise<Address | null> => {
     const initCode = await getAccountInitCode(factoryAddress, owner)
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()
@@ -37,7 +61,11 @@ const getAccountAddress = async (factoryAddress: Address, owner: WalletClient): 
     })
 }
 
-const encodeExecute = async (target: Hex, value: bigint, data: Hex): Promise<`0x${string}`> => {
+const encodeExecute = async (
+    target: Hex,
+    value: bigint,
+    data: Hex
+): Promise<`0x${string}`> => {
     return encodeFunctionData({
         abi: SimpleAccountAbi,
         functionName: "execute",
@@ -57,7 +85,10 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()
 
-    const accountAddress = await getAccountAddress(factoryAddress, eoaWalletClient)
+    const accountAddress = await getAccountAddress(
+        factoryAddress,
+        eoaWalletClient
+    )
 
     if (!accountAddress) throw new Error("Account address not found")
 
@@ -68,7 +99,11 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
 
     const userOperation: PartialBy<
         UserOperation,
-        "maxFeePerGas" | "maxPriorityFeePerGas" | "callGasLimit" | "verificationGasLimit" | "preVerificationGas"
+        | "maxFeePerGas"
+        | "maxPriorityFeePerGas"
+        | "callGasLimit"
+        | "verificationGasLimit"
+        | "preVerificationGas"
     > = {
         sender: accountAddress,
         nonce: nonce,

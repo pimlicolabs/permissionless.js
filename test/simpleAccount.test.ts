@@ -1,10 +1,21 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { SponsorUserOperationParameters, SponsorUserOperationReturnType } from "permissionless/actions/smartAccount.js"
-import { Address, Client, Hex, Transport, getContract, zeroAddress } from "viem"
+import { SponsorUserOperationReturnType } from "permissionless/actions/smartAccount.js"
+import { UserOperation } from "permissionless/index.js"
+import {
+    Address,
+    Client,
+    Hex,
+    Transport,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
+import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
+    getBundlerClient,
     getEntryPoint,
     getPimlicoPaymasterClient,
     getPrivateKeyToSimpleSmartAccount,
@@ -140,6 +151,9 @@ describe("Simple Account", () => {
 
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
+        expect(txHash).toBeString()
+        expect(txHash).toHaveLength(66)
+
         const newGreet = await greeterContract.read.greet()
 
         expect(newGreet).toBeString()
@@ -159,17 +173,21 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const publicClient = await getPublicClient()
 
-        smartAccountClient.extend((_: Client) => ({
+        const bundlerClient = getBundlerClient()
+
+        const smartAccountClient = await getSmartAccountClient({
             sponsorUserOperation: async (
-                args: SponsorUserOperationParameters
+                userOperation: UserOperation
             ): Promise<SponsorUserOperationReturnType> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
-                const { userOperation } = args
-                return pimlicoPaymaster.sponsorUserOperation({ userOperation, entryPoint: getEntryPoint() })
+                return pimlicoPaymaster.sponsorUserOperation({
+                    userOperation,
+                    entryPoint: getEntryPoint()
+                })
             }
-        }))
+        })
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
@@ -180,5 +198,32 @@ describe("Simple Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+
+        const transactionReceipt = await publicClient.waitForTransactionReceipt(
+            {
+                hash: response
+            }
+        )
+
+        let eventFound = false
+
+        for (const log of transactionReceipt.logs) {
+            const event = decodeEventLog({
+                abi: EntryPointAbi,
+                ...log
+            })
+            if (event.eventName === "UserOperationEvent") {
+                eventFound = true
+                const userOperation =
+                    await bundlerClient.getUserOperationByHash({
+                        hash: event.args.userOpHash
+                    })
+                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
+                    "0x"
+                )
+            }
+        }
+
+        expect(eventFound).toBeTrue()
     }, 1000000)
 })

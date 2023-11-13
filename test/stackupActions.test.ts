@@ -3,18 +3,28 @@ import { StackupPaymasterClient } from "permissionless/clients/stackup"
 import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
 import { buildUserOp } from "./userOp.js"
-import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils.js"
+import {
+    getEntryPoint,
+    getEoaWalletClient,
+    getPublicClient,
+    getTestingChain
+} from "./utils.js"
 
-export const testStackupBundlerActions = async (stackupBundlerClient: StackupPaymasterClient) => {
+export const testStackupBundlerActions = async (
+    stackupBundlerClient: StackupPaymasterClient
+) => {
     const entryPoint = getEntryPoint()
     const chain = getTestingChain()
 
-    const supportedPaymasters = await stackupBundlerClient.accounts({ entryPoint })
+    const supportedPaymasters = await stackupBundlerClient.accounts({
+        entryPoint
+    })
 
     const eoaWalletClient = getEoaWalletClient()
     const publicClient = await getPublicClient()
 
-    const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
+    const { maxFeePerGas, maxPriorityFeePerGas } =
+        await publicClient.estimateFeesPerGas()
 
     const userOperation: UserOperation = {
         ...(await buildUserOp(eoaWalletClient)),
@@ -26,20 +36,29 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
         preVerificationGas: 0n
     }
 
-    const sponsorUserOperationPaymasterAndData = await stackupBundlerClient.sponsorUserOperation({
-        userOperation: userOperation,
-        entryPoint: entryPoint as Address,
-        context: {
-            type: "payg"
-        }
+    const sponsorUserOperationPaymasterAndData =
+        await stackupBundlerClient.sponsorUserOperation({
+            userOperation: userOperation,
+            entryPoint: entryPoint as Address,
+            context: {
+                type: "payg"
+            }
+        })
+
+    userOperation.paymasterAndData =
+        sponsorUserOperationPaymasterAndData.paymasterAndData
+    userOperation.callGasLimit =
+        sponsorUserOperationPaymasterAndData.callGasLimit
+    userOperation.verificationGasLimit =
+        sponsorUserOperationPaymasterAndData.verificationGasLimit
+    userOperation.preVerificationGas =
+        sponsorUserOperationPaymasterAndData.preVerificationGas
+
+    const userOperationHash = getUserOperationHash({
+        userOperation,
+        entryPoint,
+        chainId: chain.id
     })
-
-    userOperation.paymasterAndData = sponsorUserOperationPaymasterAndData.paymasterAndData
-    userOperation.callGasLimit = sponsorUserOperationPaymasterAndData.callGasLimit
-    userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
-    userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
-
-    const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
 
     const signedUserOperation: UserOperation = {
         ...userOperation,

@@ -32,7 +32,7 @@
     "formatter": {
         "enabled": true,
         "formatWithErrors": true,
-        "lineWidth": 120,
+        "lineWidth": 80,
         "indentWidth": 4,
         "indentStyle": "space"
     },

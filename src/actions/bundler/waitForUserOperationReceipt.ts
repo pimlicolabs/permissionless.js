@@ -2,12 +2,17 @@ import { BaseError, type Chain, type Hash, stringify } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import { getAction } from "../../utils/getAction.js"
 import { observe } from "../../utils/observe.js"
-import { type GetUserOperationReceiptReturnType, getUserOperationReceipt } from "./getUserOperationReceipt.js"
+import {
+    type GetUserOperationReceiptReturnType,
+    getUserOperationReceipt
+} from "./getUserOperationReceipt.js"
 
 export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"
     constructor({ hash }: { hash: Hash }) {
-        super(`Timed out while waiting for transaction with hash "${hash}" to be confirmed.`)
+        super(
+            `Timed out while waiting for transaction with hash "${hash}" to be confirmed.`
+        )
     }
 }
 
@@ -46,36 +51,57 @@ export type WaitForUserOperationReceiptParameters = {
  */
 export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
     bundlerClient: BundlerClient<TChain>,
-    { hash, pollingInterval = bundlerClient.pollingInterval, timeout }: WaitForUserOperationReceiptParameters
+    {
+        hash,
+        pollingInterval = bundlerClient.pollingInterval,
+        timeout
+    }: WaitForUserOperationReceiptParameters
 ): Promise<GetUserOperationReceiptReturnType> => {
-    const observerId = stringify(["waitForUserOperationReceipt", bundlerClient.uid, hash])
+    const observerId = stringify([
+        "waitForUserOperationReceipt",
+        bundlerClient.uid,
+        hash
+    ])
 
     let userOperationReceipt: GetUserOperationReceiptReturnType
 
     return new Promise((resolve, reject) => {
         if (timeout) {
-            setTimeout(() => reject(new WaitForUserOperationReceiptTimeoutError({ hash })), timeout)
+            setTimeout(
+                () =>
+                    reject(
+                        new WaitForUserOperationReceiptTimeoutError({ hash })
+                    ),
+                timeout
+            )
         }
 
-        const _unobserve = observe(observerId, { resolve, reject }, async (emit) => {
-            const _removeInterval = setInterval(async () => {
-                const done = (fn: () => void) => {
-                    clearInterval(_removeInterval)
-                    fn()
-                    _unobserve()
-                }
+        const _unobserve = observe(
+            observerId,
+            { resolve, reject },
+            async (emit) => {
+                const _removeInterval = setInterval(async () => {
+                    const done = (fn: () => void) => {
+                        clearInterval(_removeInterval)
+                        fn()
+                        _unobserve()
+                    }
 
-                const _userOperationReceipt = await getAction(bundlerClient, getUserOperationReceipt)({ hash })
+                    const _userOperationReceipt = await getAction(
+                        bundlerClient,
+                        getUserOperationReceipt
+                    )({ hash })
 
-                if (_userOperationReceipt !== null) {
-                    userOperationReceipt = _userOperationReceipt
-                }
+                    if (_userOperationReceipt !== null) {
+                        userOperationReceipt = _userOperationReceipt
+                    }
 
-                if (userOperationReceipt) {
-                    done(() => emit.resolve(userOperationReceipt))
-                    return
-                }
-            }, pollingInterval)
-        })
+                    if (userOperationReceipt) {
+                        done(() => emit.resolve(userOperationReceipt))
+                        return
+                    }
+                }, pollingInterval)
+            }
+        )
     })
 }

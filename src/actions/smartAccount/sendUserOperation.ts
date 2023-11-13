@@ -1,12 +1,24 @@
 import type { Chain, Client, Hex, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types.js"
-import type { GetAccountParameter, PartialBy, UserOperation } from "../../types/index.js"
+import type {
+    GetAccountParameter,
+    PartialBy,
+    UserOperation
+} from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/index.js"
+import {
+    AccountOrClientNotFoundError,
+    parseAccount
+} from "../../utils/index.js"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation.js"
-import { prepareUserOperationRequest } from "./prepareUserOperationRequest.js"
+import {
+    type SponsorUserOperationMiddleware,
+    prepareUserOperationRequest
+} from "./prepareUserOperationRequest.js"
 
-export type SendUserOperationParameters<TAccount extends SmartAccount | undefined = SmartAccount | undefined> = {
+export type SendUserOperationParameters<
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+> = {
     userOperation: PartialBy<
         UserOperation,
         | "nonce"
@@ -20,7 +32,8 @@ export type SendUserOperationParameters<TAccount extends SmartAccount | undefine
         | "verificationGasLimit"
         | "paymasterAndData"
     >
-} & GetAccountParameter<TAccount>
+} & GetAccountParameter<TAccount> &
+    SponsorUserOperationMiddleware
 
 export type SendUserOperationReturnType = Hex
 
@@ -37,7 +50,10 @@ export async function sendUserOperation<
 
     const account = parseAccount(account_) as SmartAccount
 
-    const userOperation = await getAction(client, prepareUserOperationRequest)(args)
+    const userOperation = await getAction(
+        client,
+        prepareUserOperationRequest
+    )(args)
 
     userOperation.signature = await account.signUserOperation(userOperation)
 

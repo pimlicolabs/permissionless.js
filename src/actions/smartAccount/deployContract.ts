@@ -20,7 +20,12 @@ export async function deployContract<
     TChainOverride extends Chain | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    { abi, args, bytecode, ...request }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride>
+    {
+        abi,
+        args,
+        bytecode,
+        ...request
+    }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride>
 ): Promise<DeployContractReturnType> {
     const { account: account_ = client.account } = request
 
@@ -45,7 +50,12 @@ export async function deployContract<
                 abi,
                 args,
                 bytecode
-            } as unknown as DeployContractParameters<TAbi, TChain, TAccount, TChainOverride>)
+            } as unknown as DeployContractParameters<
+                TAbi,
+                TChain,
+                TAccount,
+                TChainOverride
+            >)
         },
         account: account
     })

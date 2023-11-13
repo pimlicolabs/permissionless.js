@@ -6,7 +6,10 @@ import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type EstimateUserOperationGasParameters = {
-    userOperation: PartialBy<UserOperation, "callGasLimit" | "preVerificationGas" | "verificationGasLimit">
+    userOperation: PartialBy<
+        UserOperation,
+        "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+    >
     entryPoint: Address
 }
 
@@ -51,7 +54,10 @@ export const estimateUserOperationGas = async (
 
     const response = await client.request({
         method: "eth_estimateUserOperationGas",
-        params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
+        params: [
+            deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
+            entryPoint as Address
+        ]
     })
 
     return {

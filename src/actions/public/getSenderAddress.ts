@@ -17,7 +17,10 @@ export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 export class InvalidEntryPointError extends BaseError {
     override name = "InvalidEntryPointError"
 
-    constructor({ cause, entryPoint }: { cause?: BaseError; entryPoint?: Address } = {}) {
+    constructor({
+        cause,
+        entryPoint
+    }: { cause?: BaseError; entryPoint?: Address } = {}) {
         super(
             `The entry point address (\`entryPoint\`${
                 entryPoint ? ` = ${entryPoint}` : ""
@@ -102,7 +105,11 @@ export const getSenderAddress = async <
         if (err.cause.name === "ContractFunctionRevertedError") {
             const revertError = err.cause as ContractFunctionRevertedErrorType
             const errorName = revertError.data?.errorName ?? ""
-            if (errorName === "SenderAddressResult" && revertError.data?.args && revertError.data?.args[0]) {
+            if (
+                errorName === "SenderAddressResult" &&
+                revertError.data?.args &&
+                revertError.data?.args[0]
+            ) {
                 return revertError.data?.args[0] as Address
             }
         }

@@ -1,15 +1,34 @@
-import type { Chain, Client, ClientConfig, ParseAccount, Transport, WalletClientConfig } from "viem"
+import type {
+    Chain,
+    Client,
+    ClientConfig,
+    ParseAccount,
+    Transport,
+    WalletClientConfig
+} from "viem"
 import { createClient } from "viem"
 import { type SmartAccount } from "../accounts/types.js"
+import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest.js"
 import { type BundlerRpcSchema } from "../types/bundler.js"
 import type { Prettify } from "../types/index.js"
-import { type SmartAccountActions, smartAccountActions } from "./decorators/smartAccount.js"
+import {
+    type SmartAccountActions,
+    smartAccountActions
+} from "./decorators/smartAccount.js"
 
 export type SmartAccountClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined
-> = Prettify<Client<transport, chain, account, BundlerRpcSchema, SmartAccountActions<chain, account>>>
+> = Prettify<
+    Client<
+        transport,
+        chain,
+        account,
+        BundlerRpcSchema,
+        SmartAccountActions<chain, account>
+    >
+>
 
 export type SmartAccountClientConfig<
     transport extends Transport = Transport,
@@ -18,7 +37,13 @@ export type SmartAccountClientConfig<
 > = Prettify<
     Pick<
         ClientConfig<transport, chain, TAccount>,
-        "account" | "cacheTime" | "chain" | "key" | "name" | "pollingInterval" | "transport"
+        | "account"
+        | "cacheTime"
+        | "chain"
+        | "key"
+        | "name"
+        | "pollingInterval"
+        | "transport"
     >
 >
 
@@ -46,9 +71,14 @@ export const createSmartAccountClient = <
     TChain extends Chain | undefined = undefined,
     TSmartAccount extends SmartAccount | undefined = undefined
 >(
-    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
+    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount> &
+        SponsorUserOperationMiddleware
 ): SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>> => {
-    const { key = "Account", name = "Smart Account Client", transport } = parameters
+    const {
+        key = "Account",
+        name = "Smart Account Client",
+        transport
+    } = parameters
     const client = createClient({
         ...parameters,
         key,
@@ -57,5 +87,9 @@ export const createSmartAccountClient = <
         type: "smartAccountClient"
     })
 
-    return client.extend(smartAccountActions)
+    return client.extend(
+        smartAccountActions({
+            sponsorUserOperation: parameters.sponsorUserOperation
+        })
+    )
 }

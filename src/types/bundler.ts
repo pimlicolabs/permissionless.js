@@ -5,7 +5,10 @@ import type { UserOperationWithBigIntAsHex } from "./userOperation.js"
 export type BundlerRpcSchema = [
     {
         Method: "eth_sendUserOperation"
-        Parameters: [userOperation: UserOperationWithBigIntAsHex, entryPoint: Address]
+        Parameters: [
+            userOperation: UserOperationWithBigIntAsHex,
+            entryPoint: Address
+        ]
         ReturnType: Hash
     },
     {

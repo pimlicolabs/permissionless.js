@@ -1,7 +1,17 @@
-import { type Account, type Chain, type Client, type PublicClientConfig, type Transport, createClient } from "viem"
+import {
+    type Account,
+    type Chain,
+    type Client,
+    type PublicClientConfig,
+    type Transport,
+    createClient
+} from "viem"
 import type { StackupPaymasterRpcSchema } from "../types/stackup.js"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
-import { type StackupPaymasterClientActions, stackupPaymasterActions } from "./decorators/stackup.js"
+import {
+    type StackupPaymasterClientActions,
+    stackupPaymasterActions
+} from "./decorators/stackup.js"
 
 export type StackupPaymasterClient = Client<
     Transport,
@@ -30,7 +40,10 @@ export type StackupPaymasterClient = Client<
  *   transport: http("https://api.stackup.sh/v1/paymaster/YOUR_API_KEY_HERE"),
  * })
  */
-export const createStackupPaymasterClient = <transport extends Transport, chain extends Chain | undefined = undefined>(
+export const createStackupPaymasterClient = <
+    transport extends Transport,
+    chain extends Chain | undefined = undefined
+>(
     parameters: PublicClientConfig<transport, chain>
 ): StackupPaymasterClient => {
     const { key = "public", name = "Stackup Paymaster Client" } = parameters

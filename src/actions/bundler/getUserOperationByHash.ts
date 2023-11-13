@@ -49,7 +49,13 @@ export const getUserOperationByHash = async (
 
     if (!response) return null
 
-    const { userOperation, entryPoint, transactionHash, blockHash, blockNumber } = response
+    const {
+        userOperation,
+        entryPoint,
+        transactionHash,
+        blockHash,
+        blockNumber
+    } = response
 
     return {
         userOperation: {

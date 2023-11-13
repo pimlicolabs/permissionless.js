@@ -5,10 +5,14 @@ import { getChainId } from "./smartAccount/getChainId.js"
 import {
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
+    type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
 } from "./smartAccount/prepareUserOperationRequest.js"
 
-import { sendTransaction } from "./smartAccount/sendTransaction.js"
+import {
+    type SendTransactionWithPaymasterParameters,
+    sendTransaction
+} from "./smartAccount/sendTransaction.js"
 
 import {
     type SendUserOperationParameters,
@@ -19,12 +23,6 @@ import {
 import { signMessage } from "./smartAccount/signMessage.js"
 
 import { signTypedData } from "./smartAccount/signTypedData.js"
-
-import {
-    type SponsorUserOperationParameters,
-    type SponsorUserOperationReturnType,
-    sponsorUserOperation
-} from "./smartAccount/sponsorUserOperation.js"
 
 export {
     deployContract,
@@ -38,7 +36,6 @@ export {
     type SendUserOperationReturnType,
     signMessage,
     signTypedData,
-    sponsorUserOperation,
-    type SponsorUserOperationParameters,
-    type SponsorUserOperationReturnType
+    type SendTransactionWithPaymasterParameters,
+    type SponsorUserOperationMiddleware
 }

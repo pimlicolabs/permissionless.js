@@ -36,7 +36,11 @@ export type PrivateKeySimpleSmartAccount<
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<"privateKeySimpleSmartAccount", transport, chain>
 
-const getAccountInitCode = async (factoryAddress: Address, owner: Address, index = 0n): Promise<Hex> => {
+const getAccountInitCode = async (
+    factoryAddress: Address,
+    owner: Address,
+    index = 0n
+): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
 
     return concatHex([

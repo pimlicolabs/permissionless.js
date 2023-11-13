@@ -14,8 +14,11 @@ export type GetAccountParameterWithClient<
     ? { account: Account; client?: Client<TTransport, TChain, TAccount> }
     : { client: Client<TTransport, TChain, TAccount>; account?: Account }
 
-export type GetAccountParameter<TAccount extends SmartAccount | undefined = SmartAccount | undefined> =
-    IsUndefined<TAccount> extends true ? { account: SmartAccount } : { account?: SmartAccount }
+export type GetAccountParameter<
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+> = IsUndefined<TAccount> extends true
+    ? { account: SmartAccount }
+    : { account?: SmartAccount }
 
 export type Prettify<T> = {
     [K in keyof T]: T[K]

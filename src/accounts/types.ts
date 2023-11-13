@@ -1,4 +1,11 @@
-import type { Abi, Address, Client, GetConstructorArgs, Hex, LocalAccount } from "viem"
+import type {
+    Abi,
+    Address,
+    Client,
+    GetConstructorArgs,
+    Hex,
+    LocalAccount
+} from "viem"
 import type { Chain, Transport } from "viem"
 import { type UserOperation } from "../types/index.js"
 
@@ -11,7 +18,11 @@ export type SmartAccount<
     entryPoint: Address
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
-    encodeCallData: ({ to, value, data }: { to: Address; value: bigint; data: Hex }) => Promise<Hex>
+    encodeCallData: ({
+        to,
+        value,
+        data
+    }: { to: Address; value: bigint; data: Hex }) => Promise<Hex>
     getDummySignature(): Promise<Hex>
     encodeDeployCallData: <TAbi extends Abi | readonly unknown[] = Abi>({
         abi,
