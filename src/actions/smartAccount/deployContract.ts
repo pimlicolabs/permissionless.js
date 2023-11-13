@@ -12,6 +12,7 @@ import { parseAccount } from "../../utils/index.js"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
 import { sendUserOperation } from "./sendUserOperation.js"
+import { SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
@@ -52,8 +53,10 @@ export async function deployContract<
         abi,
         args,
         bytecode,
+        sponsorUserOperation,
         ...request
-    }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride>
+    }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
+        SponsorUserOperationMiddleware
 ): Promise<DeployContractReturnType> {
     const { account: account_ = client.account } = request
 
@@ -85,7 +88,8 @@ export async function deployContract<
                 TChainOverride
             >)
         },
-        account: account
+        account: account,
+        sponsorUserOperation
     })
 
     const userOperationReceipt = await getAction(
