@@ -21,20 +21,7 @@ export const testStackupBundlerActions = async (
     })
 
     const eoaWalletClient = getEoaWalletClient()
-    const publicClient = await getPublicClient()
-
-    const { maxFeePerGas, maxPriorityFeePerGas } =
-        await publicClient.estimateFeesPerGas()
-
-    const userOperation: UserOperation = {
-        ...(await buildUserOp(eoaWalletClient)),
-        maxFeePerGas: maxFeePerGas || 0n,
-        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-        paymasterAndData: "0x",
-        callGasLimit: 0n,
-        verificationGasLimit: 0n,
-        preVerificationGas: 0n
-    }
+    const userOperation = await buildUserOp(eoaWalletClient)
 
     const sponsorUserOperationPaymasterAndData =
         await stackupBundlerClient.sponsorUserOperation({

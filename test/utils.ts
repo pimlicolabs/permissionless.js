@@ -1,6 +1,6 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import { privateKeyToSimpleSmartAccount } from "permissionless/accounts"
-import { SponsorTransactionParameters } from "permissionless/actions/smartAccount"
+import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
@@ -47,7 +47,7 @@ export const getPrivateKeyToSimpleSmartAccount = async () => {
 
 export const getSmartAccountClient = async ({
     sponsorUserOperation
-}: SponsorTransactionParameters = {}) => {
+}: SponsorUserOperationMiddleware = {}) => {
     if (!process.env.PIMLICO_API_KEY)
         throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.PIMLICO_BUNDLER_RPC_HOST)

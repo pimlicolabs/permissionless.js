@@ -58,18 +58,8 @@ describe("BUNDLER ACTIONS", () => {
 
     test("Estimate user operation gas", async () => {
         const eoaWalletClient = getEoaWalletClient()
-        const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } =
-            await publicClient.estimateFeesPerGas()
 
-        const userOperation = {
-            ...(await buildUserOp(eoaWalletClient)),
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
+        const userOperation = await buildUserOp(eoaWalletClient)
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
             userOperation,
@@ -83,18 +73,7 @@ describe("BUNDLER ACTIONS", () => {
 
     test("Sending user operation", async () => {
         const eoaWalletClient = getEoaWalletClient()
-        const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } =
-            await publicClient.estimateFeesPerGas()
-
-        const userOperation = {
-            ...(await buildUserOp(eoaWalletClient)),
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
+        const userOperation = await buildUserOp(eoaWalletClient)
 
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()
@@ -158,18 +137,7 @@ describe("BUNDLER ACTIONS", () => {
 
     test("wait for user operation receipt fail", async () => {
         const eoaWalletClient = getEoaWalletClient()
-        const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } =
-            await publicClient.estimateFeesPerGas()
-
-        const userOperation = {
-            ...(await buildUserOp(eoaWalletClient)),
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
+        const userOperation = await buildUserOp(eoaWalletClient)
 
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()

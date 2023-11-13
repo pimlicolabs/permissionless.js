@@ -73,7 +73,9 @@ const encodeExecute = async (
     })
 }
 
-export const buildUserOp = async (eoaWalletClient: WalletClient) => {
+export const buildUserOp = async (
+    eoaWalletClient: WalletClient
+): Promise<UserOperation> => {
     await new Promise((resolve) => {
         setTimeout(() => {
             // wait for prev user op to be added to make sure ew get correct nonce
@@ -97,6 +99,9 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
         entryPoint: entryPoint
     })
 
+    const { maxFeePerGas, maxPriorityFeePerGas } =
+        await publicClient.estimateFeesPerGas()
+
     const userOperation: PartialBy<
         UserOperation,
         | "maxFeePerGas"
@@ -110,7 +115,12 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
         initCode: await getInitCode(factoryAddress, eoaWalletClient),
         callData: await encodeExecute(zeroAddress as Hex, 0n, "0x" as Hex),
         paymasterAndData: "0x" as Hex,
-        signature: getDummySignature()
+        signature: getDummySignature(),
+        maxFeePerGas: maxFeePerGas || 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+        callGasLimit: 0n,
+        verificationGasLimit: 0n,
+        preVerificationGas: 0n
     }
 
     return userOperation

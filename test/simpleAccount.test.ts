@@ -1,7 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { SponsorUserOperationReturnType } from "permissionless/actions/smartAccount.js"
 import { UserOperation } from "permissionless/index.js"
 import {
     Address,
@@ -71,19 +70,6 @@ describe("Simple Account", () => {
                 data: "0x"
             })
         }).toThrow(new SignTransactionNotSupportedBySmartAccount())
-    })
-
-    test("Smart account client chain id", async () => {
-        const smartAccountClient = await getSmartAccountClient()
-
-        const chain = getTestingChain()
-
-        const chainId = await smartAccountClient.getChainId()
-
-        expect(chainId).toBeNumber()
-        expect(chainId).toBeGreaterThan(0)
-
-        expect(chainId).toEqual(chain.id)
     })
 
     test("Smart account client signMessage", async () => {
@@ -180,7 +166,12 @@ describe("Simple Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             sponsorUserOperation: async (
                 userOperation: UserOperation
-            ): Promise<SponsorUserOperationReturnType> => {
+            ): Promise<{
+                paymasterAndData: Hex
+                preVerificationGas: bigint
+                verificationGasLimit: bigint
+                callGasLimit: bigint
+            }> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

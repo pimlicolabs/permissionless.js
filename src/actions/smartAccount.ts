@@ -1,7 +1,5 @@
 import { deployContract } from "./smartAccount/deployContract.js"
 
-import { getChainId } from "./smartAccount/getChainId.js"
-
 import {
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
@@ -26,7 +24,6 @@ import { signTypedData } from "./smartAccount/signTypedData.js"
 
 export {
     deployContract,
-    getChainId,
     prepareUserOperationRequest,
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,

@@ -6,6 +6,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { UserOperation } from "permissionless/index.js"
 import { getUserOperationHash } from "permissionless/utils"
 import { http } from "viem"
 import { buildUserOp } from "./userOp.js"
@@ -98,8 +99,10 @@ describe("Pimlico Actions tests", () => {
             const { maxFeePerGas, maxPriorityFeePerGas } =
                 await publicClient.estimateFeesPerGas()
 
-            const userOperation = {
-                ...(await buildUserOp(eoaWalletClient)),
+            const partialUserOp = await buildUserOp(eoaWalletClient)
+
+            const userOperation: UserOperation = {
+                ...partialUserOp,
                 maxFeePerGas: maxFeePerGas || 0n,
                 maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
                 callGasLimit: 0n,
@@ -146,25 +149,14 @@ describe("Pimlico Actions tests", () => {
             expect(
                 sponsorUserOperationPaymasterAndData.paymasterAndData
             ).toStartWith("0x")
-        })
+        }, 100000)
 
         test("Sending user op with paymaster and data", async () => {
             const entryPoint = getEntryPoint()
             const eoaWalletClient = getEoaWalletClient()
             const chain = getTestingChain()
 
-            const publicClient = await getPublicClient()
-            const { maxFeePerGas, maxPriorityFeePerGas } =
-                await publicClient.estimateFeesPerGas()
-
-            const userOperation = {
-                ...(await buildUserOp(eoaWalletClient)),
-                maxFeePerGas: maxFeePerGas || 0n,
-                maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-                callGasLimit: 0n,
-                verificationGasLimit: 0n,
-                preVerificationGas: 0n
-            }
+            const userOperation = await buildUserOp(eoaWalletClient)
 
             const sponsorUserOperationPaymasterAndData =
                 await pimlicoPaymasterClient.sponsorUserOperation({
