@@ -11,8 +11,8 @@ import { getAction } from "../../utils/getAction.js"
 import { parseAccount } from "../../utils/index.js"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
-import { sendUserOperation } from "./sendUserOperation.js"
 import { SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
+import { sendUserOperation } from "./sendUserOperation.js"
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
