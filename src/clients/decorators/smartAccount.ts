@@ -2,13 +2,17 @@ import type {
     Abi,
     Chain,
     Client,
+    DeployContractParameters,
     SendTransactionParameters,
     Transport,
     TypedData,
     WriteContractParameters
 } from "viem"
 import type { SmartAccount } from "../../accounts/types.js"
-import { deployContract } from "../../actions/smartAccount/deployContract.js"
+import {
+    type DeployContractParametersWithPaymaster,
+    deployContract
+} from "../../actions/smartAccount/deployContract.js"
 import {
     type PrepareUserOperationRequestReturnType,
     type SponsorUserOperationMiddleware,
@@ -264,9 +268,12 @@ export type SmartAccountActions<
         const TAbi extends Abi | readonly unknown[],
         TChainOverride extends Chain | undefined = undefined
     >(
-        args: Parameters<
-            typeof deployContract<TAbi, TChain, TSmartAccount, TChainOverride>
-        >[1]
+        args: DeployContractParameters<
+            TAbi,
+            TChain,
+            TSmartAccount,
+            TChainOverride
+        >
     ) => ReturnType<
         typeof deployContract<TAbi, TChain, TSmartAccount, TChainOverride>
     >
@@ -363,7 +370,11 @@ export const smartAccountActions =
     ): SmartAccountActions<TChain, TSmartAccount> => ({
         prepareUserOperationRequest: (args) =>
             prepareUserOperationRequest(client, args),
-        deployContract: (args) => deployContract(client, args),
+        deployContract: (args) =>
+            deployContract(client, {
+                ...args,
+                sponsorUserOperation
+            } as DeployContractParametersWithPaymaster),
         sendTransaction: (args) =>
             sendTransaction(client, {
                 ...args,

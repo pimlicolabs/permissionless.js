@@ -11,8 +11,16 @@ import { getAction } from "../../utils/getAction.js"
 import { parseAccount } from "../../utils/index.js"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
 import { sendUserOperation } from "./sendUserOperation.js"
-import { SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
+
+export type DeployContractParametersWithPaymaster<
+    TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TChainOverride extends Chain | undefined = Chain | undefined
+> = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
+    SponsorUserOperationMiddleware
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
@@ -55,8 +63,7 @@ export async function deployContract<
         bytecode,
         sponsorUserOperation,
         ...request
-    }: DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
-        SponsorUserOperationMiddleware
+    }: DeployContractParametersWithPaymaster
 ): Promise<DeployContractReturnType> {
     const { account: account_ = client.account } = request
 

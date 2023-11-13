@@ -7,6 +7,6 @@
     },
     "dependencies": {
         "dotenv": "^16.3.1",
-        "viem": "0.0.0-jxom-fix-extract-chain-params.20231106T094653"
+        "viem": "^1.14.0"
     }
 }

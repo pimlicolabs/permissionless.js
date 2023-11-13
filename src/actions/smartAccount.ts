@@ -1,4 +1,7 @@
-import { deployContract } from "./smartAccount/deployContract.js"
+import {
+    type DeployContractParametersWithPaymaster,
+    deployContract
+} from "./smartAccount/deployContract.js"
 
 import {
     type PrepareUserOperationRequestParameters,
@@ -24,6 +27,7 @@ import { signTypedData } from "./smartAccount/signTypedData.js"
 
 export {
     deployContract,
+    type DeployContractParametersWithPaymaster,
     prepareUserOperationRequest,
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
