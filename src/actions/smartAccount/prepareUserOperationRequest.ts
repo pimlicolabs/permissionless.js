@@ -1,4 +1,4 @@
-import type { Chain, Client, Hex, Transport } from "viem"
+import type { Address, Chain, Client, Hex, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types.js"
 import type {
@@ -14,7 +14,10 @@ import {
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
 
 export type SponsorUserOperationMiddleware = {
-    sponsorUserOperation?: (userOperation: UserOperation) => Promise<{
+    sponsorUserOperation?: (args: {
+        userOperation: UserOperation
+        entryPoint: Address
+    }) => Promise<{
         paymasterAndData: Hex
         preVerificationGas: bigint
         verificationGasLimit: bigint
@@ -99,7 +102,10 @@ export async function prepareUserOperationRequest<
             verificationGasLimit,
             preVerificationGas,
             paymasterAndData
-        } = await sponsorUserOperation(userOperation)
+        } = await sponsorUserOperation({
+            userOperation,
+            entryPoint: account.entryPoint
+        })
         userOperation.paymasterAndData = paymasterAndData
         userOperation.callGasLimit = userOperation.callGasLimit || callGasLimit
         userOperation.verificationGasLimit =

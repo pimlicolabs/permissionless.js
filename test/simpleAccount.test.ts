@@ -164,9 +164,10 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            sponsorUserOperation: async (
-                userOperation: UserOperation
-            ): Promise<{
+            sponsorUserOperation: async ({
+                entryPoint: _entryPoint,
+                userOperation
+            }): Promise<{
                 paymasterAndData: Hex
                 preVerificationGas: bigint
                 verificationGasLimit: bigint
