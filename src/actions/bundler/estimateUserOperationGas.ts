@@ -1,12 +1,15 @@
 import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type EstimateUserOperationGasParameters = {
-    userOperation: PartialBy<UserOperation, "callGasLimit" | "preVerificationGas" | "verificationGasLimit">
+    userOperation: PartialBy<
+        UserOperation,
+        "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+    >
     entryPoint: Address
 }
 
@@ -51,7 +54,10 @@ export const estimateUserOperationGas = async (
 
     const response = await client.request({
         method: "eth_estimateUserOperationGas",
-        params: [deepHexlify(userOperation) as UserOperationWithBigIntAsHex, entryPoint as Address]
+        params: [
+            deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
+            entryPoint as Address
+        ]
     })
 
     return {

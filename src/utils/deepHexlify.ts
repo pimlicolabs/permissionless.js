@@ -21,10 +21,11 @@ export function deepHexlify(obj: any): any {
         return obj.map((member) => deepHexlify(member))
     }
     return Object.keys(obj).reduce(
-        (set, key) => ({
-            ...set,
-            [key]: deepHexlify(obj[key])
-        }),
+        // biome-ignore lint/suspicious/noExplicitAny: it's a recursive function, so it's hard to type
+        (set: any, key: string) => {
+            set[key] = deepHexlify(obj[key])
+            return set
+        },
         {}
     )
 }

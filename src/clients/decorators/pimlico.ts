@@ -13,7 +13,10 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
-import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico.js"
+import type {
+    PimlicoBundlerClient,
+    PimlicoPaymasterClient
+} from "../pimlico.js"
 
 export type PimlicoBundlerActions = {
     /**
@@ -55,11 +58,16 @@ export type PimlicoBundlerActions = {
      *
      * await bundlerClient.getUserOperationStatus({ hash: userOpHash })
      */
-    getUserOperationStatus: (args: GetUserOperationStatusParameters) => Promise<GetUserOperationStatusReturnType>
+    getUserOperationStatus: (
+        args: GetUserOperationStatusParameters
+    ) => Promise<GetUserOperationStatusReturnType>
 }
 
-export const pimlicoBundlerActions = (client: Client): PimlicoBundlerActions => ({
-    getUserOperationGasPrice: async () => getUserOperationGasPrice(client as PimlicoBundlerClient),
+export const pimlicoBundlerActions = (
+    client: Client
+): PimlicoBundlerActions => ({
+    getUserOperationGasPrice: async () =>
+        getUserOperationGasPrice(client as PimlicoBundlerClient),
     getUserOperationStatus: async (args: GetUserOperationStatusParameters) =>
         getUserOperationStatus(client as PimlicoBundlerClient, args)
 })
@@ -88,10 +96,14 @@ export type PimlicoPaymasterClientActions = {
      * }})
      *
      */
-    sponsorUserOperation: (args: SponsorUserOperationParameters) => Promise<SponsorUserOperationReturnType>
+    sponsorUserOperation: (
+        args: SponsorUserOperationParameters
+    ) => Promise<SponsorUserOperationReturnType>
 }
 
-export const pimlicoPaymasterActions = (client: Client): PimlicoPaymasterClientActions => ({
+export const pimlicoPaymasterActions = (
+    client: Client
+): PimlicoPaymasterClientActions => ({
     sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
         sponsorUserOperation(client as PimlicoPaymasterClient, args)
 })

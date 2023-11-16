@@ -13,8 +13,14 @@ import {
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation.js"
 
-import type { PimlicoBundlerActions, PimlicoPaymasterClientActions } from "../clients/decorators/pimlico.js"
-import { pimlicoBundlerActions, pimlicoPaymasterActions } from "../clients/decorators/pimlico.js"
+import type {
+    PimlicoBundlerActions,
+    PimlicoPaymasterClientActions
+} from "../clients/decorators/pimlico.js"
+import {
+    pimlicoBundlerActions,
+    pimlicoPaymasterActions
+} from "../clients/decorators/pimlico.js"
 
 export type {
     GetUserOperationGasPriceReturnType,

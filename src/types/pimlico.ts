@@ -18,7 +18,14 @@ type PimlicoUserOperationGasPriceWithBigIntAsHex = {
 }
 
 export type PimlicoUserOperationStatus = {
-    status: "not_found" | "not_submitted" | "submitted" | "rejected" | "reverted" | "included" | "failed"
+    status:
+        | "not_found"
+        | "not_submitted"
+        | "submitted"
+        | "rejected"
+        | "reverted"
+        | "included"
+        | "failed"
     transactionHash: Hash | null
 }
 
@@ -41,7 +48,10 @@ export type PimlicoPaymasterRpcSchema = [
         Parameters: [
             userOperation: PartialBy<
                 UserOperationWithBigIntAsHex,
-                "callGasLimit" | "preVerificationGas" | "verificationGasLimit" | "paymasterAndData"
+                | "callGasLimit"
+                | "preVerificationGas"
+                | "verificationGasLimit"
+                | "paymasterAndData"
             >,
             entryPoint: Address
         ]

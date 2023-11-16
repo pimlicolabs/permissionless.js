@@ -16,7 +16,10 @@ export type StackupPaymasterRpcSchema = [
         Parameters: [
             userOperation: PartialBy<
                 UserOperationWithBigIntAsHex,
-                "callGasLimit" | "preVerificationGas" | "verificationGasLimit" | "paymasterAndData"
+                | "callGasLimit"
+                | "preVerificationGas"
+                | "verificationGasLimit"
+                | "paymasterAndData"
             >,
             entryPoint: Address,
             context: StackupPaymasterContext

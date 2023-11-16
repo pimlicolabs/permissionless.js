@@ -2,50 +2,50 @@ import { BundlerClient, UserOperation } from "permissionless"
 import { StackupPaymasterClient } from "permissionless/clients/stackup"
 import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
-import { buildUserOp } from "./userOp"
-import { getEntryPoint, getEoaWalletClient, getPublicClient, getTestingChain } from "./utils"
+import { buildUserOp } from "./userOp.js"
+import {
+    getEntryPoint,
+    getEoaWalletClient,
+    getPublicClient,
+    getTestingChain
+} from "./utils.js"
 
-export const testStackupBundlerActions = async (stackupBundlerClient: StackupPaymasterClient) => {
+export const testStackupBundlerActions = async (
+    stackupBundlerClient: StackupPaymasterClient
+) => {
     const entryPoint = getEntryPoint()
     const chain = getTestingChain()
 
-    console.log("STACKUP ACTIONS:: ======= TESTING STACKUP PAYMASTER ACTIONS =======")
-    const supportedPaymasters = await stackupBundlerClient.accounts({ entryPoint })
-    console.log("PAYMASTER ADDRESSES: ", supportedPaymasters)
-
-    const eoaWalletClient = getEoaWalletClient()
-    const publicClient = await getPublicClient()
-
-    const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas()
-
-    const userOperation: UserOperation = {
-        ...(await buildUserOp(eoaWalletClient)),
-        maxFeePerGas: maxFeePerGas || 0n,
-        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-        paymasterAndData: "0x",
-        callGasLimit: 0n,
-        verificationGasLimit: 0n,
-        preVerificationGas: 0n
-    }
-
-    const sponsorUserOperationPaymasterAndData = await stackupBundlerClient.sponsorUserOperation({
-        userOperation: userOperation,
-        entryPoint: entryPoint as Address,
-        context: {
-            type: "payg"
-        }
+    const supportedPaymasters = await stackupBundlerClient.accounts({
+        entryPoint
     })
 
-    userOperation.paymasterAndData = sponsorUserOperationPaymasterAndData.paymasterAndData
-    userOperation.callGasLimit = sponsorUserOperationPaymasterAndData.callGasLimit
-    userOperation.verificationGasLimit = sponsorUserOperationPaymasterAndData.verificationGasLimit
-    userOperation.preVerificationGas = sponsorUserOperationPaymasterAndData.preVerificationGas
+    const eoaWalletClient = getEoaWalletClient()
+    const userOperation = await buildUserOp(eoaWalletClient)
 
-    console.log(userOperation, "STACKUP ACTIONS:: ============= USER OPERATION =============")
+    const sponsorUserOperationPaymasterAndData =
+        await stackupBundlerClient.sponsorUserOperation({
+            userOperation: userOperation,
+            entryPoint: entryPoint as Address,
+            context: {
+                type: "payg"
+            }
+        })
 
-    const userOperationHash = getUserOperationHash({ userOperation, entryPoint, chainId: chain.id })
+    userOperation.paymasterAndData =
+        sponsorUserOperationPaymasterAndData.paymasterAndData
+    userOperation.callGasLimit =
+        sponsorUserOperationPaymasterAndData.callGasLimit
+    userOperation.verificationGasLimit =
+        sponsorUserOperationPaymasterAndData.verificationGasLimit
+    userOperation.preVerificationGas =
+        sponsorUserOperationPaymasterAndData.preVerificationGas
 
-    console.log(userOperationHash, "STACKUP ACTIONS:: ============= USER OPERATION HASH =============")
+    const userOperationHash = getUserOperationHash({
+        userOperation,
+        entryPoint,
+        chainId: chain.id
+    })
 
     const signedUserOperation: UserOperation = {
         ...userOperation,
@@ -54,14 +54,12 @@ export const testStackupBundlerActions = async (stackupBundlerClient: StackupPay
             message: { raw: userOperationHash }
         })
     }
-    console.log(signedUserOperation, "STACKUP ACTIONS:: ============= SIGNED USER OPERATION HASH =============")
 
     const userOpHash = await stackupBundlerClient.sendUserOperation({
         userOperation: signedUserOperation,
         entryPoint: entryPoint as Address
     })
 
-    console.log("userOpHash", userOpHash)
     await stackupBundlerClient.waitForUserOperationReceipt({
         hash: userOpHash
     })

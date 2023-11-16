@@ -1,13 +1,19 @@
-import type { Address, Hex } from "viem"
+import type { Account, Address, Chain, Client, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { PimlicoPaymasterClient } from "../../clients/pimlico.js"
-import type { UserOperation, UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
+import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
+import type {
+    UserOperation,
+    UserOperationWithBigIntAsHex
+} from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<
         UserOperation,
-        "callGasLimit" | "preVerificationGas" | "verificationGasLimit" | "paymasterAndData"
+        | "callGasLimit"
+        | "preVerificationGas"
+        | "verificationGasLimit"
+        | "paymasterAndData"
     >
     entryPoint: Address
 }
@@ -44,13 +50,20 @@ export type SponsorUserOperationReturnType = {
  * }})
  *
  */
-export const sponsorUserOperation = async (
-    client: PimlicoPaymasterClient,
+export const sponsorUserOperation = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
     args: SponsorUserOperationParameters
 ): Promise<SponsorUserOperationReturnType> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: [deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex, args.entryPoint]
+        params: [
+            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex,
+            args.entryPoint
+        ]
     })
 
     return {

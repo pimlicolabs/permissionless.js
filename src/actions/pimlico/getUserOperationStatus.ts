@@ -1,6 +1,9 @@
-import type { Hash } from "viem"
+import type { Account, Chain, Client, Hash, Transport } from "viem"
 import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
-import type { PimlicoUserOperationStatus } from "../../types/pimlico.js"
+import type {
+    PimlicoBundlerRpcSchema,
+    PimlicoUserOperationStatus
+} from "../../types/pimlico.js"
 
 export type GetUserOperationStatusParameters = {
     hash: Hash
@@ -30,8 +33,12 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
  *
  */
-export const getUserOperationStatus = async (
-    client: PimlicoBundlerClient,
+export const getUserOperationStatus = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>,
     { hash }: GetUserOperationStatusParameters
 ): Promise<GetUserOperationStatusReturnType> => {
     return client.request({

@@ -1,18 +1,26 @@
 import {
     type Address,
     BaseError,
+    type Chain,
+    type Client,
     type ContractFunctionExecutionErrorType,
     type ContractFunctionRevertedErrorType,
     type Hex,
-    type PublicClient
+    type Transport
 } from "viem"
+
+import { simulateContract } from "viem/actions"
+import { getAction } from "../../utils/getAction.js"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 
 export class InvalidEntryPointError extends BaseError {
     override name = "InvalidEntryPointError"
 
-    constructor({ cause, entryPoint }: { cause?: BaseError; entryPoint?: Address } = {}) {
+    constructor({
+        cause,
+        entryPoint
+    }: { cause?: BaseError; entryPoint?: Address } = {}) {
         super(
             `The entry point address (\`entryPoint\`${
                 entryPoint ? ` = ${entryPoint}` : ""
@@ -29,8 +37,7 @@ export class InvalidEntryPointError extends BaseError {
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getSenderAddress
  *
- *
- * @param publicClient {@link PublicClient} that you created using viem's createPublicClient.
+ * @param client {@link Client} that you created using viem's createPublicClient.
  * @param args {@link GetSenderAddressParams} initCode & entryPoint
  * @returns Sender's Address
  *
@@ -50,12 +57,18 @@ export class InvalidEntryPointError extends BaseError {
  *
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
-export const getSenderAddress = async (
-    publicClient: PublicClient,
+export const getSenderAddress = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
+>(
+    client: Client<TTransport, TChain>,
     { initCode, entryPoint }: GetSenderAddressParams
 ): Promise<Address> => {
     try {
-        await publicClient.simulateContract({
+        await getAction(
+            client,
+            simulateContract
+        )({
             address: entryPoint,
             abi: [
                 {
@@ -92,7 +105,11 @@ export const getSenderAddress = async (
         if (err.cause.name === "ContractFunctionRevertedError") {
             const revertError = err.cause as ContractFunctionRevertedErrorType
             const errorName = revertError.data?.errorName ?? ""
-            if (errorName === "SenderAddressResult" && revertError.data?.args && revertError.data?.args[0]) {
+            if (
+                errorName === "SenderAddressResult" &&
+                revertError.data?.args &&
+                revertError.data?.args[0]
+            ) {
                 return revertError.data?.args[0] as Address
             }
         }

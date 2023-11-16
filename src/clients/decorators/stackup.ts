@@ -1,5 +1,8 @@
 import type { Address, Client } from "viem"
-import { type AccountsParameters, accounts } from "../../actions/stackup/accounts.js"
+import {
+    type AccountsParameters,
+    accounts
+} from "../../actions/stackup/accounts.js"
 import {
     type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
@@ -31,7 +34,9 @@ export type StackupPaymasterClientActions = {
      * }})
      *
      */
-    sponsorUserOperation: (args: SponsorUserOperationParameters) => Promise<SponsorUserOperationReturnType>
+    sponsorUserOperation: (
+        args: SponsorUserOperationParameters
+    ) => Promise<SponsorUserOperationReturnType>
 
     /**
      * Returns all the Paymaster addresses associated with an EntryPoint that’s owned by this service.
@@ -58,8 +63,11 @@ export type StackupPaymasterClientActions = {
     accounts: (args: AccountsParameters) => Promise<Address[]>
 }
 
-export const stackupPaymasterActions = (client: Client): StackupPaymasterClientActions => ({
+export const stackupPaymasterActions = (
+    client: Client
+): StackupPaymasterClientActions => ({
     sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
         sponsorUserOperation(client as StackupPaymasterClient, args),
-    accounts: async (args: AccountsParameters) => accounts(client as StackupPaymasterClient, args)
+    accounts: async (args: AccountsParameters) =>
+        accounts(client as StackupPaymasterClient, args)
 })

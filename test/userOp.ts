@@ -1,9 +1,26 @@
-import { UserOperation, getAccountNonce, getSenderAddress } from "permissionless"
-import { Address, Hex, WalletClient, concatHex, encodeFunctionData, zeroAddress } from "viem"
+import {
+    UserOperation,
+    getAccountNonce,
+    getSenderAddress
+} from "permissionless"
+import {
+    Address,
+    Hex,
+    WalletClient,
+    concatHex,
+    encodeFunctionData,
+    zeroAddress
+} from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
-import { getDummySignature, getEntryPoint, getFactoryAddress, getPublicClient, isAccountDeployed } from "./utils"
+import { SimpleAccountAbi } from "./abis/SimpleAccount.js"
+import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory.js"
+import {
+    getDummySignature,
+    getEntryPoint,
+    getFactoryAddress,
+    getPublicClient,
+    isAccountDeployed
+} from "./utils.js"
 
 const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     const accountAddress = await getAccountAddress(factoryAddress, owner)
@@ -14,7 +31,11 @@ const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
     return getAccountInitCode(factoryAddress, owner)
 }
 
-export const getAccountInitCode = async (factoryAddress: Address, owner: WalletClient, index = 0n): Promise<Hex> => {
+export const getAccountInitCode = async (
+    factoryAddress: Address,
+    owner: WalletClient,
+    index = 0n
+): Promise<Hex> => {
     if (!owner.account) throw new Error("Owner account not found")
     return concatHex([
         factoryAddress,
@@ -26,7 +47,10 @@ export const getAccountInitCode = async (factoryAddress: Address, owner: WalletC
     ])
 }
 
-const getAccountAddress = async (factoryAddress: Address, owner: WalletClient): Promise<Address | null> => {
+const getAccountAddress = async (
+    factoryAddress: Address,
+    owner: WalletClient
+): Promise<Address | null> => {
     const initCode = await getAccountInitCode(factoryAddress, owner)
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()
@@ -37,7 +61,11 @@ const getAccountAddress = async (factoryAddress: Address, owner: WalletClient): 
     })
 }
 
-const encodeExecute = async (target: Hex, value: bigint, data: Hex): Promise<`0x${string}`> => {
+const encodeExecute = async (
+    target: Hex,
+    value: bigint,
+    data: Hex
+): Promise<`0x${string}`> => {
     return encodeFunctionData({
         abi: SimpleAccountAbi,
         functionName: "execute",
@@ -45,7 +73,9 @@ const encodeExecute = async (target: Hex, value: bigint, data: Hex): Promise<`0x
     })
 }
 
-export const buildUserOp = async (eoaWalletClient: WalletClient) => {
+export const buildUserOp = async (
+    eoaWalletClient: WalletClient
+): Promise<UserOperation> => {
     await new Promise((resolve) => {
         setTimeout(() => {
             // wait for prev user op to be added to make sure ew get correct nonce
@@ -57,7 +87,10 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()
 
-    const accountAddress = await getAccountAddress(factoryAddress, eoaWalletClient)
+    const accountAddress = await getAccountAddress(
+        factoryAddress,
+        eoaWalletClient
+    )
 
     if (!accountAddress) throw new Error("Account address not found")
 
@@ -66,16 +99,28 @@ export const buildUserOp = async (eoaWalletClient: WalletClient) => {
         entryPoint: entryPoint
     })
 
+    const { maxFeePerGas, maxPriorityFeePerGas } =
+        await publicClient.estimateFeesPerGas()
+
     const userOperation: PartialBy<
         UserOperation,
-        "maxFeePerGas" | "maxPriorityFeePerGas" | "callGasLimit" | "verificationGasLimit" | "preVerificationGas"
+        | "maxFeePerGas"
+        | "maxPriorityFeePerGas"
+        | "callGasLimit"
+        | "verificationGasLimit"
+        | "preVerificationGas"
     > = {
         sender: accountAddress,
         nonce: nonce,
         initCode: await getInitCode(factoryAddress, eoaWalletClient),
         callData: await encodeExecute(zeroAddress as Hex, 0n, "0x" as Hex),
         paymasterAndData: "0x" as Hex,
-        signature: getDummySignature()
+        signature: getDummySignature(),
+        maxFeePerGas: maxFeePerGas || 0n,
+        maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+        callGasLimit: 0n,
+        verificationGasLimit: 0n,
+        preVerificationGas: 0n
     }
 
     return userOperation

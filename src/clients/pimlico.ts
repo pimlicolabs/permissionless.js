@@ -1,6 +1,15 @@
-import type { Account, Chain, Client, PublicClientConfig, Transport } from "viem"
+import type {
+    Account,
+    Chain,
+    Client,
+    PublicClientConfig,
+    Transport
+} from "viem"
 import { createClient } from "viem"
-import type { PimlicoBundlerRpcSchema, PimlicoPaymasterRpcSchema } from "../types/pimlico.js"
+import type {
+    PimlicoBundlerRpcSchema,
+    PimlicoPaymasterRpcSchema
+} from "../types/pimlico.js"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
 import {
     type PimlicoBundlerActions,
@@ -44,7 +53,10 @@ export type PimlicoPaymasterClient = Client<
  *   transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE"),
  * })
  */
-export const createPimlicoBundlerClient = <transport extends Transport, chain extends Chain | undefined = undefined>(
+export const createPimlicoBundlerClient = <
+    transport extends Transport,
+    chain extends Chain | undefined = undefined
+>(
     parameters: PublicClientConfig<transport, chain>
 ): PimlicoBundlerClient => {
     const { key = "public", name = "Pimlico Bundler Client" } = parameters
@@ -76,7 +88,10 @@ export const createPimlicoBundlerClient = <transport extends Transport, chain ex
  *   transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE"),
  * })
  */
-export const createPimlicoPaymasterClient = <transport extends Transport, chain extends Chain | undefined = undefined>(
+export const createPimlicoPaymasterClient = <
+    transport extends Transport,
+    chain extends Chain | undefined = undefined
+>(
     parameters: PublicClientConfig<transport, chain>
 ): PimlicoPaymasterClient => {
     const { key = "public", name = "Pimlico Paymaster Client" } = parameters

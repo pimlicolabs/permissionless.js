@@ -1,5 +1,5 @@
 import type { Address } from "viem"
-import type { BundlerClient } from "../../clients/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient.js"
 
 /**
  * Returns the supported entrypoints by the bundler service
@@ -23,7 +23,9 @@ import type { BundlerClient } from "../../clients/bundler.js"
  * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
  *
  */
-export const supportedEntryPoints = async (client: BundlerClient): Promise<Address[]> => {
+export const supportedEntryPoints = async (
+    client: BundlerClient
+): Promise<Address[]> => {
     return client.request({
         method: "eth_supportedEntryPoints",
         params: []

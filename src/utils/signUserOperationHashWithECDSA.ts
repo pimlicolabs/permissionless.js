@@ -8,29 +8,16 @@ import {
     type Hex,
     type Transport
 } from "viem"
+import { type GetAccountParameterWithClient } from "../types/index.js"
 import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
-
-function parseAccount(account: Address | Account): Account {
-    if (typeof account === "string") return { address: account, type: "json-rpc" }
-    return account
-}
-
-type IsUndefined<T> = [undefined] extends [T] ? true : false
-
-type GetAccountParameter<
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
-> = IsUndefined<TAccount> extends true
-    ? { account: Account; client?: undefined }
-    : { client: Client<TTransport, TChain, TAccount>; account?: undefined }
+import { parseAccount } from "./index.js"
 
 export type signUserOperationHashWithECDSAParams<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
-> = GetAccountParameter<TTransport, TChain, TAccount> &
+> = GetAccountParameterWithClient<TTransport, TChain, TAccount> &
     (
         | {
               hash: Hash
@@ -96,10 +83,15 @@ export const signUserOperationHashWithECDSA = async <
     userOperation,
     chainId,
     entryPoint
-}: signUserOperationHashWithECDSAParams<TTransport, TChain, TAccount>): Promise<Hex> => {
+}: signUserOperationHashWithECDSAParams<
+    TTransport,
+    TChain,
+    TAccount
+>): Promise<Hex> => {
     if (!account_)
         throw new AccountOrClientNotFoundError({
-            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+            docsPath:
+                "/permissionless/reference/utils/signUserOperationHashWithECDSA"
         })
 
     let userOperationHash: Hash
@@ -107,7 +99,11 @@ export const signUserOperationHashWithECDSA = async <
     if (hash) {
         userOperationHash = hash
     } else {
-        userOperationHash = getUserOperationHash({ userOperation, chainId, entryPoint })
+        userOperationHash = getUserOperationHash({
+            userOperation,
+            chainId,
+            entryPoint
+        })
     }
 
     const account = parseAccount(account_)
@@ -121,7 +117,8 @@ export const signUserOperationHashWithECDSA = async <
 
     if (!client)
         throw new AccountOrClientNotFoundError({
-            docsPath: "/permissionless/reference/utils/signUserOperationHashWithECDSA"
+            docsPath:
+                "/permissionless/reference/utils/signUserOperationHashWithECDSA"
         })
 
     return client.request({

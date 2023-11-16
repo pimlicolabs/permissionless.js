@@ -11,7 +11,10 @@ import type {
 import type { SendUserOperationParameters } from "./bundler/sendUserOperation.js"
 
 import type { GetSenderAddressParams } from "./public/getSenderAddress.js"
-import { InvalidEntryPointError, getSenderAddress } from "./public/getSenderAddress.js"
+import {
+    InvalidEntryPointError,
+    getSenderAddress
+} from "./public/getSenderAddress.js"
 
 import { chainId } from "./bundler/chainId.js"
 import { estimateUserOperationGas } from "./bundler/estimateUserOperationGas.js"
