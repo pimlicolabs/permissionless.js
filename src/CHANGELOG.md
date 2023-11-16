@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.12
+
+### Patch Changes
+
+- aabe479: Added support for SimpleAccount management
+
 ## 0.0.11
 
 ### Patch Changes

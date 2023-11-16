@@ -1,6 +1,6 @@
 {
     "name": "permissionless",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "author": "Pimlico",
     "main": "./_cjs/index.js",
     "module": "./_esm/index.js",
@@ -9,7 +9,13 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
+    "keywords": [
+        "ethereum",
+        "erc-4337",
+        "eip-4337",
+        "paymaster",
+        "bundler"
+    ],
     "license": "MIT",
     "exports": {
         ".": {
@@ -37,7 +43,6 @@
             "import": "./_esm/actions/stackup.js",
             "default": "./_cjs/actions/stackup.js"
         },
-
         "./actions/smartAccount": {
             "types": "./_types/actions/smartAccount.d.ts",
             "import": "./_esm/actions/smartAccount.js",
