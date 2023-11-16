@@ -117,7 +117,7 @@ export async function writeContract<
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request
-    } as SendTransactionWithPaymasterParameters<
+    } as unknown as SendTransactionWithPaymasterParameters<
         TChain,
         TAccount,
         TChainOverride
