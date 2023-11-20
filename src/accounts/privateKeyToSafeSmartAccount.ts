@@ -14,7 +14,6 @@ import { privateKeyToAccount, toAccount } from "viem/accounts"
 import { getBytecode, getChainId } from "viem/actions"
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../actions/public/getSenderAddress.js"
-import { getUserOperationHash } from "../utils/getUserOperationHash.js"
 import { type SmartAccount } from "./types.js"
 
 export type SafeVersion = "1.4.1"
@@ -89,7 +88,6 @@ export type PrivateKeySimpleSmartAccount<
 > = SmartAccount<"privateKeySimpleSmartAccount", transport, chain>
 
 const getAccountInitCode = async ({
-    chainId,
     owner,
     addModuleLibAddress,
     safe4337ModuleAddress,
@@ -97,7 +95,6 @@ const getAccountInitCode = async ({
     safeSingletonAddress,
     saltNonce = 0n
 }: {
-    chainId: number
     owner: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
@@ -106,8 +103,6 @@ const getAccountInitCode = async ({
     saltNonce?: bigint
 }): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
-
-    const chainIdString: string = chainId.toString()
 
     const initializer = encodeFunctionData({
         abi: [
@@ -238,7 +233,6 @@ const getAccountAddress = async <
     client,
     entryPoint,
     owner,
-    chainId,
     addModuleLibAddress,
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
@@ -247,7 +241,6 @@ const getAccountAddress = async <
 }: {
     client: Client<TTransport, TChain>
     owner: Address
-    chainId: number
     entryPoint: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
@@ -256,7 +249,6 @@ const getAccountAddress = async <
     saltNonce?: bigint
 }): Promise<Address> => {
     const initCode = await getAccountInitCode({
-        chainId,
         owner,
         saltNonce,
         addModuleLibAddress,
@@ -323,7 +315,6 @@ export async function privateKeyToSafeSmartAccount<
     const accountAddress = await getAccountAddress<TTransport, TChain>({
         client,
         entryPoint,
-        chainId: chainId,
         owner: privateKeyAccount.address,
         addModuleLibAddress,
         safe4337ModuleAddress,
@@ -419,7 +410,6 @@ export async function privateKeyToSafeSmartAccount<
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
             return getAccountInitCode({
-                chainId: chainId,
                 owner: privateKeyAccount.address,
                 addModuleLibAddress,
                 safe4337ModuleAddress,
