@@ -27,7 +27,6 @@ import { type SmartAccount } from "./types.js"
 export type SafeVersion = "1.4.1"
 
 export const EIP712_SAFE_OPERATION_TYPE = {
-    // "SafeOp(address safe,bytes callData,uint256 nonce,uint256 preVerificationGas,uint256 verificationGasLimit,uint256 callGasLimit,uint256 maxFeePerGas,uint256 maxPriorityFeePerGas,uint96 signatureTimestamps,address entryPoint)"
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "bytes", name: "callData" },
@@ -37,7 +36,6 @@ export const EIP712_SAFE_OPERATION_TYPE = {
         { type: "uint256", name: "callGasLimit" },
         { type: "uint256", name: "maxFeePerGas" },
         { type: "uint256", name: "maxPriorityFeePerGas" },
-        // { type: "uint96", name: "signatureTimestamps" },
         { type: "address", name: "entryPoint" }
     ]
 }
