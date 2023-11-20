@@ -99,24 +99,12 @@ const adjustVInSignature = (
         throw new Error("Invalid signature")
     }
     if (signingMethod === "eth_sign") {
-        /*
-        The Safe's expected V value for ECDSA signature is:
-        - 27 or 28
-        - 31 or 32 if the message was signed with a EIP-191 prefix. Should be calculated as ECDSA V value + 4
-        Some wallets do that, some wallets don't, V > 30 is used by contracts to differentiate between
-        prefixed and non-prefixed messages. The only way to know if the message was signed with a
-        prefix is to check if the signer address is the same as the recovered address.
-
-        More info:
-        https://docs.safe.global/safe-core-protocol/signatures
-      */
         if (signatureV < MIN_VALID_V_VALUE_FOR_SAFE_ECDSA) {
             signatureV += MIN_VALID_V_VALUE_FOR_SAFE_ECDSA
         }
         signatureV += 4
     }
     if (signingMethod === "eth_signTypedData") {
-        // Metamask with ledger returns V=0/1 here too, we need to adjust it to be ethereum's valid value (27 or 28)
         if (signatureV < MIN_VALID_V_VALUE_FOR_SAFE_ECDSA) {
             signatureV += MIN_VALID_V_VALUE_FOR_SAFE_ECDSA
         }
