@@ -66,8 +66,8 @@ const SAFE_ADDRESSES_MAP: {
     }
 }
 
-export class SignTransactionNotSupportedBySmartAccount extends BaseError {
-    override name = "SignTransactionNotSupportedBySmartAccount"
+export class SignTransactionNotSupportedBySafeSmartAccount extends BaseError {
+    override name = "SignTransactionNotSupportedBySafeSmartAccount"
     constructor({ docsPath }: { docsPath?: string } = {}) {
         super(
             [
@@ -82,10 +82,10 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
     }
 }
 
-export type PrivateKeySimpleSmartAccount<
+export type PrivateKeySafeSmartAccount<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<"privateKeySimpleSmartAccount", transport, chain>
+> = SmartAccount<"privateKeySafeSmartAccount", transport, chain>
 
 const getAccountInitCode = async ({
     owner,
@@ -292,7 +292,7 @@ export async function privateKeyToSafeSmartAccount<
         safeSingletonAddress?: Address
         saltNonce?: bigint
     }
-): Promise<PrivateKeySimpleSmartAccount<TTransport, TChain>> {
+): Promise<PrivateKeySafeSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     const chainId = await getChainId(client)
@@ -332,7 +332,7 @@ export async function privateKeyToSafeSmartAccount<
             return privateKeyAccount.signMessage({ message })
         },
         async signTransaction(_, __) {
-            throw new SignTransactionNotSupportedBySmartAccount()
+            throw new SignTransactionNotSupportedBySafeSmartAccount()
         },
         async signTypedData(typedData) {
             // TODO
@@ -345,7 +345,7 @@ export async function privateKeyToSafeSmartAccount<
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPoint,
-        source: "privateKeySimpleSmartAccount",
+        source: "privateKeySafeSmartAccount",
         async getNonce() {
             return getAccountNonce(client, {
                 sender: accountAddress,
