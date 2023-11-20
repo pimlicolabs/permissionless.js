@@ -85,14 +85,16 @@ const getAccountAddress = async <
     client,
     factoryAddress,
     entryPoint,
-    owner
+    owner,
+    index = 0n
 }: {
     client: Client<TTransport, TChain>
     factoryAddress: Address
     owner: Address
     entryPoint: Address
+    index?: bigint
 }): Promise<Address> => {
-    const initCode = await getAccountInitCode(factoryAddress, owner)
+    const initCode = await getAccountInitCode(factoryAddress, owner, index)
 
     return getSenderAddress(client, {
         initCode,
@@ -113,11 +115,13 @@ export async function privateKeyToSimpleSmartAccount<
     {
         privateKey,
         factoryAddress,
-        entryPoint
+        entryPoint,
+        index = 0n
     }: {
         privateKey: Hex
         factoryAddress: Address
         entryPoint: Address
+        index?: bigint
     }
 ): Promise<PrivateKeySimpleSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
@@ -127,7 +131,8 @@ export async function privateKeyToSimpleSmartAccount<
             client,
             factoryAddress,
             entryPoint,
-            owner: privateKeyAccount.address
+            owner: privateKeyAccount.address,
+            index
         }),
         getChainId(client)
     ])
@@ -177,7 +182,11 @@ export async function privateKeyToSimpleSmartAccount<
 
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
-            return getAccountInitCode(factoryAddress, privateKeyAccount.address)
+            return getAccountInitCode(
+                factoryAddress,
+                privateKeyAccount.address,
+                index
+            )
         },
         async encodeDeployCallData(_) {
             throw new Error("Simple account doesn't support account deployment")

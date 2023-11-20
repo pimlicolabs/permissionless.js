@@ -1,15 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import {
-    SignTransactionNotSupportedBySafeSmartAccount,
-    SignTransactionNotSupportedBySmartAccount
-} from "permissionless/accounts"
-import { UserOperation } from "permissionless/index.js"
+import { SignTransactionNotSupportedBySafeSmartAccount } from "permissionless/accounts"
 import {
     Address,
-    Client,
+    BaseError,
     Hex,
-    Transport,
     decodeEventLog,
     getContract,
     zeroAddress
@@ -22,8 +17,7 @@ import {
     getPimlicoPaymasterClient,
     getPrivateKeyToSafeSmartAccount,
     getPublicClient,
-    getSmartAccountClient,
-    getTestingChain
+    getSmartAccountClient
 } from "./utils.js"
 
 dotenv.config()
@@ -211,24 +205,27 @@ describe("Safe Account", () => {
             }
         )
 
-        console.log(transactionReceipt)
-
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            const event = decodeEventLog({
-                abi: EntryPointAbi,
-                ...log
-            })
-            if (event.eventName === "UserOperationEvent") {
-                eventFound = true
-                const userOperation =
-                    await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
-                    "0x"
-                )
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch (e) {
+                const error = e as BaseError
+                if (error.name !== "AbiEventSignatureNotFoundError") throw e
             }
         }
 
