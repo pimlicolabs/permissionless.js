@@ -8,12 +8,14 @@ import {
     concatHex,
     encodeFunctionData,
     encodePacked,
+    getContractAddress,
+    hexToBigInt,
+    keccak256,
     zeroAddress
 } from "viem"
 import { privateKeyToAccount, toAccount } from "viem/accounts"
-import { getBytecode, getChainId } from "viem/actions"
+import { getBytecode, getChainId, readContract } from "viem/actions"
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../actions/public/getSenderAddress.js"
 import { type SmartAccount } from "./types.js"
 
 export type SafeVersion = "1.4.1"
@@ -29,7 +31,7 @@ export const EIP712_SAFE_OPERATION_TYPE = {
         { type: "uint256", name: "callGasLimit" },
         { type: "uint256", name: "maxFeePerGas" },
         { type: "uint256", name: "maxPriorityFeePerGas" },
-        { type: "uint96", name: "signatureTimestamps" },
+        // { type: "uint96", name: "signatureTimestamps" },
         { type: "address", name: "entryPoint" }
     ]
 }
@@ -87,24 +89,16 @@ export type PrivateKeySafeSmartAccount<
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<"privateKeySafeSmartAccount", transport, chain>
 
-const getAccountInitCode = async ({
+const getInitializerCode = async ({
     owner,
     addModuleLibAddress,
-    safe4337ModuleAddress,
-    safeProxyFactoryAddress,
-    safeSingletonAddress,
-    saltNonce = 0n
+    safe4337ModuleAddress
 }: {
     owner: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
-    safeProxyFactoryAddress: Address
-    safeSingletonAddress: Address
-    saltNonce?: bigint
-}): Promise<Hex> => {
-    if (!owner) throw new Error("Owner account not found")
-
-    const initializer = encodeFunctionData({
+}) => {
+    return encodeFunctionData({
         abi: [
             {
                 inputs: [
@@ -185,45 +179,67 @@ const getAccountInitCode = async ({
             zeroAddress
         ]
     })
+}
 
-    return concatHex([
-        safeProxyFactoryAddress,
-        encodeFunctionData({
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "address",
-                            name: "_singleton",
-                            type: "address"
-                        },
-                        {
-                            internalType: "bytes",
-                            name: "initializer",
-                            type: "bytes"
-                        },
-                        {
-                            internalType: "uint256",
-                            name: "saltNonce",
-                            type: "uint256"
-                        }
-                    ],
-                    name: "createProxyWithNonce",
-                    outputs: [
-                        {
-                            internalType: "contract SafeProxy",
-                            name: "proxy",
-                            type: "address"
-                        }
-                    ],
-                    stateMutability: "nonpayable",
-                    type: "function"
-                }
-            ],
-            functionName: "createProxyWithNonce",
-            args: [safeSingletonAddress, initializer, saltNonce]
-        }) as Hex
-    ])
+const getAccountInitCode = async ({
+    owner,
+    addModuleLibAddress,
+    safe4337ModuleAddress,
+    safeProxyFactoryAddress,
+    safeSingletonAddress,
+    saltNonce = 0n
+}: {
+    owner: Address
+    addModuleLibAddress: Address
+    safe4337ModuleAddress: Address
+    safeProxyFactoryAddress: Address
+    safeSingletonAddress: Address
+    saltNonce?: bigint
+}): Promise<Hex> => {
+    if (!owner) throw new Error("Owner account not found")
+    const initializer = await getInitializerCode({
+        owner,
+        addModuleLibAddress,
+        safe4337ModuleAddress
+    })
+
+    const initCodeCallData = encodeFunctionData({
+        abi: [
+            {
+                inputs: [
+                    {
+                        internalType: "address",
+                        name: "_singleton",
+                        type: "address"
+                    },
+                    {
+                        internalType: "bytes",
+                        name: "initializer",
+                        type: "bytes"
+                    },
+                    {
+                        internalType: "uint256",
+                        name: "saltNonce",
+                        type: "uint256"
+                    }
+                ],
+                name: "createProxyWithNonce",
+                outputs: [
+                    {
+                        internalType: "contract SafeProxy",
+                        name: "proxy",
+                        type: "address"
+                    }
+                ],
+                stateMutability: "nonpayable",
+                type: "function"
+            }
+        ],
+        functionName: "createProxyWithNonce",
+        args: [safeSingletonAddress, initializer, saltNonce]
+    })
+
+    return concatHex([safeProxyFactoryAddress, initCodeCallData])
 }
 
 const getAccountAddress = async <
@@ -231,7 +247,6 @@ const getAccountAddress = async <
     TChain extends Chain | undefined = Chain | undefined
 >({
     client,
-    entryPoint,
     owner,
     addModuleLibAddress,
     safe4337ModuleAddress,
@@ -241,25 +256,55 @@ const getAccountAddress = async <
 }: {
     client: Client<TTransport, TChain>
     owner: Address
-    entryPoint: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
     saltNonce?: bigint
 }): Promise<Address> => {
-    const initCode = await getAccountInitCode({
-        owner,
-        saltNonce,
-        addModuleLibAddress,
-        safe4337ModuleAddress,
-        safeProxyFactoryAddress,
-        safeSingletonAddress
+    const proxyCreationCode = await readContract(client, {
+        abi: [
+            {
+                inputs: [],
+                name: "proxyCreationCode",
+                outputs: [
+                    {
+                        internalType: "bytes",
+                        name: "",
+                        type: "bytes"
+                    }
+                ],
+                stateMutability: "pure",
+                type: "function"
+            }
+        ],
+        address: safeProxyFactoryAddress,
+        functionName: "proxyCreationCode"
     })
 
-    return getSenderAddress(client, {
-        initCode,
-        entryPoint
+    const deploymentCode = encodePacked(
+        ["bytes", "uint256"],
+        [proxyCreationCode, hexToBigInt(safeSingletonAddress)]
+    )
+
+    const initializer = await getInitializerCode({
+        owner,
+        addModuleLibAddress,
+        safe4337ModuleAddress
+    })
+
+    const salt = keccak256(
+        encodePacked(
+            ["bytes32", "uint256"],
+            [keccak256(encodePacked(["bytes"], [initializer])), saltNonce]
+        )
+    )
+
+    return getContractAddress({
+        from: safeProxyFactoryAddress,
+        salt,
+        bytecode: deploymentCode,
+        opcode: "CREATE2"
     })
 }
 
@@ -314,7 +359,6 @@ export async function privateKeyToSafeSmartAccount<
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
         client,
-        entryPoint,
         owner: privateKeyAccount.address,
         addModuleLibAddress,
         safe4337ModuleAddress,
@@ -353,7 +397,7 @@ export async function privateKeyToSafeSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            const timestamps = 0n
+            // const timestamps = 0n
 
             const signatures = [
                 {
@@ -377,7 +421,7 @@ export async function privateKeyToSafeSmartAccount<
                             maxFeePerGas: userOperation.maxFeePerGas,
                             maxPriorityFeePerGas:
                                 userOperation.maxPriorityFeePerGas,
-                            signatureTimestamps: timestamps,
+                            // signatureTimestamps: timestamps,
                             entryPoint: entryPoint
                         }
                     })
@@ -395,12 +439,12 @@ export async function privateKeyToSafeSmartAccount<
                 signatureBytes += sig.data.slice(2)
             }
 
-            const signatureWithTimestamps = encodePacked(
-                ["uint96", "bytes"],
-                [timestamps, signatureBytes]
-            )
+            // const signatureWithTimestamps = encodePacked(
+            //     ["uint96", "bytes"],
+            //     [timestamps, signatureBytes]
+            // )
 
-            return signatureWithTimestamps
+            return signatureBytes
         },
         async getInitCode() {
             const contractCode = await getBytecode(client, {
@@ -419,7 +463,7 @@ export async function privateKeyToSafeSmartAccount<
             })
         },
         async encodeDeployCallData(_) {
-            throw new Error("Simple account doesn't support account deployment")
+            throw new Error("Safe account doesn't support account deployment")
         },
         async encodeCallData({ to, value, data }) {
             return encodeFunctionData({

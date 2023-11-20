@@ -1,5 +1,9 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
-import { privateKeyToSimpleSmartAccount } from "permissionless/accounts"
+import {
+    SmartAccount,
+    privateKeyToSafeSmartAccount,
+    privateKeyToSimpleSmartAccount
+} from "permissionless/accounts"
 import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
@@ -45,9 +49,24 @@ export const getPrivateKeyToSimpleSmartAccount = async () => {
     })
 }
 
+export const getPrivateKeyToSafeSmartAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+
+    return await privateKeyToSafeSmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        privateKey: process.env.TEST_PRIVATE_KEY as Hex,
+        safeVersion: "1.4.1",
+        saltNonce: 100n
+    })
+}
+
 export const getSmartAccountClient = async ({
+    account,
     sponsorUserOperation
-}: SponsorUserOperationMiddleware = {}) => {
+}: SponsorUserOperationMiddleware & { account?: SmartAccount } = {}) => {
     if (!process.env.PIMLICO_API_KEY)
         throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
@@ -56,7 +75,7 @@ export const getSmartAccountClient = async ({
     const chain = getTestingChain()
 
     return createSmartAccountClient({
-        account: await getPrivateKeyToSimpleSmartAccount(),
+        account: account ?? (await getPrivateKeyToSimpleSmartAccount()),
         chain,
         transport: http(
             `${
