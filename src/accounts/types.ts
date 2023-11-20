@@ -18,11 +18,19 @@ export type SmartAccount<
     entryPoint: Address
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
-    encodeCallData: ({
-        to,
-        value,
-        data
-    }: { to: Address; value: bigint; data: Hex }) => Promise<Hex>
+    encodeCallData: (
+        args:
+            | {
+                  to: Address
+                  value: bigint
+                  data: Hex
+              }
+            | {
+                  to: Address
+                  value: bigint
+                  data: Hex
+              }[]
+    ) => Promise<Hex>
     getDummySignature(): Promise<Hex>
     encodeDeployCallData: <TAbi extends Abi | readonly unknown[] = Abi>({
         abi,

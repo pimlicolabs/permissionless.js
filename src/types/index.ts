@@ -25,3 +25,8 @@ export type Prettify<T> = {
 } & {}
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+// biome-ignore lint/suspicious/noExplicitAny: generic type
+export type UnionOmit<T, K extends keyof any> = T extends any
+    ? Omit<T, K>
+    : never

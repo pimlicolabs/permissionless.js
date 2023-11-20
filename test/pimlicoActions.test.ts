@@ -16,7 +16,8 @@ import {
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    getTestingChain
+    getTestingChain,
+    waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
@@ -149,6 +150,7 @@ describe("Pimlico Actions tests", () => {
             expect(
                 sponsorUserOperationPaymasterAndData.paymasterAndData
             ).toStartWith("0x")
+            await waitForNonceUpdate()
         }, 100000)
 
         test("Sending user op with paymaster and data", async () => {
@@ -234,6 +236,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOperationStatus.transactionHash).toBe(
                 userOperationReceipt?.receipt.transactionHash
             )
+            await waitForNonceUpdate()
         }, 100000)
     })
 })

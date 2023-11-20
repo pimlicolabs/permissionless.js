@@ -25,6 +25,11 @@ import { signMessage } from "./smartAccount/signMessage.js"
 
 import { signTypedData } from "./smartAccount/signTypedData.js"
 
+import {
+    type SendTransactionsWithPaymasterParameters,
+    sendTransactions
+} from "./smartAccount/sendTransactions.js"
+
 export {
     deployContract,
     type DeployContractParametersWithPaymaster,
@@ -38,5 +43,7 @@ export {
     signMessage,
     signTypedData,
     type SendTransactionWithPaymasterParameters,
-    type SponsorUserOperationMiddleware
+    type SponsorUserOperationMiddleware,
+    sendTransactions,
+    type SendTransactionsWithPaymasterParameters
 }

@@ -12,7 +12,8 @@ import {
     getEntryPoint,
     getEoaWalletClient,
     getPublicClient,
-    getTestingChain
+    getTestingChain,
+    waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
@@ -133,6 +134,7 @@ describe("BUNDLER ACTIONS", () => {
                 userOperation[key]
             )
         }
+        await waitForNonceUpdate()
     }, 100000)
 
     test("wait for user operation receipt fail", async () => {
