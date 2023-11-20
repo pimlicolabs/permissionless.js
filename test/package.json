@@ -7,6 +7,6 @@
     },
     "dependencies": {
         "dotenv": "^16.3.1",
-        "viem": "^1.14.0"
+        "viem": "1.19.4"
     }
 }
