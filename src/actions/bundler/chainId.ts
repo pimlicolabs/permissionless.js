@@ -1,4 +1,6 @@
+import type { Account, Chain, Client, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 
 /**
  * Returns the supported chain id by the bundler service
@@ -22,7 +24,13 @@ import type { BundlerClient } from "../../clients/createBundlerClient.js"
  * // Return 5n for Goerli
  *
  */
-export const chainId = async (client: BundlerClient) => {
+export const chainId = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>
+) => {
     return Number(
         await client.request({
             method: "eth_chainId",

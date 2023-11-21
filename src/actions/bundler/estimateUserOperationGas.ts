@@ -1,6 +1,7 @@
-import type { Address } from "viem"
+import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
@@ -46,8 +47,12 @@ export type EstimateUserOperationGasReturnType = {
  * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
  *
  */
-export const estimateUserOperationGas = async (
-    client: BundlerClient,
+export const estimateUserOperationGas = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
     args: EstimateUserOperationGasParameters
 ): Promise<EstimateUserOperationGasReturnType> => {
     const { userOperation, entryPoint } = args

@@ -195,6 +195,6 @@ export const getOldUserOpHash = (): Hex => {
 
 export const waitForNonceUpdate = async () => {
     return new Promise((res) => {
-        setTimeout(res, 1000)
+        setTimeout(res, 10000)
     })
 }

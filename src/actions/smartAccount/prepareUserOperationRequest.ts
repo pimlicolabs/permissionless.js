@@ -121,7 +121,11 @@ export async function prepareUserOperationRequest<
             client,
             estimateUserOperationGas
         )({
-            userOperation,
+            userOperation: {
+                ...userOperation,
+                maxFeePerGas: 1n,
+                maxPriorityFeePerGas: 1n
+            },
             entryPoint: account.entryPoint
         })
 

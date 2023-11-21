@@ -1,5 +1,6 @@
-import type { Address, Hash } from "viem"
+import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
@@ -36,8 +37,12 @@ export type SendUserOperationParameters = {
  *
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
  */
-export const sendUserOperation = async (
-    client: BundlerClient,
+export const sendUserOperation = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
     args: SendUserOperationParameters
 ): Promise<Hash> => {
     const { userOperation, entryPoint } = args
