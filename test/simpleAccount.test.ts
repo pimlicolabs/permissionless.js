@@ -140,7 +140,6 @@ describe("Simple Account", () => {
                 }
             ]
         })
-        console.log(response)
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
@@ -283,8 +282,6 @@ describe("Simple Account", () => {
                 }
             ]
         })
-
-        console.log(response)
 
         expect(response).toBeString()
         expect(response).toHaveLength(66)
