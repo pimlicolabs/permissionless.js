@@ -26,6 +26,7 @@ export type SendTransactionsWithPaymasterParameters<
     SponsorUserOperationMiddleware & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
+        nonce?: bigint
     }
 
 /**
@@ -86,7 +87,8 @@ export async function sendTransactions<
         transactions,
         sponsorUserOperation,
         maxFeePerGas,
-        maxPriorityFeePerGas
+        maxPriorityFeePerGas,
+        nonce
     } = args
 
     if (!account_) {
@@ -121,7 +123,8 @@ export async function sendTransactions<
             paymasterAndData: "0x",
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callData: callData
+            callData: callData,
+            nonce: nonce
         },
         account: account,
         sponsorUserOperation

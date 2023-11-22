@@ -87,6 +87,7 @@ export async function sendTransaction<
         maxPriorityFeePerGas,
         to,
         value,
+        nonce,
         sponsorUserOperation
     } = args
 
@@ -119,7 +120,8 @@ export async function sendTransaction<
             paymasterAndData: "0x",
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callData: callData
+            callData: callData,
+            nonce: nonce ? BigInt(nonce) : undefined
         },
         account: account,
         sponsorUserOperation

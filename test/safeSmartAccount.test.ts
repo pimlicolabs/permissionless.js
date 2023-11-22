@@ -27,9 +27,6 @@ import {
 
 dotenv.config()
 
-let testPrivateKey: Hex
-let factoryAddress: Address
-
 beforeAll(() => {
     if (!process.env.PIMLICO_API_KEY) {
         throw new Error("PIMLICO_API_KEY environment variable not set")
@@ -53,8 +50,6 @@ beforeAll(() => {
     if (!process.env.GREETER_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
 describe("Safe Account", () => {
