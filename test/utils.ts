@@ -78,9 +78,7 @@ export const getSmartAccountClient = async ({
         account: account ?? (await getPrivateKeyToSimpleSmartAccount()),
         chain,
         transport: http(
-            `${
-                process.env.PIMLICO_BUNDLER_RPC_HOST
-            }/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
         ),
         sponsorUserOperation
     })
@@ -128,9 +126,7 @@ export const getBundlerClient = () => {
     return createBundlerClient({
         chain: chain,
         transport: http(
-            `${
-                process.env.PIMLICO_BUNDLER_RPC_HOST
-            }/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
         )
     })
 }
@@ -147,9 +143,7 @@ export const getPimlicoBundlerClient = () => {
     return createPimlicoBundlerClient({
         chain: chain,
         transport: http(
-            `${
-                process.env.PIMLICO_BUNDLER_RPC_HOST
-            }/v1/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/rpc?apikey=${pimlicoApiKey}`
         )
     })
 }
@@ -166,9 +160,7 @@ export const getPimlicoPaymasterClient = () => {
     return createPimlicoPaymasterClient({
         chain: chain,
         transport: http(
-            `${
-                process.env.PIMLICO_BUNDLER_RPC_HOST
-            }/v2/${chain.name.toLowerCase()}/rpc?apikey=${pimlicoApiKey}`
+            `${process.env.PIMLICO_PAYMASTER_RPC_HOST}?apikey=${pimlicoApiKey}`
         )
     })
 }

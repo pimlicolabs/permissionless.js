@@ -122,9 +122,7 @@ export async function prepareUserOperationRequest<
             estimateUserOperationGas
         )({
             userOperation: {
-                ...userOperation,
-                maxFeePerGas: 1n,
-                maxPriorityFeePerGas: 1n
+                ...userOperation
             },
             entryPoint: account.entryPoint
         })

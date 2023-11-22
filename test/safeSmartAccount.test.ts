@@ -344,25 +344,11 @@ describe("Safe Account", () => {
     test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
-        const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount(),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
-            }
+            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -383,6 +369,7 @@ describe("Safe Account", () => {
 
         let eventFound = false
 
+        const bundlerClient = getBundlerClient()
         for (const log of transactionReceipt.logs) {
             try {
                 const event = decodeEventLog({
