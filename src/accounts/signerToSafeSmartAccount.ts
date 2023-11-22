@@ -1,4 +1,5 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
@@ -526,6 +527,16 @@ export async function signerToSafeSmartAccount<
 ): Promise<SafeSmartAccount<TTransport, TChain>> {
     const chainId = await getChainId(client)
 
+    const viemSigner: Account =
+        signer.type === "local"
+            ? ({
+                  ...signer,
+                  signTransaction: (_, __) => {
+                      throw new SignTransactionNotSupportedBySmartAccount()
+                  }
+              } as Account)
+            : (signer as Account)
+
     const {
         addModuleLibAddress,
         safe4337ModuleAddress,
@@ -544,7 +555,7 @@ export async function signerToSafeSmartAccount<
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
         client,
-        owner: signer.address,
+        owner: viemSigner.address,
         addModuleLibAddress,
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
@@ -577,7 +588,7 @@ export async function signerToSafeSmartAccount<
             return adjustVInSignature(
                 "eth_sign",
                 await signMessage(client, {
-                    account: signer,
+                    account: viemSigner,
                     message: {
                         raw: toBytes(messageHash)
                     }
@@ -591,7 +602,7 @@ export async function signerToSafeSmartAccount<
             return adjustVInSignature(
                 "eth_signTypedData",
                 await signTypedData(client, {
-                    account: signer,
+                    account: viemSigner,
                     domain: {
                         chainId: chainId,
                         verifyingContract: accountAddress
@@ -625,9 +636,9 @@ export async function signerToSafeSmartAccount<
 
             const signatures = [
                 {
-                    signer: signer.address,
+                    signer: viemSigner.address,
                     data: await signTypedData(client, {
-                        account: signer,
+                        account: viemSigner,
                         domain: {
                             chainId: chainId,
                             verifyingContract: safe4337ModuleAddress
@@ -679,7 +690,7 @@ export async function signerToSafeSmartAccount<
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
             return getAccountInitCode({
-                owner: signer.address,
+                owner: viemSigner.address,
                 addModuleLibAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,

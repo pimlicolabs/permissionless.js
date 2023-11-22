@@ -1,4 +1,5 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
@@ -116,12 +117,22 @@ export async function signerToSimpleSmartAccount<
         index?: bigint
     }
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
+    const viemSigner: Account =
+        signer.type === "local"
+            ? ({
+                  ...signer,
+                  signTransaction: (_, __) => {
+                      throw new SignTransactionNotSupportedBySmartAccount()
+                  }
+              } as Account)
+            : (signer as Account)
+
     const [accountAddress, chainId] = await Promise.all([
         getAccountAddress<TTransport, TChain>({
             client,
             factoryAddress,
             entryPoint,
-            owner: signer.address,
+            owner: viemSigner.address,
             index
         }),
         getChainId(client)
@@ -132,13 +143,13 @@ export async function signerToSimpleSmartAccount<
     const account = toAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            return signMessage(client, { account: signer, message })
+            return signMessage(client, { account: viemSigner, message })
         },
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
         async signTypedData(typedData) {
-            return signTypedData(client, { account: signer, ...typedData })
+            return signTypedData(client, { account: viemSigner, ...typedData })
         }
     })
 
@@ -172,7 +183,7 @@ export async function signerToSimpleSmartAccount<
 
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
-            return getAccountInitCode(factoryAddress, signer.address, index)
+            return getAccountInitCode(factoryAddress, viemSigner.address, index)
         },
         async encodeDeployCallData(_) {
             throw new Error("Simple account doesn't support account deployment")
