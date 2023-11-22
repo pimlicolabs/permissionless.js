@@ -300,8 +300,6 @@ describe("Safe Account", () => {
             data: "0x"
         })
 
-        console.log(response)
-
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
