@@ -1,13 +1,31 @@
-import type {
-    Abi,
-    Address,
-    Client,
-    GetConstructorArgs,
-    Hex,
-    LocalAccount
+import {
+    type Abi,
+    type Account,
+    type Address,
+    BaseError,
+    type Client,
+    type GetConstructorArgs,
+    type Hex,
+    type LocalAccount
 } from "viem"
 import type { Chain, Transport } from "viem"
 import { type UserOperation } from "../types/index.js"
+
+export class SignTransactionNotSupportedBySmartAccount extends BaseError {
+    override name = "SignTransactionNotSupportedBySmartAccount"
+    constructor({ docsPath }: { docsPath?: string } = {}) {
+        super(
+            [
+                "A smart account cannot sign or send transaction, it can only sign message or userOperation.",
+                "Please send user operation instead."
+            ].join("\n"),
+            {
+                docsPath,
+                docsSlug: "account"
+            }
+        )
+    }
+}
 
 export type SmartAccount<
     Name extends string = string,
@@ -39,3 +57,8 @@ export type SmartAccount<
     }: { abi: TAbi; bytecode: Hex } & GetConstructorArgs<TAbi>) => Promise<Hex>
     signUserOperation: (UserOperation: UserOperation) => Promise<Hex>
 }
+
+export type SmartAccountSigner<TAddress extends Address = Address> = Omit<
+    Account<TAddress>,
+    "signTransaction"
+>

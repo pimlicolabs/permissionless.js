@@ -1,26 +1,16 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { UserOperation } from "permissionless/index.js"
-import {
-    Address,
-    Client,
-    Hex,
-    Transport,
-    decodeEventLog,
-    getContract,
-    zeroAddress
-} from "viem"
+import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     getBundlerClient,
     getEntryPoint,
     getPimlicoPaymasterClient,
-    getPrivateKeyToSimpleSmartAccount,
     getPublicClient,
+    getSignerToSimpleSmartAccount,
     getSmartAccountClient,
-    getTestingChain,
     waitForNonceUpdate
 } from "./utils.js"
 
@@ -58,7 +48,7 @@ beforeAll(() => {
 
 describe("Simple Account", () => {
     test("Simple Account address", async () => {
-        const simpleSmartAccount = await getPrivateKeyToSimpleSmartAccount()
+        const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
         expect(simpleSmartAccount.address).toBeString()
         expect(simpleSmartAccount.address).toHaveLength(42)

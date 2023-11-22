@@ -1,23 +1,33 @@
+import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount.js"
+
 import {
-    type PrivateKeySimpleSmartAccount,
+    type SimpleSmartAccount,
+    signerToSimpleSmartAccount
+} from "./signerToSimpleSmartAccount.js"
+
+import { privateKeyToSafeSmartAccount } from "./privateKeyToSafeSmartAccount.js"
+
+import {
+    type SafeSmartAccount,
+    type SafeVersion,
+    signerToSafeSmartAccount
+} from "./signerToSafeSmartAccount.js"
+
+import {
     SignTransactionNotSupportedBySmartAccount,
-    privateKeyToSimpleSmartAccount
-} from "./privateKeyToSimpleSmartAccount.js"
-
-import {
-    type PrivateKeySafeSmartAccount,
-    SignTransactionNotSupportedBySafeSmartAccount,
-    privateKeyToSafeSmartAccount
-} from "./privateKeyToSafeSmartAccount.js"
-
-import { type SmartAccount } from "./types.js"
+    type SmartAccount,
+    type SmartAccountSigner
+} from "./types.js"
 
 export {
+    type SafeVersion,
+    type SmartAccountSigner,
+    type SafeSmartAccount,
+    signerToSafeSmartAccount,
+    type SimpleSmartAccount,
+    signerToSimpleSmartAccount,
     SignTransactionNotSupportedBySmartAccount,
-    type PrivateKeySimpleSmartAccount,
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
-    SignTransactionNotSupportedBySafeSmartAccount,
-    privateKeyToSafeSmartAccount,
-    type PrivateKeySafeSmartAccount
+    privateKeyToSafeSmartAccount
 }

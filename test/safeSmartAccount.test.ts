@@ -1,15 +1,13 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { SignTransactionNotSupportedBySafeSmartAccount } from "permissionless/accounts"
+import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
     Address,
     BaseError,
-    Hex,
     decodeEventLog,
     getContract,
     hashMessage,
     hashTypedData,
-    toHex,
     zeroAddress
 } from "viem"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
@@ -19,8 +17,8 @@ import {
     getBundlerClient,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
-    getPrivateKeyToSafeSmartAccount,
     getPublicClient,
+    getSignerToSafeSmartAccount,
     getSmartAccountClient,
     waitForNonceUpdate
 } from "./utils.js"
@@ -54,7 +52,7 @@ beforeAll(() => {
 
 describe("Safe Account", () => {
     test("Safe Account address", async () => {
-        const safeSmartAccount = await getPrivateKeyToSafeSmartAccount()
+        const safeSmartAccount = await getSignerToSafeSmartAccount()
 
         expect(safeSmartAccount.address).toBeString()
         expect(safeSmartAccount.address).toHaveLength(42)
@@ -66,12 +64,12 @@ describe("Safe Account", () => {
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySafeSmartAccount())
+        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
     })
 
     test("safe Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount()
         })
 
         const messageToSign = "hello world"
@@ -146,7 +144,7 @@ describe("Safe Account", () => {
 
     test("safe Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount()
         })
 
         const signature = await smartAccountClient.signTypedData({
@@ -257,7 +255,7 @@ describe("Safe Account", () => {
 
     test("safe smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount()
         })
 
         expect(async () => {
@@ -276,7 +274,7 @@ describe("Safe Account", () => {
             "0xEc43912D8C772A0Eba5a27ea5804Ba14ab502009"
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount({
+            account: await getSignerToSafeSmartAccount({
                 setupTransactions: [
                     {
                         to: usdcTokenAddress,
@@ -305,7 +303,7 @@ describe("Safe Account", () => {
             address: process.env.GREETER_ADDRESS as Address,
             publicClient: await getPublicClient(),
             walletClient: await getSmartAccountClient({
-                account: await getPrivateKeyToSafeSmartAccount()
+                account: await getSignerToSafeSmartAccount()
             })
         })
 
@@ -327,7 +325,7 @@ describe("Safe Account", () => {
 
     test("safe Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount()
         })
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()
@@ -358,7 +356,7 @@ describe("Safe Account", () => {
 
     test("safe Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount()
         })
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
@@ -381,7 +379,7 @@ describe("Safe Account", () => {
         const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount(),
+            account: await getSignerToSafeSmartAccount(),
             sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
         })
 
@@ -437,7 +435,7 @@ describe("Safe Account", () => {
         const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getPrivateKeyToSafeSmartAccount(),
+            account: await getSignerToSafeSmartAccount(),
             sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
         })
 
