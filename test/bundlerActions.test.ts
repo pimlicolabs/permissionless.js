@@ -5,13 +5,12 @@ import {
     WaitForUserOperationReceiptTimeoutError
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
-import { http, Address, Hex } from "viem"
+import { Address } from "viem"
 import { buildUserOp } from "./userOp.js"
 import {
     getBundlerClient,
     getEntryPoint,
     getEoaWalletClient,
-    getPublicClient,
     getTestingChain,
     waitForNonceUpdate
 } from "./utils.js"

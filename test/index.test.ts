@@ -1,10 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import {
-    UserOperation,
-    getSenderAddress,
-    getUserOperationHash
-} from "permissionless"
+import { getSenderAddress, getUserOperationHash } from "permissionless"
 import { signUserOperationHashWithECDSA } from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {

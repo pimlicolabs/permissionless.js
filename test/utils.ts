@@ -1,8 +1,8 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
-    privateKeyToSafeSmartAccount,
-    privateKeyToSimpleSmartAccount
+    signerToSafeSmartAccount,
+    signerToSimpleSmartAccount
 } from "permissionless/accounts"
 import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import {
@@ -37,20 +37,22 @@ export const getTestingChain = () => {
     return goerli
 }
 
-export const getPrivateKeyToSimpleSmartAccount = async () => {
+export const getSignerToSimpleSmartAccount = async () => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
     const publicClient = await getPublicClient()
 
-    return await privateKeyToSimpleSmartAccount(publicClient, {
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToSimpleSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
-        privateKey: process.env.TEST_PRIVATE_KEY as Hex
+        signer: signer
     })
 }
 
-export const getPrivateKeyToSafeSmartAccount = async (args?: {
+export const getSignerToSafeSmartAccount = async (args?: {
     setupTransactions?: {
         to: Address
         data: Address
@@ -62,9 +64,11 @@ export const getPrivateKeyToSafeSmartAccount = async (args?: {
 
     const publicClient = await getPublicClient()
 
-    return await privateKeyToSafeSmartAccount(publicClient, {
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToSafeSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
-        privateKey: process.env.TEST_PRIVATE_KEY as Hex,
+        signer: signer,
         safeVersion: "1.4.1",
         saltNonce: 100n,
         setupTransactions: args?.setupTransactions
@@ -83,7 +87,7 @@ export const getSmartAccountClient = async ({
     const chain = getTestingChain()
 
     return createSmartAccountClient({
-        account: account ?? (await getPrivateKeyToSimpleSmartAccount()),
+        account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(
             `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`

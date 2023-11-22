@@ -2,13 +2,10 @@ import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     PimlicoBundlerClient,
-    PimlicoPaymasterClient,
-    createPimlicoBundlerClient,
-    createPimlicoPaymasterClient
+    PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
 import { UserOperation } from "permissionless/index.js"
 import { getUserOperationHash } from "permissionless/utils"
-import { http } from "viem"
 import { buildUserOp } from "./userOp.js"
 import {
     getEntryPoint,
