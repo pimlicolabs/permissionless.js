@@ -43,12 +43,14 @@ export const getSignerToSimpleSmartAccount = async () => {
 
     const publicClient = await getPublicClient()
 
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+    const smartAccountSigner = privateKeyToAccount(
+        process.env.TEST_PRIVATE_KEY as Hex
+    )
 
     return await signerToSimpleSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
-        signer: signer
+        smartAccountSigner: smartAccountSigner
     })
 }
 
@@ -64,11 +66,13 @@ export const getSignerToSafeSmartAccount = async (args?: {
 
     const publicClient = await getPublicClient()
 
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+    const smartAccountSigner = privateKeyToAccount(
+        process.env.TEST_PRIVATE_KEY as Hex
+    )
 
     return await signerToSafeSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
-        signer: signer,
+        smartAccountSigner: smartAccountSigner,
         safeVersion: "1.4.1",
         saltNonce: 100n,
         setupTransactions: args?.setupTransactions

@@ -494,7 +494,7 @@ export async function signerToSafeSmartAccount<
 >(
     client: Client<TTransport, TChain>,
     {
-        signer,
+        smartAccountSigner,
         safeVersion,
         entryPoint,
         addModuleLibAddress: _addModuleLibAddress,
@@ -508,7 +508,7 @@ export async function signerToSafeSmartAccount<
         setupTransactions = []
     }: {
         safeVersion: SafeVersion
-        signer: SmartAccountSigner
+        smartAccountSigner: SmartAccountSigner
         entryPoint: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
@@ -528,14 +528,14 @@ export async function signerToSafeSmartAccount<
     const chainId = await getChainId(client)
 
     const viemSigner: Account =
-        signer.type === "local"
+        smartAccountSigner.type === "local"
             ? ({
-                  ...signer,
+                  ...smartAccountSigner,
                   signTransaction: (_, __) => {
                       throw new SignTransactionNotSupportedBySmartAccount()
                   }
               } as Account)
-            : (signer as Account)
+            : (smartAccountSigner as Account)
 
     const {
         addModuleLibAddress,

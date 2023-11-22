@@ -106,26 +106,26 @@ export async function signerToSimpleSmartAccount<
 >(
     client: Client<TTransport, TChain>,
     {
-        signer,
+        smartAccountSigner,
         factoryAddress,
         entryPoint,
         index = 0n
     }: {
-        signer: SmartAccountSigner
+        smartAccountSigner: SmartAccountSigner
         factoryAddress: Address
         entryPoint: Address
         index?: bigint
     }
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
     const viemSigner: Account =
-        signer.type === "local"
+        smartAccountSigner.type === "local"
             ? ({
-                  ...signer,
+                  ...smartAccountSigner,
                   signTransaction: (_, __) => {
                       throw new SignTransactionNotSupportedBySmartAccount()
                   }
               } as Account)
-            : (signer as Account)
+            : (smartAccountSigner as Account)
 
     const [accountAddress, chainId] = await Promise.all([
         getAccountAddress<TTransport, TChain>({
