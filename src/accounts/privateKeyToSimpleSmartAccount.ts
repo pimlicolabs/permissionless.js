@@ -191,7 +191,48 @@ export async function privateKeyToSimpleSmartAccount<
         async encodeDeployCallData(_) {
             throw new Error("Simple account doesn't support account deployment")
         },
-        async encodeCallData({ to, value, data }) {
+        async encodeCallData(args) {
+            if (Array.isArray(args)) {
+                const argsArray = args as {
+                    to: Address
+                    value: bigint
+                    data: Hex
+                }[]
+                return encodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address[]",
+                                    name: "dest",
+                                    type: "address[]"
+                                },
+                                {
+                                    internalType: "bytes[]",
+                                    name: "func",
+                                    type: "bytes[]"
+                                }
+                            ],
+                            name: "executeBatch",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
+                    functionName: "executeBatch",
+                    args: [
+                        argsArray.map((a) => a.to),
+                        argsArray.map((a) => a.data)
+                    ]
+                })
+            }
+
+            const { to, value, data } = args as {
+                to: Address
+                value: bigint
+                data: Hex
+            }
+
             return encodeFunctionData({
                 abi: [
                     {

@@ -1,5 +1,6 @@
-import type { Address, Hash } from "viem"
+import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 import type { UserOperation } from "../../types/userOperation.js"
 
 export type GetUserOperationByHashParameters = {
@@ -36,8 +37,12 @@ export type GetUserOperationByHashReturnType = {
  * getUserOperationByHash(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationByHash = async (
-    client: BundlerClient,
+export const getUserOperationByHash = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
     { hash }: GetUserOperationByHashParameters
 ): Promise<GetUserOperationByHashReturnType> => {
     const params: [Hash] = [hash]

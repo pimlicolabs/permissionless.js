@@ -1,5 +1,12 @@
-import { BaseError, type Chain, type Hash, stringify } from "viem"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import {
+    type Account,
+    BaseError,
+    type Chain,
+    type Client,
+    type Hash,
+    type Transport,
+    stringify
+} from "viem"
 import { getAction } from "../../utils/getAction.js"
 import { observe } from "../../utils/observe.js"
 import {
@@ -49,8 +56,12 @@ export type WaitForUserOperationReceiptParameters = {
  *   hash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d',
  * })
  */
-export const waitForUserOperationReceipt = <TChain extends Chain | undefined>(
-    bundlerClient: BundlerClient<TChain>,
+export const waitForUserOperationReceipt = <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    bundlerClient: Client<TTransport, TChain, TAccount>,
     {
         hash,
         pollingInterval = bundlerClient.pollingInterval,

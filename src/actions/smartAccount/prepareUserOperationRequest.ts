@@ -121,7 +121,9 @@ export async function prepareUserOperationRequest<
             client,
             estimateUserOperationGas
         )({
-            userOperation,
+            userOperation: {
+                ...userOperation
+            },
             entryPoint: account.entryPoint
         })
 

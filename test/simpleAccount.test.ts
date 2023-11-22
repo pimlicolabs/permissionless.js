@@ -20,7 +20,8 @@ import {
     getPrivateKeyToSimpleSmartAccount,
     getPublicClient,
     getSmartAccountClient,
-    getTestingChain
+    getTestingChain,
+    waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
@@ -123,6 +124,28 @@ describe("Simple Account", () => {
         }).toThrow("Simple account doesn't support account deployment")
     })
 
+    test("Smart account client send multiple transactions", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+        const response = await smartAccountClient.sendTransactions({
+            transactions: [
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                },
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                }
+            ]
+        })
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
+    }, 1000000)
+
     test("Smart account write contract", async () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
@@ -144,6 +167,7 @@ describe("Simple Account", () => {
 
         expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
+        await waitForNonceUpdate()
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
@@ -156,6 +180,7 @@ describe("Simple Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
@@ -217,5 +242,77 @@ describe("Simple Account", () => {
         }
 
         expect(eventFound).toBeTrue()
+        await waitForNonceUpdate()
+    }, 1000000)
+
+    test("smart account client send multiple Transactions with paymaster", async () => {
+        const publicClient = await getPublicClient()
+
+        const bundlerClient = getBundlerClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            sponsorUserOperation: async ({
+                entryPoint: _entryPoint,
+                userOperation
+            }): Promise<{
+                paymasterAndData: Hex
+                preVerificationGas: bigint
+                verificationGasLimit: bigint
+                callGasLimit: bigint
+            }> => {
+                const pimlicoPaymaster = getPimlicoPaymasterClient()
+                return pimlicoPaymaster.sponsorUserOperation({
+                    userOperation,
+                    entryPoint: getEntryPoint()
+                })
+            }
+        })
+
+        const response = await smartAccountClient.sendTransactions({
+            transactions: [
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                },
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                }
+            ]
+        })
+
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+
+        const transactionReceipt = await publicClient.waitForTransactionReceipt(
+            {
+                hash: response
+            }
+        )
+
+        let eventFound = false
+
+        for (const log of transactionReceipt.logs) {
+            const event = decodeEventLog({
+                abi: EntryPointAbi,
+                ...log
+            })
+            if (event.eventName === "UserOperationEvent") {
+                eventFound = true
+                const userOperation =
+                    await bundlerClient.getUserOperationByHash({
+                        hash: event.args.userOpHash
+                    })
+                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
+                    "0x"
+                )
+            }
+        }
+
+        expect(eventFound).toBeTrue()
+        await waitForNonceUpdate()
     }, 1000000)
 })

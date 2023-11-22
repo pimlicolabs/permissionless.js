@@ -1,5 +1,6 @@
-import type { Address } from "viem"
+import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 
 /**
  * Returns the supported entrypoints by the bundler service
@@ -23,8 +24,12 @@ import type { BundlerClient } from "../../clients/createBundlerClient.js"
  * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
  *
  */
-export const supportedEntryPoints = async (
-    client: BundlerClient
+export const supportedEntryPoints = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>
 ): Promise<Address[]> => {
     return client.request({
         method: "eth_supportedEntryPoints",

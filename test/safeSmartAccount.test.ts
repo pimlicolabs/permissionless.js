@@ -20,7 +20,8 @@ import {
     getPimlicoPaymasterClient,
     getPrivateKeyToSafeSmartAccount,
     getPublicClient,
-    getSmartAccountClient
+    getSmartAccountClient,
+    waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
@@ -294,6 +295,31 @@ describe("Safe Account", () => {
 
         expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
+        await waitForNonceUpdate()
+    }, 1000000)
+
+    test("Smart account client send multiple transactions", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getPrivateKeyToSafeSmartAccount()
+        })
+        const response = await smartAccountClient.sendTransactions({
+            transactions: [
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                },
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                }
+            ]
+        })
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
@@ -308,6 +334,66 @@ describe("Safe Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+
+        await new Promise((res) => {
+            setTimeout(res, 1000)
+        })
+        await waitForNonceUpdate()
+    }, 1000000)
+
+    test("smart account client send Transaction with paymaster", async () => {
+        const publicClient = await getPublicClient()
+
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getPrivateKeyToSafeSmartAccount(),
+            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+        })
+
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+
+        const transactionReceipt = await publicClient.waitForTransactionReceipt(
+            {
+                hash: response
+            }
+        )
+
+        let eventFound = false
+
+        const bundlerClient = getBundlerClient()
+        for (const log of transactionReceipt.logs) {
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch (e) {
+                const error = e as BaseError
+                if (error.name !== "AbiEventSignatureNotFoundError") throw e
+            }
+        }
+
+        expect(eventFound).toBeTrue()
+        await waitForNonceUpdate()
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
@@ -334,10 +420,19 @@ describe("Safe Account", () => {
             }
         })
 
-        const response = await smartAccountClient.sendTransaction({
-            to: zeroAddress,
-            value: 0n,
-            data: "0x"
+        const response = await smartAccountClient.sendTransactions({
+            transactions: [
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                },
+                {
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                }
+            ]
         })
 
         expect(response).toBeString()
@@ -375,5 +470,6 @@ describe("Safe Account", () => {
         }
 
         expect(eventFound).toBeTrue()
+        await waitForNonceUpdate()
     }, 1000000)
 })

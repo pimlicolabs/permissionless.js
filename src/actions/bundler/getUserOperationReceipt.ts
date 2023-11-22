@@ -1,5 +1,14 @@
-import type { Address, Hash, Hex } from "viem"
+import type {
+    Account,
+    Address,
+    Chain,
+    Client,
+    Hash,
+    Hex,
+    Transport
+} from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
+import type { BundlerRpcSchema } from "../../types/bundler.js"
 import type { TStatus } from "../../types/userOperation.js"
 import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 
@@ -62,8 +71,12 @@ export type GetUserOperationReceiptReturnType = {
  * getUserOperationReceipt(bundlerClient, {hash: userOpHash})
  *
  */
-export const getUserOperationReceipt = async (
-    client: BundlerClient,
+export const getUserOperationReceipt = async <
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends Account | undefined = Account | undefined
+>(
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
     { hash }: GetUserOperationReceiptParameters
 ): Promise<GetUserOperationReceiptReturnType | null> => {
     const params: [Hash] = [hash]

@@ -40,35 +40,23 @@ export const EIP712_SAFE_OPERATION_TYPE = {
     ]
 }
 
-const SAFE_ADDRESSES_MAP: {
+const SAFE_VERSION_TO_ADDRESSES_MAP: {
     [key in SafeVersion]: {
-        [chainId: string]: {
-            ADD_MODULES_LIB_ADDRESS: Address
-            SAFE_4337_MODULE_ADDRESS: Address
-            SAFE_PROXY_FACTORY_ADDRESS: Address
-            SAFE_SINGLETON_ADDRESS: Address
-        }
+        ADD_MODULES_LIB_ADDRESS: Address
+        SAFE_4337_MODULE_ADDRESS: Address
+        SAFE_PROXY_FACTORY_ADDRESS: Address
+        SAFE_SINGLETON_ADDRESS: Address
+        MULTI_SEND_CALL_ONLY_ADDRESS: Address
     }
 } = {
     "1.4.1": {
-        "11155111": {
-            ADD_MODULES_LIB_ADDRESS:
-                "0x191EFDC03615B575922289DC339F4c70aC5C30Af",
-            SAFE_4337_MODULE_ADDRESS:
-                "0x39E54Bb2b3Aa444b4B39DEe15De3b7809c36Fc38",
-            SAFE_PROXY_FACTORY_ADDRESS:
-                "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
-            SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a"
-        },
-        "5": {
-            ADD_MODULES_LIB_ADDRESS:
-                "0x191EFDC03615B575922289DC339F4c70aC5C30Af",
-            SAFE_4337_MODULE_ADDRESS:
-                "0x39E54Bb2b3Aa444b4B39DEe15De3b7809c36Fc38",
-            SAFE_PROXY_FACTORY_ADDRESS:
-                "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
-            SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a"
-        }
+        ADD_MODULES_LIB_ADDRESS: "0x191EFDC03615B575922289DC339F4c70aC5C30Af",
+        SAFE_4337_MODULE_ADDRESS: "0x39E54Bb2b3Aa444b4B39DEe15De3b7809c36Fc38",
+        SAFE_PROXY_FACTORY_ADDRESS:
+            "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+        MULTI_SEND_CALL_ONLY_ADDRESS:
+            "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
     }
 }
 
@@ -371,36 +359,39 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
         saltNonce = 0n
     }: {
-        privateKey: Hex
         safeVersion: SafeVersion
+        privateKey: Hex
         entryPoint: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
         safeProxyFactoryAddress?: Address
         safeSingletonAddress?: Address
+        multiSendCallOnlyAddress?: Address
         saltNonce?: bigint
     }
 ): Promise<PrivateKeySafeSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     const chainId = await getChainId(client)
-    const chainIdString: string = chainId.toString()
 
-    const addModuleLibAddress: Address =
+    const addModuleLibAddress =
         _addModuleLibAddress ??
-        SAFE_ADDRESSES_MAP[safeVersion][chainIdString].ADD_MODULES_LIB_ADDRESS
-    const safe4337ModuleAddress: Address =
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].ADD_MODULES_LIB_ADDRESS
+    const safe4337ModuleAddress =
         _safe4337ModuleAddress ??
-        SAFE_ADDRESSES_MAP[safeVersion][chainIdString].SAFE_4337_MODULE_ADDRESS
-    const safeProxyFactoryAddress: Address =
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_4337_MODULE_ADDRESS
+    const safeProxyFactoryAddress =
         _safeProxyFactoryAddress ??
-        SAFE_ADDRESSES_MAP[safeVersion][chainIdString]
-            .SAFE_PROXY_FACTORY_ADDRESS
-    const safeSingletonAddress: Address =
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_PROXY_FACTORY_ADDRESS
+    const safeSingletonAddress =
         _safeSingletonAddress ??
-        SAFE_ADDRESSES_MAP[safeVersion][chainIdString].SAFE_SINGLETON_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_SINGLETON_ADDRESS
+    const multiSendCallOnlyAddress =
+        _multiSendCallOnlyAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_CALL_ONLY_ADDRESS
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
         client,
@@ -544,7 +535,72 @@ export async function privateKeyToSafeSmartAccount<
         async encodeDeployCallData(_) {
             throw new Error("Safe account doesn't support account deployment")
         },
-        async encodeCallData({ to, value, data }) {
+        async encodeCallData(args) {
+            let to: Address
+            let value: bigint
+            let data: Hex
+
+            if (Array.isArray(args)) {
+                const argsArray = args as {
+                    to: Address
+                    value: bigint
+                    data: Hex
+                }[]
+
+                to = multiSendCallOnlyAddress
+                value = 0n
+                data = encodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "bytes",
+                                    name: "transactions",
+                                    type: "bytes"
+                                }
+                            ],
+                            name: "multiSend",
+                            outputs: [],
+                            stateMutability: "payable",
+                            type: "function"
+                        }
+                    ],
+                    functionName: "multiSend",
+                    args: [
+                        `0x${argsArray
+                            .map(({ to, value, data }) => {
+                                const datBytes = toBytes(data)
+                                return encodePacked(
+                                    [
+                                        "uint8",
+                                        "address",
+                                        "uint256",
+                                        "uint256",
+                                        "bytes"
+                                    ],
+                                    [
+                                        0,
+                                        to,
+                                        value,
+                                        BigInt(datBytes.length),
+                                        data
+                                    ]
+                                ).slice(2)
+                            })
+                            .join("")}`
+                    ]
+                })
+            } else {
+                const singleTransaction = args as {
+                    to: Address
+                    value: bigint
+                    data: Hex
+                }
+                to = singleTransaction.to
+                data = singleTransaction.data
+                value = singleTransaction.value
+            }
+
             return encodeFunctionData({
                 abi: [
                     {
