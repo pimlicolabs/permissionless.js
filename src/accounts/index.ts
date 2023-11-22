@@ -15,11 +15,14 @@ import {
 
 import {
     type KernelEcdsaSmartAccount,
-    SignTransactionNotSupportedByKernelSmartAccount,
     signerToEcdsaKernelSmartAccount
 } from "./kernel/signerToEcdsaKernelSmartAccount.js"
 
-import { type SmartAccount } from "./types.js"
+import {
+    SignTransactionNotSupportedBySmartAccount,
+    type SmartAccount,
+    type SmartAccountSigner
+} from "./types.js"
 
 export {
     type SafeVersion,
@@ -31,10 +34,7 @@ export {
     SignTransactionNotSupportedBySmartAccount,
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
-    SignTransactionNotSupportedBySafeSmartAccount,
     privateKeyToSafeSmartAccount,
-    type PrivateKeySafeSmartAccount,
     type KernelEcdsaSmartAccount,
-    SignTransactionNotSupportedByKernelSmartAccount,
     signerToEcdsaKernelSmartAccount
 }

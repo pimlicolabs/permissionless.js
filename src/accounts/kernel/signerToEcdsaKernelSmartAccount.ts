@@ -1,6 +1,6 @@
 import {
+    type Account,
     type Address,
-    BaseError,
     type Chain,
     type Client,
     type Hex,
@@ -8,29 +8,22 @@ import {
     concatHex,
     encodeFunctionData
 } from "viem"
-import { privateKeyToAccount, toAccount } from "viem/accounts"
-import { getBytecode, getChainId } from "viem/actions"
+import { toAccount } from "viem/accounts"
+import {
+    getBytecode,
+    getChainId,
+    signMessage,
+    signTypedData
+} from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
 import type { SmartAccount } from "../types.js"
+import {
+    SignTransactionNotSupportedBySmartAccount,
+    type SmartAccountSigner
+} from "../types.js"
 import { KernelAccountAbi } from "./abi/KernelAccountAbi.js"
-
-export class SignTransactionNotSupportedByKernelSmartAccount extends BaseError {
-    override name = "SignTransactionNotSupportedByKernelSmartAccount"
-    constructor({ docsPath }: { docsPath?: string } = {}) {
-        super(
-            [
-                "A smart account cannot sign or send transaction, it can only sign message or userOperation.",
-                "Please send user operation instead."
-            ].join("\n"),
-            {
-                docsPath,
-                docsSlug: "account"
-            }
-        )
-    }
-}
 
 export type KernelEcdsaSmartAccount<
     transport extends Transport = Transport,
@@ -73,19 +66,17 @@ const createAccountAbi = [
 ] as const
 
 /**
- * Address of the ECDSA Validator
+ * Default addresses for kernel smart account
  */
-const ECDSA_VALIDATOR = "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390"
-
-/**
- * Address of the current deployed kernel smart account
- */
-const KERNEL_ACCOUNT_2_2_ADDRESS = "0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5"
-
-/**
- * Address for the kernel smart ccount factory
- */
-const KERNEL_FACTORY_ADDRESS = "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
+const KERNEL_ADDRESSES: {
+    ECDSA_VALIDATOR: Address
+    ACCOUNT_V2_2_LOGIC: Address
+    FACTORY_ADDRESS: Address
+} = {
+    ECDSA_VALIDATOR: "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390",
+    ACCOUNT_V2_2_LOGIC: "0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5",
+    FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
+}
 
 /**
  * Get the account initialization code for a kernel smart account
@@ -133,10 +124,7 @@ const getAccountInitCode = async ({
  * @param client
  * @param entryPoint
  * @param owner
- * @param index
- * @param factoryAddress
- * @param accountLogicAddress
- * @param ecdsaValidatorAddress
+ * @param initCodeProvider
  */
 const getAccountAddress = async <
     TTransport extends Transport = Transport,
@@ -144,28 +132,15 @@ const getAccountAddress = async <
 >({
     client,
     entryPoint,
-    owner,
-    index = 0n,
-    factoryAddress,
-    accountLogicAddress,
-    ecdsaValidatorAddress
+    initCodeProvider
 }: {
     client: Client<TTransport, TChain>
     owner: Address
+    initCodeProvider: () => Promise<Hex>
     entryPoint: Address
-    index?: bigint
-    factoryAddress: Address
-    accountLogicAddress: Address
-    ecdsaValidatorAddress: Address
 }): Promise<Address> => {
     // Find the init code for this account
-    const initCode = await getAccountInitCode({
-        owner,
-        index,
-        factoryAddress,
-        accountLogicAddress,
-        ecdsaValidatorAddress
-    })
+    const initCode = await initCodeProvider()
 
     // Get the sender address based on the init code
     return getSenderAddress(client, {
@@ -190,14 +165,14 @@ export async function signerToEcdsaKernelSmartAccount<
 >(
     client: Client<TTransport, TChain>,
     {
-        privateKey,
+        signer,
         entryPoint,
         index = 0n,
-        factoryAddress = KERNEL_FACTORY_ADDRESS,
-        accountLogicAddress = KERNEL_ACCOUNT_2_2_ADDRESS,
-        ecdsaValidatorAddress = ECDSA_VALIDATOR
+        factoryAddress = KERNEL_ADDRESSES.FACTORY_ADDRESS,
+        accountLogicAddress = KERNEL_ADDRESSES.ACCOUNT_V2_2_LOGIC,
+        ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR
     }: {
-        privateKey: Hex
+        signer: SmartAccountSigner
         entryPoint: Address
         index?: bigint
         factoryAddress?: Address
@@ -206,18 +181,33 @@ export async function signerToEcdsaKernelSmartAccount<
     }
 ): Promise<KernelEcdsaSmartAccount<TTransport, TChain>> {
     // Get the private key related account
-    const privateKeyAccount = privateKeyToAccount(privateKey)
+    const viemSigner: Account =
+        signer.type === "local"
+            ? ({
+                  ...signer,
+                  signTransaction: (_, __) => {
+                      throw new SignTransactionNotSupportedBySmartAccount()
+                  }
+              } as Account)
+            : (signer as Account)
+
+    // Helper to generate the init code for the smart account
+    const generateInitCode = () =>
+        getAccountInitCode({
+            owner: viemSigner.address,
+            index,
+            factoryAddress,
+            accountLogicAddress,
+            ecdsaValidatorAddress
+        })
 
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
         getAccountAddress<TTransport, TChain>({
             client,
             entryPoint,
-            owner: privateKeyAccount.address,
-            index,
-            factoryAddress,
-            accountLogicAddress,
-            ecdsaValidatorAddress
+            owner: viemSigner.address,
+            initCodeProvider: generateInitCode
         }),
         getChainId(client)
     ])
@@ -228,13 +218,13 @@ export async function signerToEcdsaKernelSmartAccount<
     const account = toAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            return privateKeyAccount.signMessage({ message })
+            return signMessage(client, { account: viemSigner, message })
         },
         async signTransaction(_, __) {
-            throw new SignTransactionNotSupportedByKernelSmartAccount()
+            throw new SignTransactionNotSupportedBySmartAccount()
         },
         async signTypedData(typedData) {
-            return privateKeyAccount.signTypedData({ ...typedData, privateKey })
+            return signTypedData(client, { account: viemSigner, ...typedData })
         }
     })
 
@@ -264,7 +254,8 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId: chainId
             })
             console.log("Hash: ", hash)
-            const signature = await privateKeyAccount.signMessage({
+            const signature = await signMessage(client, {
+                account: viemSigner,
                 message: { raw: hash }
             })
             // Always use the sudo mode, since we will use external paymaster
@@ -279,13 +270,7 @@ export async function signerToEcdsaKernelSmartAccount<
 
             if ((contractCode?.length ?? 0) > 2) return "0x"
 
-            return getAccountInitCode({
-                owner: privateKeyAccount.address,
-                index,
-                factoryAddress,
-                accountLogicAddress,
-                ecdsaValidatorAddress
-            })
+            return generateInitCode()
         },
 
         // Encode the deploy call data
