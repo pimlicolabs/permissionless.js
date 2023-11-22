@@ -47,6 +47,7 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
         SAFE_PROXY_FACTORY_ADDRESS: Address
         SAFE_SINGLETON_ADDRESS: Address
         MULTI_SEND_ADDRESS: Address
+        MULTI_SEND_CALL_ONLY_ADDRESS: Address
     }
 } = {
     "1.4.1": {
@@ -55,7 +56,9 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
         SAFE_PROXY_FACTORY_ADDRESS:
             "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
         SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
-        MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526"
+        MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        MULTI_SEND_CALL_ONLY_ADDRESS:
+            "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
     }
 }
 
@@ -445,13 +448,15 @@ const getDefaultAddresses = (
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        multiSendAddress: _multiSendCallOnlyAddress
+        multiSendAddress: _multiSendAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
     }: {
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
         safeProxyFactoryAddress?: Address
         safeSingletonAddress?: Address
         multiSendAddress?: Address
+        multiSendCallOnlyAddress?: Address
     }
 ) => {
     const addModuleLibAddress =
@@ -467,15 +472,20 @@ const getDefaultAddresses = (
         _safeSingletonAddress ??
         SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_SINGLETON_ADDRESS
     const multiSendAddress =
-        _multiSendCallOnlyAddress ??
+        _multiSendAddress ??
         SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_ADDRESS
+
+    const multiSendCallOnlyAddress =
+        _multiSendCallOnlyAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_CALL_ONLY_ADDRESS
 
     return {
         addModuleLibAddress,
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
         safeSingletonAddress,
-        multiSendAddress
+        multiSendAddress,
+        multiSendCallOnlyAddress
     }
 }
 
@@ -497,7 +507,8 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        multiSendAddress: _multiSendCallOnlyAddress,
+        multiSendAddress: _multiSendAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
         saltNonce = 0n,
         safeModules = [],
         setupTransactions = []
@@ -510,6 +521,7 @@ export async function privateKeyToSafeSmartAccount<
         safeProxyFactoryAddress?: Address
         safeSingletonAddress?: Address
         multiSendAddress?: Address
+        multiSendCallOnlyAddress?: Address
         saltNonce?: bigint
         setupTransactions?: {
             to: Address
@@ -528,13 +540,15 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
         safeSingletonAddress,
-        multiSendAddress
+        multiSendAddress,
+        multiSendCallOnlyAddress
     } = getDefaultAddresses(safeVersion, {
         addModuleLibAddress: _addModuleLibAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        multiSendAddress: _multiSendCallOnlyAddress
+        multiSendAddress: _multiSendAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
     })
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
@@ -697,7 +711,7 @@ export async function privateKeyToSafeSmartAccount<
                     data: Hex
                 }[]
 
-                to = multiSendAddress
+                to = multiSendCallOnlyAddress
                 value = 0n
 
                 data = encodeMultiSend(

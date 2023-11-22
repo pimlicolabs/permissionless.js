@@ -17,7 +17,6 @@ import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     generateApproveCallData,
     getBundlerClient,
-    getEntryPoint,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPrivateKeyToSafeSmartAccount,
