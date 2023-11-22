@@ -3,8 +3,6 @@ import type {
     Chain,
     Client,
     DeployContractParameters,
-    FormattedTransactionRequest,
-    GetChain,
     SendTransactionParameters,
     Transport,
     TypedData,
@@ -34,7 +32,6 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract.js"
-import type { GetAccountParameter, UnionOmit } from "../../types/index.js"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,
@@ -411,19 +408,9 @@ export type SmartAccountActions<
      *   value: 10000000000000000n
      * }])
      */
-    sendTransactions: <TChainOverride extends Chain | undefined = undefined>(
-        args: {
-            transactions: (UnionOmit<
-                FormattedTransactionRequest<
-                    TChainOverride extends Chain ? TChainOverride : TChain
-                >,
-                "from"
-            > &
-                GetChain<TChain, TChainOverride>)[]
-        } & GetAccountParameter<TSmartAccount>
-    ) => ReturnType<
-        typeof sendTransactions<TChain, TSmartAccount, TChainOverride>
-    >
+    sendTransactions: (
+        args: SendTransactionsWithPaymasterParameters<TSmartAccount>
+    ) => ReturnType<typeof sendTransactions<TChain, TSmartAccount>>
 }
 
 export const smartAccountActions =
