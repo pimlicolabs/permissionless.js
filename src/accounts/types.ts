@@ -58,7 +58,7 @@ export type SmartAccount<
     signUserOperation: (UserOperation: UserOperation) => Promise<Hex>
 }
 
-export type Signer<TAddress extends Address = Address> = Omit<
+export type SmartAccountSigner<TAddress extends Address = Address> = Omit<
     Account<TAddress>,
     "signTransaction"
 >
