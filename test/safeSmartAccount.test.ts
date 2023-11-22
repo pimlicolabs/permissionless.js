@@ -15,8 +15,9 @@ import {
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
+    generateApproveCallData,
     getBundlerClient,
-    getEntryPoint,
+    getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPrivateKeyToSafeSmartAccount,
     getPublicClient,
@@ -73,7 +74,7 @@ describe("Safe Account", () => {
         }).toThrow(new SignTransactionNotSupportedBySafeSmartAccount())
     })
 
-    test("Smart account client signMessage", async () => {
+    test("safe Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount()
         })
@@ -148,7 +149,7 @@ describe("Safe Account", () => {
         expect(response).toBe("0x20c13b0b")
     })
 
-    test("Smart account client signTypedData", async () => {
+    test("safe Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount()
         })
@@ -259,7 +260,7 @@ describe("Safe Account", () => {
         expect(response).toBe("0x20c13b0b")
     })
 
-    test("smart account client deploy contract", async () => {
+    test("safe smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount()
         })
@@ -272,7 +273,38 @@ describe("Safe Account", () => {
         }).toThrow("Safe account doesn't support account deployment")
     })
 
-    test("Smart account write contract", async () => {
+    test("safe Smart account deploy with setup Txs", async () => {
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
+
+        const usdcTokenAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
+        const erc20PaymasterAddress =
+            "0xEc43912D8C772A0Eba5a27ea5804Ba14ab502009"
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getPrivateKeyToSafeSmartAccount({
+                setupTransactions: [
+                    {
+                        to: usdcTokenAddress,
+                        data: generateApproveCallData(erc20PaymasterAddress),
+                        value: 0n
+                    }
+                ]
+            }),
+            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+        })
+
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+    }, 1000000)
+
+    test("safe Smart account write contract", async () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
@@ -298,10 +330,15 @@ describe("Safe Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Smart account client send multiple transactions", async () => {
+    test("safe Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount()
         })
+
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+
+        const gasPrices = await pimlicoBundlerClient.getUserOperationGasPrice()
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -314,7 +351,9 @@ describe("Safe Account", () => {
                     value: 0n,
                     data: "0x"
                 }
-            ]
+            ],
+            maxFeePerGas: gasPrices.fast.maxFeePerGas,
+            maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas
         })
         expect(response).toBeString()
         expect(response).toHaveLength(66)
@@ -322,7 +361,7 @@ describe("Safe Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Smart account client send transaction", async () => {
+    test("safe Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount()
         })
@@ -341,7 +380,7 @@ describe("Safe Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("smart account client send Transaction with paymaster", async () => {
+    test("safe smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -396,28 +435,15 @@ describe("Safe Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("smart account client send Transaction with paymaster", async () => {
+    test("safe smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getPrivateKeyToSafeSmartAccount(),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
-            }
+            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
         })
 
         const response = await smartAccountClient.sendTransactions({

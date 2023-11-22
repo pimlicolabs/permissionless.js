@@ -1,14 +1,14 @@
 import type {
+    Address,
     Chain,
     Client,
-    FormattedTransactionRequest,
-    GetChain,
+    Hex,
     SendTransactionParameters,
     SendTransactionReturnType,
     Transport
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
-import type { GetAccountParameter, UnionOmit } from "../../types/index.js"
+import type { GetAccountParameter } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 import {
     AccountOrClientNotFoundError,
@@ -19,19 +19,14 @@ import { type SponsorUserOperationMiddleware } from "./prepareUserOperationReque
 import { sendUserOperation } from "./sendUserOperation.js"
 
 export type SendTransactionsWithPaymasterParameters<
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
 > = {
-    transactions: (UnionOmit<
-        FormattedTransactionRequest<
-            TChainOverride extends Chain ? TChainOverride : TChain
-        >,
-        "from"
-    > &
-        GetChain<TChain, TChainOverride>)[]
+    transactions: { to: Address; value: bigint; data: Hex }[]
 } & GetAccountParameter<TAccount> &
-    SponsorUserOperationMiddleware
+    SponsorUserOperationMiddleware & {
+        maxFeePerGas?: bigint
+        maxPriorityFeePerGas?: bigint
+    }
 
 /**
  * Creates, signs, and sends a new transactions to the network.
@@ -81,20 +76,17 @@ export type SendTransactionsWithPaymasterParameters<
  */
 export async function sendTransactions<
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
-    TChainOverride extends Chain | undefined
+    TAccount extends SmartAccount | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: SendTransactionsWithPaymasterParameters<
-        TChain,
-        TAccount,
-        TChainOverride
-    >
+    args: SendTransactionsWithPaymasterParameters<TAccount>
 ): Promise<SendTransactionReturnType> {
     const {
         account: account_ = client.account,
         transactions,
-        sponsorUserOperation
+        sponsorUserOperation,
+        maxFeePerGas,
+        maxPriorityFeePerGas
     } = args
 
     if (!account_) {
@@ -109,43 +101,15 @@ export async function sendTransactions<
         throw new Error("RPC account type not supported")
     }
 
-    let maxFeePerGas: bigint | undefined
-    let maxPriorityFeePerGas: bigint | undefined
-
     const callData = await account.encodeCallData(
-        transactions.map(
-            ({
+        transactions.map(({ to, value, data }) => {
+            if (!to) throw new Error("Missing to address")
+            return {
                 to,
-                value,
-                data,
-                maxFeePerGas: txMaxFeePerGas,
-                maxPriorityFeePerGas: txMaxPriorityFeePerGas
-            }) => {
-                if (!to) throw new Error("Missing to address")
-
-                if (txMaxFeePerGas) {
-                    maxFeePerGas = maxFeePerGas
-                        ? maxFeePerGas > txMaxFeePerGas
-                            ? maxFeePerGas
-                            : txMaxFeePerGas
-                        : txMaxFeePerGas
-                }
-
-                if (txMaxPriorityFeePerGas) {
-                    maxPriorityFeePerGas = maxPriorityFeePerGas
-                        ? maxPriorityFeePerGas > txMaxPriorityFeePerGas
-                            ? maxPriorityFeePerGas
-                            : txMaxPriorityFeePerGas
-                        : txMaxPriorityFeePerGas
-                }
-
-                return {
-                    to,
-                    value: value || 0n,
-                    data: data || "0x"
-                }
+                value: value || 0n,
+                data: data || "0x"
             }
-        )
+        })
     )
 
     const userOpHash = await getAction(

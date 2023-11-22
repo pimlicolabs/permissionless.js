@@ -46,6 +46,7 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
         SAFE_4337_MODULE_ADDRESS: Address
         SAFE_PROXY_FACTORY_ADDRESS: Address
         SAFE_SINGLETON_ADDRESS: Address
+        MULTI_SEND_ADDRESS: Address
         MULTI_SEND_CALL_ONLY_ADDRESS: Address
     }
 } = {
@@ -55,6 +56,7 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
         SAFE_PROXY_FACTORY_ADDRESS:
             "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
         SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+        MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
         MULTI_SEND_CALL_ONLY_ADDRESS:
             "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
     }
@@ -117,6 +119,58 @@ const generateSafeMessageMessage = <
     )
 }
 
+const encodeInternalTransaction = (tx: {
+    to: Address
+    data: Address
+    value: bigint
+    operation: 0 | 1
+}): string => {
+    const encoded = encodePacked(
+        ["uint8", "address", "uint256", "uint256", "bytes"],
+        [
+            tx.operation,
+            tx.to,
+            tx.value,
+            BigInt(tx.data.slice(2).length / 2),
+            tx.data
+        ]
+    )
+    return encoded.slice(2)
+}
+
+const encodeMultiSend = (
+    txs: {
+        to: Address
+        data: Address
+        value: bigint
+        operation: 0 | 1
+    }[]
+): `0x${string}` => {
+    const data: `0x${string}` = `0x${txs
+        .map((tx) => encodeInternalTransaction(tx))
+        .join("")}`
+
+    return encodeFunctionData({
+        abi: [
+            {
+                inputs: [
+                    {
+                        internalType: "bytes",
+                        name: "transactions",
+                        type: "bytes"
+                    }
+                ],
+                name: "multiSend",
+                outputs: [],
+                stateMutability: "payable",
+                type: "function"
+            }
+        ],
+        functionName: "multiSend",
+        args: [data]
+    })
+}
+
 export type PrivateKeySafeSmartAccount<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
@@ -125,12 +179,50 @@ export type PrivateKeySafeSmartAccount<
 const getInitializerCode = async ({
     owner,
     addModuleLibAddress,
-    safe4337ModuleAddress
+    safe4337ModuleAddress,
+    multiSendAddress,
+    setupTransactions = [],
+    safeModules = []
 }: {
     owner: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
+    multiSendAddress: Address
+    setupTransactions?: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+    safeModules?: Address[]
 }) => {
+    const multiSendCallData = encodeMultiSend([
+        {
+            to: addModuleLibAddress,
+            data: encodeFunctionData({
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address[]",
+                                name: "modules",
+                                type: "address[]"
+                            }
+                        ],
+                        name: "enableModules",
+                        outputs: [],
+                        stateMutability: "nonpayable",
+                        type: "function"
+                    }
+                ],
+                functionName: "enableModules",
+                args: [[safe4337ModuleAddress, ...safeModules]]
+            }),
+            value: 0n,
+            operation: 1
+        },
+        ...setupTransactions.map((tx) => ({ ...tx, operation: 0 as 0 | 1 }))
+    ])
+
     return encodeFunctionData({
         abi: [
             {
@@ -186,26 +278,8 @@ const getInitializerCode = async ({
         args: [
             [owner],
             1n,
-            addModuleLibAddress,
-            encodeFunctionData({
-                abi: [
-                    {
-                        inputs: [
-                            {
-                                internalType: "address[]",
-                                name: "modules",
-                                type: "address[]"
-                            }
-                        ],
-                        name: "enableModules",
-                        outputs: [],
-                        stateMutability: "nonpayable",
-                        type: "function"
-                    }
-                ],
-                functionName: "enableModules",
-                args: [[safe4337ModuleAddress]]
-            }),
+            multiSendAddress,
+            multiSendCallData,
             safe4337ModuleAddress,
             zeroAddress,
             0n,
@@ -220,20 +294,33 @@ const getAccountInitCode = async ({
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
     safeSingletonAddress,
-    saltNonce = 0n
+    multiSendAddress,
+    saltNonce = 0n,
+    setupTransactions = [],
+    safeModules = []
 }: {
     owner: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
+    multiSendAddress: Address
     saltNonce?: bigint
+    setupTransactions?: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+    safeModules?: Address[]
 }): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
     const initializer = await getInitializerCode({
         owner,
         addModuleLibAddress,
-        safe4337ModuleAddress
+        safe4337ModuleAddress,
+        multiSendAddress,
+        setupTransactions,
+        safeModules
     })
 
     const initCodeCallData = encodeFunctionData({
@@ -285,6 +372,9 @@ const getAccountAddress = async <
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
     safeSingletonAddress,
+    multiSendAddress,
+    setupTransactions = [],
+    safeModules = [],
     saltNonce = 0n
 }: {
     client: Client<TTransport, TChain>
@@ -293,6 +383,13 @@ const getAccountAddress = async <
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
+    multiSendAddress: Address
+    setupTransactions: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+    safeModules?: Address[]
     saltNonce?: bigint
 }): Promise<Address> => {
     const proxyCreationCode = await readContract(client, {
@@ -323,7 +420,10 @@ const getAccountAddress = async <
     const initializer = await getInitializerCode({
         owner,
         addModuleLibAddress,
-        safe4337ModuleAddress
+        safe4337ModuleAddress,
+        multiSendAddress,
+        setupTransactions,
+        safeModules
     })
 
     const salt = keccak256(
@@ -339,6 +439,54 @@ const getAccountAddress = async <
         bytecode: deploymentCode,
         opcode: "CREATE2"
     })
+}
+
+const getDefaultAddresses = (
+    safeVersion: SafeVersion,
+    {
+        addModuleLibAddress: _addModuleLibAddress,
+        safe4337ModuleAddress: _safe4337ModuleAddress,
+        safeProxyFactoryAddress: _safeProxyFactoryAddress,
+        safeSingletonAddress: _safeSingletonAddress,
+        multiSendAddress: _multiSendAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
+    }: {
+        addModuleLibAddress?: Address
+        safe4337ModuleAddress?: Address
+        safeProxyFactoryAddress?: Address
+        safeSingletonAddress?: Address
+        multiSendAddress?: Address
+        multiSendCallOnlyAddress?: Address
+    }
+) => {
+    const addModuleLibAddress =
+        _addModuleLibAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].ADD_MODULES_LIB_ADDRESS
+    const safe4337ModuleAddress =
+        _safe4337ModuleAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_4337_MODULE_ADDRESS
+    const safeProxyFactoryAddress =
+        _safeProxyFactoryAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_PROXY_FACTORY_ADDRESS
+    const safeSingletonAddress =
+        _safeSingletonAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_SINGLETON_ADDRESS
+    const multiSendAddress =
+        _multiSendAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_ADDRESS
+
+    const multiSendCallOnlyAddress =
+        _multiSendCallOnlyAddress ??
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_CALL_ONLY_ADDRESS
+
+    return {
+        addModuleLibAddress,
+        safe4337ModuleAddress,
+        safeProxyFactoryAddress,
+        safeSingletonAddress,
+        multiSendAddress,
+        multiSendCallOnlyAddress
+    }
 }
 
 /**
@@ -359,8 +507,11 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
+        multiSendAddress: _multiSendAddress,
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
-        saltNonce = 0n
+        saltNonce = 0n,
+        safeModules = [],
+        setupTransactions = []
     }: {
         safeVersion: SafeVersion
         privateKey: Hex
@@ -369,29 +520,36 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress?: Address
         safeProxyFactoryAddress?: Address
         safeSingletonAddress?: Address
+        multiSendAddress?: Address
         multiSendCallOnlyAddress?: Address
         saltNonce?: bigint
+        setupTransactions?: {
+            to: Address
+            data: Address
+            value: bigint
+        }[]
+        safeModules?: Address[]
     }
 ): Promise<PrivateKeySafeSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     const chainId = await getChainId(client)
 
-    const addModuleLibAddress =
-        _addModuleLibAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].ADD_MODULES_LIB_ADDRESS
-    const safe4337ModuleAddress =
-        _safe4337ModuleAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_4337_MODULE_ADDRESS
-    const safeProxyFactoryAddress =
-        _safeProxyFactoryAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_PROXY_FACTORY_ADDRESS
-    const safeSingletonAddress =
-        _safeSingletonAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_SINGLETON_ADDRESS
-    const multiSendCallOnlyAddress =
-        _multiSendCallOnlyAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_CALL_ONLY_ADDRESS
+    const {
+        addModuleLibAddress,
+        safe4337ModuleAddress,
+        safeProxyFactoryAddress,
+        safeSingletonAddress,
+        multiSendAddress,
+        multiSendCallOnlyAddress
+    } = getDefaultAddresses(safeVersion, {
+        addModuleLibAddress: _addModuleLibAddress,
+        safe4337ModuleAddress: _safe4337ModuleAddress,
+        safeProxyFactoryAddress: _safeProxyFactoryAddress,
+        safeSingletonAddress: _safeSingletonAddress,
+        multiSendAddress: _multiSendAddress,
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
+    })
 
     const accountAddress = await getAccountAddress<TTransport, TChain>({
         client,
@@ -400,7 +558,10 @@ export async function privateKeyToSafeSmartAccount<
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
         safeSingletonAddress,
-        saltNonce
+        multiSendAddress,
+        saltNonce,
+        setupTransactions,
+        safeModules
     })
 
     if (!accountAddress) throw new Error("Account address not found")
@@ -529,7 +690,10 @@ export async function privateKeyToSafeSmartAccount<
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
                 safeSingletonAddress,
-                saltNonce
+                multiSendAddress,
+                saltNonce,
+                setupTransactions,
+                safeModules
             })
         },
         async encodeDeployCallData(_) {
@@ -549,47 +713,10 @@ export async function privateKeyToSafeSmartAccount<
 
                 to = multiSendCallOnlyAddress
                 value = 0n
-                data = encodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "bytes",
-                                    name: "transactions",
-                                    type: "bytes"
-                                }
-                            ],
-                            name: "multiSend",
-                            outputs: [],
-                            stateMutability: "payable",
-                            type: "function"
-                        }
-                    ],
-                    functionName: "multiSend",
-                    args: [
-                        `0x${argsArray
-                            .map(({ to, value, data }) => {
-                                const datBytes = toBytes(data)
-                                return encodePacked(
-                                    [
-                                        "uint8",
-                                        "address",
-                                        "uint256",
-                                        "uint256",
-                                        "bytes"
-                                    ],
-                                    [
-                                        0,
-                                        to,
-                                        value,
-                                        BigInt(datBytes.length),
-                                        data
-                                    ]
-                                ).slice(2)
-                            })
-                            .join("")}`
-                    ]
-                })
+
+                data = encodeMultiSend(
+                    argsArray.map((tx) => ({ ...tx, operation: 0 }))
+                )
             } else {
                 const singleTransaction = args as {
                     to: Address

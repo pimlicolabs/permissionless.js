@@ -14,7 +14,8 @@ import {
     Address,
     Hex,
     createPublicClient,
-    createWalletClient
+    createWalletClient,
+    encodeFunctionData
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { goerli } from "viem/chains"
@@ -49,7 +50,13 @@ export const getPrivateKeyToSimpleSmartAccount = async () => {
     })
 }
 
-export const getPrivateKeyToSafeSmartAccount = async () => {
+export const getPrivateKeyToSafeSmartAccount = async (args?: {
+    setupTransactions?: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+}) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -59,7 +66,8 @@ export const getPrivateKeyToSafeSmartAccount = async () => {
         entryPoint: getEntryPoint(),
         privateKey: process.env.TEST_PRIVATE_KEY as Hex,
         safeVersion: "1.4.1",
-        saltNonce: 100n
+        saltNonce: 100n,
+        setupTransactions: args?.setupTransactions
     })
 }
 
@@ -143,7 +151,7 @@ export const getPimlicoBundlerClient = () => {
     return createPimlicoBundlerClient({
         chain: chain,
         transport: http(
-            `${process.env.PIMLICO_BUNDLER_RPC_HOST}/rpc?apikey=${pimlicoApiKey}`
+            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
         )
     })
 }
@@ -189,4 +197,28 @@ export const waitForNonceUpdate = async () => {
     return new Promise((res) => {
         setTimeout(res, 10000)
     })
+}
+
+export const generateApproveCallData = (paymasterAddress: Address) => {
+    const approveData = encodeFunctionData({
+        abi: [
+            {
+                inputs: [
+                    { name: "_spender", type: "address" },
+                    { name: "_value", type: "uint256" }
+                ],
+                name: "approve",
+                outputs: [{ name: "", type: "bool" }],
+                payable: false,
+                stateMutability: "nonpayable",
+                type: "function"
+            }
+        ],
+        args: [
+            paymasterAddress,
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn
+        ]
+    })
+
+    return approveData
 }
