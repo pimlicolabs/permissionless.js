@@ -36,7 +36,7 @@ export async function privateKeyToSimpleSmartAccount<
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     return signerToSimpleSmartAccount(client, {
-        smartAccountSigner: privateKeyAccount,
+        signer: privateKeyAccount,
         factoryAddress,
         entryPoint,
         index

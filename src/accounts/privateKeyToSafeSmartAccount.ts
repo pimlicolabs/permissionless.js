@@ -57,7 +57,7 @@ export async function privateKeyToSafeSmartAccount<
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     return signerToSafeSmartAccount(client, {
-        smartAccountSigner: privateKeyAccount,
+        signer: privateKeyAccount,
         safeVersion,
         entryPoint,
         addModuleLibAddress: _addModuleLibAddress,
