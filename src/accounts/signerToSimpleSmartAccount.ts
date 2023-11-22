@@ -20,8 +20,8 @@ import { getSenderAddress } from "../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../utils/getUserOperationHash.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
-    type Signer,
-    type SmartAccount
+    type SmartAccount,
+    type SmartAccountSigner
 } from "./types.js"
 
 export type SimpleSmartAccount<
@@ -111,7 +111,7 @@ export async function signerToSimpleSmartAccount<
         entryPoint,
         index = 0n
     }: {
-        signer: Signer
+        signer: SmartAccountSigner
         factoryAddress: Address
         entryPoint: Address
         index?: bigint

@@ -30,8 +30,8 @@ import {
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
-    type Signer,
-    type SmartAccount
+    type SmartAccount,
+    type SmartAccountSigner
 } from "./types.js"
 
 export type SafeVersion = "1.4.1"
@@ -508,7 +508,7 @@ export async function signerToSafeSmartAccount<
         setupTransactions = []
     }: {
         safeVersion: SafeVersion
-        signer: Signer
+        signer: SmartAccountSigner
         entryPoint: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address

@@ -15,11 +15,13 @@ import {
 
 import {
     SignTransactionNotSupportedBySmartAccount,
-    type SmartAccount
+    type SmartAccount,
+    type SmartAccountSigner
 } from "./types.js"
 
 export {
     type SafeVersion,
+    type SmartAccountSigner,
     type SafeSmartAccount,
     signerToSafeSmartAccount,
     type SimpleSmartAccount,
