@@ -23,7 +23,7 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccountSigner
 } from "../types.js"
-import { KernelAccountAbi } from "./abi/KernelAccountAbi.js"
+import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi.js"
 
 export type KernelEcdsaSmartAccount<
     transport extends Transport = Transport,
@@ -103,7 +103,7 @@ const getAccountInitCode = async ({
 
     // Build the account initialization data
     const initialisationData = encodeFunctionData({
-        abi: KernelAccountAbi,
+        abi: KernelInitAbi,
         functionName: "initialize",
         args: [ecdsaValidatorAddress, owner]
     })
@@ -283,7 +283,7 @@ export async function signerToEcdsaKernelSmartAccount<
             if (Array.isArray(_tx)) {
                 // Encode a batched call
                 return encodeFunctionData({
-                    abi: KernelAccountAbi,
+                    abi: KernelExecuteAbi,
                     functionName: "executeBatch",
                     args: [
                         _tx.map((tx) => ({
@@ -296,7 +296,7 @@ export async function signerToEcdsaKernelSmartAccount<
             } else {
                 // Encode a simple call
                 return encodeFunctionData({
-                    abi: KernelAccountAbi,
+                    abi: KernelExecuteAbi,
                     functionName: "execute",
                     args: [_tx.to, _tx.value, _tx.data, 0]
                 })
