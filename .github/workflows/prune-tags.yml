@@ -37,12 +37,17 @@ jobs:
         run: |
           PACKAGE_NAME=$(jq -r '.name' package.json)
           TWO_DAYS_AGO=$(date --date='2 days ago' +%s)
+          FOUR_DAYS_AGO=$(date --date='4 days ago' +%s)
 
           npm view $PACKAGE_NAME time --json | jq -c 'to_entries | .[] | select(.key | test("^0.0.0-.+$"))' \
           | while read line; do
             VERSION=$(echo $line | jq -r '.key')
             TIME=$(echo $line | jq -r '.value')
             PUBLISH_DATE=$(date --date=$TIME +%s)
+          
+            if [ $PUBLISH_DATE -lt $FOUR_DAYS_AGO ]; then
+             continue # skip versions older than 4 days to reduce the number of npm deprecate calls
+            fi
 
             if [ $PUBLISH_DATE -lt $TWO_DAYS_AGO ]; then
               echo "Deprecate $PACKAGE_NAME@$VERSION"
