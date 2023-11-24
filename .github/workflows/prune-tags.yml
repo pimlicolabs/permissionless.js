@@ -21,3 +21,21 @@ jobs:
         run: npm view --json | jq -r '.["dist-tags"] | to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm viem %
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Deprecate canary versions
+        run: |
+          PACKAGE_NAME=$(jq -r '.name' package.json)
+          TWO_DAYS_AGO=$(date --date='2 days ago' +%s)
+
+          npm view $PACKAGE_NAME time --json | jq -c 'to_entries | .[] | select(.key | test("^0.0.0-.+$"))' \
+          | while read line; do
+            VERSION=$(echo $line | jq -r '.key')
+            TIME=$(echo $line | jq -r '.value')
+            PUBLISH_DATE=$(date --date=$TIME +%s)
+
+            if [ $PUBLISH_DATE -lt $TWO_DAYS_AGO ]; then
+              echo "Deprecate $PACKAGE_NAME@$VERSION"
+              # npm deprecate $PACKAGE_NAME@$VERSION "This canary version is deprecated because it is older than 2 days.
+              echo "Deprecated $PACKAGE_NAME@$VERSION"
+            fi
+          done
