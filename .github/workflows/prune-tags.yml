@@ -25,7 +25,7 @@ jobs:
         run: |
           PACKAGE_NAME=$(jq -r '.name' package.json)
           
-          npm view $PACKAGE_NAME dist-tags --json | jq -r 'to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm %
+          npm view $PACKAGE_NAME dist-tags --json | jq -r 'to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm $PACKAGE_NAME %
         working-directory: src
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
