@@ -50,7 +50,7 @@ export type PimlicoPaymasterClient = Client<
  *
  * const pimlicoBundlerClient = createPimlicoBundlerClient({
  *   chain: mainnet,
- *   transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE"),
+ *   transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE"),
  * })
  */
 export const createPimlicoBundlerClient = <

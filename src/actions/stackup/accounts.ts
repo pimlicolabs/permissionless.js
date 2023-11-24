@@ -19,7 +19,7 @@ export type AccountsParameters = {
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
- *      transport: http("https://api.stackup.sh/v1/paymaster/YOUR_API_KEY_HERE")
+ *      transport: http("https://api.stackup.sh/v2/paymaster/YOUR_API_KEY_HERE")
  * })
  *
  * await accounts(bundlerClient, {

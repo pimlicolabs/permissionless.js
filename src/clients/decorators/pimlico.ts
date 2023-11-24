@@ -33,7 +33,7 @@ export type PimlicoBundlerActions = {
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+     *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
      * }).extend(pimlicoBundlerActions)
      *
      * await bundlerClient.getUserOperationGasPrice()
@@ -53,7 +53,7 @@ export type PimlicoBundlerActions = {
      *
      * const bundlerClient = createClient({
      *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+     *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
      * }).extend(pimlicoBundlerActions)
      *
      * await bundlerClient.getUserOperationStatus({ hash: userOpHash })
@@ -109,7 +109,7 @@ export const pimlicoPaymasterActions = (
 })
 
 /**
- * TODO: Add support for pimlicoActions after we support all the actions of v1 in v2 of the Pimlico API.
+ * TODO: Add support for pimlicoActions after we support all the actions of v2 of the Pimlico API.
  */
 // export const pimlicoActions = (client: Client) => {
 //     return {

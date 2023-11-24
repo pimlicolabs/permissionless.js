@@ -31,7 +31,7 @@ export type GetUserOperationGasPriceReturnType = {
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
- *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+ *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
  * await getUserOperationGasPrice(bundlerClient)
