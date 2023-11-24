@@ -46,7 +46,7 @@ jobs:
 
             if [ $PUBLISH_DATE -lt $TWO_DAYS_AGO ]; then
               echo "Deprecate $PACKAGE_NAME@$VERSION"
-              npm deprecate $PACKAGE_NAME@$VERSION "This canary version is deprecated because it is older than 2 days."
+              npm deprecate $PACKAGE_NAME@$VERSION "This canary version is deprecated because it is older than 2 days." || true
               echo "Deprecated $PACKAGE_NAME@$VERSION"
             fi
           done
