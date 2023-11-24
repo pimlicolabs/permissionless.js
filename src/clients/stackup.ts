@@ -37,7 +37,7 @@ export type StackupPaymasterClient = Client<
  *
  * const stackupPaymasterClient = createStackupPaymasterClient({
  *   chain: mainnet,
- *   transport: http("https://api.stackup.sh/v1/paymaster/YOUR_API_KEY_HERE"),
+ *   transport: http("https://api.stackup.sh/v2/paymaster/YOUR_API_KEY_HERE"),
  * })
  */
 export const createStackupPaymasterClient = <

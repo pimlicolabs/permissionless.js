@@ -27,7 +27,7 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
- *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+ *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
  * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
