@@ -10,7 +10,6 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSignerToEcdsaKernelAccount,
-    getSignerToSimpleSmartAccount,
     getSmartAccountClient,
     waitForNonceUpdate
 } from "./utils.js"
@@ -19,7 +18,6 @@ dotenv.config()
 
 let testPrivateKey: Hex
 let factoryAddress: Address
-
 beforeAll(() => {
     if (!process.env.PIMLICO_API_KEY) {
         throw new Error("PIMLICO_API_KEY environment variable not set")
@@ -47,6 +45,9 @@ beforeAll(() => {
     factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
+/**
+ * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
+ */
 describe.only("ECDSA kernel Account", () => {
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
@@ -174,7 +175,7 @@ describe.only("ECDSA kernel Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.skip("Client send Transaction with paymaster", async () => {
+    test("Client send Transaction with paymaster", async () => {
         const account = await getSignerToEcdsaKernelAccount()
 
         const publicClient = await getPublicClient()
@@ -219,27 +220,30 @@ describe.only("ECDSA kernel Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            const event = decodeEventLog({
-                abi: EntryPointAbi,
-                ...log
-            })
-            if (event.eventName === "UserOperationEvent") {
-                eventFound = true
-                const userOperation =
-                    await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
-                    "0x"
-                )
-            }
+            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch {}
         }
 
         expect(eventFound).toBeTrue()
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.skip("Client send multiple Transactions with paymaster", async () => {
+    test("Client send multiple Transactions with paymaster", async () => {
         const account = await getSignerToEcdsaKernelAccount()
 
         const publicClient = await getPublicClient()
@@ -293,20 +297,23 @@ describe.only("ECDSA kernel Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            const event = decodeEventLog({
-                abi: EntryPointAbi,
-                ...log
-            })
-            if (event.eventName === "UserOperationEvent") {
-                eventFound = true
-                const userOperation =
-                    await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
-                    "0x"
-                )
-            }
+            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch {}
         }
 
         expect(eventFound).toBeTrue()

@@ -19,7 +19,8 @@ import {
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import { goerli } from "viem/chains"
+import { goerli, polygonMumbai } from "viem/chains"
+import * as allChains from "viem/chains"
 
 export const getFactoryAddress = () => {
     if (!process.env.FACTORY_ADDRESS)
@@ -35,6 +36,16 @@ export const getPrivateKeyAccount = () => {
 }
 
 export const getTestingChain = () => {
+    // If custom chain specified in environment variable, use that
+    if (process.env.TEST_CHAIN_ID) {
+        const chainId = parseInt(process.env.TEST_CHAIN_ID)
+        const chain = Object.values(allChains).find(
+            (chain) => chain.id === chainId
+        )
+        if (chain) return chain
+    }
+
+    // Otherwise, use fallback to goerli
     return goerli
 }
 
