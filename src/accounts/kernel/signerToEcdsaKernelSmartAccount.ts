@@ -253,7 +253,6 @@ export async function signerToEcdsaKernelSmartAccount<
                 entryPoint: entryPoint,
                 chainId: chainId
             })
-            console.log("Hash: ", hash)
             const signature = await signMessage(client, {
                 account: viemSigner,
                 message: { raw: hash }
