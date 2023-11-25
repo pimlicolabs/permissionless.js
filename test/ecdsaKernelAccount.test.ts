@@ -1,7 +1,11 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
+import {
+    SignTransactionNotSupportedBySmartAccount,
+    signerToEcdsaKernelSmartAccount
+} from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
@@ -48,7 +52,7 @@ beforeAll(() => {
 /**
  * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
  */
-describe.only("ECDSA kernel Account", () => {
+describe("ECDSA kernel Account", () => {
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
 
@@ -318,5 +322,63 @@ describe.only("ECDSA kernel Account", () => {
 
         expect(eventFound).toBeTrue()
         await waitForNonceUpdate()
+    }, 1000000)
+
+    test.only("Can use a deployed account", async () => {
+        const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
+        const publicClient = await getPublicClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: initialEcdsaSmartAccount,
+            sponsorUserOperation: async ({
+                entryPoint: _entryPoint,
+                userOperation
+            }): Promise<{
+                paymasterAndData: Hex
+                preVerificationGas: bigint
+                verificationGasLimit: bigint
+                callGasLimit: bigint
+            }> => {
+                const pimlicoPaymaster = getPimlicoPaymasterClient()
+                return pimlicoPaymaster.sponsorUserOperation({
+                    userOperation,
+                    entryPoint: getEntryPoint()
+                })
+            }
+        })
+
+        // Send an initial tx to deploy the account
+        const hash = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
+        // Wait for the tx to be done (so we are sure that the account is deployed)
+        await publicClient.waitForTransactionReceipt({ hash })
+        const deployedAccountAddress = initialEcdsaSmartAccount.address
+
+        // Build a new account with a valid owner
+        const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+        const alreadyDeployedEcdsaSmartAccount =
+            await signerToEcdsaKernelSmartAccount(publicClient, {
+                entryPoint: getEntryPoint(),
+                signer: signer,
+                deployedAccountAddress
+            })
+
+        // Ensure the two account have the same address
+        expect(alreadyDeployedEcdsaSmartAccount.address).toMatch(
+            initialEcdsaSmartAccount.address
+        )
+
+        // Ensure that it will fail with an invalid owner address
+        const invalidOwner = privateKeyToAccount(generatePrivateKey())
+        expect(async () => {
+            await signerToEcdsaKernelSmartAccount(publicClient, {
+                entryPoint: getEntryPoint(),
+                signer: invalidOwner,
+                deployedAccountAddress
+            })
+        }).toThrow(new Error("Invalid owner for the already deployed account"))
     }, 1000000)
 })

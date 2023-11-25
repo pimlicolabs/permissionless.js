@@ -6,12 +6,14 @@ import {
     type Hex,
     type Transport,
     concatHex,
-    encodeFunctionData
+    encodeFunctionData,
+    isAddressEqual
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
     getBytecode,
     getChainId,
+    readContract,
     signMessage,
     signTypedData
 } from "viem/actions"
@@ -120,25 +122,71 @@ const getAccountInitCode = async ({
 }
 
 /**
- * Get a pre-deterministic account address for a kernel smart wallet
+ * Check the validity of an existing account address, or fetch the pre-deterministic account address for a kernel smart wallet
  * @param client
- * @param entryPoint
  * @param owner
+ * @param entryPoint
+ * @param ecdsaValidatorAddress
  * @param initCodeProvider
+ * @param deployedAccountAddress
  */
 const getAccountAddress = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
     client,
+    owner,
     entryPoint,
-    initCodeProvider
+    initCodeProvider,
+    ecdsaValidatorAddress,
+    deployedAccountAddress
 }: {
     client: Client<TTransport, TChain>
     owner: Address
     initCodeProvider: () => Promise<Hex>
     entryPoint: Address
+    ecdsaValidatorAddress: Address
+    deployedAccountAddress?: Address
 }): Promise<Address> => {
+    // If we got an already deployed account, ensure it's well deployed, and the validator & signer are correct
+    if (deployedAccountAddress !== undefined) {
+        // Get the owner of the deployed account, ensure it's the same as the owner given in params
+        const deployedAccountOwner = await readContract(client, {
+            address: ecdsaValidatorAddress,
+            abi: [
+                {
+                    inputs: [
+                        {
+                            internalType: "address",
+                            name: "",
+                            type: "address"
+                        }
+                    ],
+                    name: "ecdsaValidatorStorage",
+                    outputs: [
+                        {
+                            internalType: "address",
+                            name: "owner",
+                            type: "address"
+                        }
+                    ],
+                    stateMutability: "view",
+                    type: "function"
+                }
+            ],
+            functionName: "ecdsaValidatorStorage",
+            args: [deployedAccountAddress]
+        })
+
+        // Ensure the address match
+        if (!isAddressEqual(deployedAccountOwner, owner)) {
+            throw new Error("Invalid owner for the already deployed account")
+        }
+
+        // If ok, return the address
+        return deployedAccountAddress
+    }
+
     // Find the init code for this account
     const initCode = await initCodeProvider()
 
@@ -158,6 +206,7 @@ const getAccountAddress = async <
  * @param factoryAddress
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
+ * @param deployedAccountAddress
  */
 export async function signerToEcdsaKernelSmartAccount<
     TTransport extends Transport = Transport,
@@ -170,7 +219,8 @@ export async function signerToEcdsaKernelSmartAccount<
         index = 0n,
         factoryAddress = KERNEL_ADDRESSES.FACTORY_ADDRESS,
         accountLogicAddress = KERNEL_ADDRESSES.ACCOUNT_V2_2_LOGIC,
-        ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR
+        ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR,
+        deployedAccountAddress
     }: {
         signer: SmartAccountSigner
         entryPoint: Address
@@ -178,6 +228,7 @@ export async function signerToEcdsaKernelSmartAccount<
         factoryAddress?: Address
         accountLogicAddress?: Address
         ecdsaValidatorAddress?: Address
+        deployedAccountAddress?: Address
     }
 ): Promise<KernelEcdsaSmartAccount<TTransport, TChain>> {
     // Get the private key related account
@@ -207,7 +258,9 @@ export async function signerToEcdsaKernelSmartAccount<
             client,
             entryPoint,
             owner: viemSigner.address,
-            initCodeProvider: generateInitCode
+            ecdsaValidatorAddress,
+            initCodeProvider: generateInitCode,
+            deployedAccountAddress
         }),
         getChainId(client)
     ])
