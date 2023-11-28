@@ -1,5 +1,15 @@
 # permissionless
 
+## 0.0.13
+
+### Patch Changes
+
+- 69a7b4b: Added support to enable extra modules and transactions during setup for Safe account
+- 639775d: Added support for passing in custom signers
+- 0254c24: Enable batch calls for Safe account
+- b95e9e5: Enable setting custom nonce for user operations
+- 39164f7: Added support for Safe account management
+
 ## 0.0.12
 
 ### Patch Changes
