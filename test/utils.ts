@@ -1,6 +1,7 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
+    signerToBiconomySmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -18,7 +19,8 @@ import {
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import { goerli } from "viem/chains"
+import { goerli, polygonMumbai } from "viem/chains"
+import * as allChains from "viem/chains"
 
 export const getFactoryAddress = () => {
     if (!process.env.FACTORY_ADDRESS)
@@ -34,6 +36,16 @@ export const getPrivateKeyAccount = () => {
 }
 
 export const getTestingChain = () => {
+    // If custom chain specified in environment variable, use that
+    if (process.env.TEST_CHAIN_ID) {
+        const chainId = parseInt(process.env.TEST_CHAIN_ID)
+        const chain = Object.values(allChains).find(
+            (chain) => chain.id === chainId
+        )
+        if (chain) return chain
+    }
+
+    // Otherwise, use fallback to goerli
     return goerli
 }
 
@@ -72,6 +84,20 @@ export const getSignerToSafeSmartAccount = async (args?: {
         safeVersion: "1.4.1",
         saltNonce: 100n,
         setupTransactions: args?.setupTransactions
+    })
+}
+
+export const getSignerToBiconomyAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToBiconomySmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        signer: signer,
+        index: 100n
     })
 }
 
@@ -163,6 +189,10 @@ export const getPimlicoBundlerClient = () => {
 export const getPimlicoPaymasterClient = () => {
     if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
         throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
+    if (!process.env.PIMLICO_PAYMASTER_RPC_HOST)
+        throw new Error(
+            "PIMLICO_PAYMASTER_RPC_HOST environment variable not set"
+        )
     if (!process.env.PIMLICO_API_KEY)
         throw new Error("PIMLICO_API_KEY environment variable not set")
     const pimlicoApiKey = process.env.PIMLICO_API_KEY
