@@ -154,6 +154,10 @@ const getAccountAddress = async <
     entryPoint: Address
     index?: bigint
 }): Promise<Address> => {
+    // @ts-ignore
+    const unusedClient = client; // Ignoring the error for now
+    // @ts-ignore
+    const unusedEntryPoint = entryPoint; // Ignoring the error for now
     // 1.
     /*const initCode = await getAccountInitCode({owner, index, factoryAddress, ecdsaModuleAddress})
 
