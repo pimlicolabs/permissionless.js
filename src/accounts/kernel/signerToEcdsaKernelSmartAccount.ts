@@ -348,9 +348,9 @@ export async function signerToEcdsaKernelSmartAccount<
             }
             // Encode a simple call
             return encodeFunctionData({
-                    abi: KernelExecuteAbi,
-                    functionName: "execute",
-                    args: [_tx.to, _tx.value, _tx.data, 0]
+                abi: KernelExecuteAbi,
+                functionName: "execute",
+                args: [_tx.to, _tx.value, _tx.data, 0]
             })
         },
 
