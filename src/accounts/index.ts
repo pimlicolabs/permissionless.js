@@ -14,6 +14,11 @@ import {
 } from "./signerToSafeSmartAccount.js"
 
 import {
+    type KernelEcdsaSmartAccount,
+    signerToEcdsaKernelSmartAccount
+} from "./kernel/signerToEcdsaKernelSmartAccount.js"
+
+import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
@@ -29,5 +34,7 @@ export {
     SignTransactionNotSupportedBySmartAccount,
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
-    privateKeyToSafeSmartAccount
+    privateKeyToSafeSmartAccount,
+    type KernelEcdsaSmartAccount,
+    signerToEcdsaKernelSmartAccount
 }
