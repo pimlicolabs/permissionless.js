@@ -14,6 +14,11 @@ import {
 } from "./signerToSafeSmartAccount.js"
 
 import {
+    type KernelEcdsaSmartAccount,
+    signerToEcdsaKernelSmartAccount
+} from "./kernel/signerToEcdsaKernelSmartAccount.js"
+
+import {
     type BiconomySmartAccount,
     signerToBiconomySmartAccount
 } from "./biconomy/signerToBiconomySmartAccount.js"
@@ -35,6 +40,8 @@ export {
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
     privateKeyToSafeSmartAccount,
+    type KernelEcdsaSmartAccount,
+    signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
     signerToBiconomySmartAccount
 }

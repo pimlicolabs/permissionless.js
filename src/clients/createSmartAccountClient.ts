@@ -16,6 +16,11 @@ import {
     smartAccountActions
 } from "./decorators/smartAccount.js"
 
+/**
+ * TODO:
+ *  - Add docs
+ *  - Fix typing, 'accounts' is required to signMessage, signTypedData, signTransaction, but not needed here, since account is embedded in the client
+ */
 export type SmartAccountClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
@@ -54,7 +59,7 @@ export type SmartAccountClientConfig<
  *
  * A Bundler Client is an interface to "erc 4337" [JSON-RPC API](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace) methods such as sending user operation, estimating gas for a user operation, get user operation receipt, etc through Bundler Actions.
  *
- * @param config - {@link WalletClientConfig}
+ * @param parameters - {@link WalletClientConfig}
  * @returns A Bundler Client. {@link SmartAccountClient}
  *
  * @example

@@ -2,6 +2,7 @@ import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
     signerToBiconomySmartAccount,
+    signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -84,6 +85,19 @@ export const getSignerToSafeSmartAccount = async (args?: {
         safeVersion: "1.4.1",
         saltNonce: 100n,
         setupTransactions: args?.setupTransactions
+    })
+}
+export const getSignerToEcdsaKernelAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToEcdsaKernelSmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        signer: signer,
+        index: 100n
     })
 }
 
@@ -187,8 +201,6 @@ export const getPimlicoBundlerClient = () => {
 }
 
 export const getPimlicoPaymasterClient = () => {
-    if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
-        throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
     if (!process.env.PIMLICO_PAYMASTER_RPC_HOST)
         throw new Error(
             "PIMLICO_PAYMASTER_RPC_HOST environment variable not set"
