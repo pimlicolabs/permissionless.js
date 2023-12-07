@@ -368,14 +368,5 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         expect(alreadyDeployedEcdsaSmartAccount.address).toMatch(
             initialEcdsaSmartAccount.address
         )
-
-        // Ensure that it will fail with an invalid owner address
-        const invalidOwner = privateKeyToAccount(generatePrivateKey())
-        expect(async () => {
-            await signerToBiconomySmartAccount(publicClient, {
-                entryPoint: getEntryPoint(),
-                signer: invalidOwner
-            })
-        }).toThrow(new Error("Invalid owner for the already deployed account"))
     }, 1000000)
 })

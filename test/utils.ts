@@ -97,7 +97,7 @@ export const getSignerToBiconomyAccount = async () => {
     return await signerToBiconomySmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         signer: signer,
-        index: 100n
+        index: 0n
     })
 }
 

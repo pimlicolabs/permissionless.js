@@ -10,7 +10,9 @@ import {
     encodePacked,
     getContractAddress,
     hexToBigInt,
-    keccak256
+    keccak256,
+    encodeAbiParameters,
+    parseAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
@@ -320,8 +322,8 @@ export async function signerToBiconomySmartAccount<
                 message: { raw: hash }
             })
             // userOp signature is encoded module signature + module address
-            const signatureWithModuleAddress = encodePacked(
-                ["bytes", "address"],
+            const signatureWithModuleAddress = encodeAbiParameters(
+                parseAbiParameters('bytes, address'),
                 [signature, ecdsaModuleAddress]
             )
             return signatureWithModuleAddress
