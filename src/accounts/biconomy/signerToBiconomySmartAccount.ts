@@ -20,7 +20,7 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+// import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
@@ -340,30 +340,36 @@ export async function signerToBiconomySmartAccount<
         },
 
         // Encode a call
-        async encodeCallData(_tx) {
-            if (Array.isArray(_tx)) {
+        async encodeCallData(args) {
+            if (Array.isArray(args)) {
                 // Encode a batched call
-                const allTo: `0x${string}`[] = []
-                const allValues: bigint[] = []
-                const allData: `0x${string}`[] = []
-                _tx.map((tx) => {
-                    allTo.push(tx.to)
-                    allValues.push(tx.value)
-                    allData.push(tx.data)
-                })
+                const argsArray = args as {
+                    to: Address
+                    value: bigint
+                    data: Hex
+                }[]
+
                 return encodeFunctionData({
                     abi: BiconomyExecuteAbi,
                     functionName: "executeBatch_y6U",
-                    args: [allTo, allValues, allData]
-                })
-            } else {
-                // Encode a simple call
-                return encodeFunctionData({
-                    abi: BiconomyExecuteAbi,
-                    functionName: "execute_ncC",
-                    args: [_tx.to, _tx.value, _tx.data]
+                    args: [
+                        argsArray.map((a) => a.to),
+                        argsArray.map((a) => a.value),
+                        argsArray.map((a) => a.data)
+                    ]
                 })
             }
+            const { to, value, data } = args as {
+                to: Address
+                value: bigint
+                data: Hex
+            }
+            // Encode a simple call
+            return encodeFunctionData({
+                abi: BiconomyExecuteAbi,
+                functionName: "execute_ncC",
+                args: [to, value, data]
+            })
         },
 
         // Get simple dummy signature for ECDSA module authorization
