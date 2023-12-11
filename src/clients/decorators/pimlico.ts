@@ -9,7 +9,7 @@ import {
     getUserOperationStatus
 } from "../../actions/pimlico/getUserOperationStatus.js"
 import {
-    type SponsorUserOperationParameters,
+    type PimlocoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
@@ -78,7 +78,7 @@ export type PimlicoPaymasterClientActions = {
      *
      * https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
      *
-     * @param args {@link SponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
+     * @param args {@link PimlocoSponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
      * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}
      *
      * @example
@@ -97,14 +97,14 @@ export type PimlicoPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: SponsorUserOperationParameters
+        args: PimlocoSponsorUserOperationParameters
     ) => Promise<SponsorUserOperationReturnType>
 }
 
 export const pimlicoPaymasterActions = (
     client: Client
 ): PimlicoPaymasterClientActions => ({
-    sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
+    sponsorUserOperation: async (args: PimlocoSponsorUserOperationParameters) =>
         sponsorUserOperation(client as PimlicoPaymasterClient, args)
 })
 
