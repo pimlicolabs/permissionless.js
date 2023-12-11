@@ -1,7 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { getSenderAddress, getUserOperationHash } from "permissionless"
-import { getRequiredPreFund, signUserOperationHashWithECDSA } from "permissionless/utils"
+import {
+    getRequiredPreFund,
+    signUserOperationHashWithECDSA
+} from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
     getBundlerClient,
@@ -179,10 +182,14 @@ describe("test public actions and utils", () => {
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
         const requiredGas = getRequiredPreFund({
-            userOperation,
+            userOperation
         })
 
-        expect(requiredGas).toBe((gasParameters.callGasLimit + gasParameters.verificationGasLimit + gasParameters.preVerificationGas) * userOperation.maxFeePerGas)
-
-    });
+        expect(requiredGas).toBe(
+            (gasParameters.callGasLimit +
+                gasParameters.verificationGasLimit +
+                gasParameters.preVerificationGas) *
+                userOperation.maxFeePerGas
+        )
+    })
 })
