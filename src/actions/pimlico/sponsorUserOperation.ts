@@ -7,7 +7,7 @@ import type {
 } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
-export type SponsorUserOperationParameters = {
+export type PimlocoSponsorUserOperationParameters = {
     userOperation: PartialBy<
         UserOperation,
         | "callGasLimit"
@@ -16,6 +16,9 @@ export type SponsorUserOperationParameters = {
         | "paymasterAndData"
     >
     entryPoint: Address
+    metaData?: {
+        sponsorshipPolicyId?: string
+    }
 }
 
 export type SponsorUserOperationReturnType = {
@@ -31,7 +34,7 @@ export type SponsorUserOperationReturnType = {
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
  *
  * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
- * @param args {@link sponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
+ * @param args {@link PimlocoSponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
  * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}
  *
  *
@@ -56,14 +59,24 @@ export const sponsorUserOperation = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
-    args: SponsorUserOperationParameters
+    args: PimlocoSponsorUserOperationParameters
 ): Promise<SponsorUserOperationReturnType> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex,
-            args.entryPoint
-        ]
+        params: args.metaData
+            ? [
+                  deepHexlify(
+                      args.userOperation
+                  ) as UserOperationWithBigIntAsHex,
+                  args.entryPoint,
+                  args.metaData
+              ]
+            : [
+                  deepHexlify(
+                      args.userOperation
+                  ) as UserOperationWithBigIntAsHex,
+                  args.entryPoint
+              ]
     })
 
     return {

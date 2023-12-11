@@ -53,7 +53,10 @@ export type PimlicoPaymasterRpcSchema = [
                 | "verificationGasLimit"
                 | "paymasterAndData"
             >,
-            entryPoint: Address
+            entryPoint: Address,
+            metadata?: {
+                sponsorshipPolicyId?: string
+            }
         ]
         ReturnType: {
             paymasterAndData: Hex
