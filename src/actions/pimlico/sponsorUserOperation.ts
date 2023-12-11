@@ -16,9 +16,7 @@ export type PimlocoSponsorUserOperationParameters = {
         | "paymasterAndData"
     >
     entryPoint: Address
-    metaData?: {
-        sponsorshipPolicyId?: string
-    }
+    sponsorshipPolicyId?: string
 }
 
 export type SponsorUserOperationReturnType = {
@@ -63,13 +61,15 @@ export const sponsorUserOperation = async <
 ): Promise<SponsorUserOperationReturnType> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: args.metaData
+        params: args.sponsorshipPolicyId
             ? [
                   deepHexlify(
                       args.userOperation
                   ) as UserOperationWithBigIntAsHex,
                   args.entryPoint,
-                  args.metaData
+                  {
+                      sponsorshipPolicyId: args.sponsorshipPolicyId
+                  }
               ]
             : [
                   deepHexlify(
