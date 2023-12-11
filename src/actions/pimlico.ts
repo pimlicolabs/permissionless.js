@@ -22,6 +22,12 @@ import {
     pimlicoPaymasterActions
 } from "../clients/decorators/pimlico.js"
 
+import {
+    type ValidateSponsorshipPoliciesParameters,
+    type ValidateSponsorshipPoliciesReturnType,
+    validateSponsorshipPolicies
+} from "./pimlico/validateSponsorshipPolicies.js"
+
 export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
@@ -29,7 +35,9 @@ export type {
     PimlocoSponsorUserOperationParameters,
     SponsorUserOperationReturnType,
     PimlicoBundlerActions,
-    PimlicoPaymasterClientActions
+    PimlicoPaymasterClientActions,
+    ValidateSponsorshipPoliciesParameters,
+    ValidateSponsorshipPoliciesReturnType
 }
 
 export {
@@ -37,5 +45,6 @@ export {
     getUserOperationStatus,
     sponsorUserOperation,
     pimlicoBundlerActions,
-    pimlicoPaymasterActions
+    pimlicoPaymasterActions,
+    validateSponsorshipPolicies
 }

@@ -236,4 +236,40 @@ describe("Pimlico Actions tests", () => {
             await waitForNonceUpdate()
         }, 100000)
     })
+
+    test("Validating sponsorship policies", async () => {
+        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
+
+        const partialUserOp = await buildUserOp(eoaWalletClient)
+
+        const userOperation: UserOperation = {
+            ...partialUserOp,
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
+        const entryPoint = getEntryPoint()
+
+        const validateSponsorshipPolicies =
+            await pimlicoPaymasterClient.validateSponsorshipPolicies({
+                userOperation: userOperation,
+                entryPoint: entryPoint,
+                sponsorshipPolicyIds: ["sp_shiny_puma", "sp_fake_policy"]
+            })
+
+        console.log(validateSponsorshipPolicies)
+
+        expect(validateSponsorshipPolicies).not.toBeNull()
+        expect(validateSponsorshipPolicies).not.toBeUndefined()
+        expect(validateSponsorshipPolicies).not.toBeEmpty()
+        expect(validateSponsorshipPolicies).toBeArray()
+        expect(validateSponsorshipPolicies.length).toBe(1)
+        await waitForNonceUpdate()
+    }, 100000)
 })
