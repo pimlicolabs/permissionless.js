@@ -7,6 +7,10 @@ import {
     AccountOrClientNotFoundError,
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
+import {
+    getRequiredPreFund,
+    type GetRequiredPreFundReturnType
+} from "./getRequiredPreFund.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
@@ -16,6 +20,8 @@ export function parseAccount(account: Address | Account): Account {
 
 export {
     getUserOperationHash,
+    getRequiredPreFund,
+    type GetRequiredPreFundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,
     AccountOrClientNotFoundError
