@@ -1,8 +1,8 @@
 import type { Account, Address } from "viem"
 import {
-    type GetRequiredPreFundReturnType,
-    getRequiredPreFund
-} from "./getRequiredPreFund.js"
+    type GetRequiredPrefundReturnType,
+    getRequiredPrefund
+} from "./getRequiredPrefund.js"
 import {
     type GetUserOperationHashParams,
     getUserOperationHash
@@ -20,8 +20,8 @@ export function parseAccount(account: Address | Account): Account {
 
 export {
     getUserOperationHash,
-    getRequiredPreFund,
-    type GetRequiredPreFundReturnType,
+    getRequiredPrefund,
+    type GetRequiredPrefundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,
     AccountOrClientNotFoundError
