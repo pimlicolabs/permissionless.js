@@ -1,7 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { getSenderAddress, getUserOperationHash } from "permissionless"
-import { signUserOperationHashWithECDSA } from "permissionless/utils"
+import {
+    getRequiredPrefund,
+    signUserOperationHashWithECDSA
+} from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
     getBundlerClient,
@@ -162,5 +165,31 @@ describe("test public actions and utils", () => {
         expect(signature).toStartWith("0x")
 
         expect(signature).toEqual(userOperation.signature)
+    })
+
+    test("getRequiredGas", async () => {
+        const bundlerClient = getBundlerClient()
+        const eoaWalletClient = getEoaWalletClient()
+        const userOperation = await buildUserOp(eoaWalletClient)
+
+        const gasParameters = await bundlerClient.estimateUserOperationGas({
+            userOperation,
+            entryPoint: getEntryPoint()
+        })
+
+        userOperation.callGasLimit = gasParameters.callGasLimit
+        userOperation.verificationGasLimit = gasParameters.verificationGasLimit
+        userOperation.preVerificationGas = gasParameters.preVerificationGas
+
+        const requiredGas = getRequiredPrefund({
+            userOperation
+        })
+
+        expect(requiredGas).toBe(
+            (gasParameters.callGasLimit +
+                gasParameters.verificationGasLimit +
+                gasParameters.preVerificationGas) *
+                userOperation.maxFeePerGas
+        )
     })
 })
