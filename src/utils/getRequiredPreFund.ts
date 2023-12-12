@@ -1,6 +1,6 @@
 import type { UserOperation } from "../types"
 
-export type GetRequiredPreFundReturnType = {
+export type GetRequiredPrefundReturnType = {
     userOperation: UserOperation
 }
 
@@ -9,18 +9,18 @@ export type GetRequiredPreFundReturnType = {
  * Returns the minimum required funds in the senders's smart account to execute the user operation.
  *
  * @param arags: {userOperation} as {@link UserOperation}
- * @returns requiredPreFund as {@link bigint}
+ * @returns requiredPrefund as {@link bigint}
  *
  * @example
- * import { getRequiredPreFund } from "permissionless/utils"
+ * import { getRequiredPrefund } from "permissionless/utils"
  *
- * const requiredPreFund = getRequiredPreFund({
+ * const requiredPrefund = getRequiredPrefund({
  *     userOperation
  * })
  */
-export const getRequiredPreFund = ({
+export const getRequiredPrefund = ({
     userOperation
-}: GetRequiredPreFundReturnType): bigint => {
+}: GetRequiredPrefundReturnType): bigint => {
     const multiplier = userOperation.paymasterAndData.length > 2 ? 3n : 1n
     const requiredGas =
         userOperation.callGasLimit +
