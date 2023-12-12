@@ -21,7 +21,7 @@ export type GetRequiredPreFundReturnType = {
 export const getRequiredPreFund = ({
     userOperation
 }: GetRequiredPreFundReturnType): bigint => {
-    const multiplier = userOperation.paymasterAndData.length > 2 ? 2n : 1n
+    const multiplier = userOperation.paymasterAndData.length > 2 ? 3n : 1n
     const requiredGas =
         userOperation.callGasLimit +
         userOperation.verificationGasLimit * multiplier +
