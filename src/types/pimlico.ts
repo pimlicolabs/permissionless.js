@@ -64,5 +64,22 @@ export type PimlicoPaymasterRpcSchema = [
             verificationGasLimit: Hex
             callGasLimit: Hex
         }
+    },
+    {
+        Method: "pm_validateSponsorshipPolicies"
+        Parameters: [
+            userOperation: UserOperationWithBigIntAsHex,
+            entryPoint: Address,
+            sponsorshipPolicyIds: string[]
+        ]
+        ReturnType: {
+            sponsorshipPolicyId: string
+            data: {
+                name: string | null
+                author: string | null
+                icon: string | null
+                description: string | null
+            }
+        }[]
     }
 ]
