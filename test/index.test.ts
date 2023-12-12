@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { getSenderAddress, getUserOperationHash } from "permissionless"
 import {
-    getRequiredPreFund,
+    getRequiredPrefund,
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
@@ -181,7 +181,7 @@ describe("test public actions and utils", () => {
         userOperation.verificationGasLimit = gasParameters.verificationGasLimit
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
-        const requiredGas = getRequiredPreFund({
+        const requiredGas = getRequiredPrefund({
             userOperation
         })
 
