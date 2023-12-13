@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.0.15
+
+### Patch Changes
+
+- 2857b89: Added getRequiredPrefund utility function
+- 7c54173: Added support for pm_validateSponsorshipPolicies for pimlicoPaymasterClient
+
 ## 0.0.14
 
 ### Patch Changes
