@@ -16,8 +16,8 @@ import {
     Hex,
     createPublicClient,
     createWalletClient,
-    encodeFunctionData,
-    defineChain
+    defineChain,
+    encodeFunctionData
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as allChains from "viem/chains"
@@ -125,9 +125,7 @@ export const getSmartAccountClient = async ({
     return createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
-        transport: http(
-            `${process.env.BUNDLER_RPC_HOST}`
-        ),
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
         sponsorUserOperation
     })
 }
@@ -170,9 +168,7 @@ export const getBundlerClient = () => {
 
     return createBundlerClient({
         chain: chain,
-        transport: http(
-            `${process.env.BUNDLER_RPC_HOST}`
-        )
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`)
     })
 }
 
@@ -184,9 +180,7 @@ export const getPimlicoBundlerClient = () => {
 
     return createPimlicoBundlerClient({
         chain: chain,
-        transport: http(
-            `${process.env.PIMLICO_BUNDLER_RPC_HOST}`
-        )
+        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`)
     })
 }
 
@@ -200,9 +194,7 @@ export const getPimlicoPaymasterClient = () => {
 
     return createPimlicoPaymasterClient({
         chain: chain,
-        transport: http(
-            `${process.env.PIMLICO_PAYMASTER_RPC_HOST}`
-        )
+        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`)
     })
 }
 
