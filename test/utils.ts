@@ -16,10 +16,10 @@ import {
     Hex,
     createPublicClient,
     createWalletClient,
+    defineChain,
     encodeFunctionData
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import { goerli, polygonMumbai } from "viem/chains"
 import * as allChains from "viem/chains"
 
 export const getFactoryAddress = () => {
@@ -46,7 +46,21 @@ export const getTestingChain = () => {
     }
 
     // Otherwise, use fallback to goerli
-    return goerli
+    return defineChain({
+        id: 1337,
+        network: "goerli",
+        name: "Goerli",
+        nativeCurrency: { name: "Goerli Ether", symbol: "ETH", decimals: 18 },
+        rpcUrls: {
+            default: {
+                http: ["http://0.0.0.0:3000"]
+            },
+            public: {
+                http: ["http://0.0.0.0:3000"]
+            }
+        },
+        testnet: true
+    })
 }
 
 export const getSignerToSimpleSmartAccount = async () => {
@@ -104,19 +118,14 @@ export const getSmartAccountClient = async ({
     account,
     sponsorUserOperation
 }: SponsorUserOperationMiddleware & { account?: SmartAccount } = {}) => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
-        throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
-    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+    if (!process.env.BUNDLER_RPC_HOST)
+        throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
 
     return createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
-        transport: http(
-            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
-        ),
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
         sponsorUserOperation
     })
 }
@@ -152,36 +161,26 @@ export const getPublicClient = async () => {
 }
 
 export const getBundlerClient = () => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
-        throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
-    const pimlicoApiKey = process.env.PIMLICO_API_KEY
+    if (!process.env.BUNDLER_RPC_HOST)
+        throw new Error("BUNDLER_RPC_HOST environment variable not set")
 
     const chain = getTestingChain()
 
     return createBundlerClient({
         chain: chain,
-        transport: http(
-            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
-        )
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`)
     })
 }
 
 export const getPimlicoBundlerClient = () => {
     if (!process.env.PIMLICO_BUNDLER_RPC_HOST)
         throw new Error("PIMLICO_BUNDLER_RPC_HOST environment variable not set")
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
     const chain = getTestingChain()
 
     return createPimlicoBundlerClient({
         chain: chain,
-        transport: http(
-            `${process.env.PIMLICO_BUNDLER_RPC_HOST}?apikey=${pimlicoApiKey}`
-        )
+        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`)
     })
 }
 
@@ -190,17 +189,12 @@ export const getPimlicoPaymasterClient = () => {
         throw new Error(
             "PIMLICO_PAYMASTER_RPC_HOST environment variable not set"
         )
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
     const chain = getTestingChain()
 
     return createPimlicoPaymasterClient({
         chain: chain,
-        transport: http(
-            `${process.env.PIMLICO_PAYMASTER_RPC_HOST}?apikey=${pimlicoApiKey}`
-        )
+        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`)
     })
 }
 
