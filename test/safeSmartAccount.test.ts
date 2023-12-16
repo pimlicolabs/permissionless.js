@@ -26,9 +26,6 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY) {
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    }
     if (!process.env.STACKUP_API_KEY) {
         throw new Error("STACKUP_API_KEY environment variable not set")
     }
@@ -65,192 +62,6 @@ describe("Safe Account", () => {
                 data: "0x"
             })
         }).toThrow(new SignTransactionNotSupportedBySmartAccount())
-    })
-
-    test("safe Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSafeSmartAccount()
-        })
-
-        const messageToSign = "hello world"
-        const signature = await smartAccountClient.signMessage({
-            message: messageToSign
-        })
-
-        expect(signature).toBeString()
-        expect(signature).toHaveLength(132)
-        expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
-
-        const publicClient = await getPublicClient()
-
-        const response = await publicClient.readContract({
-            address: smartAccountClient.account.address,
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "bytes",
-                            name: "_data",
-                            type: "bytes"
-                        },
-                        {
-                            internalType: "bytes",
-                            name: "_signature",
-                            type: "bytes"
-                        }
-                    ],
-                    name: "isValidSignature",
-                    outputs: [
-                        {
-                            internalType: "bytes4",
-                            name: "",
-                            type: "bytes4"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                },
-                {
-                    inputs: [
-                        {
-                            internalType: "bytes32",
-                            name: "_dataHash",
-                            type: "bytes32"
-                        },
-                        {
-                            internalType: "bytes",
-                            name: "_signature",
-                            type: "bytes"
-                        }
-                    ],
-                    name: "isValidSignature",
-                    outputs: [
-                        {
-                            internalType: "bytes4",
-                            name: "",
-                            type: "bytes4"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                }
-            ],
-            functionName: "isValidSignature",
-            args: [hashMessage(messageToSign), signature]
-        })
-
-        expect(response).toBe("0x20c13b0b")
-    })
-
-    test("safe Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSafeSmartAccount()
-        })
-
-        const signature = await smartAccountClient.signTypedData({
-            domain: {
-                chainId: 1,
-                name: "Test",
-                verifyingContract: zeroAddress
-            },
-            primaryType: "Test",
-            types: {
-                Test: [
-                    {
-                        name: "test",
-                        type: "string"
-                    }
-                ]
-            },
-            message: {
-                test: "hello world"
-            }
-        })
-
-        expect(signature).toBeString()
-        expect(signature).toHaveLength(132)
-        expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
-
-        const publicClient = await getPublicClient()
-
-        const response = await publicClient.readContract({
-            address: smartAccountClient.account.address,
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "bytes",
-                            name: "_data",
-                            type: "bytes"
-                        },
-                        {
-                            internalType: "bytes",
-                            name: "_signature",
-                            type: "bytes"
-                        }
-                    ],
-                    name: "isValidSignature",
-                    outputs: [
-                        {
-                            internalType: "bytes4",
-                            name: "",
-                            type: "bytes4"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                },
-                {
-                    inputs: [
-                        {
-                            internalType: "bytes32",
-                            name: "_dataHash",
-                            type: "bytes32"
-                        },
-                        {
-                            internalType: "bytes",
-                            name: "_signature",
-                            type: "bytes"
-                        }
-                    ],
-                    name: "isValidSignature",
-                    outputs: [
-                        {
-                            internalType: "bytes4",
-                            name: "",
-                            type: "bytes4"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                }
-            ],
-            functionName: "isValidSignature",
-            args: [
-                hashTypedData({
-                    domain: {
-                        chainId: 1,
-                        name: "Test",
-                        verifyingContract: zeroAddress
-                    },
-                    primaryType: "Test",
-                    types: {
-                        Test: [
-                            {
-                                name: "test",
-                                type: "string"
-                            }
-                        ]
-                    },
-                    message: {
-                        test: "hello world"
-                    }
-                }),
-                signature
-            ]
-        })
-
-        expect(response).toBe("0x20c13b0b")
     })
 
     test("safe smart account client deploy contract", async () => {
@@ -491,4 +302,190 @@ describe("Safe Account", () => {
         expect(eventFound).toBeTrue()
         await waitForNonceUpdate()
     }, 1000000)
+
+    test("safe Smart account client signMessage", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSafeSmartAccount()
+        })
+
+        const messageToSign = "hello world"
+        const signature = await smartAccountClient.signMessage({
+            message: messageToSign
+        })
+
+        expect(signature).toBeString()
+        expect(signature).toHaveLength(132)
+        expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
+
+        const publicClient = await getPublicClient()
+
+        const response = await publicClient.readContract({
+            address: smartAccountClient.account.address,
+            abi: [
+                {
+                    inputs: [
+                        {
+                            internalType: "bytes",
+                            name: "_data",
+                            type: "bytes"
+                        },
+                        {
+                            internalType: "bytes",
+                            name: "_signature",
+                            type: "bytes"
+                        }
+                    ],
+                    name: "isValidSignature",
+                    outputs: [
+                        {
+                            internalType: "bytes4",
+                            name: "",
+                            type: "bytes4"
+                        }
+                    ],
+                    stateMutability: "view",
+                    type: "function"
+                },
+                {
+                    inputs: [
+                        {
+                            internalType: "bytes32",
+                            name: "_dataHash",
+                            type: "bytes32"
+                        },
+                        {
+                            internalType: "bytes",
+                            name: "_signature",
+                            type: "bytes"
+                        }
+                    ],
+                    name: "isValidSignature",
+                    outputs: [
+                        {
+                            internalType: "bytes4",
+                            name: "",
+                            type: "bytes4"
+                        }
+                    ],
+                    stateMutability: "view",
+                    type: "function"
+                }
+            ],
+            functionName: "isValidSignature",
+            args: [hashMessage(messageToSign), signature]
+        })
+
+        expect(response).toBe("0x20c13b0b")
+    })
+
+    test("safe Smart account client signTypedData", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSafeSmartAccount()
+        })
+
+        const signature = await smartAccountClient.signTypedData({
+            domain: {
+                chainId: 1,
+                name: "Test",
+                verifyingContract: zeroAddress
+            },
+            primaryType: "Test",
+            types: {
+                Test: [
+                    {
+                        name: "test",
+                        type: "string"
+                    }
+                ]
+            },
+            message: {
+                test: "hello world"
+            }
+        })
+
+        expect(signature).toBeString()
+        expect(signature).toHaveLength(132)
+        expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
+
+        const publicClient = await getPublicClient()
+
+        const response = await publicClient.readContract({
+            address: smartAccountClient.account.address,
+            abi: [
+                {
+                    inputs: [
+                        {
+                            internalType: "bytes",
+                            name: "_data",
+                            type: "bytes"
+                        },
+                        {
+                            internalType: "bytes",
+                            name: "_signature",
+                            type: "bytes"
+                        }
+                    ],
+                    name: "isValidSignature",
+                    outputs: [
+                        {
+                            internalType: "bytes4",
+                            name: "",
+                            type: "bytes4"
+                        }
+                    ],
+                    stateMutability: "view",
+                    type: "function"
+                },
+                {
+                    inputs: [
+                        {
+                            internalType: "bytes32",
+                            name: "_dataHash",
+                            type: "bytes32"
+                        },
+                        {
+                            internalType: "bytes",
+                            name: "_signature",
+                            type: "bytes"
+                        }
+                    ],
+                    name: "isValidSignature",
+                    outputs: [
+                        {
+                            internalType: "bytes4",
+                            name: "",
+                            type: "bytes4"
+                        }
+                    ],
+                    stateMutability: "view",
+                    type: "function"
+                }
+            ],
+            functionName: "isValidSignature",
+            args: [
+                hashTypedData({
+                    domain: {
+                        chainId: 1,
+                        name: "Test",
+                        verifyingContract: zeroAddress
+                    },
+                    primaryType: "Test",
+                    types: {
+                        Test: [
+                            {
+                                name: "test",
+                                type: "string"
+                            }
+                        ]
+                    },
+                    message: {
+                        test: "hello world"
+                    }
+                }),
+                signature
+            ]
+        })
+
+        expect(response).toBe("0x20c13b0b")
+    })
 })

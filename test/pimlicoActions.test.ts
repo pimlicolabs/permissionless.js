@@ -20,8 +20,6 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.STACKUP_API_KEY)
         throw new Error("STACKUP_API_KEY environment variable not set")
     if (!process.env.FACTORY_ADDRESS)
@@ -33,8 +31,6 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS)
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
-
-const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
 describe("Pimlico Actions tests", () => {
     let pimlicoBundlerClient: PimlicoBundlerClient
@@ -262,8 +258,6 @@ describe("Pimlico Actions tests", () => {
                 entryPoint: entryPoint,
                 sponsorshipPolicyIds: ["sp_shiny_puma", "sp_fake_policy"]
             })
-
-        console.log(validateSponsorshipPolicies)
 
         expect(validateSponsorshipPolicies).not.toBeNull()
         expect(validateSponsorshipPolicies).not.toBeUndefined()

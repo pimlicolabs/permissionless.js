@@ -5,8 +5,6 @@ import { deepHexlify } from "./deepHexlify.js"
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.STACKUP_API_KEY)
         throw new Error("STACKUP_API_KEY environment variable not set")
     if (!process.env.FACTORY_ADDRESS)

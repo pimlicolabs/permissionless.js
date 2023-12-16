@@ -1,13 +1,14 @@
 import {
-    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
+    type LocalAccount,
     type SignableMessage,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
+    concat,
     concatHex,
     encodeFunctionData,
     encodePacked,
@@ -39,13 +40,17 @@ export type SafeVersion = "1.4.1"
 const EIP712_SAFE_OPERATION_TYPE = {
     SafeOp: [
         { type: "address", name: "safe" },
-        { type: "bytes", name: "callData" },
         { type: "uint256", name: "nonce" },
-        { type: "uint256", name: "preVerificationGas" },
-        { type: "uint256", name: "verificationGasLimit" },
+        { type: "bytes", name: "initCode" },
+        { type: "bytes", name: "callData" },
         { type: "uint256", name: "callGasLimit" },
+        { type: "uint256", name: "verificationGasLimit" },
+        { type: "uint256", name: "preVerificationGas" },
         { type: "uint256", name: "maxFeePerGas" },
         { type: "uint256", name: "maxPriorityFeePerGas" },
+        { type: "bytes", name: "paymasterAndData" },
+        { type: "uint48", name: "validAfter" },
+        { type: "uint48", name: "validUntil" },
         { type: "address", name: "entryPoint" }
     ]
 }
@@ -490,7 +495,9 @@ const getDefaultAddresses = (
  */
 export async function signerToSafeSmartAccount<
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSource extends string = "custom",
+    TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
     {
@@ -504,11 +511,13 @@ export async function signerToSafeSmartAccount<
         multiSendAddress: _multiSendAddress,
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
         saltNonce = 0n,
+        validUntil = 0,
+        validAfter = 0,
         safeModules = [],
         setupTransactions = []
     }: {
         safeVersion: SafeVersion
-        signer: SmartAccountSigner
+        signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
@@ -517,6 +526,8 @@ export async function signerToSafeSmartAccount<
         multiSendAddress?: Address
         multiSendCallOnlyAddress?: Address
         saltNonce?: bigint
+        validUntil?: number
+        validAfter?: number
         setupTransactions?: {
             to: Address
             data: Address
@@ -527,15 +538,12 @@ export async function signerToSafeSmartAccount<
 ): Promise<SafeSmartAccount<TTransport, TChain>> {
     const chainId = await getChainId(client)
 
-    const viemSigner: Account =
-        signer.type === "local"
-            ? ({
-                  ...signer,
-                  signTransaction: (_, __) => {
-                      throw new SignTransactionNotSupportedBySmartAccount()
-                  }
-              } as Account)
-            : (signer as Account)
+    const viemSigner: LocalAccount = {
+        ...signer,
+        signTransaction: (_, __) => {
+            throw new SignTransactionNotSupportedBySmartAccount()
+        }
+    } as LocalAccount
 
     const {
         addModuleLibAddress,
@@ -632,8 +640,6 @@ export async function signerToSafeSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            // const timestamps = 0n
-
             const signatures = [
                 {
                     signer: viemSigner.address,
@@ -648,17 +654,20 @@ export async function signerToSafeSmartAccount<
                         message: {
                             safe: accountAddress,
                             callData: userOperation.callData,
+                            entryPoint: entryPoint,
                             nonce: userOperation.nonce,
+                            initCode: userOperation.initCode,
+                            maxFeePerGas: userOperation.maxFeePerGas,
+                            maxPriorityFeePerGas:
+                                userOperation.maxPriorityFeePerGas,
                             preVerificationGas:
                                 userOperation.preVerificationGas,
                             verificationGasLimit:
                                 userOperation.verificationGasLimit,
                             callGasLimit: userOperation.callGasLimit,
-                            maxFeePerGas: userOperation.maxFeePerGas,
-                            maxPriorityFeePerGas:
-                                userOperation.maxPriorityFeePerGas,
-                            // signatureTimestamps: timestamps,
-                            entryPoint: entryPoint
+                            paymasterAndData: userOperation.paymasterAndData,
+                            validAfter: validAfter,
+                            validUntil: validUntil
                         }
                     })
                 }
@@ -670,17 +679,12 @@ export async function signerToSafeSmartAccount<
                     .localeCompare(right.signer.toLowerCase())
             )
 
-            let signatureBytes: Address = "0x"
-            for (const sig of signatures) {
-                signatureBytes += sig.data.slice(2)
-            }
+            const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            // const signatureWithTimestamps = encodePacked(
-            //     ["uint96", "bytes"],
-            //     [timestamps, signatureBytes]
-            // )
-
-            return signatureBytes
+            return encodePacked(
+                ["uint48", "uint48", "bytes"],
+                [validAfter, validUntil, signatureBytes]
+            )
         },
         async getInitCode() {
             const contractCode = await getBytecode(client, {
@@ -769,7 +773,7 @@ export async function signerToSafeSmartAccount<
             })
         },
         async getDummySignature() {
-            return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+            return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         }
     }
 }

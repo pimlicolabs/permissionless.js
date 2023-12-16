@@ -1,9 +1,9 @@
 import {
-    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
+    type LocalAccount,
     type Transport,
     concatHex,
     encodeFunctionData
@@ -102,7 +102,9 @@ const getAccountAddress = async <
  */
 export async function signerToSimpleSmartAccount<
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSource extends string = "custom",
+    TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
     {
@@ -111,21 +113,18 @@ export async function signerToSimpleSmartAccount<
         entryPoint,
         index = 0n
     }: {
-        signer: SmartAccountSigner
+        signer: SmartAccountSigner<TSource, TAddress>
         factoryAddress: Address
         entryPoint: Address
         index?: bigint
     }
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
-    const viemSigner: Account =
-        signer.type === "local"
-            ? ({
-                  ...signer,
-                  signTransaction: (_, __) => {
-                      throw new SignTransactionNotSupportedBySmartAccount()
-                  }
-              } as Account)
-            : (signer as Account)
+    const viemSigner: LocalAccount = {
+        ...signer,
+        signTransaction: (_, __) => {
+            throw new SignTransactionNotSupportedBySmartAccount()
+        }
+    } as LocalAccount
 
     const [accountAddress, chainId] = await Promise.all([
         getAccountAddress<TTransport, TChain>({

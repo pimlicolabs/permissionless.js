@@ -1,9 +1,9 @@
 import {
-    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
+    type LocalAccount,
     type Transport,
     concatHex,
     encodeFunctionData,
@@ -210,7 +210,9 @@ const getAccountAddress = async <
  */
 export async function signerToEcdsaKernelSmartAccount<
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSource extends string = "custom",
+    TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
     {
@@ -222,7 +224,7 @@ export async function signerToEcdsaKernelSmartAccount<
         ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR,
         deployedAccountAddress
     }: {
-        signer: SmartAccountSigner
+        signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
         index?: bigint
         factoryAddress?: Address
@@ -232,15 +234,12 @@ export async function signerToEcdsaKernelSmartAccount<
     }
 ): Promise<KernelEcdsaSmartAccount<TTransport, TChain>> {
     // Get the private key related account
-    const viemSigner: Account =
-        signer.type === "local"
-            ? ({
-                  ...signer,
-                  signTransaction: (_, __) => {
-                      throw new SignTransactionNotSupportedBySmartAccount()
-                  }
-              } as Account)
-            : (signer as Account)
+    const viemSigner: LocalAccount = {
+        ...signer,
+        signTransaction: (_, __) => {
+            throw new SignTransactionNotSupportedBySmartAccount()
+        }
+    } as LocalAccount
 
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>

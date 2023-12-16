@@ -23,9 +23,6 @@ dotenv.config()
 let testPrivateKey: Hex
 let factoryAddress: Address
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY) {
-        throw new Error("PIMLICO_API_KEY environment variable not set")
-    }
     if (!process.env.STACKUP_API_KEY) {
         throw new Error("STACKUP_API_KEY environment variable not set")
     }
