@@ -1,6 +1,5 @@
 import {
     type Abi,
-    type Account,
     type Address,
     BaseError,
     type Client,
@@ -58,7 +57,7 @@ export type SmartAccount<
     signUserOperation: (UserOperation: UserOperation) => Promise<Hex>
 }
 
-export type SmartAccountSigner<TAddress extends Address = Address> = Omit<
-    Account<TAddress>,
-    "signTransaction"
->
+export type SmartAccountSigner<
+    TSource extends string,
+    TAddress extends Address = Address
+> = Omit<LocalAccount<TSource, TAddress>, "signTransaction">
