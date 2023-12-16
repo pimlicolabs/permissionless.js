@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.16
+
+### Patch Changes
+
+- 54ea94e: Update safe module to 2.0
+
 ## 0.0.15
 
 ### Patch Changes
