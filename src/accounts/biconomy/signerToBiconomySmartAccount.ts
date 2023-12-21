@@ -22,7 +22,6 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-// import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
@@ -134,42 +133,21 @@ const getAccountInitCode = async ({
     ])
 }
 
-const getAccountAddress = async <
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
->({
-    client,
+const getAccountAddress = async ({
     factoryAddress,
     accountLogicAddress,
     fallbackHandlerAddress,
     ecdsaModuleAddress,
-    entryPoint,
     owner,
     index = 0n
 }: {
-    client: Client<TTransport, TChain>
     factoryAddress: Address
     accountLogicAddress: Address
     fallbackHandlerAddress: Address
     ecdsaModuleAddress: Address
     owner: Address
-    entryPoint: Address
     index?: bigint
 }): Promise<Address> => {
-    // @ts-ignore
-    const unusedClient = client // Ignoring the error for now
-    // @ts-ignore
-    const unusedEntryPoint = entryPoint // Ignoring the error for now
-    // 1.
-    /*const initCode = await getAccountInitCode({owner, index, factoryAddress, ecdsaModuleAddress})
-
-    return getSenderAddress(client, {
-        initCode,
-        entryPoint
-    })*/
-
-    //2.
-
     // Build the module setup data
     const ecdsaOwnershipInitData = encodeFunctionData({
         abi: BiconomyInitAbi,
@@ -262,9 +240,7 @@ export async function signerToBiconomySmartAccount<
 
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
-        getAccountAddress<TTransport, TChain>({
-            client,
-            entryPoint,
+        getAccountAddress({
             owner: viemSigner.address,
             ecdsaModuleAddress,
             factoryAddress,
