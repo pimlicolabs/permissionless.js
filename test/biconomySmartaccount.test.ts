@@ -5,7 +5,7 @@ import {
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { privateKeyToAccount } from "viem/accounts"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
