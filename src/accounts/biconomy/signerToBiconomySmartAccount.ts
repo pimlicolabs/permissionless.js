@@ -1,10 +1,10 @@
 import {
-    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
     type Transport,
+    type LocalAccount,
     concatHex,
     encodeAbiParameters,
     encodeFunctionData,
@@ -12,7 +12,7 @@ import {
     getContractAddress,
     hexToBigInt,
     keccak256,
-    parseAbiParameters
+    parseAbiParameters,
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
@@ -220,7 +220,9 @@ const getAccountAddress = async <
  */
 export async function signerToBiconomySmartAccount<
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSource extends string = "custom",
+    TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
     {
@@ -232,7 +234,7 @@ export async function signerToBiconomySmartAccount<
         fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
         ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
     }: {
-        signer: SmartAccountSigner
+        signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
         index?: bigint
         factoryAddress?: Address
@@ -242,15 +244,12 @@ export async function signerToBiconomySmartAccount<
     }
 ): Promise<BiconomySmartAccount<TTransport, TChain>> {
     // Get the private key related account
-    const viemSigner: Account =
-        signer.type === "local"
-            ? ({
-                  ...signer,
-                  signTransaction: (_, __) => {
-                      throw new SignTransactionNotSupportedBySmartAccount()
-                  }
-              } as Account)
-            : (signer as Account)
+    const viemSigner: LocalAccount = {
+        ...signer,
+        signTransaction: (_, __) => {
+            throw new SignTransactionNotSupportedBySmartAccount()
+        }
+    } as LocalAccount
 
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>
