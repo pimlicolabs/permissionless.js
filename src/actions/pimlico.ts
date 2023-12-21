@@ -8,7 +8,7 @@ import {
     getUserOperationStatus
 } from "./pimlico/getUserOperationStatus.js"
 import {
-    type SponsorUserOperationParameters,
+    type PimlocoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation.js"
@@ -22,14 +22,22 @@ import {
     pimlicoPaymasterActions
 } from "../clients/decorators/pimlico.js"
 
+import {
+    type ValidateSponsorshipPoliciesParameters,
+    type ValidateSponsorshipPoliciesReturnType,
+    validateSponsorshipPolicies
+} from "./pimlico/validateSponsorshipPolicies.js"
+
 export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    SponsorUserOperationParameters,
+    PimlocoSponsorUserOperationParameters,
     SponsorUserOperationReturnType,
     PimlicoBundlerActions,
-    PimlicoPaymasterClientActions
+    PimlicoPaymasterClientActions,
+    ValidateSponsorshipPoliciesParameters,
+    ValidateSponsorshipPoliciesReturnType
 }
 
 export {
@@ -37,5 +45,6 @@ export {
     getUserOperationStatus,
     sponsorUserOperation,
     pimlicoBundlerActions,
-    pimlicoPaymasterActions
+    pimlicoPaymasterActions,
+    validateSponsorshipPolicies
 }

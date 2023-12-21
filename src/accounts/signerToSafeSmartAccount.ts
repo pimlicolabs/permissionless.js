@@ -1,13 +1,14 @@
 import {
-    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
+    type LocalAccount,
     type SignableMessage,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
+    concat,
     concatHex,
     encodeFunctionData,
     encodePacked,
@@ -39,13 +40,17 @@ export type SafeVersion = "1.4.1"
 const EIP712_SAFE_OPERATION_TYPE = {
     SafeOp: [
         { type: "address", name: "safe" },
-        { type: "bytes", name: "callData" },
         { type: "uint256", name: "nonce" },
-        { type: "uint256", name: "preVerificationGas" },
-        { type: "uint256", name: "verificationGasLimit" },
+        { type: "bytes", name: "initCode" },
+        { type: "bytes", name: "callData" },
         { type: "uint256", name: "callGasLimit" },
+        { type: "uint256", name: "verificationGasLimit" },
+        { type: "uint256", name: "preVerificationGas" },
         { type: "uint256", name: "maxFeePerGas" },
         { type: "uint256", name: "maxPriorityFeePerGas" },
+        { type: "bytes", name: "paymasterAndData" },
+        { type: "uint48", name: "validAfter" },
+        { type: "uint48", name: "validUntil" },
         { type: "address", name: "entryPoint" }
     ]
 }
@@ -61,8 +66,8 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
     }
 } = {
     "1.4.1": {
-        ADD_MODULES_LIB_ADDRESS: "0x191EFDC03615B575922289DC339F4c70aC5C30Af",
-        SAFE_4337_MODULE_ADDRESS: "0x39E54Bb2b3Aa444b4B39DEe15De3b7809c36Fc38",
+        ADD_MODULES_LIB_ADDRESS: "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb",
+        SAFE_4337_MODULE_ADDRESS: "0xa581c4A4DB7175302464fF3C06380BC3270b4037",
         SAFE_PROXY_FACTORY_ADDRESS:
             "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
         SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
@@ -490,7 +495,9 @@ const getDefaultAddresses = (
  */
 export async function signerToSafeSmartAccount<
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSource extends string = "custom",
+    TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
     {
@@ -504,11 +511,13 @@ export async function signerToSafeSmartAccount<
         multiSendAddress: _multiSendAddress,
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
         saltNonce = 0n,
+        validUntil = 0,
+        validAfter = 0,
         safeModules = [],
         setupTransactions = []
     }: {
         safeVersion: SafeVersion
-        signer: SmartAccountSigner
+        signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
@@ -517,6 +526,8 @@ export async function signerToSafeSmartAccount<
         multiSendAddress?: Address
         multiSendCallOnlyAddress?: Address
         saltNonce?: bigint
+        validUntil?: number
+        validAfter?: number
         setupTransactions?: {
             to: Address
             data: Address
@@ -527,15 +538,12 @@ export async function signerToSafeSmartAccount<
 ): Promise<SafeSmartAccount<TTransport, TChain>> {
     const chainId = await getChainId(client)
 
-    const viemSigner: Account =
-        signer.type === "local"
-            ? ({
-                  ...signer,
-                  signTransaction: (_, __) => {
-                      throw new SignTransactionNotSupportedBySmartAccount()
-                  }
-              } as Account)
-            : (signer as Account)
+    const viemSigner: LocalAccount = {
+        ...signer,
+        signTransaction: (_, __) => {
+            throw new SignTransactionNotSupportedBySmartAccount()
+        }
+    } as LocalAccount
 
     const {
         addModuleLibAddress,
@@ -632,8 +640,6 @@ export async function signerToSafeSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            // const timestamps = 0n
-
             const signatures = [
                 {
                     signer: viemSigner.address,
@@ -648,17 +654,20 @@ export async function signerToSafeSmartAccount<
                         message: {
                             safe: accountAddress,
                             callData: userOperation.callData,
+                            entryPoint: entryPoint,
                             nonce: userOperation.nonce,
+                            initCode: userOperation.initCode,
+                            maxFeePerGas: userOperation.maxFeePerGas,
+                            maxPriorityFeePerGas:
+                                userOperation.maxPriorityFeePerGas,
                             preVerificationGas:
                                 userOperation.preVerificationGas,
                             verificationGasLimit:
                                 userOperation.verificationGasLimit,
                             callGasLimit: userOperation.callGasLimit,
-                            maxFeePerGas: userOperation.maxFeePerGas,
-                            maxPriorityFeePerGas:
-                                userOperation.maxPriorityFeePerGas,
-                            // signatureTimestamps: timestamps,
-                            entryPoint: entryPoint
+                            paymasterAndData: userOperation.paymasterAndData,
+                            validAfter: validAfter,
+                            validUntil: validUntil
                         }
                     })
                 }
@@ -670,17 +679,12 @@ export async function signerToSafeSmartAccount<
                     .localeCompare(right.signer.toLowerCase())
             )
 
-            let signatureBytes: Address = "0x"
-            for (const sig of signatures) {
-                signatureBytes += sig.data.slice(2)
-            }
+            const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            // const signatureWithTimestamps = encodePacked(
-            //     ["uint96", "bytes"],
-            //     [timestamps, signatureBytes]
-            // )
-
-            return signatureBytes
+            return encodePacked(
+                ["uint48", "uint48", "bytes"],
+                [validAfter, validUntil, signatureBytes]
+            )
         },
         async getInitCode() {
             const contractCode = await getBytecode(client, {
@@ -769,7 +773,7 @@ export async function signerToSafeSmartAccount<
             })
         },
         async getDummySignature() {
-            return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+            return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         }
     }
 }

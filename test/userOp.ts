@@ -78,7 +78,7 @@ export const buildUserOp = async (
 ): Promise<UserOperation> => {
     await new Promise((resolve) => {
         setTimeout(() => {
-            // wait for prev user op to be added to make sure ew get correct nonce
+            // wait for prev user op to be added to make sure we get correct nonce
             resolve(0)
         }, 1000)
     })

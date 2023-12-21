@@ -1,5 +1,10 @@
 import type { Client, Hash } from "viem"
 import {
+    type ValidateSponsorshipPoliciesParameters,
+    type ValidateSponsorshipPoliciesReturnType,
+    validateSponsorshipPolicies
+} from "../../actions/pimlico.js"
+import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
 } from "../../actions/pimlico/getUserOperationGasPrice.js"
@@ -9,7 +14,7 @@ import {
     getUserOperationStatus
 } from "../../actions/pimlico/getUserOperationStatus.js"
 import {
-    type SponsorUserOperationParameters,
+    type PimlocoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
@@ -78,7 +83,7 @@ export type PimlicoPaymasterClientActions = {
      *
      * https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
      *
-     * @param args {@link SponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
+     * @param args {@link PimlocoSponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
      * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}
      *
      * @example
@@ -97,15 +102,57 @@ export type PimlicoPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: SponsorUserOperationParameters
+        args: PimlocoSponsorUserOperationParameters
     ) => Promise<SponsorUserOperationReturnType>
+
+    validateSponsorshipPolicies: (
+        args: ValidateSponsorshipPoliciesParameters
+    ) => Promise<ValidateSponsorshipPoliciesReturnType>
 }
 
+/**
+ * Returns valid sponsorship policies for a userOperation from the list of ids passed
+ * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/ValidateSponsorshipPolicies
+ *
+ * @param args {@link ValidateSponsorshipPoliciesParameters} UserOperation you want to sponsor & entryPoint.
+ * @returns valid sponsorship policies, see {@link ValidateSponsorshipPoliciesReturnType}
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { validateSponsorshipPolicies } from "permissionless/actions/pimlico"
+ *
+ * const bundlerClient = createClient({
+ *   chain: goerli,
+ *   transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+ * }).extend(pimlicoPaymasterActions)
+
+ *
+ * await bundlerClient.validateSponsorshipPolicies({
+ *   userOperation: userOperationWithDummySignature,
+ *   entryPoint: entryPoint,
+ *   sponsorshipPolicyIds: ["sp_shiny_puma"]
+ * })
+ * Returns
+ * [
+ *   {
+ *     sponsorshipPolicyId: "sp_shiny_puma",
+ *     data: {
+ *       name: "Shiny Puma",
+ *       author: "Pimlico",
+ *       icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4...",
+ *       description: "This policy is for testing purposes only"
+ *    }
+ *   }
+ * ]
+ */
 export const pimlicoPaymasterActions = (
     client: Client
 ): PimlicoPaymasterClientActions => ({
-    sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
-        sponsorUserOperation(client as PimlicoPaymasterClient, args)
+    sponsorUserOperation: async (args: PimlocoSponsorUserOperationParameters) =>
+        sponsorUserOperation(client as PimlicoPaymasterClient, args),
+    validateSponsorshipPolicies: async (
+        args: ValidateSponsorshipPoliciesParameters
+    ) => validateSponsorshipPolicies(client as PimlicoPaymasterClient, args)
 })
 
 /**

@@ -1,7 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { getSenderAddress, getUserOperationHash } from "permissionless"
-import { signUserOperationHashWithECDSA } from "permissionless/utils"
+import {
+    getRequiredPrefund,
+    signUserOperationHashWithECDSA
+} from "permissionless/utils"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
     getBundlerClient,
@@ -14,11 +17,8 @@ import {
 } from "./utils.js"
 
 dotenv.config()
-const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.STACKUP_API_KEY)
         throw new Error("STACKUP_API_KEY environment variable not set")
     if (!process.env.FACTORY_ADDRESS)
@@ -162,5 +162,31 @@ describe("test public actions and utils", () => {
         expect(signature).toStartWith("0x")
 
         expect(signature).toEqual(userOperation.signature)
+    })
+
+    test("getRequiredGas", async () => {
+        const bundlerClient = getBundlerClient()
+        const eoaWalletClient = getEoaWalletClient()
+        const userOperation = await buildUserOp(eoaWalletClient)
+
+        const gasParameters = await bundlerClient.estimateUserOperationGas({
+            userOperation,
+            entryPoint: getEntryPoint()
+        })
+
+        userOperation.callGasLimit = gasParameters.callGasLimit
+        userOperation.verificationGasLimit = gasParameters.verificationGasLimit
+        userOperation.preVerificationGas = gasParameters.preVerificationGas
+
+        const requiredGas = getRequiredPrefund({
+            userOperation
+        })
+
+        expect(requiredGas).toBe(
+            (gasParameters.callGasLimit +
+                gasParameters.verificationGasLimit +
+                gasParameters.preVerificationGas) *
+                userOperation.maxFeePerGas
+        )
     })
 })

@@ -1,5 +1,26 @@
 # permissionless
 
+## 0.0.16
+
+### Patch Changes
+
+- 54ea94e: Update safe module to 2.0
+
+## 0.0.15
+
+### Patch Changes
+
+- 2857b89: Added getRequiredPrefund utility function
+- 7c54173: Added support for pm_validateSponsorshipPolicies for pimlicoPaymasterClient
+
+## 0.0.14
+
+### Patch Changes
+
+- 4d6f01f: Add sponsorship policies option to pimlicoPaymasterClient
+  Update Safe 4337 module version to 0.2.0
+- 5fe172d: Introduce a simpel version of Kernel SmartAccount (by ZeroDev), using their ECDSA Validator
+
 ## 0.0.13
 
 ### Patch Changes

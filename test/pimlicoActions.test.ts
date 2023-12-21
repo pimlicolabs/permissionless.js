@@ -20,8 +20,6 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.PIMLICO_API_KEY)
-        throw new Error("PIMLICO_API_KEY environment variable not set")
     if (!process.env.STACKUP_API_KEY)
         throw new Error("STACKUP_API_KEY environment variable not set")
     if (!process.env.FACTORY_ADDRESS)
@@ -33,8 +31,6 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS)
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
-
-const pimlicoApiKey = process.env.PIMLICO_API_KEY
 
 describe("Pimlico Actions tests", () => {
     let pimlicoBundlerClient: PimlicoBundlerClient
@@ -236,4 +232,38 @@ describe("Pimlico Actions tests", () => {
             await waitForNonceUpdate()
         }, 100000)
     })
+
+    test("Validating sponsorship policies", async () => {
+        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+            await publicClient.estimateFeesPerGas()
+
+        const partialUserOp = await buildUserOp(eoaWalletClient)
+
+        const userOperation: UserOperation = {
+            ...partialUserOp,
+            maxFeePerGas: maxFeePerGas || 0n,
+            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            callGasLimit: 0n,
+            verificationGasLimit: 0n,
+            preVerificationGas: 0n
+        }
+
+        const entryPoint = getEntryPoint()
+
+        const validateSponsorshipPolicies =
+            await pimlicoPaymasterClient.validateSponsorshipPolicies({
+                userOperation: userOperation,
+                entryPoint: entryPoint,
+                sponsorshipPolicyIds: ["sp_shiny_puma", "sp_fake_policy"]
+            })
+
+        expect(validateSponsorshipPolicies).not.toBeNull()
+        expect(validateSponsorshipPolicies).not.toBeUndefined()
+        expect(validateSponsorshipPolicies).not.toBeEmpty()
+        expect(validateSponsorshipPolicies).toBeArray()
+        expect(validateSponsorshipPolicies.length).toBe(1)
+        await waitForNonceUpdate()
+    }, 100000)
 })
