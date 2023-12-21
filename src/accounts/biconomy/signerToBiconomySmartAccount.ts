@@ -3,8 +3,8 @@ import {
     type Chain,
     type Client,
     type Hex,
-    type Transport,
     type LocalAccount,
+    type Transport,
     concatHex,
     encodeAbiParameters,
     encodeFunctionData,
@@ -12,7 +12,7 @@ import {
     getContractAddress,
     hexToBigInt,
     keccak256,
-    parseAbiParameters,
+    parseAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
