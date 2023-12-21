@@ -26,9 +26,6 @@ beforeAll(() => {
     if (!process.env.PIMLICO_API_KEY) {
         throw new Error("PIMLICO_API_KEY environment variable not set")
     }
-    if (!process.env.STACKUP_API_KEY) {
-        throw new Error("STACKUP_API_KEY environment variable not set")
-    }
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
     }
@@ -126,7 +123,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         }).toThrow("Doesn't support account deployment")
     })
 
-    test.skip("Smart account client send multiple transactions", async () => {
+    test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToBiconomyAccount()
         })
@@ -151,7 +148,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.skip("Write contract", async () => {
+    test("Write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToBiconomyAccount()
         })
