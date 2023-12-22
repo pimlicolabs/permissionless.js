@@ -8,7 +8,7 @@ import type {
     Transport
 } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema, BigNumber } from "../../types/bundler.js"
+import type { BigNumber, BundlerRpcSchema } from "../../types/bundler.js"
 import type { TStatus } from "../../types/userOperation.js"
 import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 
@@ -102,12 +102,25 @@ export const getUserOperationReceipt = async <
             blockNumber: BigInt(response.receipt.blockNumber),
             from: response.receipt.from,
             to: response.receipt.to,
-            cumulativeGasUsed: (typeof response.receipt.cumulativeGasUsed) === "object" ? BigInt((response.receipt.cumulativeGasUsed as BigNumber)._hex) : BigInt(response.receipt.cumulativeGasUsed as Hex),
+            cumulativeGasUsed:
+                typeof response.receipt.cumulativeGasUsed === "object"
+                    ? BigInt(
+                          (response.receipt.cumulativeGasUsed as BigNumber)._hex
+                      )
+                    : BigInt(response.receipt.cumulativeGasUsed as Hex),
             status: transactionReceiptStatus[response.receipt.status],
-            gasUsed: (typeof response.receipt.gasUsed) === "object" ? BigInt((response.receipt.gasUsed as BigNumber)._hex) : BigInt(response.receipt.gasUsed as Hex),
+            gasUsed:
+                typeof response.receipt.gasUsed === "object"
+                    ? BigInt((response.receipt.gasUsed as BigNumber)._hex)
+                    : BigInt(response.receipt.gasUsed as Hex),
             contractAddress: response.receipt.contractAddress,
             logsBloom: response.receipt.logsBloom,
-            effectiveGasPrice: (typeof response.receipt.effectiveGasPrice) === "object" ? BigInt((response.receipt.effectiveGasPrice as BigNumber)._hex) : BigInt(response.receipt.effectiveGasPrice as Hex),
+            effectiveGasPrice:
+                typeof response.receipt.effectiveGasPrice === "object"
+                    ? BigInt(
+                          (response.receipt.effectiveGasPrice as BigNumber)._hex
+                      )
+                    : BigInt(response.receipt.effectiveGasPrice as Hex)
         },
         logs: response.logs.map((log) => ({
             data: log.data,
