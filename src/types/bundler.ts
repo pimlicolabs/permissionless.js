@@ -2,6 +2,11 @@ import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { UserOperationWithBigIntAsHex } from "./userOperation.js"
 
+export type BigNumber = {
+    _hex: Hex
+    _isBigNumber: boolean
+}
+
 export type BundlerRpcSchema = [
     {
         Method: "eth_sendUserOperation"
@@ -68,12 +73,12 @@ type UserOperationReceiptWithBigIntAsHex = {
         blockNumber: Hex
         from: Address
         to: Address | null
-        cumulativeGasUsed: Hex
+        cumulativeGasUsed: Hex | BigNumber
         status: "0x0" | "0x1"
-        gasUsed: Hex
+        gasUsed: Hex | BigNumber
         contractAddress: Address | null
         logsBloom: Hex
-        effectiveGasPrice: Hex
+        effectiveGasPrice: Hex | BigNumber
     }
     logs: {
         data: Hex
