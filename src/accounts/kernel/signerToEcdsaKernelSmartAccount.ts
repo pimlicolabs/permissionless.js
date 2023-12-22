@@ -344,14 +344,13 @@ export async function signerToEcdsaKernelSmartAccount<
                         }))
                     ]
                 })
-            } else {
-                // Encode a simple call
-                return encodeFunctionData({
-                    abi: KernelExecuteAbi,
-                    functionName: "execute",
-                    args: [_tx.to, _tx.value, _tx.data, 0]
-                })
             }
+            // Encode a simple call
+            return encodeFunctionData({
+                abi: KernelExecuteAbi,
+                functionName: "execute",
+                args: [_tx.to, _tx.value, _tx.data, 0]
+            })
         },
 
         // Get simple dummy signature

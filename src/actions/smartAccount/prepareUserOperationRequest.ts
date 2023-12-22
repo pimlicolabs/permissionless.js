@@ -26,7 +26,7 @@ export type SponsorUserOperationMiddleware = {
 }
 
 export type PrepareUserOperationRequestParameters<
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
 > = {
     userOperation: PartialBy<
         UserOperation,

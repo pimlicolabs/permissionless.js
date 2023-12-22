@@ -1,6 +1,7 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
+    signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
@@ -111,6 +112,20 @@ export const getSignerToEcdsaKernelAccount = async () => {
         entryPoint: getEntryPoint(),
         signer: signer,
         index: 100n
+    })
+}
+
+export const getSignerToBiconomyAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToBiconomySmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        signer: signer,
+        index: 0n
     })
 }
 
