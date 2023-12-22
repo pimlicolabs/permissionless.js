@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.17
+
+### Patch Changes
+
+- 2d7004e: Added support for Biconomy accounts
+
 ## 0.0.16
 
 ### Patch Changes
