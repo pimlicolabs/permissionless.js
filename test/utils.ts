@@ -14,6 +14,7 @@ import {
 import { walletClientToCustomSigner } from "permissionless/utils"
 import {
     http,
+    Account,
     Address,
     Hex,
     createPublicClient,
@@ -65,13 +66,13 @@ export const getTestingChain = () => {
     })
 }
 
-export const getSignerToSimpleSmartAccount = async () => {
+export const getSignerToSimpleSmartAccount = async (
+    signer: Account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
     const publicClient = await getPublicClient()
-
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 
     return await signerToSimpleSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),

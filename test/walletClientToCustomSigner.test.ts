@@ -37,11 +37,9 @@ beforeAll(() => {
     if (!process.env.GREETER_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
-describe("Simple Account", () => {
+describe("Simple Account from walletClient", () => {
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
@@ -60,7 +58,9 @@ describe("Simple Account", () => {
 
     test("Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const response = await smartAccountClient.signMessage({
@@ -74,7 +74,9 @@ describe("Simple Account", () => {
 
     test("Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const response = await smartAccountClient.signTypedData({
@@ -104,7 +106,9 @@ describe("Simple Account", () => {
 
     test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         expect(async () => {
@@ -117,7 +121,9 @@ describe("Simple Account", () => {
 
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
         const response = await smartAccountClient.sendTransactions({
             transactions: [
@@ -141,7 +147,9 @@ describe("Simple Account", () => {
 
     test("Smart account write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const greeterContract = getContract({
@@ -169,7 +177,9 @@ describe("Simple Account", () => {
 
     test("Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
@@ -188,7 +198,9 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount(),
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -251,7 +263,9 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getCustomSignerToSimpleSmartAccount(),
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
