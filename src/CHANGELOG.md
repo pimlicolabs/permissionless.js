@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.18
+
+### Patch Changes
+
+- 1371eb5: Added walletClientToCustomSigner
+
 ## 0.0.17
 
 ### Patch Changes
