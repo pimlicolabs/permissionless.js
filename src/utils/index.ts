@@ -11,6 +11,7 @@ import {
     AccountOrClientNotFoundError,
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
+import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
@@ -21,6 +22,7 @@ export function parseAccount(account: Address | Account): Account {
 export {
     getUserOperationHash,
     getRequiredPrefund,
+    walletClientToCustomSigner,
     type GetRequiredPrefundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,

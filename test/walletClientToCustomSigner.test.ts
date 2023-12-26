@@ -1,19 +1,16 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import {
-    SignTransactionNotSupportedBySmartAccount,
-    signerToBiconomySmartAccount
-} from "permissionless/accounts"
+import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     getBundlerClient,
+    getCustomSignerToSimpleSmartAccount,
     getEntryPoint,
     getPimlicoPaymasterClient,
     getPublicClient,
-    getSignerToBiconomyAccount,
+    getSignerToSimpleSmartAccount,
     getSmartAccountClient,
     waitForNonceUpdate
 } from "./utils.js"
@@ -21,6 +18,9 @@ import {
 dotenv.config()
 
 beforeAll(() => {
+    if (!process.env.STACKUP_API_KEY) {
+        throw new Error("STACKUP_API_KEY environment variable not set")
+    }
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
     }
@@ -33,24 +33,22 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
+
     if (!process.env.GREETER_ADDRESS) {
-        throw new Error("GREETER_ADDRESS environment variable not set")
+        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
 })
 
-/**
- * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
- */
-describe("Biconomy Modular Smart Account (ECDSA module)", () => {
-    test("Account address", async () => {
-        const ecdsaSmartAccount = await getSignerToBiconomyAccount()
+describe("Simple Account from walletClient", () => {
+    test("Simple Account address", async () => {
+        const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
-        expect(ecdsaSmartAccount.address).toBeString()
-        expect(ecdsaSmartAccount.address).toHaveLength(42)
-        expect(ecdsaSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
+        expect(simpleSmartAccount.address).toBeString()
+        expect(simpleSmartAccount.address).toHaveLength(42)
+        expect(simpleSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
         expect(async () => {
-            await ecdsaSmartAccount.signTransaction({
+            await simpleSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
@@ -58,9 +56,11 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         }).toThrow(new SignTransactionNotSupportedBySmartAccount())
     })
 
-    test("Client signMessage", async () => {
+    test("Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const response = await smartAccountClient.signMessage({
@@ -74,7 +74,9 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const response = await smartAccountClient.signTypedData({
@@ -102,9 +104,11 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
 
-    test("Client deploy contract", async () => {
+    test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         expect(async () => {
@@ -112,14 +116,15 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Doesn't support account deployment")
+        }).toThrow("Simple account doesn't support account deployment")
     })
 
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
-
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -140,9 +145,11 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Write contract", async () => {
+    test("Smart account write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
         })
 
         const greeterContract = getContract({
@@ -168,15 +175,32 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Client send Transaction with paymaster", async () => {
-        const account = await getSignerToBiconomyAccount()
+    test("Smart account client send transaction", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+        expect(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
+    }, 1000000)
 
+    test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account,
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -213,38 +237,35 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
-            try {
-                const event = decodeEventLog({
-                    abi: EntryPointAbi,
-                    ...log
-                })
-                if (event.eventName === "UserOperationEvent") {
-                    eventFound = true
-                    const userOperation =
-                        await bundlerClient.getUserOperationByHash({
-                            hash: event.args.userOpHash
-                        })
-                    expect(
-                        userOperation?.userOperation.paymasterAndData
-                    ).not.toBe("0x")
-                }
-            } catch {}
+            const event = decodeEventLog({
+                abi: EntryPointAbi,
+                ...log
+            })
+            if (event.eventName === "UserOperationEvent") {
+                eventFound = true
+                const userOperation =
+                    await bundlerClient.getUserOperationByHash({
+                        hash: event.args.userOpHash
+                    })
+                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
+                    "0x"
+                )
+            }
         }
 
         expect(eventFound).toBeTrue()
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Client send multiple Transactions with paymaster", async () => {
-        const account = await getSignerToBiconomyAccount()
-
+    test("smart account client send multiple Transactions with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account,
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -290,72 +311,23 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
-            try {
-                const event = decodeEventLog({
-                    abi: EntryPointAbi,
-                    ...log
-                })
-                if (event.eventName === "UserOperationEvent") {
-                    eventFound = true
-                    const userOperation =
-                        await bundlerClient.getUserOperationByHash({
-                            hash: event.args.userOpHash
-                        })
-                    expect(
-                        userOperation?.userOperation.paymasterAndData
-                    ).not.toBe("0x")
-                }
-            } catch {}
+            const event = decodeEventLog({
+                abi: EntryPointAbi,
+                ...log
+            })
+            if (event.eventName === "UserOperationEvent") {
+                eventFound = true
+                const userOperation =
+                    await bundlerClient.getUserOperationByHash({
+                        hash: event.args.userOpHash
+                    })
+                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
+                    "0x"
+                )
+            }
         }
 
         expect(eventFound).toBeTrue()
         await waitForNonceUpdate()
-    }, 1000000)
-
-    test.only("Can use a deployed account", async () => {
-        const initialEcdsaSmartAccount = await getSignerToBiconomyAccount()
-        const publicClient = await getPublicClient()
-        const smartAccountClient = await getSmartAccountClient({
-            account: initialEcdsaSmartAccount,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
-            }
-        })
-
-        // Send an initial tx to deploy the account
-        const hash = await smartAccountClient.sendTransaction({
-            to: zeroAddress,
-            value: 0n,
-            data: "0x"
-        })
-
-        // Wait for the tx to be done (so we are sure that the account is deployed)
-        await publicClient.waitForTransactionReceipt({ hash })
-
-        // Build a new account with a valid owner
-        const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
-        const alreadyDeployedEcdsaSmartAccount =
-            await signerToBiconomySmartAccount(publicClient, {
-                entryPoint: getEntryPoint(),
-                signer: signer
-            })
-
-        // Ensure the two account have the same address
-        expect(alreadyDeployedEcdsaSmartAccount.address).toMatch(
-            initialEcdsaSmartAccount.address
-        )
     }, 1000000)
 })

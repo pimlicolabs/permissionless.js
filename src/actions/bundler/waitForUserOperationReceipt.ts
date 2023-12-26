@@ -87,7 +87,7 @@ export const waitForUserOperationReceipt = <
             )
         }
 
-        const _unobserve = observe(
+        const unobserve = observe(
             observerId,
             { resolve, reject },
             async (emit) => {
@@ -95,7 +95,7 @@ export const waitForUserOperationReceipt = <
                     const done = (fn: () => void) => {
                         clearInterval(_removeInterval)
                         fn()
-                        _unobserve()
+                        unobserve()
                     }
 
                     const _userOperationReceipt = await getAction(
