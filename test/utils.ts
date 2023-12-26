@@ -11,6 +11,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { walletClientToCustomSigner } from "permissionless/utils"
 import {
     http,
     Address,
@@ -127,6 +128,21 @@ export const getSignerToBiconomyAccount = async () => {
         signer: signer,
         index: 0n
     })
+}
+
+export const getCustomSignerToSimpleSmartAccount = async () => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    const walletClient = createWalletClient({
+        chain: getTestingChain(),
+        account: signer,
+        transport: http(process.env.RPC_URL as string)
+    })
+
+    return walletClientToCustomSigner(walletClient)
 }
 
 export const getSmartAccountClient = async ({
