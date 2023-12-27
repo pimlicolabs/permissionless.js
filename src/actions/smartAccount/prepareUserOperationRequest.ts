@@ -1,4 +1,4 @@
-import type { Address, Chain, Client, Hex, Transport } from "viem"
+import type { Address, Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types.js"
 import type {
@@ -17,12 +17,7 @@ export type SponsorUserOperationMiddleware = {
     sponsorUserOperation?: (args: {
         userOperation: UserOperation
         entryPoint: Address
-    }) => Promise<{
-        paymasterAndData: Hex
-        preVerificationGas: bigint
-        verificationGasLimit: bigint
-        callGasLimit: bigint
-    }>
+    }) => Promise<UserOperation>
 }
 
 export type PrepareUserOperationRequestParameters<
@@ -63,12 +58,11 @@ export async function prepareUserOperationRequest<
 
     const account = parseAccount(account_) as SmartAccount
 
-    const [sender, nonce, initCode, signature, callData, gasEstimation] =
+    const [sender, nonce, initCode, callData, gasEstimation] =
         await Promise.all([
             partialUserOperation.sender || account.address,
             partialUserOperation.nonce || account.getNonce(),
             partialUserOperation.initCode || account.getInitCode(),
-            partialUserOperation.signature || account.getDummySignature(),
             partialUserOperation.callData,
             !partialUserOperation.maxFeePerGas ||
             !partialUserOperation.maxPriorityFeePerGas
@@ -76,13 +70,13 @@ export async function prepareUserOperationRequest<
                 : undefined
         ])
 
-    const userOperation: UserOperation = {
+    let userOperation: UserOperation = {
         sender,
         nonce,
         initCode,
-        signature,
         callData,
         paymasterAndData: "0x",
+        signature: partialUserOperation.signature || "0x",
         maxFeePerGas:
             partialUserOperation.maxFeePerGas ||
             gasEstimation?.maxFeePerGas ||
@@ -96,22 +90,15 @@ export async function prepareUserOperationRequest<
         preVerificationGas: partialUserOperation.preVerificationGas || 0n
     }
 
+    if (userOperation.signature === "0x") {
+        userOperation.signature = await account.getDummySignature(userOperation)
+    }
+
     if (sponsorUserOperation) {
-        const {
-            callGasLimit,
-            verificationGasLimit,
-            preVerificationGas,
-            paymasterAndData
-        } = await sponsorUserOperation({
+        userOperation = await sponsorUserOperation({
             userOperation,
             entryPoint: account.entryPoint
         })
-        userOperation.paymasterAndData = paymasterAndData
-        userOperation.callGasLimit = userOperation.callGasLimit || callGasLimit
-        userOperation.verificationGasLimit =
-            userOperation.verificationGasLimit || verificationGasLimit
-        userOperation.preVerificationGas =
-            userOperation.preVerificationGas || preVerificationGas
     } else if (
         !userOperation.callGasLimit ||
         !userOperation.verificationGasLimit ||

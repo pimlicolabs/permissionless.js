@@ -259,7 +259,7 @@ export async function signerToSimpleSmartAccount<
                 args: [to, value, data]
             })
         },
-        async getDummySignature() {
+        async getDummySignature(_userOperation) {
             return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
     }

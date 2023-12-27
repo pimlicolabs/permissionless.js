@@ -23,6 +23,8 @@ import {
     signerToBiconomySmartAccount
 } from "./biconomy/signerToBiconomySmartAccount.js"
 
+import { privateKeyToBiconomySmartAccount } from "./biconomy/privateKeyToBiconomySmartAccount.js"
+
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -37,6 +39,7 @@ export {
     type SimpleSmartAccount,
     signerToSimpleSmartAccount,
     SignTransactionNotSupportedBySmartAccount,
+    privateKeyToBiconomySmartAccount,
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
     privateKeyToSafeSmartAccount,

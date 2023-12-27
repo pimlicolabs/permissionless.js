@@ -1,4 +1,4 @@
-import type { Address, Hex } from "viem"
+import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup.js"
 import type { StackupPaymasterContext } from "../../types/stackup.js"
@@ -20,12 +20,7 @@ export type SponsorUserOperationParameters = {
     context: StackupPaymasterContext
 }
 
-export type SponsorUserOperationReturnType = {
-    paymasterAndData: Hex
-    preVerificationGas: bigint
-    verificationGasLimit: bigint
-    callGasLimit: bigint
-}
+export type SponsorUserOperationReturnType = UserOperation
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
@@ -65,10 +60,13 @@ export const sponsorUserOperation = async (
         ]
     })
 
-    return {
+    const userOperation: UserOperation = {
+        ...args.userOperation,
         paymasterAndData: response.paymasterAndData,
         preVerificationGas: BigInt(response.preVerificationGas),
         verificationGasLimit: BigInt(response.verificationGasLimit),
         callGasLimit: BigInt(response.callGasLimit)
     }
+
+    return userOperation
 }

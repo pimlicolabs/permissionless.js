@@ -1,4 +1,4 @@
-import type { Account, Address, Chain, Client, Hex, Transport } from "viem"
+import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 import type {
@@ -19,12 +19,7 @@ export type PimlocoSponsorUserOperationParameters = {
     sponsorshipPolicyId?: string
 }
 
-export type SponsorUserOperationReturnType = {
-    paymasterAndData: Hex
-    preVerificationGas: bigint
-    verificationGasLimit: bigint
-    callGasLimit: bigint
-}
+export type SponsorUserOperationReturnType = UserOperation
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
@@ -79,10 +74,13 @@ export const sponsorUserOperation = async <
               ]
     })
 
-    return {
+    const userOperation: UserOperation = {
+        ...args.userOperation,
         paymasterAndData: response.paymasterAndData,
         preVerificationGas: BigInt(response.preVerificationGas),
         verificationGasLimit: BigInt(response.verificationGasLimit),
         callGasLimit: BigInt(response.callGasLimit)
     }
+
+    return userOperation
 }

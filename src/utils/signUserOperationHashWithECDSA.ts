@@ -13,7 +13,7 @@ import type { UserOperation } from "../types/userOperation.js"
 import { getUserOperationHash } from "./getUserOperationHash.js"
 import { parseAccount } from "./index.js"
 
-export type signUserOperationHashWithECDSAParams<
+export type SignUserOperationHashWithECDSAParams<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
@@ -83,7 +83,7 @@ export const signUserOperationHashWithECDSA = async <
     userOperation,
     chainId,
     entryPoint
-}: signUserOperationHashWithECDSAParams<
+}: SignUserOperationHashWithECDSAParams<
     TTransport,
     TChain,
     TAccount
