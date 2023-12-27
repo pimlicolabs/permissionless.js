@@ -30,6 +30,11 @@ import {
     sendTransactions
 } from "./smartAccount/sendTransactions.js"
 
+import {
+    type WriteContractWithPaymasterParameters,
+    writeContract
+} from "./smartAccount/writeContract.js"
+
 export {
     deployContract,
     type DeployContractParametersWithPaymaster,
@@ -45,5 +50,7 @@ export {
     type SendTransactionWithPaymasterParameters,
     type SponsorUserOperationMiddleware,
     sendTransactions,
-    type SendTransactionsWithPaymasterParameters
+    type SendTransactionsWithPaymasterParameters,
+    type WriteContractWithPaymasterParameters,
+    writeContract
 }

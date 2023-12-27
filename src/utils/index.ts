@@ -1,4 +1,6 @@
 import type { Account, Address } from "viem"
+import { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
+import { getAction } from "./getAction.js"
 import {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
@@ -9,6 +11,7 @@ import {
 } from "./getUserOperationHash.js"
 import {
     AccountOrClientNotFoundError,
+    type SignUserOperationHashWithECDSAParams,
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
 import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
@@ -20,11 +23,15 @@ export function parseAccount(account: Address | Account): Account {
 }
 
 export {
+    transactionReceiptStatus,
+    deepHexlify,
+    getAction,
     getUserOperationHash,
     getRequiredPrefund,
     walletClientToCustomSigner,
     type GetRequiredPrefundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,
+    type SignUserOperationHashWithECDSAParams,
     AccountOrClientNotFoundError
 }

@@ -772,7 +772,7 @@ export async function signerToSafeSmartAccount<
                 args: [to, value, data, 0]
             })
         },
-        async getDummySignature() {
+        async getDummySignature(_userOperation) {
             return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         }
     }

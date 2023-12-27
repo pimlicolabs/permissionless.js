@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
-import { getSenderAddress, getUserOperationHash } from "permissionless"
+import {
+    deepHexlify,
+    getSenderAddress,
+    getUserOperationHash
+} from "permissionless"
 import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA
@@ -32,6 +36,22 @@ beforeAll(() => {
 })
 
 describe("test public actions and utils", () => {
+    test("Test deep Hexlify", async () => {
+        expect(deepHexlify("abcd")).toBe("abcd")
+        expect(deepHexlify(null)).toBe(null)
+        expect(deepHexlify(true)).toBe(true)
+        expect(deepHexlify(false)).toBe(false)
+        expect(deepHexlify(1n)).toBe("0x1")
+        expect(
+            deepHexlify({
+                name: "Garvit",
+                balance: 1n
+            })
+        ).toEqual({
+            name: "Garvit",
+            balance: "0x1"
+        })
+    })
     test("get sender address", async () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()

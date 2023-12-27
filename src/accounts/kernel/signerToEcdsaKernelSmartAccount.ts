@@ -354,7 +354,7 @@ export async function signerToEcdsaKernelSmartAccount<
         },
 
         // Get simple dummy signature
-        async getDummySignature() {
+        async getDummySignature(_userOperation) {
             return "0x00000000fffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
     }

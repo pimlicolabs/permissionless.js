@@ -354,7 +354,7 @@ export async function signerToBiconomySmartAccount<
         },
 
         // Get simple dummy signature for ECDSA module authorization
-        async getDummySignature() {
+        async getDummySignature(_userOperation) {
             const moduleAddress =
                 BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
             const dynamicPart = moduleAddress.substring(2).padEnd(40, "0")

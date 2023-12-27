@@ -48,13 +48,13 @@ export type SmartAccount<
                   data: Hex
               }[]
     ) => Promise<Hex>
-    getDummySignature(): Promise<Hex>
+    getDummySignature(userOperation: UserOperation): Promise<Hex>
     encodeDeployCallData: <TAbi extends Abi | readonly unknown[] = Abi>({
         abi,
         args,
         bytecode
     }: { abi: TAbi; bytecode: Hex } & GetConstructorArgs<TAbi>) => Promise<Hex>
-    signUserOperation: (UserOperation: UserOperation) => Promise<Hex>
+    signUserOperation: (userOperation: UserOperation) => Promise<Hex>
 }
 
 export type SmartAccountSigner<
