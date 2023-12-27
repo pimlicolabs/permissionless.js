@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.19
+
+### Patch Changes
+
+- 7c68b39: Export all actions, sponsorUserOperation now returns complete UserOperation, we pass userOperation to getDummySignature
+
 ## 0.0.18
 
 ### Patch Changes
