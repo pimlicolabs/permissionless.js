@@ -8,7 +8,7 @@ import {
     getUserOperationStatus
 } from "./pimlico/getUserOperationStatus.js"
 import {
-    type PimlocoSponsorUserOperationParameters,
+    type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation.js"
@@ -32,7 +32,7 @@ export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    PimlocoSponsorUserOperationParameters,
+    PimlicoSponsorUserOperationParameters,
     SponsorUserOperationReturnType,
     PimlicoBundlerActions,
     PimlicoPaymasterClientActions,
