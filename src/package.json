@@ -1,6 +1,6 @@
 {
     "name": "permissionless",
-    "version": "0.0.19",
+    "version": "0.0.20",
     "author": "Pimlico",
     "main": "./_cjs/index.js",
     "module": "./_esm/index.js",
