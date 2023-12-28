@@ -26,6 +26,11 @@ import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
 } from "../../actions/smartAccount/sendTransaction.js"
+import {
+    type SendUserOperationParameters,
+    type SendUserOperationReturnType,
+    sendUserOperation
+} from "../../actions/smartAccount/sendUserOperation.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
 import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
 import {
@@ -359,6 +364,11 @@ export type SmartAccountActions<
             >
         >[1]
     ) => Promise<PrepareUserOperationRequestReturnType>
+    sendUserOperation: <TTransport extends Transport>(
+        args: Parameters<
+            typeof sendUserOperation<TTransport, TChain, TSmartAccount>
+        >[1]
+    ) => Promise<SendUserOperationReturnType>
     /**
      * Creates, signs, and sends a new transaction to the network.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -441,6 +451,11 @@ export const smartAccountActions =
                 ...args,
                 sponsorUserOperation
             } as SendTransactionsWithPaymasterParameters),
+        sendUserOperation: (args) =>
+            sendUserOperation(client, {
+                ...args,
+                sponsorUserOperation
+            } as SendUserOperationParameters),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
         writeContract: (args) =>
