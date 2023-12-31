@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.20
+
+### Patch Changes
+
+- c404bb0: Export sendUserOperation from smartAccountClient
+
 ## 0.0.19
 
 ### Patch Changes
