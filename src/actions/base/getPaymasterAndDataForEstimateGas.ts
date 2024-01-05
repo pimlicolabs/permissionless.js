@@ -1,13 +1,5 @@
-import type {
-    Account,
-    Address,
-    Chain,
-    Client,
-    Hash,
-    Hex,
-    Transport
-} from "viem"
-import { type BasePaymasterRpcSchema } from "../../types/base.js"
+import type { Address, Hash, Hex } from "viem"
+import { BasePaymasterClient } from "../../clients/base.js"
 import { type UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 
 export type GetPaymasterAndDataForEstimateGasParameters = {
@@ -18,12 +10,31 @@ export type GetPaymasterAndDataForEstimateGasParameters = {
 
 export type GetPaymasterAndDataForEstimateGasReturnType = Hash
 
-export const getPaymasterAndDataForEstimateGas = async <
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
->(
-    client: Client<TTransport, TChain, TAccount, BasePaymasterRpcSchema>,
+/**
+ * Returns paymasterAndData for gas estimation. Note that this is a dummy signature that won't be accepted by the paymaster, except for gas estimation.
+ *
+ * @param client {@link BasePaymasterClient} that you created using viem's createClient whose transport url is pointing to the Base paymaster.
+ * @param args {@link GetPaymasterAndDataForEstimateGasParameters} UserOperation you want to sponsor, entryPoint, and chain ID.
+ * @returns paymasterAndData with a dummy signature just for gas estimation.
+ *
+ *
+ * @example
+ * import { createClient } from "viem"
+ * import { getPaymasterAndDataForEstimateGas } from "permissionless/actions/base"
+ *
+ * const paymasterClient = createClient({
+ *      transport: http("https://paymaster.base.org")
+ * })
+ *
+ * await getPaymasterAndDataForEstimateGas(bundlerClient, {
+ *      userOperation: userOperationWithoutPaymaster,
+ *      entryPoint: entryPoint,
+ *      chainId: toHex(chainId)
+ * }})
+ *
+ */
+export const getPaymasterAndDataForEstimateGas = async (
+    client: BasePaymasterClient,
     args: GetPaymasterAndDataForEstimateGasParameters
 ): Promise<GetPaymasterAndDataForEstimateGasReturnType> => {
     const response = await client.request({

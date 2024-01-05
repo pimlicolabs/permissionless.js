@@ -20,6 +20,21 @@ export type BasePaymasterClient = Client<
     BasePaymasterClientActions
 >
 
+/**
+ * Creates a Base paymaster client.
+ *
+ * - Docs: https://github.com/base-org/paymaster
+ *
+ * @param config - {@link PublicClientConfig}
+ * @returns A Base Paymaster Client. {@link BasePaymasterClient}
+ *
+ * @example
+ * import { createPublicClient, http } from 'viem'
+ *
+ * const basePaymasterClient = createBasePaymasterClient({
+ *   transport: http("https://paymaster.base.org"),
+ * })
+ */
 export const createBasePaymasterClient = <
     transport extends Transport,
     chain extends Chain | undefined = undefined

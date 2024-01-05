@@ -12,9 +12,52 @@ import {
 import { type BasePaymasterClient } from "../base.js"
 
 export type BasePaymasterClientActions = {
+    /**
+     * Returns paymasterAndData for gas estimation. Note that this is a dummy signature that won't be accepted by the paymaster, except for gas estimation.
+     *
+     * @param args {@link GetPaymasterAndDataForEstimateGasParameters} UserOperation you want to sponsor, entryPoint, and chain ID.
+     * @returns paymasterAndData with a dummy signature just for gas estimation.
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { basePaymasterActions } from "permissionless/actions/base"
+     *
+     * const basePaymasterClient = createClient({
+     *      transport: http("https://paymaster.base.org")
+     * }).extend(basePaymasterActions)
+     *
+     * await basePaymasterClient.getPaymasterAndDataForEstimateGas({
+     *      userOperation: userOperationWithoutPaymaster,,
+     *      entryPoint: entryPoint,
+     *      chainId: toHex(chainId)
+     * })
+     *
+     */
     getPaymasterAndDataForEstimateGas: (
         args: GetPaymasterAndDataForEstimateGasParameters
     ) => Promise<GetPaymasterAndDataForEstimateGasReturnType>
+
+    /**
+     * Returns paymasterAndData for sponsoring a userOp.
+     *
+     * @param args {@link GetPaymasterAndDataForUserOperationParameters} UserOperation you want to sponsor, entryPoint, and chain ID.
+     * @returns paymasterAndData for sponsoring a userOp.
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { basePaymasterActions } from "permissionless/actions/base"
+     *
+     * const basePaymasterClient = createClient({
+     *      transport: http("https://paymaster.base.org")
+     * }).extend(basePaymasterActions)
+     *
+     * await basePaymasterClient.getPaymasterAndDataForUserOperation({
+     *      userOperation: userOperation,
+     *      entryPoint: entryPoint,
+     *      chainId: toHex(chainId)
+     * })
+     *
+     */
     getPaymasterAndDataForUserOperation: (
         args: GetPaymasterAndDataForUserOperationParameters
     ) => Promise<GetPaymasterAndDataForUserOperationReturnType>
