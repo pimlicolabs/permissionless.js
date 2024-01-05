@@ -4,8 +4,10 @@ import {
     type Client,
     type PublicClientConfig,
     type Transport,
-    createClient
+    createClient,
+    http
 } from "viem"
+import type { PartialBy } from "viem/types/utils"
 import { type BasePaymasterRpcSchema } from "../types/base.js"
 import {
     type BasePaymasterClientActions,
@@ -39,14 +41,14 @@ export const createBasePaymasterClient = <
     transport extends Transport,
     chain extends Chain | undefined = undefined
 >(
-    parameters: PublicClientConfig<transport, chain>
+    parameters?: PartialBy<PublicClientConfig<transport, chain>, 'transport'>
 ): BasePaymasterClient => {
-    const { key = "public", name = "Base Paymaster Client" } = parameters
     const client = createClient({
         ...parameters,
-        key,
-        name,
-        type: "basePaymasterClient"
+        key: parameters?.key ?? "public",
+        name: parameters?.name ?? "Base Paymaster Client",
+        type: "basePaymasterClient",
+        transport: parameters?.transport ?? http("https://paymaster.base.org")
     })
     return client.extend(basePaymasterActions)
 }
