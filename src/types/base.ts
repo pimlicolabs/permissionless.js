@@ -1,11 +1,11 @@
 import type { Address, Hash, Hex } from "viem"
-import type { UserOperation } from "./userOperation.js"
+import type { UserOperationWithBigIntAsHex } from "./userOperation.js"
 
 export type BasePaymasterRpcSchema = [
     {
         Method: "eth_paymasterAndDataForEstimateGas"
         Parameters: [
-            userOperation: UserOperation,
+            userOperation: UserOperationWithBigIntAsHex,
             entryPoint: Address,
             chainId: Hex
         ]
@@ -14,7 +14,7 @@ export type BasePaymasterRpcSchema = [
     {
         Method: "eth_paymasterAndDataForUserOperation"
         Parameters: [
-            userOperation: UserOperation,
+            userOperation: UserOperationWithBigIntAsHex,
             entryPoint: Address,
             chainId: Hex
         ]

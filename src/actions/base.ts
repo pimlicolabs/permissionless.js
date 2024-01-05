@@ -13,7 +13,7 @@ export type {
     GetPaymasterAndDataForEstimateGasParameters,
     GetPaymasterAndDataForEstimateGasReturnType,
     GetPaymasterAndDataForUserOperationParameters,
-    GetPaymasterAndDataForUserOperationReturnType,
+    GetPaymasterAndDataForUserOperationReturnType
 }
 
 export {

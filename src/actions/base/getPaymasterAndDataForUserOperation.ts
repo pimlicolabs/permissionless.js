@@ -1,9 +1,17 @@
-import type { Account, Address, Chain, Client, Hash, Hex, Transport } from "viem"
+import type {
+    Account,
+    Address,
+    Chain,
+    Client,
+    Hash,
+    Hex,
+    Transport
+} from "viem"
 import { type BasePaymasterRpcSchema } from "../../types/base.js"
-import { type UserOperation } from "../../types/userOperation.js"
+import { type UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 
 export type GetPaymasterAndDataForUserOperationParameters = {
-    userOperation: UserOperation
+    userOperation: UserOperationWithBigIntAsHex
     entryPoint: Address
     chainId: Hex
 }
