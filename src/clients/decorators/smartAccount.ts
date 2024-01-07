@@ -2,6 +2,8 @@ import type {
     Abi,
     Chain,
     Client,
+    ContractFunctionArgs,
+    ContractFunctionName,
     DeployContractParameters,
     SendTransactionParameters,
     Transport,
@@ -283,9 +285,7 @@ export type SmartAccountActions<
             TSmartAccount,
             TChainOverride
         >
-    ) => ReturnType<
-        typeof deployContract<TAbi, TChain, TSmartAccount, TChainOverride>
-    >
+    ) => ReturnType<typeof deployContract<TChain, TSmartAccount>>
     /**
      * Executes a write function on a contract.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -336,12 +336,21 @@ export type SmartAccountActions<
      */
     writeContract: <
         const TAbi extends Abi | readonly unknown[],
-        TFunctionName extends string,
+        TFunctionName extends ContractFunctionName<
+            TAbi,
+            "nonpayable" | "payable"
+        > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
+        TArgs extends ContractFunctionArgs<
+            TAbi,
+            "nonpayable" | "payable",
+            TFunctionName
+        > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
         TChainOverride extends Chain | undefined = undefined
     >(
         args: WriteContractParameters<
             TAbi,
             TFunctionName,
+            TArgs,
             TChain,
             TSmartAccount,
             TChainOverride
@@ -352,6 +361,7 @@ export type SmartAccountActions<
             TSmartAccount,
             TAbi,
             TFunctionName,
+            TArgs,
             TChainOverride
         >
     >
@@ -458,9 +468,41 @@ export const smartAccountActions =
             } as SendUserOperationParameters),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
-        writeContract: (args) =>
+        writeContract: <
+            const TAbi extends Abi | readonly unknown[],
+            TFunctionName extends ContractFunctionName<
+                TAbi,
+                "nonpayable" | "payable"
+            > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
+            TArgs extends ContractFunctionArgs<
+                TAbi,
+                "nonpayable" | "payable",
+                TFunctionName
+            > = ContractFunctionArgs<
+                TAbi,
+                "nonpayable" | "payable",
+                TFunctionName
+            >,
+            TChainOverride extends Chain | undefined = undefined
+        >(
+            args: WriteContractParameters<
+                TAbi,
+                TFunctionName,
+                TArgs,
+                TChain,
+                TSmartAccount,
+                TChainOverride
+            >
+        ) =>
             writeContract(client, {
                 ...args,
                 sponsorUserOperation
-            } as WriteContractWithPaymasterParameters)
+            } as WriteContractWithPaymasterParameters<
+                TChain,
+                TSmartAccount,
+                TAbi,
+                TFunctionName,
+                TArgs,
+                TChainOverride
+            >)
     })

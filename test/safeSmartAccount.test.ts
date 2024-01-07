@@ -112,10 +112,12 @@ describe("Safe Account", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: await getSmartAccountClient({
-                account: await getSignerToSafeSmartAccount()
-            })
+            client: {
+                public: await getPublicClient(),
+                wallet: await getSmartAccountClient({
+                    account: await getSignerToSafeSmartAccount()
+                })
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()

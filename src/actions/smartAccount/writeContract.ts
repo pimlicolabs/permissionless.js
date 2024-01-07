@@ -2,6 +2,8 @@ import {
     type Abi,
     type Chain,
     type Client,
+    type ContractFunctionArgs,
+    type ContractFunctionName,
     type EncodeFunctionDataParameters,
     type Transport,
     type WriteContractParameters,
@@ -71,11 +73,20 @@ export type WriteContractWithPaymasterParameters<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount | undefined = SmartAccount | undefined,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-    TFunctionName extends string = string,
+    TFunctionName extends ContractFunctionName<
+        TAbi,
+        "nonpayable" | "payable"
+    > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
+    TArgs extends ContractFunctionArgs<
+        TAbi,
+        "nonpayable" | "payable",
+        TFunctionName
+    > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
     TChainOverride extends Chain | undefined = undefined
 > = WriteContractParameters<
     TAbi,
     TFunctionName,
+    TArgs,
     TChain,
     TAccount,
     TChainOverride
@@ -86,7 +97,15 @@ export async function writeContract<
     TChain extends Chain | undefined,
     TAccount extends SmartAccount | undefined,
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends string,
+    TFunctionName extends ContractFunctionName<
+        TAbi,
+        "nonpayable" | "payable"
+    > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
+    TArgs extends ContractFunctionArgs<
+        TAbi,
+        "nonpayable" | "payable",
+        TFunctionName
+    > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
     TChainOverride extends Chain | undefined = undefined
 >(
     client: Client<Transport, TChain, TAccount>,
@@ -102,14 +121,15 @@ export async function writeContract<
         TAccount,
         TAbi,
         TFunctionName,
+        TArgs,
         TChainOverride
     >
 ): Promise<WriteContractReturnType> {
-    const data = encodeFunctionData({
+    const data = encodeFunctionData<TAbi, TFunctionName>({
         abi,
         args,
         functionName
-    } as unknown as EncodeFunctionDataParameters<TAbi, TFunctionName>)
+    } as EncodeFunctionDataParameters<TAbi, TFunctionName>)
     const hash = await getAction(
         client,
         sendTransaction<TChain, TAccount, TChainOverride>

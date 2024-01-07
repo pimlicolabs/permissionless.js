@@ -156,8 +156,10 @@ describe("ECDSA kernel Account", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: smartAccountClient
+            client: {
+                public: await getPublicClient(),
+                wallet: smartAccountClient
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()

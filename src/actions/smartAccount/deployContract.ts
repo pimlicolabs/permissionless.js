@@ -51,10 +51,8 @@ export type DeployContractParametersWithPaymaster<
  * })
  */
 export async function deployContract<
-    const TAbi extends Abi | readonly unknown[],
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
-    TChainOverride extends Chain | undefined
+    TAccount extends SmartAccount | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     {
@@ -88,12 +86,7 @@ export async function deployContract<
                 abi,
                 args,
                 bytecode
-            } as unknown as DeployContractParameters<
-                TAbi,
-                TChain,
-                TAccount,
-                TChainOverride
-            >)
+            })
         },
         account: account,
         sponsorUserOperation
