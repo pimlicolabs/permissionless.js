@@ -102,14 +102,7 @@ export const buildUserOp = async (
     const { maxFeePerGas, maxPriorityFeePerGas } =
         await publicClient.estimateFeesPerGas()
 
-    const userOperation: PartialBy<
-        UserOperation,
-        | "maxFeePerGas"
-        | "maxPriorityFeePerGas"
-        | "callGasLimit"
-        | "verificationGasLimit"
-        | "preVerificationGas"
-    > = {
+    const userOperation: UserOperation= {
         sender: accountAddress,
         nonce: nonce,
         initCode: await getInitCode(factoryAddress, eoaWalletClient),
