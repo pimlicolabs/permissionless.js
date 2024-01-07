@@ -125,6 +125,7 @@ describe("Simple Account from walletClient", () => {
                 await getCustomSignerToSimpleSmartAccount()
             )
         })
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -155,8 +156,10 @@ describe("Simple Account from walletClient", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: smartAccountClient
+            client: {
+                public: await getPublicClient(),
+                wallet: smartAccountClient
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()

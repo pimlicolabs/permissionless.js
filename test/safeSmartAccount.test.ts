@@ -377,7 +377,7 @@ describe("Safe Account", () => {
             args: [hashMessage(messageToSign), signature]
         })
 
-        expect(response).toBe("0x20c13b0b")
+        expect(response).toBe("0x1626ba7e")
     })
 
     test("safe Smart account client signTypedData", async () => {
@@ -488,6 +488,6 @@ describe("Safe Account", () => {
             ]
         })
 
-        expect(response).toBe("0x20c13b0b")
+        expect(response).toBe("0x1626ba7e")
     })
 })
