@@ -2,6 +2,8 @@
     "name": "permissionless",
     "version": "0.0.20",
     "author": "Pimlico",
+    "homepage": "https://docs.pimlico.io/permissionless",
+    "repository": "github:pimlicolabs/permissionless.js",
     "main": "./_cjs/index.js",
     "module": "./_esm/index.js",
     "types": "./_types/index.d.ts",
