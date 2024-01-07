@@ -4,6 +4,7 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
+import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
@@ -148,8 +149,10 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: smartAccountClient
+            client: {
+                public: await getPublicClient(),
+                wallet: smartAccountClient
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()
@@ -180,12 +183,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -248,12 +246,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -321,12 +314,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

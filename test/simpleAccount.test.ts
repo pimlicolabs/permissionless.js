@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
@@ -137,8 +138,10 @@ describe("Simple Account", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: await getSmartAccountClient()
+            client: {
+                public: await getPublicClient(),
+                wallet: await getSmartAccountClient()
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()
@@ -179,12 +182,7 @@ describe("Simple Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -241,12 +239,7 @@ describe("Simple Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

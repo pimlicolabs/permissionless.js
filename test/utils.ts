@@ -1,6 +1,7 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
+    SmartAccountSigner,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount,
@@ -67,7 +68,9 @@ export const getTestingChain = () => {
 }
 
 export const getSignerToSimpleSmartAccount = async (
-    signer: Account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+    signer: SmartAccountSigner = privateKeyToAccount(
+        process.env.TEST_PRIVATE_KEY as Hex
+    )
 ) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")

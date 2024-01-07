@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToEcdsaKernelSmartAccount
@@ -190,12 +191,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -258,12 +254,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -331,12 +322,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
