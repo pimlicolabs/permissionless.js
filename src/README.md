@@ -48,7 +48,7 @@ import { http } from "viem"
 
 // Create the required clients.
 const bundlerClient = createBundlerClient({
-    chain: goerli,
+    chain: sepolia,
     transport: http(`https://api.pimlico.io/v1/sepolia/rpc?apikey=${pimlicoApiKey}`) // Use any bundler url
 })
 
