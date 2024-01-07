@@ -4,18 +4,27 @@
 
 ![Node Version](https://img.shields.io/badge/node-20.x-green)
 
-Permissionless.js is a Typescript library built on top of [viem](https://viem.sh) for interacting with [ERC-4337 bundlers](https://eips.ethereum.org/EIPS/eip-4337) and paymasters.
+permissionless.js is a TypeScript library built on top of [viem](https://viem.sh) for deploying and managing [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) smart accounts, interacting with bundlers and paymasters, and leveraging custom signers.
 
 ## Features
 
-- **Full ERC-4337 Support**: We support all bundler actions following [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
+- **High-Level Smart Account Support**: We support a high-level API for deploying and managing smart accounts, including some of the most popular implementations ([Safe](https://safe.global), [Kernel](https://zerodev.app), [Biconomy](https://biconomy.io), etc.)
+- **Bundler Support**: We support all bundler actions following [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
 - **Gas Sponsorship**: We support paymaster actions to allow you to easily sponsor gas fees.
-- **Built on & for viem**: We provide convenient helper functions like `createBundlerClient` to easily create viem clients.
-- More to come soon...
+- **User Operation Utility Functions**: We provide many low-level utility functions useful for dealing with User Operations.
+- **Modular and Extensible**: We allow you to easily create and plug in your own smart account systems, bundlers, paymasters, and signers.
+- **Built on & for viem**: permissionless.js is designed to be a thin wrapper around viem, maintaining the same style and overall feel viem provides.
+- and a lot more...
+
+## Documentation
+
+[Take a look at our documentation](https://docs.pimlico.io/permissionless) to learn more about permissionless.js.
 
 ## Installation
 
-Install [viem](https://viem.sh) as a peer dependency
+Install [viem](https://viem.sh) as a peer dependency.
+
+Then install permissionless.js:
 
 ```bash
 npm install viem permissionless
@@ -29,33 +38,29 @@ bun install viem permissionless
 yarn add viem permissionless
 ```
 
-## Quick start
-
-Create a bundler client, and start sending user operations!
+## Quick Start
 
 ```typescript
-
-import { createBundlerClient } from "permissionless/clients/pimlico"
-import { goerli } from "viem/chains"
+// Import the required modules.
+import { createBundlerClient } from "permissionless"
+import { sepolia } from "viem/chains"
 import { http } from "viem"
 
+// Create the required clients.
 const bundlerClient = createBundlerClient({
     chain: goerli,
-    transport: http(`https://api.pimlico.io/v1/goerli/rpc?apikey=${pimlicoApiKey}`) // Use any bundler url
+    transport: http(`https://api.pimlico.io/v1/sepolia/rpc?apikey=${pimlicoApiKey}`) // Use any bundler url
 })
 
-const userOpHash = await bundlerClient.sendUserOperation({
-    userOperation: signedUserOperation,
-    entryPoint: entryPoint
+// Consume bundler, paymaster, and smart account actions!
+const userOperationReceipt = await bundlerClient.getUserOperationReceipt({
+    hash: "0x5faea6a3af76292c2b23468bbea96ef63fb31360848be195748437f0a79106c8"
 })
 ```
 
-For detailed documentation visit our [docs page](https://docs.pimlico.io/permissionless).
-
-
 ## Contributors
 
-For a full explanation of Permissionless.js, please visit our [docs page](https://docs.pimlico.io/permissionless)
+For a full explanation of permissionless.js, please visit our [docs page](https://docs.pimlico.io/permissionless)
 
 Build permissionless.js locally with:
 ```bash
