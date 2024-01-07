@@ -468,41 +468,9 @@ export const smartAccountActions =
             } as SendUserOperationParameters),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
-        writeContract: <
-            const TAbi extends Abi | readonly unknown[],
-            TFunctionName extends ContractFunctionName<
-                TAbi,
-                "nonpayable" | "payable"
-            > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
-            TArgs extends ContractFunctionArgs<
-                TAbi,
-                "nonpayable" | "payable",
-                TFunctionName
-            > = ContractFunctionArgs<
-                TAbi,
-                "nonpayable" | "payable",
-                TFunctionName
-            >,
-            TChainOverride extends Chain | undefined = undefined
-        >(
-            args: WriteContractParameters<
-                TAbi,
-                TFunctionName,
-                TArgs,
-                TChain,
-                TSmartAccount,
-                TChainOverride
-            >
-        ) =>
+        writeContract: (args) =>
             writeContract(client, {
                 ...args,
                 sponsorUserOperation
-            } as WriteContractWithPaymasterParameters<
-                TChain,
-                TSmartAccount,
-                TAbi,
-                TFunctionName,
-                TArgs,
-                TChainOverride
-            >)
+            } as WriteContractWithPaymasterParameters<TChain, TSmartAccount>)
     })
