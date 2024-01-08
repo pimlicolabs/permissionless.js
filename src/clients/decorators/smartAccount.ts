@@ -445,7 +445,10 @@ export const smartAccountActions =
         client: Client<TTransport, TChain, TSmartAccount>
     ): SmartAccountActions<TChain, TSmartAccount> => ({
         prepareUserOperationRequest: (args) =>
-            prepareUserOperationRequest(client, args),
+            prepareUserOperationRequest(client, {
+                ...args,
+                sponsorUserOperation
+            }),
         deployContract: (args) =>
             deployContract(client, {
                 ...args,
