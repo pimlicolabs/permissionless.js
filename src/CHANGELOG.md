@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.21
+
+### Patch Changes
+
+- 3f48e11: Upgrade to viem ^2.0.0
+
 ## 0.0.20
 
 ### Patch Changes
