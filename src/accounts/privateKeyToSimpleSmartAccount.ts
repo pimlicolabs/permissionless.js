@@ -20,7 +20,7 @@ export async function privateKeyToSimpleSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<TTransport, TChain>,
+    client: Client<TTransport, TChain, undefined>,
     {
         privateKey,
         factoryAddress,

@@ -73,8 +73,8 @@ export type SmartAccountClientConfig<
  */
 export const createSmartAccountClient = <
     TTransport extends Transport,
-    TChain extends Chain | undefined = undefined,
-    TSmartAccount extends SmartAccount | undefined = undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
     parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount> &
         SponsorUserOperationMiddleware

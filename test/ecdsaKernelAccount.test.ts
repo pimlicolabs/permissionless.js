@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToEcdsaKernelSmartAccount
@@ -156,8 +157,10 @@ describe("ECDSA kernel Account", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: smartAccountClient
+            client: {
+                public: await getPublicClient(),
+                wallet: smartAccountClient
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()
@@ -188,12 +191,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -256,12 +254,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -329,12 +322,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

@@ -10,6 +10,7 @@ import type {
     WalletClient
 } from "viem"
 
+import { signTypedData } from "viem/actions"
 import type { SmartAccountSigner } from "../accounts/types.js"
 
 export function walletClientToCustomSigner<
@@ -27,16 +28,19 @@ export function walletClientToCustomSigner<
         }: { message: SignableMessage }): Promise<Hex> => {
             return walletClient.signMessage({ message })
         },
-        signTypedData: async <
-            const TTypedData extends TypedData | { [key: string]: unknown },
-            TPrimaryType extends string = string
-        >(
-            typedData: TypedDataDefinition<TTypedData, TPrimaryType>
-        ): Promise<Hex> => {
-            return walletClient.signTypedData({
-                account: walletClient.account,
-                ...typedData
-            })
+        async signTypedData<
+            const TTypedData extends TypedData | Record<string, unknown>,
+            TPrimaryType extends
+                | keyof TTypedData
+                | "EIP712Domain" = keyof TTypedData
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+            return signTypedData<TTypedData, TPrimaryType, TChain, Account>(
+                walletClient,
+                {
+                    account: walletClient.account,
+                    ...typedData
+                }
+            )
         }
     }
 }

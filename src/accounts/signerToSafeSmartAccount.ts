@@ -103,7 +103,7 @@ const adjustVInSignature = (
 
 const generateSafeMessageMessage = <
     const TTypedData extends TypedData | { [key: string]: unknown },
-    TPrimaryType extends string = string
+    TPrimaryType extends keyof TTypedData | "EIP712Domain" = keyof TTypedData
 >(
     message: SignableMessage | TypedDataDefinition<TTypedData, TPrimaryType>
 ): Hex => {
@@ -606,7 +606,12 @@ export async function signerToSafeSmartAccount<
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        async signTypedData(typedData) {
+        async signTypedData<
+            const TTypedData extends TypedData | Record<string, unknown>,
+            TPrimaryType extends
+                | keyof TTypedData
+                | "EIP712Domain" = keyof TTypedData
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
             return adjustVInSignature(
                 "eth_signTypedData",
                 await signTypedData(client, {
@@ -620,7 +625,10 @@ export async function signerToSafeSmartAccount<
                     },
                     primaryType: "SafeMessage",
                     message: {
-                        message: generateSafeMessageMessage(typedData)
+                        message: generateSafeMessageMessage<
+                            TTypedData,
+                            TPrimaryType
+                        >(typedData)
                     }
                 })
             )

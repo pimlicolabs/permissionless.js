@@ -112,10 +112,12 @@ describe("Safe Account", () => {
         const greeterContract = getContract({
             abi: GreeterAbi,
             address: process.env.GREETER_ADDRESS as Address,
-            publicClient: await getPublicClient(),
-            walletClient: await getSmartAccountClient({
-                account: await getSignerToSafeSmartAccount()
-            })
+            client: {
+                public: await getPublicClient(),
+                wallet: await getSmartAccountClient({
+                    account: await getSignerToSafeSmartAccount()
+                })
+            }
         })
 
         const oldGreet = await greeterContract.read.greet()
@@ -375,7 +377,7 @@ describe("Safe Account", () => {
             args: [hashMessage(messageToSign), signature]
         })
 
-        expect(response).toBe("0x20c13b0b")
+        expect(response).toBe("0x1626ba7e")
     })
 
     test("safe Smart account client signTypedData", async () => {
@@ -486,6 +488,6 @@ describe("Safe Account", () => {
             ]
         })
 
-        expect(response).toBe("0x20c13b0b")
+        expect(response).toBe("0x1626ba7e")
     })
 })

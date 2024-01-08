@@ -1,6 +1,7 @@
 import { createBundlerClient, createSmartAccountClient } from "permissionless"
 import {
     SmartAccount,
+    SmartAccountSigner,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount,
@@ -17,6 +18,7 @@ import {
     Account,
     Address,
     Hex,
+    Transport,
     createPublicClient,
     createWalletClient,
     defineChain,
@@ -67,7 +69,9 @@ export const getTestingChain = () => {
 }
 
 export const getSignerToSimpleSmartAccount = async (
-    signer: Account = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+    signer: SmartAccountSigner = privateKeyToAccount(
+        process.env.TEST_PRIVATE_KEY as Hex
+    )
 ) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -154,7 +158,7 @@ export const getSmartAccountClient = async ({
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
 
-    return createSmartAccountClient({
+    return createSmartAccountClient<Transport, typeof chain, SmartAccount>({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),

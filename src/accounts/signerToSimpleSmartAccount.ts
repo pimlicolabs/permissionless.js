@@ -1,3 +1,4 @@
+import type { TypedData } from "abitype"
 import {
     type Address,
     type Chain,
@@ -5,6 +6,7 @@ import {
     type Hex,
     type LocalAccount,
     type Transport,
+    type TypedDataDefinition,
     concatHex,
     encodeFunctionData
 } from "viem"
@@ -106,7 +108,7 @@ export async function signerToSimpleSmartAccount<
     TSource extends string = "custom",
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain>,
+    client: Client<TTransport, TChain, undefined>,
     {
         signer,
         factoryAddress,
@@ -147,8 +149,19 @@ export async function signerToSimpleSmartAccount<
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        async signTypedData(typedData) {
-            return signTypedData(client, { account: viemSigner, ...typedData })
+        async signTypedData<
+            const TTypedData extends TypedData | Record<string, unknown>,
+            TPrimaryType extends
+                | keyof TTypedData
+                | "EIP712Domain" = keyof TTypedData
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+            return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
+                client,
+                {
+                    account: viemSigner,
+                    ...typedData
+                }
+            )
         }
     })
 

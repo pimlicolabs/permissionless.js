@@ -3,11 +3,10 @@ import {
     type Address,
     BaseError,
     type Client,
-    type GetConstructorArgs,
     type Hex,
     type LocalAccount
 } from "viem"
-import type { Chain, Transport } from "viem"
+import type { Chain, EncodeDeployDataParameters, Transport } from "viem"
 import { type UserOperation } from "../types/index.js"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
@@ -53,7 +52,7 @@ export type SmartAccount<
         abi,
         args,
         bytecode
-    }: { abi: TAbi; bytecode: Hex } & GetConstructorArgs<TAbi>) => Promise<Hex>
+    }: EncodeDeployDataParameters<TAbi>) => Promise<Hex>
     signUserOperation: (userOperation: UserOperation) => Promise<Hex>
 }
 
