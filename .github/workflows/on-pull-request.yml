@@ -41,6 +41,7 @@ jobs:
           BUNDLER_RPC_HOST: ${{ secrets.BUNDLER_RPC_HOST }}
           PIMLICO_BUNDLER_RPC_HOST: ${{ secrets.PIMLICO_BUNDLER_RPC_HOST }}
           PIMLICO_PAYMASTER_RPC_HOST: ${{ secrets.PIMLICO_PAYMASTER_RPC_HOST }}
+          ACTIVE_SPONSORSHIP_POLICY: ${{ secrets.ACTIVE_SPONSORSHIP_POLICY }}
           DEBUG: true
 
       - name: Upload coverage reports to Codecov
