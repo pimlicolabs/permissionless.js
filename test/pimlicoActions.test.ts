@@ -182,6 +182,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOperationFromUserOpHash?.transactionHash).toBe(
                 userOperationReceipt?.receipt.transactionHash
             )
+            await waitForNonceUpdate()
             // for (const key in userOperationFromUserOpHash?.userOperation) {
             //     expect(userOperationFromUserOpHash?.userOperation[key]).toBe(userOperation[key])
             // }
