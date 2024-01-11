@@ -37,6 +37,7 @@ beforeAll(() => {
 
 describe("test public actions and utils", () => {
     test("Test deep Hexlify", async () => {
+        console.log("Testing deep hexlify")
         expect(deepHexlify("abcd")).toBe("abcd")
         expect(deepHexlify(null)).toBe(null)
         expect(deepHexlify(true)).toBe(true)
