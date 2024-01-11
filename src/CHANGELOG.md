@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.23
+
+### Patch Changes
+
+- 9c28e23: clear interval and unobserve on timeout in waitForUserOperationReceipt
+
 ## 0.0.22
 
 ### Patch Changes
