@@ -13,7 +13,8 @@ import {
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    getTestingChain
+    getTestingChain,
+    waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
@@ -124,6 +125,7 @@ describe("Pimlico Actions tests", () => {
             expect(
                 sponsorUserOperationPaymasterAndData.paymasterAndData
             ).toStartWith("0x")
+            await waitForNonceUpdate()
         }, 100000)
         test("Sending user op with paymaster and data", async () => {
             const entryPoint = getEntryPoint()
@@ -180,6 +182,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOperationFromUserOpHash?.transactionHash).toBe(
                 userOperationReceipt?.receipt.transactionHash
             )
+            await waitForNonceUpdate()
             // for (const key in userOperationFromUserOpHash?.userOperation) {
             //     expect(userOperationFromUserOpHash?.userOperation[key]).toBe(userOperation[key])
             // }
@@ -193,6 +196,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOperationStatus.transactionHash).toBe(
                 userOperationReceipt?.receipt.transactionHash
             )
+            await waitForNonceUpdate()
         }, 100000)
     })
 
@@ -235,5 +239,6 @@ describe("Pimlico Actions tests", () => {
         expect(validateSponsorshipPolicies).not.toBeEmpty()
         expect(validateSponsorshipPolicies).toBeArray()
         expect(validateSponsorshipPolicies.length).toBe(1)
+        await waitForNonceUpdate()
     }, 100000)
 })
