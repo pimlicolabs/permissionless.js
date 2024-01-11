@@ -11,8 +11,7 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSignerToSimpleSmartAccount,
-    getSmartAccountClient,
-    waitForNonceUpdate
+    getSmartAccountClient
 } from "./utils.js"
 
 dotenv.config()
@@ -128,7 +127,6 @@ describe("Simple Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Smart account write contract", async () => {
@@ -154,7 +152,6 @@ describe("Simple Account", () => {
 
         expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
@@ -167,7 +164,6 @@ describe("Simple Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
@@ -224,7 +220,6 @@ describe("Simple Account", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("smart account client send multiple Transactions with paymaster", async () => {
@@ -290,6 +285,5 @@ describe("Simple Account", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 })

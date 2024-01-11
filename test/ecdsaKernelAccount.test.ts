@@ -15,8 +15,7 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSignerToEcdsaKernelAccount,
-    getSmartAccountClient,
-    waitForNonceUpdate
+    getSmartAccountClient
 } from "./utils.js"
 
 dotenv.config()
@@ -143,7 +142,6 @@ describe("ECDSA kernel Account", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Write contract", async () => {
@@ -173,7 +171,6 @@ describe("ECDSA kernel Account", () => {
 
         expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Client send Transaction with paymaster", async () => {
@@ -236,7 +233,6 @@ describe("ECDSA kernel Account", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Client send multiple Transactions with paymaster", async () => {
@@ -308,7 +304,6 @@ describe("ECDSA kernel Account", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Can use a deployed account", async () => {

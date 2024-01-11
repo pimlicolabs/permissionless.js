@@ -15,8 +15,7 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSignerToBiconomyAccount,
-    getSmartAccountClient,
-    waitForNonceUpdate
+    getSmartAccountClient
 } from "./utils.js"
 
 dotenv.config()
@@ -138,7 +137,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         expect(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Write contract", async () => {
@@ -168,7 +166,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Client send Transaction with paymaster", async () => {
@@ -231,7 +228,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Client send multiple Transactions with paymaster", async () => {
@@ -303,7 +299,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         }
 
         expect(eventFound).toBeTrue()
-        await waitForNonceUpdate()
     }, 1000000)
 
     test("Can use a deployed account", async () => {
