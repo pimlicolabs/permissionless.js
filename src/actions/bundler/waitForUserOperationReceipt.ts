@@ -97,18 +97,22 @@ export const waitForUserOperationReceipt = <
                         fn()
                         unobserve()
                     }
+                    try {
+                        const _userOperationReceipt = await getAction(
+                            bundlerClient,
+                            getUserOperationReceipt
+                        )({ hash })
 
-                    const _userOperationReceipt = await getAction(
-                        bundlerClient,
-                        getUserOperationReceipt
-                    )({ hash })
+                        if (_userOperationReceipt !== null) {
+                            userOperationReceipt = _userOperationReceipt
+                        }
 
-                    if (_userOperationReceipt !== null) {
-                        userOperationReceipt = _userOperationReceipt
-                    }
-
-                    if (userOperationReceipt) {
-                        done(() => emit.resolve(userOperationReceipt))
+                        if (userOperationReceipt) {
+                            done(() => emit.resolve(userOperationReceipt))
+                            return
+                        }
+                    } catch (err) {
+                        done(() => emit.reject(err))
                         return
                     }
                 }, pollingInterval)
