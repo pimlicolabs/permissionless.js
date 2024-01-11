@@ -121,7 +121,7 @@ describe("ECDSA kernel Account", () => {
         }).toThrow("Simple account doesn't support account deployment")
     })
 
-    test.skip("Smart account client send multiple transactions", async () => {
+    test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
         })
@@ -146,7 +146,7 @@ describe("ECDSA kernel Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.skip("Write contract", async () => {
+    test("Write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
         })
