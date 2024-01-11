@@ -306,7 +306,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.only("Can use a deployed account", async () => {
+    test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount()
         const publicClient = await getPublicClient()
         const smartAccountClient = await getSmartAccountClient({

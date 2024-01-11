@@ -26,8 +26,11 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
+      - name: Build
+        run: bun run build
+
       - name: Run benchmarks
-        run: bun run build && bun test --coverage
+        run: bun test --coverage
         env:
           ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}
           FACTORY_ADDRESS: ${{ vars.FACTORY_ADDRESS }}

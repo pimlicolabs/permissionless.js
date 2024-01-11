@@ -314,7 +314,7 @@ describe("ECDSA kernel Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.only("Can use a deployed account", async () => {
+    test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
         const publicClient = await getPublicClient()
         const smartAccountClient = await getSmartAccountClient({
