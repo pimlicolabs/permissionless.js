@@ -24,9 +24,6 @@ dotenv.config()
 let testPrivateKey: Hex
 let factoryAddress: Address
 beforeAll(() => {
-    if (!process.env.STACKUP_API_KEY) {
-        throw new Error("STACKUP_API_KEY environment variable not set")
-    }
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
     }
@@ -124,7 +121,7 @@ describe("ECDSA kernel Account", () => {
         }).toThrow("Simple account doesn't support account deployment")
     })
 
-    test.skip("Smart account client send multiple transactions", async () => {
+    test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
         })
@@ -149,7 +146,7 @@ describe("ECDSA kernel Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.skip("Write contract", async () => {
+    test("Write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
         })
@@ -314,7 +311,7 @@ describe("ECDSA kernel Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test.only("Can use a deployed account", async () => {
+    test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
         const publicClient = await getPublicClient()
         const smartAccountClient = await getSmartAccountClient({

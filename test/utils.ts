@@ -254,9 +254,9 @@ export const getOldUserOpHash = (): Hex => {
     return "0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34"
 }
 
-export const waitForNonceUpdate = async () => {
+export const waitForNonceUpdate = async (time = 10000) => {
     return new Promise((res) => {
-        setTimeout(res, 10000)
+        setTimeout(res, time)
     })
 }
 

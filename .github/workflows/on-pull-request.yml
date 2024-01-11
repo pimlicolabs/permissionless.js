@@ -14,10 +14,9 @@ jobs:
     secrets: inherit
 
   bench:
-    # Disable as benchmarking isn't working in CI
-    if: false
     name: Benchmark
     runs-on: ubuntu-latest
+    environment: release
     timeout-minutes: 5
 
     steps:
@@ -27,17 +26,28 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
-      - name: Run benchmarks
-        run: bun run bench:ci
-        env:
-          VITE_ANVIL_BLOCK_NUMBER: ${{ vars.VITE_ANVIL_BLOCK_NUMBER }}
-          VITE_ANVIL_BLOCK_TIME: ${{ vars.VITE_ANVIL_BLOCK_TIME }}
-          VITE_ANVIL_FORK_URL: ${{ secrets.VITE_ANVIL_FORK_URL }}
+      - name: Build
+        run: bun run build
 
-      - name: Report benchmarks
-        run: bun ./.github/scripts/bench.ts
+      - name: Run benchmarks
+        run: bun test --coverage
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}
+          FACTORY_ADDRESS: ${{ vars.FACTORY_ADDRESS }}
+          TEST_CHAIN_ID: ${{ vars.TEST_CHAIN_ID }}
+          GREETER_ADDRESS:  ${{ vars.GREETER_ADDRESS }}
+          TEST_PRIVATE_KEY: ${{ secrets.TEST_PRIVATE_KEY }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+          BUNDLER_RPC_HOST: ${{ secrets.BUNDLER_RPC_HOST }}
+          PIMLICO_BUNDLER_RPC_HOST: ${{ secrets.PIMLICO_BUNDLER_RPC_HOST }}
+          PIMLICO_PAYMASTER_RPC_HOST: ${{ secrets.PIMLICO_PAYMASTER_RPC_HOST }}
+          ACTIVE_SPONSORSHIP_POLICY: ${{ secrets.ACTIVE_SPONSORSHIP_POLICY }}
+          DEBUG: true
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   size:
     name: Size

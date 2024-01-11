@@ -77,16 +77,6 @@ export const waitForUserOperationReceipt = <
     let userOperationReceipt: GetUserOperationReceiptReturnType
 
     return new Promise((resolve, reject) => {
-        if (timeout) {
-            setTimeout(
-                () =>
-                    reject(
-                        new WaitForUserOperationReceiptTimeoutError({ hash })
-                    ),
-                timeout
-            )
-        }
-
         const unobserve = observe(
             observerId,
             { resolve, reject },
@@ -116,6 +106,18 @@ export const waitForUserOperationReceipt = <
                         return
                     }
                 }, pollingInterval)
+
+                if (timeout) {
+                    setTimeout(() => {
+                        clearInterval(_removeInterval)
+                        unobserve()
+                        reject(
+                            new WaitForUserOperationReceiptTimeoutError({
+                                hash
+                            })
+                        )
+                    }, timeout)
+                }
             }
         )
     })

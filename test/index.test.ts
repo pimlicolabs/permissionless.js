@@ -23,8 +23,6 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.STACKUP_API_KEY)
-        throw new Error("STACKUP_API_KEY environment variable not set")
     if (!process.env.FACTORY_ADDRESS)
         throw new Error("FACTORY_ADDRESS environment variable not set")
     if (!process.env.TEST_PRIVATE_KEY)
@@ -37,6 +35,7 @@ beforeAll(() => {
 
 describe("test public actions and utils", () => {
     test("Test deep Hexlify", async () => {
+        console.log("Testing deep hexlify")
         expect(deepHexlify("abcd")).toBe("abcd")
         expect(deepHexlify(null)).toBe(null)
         expect(deepHexlify(true)).toBe(true)

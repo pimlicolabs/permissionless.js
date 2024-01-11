@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
+import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
@@ -18,9 +19,6 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.STACKUP_API_KEY) {
-        throw new Error("STACKUP_API_KEY environment variable not set")
-    }
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
     }
@@ -207,12 +205,7 @@ describe("Simple Account from walletClient", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -272,12 +265,7 @@ describe("Simple Account from walletClient", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<{
-                paymasterAndData: Hex
-                preVerificationGas: bigint
-                verificationGasLimit: bigint
-                callGasLimit: bigint
-            }> => {
+            }): Promise<UserOperation> => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
