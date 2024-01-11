@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.0.22
+
+### Patch Changes
+
+- 975b1f5: Fix potential memoryLeak in waitForUserOperationReceipt
+- 6799f81: Add sponsorship to prepareUserOperation
+
 ## 0.0.21
 
 ### Patch Changes
