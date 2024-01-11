@@ -81,11 +81,14 @@ export const waitForUserOperationReceipt = <
             observerId,
             { resolve, reject },
             async (emit) => {
+                let timeoutTimer: ReturnType<typeof setTimeout>
+
                 const _removeInterval = setInterval(async () => {
                     const done = (fn: () => void) => {
                         clearInterval(_removeInterval)
                         fn()
                         unobserve()
+                        if (timeout) clearTimeout(timeoutTimer)
                     }
                     try {
                         const _userOperationReceipt = await getAction(
@@ -108,7 +111,7 @@ export const waitForUserOperationReceipt = <
                 }, pollingInterval)
 
                 if (timeout) {
-                    setTimeout(() => {
+                    timeoutTimer = setTimeout(() => {
                         clearInterval(_removeInterval)
                         unobserve()
                         reject(
@@ -116,6 +119,7 @@ export const waitForUserOperationReceipt = <
                                 hash
                             })
                         )
+                        clearTimeout(timeoutTimer)
                     }, timeout)
                 }
             }
