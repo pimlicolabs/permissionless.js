@@ -14,10 +14,10 @@ jobs:
     secrets: inherit
 
   bench:
-    name: Benchmark
+    name: Coverage
     runs-on: ubuntu-latest
     environment: release
-    timeout-minutes: 5
+    timeout-minutes: 20
 
     steps:
       - name: Clone repository
@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Run benchmarks
+      - name: Run tests & coverage
         run: bun test --coverage
         env:
           ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}

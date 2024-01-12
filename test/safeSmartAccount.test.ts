@@ -145,13 +145,13 @@ describe("Safe Account", () => {
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
-                    to: zeroAddress,
-                    value: 0n,
+                    to: smartAccountClient.account.address,
+                    value: 10n,
                     data: "0x"
                 },
                 {
-                    to: zeroAddress,
-                    value: 0n,
+                    to: smartAccountClient.account.address,
+                    value: 10n,
                     data: "0x"
                 }
             ],
