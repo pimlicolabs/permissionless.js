@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.25
+
+### Patch Changes
+
+- fd1292a: Send delegatecall to multisend safe
+
 ## 0.0.24
 
 ### Patch Changes
