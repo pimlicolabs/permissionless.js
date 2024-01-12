@@ -720,6 +720,7 @@ export async function signerToSafeSmartAccount<
             let to: Address
             let value: bigint
             let data: Hex
+            let operationType = 0
 
             if (Array.isArray(args)) {
                 const argsArray = args as {
@@ -734,6 +735,7 @@ export async function signerToSafeSmartAccount<
                 data = encodeMultiSend(
                     argsArray.map((tx) => ({ ...tx, operation: 0 }))
                 )
+                operationType = 1
             } else {
                 const singleTransaction = args as {
                     to: Address
@@ -777,7 +779,7 @@ export async function signerToSafeSmartAccount<
                     }
                 ],
                 functionName: "executeUserOp",
-                args: [to, value, data, 0]
+                args: [to, value, data, operationType]
             })
         },
         async getDummySignature(_userOperation) {
