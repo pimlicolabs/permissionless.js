@@ -50,7 +50,8 @@ export type SmartAccountClientConfig<
         | "pollingInterval"
         | "transport"
     >
->
+> &
+    SponsorUserOperationMiddleware
 
 /**
  * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
@@ -71,14 +72,18 @@ export type SmartAccountClientConfig<
  *   transport: http(BUNDLER_URL),
  * })
  */
-export const createSmartAccountClient = <
+
+export function createSmartAccountClient<
     TTransport extends Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
-    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount> &
-        SponsorUserOperationMiddleware
-): SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>> => {
+    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
+): SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>>
+
+export function createSmartAccountClient(
+    parameters: SmartAccountClientConfig
+): SmartAccountClient {
     const {
         key = "Account",
         name = "Smart Account Client",
