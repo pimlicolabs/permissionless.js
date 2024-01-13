@@ -158,7 +158,7 @@ export const getSmartAccountClient = async ({
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
 
-    return createSmartAccountClient<Transport, typeof chain, SmartAccount>({
+    return createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
