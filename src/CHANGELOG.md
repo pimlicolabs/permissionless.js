@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.26
+
+### Patch Changes
+
+- e290cf7: Fix type for createSmartAccountClient
+
 ## 0.0.25
 
 ### Patch Changes
