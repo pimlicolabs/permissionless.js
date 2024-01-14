@@ -57,6 +57,6 @@ export type SmartAccount<
 }
 
 export type SmartAccountSigner<
-    TSource extends string,
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Omit<LocalAccount<TSource, TAddress>, "signTransaction">

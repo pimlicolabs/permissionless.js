@@ -2,7 +2,6 @@ import type {
     Chain,
     Client,
     ClientConfig,
-    ParseAccount,
     Transport,
     WalletClientConfig
 } from "viem"
@@ -15,6 +14,10 @@ import {
     type SmartAccountActions,
     smartAccountActions
 } from "./decorators/smartAccount.js"
+
+export type ParseAccount<
+    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+> = TAccount extends SmartAccount ? TAccount : undefined
 
 /**
  * TODO:
