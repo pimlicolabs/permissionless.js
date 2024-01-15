@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.27
+
+### Patch Changes
+
+- ee5e795d9fcbdc0e33afd608faff14814055e4a6: 1. Account type for smartAccountCLient will be inferred automatically, so you will not have to pass `account` everywhere in functions like `sendTransaction` 2. Switching tests to vitest to enable type testing for better types in future 3. Better types for all the actions, we prettify all the args & return types
+
 ## 0.0.26
 
 ### Patch Changes
