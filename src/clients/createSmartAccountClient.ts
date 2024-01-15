@@ -2,6 +2,7 @@ import type {
     Chain,
     Client,
     ClientConfig,
+    ParseAccount,
     Transport,
     WalletClientConfig
 } from "viem"
@@ -15,10 +16,6 @@ import {
     smartAccountActions
 } from "./decorators/smartAccount.js"
 
-export type ParseAccount<
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined
-> = TAccount extends SmartAccount ? TAccount : undefined
-
 /**
  * TODO:
  *  - Add docs
@@ -28,31 +25,27 @@ export type SmartAccountClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined
-> = Prettify<
-    Client<
-        transport,
-        chain,
-        account,
-        BundlerRpcSchema,
-        SmartAccountActions<chain, account>
-    >
+> = Client<
+    transport,
+    chain,
+    account,
+    BundlerRpcSchema,
+    SmartAccountActions<chain, account>
 >
 
 export type SmartAccountClientConfig<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
-> = Prettify<
-    Pick<
-        ClientConfig<transport, chain, TAccount>,
-        | "account"
-        | "cacheTime"
-        | "chain"
-        | "key"
-        | "name"
-        | "pollingInterval"
-        | "transport"
-    >
+> = Pick<
+    ClientConfig<transport, chain, TAccount>,
+    | "account"
+    | "cacheTime"
+    | "chain"
+    | "key"
+    | "name"
+    | "pollingInterval"
+    | "transport"
 > &
     SponsorUserOperationMiddleware
 
@@ -78,15 +71,13 @@ export type SmartAccountClientConfig<
 
 export function createSmartAccountClient<
     TTransport extends Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TChain extends Chain | undefined = undefined,
+    TSmartAccount extends SmartAccount | undefined = undefined
 >(
     parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
-): SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>>
-
-export function createSmartAccountClient(
-    parameters: SmartAccountClientConfig
-): SmartAccountClient {
+): Prettify<
+    SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>>
+> {
     const {
         key = "Account",
         name = "Smart Account Client",

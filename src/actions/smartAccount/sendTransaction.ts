@@ -1,11 +1,12 @@
 import type {
     Chain,
     Client,
+    Hash,
     SendTransactionParameters,
-    SendTransactionReturnType,
     Transport
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
+import type { Prettify } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 import {
     AccountOrClientNotFoundError,
@@ -34,7 +35,7 @@ export type SendTransactionWithPaymasterParameters<
  *
  * @param client - Client to use
  * @param parameters - {@link SendTransactionParameters}
- * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link SendTransactionReturnType}
+ * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash.
  *
  * @example
  * import { createWalletClient, custom } from 'viem'
@@ -74,12 +75,10 @@ export async function sendTransaction<
     TChainOverride extends Chain | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: SendTransactionWithPaymasterParameters<
-        TChain,
-        TAccount,
-        TChainOverride
+    args: Prettify<
+        SendTransactionWithPaymasterParameters<TChain, TAccount, TChainOverride>
     >
-): Promise<SendTransactionReturnType> {
+): Promise<Hash> {
     const {
         account: account_ = client.account,
         data,

@@ -1,5 +1,6 @@
 import type { Account, Chain, Client, Hash, Transport } from "viem"
 import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
+import type { Prettify } from "../../types/index.js"
 import type {
     PimlicoBundlerRpcSchema,
     PimlicoUserOperationStatus
@@ -39,8 +40,8 @@ export const getUserOperationStatus = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>,
-    { hash }: GetUserOperationStatusParameters
-): Promise<GetUserOperationStatusReturnType> => {
+    { hash }: Prettify<GetUserOperationStatusParameters>
+): Promise<Prettify<GetUserOperationStatusReturnType>> => {
     return client.request({
         method: "pimlico_getUserOperationStatus",
         params: [hash]

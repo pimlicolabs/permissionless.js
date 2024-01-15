@@ -5,9 +5,9 @@ import {
     type ContractFunctionArgs,
     type ContractFunctionName,
     type EncodeFunctionDataParameters,
+    type Hash,
     type Transport,
     type WriteContractParameters,
-    type WriteContractReturnType,
     encodeFunctionData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types.js"
@@ -33,7 +33,7 @@ import {
  *
  * @param client - Client to use
  * @param parameters - {@link WriteContractParameters}
- * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms.html#hash). {@link WriteContractReturnType}
+ * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms.html#hash).
  *
  * @example
  * import { createWalletClient, custom, parseAbi } from 'viem'
@@ -124,7 +124,7 @@ export async function writeContract<
         TArgs,
         TChainOverride
     >
-): Promise<WriteContractReturnType> {
+): Promise<Hash> {
     const data = encodeFunctionData<TAbi, TFunctionName>({
         abi,
         args,

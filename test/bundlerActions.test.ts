@@ -2,7 +2,8 @@ import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     BundlerClient,
-    WaitForUserOperationReceiptTimeoutError
+    WaitForUserOperationReceiptTimeoutError,
+    getAccountNonce
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { Address } from "viem"
@@ -11,6 +12,7 @@ import {
     getBundlerClient,
     getEntryPoint,
     getEoaWalletClient,
+    getPublicClient,
     getTestingChain,
     waitForNonceUpdate
 } from "./utils.js"
@@ -69,6 +71,7 @@ describe("BUNDLER ACTIONS", () => {
 
     test("Sending user operation", async () => {
         const eoaWalletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
         const userOperation = await buildUserOp(eoaWalletClient)
 
         const entryPoint = getEntryPoint()
@@ -106,7 +109,6 @@ describe("BUNDLER ACTIONS", () => {
             await bundlerClient.waitForUserOperationReceipt({
                 hash: userOpHash
             })
-
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
         expect(userOperationReceipt?.receipt.transactionHash).not.toBeEmpty()
@@ -114,6 +116,14 @@ describe("BUNDLER ACTIONS", () => {
         expect(
             userOperationReceipt?.receipt.transactionHash
         ).not.toBeUndefined()
+
+        const receipt = await bundlerClient.getUserOperationReceipt({
+            hash: userOpHash
+        })
+
+        expect(receipt?.receipt.transactionHash).toBe(
+            userOperationReceipt?.receipt.transactionHash
+        )
 
         const userOperationFromUserOpHash =
             await bundlerClient.getUserOperationByHash({ hash: userOpHash })
@@ -130,6 +140,13 @@ describe("BUNDLER ACTIONS", () => {
             )
         }
         await waitForNonceUpdate()
+
+        const newNonce = getAccountNonce(publicClient, {
+            sender: userOperation.sender,
+            entryPoint: getEntryPoint()
+        })
+
+        expect(newNonce).toBe(userOperation.nonce + BigInt(1))
     }, 100000)
 
     test("wait for user operation receipt fail", async () => {

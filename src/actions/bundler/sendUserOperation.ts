@@ -1,6 +1,7 @@
 import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { Prettify } from "../../types/index.js"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
@@ -43,7 +44,7 @@ export const sendUserOperation = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    args: SendUserOperationParameters
+    args: Prettify<SendUserOperationParameters>
 ): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 

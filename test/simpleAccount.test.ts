@@ -170,6 +170,23 @@ describe("Simple Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
+    test("test prepareUserOperationRequest", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        // smartAccountClient.sendUserOperation()
+    }, 1000000)
+
     test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 

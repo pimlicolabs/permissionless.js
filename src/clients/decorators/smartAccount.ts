@@ -5,6 +5,7 @@ import type {
     ContractFunctionArgs,
     ContractFunctionName,
     DeployContractParameters,
+    Hash,
     SendTransactionParameters,
     Transport,
     TypedData,
@@ -30,7 +31,6 @@ import {
 } from "../../actions/smartAccount/sendTransaction.js"
 import {
     type SendUserOperationParameters,
-    type SendUserOperationReturnType,
     sendUserOperation
 } from "../../actions/smartAccount/sendUserOperation.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
@@ -39,6 +39,7 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract.js"
+import type { Prettify } from "../../types/index.js"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,
@@ -279,11 +280,13 @@ export type SmartAccountActions<
         const TAbi extends Abi | readonly unknown[],
         TChainOverride extends Chain | undefined = undefined
     >(
-        args: DeployContractParameters<
-            TAbi,
-            TChain,
-            TSmartAccount,
-            TChainOverride
+        args: Prettify<
+            DeployContractParameters<
+                TAbi,
+                TChain,
+                TSmartAccount,
+                TChainOverride
+            >
         >
     ) => ReturnType<typeof deployContract<TChain, TSmartAccount>>
     /**
@@ -366,19 +369,23 @@ export type SmartAccountActions<
         >
     >
     prepareUserOperationRequest: <TTransport extends Transport>(
-        args: Parameters<
-            typeof prepareUserOperationRequest<
-                TTransport,
-                TChain,
-                TSmartAccount
-            >
-        >[1]
-    ) => Promise<PrepareUserOperationRequestReturnType>
+        args: Prettify<
+            Parameters<
+                typeof prepareUserOperationRequest<
+                    TTransport,
+                    TChain,
+                    TSmartAccount
+                >
+            >[1]
+        >
+    ) => Promise<Prettify<PrepareUserOperationRequestReturnType>>
     sendUserOperation: <TTransport extends Transport>(
-        args: Parameters<
-            typeof sendUserOperation<TTransport, TChain, TSmartAccount>
-        >[1]
-    ) => Promise<SendUserOperationReturnType>
+        args: Prettify<
+            Parameters<
+                typeof sendUserOperation<TTransport, TChain, TSmartAccount>
+            >[1]
+        >
+    ) => Promise<Hash>
     /**
      * Creates, signs, and sends a new transaction to the network.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -429,7 +436,7 @@ export type SmartAccountActions<
      * }])
      */
     sendTransactions: (
-        args: SendTransactionsWithPaymasterParameters<TSmartAccount>
+        args: Prettify<SendTransactionsWithPaymasterParameters<TSmartAccount>>
     ) => ReturnType<typeof sendTransactions<TChain, TSmartAccount>>
 }
 
@@ -458,17 +465,17 @@ export const smartAccountActions =
             sendTransaction(client, {
                 ...args,
                 sponsorUserOperation
-            } as SendTransactionWithPaymasterParameters),
+            } as SendTransactionWithPaymasterParameters<TChain, TSmartAccount>),
         sendTransactions: (args) =>
             sendTransactions(client, {
                 ...args,
                 sponsorUserOperation
-            } as SendTransactionsWithPaymasterParameters),
+            } as SendTransactionsWithPaymasterParameters<TSmartAccount>),
         sendUserOperation: (args) =>
             sendUserOperation(client, {
                 ...args,
                 sponsorUserOperation
-            } as SendUserOperationParameters),
+            } as SendUserOperationParameters<TSmartAccount>),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
         writeContract: (args) =>

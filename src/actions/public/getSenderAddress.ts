@@ -10,6 +10,7 @@ import {
 } from "viem"
 
 import { simulateContract } from "viem/actions"
+import type { Prettify } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
@@ -62,8 +63,10 @@ export const getSenderAddress = async <
     TChain extends Chain | undefined = Chain | undefined
 >(
     client: Client<TTransport, TChain>,
-    { initCode, entryPoint }: GetSenderAddressParams
+    args: Prettify<GetSenderAddressParams>
 ): Promise<Address> => {
+    const { initCode, entryPoint } = args
+
     try {
         await getAction(
             client,

@@ -1,7 +1,7 @@
 import type { Client, Hash } from "viem"
 import {
+    type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
-    type ValidateSponsorshipPoliciesReturnType,
     validateSponsorshipPolicies
 } from "../../actions/pimlico.js"
 import {
@@ -18,6 +18,7 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
+import type { Prettify } from "../../types/index.js"
 import type {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
@@ -43,7 +44,9 @@ export type PimlicoBundlerActions = {
      *
      * await bundlerClient.getUserOperationGasPrice()
      */
-    getUserOperationGasPrice: () => Promise<GetUserOperationGasPriceReturnType>
+    getUserOperationGasPrice: () => Promise<
+        Prettify<GetUserOperationGasPriceReturnType>
+    >
     /**
      * Returns the status of the userOperation that is pending in the mempool.
      *
@@ -64,8 +67,8 @@ export type PimlicoBundlerActions = {
      * await bundlerClient.getUserOperationStatus({ hash: userOpHash })
      */
     getUserOperationStatus: (
-        args: GetUserOperationStatusParameters
-    ) => Promise<GetUserOperationStatusReturnType>
+        args: Prettify<GetUserOperationStatusParameters>
+    ) => Promise<Prettify<GetUserOperationStatusReturnType>>
 }
 
 export const pimlicoBundlerActions = (
@@ -102,12 +105,12 @@ export type PimlicoPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: PimlicoSponsorUserOperationParameters
-    ) => Promise<SponsorUserOperationReturnType>
+        args: Prettify<PimlicoSponsorUserOperationParameters>
+    ) => Promise<Prettify<SponsorUserOperationReturnType>>
 
     validateSponsorshipPolicies: (
-        args: ValidateSponsorshipPoliciesParameters
-    ) => Promise<ValidateSponsorshipPoliciesReturnType>
+        args: Prettify<ValidateSponsorshipPoliciesParameters>
+    ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
 }
 
 /**
@@ -115,7 +118,7 @@ export type PimlicoPaymasterClientActions = {
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/ValidateSponsorshipPolicies
  *
  * @param args {@link ValidateSponsorshipPoliciesParameters} UserOperation you want to sponsor & entryPoint.
- * @returns valid sponsorship policies, see {@link ValidateSponsorshipPoliciesReturnType}
+ * @returns valid sponsorship policies, see {@link ValidateSponsorshipPolicies}
  *
  * @example
  * import { createClient } from "viem"
