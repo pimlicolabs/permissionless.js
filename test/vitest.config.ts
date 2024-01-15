@@ -2,10 +2,6 @@ import { defineConfig } from "vitest/config"
 
 export default defineConfig({
     test: {
-        benchmark: {
-            outputFile: "./bench/report.json",
-            reporters: process.env.CI ? ["json"] : ["verbose"]
-        },
         coverage: {
             all: false,
             provider: "v8",
