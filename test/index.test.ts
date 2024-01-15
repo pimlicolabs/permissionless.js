@@ -1,4 +1,3 @@
-import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     deepHexlify,
@@ -9,6 +8,8 @@ import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
+import { Address, Hash, Hex } from "viem"
+import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "./userOp.js"
 import {
     getBundlerClient,
@@ -69,8 +70,7 @@ describe("test public actions and utils", () => {
 
         expect(sender).not.toBeNull()
         expect(sender).not.toBeUndefined()
-        expect(sender).not.toBeEmpty()
-        expect(sender).toStartWith("0x")
+        expectTypeOf(sender).toMatchTypeOf<Address>()
     })
 
     test("get sender address with invalid entry point", async () => {
@@ -84,12 +84,12 @@ describe("test public actions and utils", () => {
         const publicClient = await getPublicClient()
         const entryPoint = "0x0000000"
 
-        await expect(async () => {
-            await getSenderAddress(publicClient, {
+        await expect(async () =>
+            getSenderAddress(publicClient, {
                 initCode,
                 entryPoint
             })
-        }).toThrow()
+        ).rejects.toThrow()
     })
 
     test("getUserOperationHash", async () => {
@@ -114,8 +114,9 @@ describe("test public actions and utils", () => {
             chainId: chain.id
         })
 
-        expect(userOpHash).toBeString()
-        expect(userOpHash).toStartWith("0x")
+        expect(userOpHash).length.greaterThan(0)
+        expectTypeOf(userOpHash).toBeString()
+        expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
     })
 
     test("signUserOperationHashWithECDSA", async () => {
@@ -148,9 +149,8 @@ describe("test public actions and utils", () => {
             chainId: chain.id
         })
 
-        expect(userOperation.signature).not.toBeEmpty()
-        expect(userOperation.signature).toBeString()
-        expect(userOperation.signature).toStartWith("0x")
+        expectTypeOf(userOperation.signature).toBeString()
+        expectTypeOf(userOperation.signature).toMatchTypeOf<Hex>()
 
         const signature = await signUserOperationHashWithECDSA({
             client: eoaWalletClient,
@@ -176,9 +176,9 @@ describe("test public actions and utils", () => {
             chainId: chain.id
         })
 
-        expect(signature).not.toBeEmpty()
-        expect(signature).toBeString()
-        expect(signature).toStartWith("0x")
+        expectTypeOf(userOpHash).toBeString()
+        expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
+        expect(userOpHash).length.greaterThan(0)
 
         expect(signature).toEqual(userOperation.signature)
     })

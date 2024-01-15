@@ -158,12 +158,14 @@ export const getSmartAccountClient = async ({
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
 
-    return createSmartAccountClient({
+    const smartAccountClient = createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
         sponsorUserOperation
     })
+
+    return smartAccountClient
 }
 
 export const getEoaWalletClient = () => {

@@ -1,12 +1,14 @@
-import {
-    type Abi,
-    type Chain,
-    type Client,
-    type DeployContractParameters,
-    type DeployContractReturnType,
-    type Transport
+import type {
+    Abi,
+    Chain,
+    Client,
+    DeployContractParameters,
+    EncodeDeployDataParameters,
+    Hash,
+    Transport
 } from "viem"
 import type { SmartAccount } from "../../accounts/types.js"
+import type { Prettify } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 import { parseAccount } from "../../utils/index.js"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
@@ -31,7 +33,7 @@ export type DeployContractParametersWithPaymaster<
  *
  * @param client - Client to use
  * @param parameters - {@link DeployContractParameters}
- * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link DeployContractReturnType}
+ * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash.
  *
  * @example
  * import { createWalletClient, http } from 'viem'
@@ -55,14 +57,16 @@ export async function deployContract<
     TAccount extends SmartAccount | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    {
+    args: Prettify<DeployContractParametersWithPaymaster>
+): Promise<Hash> {
+    const {
         abi,
-        args,
+        args: constructorArgs,
         bytecode,
         sponsorUserOperation,
         ...request
-    }: DeployContractParametersWithPaymaster
-): Promise<DeployContractReturnType> {
+    } = args
+
     const { account: account_ = client.account } = request
 
     if (!account_) {
@@ -84,9 +88,9 @@ export async function deployContract<
             maxPriorityFeePerGas: request.maxPriorityFeePerGas || 0n,
             callData: await account.encodeDeployCallData({
                 abi,
-                args,
-                bytecode
-            })
+                bytecode,
+                args: constructorArgs
+            } as EncodeDeployDataParameters)
         },
         account: account,
         sponsorUserOperation

@@ -1,4 +1,5 @@
 import type { Account, Address, Chain, Client, Transport } from "viem"
+import type { Prettify } from "../../types/index.js"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 import type {
     UserOperation,
@@ -12,7 +13,7 @@ export type ValidateSponsorshipPoliciesParameters = {
     sponsorshipPolicyIds: string[]
 }
 
-export type ValidateSponsorshipPoliciesReturnType = {
+export type ValidateSponsorshipPolicies = {
     sponsorshipPolicyId: string
     data: {
         name: string | null
@@ -20,7 +21,7 @@ export type ValidateSponsorshipPoliciesReturnType = {
         icon: string | null
         description: string | null
     }
-}[]
+}
 
 /**
  * Returns valid sponsorship policies for a userOperation from the list of ids passed
@@ -28,7 +29,7 @@ export type ValidateSponsorshipPoliciesReturnType = {
  *
  * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @param args {@link ValidateSponsorshipPoliciesParameters} UserOperation you want to sponsor & entryPoint.
- * @returns valid sponsorship policies, see {@link ValidateSponsorshipPoliciesReturnType}
+ * @returns valid sponsorship policies, see {@link ValidateSponsorshipPolicies}
  *
  * @example
  * import { createClient } from "viem"
@@ -63,8 +64,8 @@ export const validateSponsorshipPolicies = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
-    args: ValidateSponsorshipPoliciesParameters
-): Promise<ValidateSponsorshipPoliciesReturnType> => {
+    args: Prettify<ValidateSponsorshipPoliciesParameters>
+): Promise<Prettify<ValidateSponsorshipPolicies>[]> => {
     return await client.request({
         method: "pm_validateSponsorshipPolicies",
         params: [

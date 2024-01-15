@@ -1,12 +1,13 @@
 {
-    "name": "test",
-    "private": true,
-    "type": "module",
-    "devDependencies": {
-        "bun-types": "^1.0.7"
-    },
-    "dependencies": {
-        "dotenv": "^16.3.1",
-        "viem": "^2.0.0"
-    }
+  "name": "test",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vitest": "^1.2.0"
+  },
+  "dependencies": {
+    "@vitest/coverage-v8": "^1.2.0",
+    "dotenv": "^16.3.1",
+    "viem": "^2.0.0"
+  }
 }

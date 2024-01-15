@@ -4,6 +4,7 @@ import type { SmartAccount } from "../../accounts/types.js"
 import type {
     GetAccountParameter,
     PartialBy,
+    Prettify,
     UserOperation
 } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
@@ -47,8 +48,8 @@ export async function prepareUserOperationRequest<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: PrepareUserOperationRequestParameters<TAccount>
-): Promise<PrepareUserOperationRequestReturnType> {
+    args: Prettify<PrepareUserOperationRequestParameters<TAccount>>
+): Promise<Prettify<PrepareUserOperationRequestReturnType>> {
     const {
         account: account_ = client.account,
         userOperation: partialUserOperation,

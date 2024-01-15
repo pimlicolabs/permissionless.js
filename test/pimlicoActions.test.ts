@@ -1,4 +1,3 @@
-import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     PimlicoBundlerClient,
@@ -6,6 +5,15 @@ import {
 } from "permissionless/clients/pimlico"
 import { UserOperation } from "permissionless/index.js"
 import { getUserOperationHash } from "permissionless/utils"
+import { Hash, Hex } from "viem"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { buildUserOp } from "./userOp.js"
 import {
     getEntryPoint,
@@ -121,10 +129,10 @@ describe("Pimlico Actions tests", () => {
             ).toBeGreaterThan(BigInt(0))
             expect(
                 sponsorUserOperationPaymasterAndData.paymasterAndData
-            ).not.toBeEmpty()
-            expect(
+            ).length.greaterThan(0)
+            expectTypeOf(
                 sponsorUserOperationPaymasterAndData.paymasterAndData
-            ).toStartWith("0x")
+            ).toMatchTypeOf<Hex>()
             await waitForNonceUpdate()
         }, 100000)
         test("Sending user op with paymaster and data", async () => {
@@ -158,8 +166,8 @@ describe("Pimlico Actions tests", () => {
                 userOperation: userOperation,
                 entryPoint: entryPoint
             })
-            expect(userOpHash).toBeString()
-            expect(userOpHash).toStartWith("0x")
+            expectTypeOf(userOpHash).toBeString()
+            expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
             const userOperationReceipt =
                 await pimlicoBundlerClient.waitForUserOperationReceipt({
                     hash: userOpHash
@@ -168,7 +176,7 @@ describe("Pimlico Actions tests", () => {
             expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
             expect(
                 userOperationReceipt?.receipt.transactionHash
-            ).not.toBeEmpty()
+            ).length.greaterThan(0)
             expect(userOperationReceipt?.receipt.transactionHash).not.toBeNull()
             expect(
                 userOperationReceipt?.receipt.transactionHash
@@ -236,8 +244,8 @@ describe("Pimlico Actions tests", () => {
 
         expect(validateSponsorshipPolicies).not.toBeNull()
         expect(validateSponsorshipPolicies).not.toBeUndefined()
-        expect(validateSponsorshipPolicies).not.toBeEmpty()
-        expect(validateSponsorshipPolicies).toBeArray()
+        expect(validateSponsorshipPolicies).length.greaterThan(0)
+        expectTypeOf(validateSponsorshipPolicies).toBeArray()
         expect(validateSponsorshipPolicies.length).toBe(1)
         await waitForNonceUpdate()
     }, 100000)

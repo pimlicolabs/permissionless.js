@@ -25,6 +25,7 @@ import {
     type WaitForUserOperationReceiptParameters,
     waitForUserOperationReceipt
 } from "../../actions/bundler/waitForUserOperationReceipt.js"
+import type { Prettify } from "../../types/index.js"
 import type { BundlerClient } from "../createBundlerClient.js"
 
 export type BundlerActions = {
@@ -53,7 +54,9 @@ export type BundlerActions = {
      *
      * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
      */
-    sendUserOperation: (args: SendUserOperationParameters) => Promise<Hash>
+    sendUserOperation: (
+        args: Prettify<SendUserOperationParameters>
+    ) => Promise<Hash>
     /**
      *
      * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -80,8 +83,8 @@ export type BundlerActions = {
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
     estimateUserOperationGas: (
-        args: EstimateUserOperationGasParameters
-    ) => Promise<EstimateUserOperationGasReturnType>
+        args: Prettify<EstimateUserOperationGasParameters>
+    ) => Promise<Prettify<EstimateUserOperationGasReturnType>>
     /**
      *
      * Returns the supported entrypoints by the bundler service
@@ -147,8 +150,8 @@ export type BundlerActions = {
      *
      */
     getUserOperationByHash: (
-        args: GetUserOperationByHashParameters
-    ) => Promise<GetUserOperationByHashReturnType>
+        args: Prettify<GetUserOperationByHashParameters>
+    ) => Promise<Prettify<GetUserOperationByHashReturnType> | null>
     /**
      *
      * Returns the user operation receipt from userOpHash
@@ -171,8 +174,8 @@ export type BundlerActions = {
      *
      */
     getUserOperationReceipt: (
-        args: GetUserOperationReceiptParameters
-    ) => Promise<GetUserOperationReceiptReturnType | null>
+        args: Prettify<GetUserOperationReceiptParameters>
+    ) => Promise<Prettify<GetUserOperationReceiptReturnType> | null>
 
     /**
      * Waits for the User Operation to be included on a [Block](https://viem.sh/docs/glossary/terms.html#block) (one confirmation), and then returns the [User Operation Receipt](https://docs.pimlico.io/permissionless/reference/bundler-actions/getUserOperationReceipt).
@@ -196,8 +199,8 @@ export type BundlerActions = {
      * })
      */
     waitForUserOperationReceipt: (
-        args: WaitForUserOperationReceiptParameters
-    ) => Promise<GetUserOperationReceiptReturnType>
+        args: Prettify<WaitForUserOperationReceiptParameters>
+    ) => Promise<Prettify<GetUserOperationReceiptReturnType>>
 }
 
 const bundlerActions = (client: Client): BundlerActions => ({

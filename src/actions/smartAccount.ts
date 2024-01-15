@@ -17,7 +17,6 @@ import {
 
 import {
     type SendUserOperationParameters,
-    type SendUserOperationReturnType,
     sendUserOperation
 } from "./smartAccount/sendUserOperation.js"
 
@@ -44,7 +43,6 @@ export {
     sendTransaction,
     sendUserOperation,
     type SendUserOperationParameters,
-    type SendUserOperationReturnType,
     signMessage,
     signTypedData,
     type SendTransactionWithPaymasterParameters,

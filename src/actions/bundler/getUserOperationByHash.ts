@@ -1,6 +1,7 @@
 import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { Prettify } from "../../types/index.js"
 import type { UserOperation } from "../../types/userOperation.js"
 
 export type GetUserOperationByHashParameters = {
@@ -13,7 +14,7 @@ export type GetUserOperationByHashReturnType = {
     transactionHash: Hash
     blockHash: Hash
     blockNumber: bigint
-} | null
+}
 
 /**
  * Returns the user operation from userOpHash
@@ -43,8 +44,8 @@ export const getUserOperationByHash = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    { hash }: GetUserOperationByHashParameters
-): Promise<GetUserOperationByHashReturnType> => {
+    { hash }: Prettify<GetUserOperationByHashParameters>
+): Promise<Prettify<GetUserOperationByHashReturnType> | null> => {
     const params: [Hash] = [hash]
 
     const response = await client.request({

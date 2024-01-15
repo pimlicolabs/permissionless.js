@@ -23,8 +23,8 @@ import {
 } from "../clients/decorators/pimlico.js"
 
 import {
+    type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
-    type ValidateSponsorshipPoliciesReturnType,
     validateSponsorshipPolicies
 } from "./pimlico/validateSponsorshipPolicies.js"
 
@@ -37,7 +37,7 @@ export type {
     PimlicoBundlerActions,
     PimlicoPaymasterClientActions,
     ValidateSponsorshipPoliciesParameters,
-    ValidateSponsorshipPoliciesReturnType
+    ValidateSponsorshipPolicies
 }
 
 export {

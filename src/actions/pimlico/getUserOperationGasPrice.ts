@@ -1,4 +1,5 @@
 import type { Account, Chain, Client, Transport } from "viem"
+import type { Prettify } from "../../types/index.js"
 import type { PimlicoBundlerRpcSchema } from "../../types/pimlico.js"
 
 export type GetUserOperationGasPriceReturnType = {
@@ -43,7 +44,7 @@ export const getUserOperationGasPrice = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>
-): Promise<GetUserOperationGasPriceReturnType> => {
+): Promise<Prettify<GetUserOperationGasPriceReturnType>> => {
     const gasPrices = await client.request({
         method: "pimlico_getUserOperationGasPrice",
         params: []

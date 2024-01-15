@@ -1,8 +1,8 @@
-import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
+import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
@@ -45,17 +45,17 @@ describe("Simple Account", () => {
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
-        expect(simpleSmartAccount.address).toBeString()
+        expectTypeOf(simpleSmartAccount.address).toBeString()
         expect(simpleSmartAccount.address).toHaveLength(42)
         expect(simpleSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
-        expect(async () => {
-            await simpleSmartAccount.signTransaction({
+        await expect(async () =>
+            simpleSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("Smart account client signMessage", async () => {
@@ -65,7 +65,7 @@ describe("Simple Account", () => {
             message: "hello world"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -93,7 +93,7 @@ describe("Simple Account", () => {
             }
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -101,12 +101,14 @@ describe("Simple Account", () => {
     test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
-        expect(async () => {
-            await smartAccountClient.deployContract({
+        await expect(async () =>
+            smartAccountClient.deployContract({
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Simple account doesn't support account deployment")
+        ).rejects.toThrowError(
+            "Simple account doesn't support account deployment"
+        )
     })
 
     test("Smart account client send multiple transactions", async () => {
@@ -125,7 +127,7 @@ describe("Simple Account", () => {
                 }
             ]
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
         await waitForNonceUpdate()
@@ -143,16 +145,12 @@ describe("Simple Account", () => {
 
         const oldGreet = await greeterContract.read.greet()
 
-        expect(oldGreet).toBeString()
-
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
-        expect(txHash).toBeString()
+        expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
         const newGreet = await greeterContract.read.greet()
-
-        expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
@@ -164,10 +162,27 @@ describe("Simple Account", () => {
             value: 0n,
             data: "0x"
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
         await waitForNonceUpdate()
+    }, 1000000)
+
+    test("test prepareUserOperationRequest", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        // smartAccountClient.sendUserOperation()
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
@@ -194,7 +209,7 @@ describe("Simple Account", () => {
             data: "0x"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -223,7 +238,7 @@ describe("Simple Account", () => {
             }
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -260,7 +275,7 @@ describe("Simple Account", () => {
             ]
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -289,7 +304,7 @@ describe("Simple Account", () => {
             }
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 })

@@ -1,8 +1,9 @@
-import type { Chain, Client, Hex, Transport } from "viem"
+import type { Chain, Client, Hash, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types.js"
 import type {
     GetAccountParameter,
     PartialBy,
+    Prettify,
     UserOperation
 } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
@@ -35,16 +36,14 @@ export type SendUserOperationParameters<
 } & GetAccountParameter<TAccount> &
     SponsorUserOperationMiddleware
 
-export type SendUserOperationReturnType = Hex
-
 export async function sendUserOperation<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: SendUserOperationParameters<TAccount>
-): Promise<SendUserOperationReturnType> {
+    args: Prettify<SendUserOperationParameters<TAccount>>
+): Promise<Hash> {
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
@@ -57,14 +56,8 @@ export async function sendUserOperation<
 
     userOperation.signature = await account.signUserOperation(userOperation)
 
-    const userOpHash = await getAction(
-        client,
-        sendUserOperationBundler,
-        "sendUserOperation"
-    )({
+    return sendUserOperationBundler(client, {
         userOperation: userOperation,
         entryPoint: account.entryPoint
     })
-
-    return userOpHash
 }

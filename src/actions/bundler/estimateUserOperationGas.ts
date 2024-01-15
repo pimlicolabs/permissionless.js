@@ -2,6 +2,7 @@ import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { Prettify } from "../../types/index.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
@@ -53,8 +54,8 @@ export const estimateUserOperationGas = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    args: EstimateUserOperationGasParameters
-): Promise<EstimateUserOperationGasReturnType> => {
+    args: Prettify<EstimateUserOperationGasParameters>
+): Promise<Prettify<EstimateUserOperationGasReturnType>> => {
     const { userOperation, entryPoint } = args
 
     const response = await client.request({

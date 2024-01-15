@@ -7,6 +7,7 @@ import {
     type Transport,
     stringify
 } from "viem"
+import type { Prettify } from "../../types/index.js"
 import { getAction } from "../../utils/getAction.js"
 import { observe } from "../../utils/observe.js"
 import {
@@ -66,8 +67,8 @@ export const waitForUserOperationReceipt = <
         hash,
         pollingInterval = bundlerClient.pollingInterval,
         timeout
-    }: WaitForUserOperationReceiptParameters
-): Promise<GetUserOperationReceiptReturnType> => {
+    }: Prettify<WaitForUserOperationReceiptParameters>
+): Promise<Prettify<GetUserOperationReceiptReturnType>> => {
     const observerId = stringify([
         "waitForUserOperationReceipt",
         bundlerClient.uid,

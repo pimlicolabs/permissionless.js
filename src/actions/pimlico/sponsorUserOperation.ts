@@ -1,5 +1,6 @@
 import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { Prettify } from "../../types/index.js"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
 import type {
     UserOperation,
@@ -52,8 +53,8 @@ export const sponsorUserOperation = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
-    args: PimlicoSponsorUserOperationParameters
-): Promise<SponsorUserOperationReturnType> => {
+    args: Prettify<PimlicoSponsorUserOperationParameters>
+): Promise<Prettify<SponsorUserOperationReturnType>> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
         params: args.sponsorshipPolicyId

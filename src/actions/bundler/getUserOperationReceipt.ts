@@ -9,6 +9,7 @@ import type {
 } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { Prettify } from "../../types/index.js"
 import type { TStatus } from "../../types/userOperation.js"
 import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
 
@@ -77,8 +78,8 @@ export const getUserOperationReceipt = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    { hash }: GetUserOperationReceiptParameters
-): Promise<GetUserOperationReceiptReturnType | null> => {
+    { hash }: Prettify<GetUserOperationReceiptParameters>
+): Promise<Prettify<GetUserOperationReceiptReturnType> | null> => {
     const params: [Hash] = [hash]
 
     const response = await client.request({

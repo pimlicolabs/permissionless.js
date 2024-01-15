@@ -1,4 +1,3 @@
-import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import {
@@ -7,6 +6,7 @@ import {
 } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
@@ -51,17 +51,17 @@ describe("ECDSA kernel Account", () => {
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
 
-        expect(ecdsaSmartAccount.address).toBeString()
+        expectTypeOf(ecdsaSmartAccount.address).toBeString()
         expect(ecdsaSmartAccount.address).toHaveLength(42)
         expect(ecdsaSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
-        expect(async () => {
-            await ecdsaSmartAccount.signTransaction({
+        await expect(async () =>
+            ecdsaSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("Client signMessage", async () => {
@@ -73,7 +73,7 @@ describe("ECDSA kernel Account", () => {
             message: "hello world"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -103,7 +103,7 @@ describe("ECDSA kernel Account", () => {
             }
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -113,12 +113,14 @@ describe("ECDSA kernel Account", () => {
             account: await getSignerToEcdsaKernelAccount()
         })
 
-        expect(async () => {
-            await smartAccountClient.deployContract({
+        await expect(async () =>
+            smartAccountClient.deployContract({
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Simple account doesn't support account deployment")
+        ).rejects.toThrowError(
+            "Simple account doesn't support account deployment"
+        )
     })
 
     test("Smart account client send multiple transactions", async () => {
@@ -140,7 +142,7 @@ describe("ECDSA kernel Account", () => {
                 }
             ]
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
         await waitForNonceUpdate()
@@ -162,16 +164,13 @@ describe("ECDSA kernel Account", () => {
 
         const oldGreet = await greeterContract.read.greet()
 
-        expect(oldGreet).toBeString()
-
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
-        expect(txHash).toBeString()
+        expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
         const newGreet = await greeterContract.read.greet()
 
-        expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
@@ -203,7 +202,7 @@ describe("ECDSA kernel Account", () => {
             data: "0x"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -235,7 +234,7 @@ describe("ECDSA kernel Account", () => {
             } catch {}
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -275,7 +274,7 @@ describe("ECDSA kernel Account", () => {
             ]
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -307,7 +306,7 @@ describe("ECDSA kernel Account", () => {
             } catch {}
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -355,12 +354,12 @@ describe("ECDSA kernel Account", () => {
 
         // Ensure that it will fail with an invalid owner address
         const invalidOwner = privateKeyToAccount(generatePrivateKey())
-        expect(async () => {
-            await signerToEcdsaKernelSmartAccount(publicClient, {
+        await expect(async () =>
+            signerToEcdsaKernelSmartAccount(publicClient, {
                 entryPoint: getEntryPoint(),
                 signer: invalidOwner,
                 deployedAccountAddress
             })
-        }).toThrow(new Error("Invalid owner for the already deployed account"))
+        ).rejects.toThrowError("Invalid owner for the already deployed account")
     }, 1000000)
 })
