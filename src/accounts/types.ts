@@ -28,7 +28,8 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 export type SmartAccount<
     Name extends string = string,
     transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined
+    chain extends Chain | undefined = Chain | undefined,
+    TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<Name> & {
     client: Client<transport, chain>
     entryPoint: Address
@@ -48,7 +49,7 @@ export type SmartAccount<
               }[]
     ) => Promise<Hex>
     getDummySignature(userOperation: UserOperation): Promise<Hex>
-    encodeDeployCallData: <TAbi extends Abi | readonly unknown[] = Abi>({
+    encodeDeployCallData: ({
         abi,
         args,
         bytecode

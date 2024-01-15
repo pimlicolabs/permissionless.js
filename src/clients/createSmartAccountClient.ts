@@ -2,7 +2,6 @@ import type {
     Chain,
     Client,
     ClientConfig,
-    ParseAccount,
     Transport,
     WalletClientConfig
 } from "viem"
@@ -25,29 +24,28 @@ export type SmartAccountClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined
-> = Client<
-    transport,
-    chain,
-    account,
-    BundlerRpcSchema,
-    SmartAccountActions<chain, account>
+> = Prettify<
+    Client<
+        transport,
+        chain,
+        account,
+        BundlerRpcSchema,
+        SmartAccountActions<chain, account>
+    >
 >
 
 export type SmartAccountClientConfig<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined
-> = Pick<
-    ClientConfig<transport, chain, TAccount>,
-    | "account"
-    | "cacheTime"
-    | "chain"
-    | "key"
-    | "name"
-    | "pollingInterval"
-    | "transport"
-> &
-    SponsorUserOperationMiddleware
+    account extends SmartAccount | undefined = SmartAccount | undefined
+> = Prettify<
+    Pick<
+        ClientConfig<transport, chain, account>,
+        "cacheTime" | "chain" | "key" | "name" | "pollingInterval" | "transport"
+    > & {
+        account?: account
+    } & SponsorUserOperationMiddleware
+>
 
 /**
  * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
@@ -75,9 +73,11 @@ export function createSmartAccountClient<
     TSmartAccount extends SmartAccount | undefined = undefined
 >(
     parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
-): Prettify<
-    SmartAccountClient<TTransport, TChain, ParseAccount<TSmartAccount>>
-> {
+): SmartAccountClient<TTransport, TChain, TSmartAccount>
+
+export function createSmartAccountClient(
+    parameters: SmartAccountClientConfig
+): SmartAccountClient {
     const {
         key = "Account",
         name = "Smart Account Client",

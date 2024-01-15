@@ -3,6 +3,7 @@ import type {
     Chain,
     Client,
     DeployContractParameters,
+    EncodeDeployDataParameters,
     Hash,
     Transport
 } from "viem"
@@ -89,7 +90,7 @@ export async function deployContract<
                 abi,
                 bytecode,
                 args: constructorArgs
-            })
+            } as EncodeDeployDataParameters)
         },
         account: account,
         sponsorUserOperation

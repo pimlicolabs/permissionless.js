@@ -440,9 +440,10 @@ export type SmartAccountActions<
     ) => ReturnType<typeof sendTransactions<TChain, TSmartAccount>>
 }
 
-export const smartAccountActions =
-    ({ sponsorUserOperation }: SponsorUserOperationMiddleware) =>
-    <
+export function smartAccountActions({
+    sponsorUserOperation
+}: SponsorUserOperationMiddleware) {
+    return <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
         TSmartAccount extends SmartAccount | undefined =
@@ -484,3 +485,4 @@ export const smartAccountActions =
                 sponsorUserOperation
             } as WriteContractWithPaymasterParameters<TChain, TSmartAccount>)
     })
+}

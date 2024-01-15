@@ -1,4 +1,3 @@
-import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     SignTransactionNotSupportedBySmartAccount,
@@ -7,6 +6,7 @@ import {
 import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
@@ -46,7 +46,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToBiconomyAccount()
 
-        expect(ecdsaSmartAccount.address).toBeString()
+        expectTypeOf(ecdsaSmartAccount.address).toBeString()
         expect(ecdsaSmartAccount.address).toHaveLength(42)
         expect(ecdsaSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
@@ -68,7 +68,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             message: "hello world"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -98,7 +98,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             }
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(132)
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
@@ -135,7 +135,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
                 }
             ]
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
         await waitForNonceUpdate()
@@ -157,16 +157,13 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         const oldGreet = await greeterContract.read.greet()
 
-        expect(oldGreet).toBeString()
-
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
-        expect(txHash).toBeString()
+        expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
         const newGreet = await greeterContract.read.greet()
 
-        expect(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
@@ -198,7 +195,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             data: "0x"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -230,7 +227,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             } catch {}
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -270,7 +267,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             ]
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -302,7 +299,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             } catch {}
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 

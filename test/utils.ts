@@ -165,8 +165,6 @@ export const getSmartAccountClient = async ({
         sponsorUserOperation
     })
 
-    smartAccountClient.account.address
-
     return smartAccountClient
 }
 

@@ -1,4 +1,3 @@
-import { beforeAll, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
@@ -10,6 +9,7 @@ import {
     hashTypedData,
     zeroAddress
 } from "viem"
+import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
@@ -100,7 +100,7 @@ describe("Safe Account", () => {
             data: "0x"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
     }, 1000000)
@@ -119,16 +119,16 @@ describe("Safe Account", () => {
 
         const oldGreet = await greeterContract.read.greet()
 
-        expect(oldGreet).toBeString()
+        expectTypeOf(oldGreet).toBeString()
 
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
-        expect(txHash).toBeString()
+        expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
         const newGreet = await greeterContract.read.greet()
 
-        expect(newGreet).toBeString()
+        expectTypeOf(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
@@ -158,7 +158,7 @@ describe("Safe Account", () => {
             maxFeePerGas: gasPrices.fast.maxFeePerGas,
             maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
         await waitForNonceUpdate()
@@ -173,7 +173,7 @@ describe("Safe Account", () => {
             value: 0n,
             data: "0x"
         })
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -199,7 +199,7 @@ describe("Safe Account", () => {
             data: "0x"
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -234,7 +234,7 @@ describe("Safe Account", () => {
             }
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -264,7 +264,7 @@ describe("Safe Account", () => {
             ]
         })
 
-        expect(response).toBeString()
+        expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
 
@@ -298,7 +298,7 @@ describe("Safe Account", () => {
             }
         }
 
-        expect(eventFound).toBeTrue()
+        expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
@@ -312,7 +312,7 @@ describe("Safe Account", () => {
             message: messageToSign
         })
 
-        expect(signature).toBeString()
+        expectTypeOf(signature).toBeString()
         expect(signature).toHaveLength(132)
         expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
 
@@ -402,7 +402,7 @@ describe("Safe Account", () => {
             }
         })
 
-        expect(signature).toBeString()
+        expectTypeOf(signature).toBeString()
         expect(signature).toHaveLength(132)
         expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
 

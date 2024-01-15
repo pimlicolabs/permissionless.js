@@ -1,4 +1,3 @@
-import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import dotenv from "dotenv"
 import {
     BundlerClient,
@@ -6,7 +5,15 @@ import {
     getAccountNonce
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
-import { Address } from "viem"
+import { Address, type Hash } from "viem"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { buildUserOp } from "./userOp.js"
 import {
     getBundlerClient,
@@ -40,7 +47,7 @@ describe("BUNDLER ACTIONS", () => {
     test("Supported entry points request", async () => {
         const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
-        expect(supportedEntryPoints).toBeArray()
+        expectTypeOf(supportedEntryPoints).toBeArray()
         expect(supportedEntryPoints.length).toBeGreaterThan(0)
         expect(supportedEntryPoints.includes(getEntryPoint())).toBe(true)
     })
@@ -49,7 +56,7 @@ describe("BUNDLER ACTIONS", () => {
         const chainId = await bundlerClient.chainId()
         const chain = getTestingChain()
 
-        expect(chainId).toBeNumber()
+        expectTypeOf(chainId).toBeNumber()
         expect(chainId).toBeGreaterThan(0)
         expect(chainId === chain.id).toBe(true)
     })
@@ -102,8 +109,8 @@ describe("BUNDLER ACTIONS", () => {
             entryPoint: entryPoint as Address
         })
 
-        expect(userOpHash).toBeString()
-        expect(userOpHash).toStartWith("0x")
+        expectTypeOf(userOpHash).toBeString()
+        expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
 
         const userOperationReceipt =
             await bundlerClient.waitForUserOperationReceipt({
@@ -111,7 +118,6 @@ describe("BUNDLER ACTIONS", () => {
             })
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(userOpHash)
-        expect(userOperationReceipt?.receipt.transactionHash).not.toBeEmpty()
         expect(userOperationReceipt?.receipt.transactionHash).not.toBeNull()
         expect(
             userOperationReceipt?.receipt.transactionHash
