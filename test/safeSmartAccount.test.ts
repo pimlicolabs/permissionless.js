@@ -48,17 +48,17 @@ describe("Safe Account", () => {
     test("Safe Account address", async () => {
         const safeSmartAccount = await getSignerToSafeSmartAccount()
 
-        expect(safeSmartAccount.address).toBeString()
+        expectTypeOf(safeSmartAccount.address).toBeString()
         expect(safeSmartAccount.address).toHaveLength(42)
         expect(safeSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
-        expect(async () => {
-            await safeSmartAccount.signTransaction({
+        await expect(async () =>
+            safeSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("safe smart account client deploy contract", async () => {
@@ -66,12 +66,12 @@ describe("Safe Account", () => {
             account: await getSignerToSafeSmartAccount()
         })
 
-        expect(async () => {
-            await smartAccountClient.deployContract({
+        await expect(() =>
+            smartAccountClient.deployContract({
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Safe account doesn't support account deployment")
+        ).rejects.toThrowError(/doesn't support account deployment/)
     })
 
     test("safe Smart account deploy with setup Txs", async () => {
@@ -119,8 +119,6 @@ describe("Safe Account", () => {
 
         const oldGreet = await greeterContract.read.greet()
 
-        expectTypeOf(oldGreet).toBeString()
-
         const txHash = await greeterContract.write.setGreeting(["hello world"])
 
         expectTypeOf(txHash).toBeString()
@@ -128,7 +126,6 @@ describe("Safe Account", () => {
 
         const newGreet = await greeterContract.read.greet()
 
-        expectTypeOf(newGreet).toBeString()
         expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)

@@ -50,13 +50,13 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         expect(ecdsaSmartAccount.address).toHaveLength(42)
         expect(ecdsaSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
-        expect(async () => {
-            await ecdsaSmartAccount.signTransaction({
+        await expect(async () =>
+            ecdsaSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("Client signMessage", async () => {
@@ -108,12 +108,12 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             account: await getSignerToBiconomyAccount()
         })
 
-        expect(async () => {
-            await smartAccountClient.deployContract({
+        await expect(async () =>
+            smartAccountClient.deployContract({
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Doesn't support account deployment")
+        ).rejects.toThrowError("Doesn't support account deployment")
     })
 
     test("Smart account client send multiple transactions", async () => {

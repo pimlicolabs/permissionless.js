@@ -49,13 +49,13 @@ describe("Simple Account", () => {
         expect(simpleSmartAccount.address).toHaveLength(42)
         expect(simpleSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
-        expect(async () => {
-            await simpleSmartAccount.signTransaction({
+        await expect(async () =>
+            simpleSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
             })
-        }).toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("Smart account client signMessage", async () => {
@@ -101,12 +101,14 @@ describe("Simple Account", () => {
     test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
-        expect(async () => {
-            await smartAccountClient.deployContract({
+        await expect(async () =>
+            smartAccountClient.deployContract({
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        }).toThrow("Simple account doesn't support account deployment")
+        ).rejects.toThrowError(
+            "Simple account doesn't support account deployment"
+        )
     })
 
     test("Smart account client send multiple transactions", async () => {

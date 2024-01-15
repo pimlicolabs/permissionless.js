@@ -56,14 +56,8 @@ export async function sendUserOperation<
 
     userOperation.signature = await account.signUserOperation(userOperation)
 
-    const userOpHash = await getAction(
-        client,
-        sendUserOperationBundler,
-        "sendUserOperation"
-    )({
+    return sendUserOperationBundler(client, {
         userOperation: userOperation,
         entryPoint: account.entryPoint
     })
-
-    return userOpHash
 }

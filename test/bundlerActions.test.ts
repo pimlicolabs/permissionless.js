@@ -177,13 +177,11 @@ describe("BUNDLER ACTIONS", () => {
             chainId: chain.id
         })
 
-        expect(async () => {
-            await bundlerClient.waitForUserOperationReceipt({
+        await expect(async () =>
+            bundlerClient.waitForUserOperationReceipt({
                 hash: userOpHash,
                 timeout: 100
             })
-        }).toThrow(
-            new WaitForUserOperationReceiptTimeoutError({ hash: userOpHash })
-        )
+        ).rejects.toThrow(WaitForUserOperationReceiptTimeoutError)
     })
 })

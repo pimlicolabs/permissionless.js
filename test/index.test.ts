@@ -84,12 +84,12 @@ describe("test public actions and utils", () => {
         const publicClient = await getPublicClient()
         const entryPoint = "0x0000000"
 
-        await expect(async () => {
-            await getSenderAddress(publicClient, {
+        await expect(async () =>
+            getSenderAddress(publicClient, {
                 initCode,
                 entryPoint
             })
-        }).toThrow()
+        ).rejects.toThrow()
     })
 
     test("getUserOperationHash", async () => {
