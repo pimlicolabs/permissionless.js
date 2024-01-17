@@ -16,7 +16,6 @@ jobs:
   bench:
     name: Coverage
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     steps:
       - name: Clone repository
