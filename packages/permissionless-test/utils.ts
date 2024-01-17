@@ -182,11 +182,12 @@ export const getSmartAccountClient = async ({
                 maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
             }
 
-            if (sponsorUserOperation)
-                newUserOperation = await sponsorUserOperation({
+            if (sponsorUserOperation) {
+                return sponsorUserOperation({
                     userOperation,
                     entryPoint
                 })
+            }
 
             const gasLimits = await bundlerClient.estimateUserOperationGas({
                 userOperation: newUserOperation,

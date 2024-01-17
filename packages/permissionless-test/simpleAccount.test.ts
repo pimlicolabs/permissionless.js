@@ -34,9 +34,6 @@ beforeAll(() => {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
 
-    if (!process.env.GREETER_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
     testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
     factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
@@ -134,24 +131,36 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account write contract", async () => {
-        const greeterContract = getContract({
-            abi: GreeterAbi,
-            address: process.env.GREETER_ADDRESS as Address,
+        const smartAccountClient = await getSmartAccountClient()
+
+        const entryPointContract = getContract({
+            abi: EntryPointAbi,
+            address: getEntryPoint(),
             client: {
                 public: await getPublicClient(),
-                wallet: await getSmartAccountClient()
+                wallet: smartAccountClient
             }
         })
 
-        const oldGreet = await greeterContract.read.greet()
+        const oldBalance = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        const txHash = await greeterContract.write.setGreeting(["hello world"])
+        const txHash = await entryPointContract.write.depositTo(
+            [smartAccountClient.account.address],
+            {
+                value: 10n
+            }
+        )
 
         expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
-        const newGreet = await greeterContract.read.greet()
-        expect(newGreet).toEqual("hello world")
+        const newBalnce = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
+
+        expect(newBalnce - oldBalance > 10n).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
