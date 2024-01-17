@@ -12,6 +12,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { UserOperation } from "permissionless/types"
 import { walletClientToCustomSigner } from "permissionless/utils"
 import {
     http,
@@ -158,11 +159,47 @@ export const getSmartAccountClient = async ({
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
 
+    const pimlicoBundlerClient = getPimlicoBundlerClient()
+    const bundlerClient = getBundlerClient()
+
     const smartAccountClient = createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation
+        sponsorUserOperation: async ({
+            userOperation,
+            entryPoint
+        }: {
+            userOperation: UserOperation
+            entryPoint: Address
+        }): Promise<UserOperation> => {
+            const gasPrice =
+                await pimlicoBundlerClient.getUserOperationGasPrice()
+
+            let newUserOperation: UserOperation = {
+                ...userOperation,
+                maxFeePerGas: gasPrice.fast.maxFeePerGas,
+                maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
+            }
+
+            if (sponsorUserOperation)
+                newUserOperation = await sponsorUserOperation({
+                    userOperation,
+                    entryPoint
+                })
+
+            const gasLimits = await bundlerClient.estimateUserOperationGas({
+                userOperation: newUserOperation,
+                entryPoint
+            })
+
+            newUserOperation = {
+                ...newUserOperation,
+                ...gasLimits
+            }
+
+            return newUserOperation
+        }
     })
 
     return smartAccountClient

@@ -26,12 +26,12 @@ jobs:
           PACKAGE_NAME=$(jq -r '.name' package.json)
           
           npm view $PACKAGE_NAME dist-tags --json | jq -r 'to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm $PACKAGE_NAME %
-        working-directory: src
+        working-directory: packages/permissionless
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Deprecate canary versions
-        working-directory: src
+        working-directory: packages/permissionless
         run: |
           PACKAGE_NAME=$(jq -r '.name' package.json)
           TWO_DAYS_AGO=$(date --date='2 days ago' +%s)
