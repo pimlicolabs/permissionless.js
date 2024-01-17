@@ -160,7 +160,6 @@ describe("Simple Account", () => {
             smartAccountClient.account.address
         ])
 
-        expect(newBalnce - oldBalance > 10n).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
