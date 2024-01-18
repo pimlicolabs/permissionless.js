@@ -21,13 +21,13 @@ import {
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import type { SmartAccount } from "../types.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccountSigner
 } from "../types.js"
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 
 export type KernelEcdsaSmartAccount<
     transport extends Transport = Transport,
