@@ -20,6 +20,7 @@ import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -29,7 +30,6 @@ import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 // import Abis
 
 export type BiconomySmartAccount<
