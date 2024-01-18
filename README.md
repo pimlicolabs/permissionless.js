@@ -1,1 +1,1 @@
-src/README.md
+packages/permissionless/README.md
