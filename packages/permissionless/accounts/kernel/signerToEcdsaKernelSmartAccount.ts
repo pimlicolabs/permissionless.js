@@ -13,7 +13,6 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
-    getBytecode,
     getChainId,
     readContract,
     signMessage,
@@ -22,6 +21,7 @@ import {
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import type { SmartAccount } from "../types.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
@@ -219,6 +219,7 @@ export async function signerToEcdsaKernelSmartAccount<
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
+        address,
         entryPoint,
         index = 0n,
         factoryAddress = KERNEL_ADDRESSES.FACTORY_ADDRESS,
@@ -228,6 +229,7 @@ export async function signerToEcdsaKernelSmartAccount<
     }: {
         signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
+        address?: Address
         index?: bigint
         factoryAddress?: Address
         accountLogicAddress?: Address
@@ -255,18 +257,24 @@ export async function signerToEcdsaKernelSmartAccount<
 
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
-        getAccountAddress<TTransport, TChain>({
-            client,
-            entryPoint,
-            owner: viemSigner.address,
-            ecdsaValidatorAddress,
-            initCodeProvider: generateInitCode,
-            deployedAccountAddress
-        }),
+        address ??
+            getAccountAddress<TTransport, TChain>({
+                client,
+                entryPoint,
+                owner: viemSigner.address,
+                ecdsaValidatorAddress,
+                initCodeProvider: generateInitCode,
+                deployedAccountAddress
+            }),
         getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
+
+    let smartAccountDeployed = await isSmartAccountDeployed(
+        client,
+        accountAddress
+    )
 
     // Build the EOA Signer
     const account = toAccount({
@@ -328,11 +336,14 @@ export async function signerToEcdsaKernelSmartAccount<
 
         // Encode the init code
         async getInitCode() {
-            const contractCode = await getBytecode(client, {
-                address: accountAddress
-            })
+            if (smartAccountDeployed) return "0x"
 
-            if ((contractCode?.length ?? 0) > 2) return "0x"
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return "0x"
 
             return generateInitCode()
         },

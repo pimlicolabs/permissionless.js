@@ -52,9 +52,9 @@ describe("Simple Account from walletClient", () => {
 
     test("Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
 
         const response = await smartAccountClient.signMessage({
@@ -68,9 +68,9 @@ describe("Simple Account from walletClient", () => {
 
     test("Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
 
         const response = await smartAccountClient.signTypedData({
@@ -100,9 +100,9 @@ describe("Simple Account from walletClient", () => {
 
     test("smart account client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
 
         await expect(async () =>
@@ -117,9 +117,9 @@ describe("Simple Account from walletClient", () => {
 
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
 
         const response = await smartAccountClient.sendTransactions({
@@ -144,9 +144,9 @@ describe("Simple Account from walletClient", () => {
 
     test("Smart account write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
 
         const entryPointContract = getContract({
@@ -181,9 +181,9 @@ describe("Simple Account from walletClient", () => {
 
     test("Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            )
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            })
         })
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
@@ -202,9 +202,9 @@ describe("Simple Account from walletClient", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            ),
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            }),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -262,9 +262,9 @@ describe("Simple Account from walletClient", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount(
-                await getCustomSignerToSimpleSmartAccount()
-            ),
+            account: await getSignerToSimpleSmartAccount({
+                signer: await getCustomSignerToSimpleSmartAccount()
+            }),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation

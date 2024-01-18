@@ -11,15 +11,11 @@ import {
     encodeFunctionData
 } from "viem"
 import { toAccount } from "viem/accounts"
-import {
-    getBytecode,
-    getChainId,
-    signMessage,
-    signTypedData
-} from "viem/actions"
+import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../actions/public/getSenderAddress.js"
 import { getUserOperationHash } from "../utils/getUserOperationHash.js"
+import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed.js"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -113,12 +109,14 @@ export async function signerToSimpleSmartAccount<
         signer,
         factoryAddress,
         entryPoint,
-        index = 0n
+        index = 0n,
+        address
     }: {
         signer: SmartAccountSigner<TSource, TAddress>
         factoryAddress: Address
         entryPoint: Address
         index?: bigint
+        address?: Address
     }
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
     const viemSigner: LocalAccount = {
@@ -129,17 +127,23 @@ export async function signerToSimpleSmartAccount<
     } as LocalAccount
 
     const [accountAddress, chainId] = await Promise.all([
-        getAccountAddress<TTransport, TChain>({
-            client,
-            factoryAddress,
-            entryPoint,
-            owner: viemSigner.address,
-            index
-        }),
+        address ??
+            getAccountAddress<TTransport, TChain>({
+                client,
+                factoryAddress,
+                entryPoint,
+                owner: viemSigner.address,
+                index
+            }),
         getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
+
+    let smartAccountDeployed = await isSmartAccountDeployed(
+        client,
+        accountAddress
+    )
 
     const account = toAccount({
         address: accountAddress,
@@ -189,11 +193,14 @@ export async function signerToSimpleSmartAccount<
             })
         },
         async getInitCode() {
-            const contractCode = await getBytecode(client, {
-                address: accountAddress
-            })
+            if (smartAccountDeployed) return "0x"
 
-            if ((contractCode?.length ?? 0) > 2) return "0x"
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return "0x"
 
             return getAccountInitCode(factoryAddress, viemSigner.address, index)
         },
