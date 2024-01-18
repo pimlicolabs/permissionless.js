@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.28
+
+### Patch Changes
+
+- 341b5948b44e22cd9b3dcdfd1449a76c45530d2d: Add ability to pass deployed account address to signer\*\*Account actions
+
 ## 0.0.27
 
 ### Patch Changes
