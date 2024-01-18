@@ -22,7 +22,6 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
-    getBytecode,
     getChainId,
     readContract,
     signMessage,
@@ -34,6 +33,7 @@ import {
     type SmartAccount,
     type SmartAccountSigner
 } from "./types.js"
+import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed.js"
 
 export type SafeVersion = "1.4.1"
 
@@ -502,6 +502,7 @@ export async function signerToSafeSmartAccount<
     client: Client<TTransport, TChain>,
     {
         signer,
+        address,
         safeVersion,
         entryPoint,
         addModuleLibAddress: _addModuleLibAddress,
@@ -516,9 +517,10 @@ export async function signerToSafeSmartAccount<
         safeModules = [],
         setupTransactions = []
     }: {
-        safeVersion: SafeVersion
         signer: SmartAccountSigner<TSource, TAddress>
+        safeVersion: SafeVersion
         entryPoint: Address
+        address?: Address
         addModuleLibAddress?: Address
         safe4337ModuleAddress?: Address
         safeProxyFactoryAddress?: Address
@@ -561,20 +563,24 @@ export async function signerToSafeSmartAccount<
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress
     })
 
-    const accountAddress = await getAccountAddress<TTransport, TChain>({
-        client,
-        owner: viemSigner.address,
-        addModuleLibAddress,
-        safe4337ModuleAddress,
-        safeProxyFactoryAddress,
-        safeSingletonAddress,
-        multiSendAddress,
-        saltNonce,
-        setupTransactions,
-        safeModules
-    })
+    const accountAddress =
+        address ??
+        (await getAccountAddress<TTransport, TChain>({
+            client,
+            owner: viemSigner.address,
+            addModuleLibAddress,
+            safe4337ModuleAddress,
+            safeProxyFactoryAddress,
+            safeSingletonAddress,
+            multiSendAddress,
+            saltNonce,
+            setupTransactions,
+            safeModules
+        }))
 
     if (!accountAddress) throw new Error("Account address not found")
+
+    let safeDeployed = await isSmartAccountDeployed(client, accountAddress)
 
     const account = toAccount({
         address: accountAddress,
@@ -695,11 +701,11 @@ export async function signerToSafeSmartAccount<
             )
         },
         async getInitCode() {
-            const contractCode = await getBytecode(client, {
-                address: accountAddress
-            })
+            if (safeDeployed) return "0x"
 
-            if ((contractCode?.length ?? 0) > 2) return "0x"
+            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
+
+            if (safeDeployed) return "0x"
 
             return getAccountInitCode({
                 owner: viemSigner.address,

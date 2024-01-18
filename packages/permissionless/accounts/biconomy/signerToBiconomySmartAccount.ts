@@ -17,12 +17,7 @@ import {
     parseAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
-import {
-    getBytecode,
-    getChainId,
-    signMessage,
-    signTypedData
-} from "viem/actions"
+import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
 import {
@@ -34,6 +29,7 @@ import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 // import Abis
 
 export type BiconomySmartAccount<
@@ -207,6 +203,7 @@ export async function signerToBiconomySmartAccount<
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
+        address,
         entryPoint,
         index = 0n,
         factoryAddress = BICONOMY_ADDRESSES.FACTORY_ADDRESS,
@@ -216,6 +213,7 @@ export async function signerToBiconomySmartAccount<
     }: {
         signer: SmartAccountSigner<TSource, TAddress>
         entryPoint: Address
+        address?: Address
         index?: bigint
         factoryAddress?: Address
         accountLogicAddress?: Address
@@ -242,18 +240,24 @@ export async function signerToBiconomySmartAccount<
 
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
-        getAccountAddress({
-            owner: viemSigner.address,
-            ecdsaModuleAddress,
-            factoryAddress,
-            accountLogicAddress,
-            fallbackHandlerAddress,
-            index
-        }),
+        address ??
+            getAccountAddress({
+                owner: viemSigner.address,
+                ecdsaModuleAddress,
+                factoryAddress,
+                accountLogicAddress,
+                fallbackHandlerAddress,
+                index
+            }),
         getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
+
+    let smartAccountDeployed = await isSmartAccountDeployed(
+        client,
+        accountAddress
+    )
 
     // Build the EOA Signer
     const account = toAccount({
@@ -319,11 +323,14 @@ export async function signerToBiconomySmartAccount<
 
         // Encode the init code
         async getInitCode() {
-            const contractCode = await getBytecode(client, {
-                address: accountAddress
-            })
+            if (smartAccountDeployed) return "0x"
 
-            if ((contractCode?.length ?? 0) > 2) return "0x"
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return "0x"
 
             return generateInitCode()
         },

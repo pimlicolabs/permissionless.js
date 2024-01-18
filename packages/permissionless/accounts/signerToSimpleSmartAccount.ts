@@ -140,7 +140,10 @@ export async function signerToSimpleSmartAccount<
 
     if (!accountAddress) throw new Error("Account address not found")
 
-    let walletDeployed = await isSmartAccountDeployed(client, accountAddress)
+    let smartAccountDeployed = await isSmartAccountDeployed(
+        client,
+        accountAddress
+    )
 
     const account = toAccount({
         address: accountAddress,
@@ -190,14 +193,14 @@ export async function signerToSimpleSmartAccount<
             })
         },
         async getInitCode() {
-            if (walletDeployed) return "0x"
+            if (smartAccountDeployed) return "0x"
 
-            walletDeployed = await isSmartAccountDeployed(
+            smartAccountDeployed = await isSmartAccountDeployed(
                 client,
                 accountAddress
             )
 
-            if (walletDeployed) return "0x"
+            if (smartAccountDeployed) return "0x"
 
             return getAccountInitCode(factoryAddress, viemSigner.address, index)
         },
