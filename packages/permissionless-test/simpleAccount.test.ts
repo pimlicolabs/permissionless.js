@@ -176,6 +176,25 @@ describe("Simple Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
+    test("Smart account client send transaction with address", async () => {
+        const oldSmartAccountClient = await getSmartAccountClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount({
+                address: oldSmartAccountClient.account.address
+            })
+        })
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+        expectTypeOf(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
+    }, 1000000)
+
     test("test prepareUserOperationRequest", async () => {
         const smartAccountClient = await getSmartAccountClient()
 

@@ -69,11 +69,13 @@ export const getTestingChain = () => {
     })
 }
 
-export const getSignerToSimpleSmartAccount = async (
-    signer: SmartAccountSigner = privateKeyToAccount(
-        process.env.TEST_PRIVATE_KEY as Hex
-    )
-) => {
+export const getSignerToSimpleSmartAccount = async ({
+    signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
+    address
+}: {
+    signer?: SmartAccountSigner
+    address?: Address
+} = {}) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -82,7 +84,8 @@ export const getSignerToSimpleSmartAccount = async (
     return await signerToSimpleSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
-        signer: signer
+        signer: signer,
+        address
     })
 }
 
