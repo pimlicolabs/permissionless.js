@@ -1,0 +1,14 @@
+{
+    "name": "test",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "vitest": "^1.2.0"
+    },
+    "dependencies": {
+        "@vitest/coverage-v8": "^1.2.0",
+        "permissionless": "workspace:*",
+        "dotenv": "^16.3.1",
+        "viem": "^2.0.0"
+    }
+}

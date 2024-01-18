@@ -15,6 +15,7 @@ import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     generateApproveCallData,
     getBundlerClient,
+    getEntryPoint,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
@@ -36,10 +37,6 @@ beforeAll(() => {
         throw new Error("RPC_URL environment variable not set")
     }
     if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
-
-    if (!process.env.GREETER_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
 })
@@ -106,27 +103,37 @@ describe("Safe Account", () => {
     }, 1000000)
 
     test("safe Smart account write contract", async () => {
-        const greeterContract = getContract({
-            abi: GreeterAbi,
-            address: process.env.GREETER_ADDRESS as Address,
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSafeSmartAccount()
+        })
+
+        const entryPointContract = getContract({
+            abi: EntryPointAbi,
+            address: getEntryPoint(),
             client: {
                 public: await getPublicClient(),
-                wallet: await getSmartAccountClient({
-                    account: await getSignerToSafeSmartAccount()
-                })
+                wallet: smartAccountClient
             }
         })
 
-        const oldGreet = await greeterContract.read.greet()
+        const oldBalance = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        const txHash = await greeterContract.write.setGreeting(["hello world"])
+        const txHash = await entryPointContract.write.depositTo(
+            [smartAccountClient.account.address],
+            {
+                value: 10n
+            }
+        )
 
         expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
-        const newGreet = await greeterContract.read.greet()
+        const newBalnce = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
 

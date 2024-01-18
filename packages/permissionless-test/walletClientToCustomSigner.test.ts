@@ -1,12 +1,13 @@
 import dotenv from "dotenv"
-import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
+import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
 import {
     getBundlerClient,
+    getCustomSignerToSimpleSmartAccount,
     getEntryPoint,
     getPimlicoPaymasterClient,
     getPublicClient,
@@ -16,9 +17,6 @@ import {
 } from "./utils.js"
 
 dotenv.config()
-
-let testPrivateKey: Hex
-let factoryAddress: Address
 
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS) {
@@ -33,15 +31,9 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-
-    if (!process.env.GREETER_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
-describe("Simple Account", () => {
+describe("Simple Account from walletClient", () => {
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
@@ -55,11 +47,15 @@ describe("Simple Account", () => {
                 value: 0n,
                 data: "0x"
             })
-        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
+        ).rejects.toThrow(new SignTransactionNotSupportedBySmartAccount())
     })
 
     test("Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
 
         const response = await smartAccountClient.signMessage({
             message: "hello world"
@@ -71,7 +67,11 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
 
         const response = await smartAccountClient.signTypedData({
             domain: {
@@ -99,7 +99,11 @@ describe("Simple Account", () => {
     })
 
     test("smart account client deploy contract", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
 
         await expect(async () =>
             smartAccountClient.deployContract({
@@ -112,7 +116,12 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client send multiple transactions", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -134,29 +143,48 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account write contract", async () => {
-        const greeterContract = getContract({
-            abi: GreeterAbi,
-            address: process.env.GREETER_ADDRESS as Address,
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
+
+        const entryPointContract = getContract({
+            abi: EntryPointAbi,
+            address: getEntryPoint(),
             client: {
                 public: await getPublicClient(),
-                wallet: await getSmartAccountClient()
+                wallet: smartAccountClient
             }
         })
 
-        const oldGreet = await greeterContract.read.greet()
+        const oldBalance = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        const txHash = await greeterContract.write.setGreeting(["hello world"])
+        const txHash = await entryPointContract.write.depositTo(
+            [smartAccountClient.account.address],
+            {
+                value: 10n
+            }
+        )
 
         expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
-        const newGreet = await greeterContract.read.greet()
-        expect(newGreet).toEqual("hello world")
+        const newBalnce = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
+
         await waitForNonceUpdate()
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            )
+        })
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
@@ -168,29 +196,15 @@ describe("Simple Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("test prepareUserOperationRequest", async () => {
-        const smartAccountClient = await getSmartAccountClient()
-
-        const userOperation =
-            await smartAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await smartAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    })
-                }
-            })
-
-        // smartAccountClient.sendUserOperation()
-    }, 1000000)
-
     test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -248,6 +262,9 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount(
+                await getCustomSignerToSimpleSmartAccount()
+            ),
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation

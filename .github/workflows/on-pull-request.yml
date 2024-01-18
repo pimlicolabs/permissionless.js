@@ -16,7 +16,6 @@ jobs:
   bench:
     name: Coverage
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     steps:
       - name: Clone repository
@@ -34,7 +33,6 @@ jobs:
           ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}
           FACTORY_ADDRESS: ${{ vars.FACTORY_ADDRESS }}
           TEST_CHAIN_ID: ${{ vars.TEST_CHAIN_ID }}
-          GREETER_ADDRESS:  ${{ vars.GREETER_ADDRESS }}
           TEST_PRIVATE_KEY: ${{ secrets.TEST_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.RPC_URL }}
           BUNDLER_RPC_HOST: ${{ secrets.BUNDLER_RPC_HOST }}

@@ -1,11 +1,11 @@
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
-    signerToBiconomySmartAccount
+    signerToEcdsaKernelSmartAccount
 } from "permissionless/accounts"
-import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint.js"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
@@ -14,13 +14,15 @@ import {
     getEntryPoint,
     getPimlicoPaymasterClient,
     getPublicClient,
-    getSignerToBiconomyAccount,
+    getSignerToEcdsaKernelAccount,
     getSmartAccountClient,
     waitForNonceUpdate
 } from "./utils.js"
 
 dotenv.config()
 
+let testPrivateKey: Hex
+let factoryAddress: Address
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
@@ -34,17 +36,17 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-    if (!process.env.GREETER_ADDRESS) {
-        throw new Error("GREETER_ADDRESS environment variable not set")
-    }
+
+    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
+    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
 /**
  * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
  */
-describe("Biconomy Modular Smart Account (ECDSA module)", () => {
+describe("ECDSA kernel Account", () => {
     test("Account address", async () => {
-        const ecdsaSmartAccount = await getSignerToBiconomyAccount()
+        const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
 
         expectTypeOf(ecdsaSmartAccount.address).toBeString()
         expect(ecdsaSmartAccount.address).toHaveLength(42)
@@ -61,7 +63,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToEcdsaKernelAccount()
         })
 
         const response = await smartAccountClient.signMessage({
@@ -75,7 +77,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToEcdsaKernelAccount()
         })
 
         const response = await smartAccountClient.signTypedData({
@@ -105,7 +107,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Client deploy contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToEcdsaKernelAccount()
         })
 
         await expect(async () =>
@@ -113,12 +115,14 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
                 abi: GreeterAbi,
                 bytecode: GreeterBytecode
             })
-        ).rejects.toThrowError("Doesn't support account deployment")
+        ).rejects.toThrowError(
+            "Simple account doesn't support account deployment"
+        )
     })
 
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToEcdsaKernelAccount()
         })
 
         const response = await smartAccountClient.sendTransactions({
@@ -143,33 +147,41 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Write contract", async () => {
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToBiconomyAccount()
+            account: await getSignerToEcdsaKernelAccount()
         })
 
-        const greeterContract = getContract({
-            abi: GreeterAbi,
-            address: process.env.GREETER_ADDRESS as Address,
+        const entryPointContract = getContract({
+            abi: EntryPointAbi,
+            address: getEntryPoint(),
             client: {
                 public: await getPublicClient(),
                 wallet: smartAccountClient
             }
         })
 
-        const oldGreet = await greeterContract.read.greet()
+        const oldBalance = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        const txHash = await greeterContract.write.setGreeting(["hello world"])
+        const txHash = await entryPointContract.write.depositTo(
+            [smartAccountClient.account.address],
+            {
+                value: 10n
+            }
+        )
 
         expectTypeOf(txHash).toBeString()
         expect(txHash).toHaveLength(66)
 
-        const newGreet = await greeterContract.read.greet()
+        const newBalnce = await entryPointContract.read.balanceOf([
+            smartAccountClient.account.address
+        ])
 
-        expect(newGreet).toEqual("hello world")
         await waitForNonceUpdate()
     }, 1000000)
 
     test("Client send Transaction with paymaster", async () => {
-        const account = await getSignerToBiconomyAccount()
+        const account = await getSignerToEcdsaKernelAccount()
 
         const publicClient = await getPublicClient()
 
@@ -232,7 +244,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     }, 1000000)
 
     test("Client send multiple Transactions with paymaster", async () => {
-        const account = await getSignerToBiconomyAccount()
+        const account = await getSignerToEcdsaKernelAccount()
 
         const publicClient = await getPublicClient()
 
@@ -304,7 +316,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     }, 1000000)
 
     test("Can use a deployed account", async () => {
-        const initialEcdsaSmartAccount = await getSignerToBiconomyAccount()
+        const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
         const publicClient = await getPublicClient()
         const smartAccountClient = await getSmartAccountClient({
             account: initialEcdsaSmartAccount,
@@ -329,18 +341,30 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         // Wait for the tx to be done (so we are sure that the account is deployed)
         await publicClient.waitForTransactionReceipt({ hash })
+        const deployedAccountAddress = initialEcdsaSmartAccount.address
 
         // Build a new account with a valid owner
         const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
         const alreadyDeployedEcdsaSmartAccount =
-            await signerToBiconomySmartAccount(publicClient, {
+            await signerToEcdsaKernelSmartAccount(publicClient, {
                 entryPoint: getEntryPoint(),
-                signer: signer
+                signer: signer,
+                deployedAccountAddress
             })
 
         // Ensure the two account have the same address
         expect(alreadyDeployedEcdsaSmartAccount.address).toMatch(
             initialEcdsaSmartAccount.address
         )
+
+        // Ensure that it will fail with an invalid owner address
+        const invalidOwner = privateKeyToAccount(generatePrivateKey())
+        await expect(async () =>
+            signerToEcdsaKernelSmartAccount(publicClient, {
+                entryPoint: getEntryPoint(),
+                signer: invalidOwner,
+                deployedAccountAddress
+            })
+        ).rejects.toThrowError("Invalid owner for the already deployed account")
     }, 1000000)
 })

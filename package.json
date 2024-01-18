@@ -1,5 +1,5 @@
 {
-    "workspaces": ["src", "test"],
+    "workspaces": ["packages/*"],
     "private": true,
     "author": "Pimlico",
     "type": "module",
@@ -23,18 +23,18 @@
     "license": "MIT",
     "scripts": {
         "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
-        "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./src/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./src/_cjs/package.json",
-        "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./src/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./src/_esm/package.json",
-        "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./src/_types --emitDeclarationOnly --declaration --declarationMap",
-        "clean": "rimraf src/_esm src/_cjs src/_types",
+        "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./packages/permissionless/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
+        "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./packages/permissionless/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
+        "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./packages/permissionless/_types --emitDeclarationOnly --declaration --declarationMap",
+        "clean": "rimraf ./packages/permissionless/_esm ./packages/permissionless/_cjs ./packages/permissionless/_types",
         "changeset": "changeset",
         "changeset:release": "bun run build && changeset publish",
         "changeset:version": "changeset version && bun install --lockfile-only",
         "format": "biome format . --write",
         "lint": "biome check .",
         "lint:fix": "bun run lint --apply",
-        "test": "vitest -c ./test/vitest.config.ts",
-        "test:ci": "CI=true vitest -c ./test/vitest.config.ts --coverage"
+        "test": "vitest -c ./packages/permissionless-test/vitest.config.ts",
+        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage"
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"
