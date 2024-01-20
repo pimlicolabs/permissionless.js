@@ -18,7 +18,20 @@ export type BundlerRpcSchema = [
                 UserOperationWithBigIntAsHex,
                 "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
             >,
-            entryPoint: Address
+            entryPoint: Address,
+            stateOverrides?: {
+                [x: string]: {
+                    balance?: Hex
+                    nonce?: Hex
+                    code?: Hex
+                    state?: {
+                        [x: Hex]: Hex
+                    }
+                    stateDiff?: {
+                        [x: Hex]: Hex
+                    }
+                }
+            }
         ]
         ReturnType: {
             preVerificationGas: Hex
@@ -85,4 +98,18 @@ type UserOperationReceiptWithBigIntAsHex = {
         address: Address
         topics: Hex[]
     }[]
+}
+
+export type StateOverrides = {
+    [x: string]: {
+        balance?: bigint | undefined
+        nonce?: bigint | number | undefined
+        code?: Hex | undefined
+        state?: {
+            [x: Hex]: Hex
+        }
+        stateDiff?: {
+            [x: Hex]: Hex
+        }
+    }
 }

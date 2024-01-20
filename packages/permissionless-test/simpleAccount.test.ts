@@ -184,11 +184,13 @@ describe("Simple Account", () => {
                 address: oldSmartAccountClient.account.address
             })
         })
+
         const response = await smartAccountClient.sendTransaction({
-            to: zeroAddress,
-            value: 0n,
-            data: "0x"
+            to: smartAccountClient.account.address,
+            data: "0x",
+            value: 0n
         })
+
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)

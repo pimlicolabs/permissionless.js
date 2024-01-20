@@ -39,6 +39,7 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract.js"
+import type { StateOverrides } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
 
 export type SmartAccountActions<
@@ -377,7 +378,8 @@ export type SmartAccountActions<
                     TSmartAccount
                 >
             >[1]
-        >
+        >,
+        stateOverrides?: StateOverrides
     ) => Promise<Prettify<PrepareUserOperationRequestReturnType>>
     sendUserOperation: <TTransport extends Transport>(
         args: Prettify<
@@ -452,11 +454,15 @@ export function smartAccountActions({
     >(
         client: Client<TTransport, TChain, TSmartAccount>
     ): SmartAccountActions<TChain, TSmartAccount> => ({
-        prepareUserOperationRequest: (args) =>
-            prepareUserOperationRequest(client, {
-                ...args,
-                sponsorUserOperation
-            }),
+        prepareUserOperationRequest: (args, stateOverrides) =>
+            prepareUserOperationRequest(
+                client,
+                {
+                    ...args,
+                    sponsorUserOperation
+                },
+                stateOverrides
+            ),
         deployContract: (args) =>
             deployContract(client, {
                 ...args,

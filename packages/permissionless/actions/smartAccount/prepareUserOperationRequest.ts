@@ -1,6 +1,7 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types.js"
+import type { StateOverrides } from "../../types/bundler.js"
 import type {
     GetAccountParameter,
     PartialBy,
@@ -48,7 +49,8 @@ export async function prepareUserOperationRequest<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<PrepareUserOperationRequestParameters<TAccount>>
+    args: Prettify<PrepareUserOperationRequestParameters<TAccount>>,
+    stateOverrides?: StateOverrides
 ): Promise<Prettify<PrepareUserOperationRequestReturnType>> {
     const {
         account: account_ = client.account,
@@ -105,15 +107,15 @@ export async function prepareUserOperationRequest<
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
     ) {
-        const gasParameters = await getAction(
-            client,
-            estimateUserOperationGas
-        )({
-            userOperation: {
-                ...userOperation
+        const gasParameters = await getAction(client, estimateUserOperationGas)(
+            {
+                userOperation: {
+                    ...userOperation
+                },
+                entryPoint: account.entryPoint
             },
-            entryPoint: account.entryPoint
-        })
+            stateOverrides
+        )
 
         userOperation.callGasLimit =
             userOperation.callGasLimit || gasParameters.callGasLimit

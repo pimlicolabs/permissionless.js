@@ -15,6 +15,8 @@ esbuild-why-permissionless*
 # local env files
 .env
 .env.local
+.env.staging
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
