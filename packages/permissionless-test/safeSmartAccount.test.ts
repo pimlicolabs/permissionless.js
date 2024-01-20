@@ -93,7 +93,7 @@ describe("Safe Account", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 10000n,
+            value: 0n,
             data: "0x"
         })
 

@@ -177,7 +177,13 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account client send transaction with address", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const oldSmartAccountClient = await getSmartAccountClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount({
+                address: oldSmartAccountClient.account.address
+            })
+        })
 
         const response = await smartAccountClient.sendTransaction({
             to: smartAccountClient.account.address,
