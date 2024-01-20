@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.29
+
+### Patch Changes
+
+- 4de179a0d49f23b5961b84b6ccba56f0f7cde345: Enable state overrides during estimation
+
 ## 0.0.28
 
 ### Patch Changes
