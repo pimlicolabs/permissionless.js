@@ -39,8 +39,8 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract.js"
-import type { Prettify } from "../../types/index.js"
 import type { StateOverrides } from "../../types/bundler.js"
+import type { Prettify } from "../../types/index.js"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,
