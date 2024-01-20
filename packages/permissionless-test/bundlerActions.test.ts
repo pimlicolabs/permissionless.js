@@ -84,10 +84,17 @@ describe("BUNDLER ACTIONS", () => {
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()
 
-        const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: getEntryPoint()
-        })
+        const gasParameters = await bundlerClient.estimateUserOperationGas(
+            {
+                userOperation,
+                entryPoint: getEntryPoint()
+            },
+            {
+                [userOperation.sender]: {
+                    balance: 1000n
+                }
+            }
+        )
 
         userOperation.callGasLimit = gasParameters.callGasLimit
         userOperation.verificationGasLimit = gasParameters.verificationGasLimit

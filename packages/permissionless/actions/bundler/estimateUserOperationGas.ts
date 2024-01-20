@@ -1,10 +1,9 @@
 import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
 import type { UserOperation } from "../../types/userOperation.js"
-import type { UserOperationWithBigIntAsHex } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type EstimateUserOperationGasParameters = {
@@ -54,16 +53,23 @@ export const estimateUserOperationGas = async <
     TAccount extends Account | undefined = Account | undefined
 >(
     client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    args: Prettify<EstimateUserOperationGasParameters>
+    args: Prettify<EstimateUserOperationGasParameters>,
+    stateOverrides?: StateOverrides
 ): Promise<Prettify<EstimateUserOperationGasReturnType>> => {
     const { userOperation, entryPoint } = args
 
+    const userOperationWithBigIntAsHex = deepHexlify(userOperation)
+    const stateOverridesWithBigIntAsHex = deepHexlify(stateOverrides)
+
     const response = await client.request({
         method: "eth_estimateUserOperationGas",
-        params: [
-            deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
-            entryPoint as Address
-        ]
+        params: stateOverrides
+            ? [
+                  userOperationWithBigIntAsHex,
+                  entryPoint,
+                  stateOverridesWithBigIntAsHex
+              ]
+            : [userOperationWithBigIntAsHex, entryPoint]
     })
 
     return {

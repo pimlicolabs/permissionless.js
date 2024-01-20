@@ -43,17 +43,17 @@ export const getPrivateKeyAccount = () => {
 
 export const getTestingChain = () => {
     // If custom chain specified in environment variable, use that
-    if (process.env.TEST_CHAIN_ID) {
-        const chainId = parseInt(process.env.TEST_CHAIN_ID)
-        const chain = Object.values(allChains).find(
-            (chain) => chain.id === chainId
-        )
-        if (chain) return chain
-    }
+
+    if (!process.env.TEST_CHAIN_ID)
+        throw new Error("TEST_CHAIN_ID environment variable not set")
+
+    const chainId = parseInt(process.env.TEST_CHAIN_ID)
+    const chain = Object.values(allChains).find((chain) => chain.id === chainId)
+    if (chain) return chain
 
     // Otherwise, use fallback to goerli
     return defineChain({
-        id: 1337,
+        id: chainId,
         network: "goerli",
         name: "Goerli",
         nativeCurrency: { name: "Goerli Ether", symbol: "ETH", decimals: 18 },
@@ -234,7 +234,11 @@ export const getPublicClient = async () => {
     const chainId = await publicClient.getChainId()
 
     if (chainId !== getTestingChain().id)
-        throw new Error("Testing Chain ID not supported by RPC URL")
+        throw new Error(
+            `Testing Chain ID: ${
+                getTestingChain().id
+            } not supported by RPC URL, RPC Chain ID: ${chainId}`
+        )
 
     return publicClient
 }

@@ -27,6 +27,7 @@ import {
 } from "../../actions/bundler/waitForUserOperationReceipt.js"
 import type { Prettify } from "../../types/index.js"
 import type { BundlerClient } from "../createBundlerClient.js"
+import type { StateOverrides } from "../../types/bundler.js"
 
 export type BundlerActions = {
     /**
@@ -83,7 +84,8 @@ export type BundlerActions = {
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
     estimateUserOperationGas: (
-        args: Prettify<EstimateUserOperationGasParameters>
+        args: Prettify<EstimateUserOperationGasParameters>,
+        stateOverrides?: StateOverrides
     ) => Promise<Prettify<EstimateUserOperationGasReturnType>>
     /**
      *
@@ -207,8 +209,11 @@ const bundlerActions = (client: Client): BundlerActions => ({
     sendUserOperation: async (
         args: SendUserOperationParameters
     ): Promise<Hash> => sendUserOperation(client as BundlerClient, args),
-    estimateUserOperationGas: (args: EstimateUserOperationGasParameters) =>
-        estimateUserOperationGas(client as BundlerClient, args),
+    estimateUserOperationGas: (
+        args: EstimateUserOperationGasParameters,
+        stateOverrides
+    ) =>
+        estimateUserOperationGas(client as BundlerClient, args, stateOverrides),
     supportedEntryPoints: (): Promise<Address[]> =>
         supportedEntryPoints(client as BundlerClient),
     chainId: () => chainId(client as BundlerClient),
