@@ -25,9 +25,9 @@ import {
     type WaitForUserOperationReceiptParameters,
     waitForUserOperationReceipt
 } from "../../actions/bundler/waitForUserOperationReceipt.js"
+import type { StateOverrides } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
 import type { BundlerClient } from "../createBundlerClient.js"
-import type { StateOverrides } from "../../types/bundler.js"
 
 export type BundlerActions = {
     /**

@@ -1,6 +1,7 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types.js"
+import type { StateOverrides } from "../../types/bundler.js"
 import type {
     GetAccountParameter,
     PartialBy,
@@ -13,7 +14,6 @@ import {
     parseAccount
 } from "../../utils/index.js"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
-import type { StateOverrides } from "../../types/bundler.js"
 
 export type SponsorUserOperationMiddleware = {
     sponsorUserOperation?: (args: {
