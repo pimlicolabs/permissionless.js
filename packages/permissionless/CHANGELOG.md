@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.30
+
+### Patch Changes
+
+- 1069679230b07113a993927dd453d5eca4d94bc5: Added support for sendCompressedUserOperation Pimlico bundler action
+
 ## 0.0.29
 
 ### Patch Changes
