@@ -25,11 +25,12 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  * @example
  * import { createClient } from "viem"
  * import { getUserOperationStatus } from "permissionless/actions/pimlico"
+ * import { pimlicoBundlerActions } from 'permissionless/actions/pimlico'
  *
  * const bundlerClient = createClient({
  *      chain: goerli,
  *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
- * })
+ * }).extend(pimlicoBundlerActions)
  *
  * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
  *
