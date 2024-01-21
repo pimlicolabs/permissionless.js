@@ -1,16 +1,20 @@
 import {
-    type GetUserOperationGasPriceReturnType,
-    getUserOperationGasPrice
+    getUserOperationGasPrice,
+    type GetUserOperationGasPriceReturnType
 } from "./pimlico/getUserOperationGasPrice.js"
 import {
+    getUserOperationStatus,
     type GetUserOperationStatusParameters,
-    type GetUserOperationStatusReturnType,
-    getUserOperationStatus
+    type GetUserOperationStatusReturnType
 } from "./pimlico/getUserOperationStatus.js"
 import {
+    sendCompressedUserOperation,
+    type SendCompressedUserOperationParameters
+} from "./pimlico/sendCompressedUserOperation.js"
+import {
+    sponsorUserOperation,
     type PimlicoSponsorUserOperationParameters,
-    type SponsorUserOperationReturnType,
-    sponsorUserOperation
+    type SponsorUserOperationReturnType
 } from "./pimlico/sponsorUserOperation.js"
 
 import type {
@@ -23,28 +27,30 @@ import {
 } from "../clients/decorators/pimlico.js"
 
 import {
+    validateSponsorshipPolicies,
     type ValidateSponsorshipPolicies,
-    type ValidateSponsorshipPoliciesParameters,
-    validateSponsorshipPolicies
+    type ValidateSponsorshipPoliciesParameters
 } from "./pimlico/validateSponsorshipPolicies.js"
 
 export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    PimlicoSponsorUserOperationParameters,
-    SponsorUserOperationReturnType,
     PimlicoBundlerActions,
     PimlicoPaymasterClientActions,
-    ValidateSponsorshipPoliciesParameters,
-    ValidateSponsorshipPolicies
+    PimlicoSponsorUserOperationParameters,
+    SendCompressedUserOperationParameters,
+    SponsorUserOperationReturnType,
+    ValidateSponsorshipPolicies,
+    ValidateSponsorshipPoliciesParameters
 }
 
 export {
     getUserOperationGasPrice,
     getUserOperationStatus,
-    sponsorUserOperation,
     pimlicoBundlerActions,
     pimlicoPaymasterActions,
+    sendCompressedUserOperation,
+    sponsorUserOperation,
     validateSponsorshipPolicies
 }
