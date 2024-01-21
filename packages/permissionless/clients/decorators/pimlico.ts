@@ -1,8 +1,8 @@
 import type { Client, Hash } from "viem"
 import {
-    SendCompressedUserOperationParameters,
     sendCompressedUserOperation,
     validateSponsorshipPolicies,
+    type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters
 } from "../../actions/pimlico.js"
