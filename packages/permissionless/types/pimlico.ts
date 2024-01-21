@@ -39,6 +39,15 @@ export type PimlicoBundlerRpcSchema = [
         Method: "pimlico_getUserOperationStatus"
         Parameters: [hash: Hash]
         ReturnType: PimlicoUserOperationStatus
+    },
+    {
+        Method: "pimlico_sendCompressedUserOperation"
+        Parameters: [
+            compressedUserOperation: Hex,
+            inflatorAddress: Address,
+            entryPoint: Address
+        ]
+        ReturnType: Hash
     }
 ]
 

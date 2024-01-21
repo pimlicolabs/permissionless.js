@@ -1,7 +1,9 @@
 import type { Client, Hash } from "viem"
 import {
+    type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
+    sendCompressedUserOperation,
     validateSponsorshipPolicies
 } from "../../actions/pimlico.js"
 import {
@@ -69,6 +71,33 @@ export type PimlicoBundlerActions = {
     getUserOperationStatus: (
         args: Prettify<GetUserOperationStatusParameters>
     ) => Promise<Prettify<GetUserOperationStatusReturnType>>
+    /**
+     * Sends a compressed user operation to the bundler
+     *
+     * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/sendCompressedUserOperation
+     *
+     * @param args {@link SendCompressedUserOperationParameters}.
+     * @returns UserOpHash that you can use to track user operation as {@link Hash}.
+     *
+     * @example
+     * import { createClient } from "viem"
+     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
+     *
+     * const bundlerClient = createClient({
+     *      chain: goerli,
+     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+     * }).extend(pimlicoBundlerActions)
+     *
+     * const userOpHash = await bundlerClient.sendCompressedUserOperation({
+     *     compressedUserOperation,
+     *     inflatorAddress,
+     *     entryPoint
+     * })
+     * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
+     */
+    sendCompressedUserOperation: (
+        args: Prettify<SendCompressedUserOperationParameters>
+    ) => Promise<Hash>
 }
 
 export const pimlicoBundlerActions = (
@@ -77,7 +106,10 @@ export const pimlicoBundlerActions = (
     getUserOperationGasPrice: async () =>
         getUserOperationGasPrice(client as PimlicoBundlerClient),
     getUserOperationStatus: async (args: GetUserOperationStatusParameters) =>
-        getUserOperationStatus(client as PimlicoBundlerClient, args)
+        getUserOperationStatus(client as PimlicoBundlerClient, args),
+    sendCompressedUserOperation: async (
+        args: SendCompressedUserOperationParameters
+    ) => sendCompressedUserOperation(client as PimlicoBundlerClient, args)
 })
 
 export type PimlicoPaymasterClientActions = {
