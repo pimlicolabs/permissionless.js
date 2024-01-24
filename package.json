@@ -23,9 +23,13 @@
     "license": "MIT",
     "scripts": {
         "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
-        "build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./packages/permissionless/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
-        "build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./packages/permissionless/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
-        "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./packages/permissionless/_types --emitDeclarationOnly --declaration --declarationMap",
+        "build:wagmi": "bun run clean && bun run build:wagmi:cjs && bun run build:wagmi:esm && bun run build:wagmi:types",
+        "build:wagmi:cjs": "tsc --project ./tsconfig.wagmi.json --module commonjs --outDir ./packages/wagmi/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./packages/wagmi/_cjs/package.json",
+        "build:wagmi:esm": "tsc --project ./tsconfig.wagmi.json --module es2015 --outDir ./packages/wagmi/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
+        "build:wagmi:types": "tsc --project ./tsconfig.wagmi.json --module esnext --declarationDir ./packages/wagmi/_types --emitDeclarationOnly --declaration --declarationMap",
+        "build:cjs": "tsc --project ./tsconfig.permissionless.json --module commonjs --outDir ./packages/permissionless/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
+        "build:esm": "tsc --project ./tsconfig.permissionless.json --module es2015 --outDir ./packages/permissionless/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
+        "build:types": "tsc --project ./tsconfig.permissionless.json --module esnext --declarationDir ./packages/permissionless/_types --emitDeclarationOnly --declaration --declarationMap",
         "clean": "rimraf ./packages/permissionless/_esm ./packages/permissionless/_cjs ./packages/permissionless/_types",
         "changeset": "changeset",
         "changeset:release": "bun run build && changeset publish",
@@ -33,10 +37,14 @@
         "format": "biome format . --write",
         "lint": "biome check .",
         "lint:fix": "bun run lint --apply",
-        "test": "vitest -c ./packages/permissionless-test/vitest.config.ts",
-        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage"
+        "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
+        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage",
+        "run:demo": "bun run --cwd packages/wagmi-demo dev"
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"
+    },
+    "dependencies": {
+        "get-port": "^7.0.0"
     }
 }

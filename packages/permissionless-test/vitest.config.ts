@@ -1,3 +1,4 @@
+import { join } from "node:path"
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
@@ -19,5 +20,7 @@ export default defineConfig({
         fileParallelism: false,
         environment: "node",
         testTimeout: 10_000
+        // setupFiles: [join(__dirname, "./setup.ts")],
+        // globalSetup: [join(__dirname, "./globalSetup.ts")]
     }
 })

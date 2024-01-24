@@ -23,7 +23,8 @@ import {
     createPublicClient,
     createWalletClient,
     defineChain,
-    encodeFunctionData
+    encodeFunctionData,
+    parseEther
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as allChains from "viem/chains"
@@ -205,6 +206,21 @@ export const getSmartAccountClient = async ({
             return newUserOperation
         }
     })
+
+    const walletClient = getEoaWalletClient()
+    const publicClient = await getPublicClient()
+
+    const balance = await publicClient.getBalance({
+        address: smartAccountClient.account.address
+    })
+
+    if (balance < parseEther("1")) {
+        await walletClient.sendTransaction({
+            to: smartAccountClient.account.address,
+            value: parseEther("1"),
+            data: "0x"
+        })
+    }
 
     return smartAccountClient
 }

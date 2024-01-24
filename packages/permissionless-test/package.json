@@ -1,14 +1,21 @@
 {
     "name": "test",
+    "author": "Pimlico",
+    "repository": "github:pimlicolabs/permissionless.js",
+    "homepage": "https://docs.pimlico.io/permissionless",
     "private": true,
     "type": "module",
     "devDependencies": {
         "vitest": "^1.2.0"
     },
     "dependencies": {
+        "@types/node": "^20.11.5",
+        "@viem/anvil": "^0.0.7",
         "@vitest/coverage-v8": "^1.2.0",
-        "permissionless": "workspace:*",
         "dotenv": "^16.3.1",
+        "execa": "^8.0.1",
+        "get-port": "^7.0.0",
+        "permissionless": "workspace:*",
         "viem": "^2.0.0"
     }
 }

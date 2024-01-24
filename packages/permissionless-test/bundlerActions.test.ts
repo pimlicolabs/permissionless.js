@@ -1,11 +1,12 @@
 import dotenv from "dotenv"
 import {
     BundlerClient,
+    UserOperation,
     WaitForUserOperationReceiptTimeoutError,
     getAccountNonce
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
-import { Address, type Hash } from "viem"
+import { Address, parseEther, type Hash } from "viem"
 import {
     beforeAll,
     beforeEach,
