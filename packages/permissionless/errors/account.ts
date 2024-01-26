@@ -43,7 +43,6 @@ export class InitCodeFailedOrOutOfGas extends BaseError {
                 "• Verify that the factory address in the initCode is correct (the factory address is the first 20 bytes of the initCode).",
                 "• Verify that the initCode is correct.",
                 "• Check whether the verificationGasLimit is sufficient for the initCode to complete without running out of gas.",
-                "• If the root cause is a revert, investigate why the initCode reverts during the account deployment process using tools like Tenderly.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -77,7 +76,6 @@ export class InitCodeReturnedDifferentSmartAccountAddress extends BaseError {
                 "Possible solutions:",
                 "• Verify that the sender address was generated deterministically from the initCode. (consider leveraging functions like getSenderAddress)",
                 "• Verify that the factory address in the initCode is correct (the factory address is the first 20 bytes of the initCode)",
-                "• If all else fails, investigate why the initCode deploys to a different address than expected using tools like Tenderly.",
                 "• Verify that the initCode is correct.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
@@ -112,7 +110,6 @@ export class InitCodeDidNotDeploySender extends BaseError {
                 "Possible solutions:",
                 "• Verify that the factory address in the initCode is correct (the factory address is the first 20 bytes of the initCode).",
                 "• Verify that the initCode factory is implemented correctly. The factory must deploy the smart account at the sender address.",
-                "• If all else fails, investigate why the initCode deploys to a different address than expected using tools like Tenderly.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -266,7 +263,6 @@ export class SmartAccountInvalidSignature extends BaseError {
                 "• Most smart account implementations sign over the userOpHash. Make sure that the userOpHash is correctly computed. Consider leveraging functions like getUserOperationHash.",
                 "• Make sure you have selected the correct chainId and entryPointAddress when computing the userOpHash.",
                 "• Make sure the smart account signature verification function is correctly implemented.",
-                "• If all else fails, investigate why the validateUserOp function rejected the user operation signature using tools like Tenderly.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),

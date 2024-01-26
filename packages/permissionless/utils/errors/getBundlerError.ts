@@ -17,9 +17,11 @@ import {
 } from "../../errors/account"
 import type { UserOperation } from "../../types"
 import {
+    PaymasterDataRejected,
     PaymasterDepositTooLow,
     PaymasterExpiredOrNotDue,
-    PaymasterNotDeployed
+    PaymasterNotDeployed,
+    PaymasterValidationRevertedOrNotEnoughGas
 } from "../../errors/paymaster"
 
 export type GetBundlerErrorParameters = {
@@ -159,6 +161,24 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa32"
+        })
+    }
+
+    if (PaymasterValidationRevertedOrNotEnoughGas.message.test(message)) {
+        return new PaymasterValidationRevertedOrNotEnoughGas({
+            cause: err,
+            paymasterAndData: args.userOperation.paymasterAndData,
+            docsPath:
+                "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa33"
+        })
+    }
+
+    if (PaymasterDataRejected.message.test(message)) {
+        return new PaymasterDataRejected({
+            cause: err,
+            paymasterAndData: args.userOperation.paymasterAndData,
+            docsPath:
+                "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa34"
         })
     }
 

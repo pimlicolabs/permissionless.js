@@ -7,11 +7,31 @@ import {
     SmartAccountDoNotHaveEnoughFunds,
     SmartAccountSignatureExpiredOrNotDue,
     SmartAccountRevertedOrOutOfGasDuringValidation,
+    SmartAccountInvalidSignature,
     SmartAccountNonceInvalid
-} from "./account"
-import { EstimateUserOperationGasError } from "./estimateUserOperationGas"
+} from "./account.js"
+import { EstimateUserOperationGasError } from "./estimateUserOperationGas.js"
 
-import { PaymasterNotDeployed, PaymasterDepositTooLow } from "./paymaster"
+import {
+    PaymasterNotDeployed,
+    PaymasterDepositTooLow,
+    InvalidPaymasterAndData,
+    PaymasterDataRejected,
+    PaymasterExpiredOrNotDue,
+    PaymasterValidationRevertedOrNotEnoughGas
+} from "./paymaster.js"
+
+import {
+    InvalidBeneficiaryAddressSetByBundler,
+    InvalidAggregator
+} from "./bundler.js"
+
+import {
+    VerificationGasLimitNotEnough,
+    FundsLowerThanActualGasCost,
+    GasValuesOverFlow,
+    OutOfGas
+} from "./gas.js"
 
 export {
     SmartAccountAlreadyDeployed,
@@ -25,5 +45,16 @@ export {
     SmartAccountRevertedOrOutOfGasDuringValidation,
     SmartAccountNonceInvalid,
     PaymasterNotDeployed,
-    PaymasterDepositTooLow
+    PaymasterDepositTooLow,
+    SmartAccountInvalidSignature,
+    InvalidBeneficiaryAddressSetByBundler,
+    InvalidAggregator,
+    InvalidPaymasterAndData,
+    PaymasterDataRejected,
+    PaymasterExpiredOrNotDue,
+    PaymasterValidationRevertedOrNotEnoughGas,
+    VerificationGasLimitNotEnough,
+    FundsLowerThanActualGasCost,
+    GasValuesOverFlow,
+    OutOfGas
 }

@@ -1,5 +1,5 @@
 import { BaseError, type Hex } from "viem"
-import { getAddressFromInitCodeOrPaymasterAndData } from "../utils"
+import { getAddressFromInitCodeOrPaymasterAndData } from "../utils/index.js"
 
 export class PaymasterNotDeployed extends BaseError {
     static message = /aa30/
@@ -130,6 +130,100 @@ export class PaymasterValidationRevertedOrNotEnoughGas extends BaseError {
                 "• If you are using your own paymaster contract, verify that the validatePaymasterUserOp function is implemented with the correct logic, and that the user operation is supposed to be valid.",
                 "• If you are using a paymaster service like Pimlico, and the user operation is well formed with a high enough verificationGasLimit, reach out to them.",
                 "• If you are not looking to use a paymaster to cover the gas fees, verify that the paymasterAndData field is not set.",
+                "",
+                docsPath ? `Docs: ${docsPath}` : ""
+            ].join("\n"),
+            {
+                cause
+            }
+        )
+    }
+}
+
+export class PaymasterDataRejected extends BaseError {
+    static message = /aa34/
+    override name = "PaymasterDataRejected"
+    constructor({
+        cause,
+        paymasterAndData,
+        docsPath
+    }: {
+        cause?: BaseError
+        paymasterAndData?: Hex
+        docsPath?: string
+    }) {
+        const paymaster = paymasterAndData
+            ? getAddressFromInitCodeOrPaymasterAndData(paymasterAndData)
+            : "0x"
+
+        super(
+            [
+                `The validatePaymasterUserOp function of the paymaster: ${paymaster} rejected paymasterAndData.`,
+                "",
+                "Possible solutions:",
+                "• If you are using your own paymaster contract, verify that the user operation was correctly signed according to your implementation, and that the paymaster signature was correctly encoded in the paymasterAndData field of the user operation.",
+                "• If you are using a paymaster service like Pimlico, make sure you do not modify any of the fields of the user operation after the paymaster signs over it (except the signature field).",
+                "• If you are using a paymaster service like Pimlico and you have not modified any of the fields except the signature but you are still getting this error, reach out to them.",
+                "",
+                docsPath ? `Docs: ${docsPath}` : ""
+            ].join("\n"),
+            {
+                cause
+            }
+        )
+    }
+}
+
+export class PaymasterPostOpReverted extends BaseError {
+    static message = /aa50/
+    override name = "PaymasterPostOpReverted"
+    constructor({
+        cause,
+        paymasterAndData,
+        docsPath
+    }: {
+        cause?: BaseError
+        paymasterAndData?: Hex
+        docsPath?: string
+    }) {
+        const paymaster = paymasterAndData
+            ? getAddressFromInitCodeOrPaymasterAndData(paymasterAndData)
+            : "0x"
+
+        super(
+            [
+                `The postOp function of the paymaster: ${paymaster} reverted.`,
+                "",
+                "Possible solutions:",
+                "• If you are using your own paymaster contract, verify that that you have correctly implemented the postOp function (if you are using one). If you do not intent to make use of the postOp function, make sure you do not set the context parameter in the paymaster's validatePaymasterUserOp function.",
+                "• If you are using a paymaster service like Pimlico and you see this error, reach out to them.",
+                "",
+                docsPath ? `Docs: ${docsPath}` : ""
+            ].join("\n"),
+            {
+                cause
+            }
+        )
+    }
+}
+
+export class InvalidPaymasterAndData extends BaseError {
+    static message = /aa93/
+    override name = "InvalidPaymasterAndData"
+    constructor({
+        cause,
+        docsPath
+    }: {
+        cause?: BaseError
+        docsPath?: string
+    }) {
+        super(
+            [
+                "The paymasterAndData field of the user operation is invalid.",
+                "",
+                "Possible solutions:",
+                "• Make sure you have either not set a value for the paymasterAndData, or that it is at least 20 bytes long.",
+                "• If you are using a paymaster service like Pimlico, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
