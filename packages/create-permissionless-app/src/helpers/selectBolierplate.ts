@@ -21,118 +21,234 @@ const overwriteFileContent = (sourceFile: string, destinationFile: string) => {
     fs.writeFileSync(destinationFile, content)
 }
 
-// // Use import.meta.url to get the current module file path
-// const __filename = fileURLToPath(import.meta.url);
-// // Use path.dirname to get the directory path
-// const moduleDir = path.dirname(__filename);
+// Use import.meta.url to get the current module file path
+const __filename = fileURLToPath(import.meta.url)
+// Use path.dirname to get the currrent directory path
+const moduleDir = path.dirname(__filename)
 
-// Select common/base files
-const selectCommonBase = (generatedBoilerplateDir: string) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
+const templateExtrasDir = path.resolve(moduleDir, "../../template/extras")
 
-    console.log("templateExtrasDir:", templateExtrasDir)
-    copyFiles(path.join(templateExtrasDir, "base"), generatedBoilerplateDir)
-}
+// Select base files
+// const selectCommonBase = (generatedBoilerplateDir: string) => {
+//   const templateExtrasDir = path.resolve(
+//     generatedBoilerplateDir,
+//     "../template/extras"
+//   );
+
+//   console.log("templateExtrasDir:", templateExtrasDir);
+//   copyFiles(path.join(templateExtrasDir, "base"), generatedBoilerplateDir);
+// };
 
 // Select bundler-specific files
-const selectBundlerFiles = (
+const selectBundlerConfigFile = (
     bundler: string,
     generatedBoilerplateDir: string
 ) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
-    copyFiles(
-        path.join(templateExtrasDir, "bundler", bundler),
-        path.join(generatedBoilerplateDir, "src", "config", "bundlerConfig.ts")
-    )
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "bundler",
+            bundler,
+            "config.ts"
+        )
+        const destinationPath = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "config",
+            "bundlerConfig.ts"
+        )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            copyFiles(sourcePath, destinationPath)
+
+            console.log(`Bundler files copied successfully: ${bundler}`)
+        } else {
+            console.error(`Bundler files not found for: ${bundler}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting bundler files: ${error.message}`)
+    }
 }
 
 // Select paymaster-specific files
-const selectPaymasterFiles = (
+const selectPaymasterConfigFile = (
     paymaster: string,
     generatedBoilerplateDir: string
 ) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
-    copyFiles(
-        path.join(templateExtrasDir, "paymaster", paymaster),
-        path.join(
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "paymaster",
+            paymaster,
+            "config.ts"
+        )
+        const destinationPath = path.join(
             generatedBoilerplateDir,
             "src",
             "config",
             "paymasterConfig.ts"
         )
-    )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            copyFiles(sourcePath, destinationPath)
+
+            console.log(
+                `Paymaster config file copied successfully: ${paymaster}`
+            )
+        } else {
+            console.error(`Paymaster config file not found for: ${paymaster}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting bundler file: ${error.message}`)
+    }
 }
 
 // Select signer-specific files
-const selectSignerFiles = (signer: string, generatedBoilerplateDir: string) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
-    copyFiles(
-        path.join(templateExtrasDir, "signer", signer),
-        path.join(generatedBoilerplateDir, "src", "config", "signerConfig.ts")
-    )
+const selectSignerConfigFile = (
+    signer: string,
+    generatedBoilerplateDir: string
+) => {
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "signer",
+            signer,
+            "config.ts"
+        )
+        const destinationPath = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "config",
+            "signerConfig.ts"
+        )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            copyFiles(sourcePath, destinationPath)
+
+            console.log(`Signer config file copied successfully: ${signer}`)
+        } else {
+            console.error(`Signer config file not found for: ${signer}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting signer config file: ${error.message}`)
+    }
 }
 
 // Select _app.tsx content
 const selectAppFile = (signer: string, generatedBoilerplateDir: string) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
-    overwriteFileContent(
-        path.join(templateExtrasDir, "pages", "_app", `with-${signer}.tsx`),
-        path.join(generatedBoilerplateDir, "src", "pages", "_app.tsx")
-    )
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "pages",
+            "_app",
+            `with-${signer}.tsx`
+        )
+
+        const destinationPath = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "pages",
+            "_app.tsx"
+        )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            overwriteFileContent(sourcePath, destinationPath)
+
+            console.log(`App file overwritten successfully: ${signer}`)
+        } else {
+            console.error(`App file not found for: ${signer}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting App file: ${error.message}`)
+    }
 }
 
 // Select index.tsx content
 const selectIndexFile = (signer: string, generatedBoilerplateDir: string) => {
-    const templateExtrasDir = path.resolve(
-        generatedBoilerplateDir,
-        "../template/extras"
-    )
-    overwriteFileContent(
-        path.join(templateExtrasDir, "pages", "index", `with-${signer}.tsx`),
-        path.join(generatedBoilerplateDir, "src", "pages", "index.tsx")
-    )
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "pages",
+            "index",
+            `with-${signer}.tsx`
+        )
+        const destinationPath = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "pages",
+            "index.tsx"
+        )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            overwriteFileContent(sourcePath, destinationPath)
+
+            console.log(`Index file overwritten successfully: ${signer}`)
+        } else {
+            console.error(`Index file not found for: ${signer}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting Index file: ${error.message}`)
+    }
 }
 
 // Select signer-specific hooks
 const selectSignerHooks = (
     signer: string,
-    accountOption: string,
+    accountSystem: string,
     generatedBoilerplateDir: string
 ) => {
-    if (signer === "privy") {
-        const templateExtrasDir = path.resolve(
-            generatedBoilerplateDir,
-            "../template/extras"
-        )
-        const sourceHookFile = path.join(
-            templateExtrasDir,
-            "signer",
-            signer,
-            "hooks",
-            `usePrivyAuthWith${accountOption}.ts`
-        )
-        const destinationHookFile = path.join(
-            generatedBoilerplateDir,
-            "src",
-            "hooks",
-            "usePrivyAuth.ts"
-        )
-        overwriteFileContent(sourceHookFile, destinationHookFile)
+    try {
+        if (signer === "privy" && accountSystem === "safe") {
+            const sourceHookFile = path.join(
+                templateExtrasDir,
+                "signer",
+                signer,
+                "hooks",
+                `usePrivyAuthWithSafeAccount.ts`
+            )
+
+            const destinationHookFile = path.join(
+                generatedBoilerplateDir,
+                "src",
+                "hooks",
+                "usePrivyAuth.ts"
+            )
+
+            if (fs.existsSync(sourceHookFile)) {
+                // Ensure the destination directory exists before copying
+                fs.ensureDirSync(path.dirname(destinationHookFile))
+
+                overwriteFileContent(sourceHookFile, destinationHookFile)
+
+                console.log(
+                    `Hook file with account option  ${accountSystem} overwritten successfully`
+                )
+            } else {
+                console.error(`Hook file not found for:  ${accountSystem} `)
+            }
+        }
+    } catch (error) {
+        console.error(`Failed to select signer hooks: ${error.message}`)
     }
 }
 
@@ -146,12 +262,11 @@ export const selectBoilerplate = ({
 }: SelectBoilerplateOptions) => {
     try {
         const generatedBoilerplateDir = path.resolve(process.cwd(), projectDir)
-        console.log("generatedBoilerplateDir:", generatedBoilerplateDir)
 
-        selectCommonBase(generatedBoilerplateDir)
-        selectBundlerFiles(bundler, generatedBoilerplateDir)
-        selectPaymasterFiles(paymaster, generatedBoilerplateDir)
-        selectSignerFiles(signer, generatedBoilerplateDir)
+        // selectCommonBase(generatedBoilerplateDir);
+        selectBundlerConfigFile(bundler, generatedBoilerplateDir)
+        selectPaymasterConfigFile(paymaster, generatedBoilerplateDir)
+        selectSignerConfigFile(signer, generatedBoilerplateDir)
         selectAppFile(signer, generatedBoilerplateDir)
         selectIndexFile(signer, generatedBoilerplateDir)
         selectSignerHooks(signer, accountSystem, generatedBoilerplateDir)
@@ -159,6 +274,5 @@ export const selectBoilerplate = ({
         console.log("Boilerplate selection successful!")
     } catch (error) {
         console.error("Boilerplate selection failed:", error.message)
-        // You may choose to throw the error or handle it as appropriate for your application.
     }
 }
