@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.31
+
+### Patch Changes
+
+- 3917ad1acfb6ac7f45da7f74e277a22bcf24231b: fix isSmartAccountDeployed
+
 ## 0.0.30
 
 ### Patch Changes

@@ -9,7 +9,7 @@ import {
     type GetUserOperationHashParams,
     getUserOperationHash
 } from "./getUserOperationHash.js"
-import { isSmartAccountDeployed } from "./isSmartAccountDeployed"
+import { isSmartAccountDeployed } from "./isSmartAccountDeployed.js"
 import {
     AccountOrClientNotFoundError,
     type SignUserOperationHashWithECDSAParams,
