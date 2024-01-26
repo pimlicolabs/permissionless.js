@@ -4,8 +4,7 @@ import {
     type Address,
     type Chain,
     type Client,
-    type Transport,
-    UnknownNodeError
+    type Transport
 } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
@@ -13,7 +12,6 @@ import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
-import { EstimateUserOperationGasExecutionError } from "../../errors/EstimateGasExecutionError.js"
 import { getEstimateUserOperationGasError } from "../../utils/errors/getEstimateUserOperationGasError.js"
 
 export type EstimateUserOperationGasParameters = {
@@ -89,18 +87,9 @@ export const estimateUserOperationGas = async <
             callGasLimit: BigInt(response.callGasLimit || 0)
         }
     } catch (err) {
-        console.log(err)
-        const cause = (() => {
-            const cause = getEstimateUserOperationGasError(
-                err as BaseError,
-                args as EstimateUserOperationGasParameters
-            )
-            if (cause instanceof UnknownNodeError) return err as BaseError
-            return cause
-        })()
-
-        throw new EstimateUserOperationGasExecutionError(cause, {
-            ...args
-        })
+        throw getEstimateUserOperationGasError(
+            err as BaseError,
+            args as EstimateUserOperationGasParameters
+        )
     }
 }

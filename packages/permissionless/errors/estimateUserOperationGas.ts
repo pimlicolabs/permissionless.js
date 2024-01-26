@@ -2,14 +2,14 @@ import { BaseError } from "viem"
 import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas"
 import { prettyPrint } from "./utils"
 
-export type EstimateUserOperationGasExecutionErrorType =
-    EstimateUserOperationGasExecutionError & {
-        name: "EstimateUserOperationGasExecutionError"
+export type EstimateUserOperationGasErrorType =
+    EstimateUserOperationGasError & {
+        name: "EstimateUserOperationGasError"
     }
-export class EstimateUserOperationGasExecutionError extends BaseError {
+export class EstimateUserOperationGasError extends BaseError {
     override cause: BaseError
 
-    override name = "EstimateUserOperationGasExecutionError"
+    override name = "EstimateUserOperationGasError"
 
     constructor(
         cause: BaseError,

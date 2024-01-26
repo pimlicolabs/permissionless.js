@@ -16,6 +16,7 @@ import {
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
 import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
+import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
@@ -35,5 +36,6 @@ export {
     signUserOperationHashWithECDSA,
     type SignUserOperationHashWithECDSAParams,
     AccountOrClientNotFoundError,
-    isSmartAccountDeployed
+    isSmartAccountDeployed,
+    getAddressFromInitCodeOrPaymasterAndData
 }

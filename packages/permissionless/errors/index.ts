@@ -1,4 +1,29 @@
-import { SmartAccountAlreadyDeployed } from "./account"
-import { EstimateUserOperationGasExecutionError } from "./EstimateGasExecutionError"
+import {
+    SmartAccountAlreadyDeployed,
+    InitCodeFailedOrOutOfGas,
+    InitCodeReturnedDifferentSmartAccountAddress,
+    InitCodeDidNotDeploySender,
+    SmartAccountNotDeployed,
+    SmartAccountDoNotHaveEnoughFunds,
+    SmartAccountSignatureExpiredOrNotDue,
+    SmartAccountRevertedOrOutOfGasDuringValidation,
+    SmartAccountNonceInvalid
+} from "./account"
+import { EstimateUserOperationGasError } from "./estimateUserOperationGas"
 
-export { SmartAccountAlreadyDeployed, EstimateUserOperationGasExecutionError }
+import { PaymasterNotDeployed, PaymasterDepositTooLow } from "./paymaster"
+
+export {
+    SmartAccountAlreadyDeployed,
+    EstimateUserOperationGasError,
+    InitCodeFailedOrOutOfGas,
+    InitCodeReturnedDifferentSmartAccountAddress,
+    InitCodeDidNotDeploySender,
+    SmartAccountNotDeployed,
+    SmartAccountDoNotHaveEnoughFunds,
+    SmartAccountSignatureExpiredOrNotDue,
+    SmartAccountRevertedOrOutOfGasDuringValidation,
+    SmartAccountNonceInvalid,
+    PaymasterNotDeployed,
+    PaymasterDepositTooLow
+}
