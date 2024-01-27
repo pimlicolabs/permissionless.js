@@ -1,6 +1,6 @@
-import type { ExecaChildProcess } from "execa"
-import { Writable } from "node:stream"
 import { EventEmitter } from "node:events"
+import { Writable } from "node:stream"
+import type { ExecaChildProcess } from "execa"
 
 export type CreateAltoOptions = {
     port?: number

@@ -1,7 +1,7 @@
 import {
-    BaseError,
     type Account,
     type Address,
+    BaseError,
     type Chain,
     type Client,
     type Transport
