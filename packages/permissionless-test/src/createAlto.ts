@@ -264,7 +264,7 @@ export function createAlto(options: CreateAltoOptions = {}): Alto {
     return {
         start,
         stop,
-        // rome-ignore lint/suspicious/noExplicitAny: typed via the return type
+        // biome-ignore lint/suspicious/noExplicitAny: typed via the return type
         on: (event: string, listener: any) => {
             emitter.on(event, listener)
 
