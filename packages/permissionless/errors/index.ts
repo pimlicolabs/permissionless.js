@@ -5,7 +5,7 @@ import {
     InitCodeDidNotDeploySenderError,
     SenderNotDeployedError,
     SmartAccountInsufficientFundsError,
-    SenderSignatureExpiredOrNotDue,
+    SmartAccountSignatureValidityPeriodError,
     SmartAccountValidationRevertedError,
     InvalidSmartAccountSignatureError,
     InvalidSmartAccountNonceError
@@ -42,7 +42,7 @@ export {
     InitCodeDidNotDeploySenderError,
     SenderNotDeployedError,
     SmartAccountInsufficientFundsError,
-    SenderSignatureExpiredOrNotDue,
+    SmartAccountSignatureValidityPeriodError,
     SmartAccountValidationRevertedError,
     InvalidSmartAccountNonceError,
     PaymasterNotDeployedError,

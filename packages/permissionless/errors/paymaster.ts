@@ -19,7 +19,7 @@ export class PaymasterNotDeployedError extends BaseError {
 
         super(
             [
-                `Paymaster: ${paymaster} is not deployed.`,
+                `Paymaster ${paymaster} is not deployed.`,
                 "",
                 "Possible solutions:",
                 "• Verify that the paymasterAndData field is correct, and that the first 20 bytes are the address of the paymaster contract you intend to use.",
@@ -52,7 +52,7 @@ export class PaymasterDepositTooLowError extends BaseError {
 
         super(
             [
-                `Paymaster: ${paymaster} contract does not have enough funds deposited into the EntryPoint contract to cover the required funds for the user operation.`,
+                `Paymaster ${paymaster} contract does not have enough funds deposited into the EntryPoint contract to cover the required funds for the user operation.`,
                 "",
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, deposit more funds into the EntryPoint contract through the deposit() function of the paymaster contract.",
@@ -86,7 +86,7 @@ export class PaymasterValidityPeriodError extends BaseError {
 
         super(
             [
-                `Paymaster: ${paymaster}'s data used in the paymasterAndData field of the user operation is not valid, because it is outside of the time range it specified.`,
+                `Paymaster ${paymaster}'s data used in the paymasterAndData field of the user operation is not valid, because it is outside of the time range it specified.`,
                 "",
                 "Possible reasons:",
                 "• This error occurs when the block.timestamp falls after the validUntil timestamp, or before the validAfter timestamp.",
@@ -123,7 +123,7 @@ export class PaymasterValidationRevertedError extends BaseError {
 
         super(
             [
-                `The validatePaymasterUserOp function of the paymaster: ${paymaster} either reverted or ran out of gas.`,
+                `The validatePaymasterUserOp function of the paymaster ${paymaster} either reverted or ran out of gas.`,
                 "",
                 "Possible solutions:",
                 "• Verify that the verificationGasLimit is high enough to cover the validatePaymasterUserOp function's gas costs.",
@@ -158,7 +158,7 @@ export class PaymasterDataRejectedError extends BaseError {
 
         super(
             [
-                `The validatePaymasterUserOp function of the paymaster: ${paymaster} rejected paymasterAndData.`,
+                `The validatePaymasterUserOp function of the paymaster ${paymaster} rejected paymasterAndData.`,
                 "",
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, verify that the user operation was correctly signed according to your implementation, and that the paymaster signature was correctly encoded in the paymasterAndData field of the user operation.",
@@ -192,7 +192,7 @@ export class PaymasterPostOpRevertedError extends BaseError {
 
         super(
             [
-                `The postOp function of the paymaster: ${paymaster} reverted.`,
+                `The postOp function of the paymaster ${paymaster} reverted.`,
                 "",
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, verify that that you have correctly implemented the postOp function (if you are using one). If you do not intent to make use of the postOp function, make sure you do not set the context parameter in the paymaster's validatePaymasterUserOp function.",

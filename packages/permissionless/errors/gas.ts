@@ -14,7 +14,7 @@ export class VerificationGasLimitTooLowError extends BaseError {
     }) {
         super(
             [
-                `Smart account and paymaster verification exceeded the verificationGasLimit ${verificationGasLimit} set for the user operation.`,
+                `The smart account and paymaster verification exceeded the verificationGasLimit ${verificationGasLimit} set for the user operation.`,
                 "",
                 "Possible solutions:",
                 "• Verify that the verificationGasLimit set for the user operation is high enough to cover the gas used during smart account and paymaster verification.",

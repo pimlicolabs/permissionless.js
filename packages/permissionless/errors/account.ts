@@ -67,7 +67,7 @@ export class SenderAddressMismatchError extends BaseError {
     }) {
         super(
             [
-                "Init code returned a different smart account address than expected.",
+                "The initCode returned a different smart account address than expected.",
                 `Expected: ${sender}`,
                 "",
                 "Possible reasons:",
@@ -101,7 +101,7 @@ export class InitCodeDidNotDeploySenderError extends BaseError {
     }) {
         super(
             [
-                `Init code did not deploy the sender at the address ${sender}.`,
+                `The initCode did not deploy the sender at the address ${sender}.`,
                 "",
                 "Possible reasons:",
                 "• The initCode factory is not creating an account.",
@@ -166,10 +166,10 @@ export class SmartAccountInsufficientFundsError extends BaseError {
     }) {
         super(
             [
-                `You are not using a paymaster, but the ${sender} address did not have enough native tokens to cover the gas costs associated with the user operation.`,
+                `You are not using a paymaster, and the ${sender} address did not have enough native tokens to cover the gas costs associated with the user operation.`,
                 "",
                 "Possible solutions:",
-                "• If you are not using a paymaster, verify that the sender address has enough native tokens to cover the required pre-fund. Consider leveraging functions like getRequiredPrefund.",
+                "• If you are not using a paymaster, verify that the sender address has enough native tokens to cover the required prefund. Consider leveraging functions like getRequiredPrefund.",
                 "• If you are looking to use a paymaster to cover the gas fees, verify that the paymasterAndData field is set.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
@@ -181,9 +181,9 @@ export class SmartAccountInsufficientFundsError extends BaseError {
     }
 }
 
-export class SenderSignatureExpiredOrNotDue extends BaseError {
+export class SmartAccountSignatureValidityPeriodError extends BaseError {
     static message = /aa22/
-    override name = "SenderSignatureExpiredOrNotDue"
+    override name = "SmartAccountSignatureValidityPeriodError"
     constructor({
         cause,
         docsPath

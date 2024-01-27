@@ -13,7 +13,7 @@ import {
     InvalidSmartAccountNonceError,
     SenderNotDeployedError,
     SmartAccountValidationRevertedError,
-    SenderSignatureExpiredOrNotDue
+    SmartAccountSignatureValidityPeriodError
 } from "../../errors/account"
 import type { UserOperation } from "../../types"
 import {
@@ -110,8 +110,8 @@ export function getBundlerError(
         })
     }
 
-    if (SenderSignatureExpiredOrNotDue.message.test(message)) {
-        return new SenderSignatureExpiredOrNotDue({
+    if (SmartAccountSignatureValidityPeriodError.message.test(message)) {
+        return new SmartAccountSignatureValidityPeriodError({
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa22"
