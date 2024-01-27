@@ -16,7 +16,7 @@ import {
 } from "./estimateUserOperationGas.js"
 import {
     SendUserOperationError,
-    SendUserOperationErrorType
+    type SendUserOperationErrorType
 } from "./sendUserOperation.js"
 
 import {
@@ -67,6 +67,6 @@ export {
     BundlerOutOfGasError,
     PaymasterPostOpRevertedError,
     SendUserOperationError,
-    EstimateUserOperationGasErrorType,
-    SendUserOperationErrorType
+    type EstimateUserOperationGasErrorType,
+    type SendUserOperationErrorType
 }
