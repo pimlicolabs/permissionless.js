@@ -6,7 +6,7 @@ import {
     getAccountNonce
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
-import { Address, parseEther, type Hash } from "viem"
+import { Address, type Hash, parseEther } from "viem"
 import {
     beforeAll,
     beforeEach,

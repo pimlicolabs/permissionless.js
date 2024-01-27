@@ -1,4 +1,15 @@
 import dotenv from "dotenv"
+import {
+    EstimateUserOperationGasError,
+    InitCodeRevertedError,
+    InvalidSmartAccountNonceError,
+    PaymasterDepositTooLowError,
+    PaymasterNotDeployedError,
+    SenderAddressMismatchError,
+    SenderAlreadyDeployedError,
+    SenderNotDeployedError,
+    SmartAccountInsufficientFundsError
+} from "permissionless/errors"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
 import {
@@ -7,17 +18,6 @@ import {
     getEoaWalletClient,
     getFactoryAddress
 } from "../utils"
-import {
-    EstimateUserOperationGasError,
-    InitCodeRevertedError,
-    SenderAlreadyDeployedError,
-    InvalidSmartAccountNonceError,
-    SenderNotDeployedError,
-    SenderAddressMismatchError,
-    SmartAccountInsufficientFundsError,
-    PaymasterNotDeployedError,
-    PaymasterDepositTooLowError
-} from "permissionless/errors"
 
 dotenv.config()
 

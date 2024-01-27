@@ -1,6 +1,7 @@
 import type { Account, Address } from "viem"
 import { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
 import { getAction } from "./getAction.js"
+import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
 import {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
@@ -16,7 +17,6 @@ import {
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
 import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
-import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
