@@ -4,7 +4,7 @@ import {
     type GetBundlerErrorParameters,
     getBundlerError
 } from "./getBundlerError"
-import { SendUserOperationParameters } from "../../actions/bundler/sendUserOperation"
+import type { SendUserOperationParameters } from "../../actions/bundler/sendUserOperation"
 
 export function getSendUserOperationError(
     err: BaseError,

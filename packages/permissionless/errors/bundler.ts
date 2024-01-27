@@ -1,8 +1,8 @@
 import { BaseError } from "viem"
 
-export class InvalidBeneficiaryAddress extends BaseError {
+export class InvalidBeneficiaryAddressError extends BaseError {
     static message = /aa9[01]/
-    override name = "InvalidBeneficiaryAddress"
+    override name = "InvalidBeneficiaryAddressError"
     constructor({
         cause,
         docsPath
@@ -27,9 +27,9 @@ export class InvalidBeneficiaryAddress extends BaseError {
     }
 }
 
-export class InvalidAggregator extends BaseError {
+export class InvalidAggregatorError extends BaseError {
     static message = /aa96/
-    override name = "InvalidAggregator"
+    override name = "InvalidAggregatorError"
     constructor({
         cause,
         docsPath

@@ -15,7 +15,6 @@ import type {
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
-import { EstimateUserOperationGasParameters } from "./estimateUserOperationGas.js"
 import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError.js"
 
 export type SendUserOperationParameters = {

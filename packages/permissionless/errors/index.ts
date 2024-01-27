@@ -1,57 +1,62 @@
 import {
-    SmartAccountAlreadyDeployed,
-    InitCodeFailedOrOutOfGas,
-    InitCodeReturnedDifferentSmartAccountAddress,
-    InitCodeDidNotDeploySender,
-    SmartAccountNotDeployed,
-    SmartAccountDoNotHaveEnoughFunds,
-    SmartAccountSignatureExpiredOrNotDue,
-    SmartAccountRevertedOrOutOfGasDuringValidation,
-    SmartAccountInvalidSignature,
-    SmartAccountNonceInvalid
+    SenderAlreadyDeployedError,
+    InitCodeRevertedError,
+    SenderAddressMismatchError,
+    InitCodeDidNotDeploySenderError,
+    SenderNotDeployedError,
+    SmartAccountInsufficientFundsError,
+    SenderSignatureExpiredOrNotDue,
+    SmartAccountValidationRevertedError,
+    InvalidSmartAccountSignatureError,
+    InvalidSmartAccountNonceError
 } from "./account.js"
 import { EstimateUserOperationGasError } from "./estimateUserOperationGas.js"
 
 import {
-    PaymasterNotDeployed,
-    PaymasterDepositTooLow,
-    InvalidPaymasterAndData,
-    PaymasterDataRejected,
-    PaymasterExpiredOrNotDue,
-    PaymasterValidationRevertedOrOutOfGas
+    PaymasterNotDeployedError,
+    PaymasterDepositTooLowError,
+    InvalidPaymasterAndDataError,
+    PaymasterDataRejectedError,
+    PaymasterValidityPeriodError,
+    PaymasterValidationRevertedError,
+    PaymasterPostOpRevertedError
 } from "./paymaster.js"
 
-import { InvalidBeneficiaryAddress, InvalidAggregator } from "./bundler.js"
+import {
+    InvalidBeneficiaryAddressError,
+    InvalidAggregatorError
+} from "./bundler.js"
 
 import {
-    VerificationGasLimitNotEnough,
-    FundsLowerThanActualGasCost,
-    GasValuesOverFlow,
-    OutOfGas
+    VerificationGasLimitTooLowError,
+    ActualGasCostTooHighError,
+    GasValuesOverflowError,
+    BundlerOutOfGasError
 } from "./gas.js"
 
 export {
-    SmartAccountAlreadyDeployed,
+    SenderAlreadyDeployedError,
     EstimateUserOperationGasError,
-    InitCodeFailedOrOutOfGas,
-    InitCodeReturnedDifferentSmartAccountAddress,
-    InitCodeDidNotDeploySender,
-    SmartAccountNotDeployed,
-    SmartAccountDoNotHaveEnoughFunds,
-    SmartAccountSignatureExpiredOrNotDue,
-    SmartAccountRevertedOrOutOfGasDuringValidation,
-    SmartAccountNonceInvalid,
-    PaymasterNotDeployed,
-    PaymasterDepositTooLow,
-    SmartAccountInvalidSignature,
-    InvalidBeneficiaryAddress,
-    InvalidAggregator,
-    InvalidPaymasterAndData,
-    PaymasterDataRejected,
-    PaymasterExpiredOrNotDue,
-    PaymasterValidationRevertedOrOutOfGas,
-    VerificationGasLimitNotEnough,
-    FundsLowerThanActualGasCost,
-    GasValuesOverFlow,
-    OutOfGas
+    InitCodeRevertedError,
+    SenderAddressMismatchError,
+    InitCodeDidNotDeploySenderError,
+    SenderNotDeployedError,
+    SmartAccountInsufficientFundsError,
+    SenderSignatureExpiredOrNotDue,
+    SmartAccountValidationRevertedError,
+    InvalidSmartAccountNonceError,
+    PaymasterNotDeployedError,
+    PaymasterDepositTooLowError,
+    InvalidSmartAccountSignatureError,
+    InvalidBeneficiaryAddressError,
+    InvalidAggregatorError,
+    InvalidPaymasterAndDataError,
+    PaymasterDataRejectedError,
+    PaymasterValidityPeriodError,
+    PaymasterValidationRevertedError,
+    VerificationGasLimitTooLowError,
+    ActualGasCostTooHighError,
+    GasValuesOverflowError,
+    BundlerOutOfGasError,
+    PaymasterPostOpRevertedError
 }

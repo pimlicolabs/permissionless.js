@@ -1,8 +1,8 @@
 import { BaseError } from "viem"
 
-export class VerificationGasLimitNotEnough extends BaseError {
+export class VerificationGasLimitTooLowError extends BaseError {
     static message = /aa4[01]/
-    override name = "VerificationGasLimitNotEnough"
+    override name = "VerificationGasLimitTooLowError"
     constructor({
         cause,
         verificationGasLimit,
@@ -29,9 +29,9 @@ export class VerificationGasLimitNotEnough extends BaseError {
     }
 }
 
-export class FundsLowerThanActualGasCost extends BaseError {
+export class ActualGasCostTooHighError extends BaseError {
     static message = /aa51/
-    override name = "FundsLowerThanActualGasCost"
+    override name = "ActualGasCostTooHighError"
     constructor({
         cause,
         docsPath
@@ -56,9 +56,9 @@ export class FundsLowerThanActualGasCost extends BaseError {
     }
 }
 
-export class GasValuesOverFlow extends BaseError {
+export class GasValuesOverflowError extends BaseError {
     static message = /aa94/
-    override name = "GasValuesOverFlow"
+    override name = "GasValuesOverflowError"
     constructor({
         cause,
         docsPath
@@ -79,9 +79,9 @@ export class GasValuesOverFlow extends BaseError {
     }
 }
 
-export class OutOfGas extends BaseError {
+export class BundlerOutOfGasError extends BaseError {
     static message = /aa95/
-    override name = "OutOfGas"
+    override name = "BundlerOutOfGasError"
     constructor({
         cause,
         docsPath

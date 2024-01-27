@@ -1,8 +1,8 @@
 import { type Address, BaseError } from "viem"
 
-export class SmartAccountAlreadyDeployed extends BaseError {
+export class SenderAlreadyDeployedError extends BaseError {
     static message = /aa10/
-    override name = "SmartAccountAlreadyDeployed"
+    override name = "SenderAlreadyDeployedError"
     constructor({
         cause,
         sender,
@@ -24,9 +24,9 @@ export class SmartAccountAlreadyDeployed extends BaseError {
     }
 }
 
-export class InitCodeFailedOrOutOfGas extends BaseError {
+export class InitCodeRevertedError extends BaseError {
     static message = /aa13/
-    override name = "InitCodeFailedOrOutOfGas"
+    override name = "InitCodeRevertedError"
     constructor({
         cause,
         docsPath
@@ -53,9 +53,9 @@ export class InitCodeFailedOrOutOfGas extends BaseError {
     }
 }
 
-export class InitCodeReturnedDifferentSmartAccountAddress extends BaseError {
+export class SenderAddressMismatchError extends BaseError {
     static message = /aa14/
-    override name = "InitCodeReturnedDifferentSmartAccountAddress"
+    override name = "SenderAddressMismatchError"
     constructor({
         cause,
         sender,
@@ -87,9 +87,9 @@ export class InitCodeReturnedDifferentSmartAccountAddress extends BaseError {
     }
 }
 
-export class InitCodeDidNotDeploySender extends BaseError {
+export class InitCodeDidNotDeploySenderError extends BaseError {
     static message = /aa15/
-    override name = "InitCodeDidNotDeploySender"
+    override name = "InitCodeDidNotDeploySenderError"
     constructor({
         cause,
         sender,
@@ -120,9 +120,9 @@ export class InitCodeDidNotDeploySender extends BaseError {
     }
 }
 
-export class SmartAccountNotDeployed extends BaseError {
+export class SenderNotDeployedError extends BaseError {
     static message = /aa20/
-    override name = "SmartAccountNotDeployed"
+    override name = "SenderNotDeployedError"
     constructor({
         cause,
         sender,
@@ -152,9 +152,9 @@ export class SmartAccountNotDeployed extends BaseError {
     }
 }
 
-export class SmartAccountDoNotHaveEnoughFunds extends BaseError {
+export class SmartAccountInsufficientFundsError extends BaseError {
     static message = /aa21/
-    override name = "SmartAccountDoNotHaveEnoughFunds"
+    override name = "SmartAccountInsufficientFundsError"
     constructor({
         cause,
         sender,
@@ -181,9 +181,9 @@ export class SmartAccountDoNotHaveEnoughFunds extends BaseError {
     }
 }
 
-export class SmartAccountSignatureExpiredOrNotDue extends BaseError {
-    static message = /aa21/
-    override name = "SmartAccountDoNotHaveEnoughFunds"
+export class SenderSignatureExpiredOrNotDue extends BaseError {
+    static message = /aa22/
+    override name = "SenderSignatureExpiredOrNotDue"
     constructor({
         cause,
         docsPath
@@ -211,9 +211,9 @@ export class SmartAccountSignatureExpiredOrNotDue extends BaseError {
     }
 }
 
-export class SmartAccountRevertedOrOutOfGasDuringValidation extends BaseError {
+export class SmartAccountValidationRevertedError extends BaseError {
     static message = /aa23/
-    override name = "SmartAccountRevertedOrOutOfGasDuringValidation"
+    override name = "SmartAccountValidationRevertedError"
     constructor({
         cause,
         sender,
@@ -242,9 +242,9 @@ export class SmartAccountRevertedOrOutOfGasDuringValidation extends BaseError {
     }
 }
 
-export class SmartAccountInvalidSignature extends BaseError {
+export class InvalidSmartAccountSignatureError extends BaseError {
     static message = /aa24/
-    override name = "SmartAccountInvalidSignature"
+    override name = "InvalidSmartAccountSignatureError"
     constructor({
         cause,
         sender,
@@ -273,9 +273,9 @@ export class SmartAccountInvalidSignature extends BaseError {
     }
 }
 
-export class SmartAccountNonceInvalid extends BaseError {
+export class InvalidSmartAccountNonceError extends BaseError {
     static message = /aa25/
-    override name = "SmartAccountNonceInvalid"
+    override name = "InvalidSmartAccountNonceError"
     constructor({
         cause,
         sender,

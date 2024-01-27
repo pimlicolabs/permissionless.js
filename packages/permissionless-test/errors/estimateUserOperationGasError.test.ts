@@ -9,15 +9,14 @@ import {
 } from "../utils"
 import {
     EstimateUserOperationGasError,
-    InitCodeDidNotDeploySender,
-    InitCodeFailedOrOutOfGas,
-    SmartAccountAlreadyDeployed,
-    SmartAccountNonceInvalid,
-    SmartAccountNotDeployed,
-    InitCodeReturnedDifferentSmartAccountAddress,
-    SmartAccountDoNotHaveEnoughFunds,
-    PaymasterNotDeployed,
-    PaymasterDepositTooLow
+    InitCodeRevertedError,
+    SenderAlreadyDeployedError,
+    InvalidSmartAccountNonceError,
+    SenderNotDeployedError,
+    SenderAddressMismatchError,
+    SmartAccountInsufficientFundsError,
+    PaymasterNotDeployedError,
+    PaymasterDepositTooLowError
 } from "permissionless/errors"
 
 dotenv.config()
@@ -38,7 +37,7 @@ beforeAll(() => {
 })
 
 describe("estimateUserOperationGasError", async () => {
-    test.skip("SenderAlreadyDeployed", async () => {
+    test("SenderAlreadyDeployedError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 0n
@@ -65,10 +64,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(SmartAccountAlreadyDeployed)
+        }).rejects.toBeInstanceOf(SenderAlreadyDeployedError)
     })
 
-    test.skip("InitCodeFailedOrOutOfGas", async () => {
+    test("InitCodeRevertedError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 1n
@@ -92,10 +91,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(InitCodeFailedOrOutOfGas)
+        }).rejects.toBeInstanceOf(InitCodeRevertedError)
     })
 
-    test.skip("InitCodeReturnedDifferentSmartAccountAddress", async () => {
+    test("SenderAddressMismatchError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 2n
@@ -119,10 +118,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(InitCodeReturnedDifferentSmartAccountAddress)
+        }).rejects.toBeInstanceOf(SenderAddressMismatchError)
     })
 
-    test.skip("InitCodeDidNotDeploySender", async () => {
+    test("InitCodeDidNotDeploySenderError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 2n
@@ -149,10 +148,10 @@ describe("estimateUserOperationGasError", async () => {
         //         throw estimationError.cause
         //     }
         //     throw new Error("Should have thrown")
-        // }).rejects.toBeInstanceOf(InitCodeDidNotDeploySender)
+        // }).rejects.toBeInstanceOf(InitCodeDidNotDeploySenderError)
     })
 
-    test.skip("SmartAccountNotDeployed", async () => {
+    test("SenderNotDeployedError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 2n
@@ -175,10 +174,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(SmartAccountNotDeployed)
+        }).rejects.toBeInstanceOf(SenderNotDeployedError)
     })
 
-    test.skip("SmartAccountDoNotHaveEnoughFunds", async () => {
+    test("SmartAccountInsufficientFundsError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 0n
@@ -206,10 +205,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(SmartAccountDoNotHaveEnoughFunds)
+        }).rejects.toBeInstanceOf(SmartAccountInsufficientFundsError)
     })
 
-    test.skip("SmartAccountNonceInvalid", async () => {
+    test("InvalidSmartAccountNonceError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 0n
@@ -232,10 +231,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(SmartAccountNonceInvalid)
+        }).rejects.toBeInstanceOf(InvalidSmartAccountNonceError)
     })
 
-    test("PaymasterNotDeployed", async () => {
+    test("PaymasterNotDeployedError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 0n
@@ -259,10 +258,10 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(PaymasterNotDeployed)
+        }).rejects.toBeInstanceOf(PaymasterNotDeployedError)
     })
 
-    test("PaymasterDepositTooLow", async () => {
+    test("PaymasterDepositTooLowError", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const index = 0n
@@ -286,6 +285,6 @@ describe("estimateUserOperationGasError", async () => {
                 throw estimationError.cause
             }
             throw new Error("Should have thrown")
-        }).rejects.toBeInstanceOf(PaymasterDepositTooLow)
+        }).rejects.toBeInstanceOf(PaymasterDepositTooLowError)
     })
 })

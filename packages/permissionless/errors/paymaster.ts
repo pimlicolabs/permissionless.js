@@ -1,9 +1,9 @@
 import { BaseError, type Hex } from "viem"
 import { getAddressFromInitCodeOrPaymasterAndData } from "../utils/index.js"
 
-export class PaymasterNotDeployed extends BaseError {
+export class PaymasterNotDeployedError extends BaseError {
     static message = /aa30/
-    override name = "PaymasterNotDeployed"
+    override name = "PaymasterNotDeployedError"
     constructor({
         cause,
         paymasterAndData,
@@ -34,9 +34,9 @@ export class PaymasterNotDeployed extends BaseError {
     }
 }
 
-export class PaymasterDepositTooLow extends BaseError {
+export class PaymasterDepositTooLowError extends BaseError {
     static message = /aa31/
-    override name = "PaymasterDepositTooLow"
+    override name = "PaymasterDepositTooLowError"
     constructor({
         cause,
         paymasterAndData,
@@ -68,9 +68,9 @@ export class PaymasterDepositTooLow extends BaseError {
     }
 }
 
-export class PaymasterExpiredOrNotDue extends BaseError {
+export class PaymasterValidityPeriodError extends BaseError {
     static message = /aa32/
-    override name = "PaymasterExpiredOrNotDue"
+    override name = "PaymasterValidityPeriodError"
     constructor({
         cause,
         paymasterAndData,
@@ -105,9 +105,9 @@ export class PaymasterExpiredOrNotDue extends BaseError {
     }
 }
 
-export class PaymasterValidationRevertedOrOutOfGas extends BaseError {
+export class PaymasterValidationRevertedError extends BaseError {
     static message = /aa33/
-    override name = "PaymasterValidationRevertedOrOutOfGas"
+    override name = "PaymasterValidationRevertedError"
     constructor({
         cause,
         paymasterAndData,
@@ -140,9 +140,9 @@ export class PaymasterValidationRevertedOrOutOfGas extends BaseError {
     }
 }
 
-export class PaymasterDataRejected extends BaseError {
+export class PaymasterDataRejectedError extends BaseError {
     static message = /aa34/
-    override name = "PaymasterDataRejected"
+    override name = "PaymasterDataRejectedError"
     constructor({
         cause,
         paymasterAndData,
@@ -174,9 +174,9 @@ export class PaymasterDataRejected extends BaseError {
     }
 }
 
-export class PaymasterPostOpReverted extends BaseError {
+export class PaymasterPostOpRevertedError extends BaseError {
     static message = /aa50/
-    override name = "PaymasterPostOpReverted"
+    override name = "PaymasterPostOpRevertedError"
     constructor({
         cause,
         paymasterAndData,
@@ -207,9 +207,9 @@ export class PaymasterPostOpReverted extends BaseError {
     }
 }
 
-export class InvalidPaymasterAndData extends BaseError {
+export class InvalidPaymasterAndDataError extends BaseError {
     static message = /aa93/
-    override name = "InvalidPaymasterAndData"
+    override name = "InvalidPaymasterAndDataError"
     constructor({
         cause,
         docsPath

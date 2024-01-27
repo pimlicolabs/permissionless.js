@@ -4,24 +4,24 @@ import {
     BaseError,
     ExecutionRevertedError
 } from "viem"
-import { SmartAccountAlreadyDeployed } from "../../errors"
+import { SenderAlreadyDeployedError } from "../../errors"
 import {
-    InitCodeDidNotDeploySender,
-    InitCodeFailedOrOutOfGas,
-    InitCodeReturnedDifferentSmartAccountAddress,
-    SmartAccountDoNotHaveEnoughFunds,
-    SmartAccountNonceInvalid,
-    SmartAccountNotDeployed,
-    SmartAccountRevertedOrOutOfGasDuringValidation,
-    SmartAccountSignatureExpiredOrNotDue
+    InitCodeDidNotDeploySenderError,
+    InitCodeRevertedError,
+    SenderAddressMismatchError,
+    SmartAccountInsufficientFundsError,
+    InvalidSmartAccountNonceError,
+    SenderNotDeployedError,
+    SmartAccountValidationRevertedError,
+    SenderSignatureExpiredOrNotDue
 } from "../../errors/account"
 import type { UserOperation } from "../../types"
 import {
-    PaymasterDataRejected,
-    PaymasterDepositTooLow,
-    PaymasterExpiredOrNotDue,
-    PaymasterNotDeployed,
-    PaymasterValidationRevertedOrOutOfGas
+    PaymasterDataRejectedError,
+    PaymasterDepositTooLowError,
+    PaymasterValidityPeriodError,
+    PaymasterNotDeployedError,
+    PaymasterValidationRevertedError
 } from "../../errors/paymaster"
 
 export type GetBundlerErrorParameters = {
@@ -57,8 +57,8 @@ export function getBundlerError(
     if (args.userOperation.nonce === undefined)
         return new UnknownNodeError({ cause: err })
 
-    if (SmartAccountAlreadyDeployed.message.test(message)) {
-        return new SmartAccountAlreadyDeployed({
+    if (SenderAlreadyDeployedError.message.test(message)) {
+        return new SenderAlreadyDeployedError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -66,16 +66,16 @@ export function getBundlerError(
         })
     }
 
-    if (InitCodeFailedOrOutOfGas.message.test(message)) {
-        return new InitCodeFailedOrOutOfGas({
+    if (InitCodeRevertedError.message.test(message)) {
+        return new InitCodeRevertedError({
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa13"
         })
     }
 
-    if (InitCodeReturnedDifferentSmartAccountAddress.message.test(message)) {
-        return new InitCodeReturnedDifferentSmartAccountAddress({
+    if (SenderAddressMismatchError.message.test(message)) {
+        return new SenderAddressMismatchError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -83,8 +83,8 @@ export function getBundlerError(
         })
     }
 
-    if (InitCodeDidNotDeploySender.message.test(message)) {
-        return new InitCodeDidNotDeploySender({
+    if (InitCodeDidNotDeploySenderError.message.test(message)) {
+        return new InitCodeDidNotDeploySenderError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -92,8 +92,8 @@ export function getBundlerError(
         })
     }
 
-    if (SmartAccountNotDeployed.message.test(message)) {
-        return new SmartAccountNotDeployed({
+    if (SenderNotDeployedError.message.test(message)) {
+        return new SenderNotDeployedError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -101,8 +101,8 @@ export function getBundlerError(
         })
     }
 
-    if (SmartAccountDoNotHaveEnoughFunds.message.test(message)) {
-        return new SmartAccountDoNotHaveEnoughFunds({
+    if (SmartAccountInsufficientFundsError.message.test(message)) {
+        return new SmartAccountInsufficientFundsError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -110,16 +110,16 @@ export function getBundlerError(
         })
     }
 
-    if (SmartAccountSignatureExpiredOrNotDue.message.test(message)) {
-        return new SmartAccountSignatureExpiredOrNotDue({
+    if (SenderSignatureExpiredOrNotDue.message.test(message)) {
+        return new SenderSignatureExpiredOrNotDue({
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa22"
         })
     }
 
-    if (SmartAccountRevertedOrOutOfGasDuringValidation.message.test(message)) {
-        return new SmartAccountRevertedOrOutOfGasDuringValidation({
+    if (SmartAccountValidationRevertedError.message.test(message)) {
+        return new SmartAccountValidationRevertedError({
             cause: err,
             sender: args.userOperation.sender,
             docsPath:
@@ -127,8 +127,8 @@ export function getBundlerError(
         })
     }
 
-    if (SmartAccountNonceInvalid.message.test(message)) {
-        return new SmartAccountNonceInvalid({
+    if (InvalidSmartAccountNonceError.message.test(message)) {
+        return new InvalidSmartAccountNonceError({
             cause: err,
             sender: args.userOperation.sender,
             nonce: args.userOperation.nonce,
@@ -137,8 +137,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterNotDeployed.message.test(message)) {
-        return new PaymasterNotDeployed({
+    if (PaymasterNotDeployedError.message.test(message)) {
+        return new PaymasterNotDeployedError({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
@@ -146,8 +146,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterDepositTooLow.message.test(message)) {
-        return new PaymasterDepositTooLow({
+    if (PaymasterDepositTooLowError.message.test(message)) {
+        return new PaymasterDepositTooLowError({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
@@ -155,8 +155,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterExpiredOrNotDue.message.test(message)) {
-        return new PaymasterExpiredOrNotDue({
+    if (PaymasterValidityPeriodError.message.test(message)) {
+        return new PaymasterValidityPeriodError({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
@@ -164,8 +164,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterValidationRevertedOrOutOfGas.message.test(message)) {
-        return new PaymasterValidationRevertedOrOutOfGas({
+    if (PaymasterValidationRevertedError.message.test(message)) {
+        return new PaymasterValidationRevertedError({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
@@ -173,8 +173,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterDataRejected.message.test(message)) {
-        return new PaymasterDataRejected({
+    if (PaymasterDataRejectedError.message.test(message)) {
+        return new PaymasterDataRejectedError({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
