@@ -10,8 +10,14 @@ import {
     SmartAccountSignatureValidityPeriodError,
     SmartAccountValidationRevertedError
 } from "./account.js"
-import { EstimateUserOperationGasError } from "./estimateUserOperationGas.js"
-import { SendUserOperationError } from "./sendUserOperation.js"
+import {
+    EstimateUserOperationGasError,
+    type EstimateUserOperationGasErrorType
+} from "./estimateUserOperationGas.js"
+import {
+    SendUserOperationError,
+    SendUserOperationErrorType
+} from "./sendUserOperation.js"
 
 import {
     InvalidPaymasterAndDataError,
@@ -60,5 +66,7 @@ export {
     GasValuesOverflowError,
     BundlerOutOfGasError,
     PaymasterPostOpRevertedError,
-    SendUserOperationError
+    SendUserOperationError,
+    EstimateUserOperationGasErrorType,
+    SendUserOperationErrorType
 }
