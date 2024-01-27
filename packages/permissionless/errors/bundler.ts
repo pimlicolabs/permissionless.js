@@ -1,8 +1,8 @@
 import { BaseError } from "viem"
 
-export class InvalidBeneficiaryAddressSetByBundler extends BaseError {
+export class InvalidBeneficiaryAddress extends BaseError {
     static message = /aa9[01]/
-    override name = "InvalidBeneficiaryAddressSetByBundler"
+    override name = "InvalidBeneficiaryAddress"
     constructor({
         cause,
         docsPath
@@ -16,7 +16,7 @@ export class InvalidBeneficiaryAddressSetByBundler extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you encounter this error when running self-hosted bundler, make sure you have configured the bundler correctly.",
-                "• If you are using a bundler provider like Pimlico, reach out to them.",
+                "• If you are using a bundler provider, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -43,7 +43,7 @@ export class InvalidAggregator extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you are using your own bundler, configure it to use a valid aggregator.",
-                "• If you are using a bundler provider like Pimlico, reach out to them.",
+                "• If you are using a bundler provider, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),

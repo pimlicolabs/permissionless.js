@@ -18,7 +18,7 @@ export class VerificationGasLimitNotEnough extends BaseError {
                 "",
                 "Possible solutions:",
                 "• Verify that the verificationGasLimit set for the user operation is high enough to cover the gas used during smart account and paymaster verification.",
-                "• If you are using the eth_estimateUserOperationGas or pm_sponsorUserOperation method from bundler provider like Pimlico to set user operation gas limits and the EntryPoint throws this error during submission, reach out to them.",
+                "• If you are using the eth_estimateUserOperationGas or pm_sponsorUserOperation method from bundler provider to set user operation gas limits and the EntryPoint throws this error during submission, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -45,7 +45,7 @@ export class FundsLowerThanActualGasCost extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you encounter this error, try increasing the verificationGasLimit set for the user operation.",
-                "• If you are using the eth_estimateUserOperationGas or pm_sponsorUserOperation method from bundler provider like Pimlico to set user operation gas limits and the EntryPoint throws this error during submission, reach out to them.",
+                "• If you are using the eth_estimateUserOperationGas or pm_sponsorUserOperation method from bundler provider to set user operation gas limits and the EntryPoint throws this error during submission, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -95,7 +95,7 @@ export class OutOfGas extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you are using your own bundler, configure it send gas limits properly.",
-                "• If you are using a bundler provider like Pimlico, reach out to them.",
+                "• If you are using a bundler provider, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),

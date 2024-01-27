@@ -18,13 +18,10 @@ import {
     InvalidPaymasterAndData,
     PaymasterDataRejected,
     PaymasterExpiredOrNotDue,
-    PaymasterValidationRevertedOrNotEnoughGas
+    PaymasterValidationRevertedOrOutOfGas
 } from "./paymaster.js"
 
-import {
-    InvalidBeneficiaryAddressSetByBundler,
-    InvalidAggregator
-} from "./bundler.js"
+import { InvalidBeneficiaryAddress, InvalidAggregator } from "./bundler.js"
 
 import {
     VerificationGasLimitNotEnough,
@@ -47,12 +44,12 @@ export {
     PaymasterNotDeployed,
     PaymasterDepositTooLow,
     SmartAccountInvalidSignature,
-    InvalidBeneficiaryAddressSetByBundler,
+    InvalidBeneficiaryAddress,
     InvalidAggregator,
     InvalidPaymasterAndData,
     PaymasterDataRejected,
     PaymasterExpiredOrNotDue,
-    PaymasterValidationRevertedOrNotEnoughGas,
+    PaymasterValidationRevertedOrOutOfGas,
     VerificationGasLimitNotEnough,
     FundsLowerThanActualGasCost,
     GasValuesOverFlow,

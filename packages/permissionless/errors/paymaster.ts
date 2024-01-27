@@ -57,7 +57,7 @@ export class PaymasterDepositTooLow extends BaseError {
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, deposit more funds into the EntryPoint contract through the deposit() function of the paymaster contract.",
                 "• Verify that the paymasterAndData field is correct, and that the first 20 bytes are the address of the paymaster contract you intend to useVerify that the paymasterAndData field is correct, and that the first 20 bytes are the address of the paymaster contract you intend to use.",
-                "• If you are using a paymaster service like Pimlico, reach out to them.",
+                "• If you are using a paymaster service, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -105,9 +105,9 @@ export class PaymasterExpiredOrNotDue extends BaseError {
     }
 }
 
-export class PaymasterValidationRevertedOrNotEnoughGas extends BaseError {
+export class PaymasterValidationRevertedOrOutOfGas extends BaseError {
     static message = /aa33/
-    override name = "PaymasterValidationRevertedOrNotEnoughGas"
+    override name = "PaymasterValidationRevertedOrOutOfGas"
     constructor({
         cause,
         paymasterAndData,
@@ -128,7 +128,7 @@ export class PaymasterValidationRevertedOrNotEnoughGas extends BaseError {
                 "Possible solutions:",
                 "• Verify that the verificationGasLimit is high enough to cover the validatePaymasterUserOp function's gas costs.",
                 "• If you are using your own paymaster contract, verify that the validatePaymasterUserOp function is implemented with the correct logic, and that the user operation is supposed to be valid.",
-                "• If you are using a paymaster service like Pimlico, and the user operation is well formed with a high enough verificationGasLimit, reach out to them.",
+                "• If you are using a paymaster service, and the user operation is well formed with a high enough verificationGasLimit, reach out to them.",
                 "• If you are not looking to use a paymaster to cover the gas fees, verify that the paymasterAndData field is not set.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
@@ -162,8 +162,8 @@ export class PaymasterDataRejected extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, verify that the user operation was correctly signed according to your implementation, and that the paymaster signature was correctly encoded in the paymasterAndData field of the user operation.",
-                "• If you are using a paymaster service like Pimlico, make sure you do not modify any of the fields of the user operation after the paymaster signs over it (except the signature field).",
-                "• If you are using a paymaster service like Pimlico and you have not modified any of the fields except the signature but you are still getting this error, reach out to them.",
+                "• If you are using a paymaster service, make sure you do not modify any of the fields of the user operation after the paymaster signs over it (except the signature field).",
+                "• If you are using a paymaster service and you have not modified any of the fields except the signature but you are still getting this error, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -196,7 +196,7 @@ export class PaymasterPostOpReverted extends BaseError {
                 "",
                 "Possible solutions:",
                 "• If you are using your own paymaster contract, verify that that you have correctly implemented the postOp function (if you are using one). If you do not intent to make use of the postOp function, make sure you do not set the context parameter in the paymaster's validatePaymasterUserOp function.",
-                "• If you are using a paymaster service like Pimlico and you see this error, reach out to them.",
+                "• If you are using a paymaster service and you see this error, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),
@@ -223,7 +223,7 @@ export class InvalidPaymasterAndData extends BaseError {
                 "",
                 "Possible solutions:",
                 "• Make sure you have either not set a value for the paymasterAndData, or that it is at least 20 bytes long.",
-                "• If you are using a paymaster service like Pimlico, reach out to them.",
+                "• If you are using a paymaster service, reach out to them.",
                 "",
                 docsPath ? `Docs: ${docsPath}` : ""
             ].join("\n"),

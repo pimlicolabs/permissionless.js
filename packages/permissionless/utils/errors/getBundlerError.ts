@@ -21,7 +21,7 @@ import {
     PaymasterDepositTooLow,
     PaymasterExpiredOrNotDue,
     PaymasterNotDeployed,
-    PaymasterValidationRevertedOrNotEnoughGas
+    PaymasterValidationRevertedOrOutOfGas
 } from "../../errors/paymaster"
 
 export type GetBundlerErrorParameters = {
@@ -164,8 +164,8 @@ export function getBundlerError(
         })
     }
 
-    if (PaymasterValidationRevertedOrNotEnoughGas.message.test(message)) {
-        return new PaymasterValidationRevertedOrNotEnoughGas({
+    if (PaymasterValidationRevertedOrOutOfGas.message.test(message)) {
+        return new PaymasterValidationRevertedOrOutOfGas({
             cause: err,
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
