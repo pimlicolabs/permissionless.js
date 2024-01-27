@@ -9,7 +9,7 @@ import {
     SenderAlreadyDeployedError,
     SenderNotDeployedError,
     SmartAccountInsufficientFundsError
-} from "permissionless/errors"
+} from "permissionless"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
 import {

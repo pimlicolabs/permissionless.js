@@ -85,3 +85,4 @@ import { getUserOperationHash } from "./utils/getUserOperationHash.js"
 
 export { getUserOperationHash, type GetUserOperationHashParams }
 export * from "./utils/index.js"
+export * from "./errors/index.js"
