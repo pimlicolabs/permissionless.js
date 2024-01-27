@@ -1,5 +1,5 @@
 import { BaseError, UnknownNodeError } from "viem"
-import { EstimateUserOperationGasError } from "../../errors"
+import { SendUserOperationError } from "../../errors"
 import {
     type GetBundlerErrorParameters,
     getBundlerError
@@ -19,7 +19,7 @@ export function getSendUserOperationError(
         return cause
     })()
 
-    throw new EstimateUserOperationGasError(cause, {
+    throw new SendUserOperationError(cause, {
         ...args
     })
 }

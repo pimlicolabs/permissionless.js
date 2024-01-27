@@ -287,10 +287,13 @@ export class InvalidSmartAccountNonceError extends BaseError {
         docsPath?: string
         nonce: bigint
     }) {
+        const nonceKey = nonce >> 64n // first 192 bits of nonce
+        const nonceSequence = nonce & 0xffffffffffffffffn // last 64 bits of nonce
+
         super(
             [
                 `The smart account ${sender} nonce is invalid.`,
-                `Nonce sent: ${nonce}`,
+                `Nonce sent: ${nonce} (key: ${nonceKey}, sequence: ${nonceSequence})`,
                 "",
                 "Possible solutions:",
                 "• Verify that you are using the correct nonce for the user operation. The nonce should be the current nonce of the smart account for the selected key. Consider leveraging functions like getAccountNonce.",

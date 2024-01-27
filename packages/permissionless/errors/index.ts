@@ -11,6 +11,7 @@ import {
     InvalidSmartAccountNonceError
 } from "./account.js"
 import { EstimateUserOperationGasError } from "./estimateUserOperationGas.js"
+import { SendUserOperationError } from "./sendUserOperation.js"
 
 import {
     PaymasterNotDeployedError,
@@ -58,5 +59,6 @@ export {
     ActualGasCostTooHighError,
     GasValuesOverflowError,
     BundlerOutOfGasError,
-    PaymasterPostOpRevertedError
+    PaymasterPostOpRevertedError,
+    SendUserOperationError
 }
