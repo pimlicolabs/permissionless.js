@@ -31,22 +31,29 @@ beforeAll(() => {
 
 describe("sendUserOperation", async () => {
     test("SenderAlreadyDeployedError", async () => {
-        const eoaWalletClient = getEoaWalletClient()
+        const safeSmartAccount = await getSignerToSafeSmartAccount()
 
-        const index = 0n
+        const paymasterClient = getPimlicoPaymasterClient()
 
-        const userOperation = await buildUserOp(eoaWalletClient, index)
+        const smartAccountClient = (
+            await getSmartAccountClient({
+                account: safeSmartAccount,
+                sponsorUserOperation: async (args) => {
+                    const userOp =
+                        await paymasterClient.sponsorUserOperation(args)
 
-        userOperation.initCode = "0x"
-        userOperation.preVerificationGas = 100_000n
-        userOperation.verificationGasLimit = 100_000n
-        userOperation.callGasLimit = 100_000n
+                    return {
+                        ...userOp,
+                        initCode: "0x"
+                    }
+                }
+            })
+        ).extend(pimlicoBundlerActions)
 
-        const bundlerClient = getBundlerClient()
-
-        await bundlerClient.sendUserOperation({
-            userOperation,
-            entryPoint: getEntryPoint()
+        await smartAccountClient.sendTransaction({
+            to: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+            value: 0n,
+            data: "0x1234"
         })
     })
 })
