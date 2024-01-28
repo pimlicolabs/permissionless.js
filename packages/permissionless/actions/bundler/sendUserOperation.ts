@@ -58,13 +58,15 @@ export const sendUserOperation = async <
     const { userOperation, entryPoint } = args
 
     try {
-        return client.request({
+        const userOperationHash = await client.request({
             method: "eth_sendUserOperation",
             params: [
                 deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
                 entryPoint as Address
             ]
         })
+
+        return userOperationHash
     } catch (err) {
         throw getSendUserOperationError(
             err as BaseError,
