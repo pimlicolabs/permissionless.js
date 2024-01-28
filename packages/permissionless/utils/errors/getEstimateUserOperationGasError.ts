@@ -1,15 +1,15 @@
 import { BaseError, UnknownNodeError } from "viem"
 import type { EstimateUserOperationGasParameters } from "../../actions/bundler/estimateUserOperationGas"
 import {
-    type GetBundlerErrorParameters,
-    getBundlerError,
-    type GetBundlerErrorReturnType
-} from "./getBundlerError"
-import { type ErrorType } from "../../errors/utils"
-import {
     EstimateUserOperationGasError,
     type EstimateUserOperationGasErrorType
 } from "../../errors/estimateUserOperationGas"
+import { type ErrorType } from "../../errors/utils"
+import {
+    type GetBundlerErrorParameters,
+    type GetBundlerErrorReturnType,
+    getBundlerError
+} from "./getBundlerError"
 
 export type GetEstimateUserOperationGasErrorReturnType<cause = ErrorType> =
     Omit<EstimateUserOperationGasErrorType, "cause"> & {

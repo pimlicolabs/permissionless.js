@@ -6,11 +6,13 @@ import {
     PaymasterDepositTooLowError,
     PaymasterNotDeployedError,
     SenderAddressMismatchError,
-    SenderNotDeployedError,
-    SmartAccountInsufficientFundsError,
+    SenderAlreadyDeployedError,
     SenderAlreadyDeployedErrorType,
-    SenderAlreadyDeployedError
+    SenderNotDeployedError,
+    SmartAccountInsufficientFundsError
 } from "permissionless"
+import { EstimateUserOperationErrorType } from "permissionless/actions"
+import { EstimateGasErrorType } from "viem"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
 import {
@@ -19,8 +21,6 @@ import {
     getEoaWalletClient,
     getFactoryAddress
 } from "../utils"
-import { EstimateUserOperationErrorType } from "permissionless/actions"
-import { EstimateGasErrorType } from "viem"
 
 dotenv.config()
 
