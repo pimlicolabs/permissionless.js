@@ -23,7 +23,8 @@ import {
     createPublicClient,
     createWalletClient,
     defineChain,
-    encodeFunctionData
+    encodeFunctionData,
+    parseEther
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as allChains from "viem/chains"
@@ -156,8 +157,12 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 
 export const getSmartAccountClient = async ({
     account,
-    sponsorUserOperation
-}: SponsorUserOperationMiddleware & { account?: SmartAccount } = {}) => {
+    sponsorUserOperation,
+    preFund = false
+}: SponsorUserOperationMiddleware & {
+    account?: SmartAccount
+    preFund?: boolean
+} = {}) => {
     if (!process.env.BUNDLER_RPC_HOST)
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
     const chain = getTestingChain()
@@ -205,6 +210,23 @@ export const getSmartAccountClient = async ({
             return newUserOperation
         }
     })
+
+    if (preFund) {
+        const walletClient = getEoaWalletClient()
+        const publicClient = await getPublicClient()
+
+        const balance = await publicClient.getBalance({
+            address: smartAccountClient.account.address
+        })
+
+        if (balance < parseEther("1")) {
+            await walletClient.sendTransaction({
+                to: smartAccountClient.account.address,
+                value: parseEther("1"),
+                data: "0x"
+            })
+        }
+    }
 
     return smartAccountClient
 }

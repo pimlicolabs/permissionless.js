@@ -1,4 +1,12 @@
-import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
+import type {
+    Account,
+    Address,
+    BaseError,
+    Chain,
+    Client,
+    Hash,
+    Transport
+} from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient.js"
 import type { BundlerRpcSchema } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
@@ -7,6 +15,7 @@ import type {
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
+import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError.js"
 
 export type SendUserOperationParameters = {
     userOperation: UserOperation
@@ -48,11 +57,20 @@ export const sendUserOperation = async <
 ): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
-    return client.request({
-        method: "eth_sendUserOperation",
-        params: [
-            deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
-            entryPoint as Address
-        ]
-    })
+    try {
+        const userOperationHash = await client.request({
+            method: "eth_sendUserOperation",
+            params: [
+                deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
+                entryPoint as Address
+            ]
+        })
+
+        return userOperationHash
+    } catch (err) {
+        throw getSendUserOperationError(
+            err as BaseError,
+            args as SendUserOperationParameters
+        )
+    }
 }

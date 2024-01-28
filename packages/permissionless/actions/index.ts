@@ -1,4 +1,5 @@
 import type {
+    EstimateUserOperationErrorType,
     EstimateUserOperationGasParameters,
     EstimateUserOperationGasReturnType
 } from "./bundler/estimateUserOperationGas.js"
@@ -40,7 +41,8 @@ export type {
     GetUserOperationReceiptReturnType,
     GetSenderAddressParams,
     GetAccountNonceParams,
-    WaitForUserOperationReceiptParameters
+    WaitForUserOperationReceiptParameters,
+    EstimateUserOperationErrorType
 }
 
 export {

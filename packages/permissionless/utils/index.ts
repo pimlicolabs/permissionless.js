@@ -1,6 +1,7 @@
 import type { Account, Address } from "viem"
 import { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
 import { getAction } from "./getAction.js"
+import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
 import {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
@@ -35,5 +36,6 @@ export {
     signUserOperationHashWithECDSA,
     type SignUserOperationHashWithECDSAParams,
     AccountOrClientNotFoundError,
-    isSmartAccountDeployed
+    isSmartAccountDeployed,
+    getAddressFromInitCodeOrPaymasterAndData
 }
