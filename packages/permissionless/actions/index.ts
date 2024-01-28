@@ -1,7 +1,7 @@
 import type {
+    EstimateUserOperationErrorType,
     EstimateUserOperationGasParameters,
-    EstimateUserOperationGasReturnType,
-    EstimateUserOperationErrorType
+    EstimateUserOperationGasReturnType
 } from "./bundler/estimateUserOperationGas.js"
 import type { GetUserOperationByHashParameters } from "./bundler/getUserOperationByHash.js"
 import type { GetUserOperationByHashReturnType } from "./bundler/getUserOperationByHash.js"
