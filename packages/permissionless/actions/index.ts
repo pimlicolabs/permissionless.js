@@ -1,6 +1,7 @@
 import type {
     EstimateUserOperationGasParameters,
-    EstimateUserOperationGasReturnType
+    EstimateUserOperationGasReturnType,
+    EstimateUserOperationErrorType
 } from "./bundler/estimateUserOperationGas.js"
 import type { GetUserOperationByHashParameters } from "./bundler/getUserOperationByHash.js"
 import type { GetUserOperationByHashReturnType } from "./bundler/getUserOperationByHash.js"
@@ -40,7 +41,8 @@ export type {
     GetUserOperationReceiptReturnType,
     GetSenderAddressParams,
     GetAccountNonceParams,
-    WaitForUserOperationReceiptParameters
+    WaitForUserOperationReceiptParameters,
+    EstimateUserOperationErrorType
 }
 
 export {

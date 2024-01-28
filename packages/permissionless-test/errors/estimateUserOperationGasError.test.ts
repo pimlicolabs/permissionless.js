@@ -6,9 +6,10 @@ import {
     PaymasterDepositTooLowError,
     PaymasterNotDeployedError,
     SenderAddressMismatchError,
-    SenderAlreadyDeployedError,
     SenderNotDeployedError,
-    SmartAccountInsufficientFundsError
+    SmartAccountInsufficientFundsError,
+    SenderAlreadyDeployedErrorType,
+    SenderAlreadyDeployedError
 } from "permissionless"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
@@ -18,6 +19,8 @@ import {
     getEoaWalletClient,
     getFactoryAddress
 } from "../utils"
+import { EstimateUserOperationErrorType } from "permissionless/actions"
+import { EstimateGasErrorType } from "viem"
 
 dotenv.config()
 
@@ -59,7 +62,19 @@ describe("estimateUserOperationGasError", async () => {
                     entryPoint: getEntryPoint()
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError = err as EstimateGasErrorType
+
+                const error = estimationError.walk(
+                    (e) => e instanceof SenderAlreadyDeployedError
+                ) as SenderAlreadyDeployedErrorType
+
+                estimationError.name
+
+                if (
+                    estimationError.cause.name === "SenderAlreadyDeployedError"
+                ) {
+                    estimationError.cause.message
+                }
 
                 throw estimationError.cause
             }

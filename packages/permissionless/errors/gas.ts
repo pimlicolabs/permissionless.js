@@ -1,5 +1,9 @@
 import { BaseError } from "viem"
 
+export type VerificationGasLimitTooLowErrorType =
+    VerificationGasLimitTooLowError & {
+        name: "VerificationGasLimitTooLowError"
+    }
 export class VerificationGasLimitTooLowError extends BaseError {
     static message = /aa4[01]/
     override name = "VerificationGasLimitTooLowError"
@@ -29,6 +33,9 @@ export class VerificationGasLimitTooLowError extends BaseError {
     }
 }
 
+export type ActualGasCostTooHighErrorType = ActualGasCostTooHighError & {
+    name: "ActualGasCostTooHighError"
+}
 export class ActualGasCostTooHighError extends BaseError {
     static message = /aa51/
     override name = "ActualGasCostTooHighError"
@@ -56,6 +63,9 @@ export class ActualGasCostTooHighError extends BaseError {
     }
 }
 
+export type GasValuesOverflowErrorType = GasValuesOverflowError & {
+    name: "GasValuesOverflowError"
+}
 export class GasValuesOverflowError extends BaseError {
     static message = /aa94/
     override name = "GasValuesOverflowError"
@@ -79,6 +89,9 @@ export class GasValuesOverflowError extends BaseError {
     }
 }
 
+export type BundlerOutOfGasErrorType = BundlerOutOfGasError & {
+    name: "BundlerOutOfGasError"
+}
 export class BundlerOutOfGasError extends BaseError {
     static message = /aa95/
     override name = "BundlerOutOfGasError"

@@ -2,25 +2,41 @@ import {
     type Address,
     BaseError,
     ExecutionRevertedError,
-    UnknownNodeError
+    UnknownNodeError,
+    type ExecutionRevertedErrorType,
+    type UnknownNodeErrorType
 } from "viem"
 import { SenderAlreadyDeployedError } from "../../errors"
 import {
     InitCodeDidNotDeploySenderError,
+    type InitCodeDidNotDeploySenderErrorType,
     InitCodeRevertedError,
+    type InitCodeRevertedErrorType,
     InvalidSmartAccountNonceError,
+    type InvalidSmartAccountNonceErrorType,
     SenderAddressMismatchError,
+    type SenderAddressMismatchErrorType,
+    type SenderAlreadyDeployedErrorType,
     SenderNotDeployedError,
+    type SenderNotDeployedErrorType,
     SmartAccountInsufficientFundsError,
+    type SmartAccountInsufficientFundsErrorType,
     SmartAccountSignatureValidityPeriodError,
-    SmartAccountValidationRevertedError
+    type SmartAccountSignatureValidityPeriodErrorType,
+    SmartAccountValidationRevertedError,
+    type SmartAccountValidationRevertedErrorType
 } from "../../errors/account"
 import {
     PaymasterDataRejectedError,
+    type PaymasterDataRejectedErrorType,
     PaymasterDepositTooLowError,
+    type PaymasterDepositTooLowErrorType,
     PaymasterNotDeployedError,
+    type PaymasterNotDeployedErrorType,
     PaymasterValidationRevertedError,
-    PaymasterValidityPeriodError
+    type PaymasterValidationRevertedErrorType,
+    PaymasterValidityPeriodError,
+    type PaymasterValidityPeriodErrorType
 } from "../../errors/paymaster"
 import type { UserOperation } from "../../types"
 
@@ -28,6 +44,24 @@ export type GetBundlerErrorParameters = {
     userOperation: Partial<UserOperation>
     entryPoint: Address
 }
+
+export type GetBundlerErrorReturnType =
+    | ExecutionRevertedErrorType
+    | UnknownNodeErrorType
+    | SenderAlreadyDeployedErrorType
+    | InitCodeRevertedErrorType
+    | SenderAddressMismatchErrorType
+    | InitCodeDidNotDeploySenderErrorType
+    | SenderNotDeployedErrorType
+    | SmartAccountInsufficientFundsErrorType
+    | SmartAccountSignatureValidityPeriodErrorType
+    | SmartAccountValidationRevertedErrorType
+    | InvalidSmartAccountNonceErrorType
+    | PaymasterNotDeployedErrorType
+    | PaymasterDepositTooLowErrorType
+    | PaymasterValidityPeriodErrorType
+    | PaymasterValidationRevertedErrorType
+    | PaymasterDataRejectedErrorType
 
 export function getBundlerError(
     err: BaseError,
@@ -63,7 +97,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa10"
-        })
+        }) as any
     }
 
     if (InitCodeRevertedError.message.test(message)) {
@@ -71,7 +105,7 @@ export function getBundlerError(
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa13"
-        })
+        }) as any
     }
 
     if (SenderAddressMismatchError.message.test(message)) {
@@ -80,7 +114,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa14"
-        })
+        }) as any
     }
 
     if (InitCodeDidNotDeploySenderError.message.test(message)) {
@@ -89,7 +123,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa15"
-        })
+        }) as any
     }
 
     if (SenderNotDeployedError.message.test(message)) {
@@ -98,7 +132,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa20"
-        })
+        }) as any
     }
 
     if (SmartAccountInsufficientFundsError.message.test(message)) {
@@ -107,7 +141,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa21"
-        })
+        }) as any
     }
 
     if (SmartAccountSignatureValidityPeriodError.message.test(message)) {
@@ -115,7 +149,7 @@ export function getBundlerError(
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa22"
-        })
+        }) as any
     }
 
     if (SmartAccountValidationRevertedError.message.test(message)) {
@@ -124,7 +158,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa23"
-        })
+        }) as any
     }
 
     if (InvalidSmartAccountNonceError.message.test(message)) {
@@ -134,7 +168,7 @@ export function getBundlerError(
             nonce: args.userOperation.nonce,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa25"
-        })
+        }) as any
     }
 
     if (PaymasterNotDeployedError.message.test(message)) {
@@ -143,7 +177,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa30"
-        })
+        }) as any
     }
 
     if (PaymasterDepositTooLowError.message.test(message)) {
@@ -152,7 +186,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa31"
-        })
+        }) as any
     }
 
     if (PaymasterValidityPeriodError.message.test(message)) {
@@ -161,7 +195,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa32"
-        })
+        }) as any
     }
 
     if (PaymasterValidationRevertedError.message.test(message)) {
@@ -170,7 +204,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa33"
-        })
+        }) as any
     }
 
     if (PaymasterDataRejectedError.message.test(message)) {
@@ -179,8 +213,8 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa34"
-        })
+        }) as any
     }
 
-    return new UnknownNodeError({ cause: err })
+    return new UnknownNodeError({ cause: err }) as any
 }

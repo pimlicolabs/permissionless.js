@@ -12,7 +12,10 @@ import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler.js"
 import type { Prettify } from "../../types/index.js"
 import type { UserOperation } from "../../types/userOperation.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
-import { getEstimateUserOperationGasError } from "../../utils/errors/getEstimateUserOperationGasError.js"
+import {
+    type GetEstimateUserOperationGasErrorReturnType,
+    getEstimateUserOperationGasError
+} from "../../utils/errors/getEstimateUserOperationGasError.js"
 
 export type EstimateUserOperationGasParameters = {
     userOperation: PartialBy<
@@ -27,6 +30,9 @@ export type EstimateUserOperationGasReturnType = {
     verificationGasLimit: bigint
     callGasLimit: bigint
 }
+
+export type EstimateUserOperationErrorType =
+    GetEstimateUserOperationGasErrorReturnType
 
 /**
  * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -87,9 +93,6 @@ export const estimateUserOperationGas = async <
             callGasLimit: BigInt(response.callGasLimit || 0)
         }
     } catch (err) {
-        throw getEstimateUserOperationGasError(
-            err as BaseError,
-            args as EstimateUserOperationGasParameters
-        )
+        throw getEstimateUserOperationGasError(err as BaseError, args)
     }
 }

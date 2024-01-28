@@ -1,6 +1,9 @@
 import { BaseError, type Hex } from "viem"
 import { getAddressFromInitCodeOrPaymasterAndData } from "../utils/index.js"
 
+export type PaymasterNotDeployedErrorType = PaymasterNotDeployedError & {
+    name: "PaymasterNotDeployedError"
+}
 export class PaymasterNotDeployedError extends BaseError {
     static message = /aa30/
     override name = "PaymasterNotDeployedError"
@@ -34,6 +37,9 @@ export class PaymasterNotDeployedError extends BaseError {
     }
 }
 
+export type PaymasterDepositTooLowErrorType = PaymasterDepositTooLowError & {
+    name: "PaymasterDepositTooLowError"
+}
 export class PaymasterDepositTooLowError extends BaseError {
     static message = /aa31/
     override name = "PaymasterDepositTooLowError"
@@ -68,6 +74,9 @@ export class PaymasterDepositTooLowError extends BaseError {
     }
 }
 
+export type PaymasterValidityPeriodErrorType = PaymasterValidityPeriodError & {
+    name: "PaymasterValidityPeriodError"
+}
 export class PaymasterValidityPeriodError extends BaseError {
     static message = /aa32/
     override name = "PaymasterValidityPeriodError"
@@ -105,6 +114,10 @@ export class PaymasterValidityPeriodError extends BaseError {
     }
 }
 
+export type PaymasterValidationRevertedErrorType =
+    PaymasterValidationRevertedError & {
+        name: "PaymasterValidationRevertedError"
+    }
 export class PaymasterValidationRevertedError extends BaseError {
     static message = /aa33/
     override name = "PaymasterValidationRevertedError"
@@ -140,6 +153,9 @@ export class PaymasterValidationRevertedError extends BaseError {
     }
 }
 
+export type PaymasterDataRejectedErrorType = PaymasterDataRejectedError & {
+    name: "PaymasterDataRejectedError"
+}
 export class PaymasterDataRejectedError extends BaseError {
     static message = /aa34/
     override name = "PaymasterDataRejectedError"
@@ -174,6 +190,9 @@ export class PaymasterDataRejectedError extends BaseError {
     }
 }
 
+export type PaymasterPostOpRevertedErrorType = PaymasterPostOpRevertedError & {
+    name: "PaymasterPostOpRevertedError"
+}
 export class PaymasterPostOpRevertedError extends BaseError {
     static message = /aa50/
     override name = "PaymasterPostOpRevertedError"
@@ -207,6 +226,9 @@ export class PaymasterPostOpRevertedError extends BaseError {
     }
 }
 
+export type InvalidPaymasterAndDataErrorType = InvalidPaymasterAndDataError & {
+    name: "InvalidPaymasterAndDataError"
+}
 export class InvalidPaymasterAndDataError extends BaseError {
     static message = /aa93/
     override name = "InvalidPaymasterAndDataError"

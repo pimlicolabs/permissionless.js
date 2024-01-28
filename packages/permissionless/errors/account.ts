@@ -1,8 +1,11 @@
 import { type Address, BaseError } from "viem"
 
+export type SenderAlreadyDeployedErrorType = SenderAlreadyDeployedError & {
+    name: "SenderAlreadyDeployedError"
+}
 export class SenderAlreadyDeployedError extends BaseError {
     static message = /aa10/
-    override name = "SenderAlreadyDeployedError"
+    override name = "SenderAlreadyDeployedError" as const
     constructor({
         cause,
         sender,
@@ -24,9 +27,12 @@ export class SenderAlreadyDeployedError extends BaseError {
     }
 }
 
+export type InitCodeRevertedErrorType = InitCodeRevertedError & {
+    name: "InitCodeRevertedError"
+}
 export class InitCodeRevertedError extends BaseError {
     static message = /aa13/
-    override name = "InitCodeRevertedError"
+    override name = "InitCodeRevertedError" as const
     constructor({
         cause,
         docsPath
@@ -53,9 +59,12 @@ export class InitCodeRevertedError extends BaseError {
     }
 }
 
+export type SenderAddressMismatchErrorType = SenderAddressMismatchError & {
+    name: "SenderAddressMismatchError"
+}
 export class SenderAddressMismatchError extends BaseError {
     static message = /aa14/
-    override name = "SenderAddressMismatchError"
+    override name = "SenderAddressMismatchError" as const
     constructor({
         cause,
         sender,
@@ -87,9 +96,13 @@ export class SenderAddressMismatchError extends BaseError {
     }
 }
 
+export type InitCodeDidNotDeploySenderErrorType =
+    InitCodeDidNotDeploySenderError & {
+        name: "InitCodeDidNotDeploySenderError"
+    }
 export class InitCodeDidNotDeploySenderError extends BaseError {
     static message = /aa15/
-    override name = "InitCodeDidNotDeploySenderError"
+    override name = "InitCodeDidNotDeploySenderError" as const
     constructor({
         cause,
         sender,
@@ -120,9 +133,12 @@ export class InitCodeDidNotDeploySenderError extends BaseError {
     }
 }
 
+export type SenderNotDeployedErrorType = SenderNotDeployedError & {
+    name: "SenderNotDeployedError"
+}
 export class SenderNotDeployedError extends BaseError {
     static message = /aa20/
-    override name = "SenderNotDeployedError"
+    override name = "SenderNotDeployedError" as const
     constructor({
         cause,
         sender,
@@ -152,9 +168,13 @@ export class SenderNotDeployedError extends BaseError {
     }
 }
 
+export type SmartAccountInsufficientFundsErrorType =
+    SmartAccountInsufficientFundsError & {
+        name: "SmartAccountInsufficientFundsError"
+    }
 export class SmartAccountInsufficientFundsError extends BaseError {
     static message = /aa21/
-    override name = "SmartAccountInsufficientFundsError"
+    override name = "SmartAccountInsufficientFundsError" as const
     constructor({
         cause,
         sender,
@@ -181,9 +201,13 @@ export class SmartAccountInsufficientFundsError extends BaseError {
     }
 }
 
+export type SmartAccountSignatureValidityPeriodErrorType =
+    SmartAccountSignatureValidityPeriodError & {
+        name: "SmartAccountSignatureValidityPeriodError"
+    }
 export class SmartAccountSignatureValidityPeriodError extends BaseError {
     static message = /aa22/
-    override name = "SmartAccountSignatureValidityPeriodError"
+    override name = "SmartAccountSignatureValidityPeriodError" as const
     constructor({
         cause,
         docsPath
@@ -211,9 +235,13 @@ export class SmartAccountSignatureValidityPeriodError extends BaseError {
     }
 }
 
+export type SmartAccountValidationRevertedErrorType =
+    SmartAccountValidationRevertedError & {
+        name: "SmartAccountValidationRevertedError"
+    }
 export class SmartAccountValidationRevertedError extends BaseError {
     static message = /aa23/
-    override name = "SmartAccountValidationRevertedError"
+    override name = "SmartAccountValidationRevertedError" as const
     constructor({
         cause,
         sender,
@@ -242,9 +270,13 @@ export class SmartAccountValidationRevertedError extends BaseError {
     }
 }
 
+export type InvalidSmartAccountSignatureErrorType =
+    InvalidSmartAccountSignatureError & {
+        name: "InvalidSmartAccountSignatureError"
+    }
 export class InvalidSmartAccountSignatureError extends BaseError {
     static message = /aa24/
-    override name = "InvalidSmartAccountSignatureError"
+    override name = "InvalidSmartAccountSignatureError" as const
     constructor({
         cause,
         sender,
@@ -273,9 +305,13 @@ export class InvalidSmartAccountSignatureError extends BaseError {
     }
 }
 
+export type InvalidSmartAccountNonceErrorType =
+    InvalidSmartAccountNonceError & {
+        name: "InvalidSmartAccountNonceError"
+    }
 export class InvalidSmartAccountNonceError extends BaseError {
     static message = /aa25/
-    override name = "InvalidSmartAccountNonceError"
+    override name = "InvalidSmartAccountNonceError" as const
     constructor({
         cause,
         sender,
