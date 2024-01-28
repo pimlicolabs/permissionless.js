@@ -1,6 +1,6 @@
 import { BaseError } from "viem"
 import { prettyPrint } from "./utils.js"
-import { SendUserOperationParameters } from "../actions/bundler/sendUserOperation.js"
+import { type SendUserOperationParameters } from "../actions/bundler/sendUserOperation.js"
 
 export type SendUserOperationErrorType = SendUserOperationError & {
     name: "SendUserOperationError"
