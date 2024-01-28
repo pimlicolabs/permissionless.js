@@ -1,5 +1,8 @@
 import dotenv from "dotenv"
+import { bundlerActions } from "permissionless"
+import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
 import { beforeAll, describe, test } from "vitest"
+import { buildUserOp } from "../userOp"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -8,9 +11,6 @@ import {
     getSignerToSafeSmartAccount,
     getSmartAccountClient
 } from "../utils"
-import { bundlerActions } from "permissionless"
-import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
-import { buildUserOp } from "../userOp"
 
 dotenv.config()
 
