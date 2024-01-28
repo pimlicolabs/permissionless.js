@@ -1,6 +1,6 @@
 import { BaseError } from "viem"
-import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas.js"
 import { prettyPrint } from "./utils.js"
+import { SendUserOperationParameters } from "../actions/bundler/sendUserOperation.js"
 
 export type SendUserOperationErrorType = SendUserOperationError & {
     name: "SendUserOperationError"
@@ -16,7 +16,7 @@ export class SendUserOperationError extends BaseError {
             userOperation,
             entryPoint,
             docsPath
-        }: EstimateUserOperationGasParameters & {
+        }: SendUserOperationParameters & {
             docsPath?: string
         }
     ) {
