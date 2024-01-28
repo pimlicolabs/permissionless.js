@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.32
+
+### Patch Changes
+
+- 57dd176305078ab121e0289cdf6566dd063ca0e4: We now throw custom error types which correspond to AA errors
+
 ## 0.0.31
 
 ### Patch Changes
