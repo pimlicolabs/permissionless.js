@@ -1,0 +1,29 @@
+{
+    "name": "@permissionless/wagmi-demo",
+    "private": true,
+    "author": "Pimlico",
+    "homepage": "https://docs.pimlico.io/permissionless/wagmi",
+    "repository": "github:pimlicolabs/permissionless.js",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "lint": "biome check .",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "wagmi": "^0.0.0-canary-20240123224806",
+        "viem": "^2.0.0",
+        "@tanstack/react-query": "5.0.5",
+        "react": "^18.2.0",
+        "permissionless": "^0.0.30",
+        "vite": "^4.4.9",
+        "@types/react": "^18.2.22",
+        "@types/react-dom": "^18.2.7",
+        "react-dom": "^18.2.0",
+        "@vitejs/plugin-react": "^4.1.0"
+    },
+    "peerDependencies": {
+        "@permissionless/wagmi": "workspace:*"
+    }
+}
