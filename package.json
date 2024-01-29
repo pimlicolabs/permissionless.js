@@ -23,9 +23,9 @@
     "license": "MIT",
     "scripts": {
         "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
-        "build:cjs": "tsc --project ./tsconfig.permissionless.json --module commonjs --outDir ./packages/permissionless/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
-        "build:esm": "tsc --project ./tsconfig.permissionless.json --module es2015 --outDir ./packages/permissionless/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
-        "build:types": "tsc --project ./tsconfig.permissionless.json --module esnext --declarationDir ./packages/permissionless/_types --emitDeclarationOnly --declaration --declarationMap",
+        "build:cjs": "tsc --project ./tsconfig.cjs.json && tsc-alias -p ./tsconfig.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
+        "build:esm": "tsc --project ./tsconfig.esm.json && tsc-alias -p ./tsconfig.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
+        "build:types": "tsc --project ./tsconfig.types.json && tsc-alias -p ./tsconfig.types.json",
         "clean": "rimraf ./packages/permissionless/_esm ./packages/permissionless/_cjs ./packages/permissionless/_types",
         "changeset": "changeset",
         "changeset:release": "bun run build && changeset publish",
@@ -41,6 +41,7 @@
         "pre-commit": "bun run format && bun run lint:fix"
     },
     "dependencies": {
-        "get-port": "^7.0.0"
+        "get-port": "^7.0.0",
+        "tsc-alias": "^1.8.8"
     }
 }

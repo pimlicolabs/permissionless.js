@@ -13,7 +13,7 @@ import {
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
 import { UserOperation } from "permissionless/types"
-import { walletClientToCustomSigner } from "permissionless/utils"
+import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import {
     http,
     Account,
@@ -152,7 +152,7 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
         transport: http(process.env.RPC_URL as string)
     })
 
-    return walletClientToCustomSigner(walletClient)
+    return walletClientToSmartAccountSigner(walletClient)
 }
 
 export const getSmartAccountClient = async ({

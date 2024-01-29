@@ -10,13 +10,13 @@ import {
     type WriteContractParameters,
     encodeFunctionData
 } from "viem"
-import { type SmartAccount } from "../../accounts/types.js"
-import { getAction } from "../../utils/getAction.js"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
+import { type SmartAccount } from "../../accounts/types"
+import { getAction } from "../../utils/getAction"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
-} from "./sendTransaction.js"
+} from "./sendTransaction"
 
 /**
  * Executes a write function on a contract.

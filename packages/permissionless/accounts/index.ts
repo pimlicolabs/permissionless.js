@@ -1,35 +1,35 @@
-import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount.js"
+import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount"
 
 import {
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
-} from "./signerToSimpleSmartAccount.js"
+} from "./signerToSimpleSmartAccount"
 
-import { privateKeyToSafeSmartAccount } from "./privateKeyToSafeSmartAccount.js"
+import { privateKeyToSafeSmartAccount } from "./privateKeyToSafeSmartAccount"
 
 import {
     type SafeSmartAccount,
     type SafeVersion,
     signerToSafeSmartAccount
-} from "./signerToSafeSmartAccount.js"
+} from "./signerToSafeSmartAccount"
 
 import {
     type KernelEcdsaSmartAccount,
     signerToEcdsaKernelSmartAccount
-} from "./kernel/signerToEcdsaKernelSmartAccount.js"
+} from "./kernel/signerToEcdsaKernelSmartAccount"
 
 import {
     type BiconomySmartAccount,
     signerToBiconomySmartAccount
-} from "./biconomy/signerToBiconomySmartAccount.js"
+} from "./biconomy/signerToBiconomySmartAccount"
 
-import { privateKeyToBiconomySmartAccount } from "./biconomy/privateKeyToBiconomySmartAccount.js"
+import { privateKeyToBiconomySmartAccount } from "./biconomy/privateKeyToBiconomySmartAccount"
 
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types.js"
+} from "./types"
 
 export {
     type SafeVersion,

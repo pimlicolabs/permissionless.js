@@ -5,26 +5,23 @@ import {
     type ValidateSponsorshipPoliciesParameters,
     sendCompressedUserOperation,
     validateSponsorshipPolicies
-} from "../../actions/pimlico.js"
+} from "../../actions/pimlico"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
-} from "../../actions/pimlico/getUserOperationGasPrice.js"
+} from "../../actions/pimlico/getUserOperationGasPrice"
 import {
     type GetUserOperationStatusParameters,
     type GetUserOperationStatusReturnType,
     getUserOperationStatus
-} from "../../actions/pimlico/getUserOperationStatus.js"
+} from "../../actions/pimlico/getUserOperationStatus"
 import {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "../../actions/pimlico/sponsorUserOperation.js"
-import type { Prettify } from "../../types/index.js"
-import type {
-    PimlicoBundlerClient,
-    PimlicoPaymasterClient
-} from "../pimlico.js"
+} from "../../actions/pimlico/sponsorUserOperation"
+import type { Prettify } from "../../types/"
+import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
 
 export type PimlicoBundlerActions = {
     /**

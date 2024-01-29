@@ -1,0 +1,10 @@
+{
+    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    "extends": "./tsconfig.permissionless.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "./packages/permissionless/_cjs",
+        "removeComments": true,
+        "verbatimModuleSyntax": false
+    }
+}

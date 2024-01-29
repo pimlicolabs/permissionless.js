@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { UserOperationWithBigIntAsHex } from "./userOperation.js"
+import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 interface StackupPaymasterContextType {
     type: "erc20token" | "payg"

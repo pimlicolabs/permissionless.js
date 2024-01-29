@@ -27,13 +27,13 @@ import {
     signMessage,
     signTypedData
 } from "viem/actions"
-import { getAccountNonce } from "../actions/public/getAccountNonce.js"
-import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed.js"
+import { getAccountNonce } from "../actions/public/getAccountNonce"
+import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types.js"
+} from "./types"
 
 export type SafeVersion = "1.4.1"
 

@@ -1,12 +1,12 @@
 import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import { type StackupPaymasterClient } from "../../clients/stackup.js"
-import type { StackupPaymasterContext } from "../../types/stackup.js"
+import { type StackupPaymasterClient } from "../../clients/stackup"
+import type { StackupPaymasterContext } from "../../types/stackup"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
-} from "../../types/userOperation.js"
-import { deepHexlify } from "../../utils/deepHexlify.js"
+} from "../../types/userOperation"
+import { deepHexlify } from "../../utils/deepHexlify"
 
 export type SponsorUserOperationParameters = {
     userOperation: PartialBy<

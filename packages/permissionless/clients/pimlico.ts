@@ -9,14 +9,14 @@ import { createClient } from "viem"
 import type {
     PimlicoBundlerRpcSchema,
     PimlicoPaymasterRpcSchema
-} from "../types/pimlico.js"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
+} from "../types/pimlico"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 import {
     type PimlicoBundlerActions,
     type PimlicoPaymasterClientActions,
     pimlicoBundlerActions,
     pimlicoPaymasterActions
-} from "./decorators/pimlico.js"
+} from "./decorators/pimlico"
 
 export type PimlicoBundlerClient = Client<
     Transport,

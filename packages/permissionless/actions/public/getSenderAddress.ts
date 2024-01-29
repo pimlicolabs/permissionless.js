@@ -10,8 +10,8 @@ import {
 } from "viem"
 
 import { simulateContract } from "viem/actions"
-import type { Prettify } from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
+import type { Prettify } from "../../types/"
+import { getAction } from "../../utils/getAction"
 
 export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
 

@@ -9,7 +9,7 @@ import { privateKeyToAccount } from "viem/accounts"
 import {
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
-} from "./signerToSimpleSmartAccount.js"
+} from "./signerToSimpleSmartAccount"
 
 /**
  * @description Creates an Simple Account from a private key.

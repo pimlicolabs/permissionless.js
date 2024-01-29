@@ -7,8 +7,8 @@ import {
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint.js"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
+import { EntryPointAbi } from "./abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -17,7 +17,7 @@ import {
     getSignerToEcdsaKernelAccount,
     getSmartAccountClient,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 
