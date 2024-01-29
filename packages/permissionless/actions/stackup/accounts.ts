@@ -1,5 +1,5 @@
 import type { Address } from "viem"
-import type { StackupPaymasterClient } from "../../clients/stackup.js"
+import type { StackupPaymasterClient } from "../../clients/stackup"
 
 export type AccountsParameters = {
     entryPoint: Address

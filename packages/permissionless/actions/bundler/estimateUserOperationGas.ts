@@ -7,15 +7,15 @@ import {
     type Transport
 } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
-import type { UserOperation } from "../../types/userOperation.js"
-import { deepHexlify } from "../../utils/deepHexlify.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
+import type { Prettify } from "../../types/"
+import type { UserOperation } from "../../types/userOperation"
+import { deepHexlify } from "../../utils/deepHexlify"
 import {
     type GetEstimateUserOperationGasErrorReturnType,
     getEstimateUserOperationGasError
-} from "../../utils/errors/getEstimateUserOperationGasError.js"
+} from "../../utils/errors/getEstimateUserOperationGasError"
 
 export type EstimateUserOperationGasParameters = {
     userOperation: PartialBy<

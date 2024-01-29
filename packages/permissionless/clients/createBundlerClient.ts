@@ -6,8 +6,8 @@ import type {
     Transport
 } from "viem"
 import { createClient } from "viem"
-import type { BundlerRpcSchema } from "../types/bundler.js"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
+import type { BundlerRpcSchema } from "../types/bundler"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 
 export type BundlerClient<
     TChain extends Chain | undefined = Chain | undefined

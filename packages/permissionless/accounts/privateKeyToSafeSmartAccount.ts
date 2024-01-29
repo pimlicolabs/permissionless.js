@@ -10,7 +10,7 @@ import {
     type SafeSmartAccount,
     type SafeVersion,
     signerToSafeSmartAccount
-} from "./signerToSafeSmartAccount.js"
+} from "./signerToSafeSmartAccount"
 
 /**
  * @description Creates an Simple Account from a private key.

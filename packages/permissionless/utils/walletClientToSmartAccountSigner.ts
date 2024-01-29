@@ -11,7 +11,7 @@ import type {
 } from "viem"
 
 import { signTypedData } from "viem/actions"
-import type { SmartAccountSigner } from "../accounts/types.js"
+import type { SmartAccountSigner } from "../accounts/types"
 
 export function walletClientToSmartAccountSigner<
     TChain extends Chain | undefined = Chain | undefined

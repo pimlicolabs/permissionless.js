@@ -1,19 +1,16 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
-import type { SmartAccount } from "../../accounts/types.js"
-import type { StateOverrides } from "../../types/bundler.js"
+import type { SmartAccount } from "../../accounts/types"
+import type { StateOverrides } from "../../types/bundler"
 import type {
     GetAccountParameter,
     PartialBy,
     Prettify,
     UserOperation
-} from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
-import {
-    AccountOrClientNotFoundError,
-    parseAccount
-} from "../../utils/index.js"
-import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas.js"
+} from "../../types/"
+import { getAction } from "../../utils/getAction"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
 export type SponsorUserOperationMiddleware = {
     sponsorUserOperation?: (args: {

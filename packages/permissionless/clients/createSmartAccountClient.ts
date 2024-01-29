@@ -6,14 +6,14 @@ import type {
     WalletClientConfig
 } from "viem"
 import { createClient } from "viem"
-import { type SmartAccount } from "../accounts/types.js"
-import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest.js"
-import { type BundlerRpcSchema } from "../types/bundler.js"
-import type { Prettify } from "../types/index.js"
+import { type SmartAccount } from "../accounts/types"
+import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest"
+import { type BundlerRpcSchema } from "../types/bundler"
+import type { Prettify } from "../types/"
 import {
     type SmartAccountActions,
     smartAccountActions
-} from "./decorators/smartAccount.js"
+} from "./decorators/smartAccount"
 
 /**
  * TODO:

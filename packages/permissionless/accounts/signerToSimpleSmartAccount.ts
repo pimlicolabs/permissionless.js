@@ -12,15 +12,15 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
-import { getAccountNonce } from "../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../actions/public/getSenderAddress.js"
-import { getUserOperationHash } from "../utils/getUserOperationHash.js"
-import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed.js"
+import { getAccountNonce } from "../actions/public/getAccountNonce"
+import { getSenderAddress } from "../actions/public/getSenderAddress"
+import { getUserOperationHash } from "../utils/getUserOperationHash"
+import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types.js"
+} from "./types"
 
 export type SimpleSmartAccount<
     transport extends Transport = Transport,

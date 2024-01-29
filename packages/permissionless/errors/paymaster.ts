@@ -1,5 +1,5 @@
 import { BaseError, type Hex } from "viem"
-import { getAddressFromInitCodeOrPaymasterAndData } from "../utils/index.js"
+import { getAddressFromInitCodeOrPaymasterAndData } from "../utils/"
 
 export type PaymasterNotDeployedErrorType = PaymasterNotDeployedError & {
     name: "PaymasterNotDeployedError"

@@ -5,11 +5,8 @@ import type {
     SignMessageReturnType,
     Transport
 } from "viem"
-import { type SmartAccount } from "../../accounts/types.js"
-import {
-    AccountOrClientNotFoundError,
-    parseAccount
-} from "../../utils/index.js"
+import { type SmartAccount } from "../../accounts/types"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 
 /**
  * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.

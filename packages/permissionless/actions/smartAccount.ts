@@ -1,38 +1,38 @@
 import {
     type DeployContractParametersWithPaymaster,
     deployContract
-} from "./smartAccount/deployContract.js"
+} from "./smartAccount/deployContract"
 
 import {
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
     type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
-} from "./smartAccount/prepareUserOperationRequest.js"
+} from "./smartAccount/prepareUserOperationRequest"
 
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
-} from "./smartAccount/sendTransaction.js"
+} from "./smartAccount/sendTransaction"
 
 import {
     type SendUserOperationParameters,
     sendUserOperation
-} from "./smartAccount/sendUserOperation.js"
+} from "./smartAccount/sendUserOperation"
 
-import { signMessage } from "./smartAccount/signMessage.js"
+import { signMessage } from "./smartAccount/signMessage"
 
-import { signTypedData } from "./smartAccount/signTypedData.js"
+import { signTypedData } from "./smartAccount/signTypedData"
 
 import {
     type SendTransactionsWithPaymasterParameters,
     sendTransactions
-} from "./smartAccount/sendTransactions.js"
+} from "./smartAccount/sendTransactions"
 
 import {
     type WriteContractWithPaymasterParameters,
     writeContract
-} from "./smartAccount/writeContract.js"
+} from "./smartAccount/writeContract"
 
 export {
     deployContract,

@@ -7,15 +7,15 @@ import type {
     Hash,
     Transport
 } from "viem"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { BundlerRpcSchema } from "../../types/bundler"
+import type { Prettify } from "../../types/"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
-} from "../../types/userOperation.js"
-import { deepHexlify } from "../../utils/deepHexlify.js"
-import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError.js"
+} from "../../types/userOperation"
+import { deepHexlify } from "../../utils/deepHexlify"
+import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError"
 
 export type SendUserOperationParameters = {
     userOperation: UserOperation

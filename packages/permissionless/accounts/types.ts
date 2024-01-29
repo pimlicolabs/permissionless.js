@@ -7,7 +7,7 @@ import {
     type LocalAccount
 } from "viem"
 import type { Chain, EncodeDeployDataParameters, Transport } from "viem"
-import { type UserOperation } from "../types/index.js"
+import { type UserOperation } from "../types"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
     override name = "SignTransactionNotSupportedBySmartAccount"

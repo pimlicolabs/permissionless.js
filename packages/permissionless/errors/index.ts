@@ -19,15 +19,15 @@ import {
     type SmartAccountSignatureValidityPeriodErrorType,
     SmartAccountValidationRevertedError,
     type SmartAccountValidationRevertedErrorType
-} from "./account.js"
+} from "./account"
 import {
     EstimateUserOperationGasError,
     type EstimateUserOperationGasErrorType
-} from "./estimateUserOperationGas.js"
+} from "./estimateUserOperationGas"
 import {
     SendUserOperationError,
     type SendUserOperationErrorType
-} from "./sendUserOperation.js"
+} from "./sendUserOperation"
 
 import {
     InvalidPaymasterAndDataError,
@@ -44,14 +44,14 @@ import {
     type PaymasterValidationRevertedErrorType,
     PaymasterValidityPeriodError,
     type PaymasterValidityPeriodErrorType
-} from "./paymaster.js"
+} from "./paymaster"
 
 import {
     InvalidAggregatorError,
     type InvalidAggregatorErrorType,
     InvalidBeneficiaryAddressError,
     type InvalidBeneficiaryAddressErrorType
-} from "./bundler.js"
+} from "./bundler"
 
 import {
     ActualGasCostTooHighError,
@@ -62,7 +62,7 @@ import {
     type GasValuesOverflowErrorType,
     VerificationGasLimitTooLowError,
     type VerificationGasLimitTooLowErrorType
-} from "./gas.js"
+} from "./gas"
 
 export {
     type InitCodeDidNotDeploySenderErrorType,

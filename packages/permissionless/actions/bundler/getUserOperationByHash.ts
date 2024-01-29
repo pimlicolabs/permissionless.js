@@ -1,8 +1,8 @@
 import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
-import type { UserOperation } from "../../types/userOperation.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { BundlerRpcSchema } from "../../types/bundler"
+import type { Prettify } from "../../types/"
+import type { UserOperation } from "../../types/userOperation"
 
 export type GetUserOperationByHashParameters = {
     hash: Hash

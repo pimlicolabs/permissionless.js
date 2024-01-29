@@ -7,14 +7,14 @@ import type {
     Hash,
     Transport
 } from "viem"
-import type { SmartAccount } from "../../accounts/types.js"
-import type { Prettify } from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
-import { parseAccount } from "../../utils/index.js"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA.js"
-import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
-import { sendUserOperation } from "./sendUserOperation.js"
+import type { SmartAccount } from "../../accounts/types"
+import type { Prettify } from "../../types/"
+import { getAction } from "../../utils/getAction"
+import { parseAccount } from "../../utils/"
+import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
+import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],

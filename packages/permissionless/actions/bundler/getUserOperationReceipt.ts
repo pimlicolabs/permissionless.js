@@ -7,11 +7,11 @@ import type {
     Hex,
     Transport
 } from "viem"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
-import type { TStatus } from "../../types/userOperation.js"
-import { transactionReceiptStatus } from "../../utils/deepHexlify.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { BundlerRpcSchema } from "../../types/bundler"
+import type { Prettify } from "../../types"
+import type { TStatus } from "../../types/userOperation"
+import { transactionReceiptStatus } from "../../utils/deepHexlify"
 
 export type GetUserOperationReceiptParameters = {
     hash: Hash

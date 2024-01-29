@@ -1,6 +1,6 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema } from "../../types/bundler.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { BundlerRpcSchema } from "../../types/bundler"
 
 /**
  * Returns the supported chain id by the bundler service

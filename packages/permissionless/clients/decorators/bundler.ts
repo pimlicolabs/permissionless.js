@@ -1,33 +1,33 @@
 import type { Address } from "abitype"
 import type { Client, Hash } from "viem"
-import { chainId } from "../../actions/bundler/chainId.js"
+import { chainId } from "../../actions/bundler/chainId"
 import {
     type EstimateUserOperationGasParameters,
     type EstimateUserOperationGasReturnType,
     estimateUserOperationGas
-} from "../../actions/bundler/estimateUserOperationGas.js"
+} from "../../actions/bundler/estimateUserOperationGas"
 import {
     type GetUserOperationByHashParameters,
     type GetUserOperationByHashReturnType,
     getUserOperationByHash
-} from "../../actions/bundler/getUserOperationByHash.js"
+} from "../../actions/bundler/getUserOperationByHash"
 import {
     type GetUserOperationReceiptParameters,
     type GetUserOperationReceiptReturnType,
     getUserOperationReceipt
-} from "../../actions/bundler/getUserOperationReceipt.js"
+} from "../../actions/bundler/getUserOperationReceipt"
 import {
     type SendUserOperationParameters,
     sendUserOperation
-} from "../../actions/bundler/sendUserOperation.js"
-import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints.js"
+} from "../../actions/bundler/sendUserOperation"
+import { supportedEntryPoints } from "../../actions/bundler/supportedEntryPoints"
 import {
     type WaitForUserOperationReceiptParameters,
     waitForUserOperationReceipt
-} from "../../actions/bundler/waitForUserOperationReceipt.js"
-import type { StateOverrides } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
-import type { BundlerClient } from "../createBundlerClient.js"
+} from "../../actions/bundler/waitForUserOperationReceipt"
+import type { StateOverrides } from "../../types/bundler"
+import type { Prettify } from "../../types/"
+import type { BundlerClient } from "../createBundlerClient"
 
 export type BundlerActions = {
     /**

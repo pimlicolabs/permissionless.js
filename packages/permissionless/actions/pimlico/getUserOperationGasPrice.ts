@@ -1,6 +1,6 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { Prettify } from "../../types/index.js"
-import type { PimlicoBundlerRpcSchema } from "../../types/pimlico.js"
+import type { Prettify } from "../../types/"
+import type { PimlicoBundlerRpcSchema } from "../../types/pimlico"
 
 export type GetUserOperationGasPriceReturnType = {
     slow: {

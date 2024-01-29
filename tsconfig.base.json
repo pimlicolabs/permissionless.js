@@ -37,5 +37,9 @@
         // Skip type checking for node modules
         "skipLibCheck": true,
         "noErrorTruncation": true
+    },
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "verbose": false
     }
 }

@@ -18,16 +18,16 @@ import {
     signMessage,
     signTypedData
 } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
-import type { SmartAccount } from "../types.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { getUserOperationHash } from "../../utils/getUserOperationHash"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import type { SmartAccount } from "../types"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccountSigner
-} from "../types.js"
-import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi.js"
+} from "../types"
+import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
 
 export type KernelEcdsaSmartAccount<
     transport extends Transport = Transport,

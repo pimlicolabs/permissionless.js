@@ -8,10 +8,10 @@ import {
     type Hex,
     type Transport
 } from "viem"
-import { type GetAccountParameterWithClient } from "../types/index.js"
-import type { UserOperation } from "../types/userOperation.js"
-import { getUserOperationHash } from "./getUserOperationHash.js"
-import { parseAccount } from "./index.js"
+import { type GetAccountParameterWithClient } from "../types/"
+import type { UserOperation } from "../types/userOperation"
+import { getUserOperationHash } from "./getUserOperationHash"
+import { parseAccount } from "./"
 
 export type SignUserOperationHashWithECDSAParams<
     TTransport extends Transport = Transport,
