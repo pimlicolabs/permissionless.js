@@ -8,8 +8,8 @@ import type {
     Transport
 } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
-import type { BundlerRpcSchema } from "../../types/bundler"
 import type { Prettify } from "../../types/"
+import type { BundlerRpcSchema } from "../../types/bundler"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex

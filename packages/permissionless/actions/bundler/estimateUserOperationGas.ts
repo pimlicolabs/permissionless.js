@@ -8,8 +8,8 @@ import {
 } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient"
-import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
 import type { Prettify } from "../../types/"
+import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
 import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import {

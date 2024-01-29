@@ -1,15 +1,15 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
 import type { SmartAccount } from "../../accounts/types"
-import type { StateOverrides } from "../../types/bundler"
 import type {
     GetAccountParameter,
     PartialBy,
     Prettify,
     UserOperation
 } from "../../types/"
-import { getAction } from "../../utils/getAction"
+import type { StateOverrides } from "../../types/bundler"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { getAction } from "../../utils/getAction"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
 export type SponsorUserOperationMiddleware = {

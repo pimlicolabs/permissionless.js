@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
-import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { UserOperation } from "permissionless"
+import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"

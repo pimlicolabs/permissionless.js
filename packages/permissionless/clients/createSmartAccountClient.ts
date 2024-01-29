@@ -8,8 +8,8 @@ import type {
 import { createClient } from "viem"
 import { type SmartAccount } from "../accounts/types"
 import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest"
-import { type BundlerRpcSchema } from "../types/bundler"
 import type { Prettify } from "../types/"
+import { type BundlerRpcSchema } from "../types/bundler"
 import {
     type SmartAccountActions,
     smartAccountActions

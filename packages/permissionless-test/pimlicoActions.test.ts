@@ -1,9 +1,9 @@
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import { UserOperation } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
 import { Hash, Hex } from "viem"
 import {

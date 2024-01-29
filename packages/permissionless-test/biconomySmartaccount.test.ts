@@ -1,9 +1,9 @@
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
-import { UserOperation } from "permissionless"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"

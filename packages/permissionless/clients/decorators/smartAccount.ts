@@ -39,8 +39,8 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract"
-import type { StateOverrides } from "../../types/bundler"
 import type { Prettify } from "../../types/"
+import type { StateOverrides } from "../../types/bundler"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,

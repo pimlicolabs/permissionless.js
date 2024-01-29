@@ -6,8 +6,8 @@ import type {
     Prettify,
     UserOperation
 } from "../../types/"
-import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { getAction } from "../../utils/getAction"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 import {
     type SponsorUserOperationMiddleware,

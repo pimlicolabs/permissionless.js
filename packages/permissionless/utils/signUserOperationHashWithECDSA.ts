@@ -10,8 +10,8 @@ import {
 } from "viem"
 import { type GetAccountParameterWithClient } from "../types/"
 import type { UserOperation } from "../types/userOperation"
-import { getUserOperationHash } from "./getUserOperationHash"
 import { parseAccount } from "./"
+import { getUserOperationHash } from "./getUserOperationHash"
 
 export type SignUserOperationHashWithECDSAParams<
     TTransport extends Transport = Transport,
