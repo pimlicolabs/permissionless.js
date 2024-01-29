@@ -11,13 +11,13 @@ import {
     getUserOperationHash
 } from "./getUserOperationHash.js"
 import { isSmartAccountDeployed } from "./isSmartAccountDeployed.js"
+import { providerToSmartAccountSigner } from "./providerToSmartAccountSigner.js"
 import {
     AccountOrClientNotFoundError,
     type SignUserOperationHashWithECDSAParams,
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
 import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner.js"
-import { providerToSmartAccountSigner } from "./providerToSmartAccountSigner.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
