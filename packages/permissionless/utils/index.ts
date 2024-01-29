@@ -16,7 +16,8 @@ import {
     type SignUserOperationHashWithECDSAParams,
     signUserOperationHashWithECDSA
 } from "./signUserOperationHashWithECDSA.js"
-import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
+import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner.js"
+import { providerToSmartAccountSigner } from "./providerToSmartAccountSigner.js"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
@@ -30,12 +31,13 @@ export {
     getAction,
     getUserOperationHash,
     getRequiredPrefund,
-    walletClientToCustomSigner,
+    walletClientToSmartAccountSigner,
     type GetRequiredPrefundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,
     type SignUserOperationHashWithECDSAParams,
     AccountOrClientNotFoundError,
     isSmartAccountDeployed,
+    providerToSmartAccountSigner,
     getAddressFromInitCodeOrPaymasterAndData
 }
