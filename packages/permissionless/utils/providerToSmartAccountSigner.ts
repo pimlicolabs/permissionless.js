@@ -4,7 +4,7 @@ import {
     createWalletClient,
     custom
 } from "viem"
-import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner"
+import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner.js"
 
 export const providerToSmartAccountSigner = async (
     provider: EIP1193Provider,
