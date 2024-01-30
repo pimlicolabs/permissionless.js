@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.34
+
+### Patch Changes
+
+- 76c4031e4d5e42fd8ceadf7ed96ba55d2bf4ea06: Remove imports from abitype and move them to viem, fixes: issue#105
+
 ## 0.0.33
 
 ### Patch Changes
