@@ -28,7 +28,7 @@ jobs:
           npm view $PACKAGE_NAME dist-tags --json | jq -r 'to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm $PACKAGE_NAME %
         working-directory: packages/permissionless
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}
 
       - name: Deprecate permissionless canary versions
         working-directory: packages/permissionless
@@ -54,7 +54,7 @@ jobs:
             fi
           done
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}
 
       - name: Prune @permissionless/wagmi tags
         run: |
@@ -63,7 +63,7 @@ jobs:
           npm view $PACKAGE_NAME dist-tags --json | jq -r 'to_entries | .[] | select(.key != "latest") | select(.key != "main") | select(.key != "next") | .key' | xargs -I % npm dist-tag rm $PACKAGE_NAME %
         working-directory: packages/wagmi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}
 
       - name: Deprecate @permissionless/wagmi canary versions
         working-directory: packages/wagmi
@@ -89,4 +89,4 @@ jobs:
             fi
           done
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}

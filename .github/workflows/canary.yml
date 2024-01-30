@@ -41,7 +41,7 @@ jobs:
       - name: Publish permissionless to npm
         run: cd packages/permissionless && npm publish --tag $(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//')
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}
 
       - name: Publish permissionless/wagmi to npm
         run: cd packages/wagmi && npm publish --tag $(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//')
