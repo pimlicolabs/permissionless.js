@@ -1,4 +1,4 @@
-import type { TypedData } from "abitype"
+import type { TypedData } from "viem"
 import {
     type Address,
     type Chain,
