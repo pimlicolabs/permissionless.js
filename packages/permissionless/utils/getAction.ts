@@ -1,5 +1,6 @@
 import type { Client } from "viem"
 
+// biome-ignore lint/suspicious/noExplicitAny: it's a generic function, so it's hard to type
 export function getAction<params extends any[], returnType extends {}>(
     client: Client,
     // biome-ignore lint/suspicious/noExplicitAny: it's a recursive function, so it's hard to type
