@@ -3,6 +3,6 @@
     "extends": "./tsconfig.permissionless.json",
     "compilerOptions": {
         "module": "es2015",
-        "outDir": "./packages/permissionless/_esm",
+        "outDir": "../packages/permissionless/_esm",
     }
 }

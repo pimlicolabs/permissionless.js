@@ -1,10 +1,10 @@
 {
     // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
-    "extends": "./tsconfig.permissionless.json",
+    "extends": "./tsconfig.wagmi.json",
     "compilerOptions": {
         "module": "esnext",
-        "outDir": "./packages/permissionless/_esm",
-        "declarationDir": "./packages/permissionless/_types",
+        "outDir": "../packages/wagmi/_esm",
+        "declarationDir": "../packages/wagmi/_types",
         "emitDeclarationOnly": true,
         "declaration": true,
         "declarationMap": true,

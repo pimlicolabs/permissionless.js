@@ -82,7 +82,7 @@ export function getBundlerError(
         return new ExecutionRevertedError({
             cause: err,
             message: executionRevertedError.details
-        }) as any
+        }) as ExecutionRevertedErrorType
     }
 
     // TODO: Add validation Errors
@@ -97,7 +97,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa10"
-        }) as any
+        }) as SenderAlreadyDeployedErrorType
     }
 
     if (InitCodeRevertedError.message.test(message)) {
@@ -105,7 +105,7 @@ export function getBundlerError(
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa13"
-        }) as any
+        }) as InitCodeRevertedErrorType
     }
 
     if (SenderAddressMismatchError.message.test(message)) {
@@ -114,7 +114,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa14"
-        }) as any
+        }) as SenderAddressMismatchErrorType
     }
 
     if (InitCodeDidNotDeploySenderError.message.test(message)) {
@@ -123,7 +123,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa15"
-        }) as any
+        }) as InitCodeDidNotDeploySenderErrorType
     }
 
     if (SenderNotDeployedError.message.test(message)) {
@@ -132,7 +132,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa20"
-        }) as any
+        }) as SenderNotDeployedErrorType
     }
 
     if (SmartAccountInsufficientFundsError.message.test(message)) {
@@ -141,7 +141,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa21"
-        }) as any
+        }) as SmartAccountInsufficientFundsErrorType
     }
 
     if (SmartAccountSignatureValidityPeriodError.message.test(message)) {
@@ -149,7 +149,7 @@ export function getBundlerError(
             cause: err,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa22"
-        }) as any
+        }) as SmartAccountSignatureValidityPeriodErrorType
     }
 
     if (SmartAccountValidationRevertedError.message.test(message)) {
@@ -158,7 +158,7 @@ export function getBundlerError(
             sender: args.userOperation.sender,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa23"
-        }) as any
+        }) as SmartAccountValidationRevertedErrorType
     }
 
     if (InvalidSmartAccountNonceError.message.test(message)) {
@@ -168,7 +168,7 @@ export function getBundlerError(
             nonce: args.userOperation.nonce,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa25"
-        }) as any
+        }) as InvalidSmartAccountNonceErrorType
     }
 
     if (PaymasterNotDeployedError.message.test(message)) {
@@ -177,7 +177,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa30"
-        }) as any
+        }) as PaymasterNotDeployedErrorType
     }
 
     if (PaymasterDepositTooLowError.message.test(message)) {
@@ -186,7 +186,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa31"
-        }) as any
+        }) as PaymasterDepositTooLowErrorType
     }
 
     if (PaymasterValidityPeriodError.message.test(message)) {
@@ -195,7 +195,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa32"
-        }) as any
+        }) as PaymasterValidityPeriodErrorType
     }
 
     if (PaymasterValidationRevertedError.message.test(message)) {
@@ -204,7 +204,7 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa33"
-        }) as any
+        }) as PaymasterValidationRevertedErrorType
     }
 
     if (PaymasterDataRejectedError.message.test(message)) {
@@ -213,8 +213,8 @@ export function getBundlerError(
             paymasterAndData: args.userOperation.paymasterAndData,
             docsPath:
                 "https://docs.pimlico.io/bundler/reference/entrypoint-errors/aa34"
-        }) as any
+        }) as PaymasterDataRejectedErrorType
     }
 
-    return new UnknownNodeError({ cause: err }) as any
+    return new UnknownNodeError({ cause: err }) as UnknownNodeErrorType
 }
