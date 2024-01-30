@@ -18,18 +18,18 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getUserOperationHash } from "../../utils/getUserOperationHash"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "../types.js"
+} from "../types"
 import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
-} from "./abi/BiconomySmartAccountAbi.js"
+} from "./abi/BiconomySmartAccountAbi"
 // import Abis
 
 export type BiconomySmartAccount<

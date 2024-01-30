@@ -1,6 +1,6 @@
 import { BaseError } from "viem"
-import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas.js"
-import { prettyPrint } from "./utils.js"
+import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas"
+import { prettyPrint } from "./utils"
 
 export type EstimateUserOperationGasErrorType =
     EstimateUserOperationGasError & {

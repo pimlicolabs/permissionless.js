@@ -1,9 +1,9 @@
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import { UserOperation } from "permissionless/index.js"
 import { getUserOperationHash } from "permissionless/utils"
 import { Hash, Hex } from "viem"
 import {
@@ -14,7 +14,7 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { buildUserOp } from "./userOp.js"
+import { buildUserOp } from "./userOp"
 import {
     getEntryPoint,
     getEoaWalletClient,
@@ -23,7 +23,7 @@ import {
     getPublicClient,
     getTestingChain,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 

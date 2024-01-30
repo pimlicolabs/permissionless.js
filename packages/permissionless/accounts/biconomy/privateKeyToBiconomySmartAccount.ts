@@ -9,7 +9,7 @@ import { privateKeyToAccount } from "viem/accounts"
 import {
     type BiconomySmartAccount,
     signerToBiconomySmartAccount
-} from "./signerToBiconomySmartAccount.js"
+} from "./signerToBiconomySmartAccount"
 
 /**
  * @description Creates a Biconomy Smart Account from a private key.

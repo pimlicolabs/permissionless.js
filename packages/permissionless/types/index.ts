@@ -1,6 +1,6 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { SmartAccount } from "../accounts/types.js"
-import type { UserOperation } from "./userOperation.js"
+import type { SmartAccount } from "../accounts/types"
+import type { UserOperation } from "./userOperation"
 export type { UserOperation }
 
 type IsUndefined<T> = [undefined] extends [T] ? true : false

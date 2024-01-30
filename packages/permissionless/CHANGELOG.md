@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.0.33
+
+### Patch Changes
+
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Renamed walletClientToCustomSigner to walletClientToSmartAccountSigner
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Added providerToSmartAccountSigner
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Use tsc-alias to resolve full paths
+
 ## 0.0.32
 
 ### Patch Changes

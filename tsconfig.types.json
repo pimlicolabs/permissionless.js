@@ -1,0 +1,12 @@
+{
+    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    "extends": "./tsconfig.permissionless.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "outDir": "./packages/permissionless/_esm",
+        "declarationDir": "./packages/permissionless/_types",
+        "emitDeclarationOnly": true,
+        "declaration": true,
+        "declarationMap": true,
+    }
+}

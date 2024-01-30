@@ -11,36 +11,36 @@ import type {
     TypedData,
     WriteContractParameters
 } from "viem"
-import type { SmartAccount } from "../../accounts/types.js"
+import type { SmartAccount } from "../../accounts/types"
 import {
     type SendTransactionsWithPaymasterParameters,
     sendTransactions
-} from "../../actions/smartAccount.js"
+} from "../../actions/smartAccount"
 import {
     type DeployContractParametersWithPaymaster,
     deployContract
-} from "../../actions/smartAccount/deployContract.js"
+} from "../../actions/smartAccount/deployContract"
 import {
     type PrepareUserOperationRequestReturnType,
     type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
-} from "../../actions/smartAccount/prepareUserOperationRequest.js"
+} from "../../actions/smartAccount/prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
-} from "../../actions/smartAccount/sendTransaction.js"
+} from "../../actions/smartAccount/sendTransaction"
 import {
     type SendUserOperationParameters,
     sendUserOperation
-} from "../../actions/smartAccount/sendUserOperation.js"
-import { signMessage } from "../../actions/smartAccount/signMessage.js"
-import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
+} from "../../actions/smartAccount/sendUserOperation"
+import { signMessage } from "../../actions/smartAccount/signMessage"
+import { signTypedData } from "../../actions/smartAccount/signTypedData"
 import {
     type WriteContractWithPaymasterParameters,
     writeContract
-} from "../../actions/smartAccount/writeContract.js"
-import type { StateOverrides } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
+} from "../../actions/smartAccount/writeContract"
+import type { Prettify } from "../../types/"
+import type { StateOverrides } from "../../types/bundler"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,

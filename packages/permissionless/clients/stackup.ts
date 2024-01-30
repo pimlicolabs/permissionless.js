@@ -6,12 +6,12 @@ import {
     type Transport,
     createClient
 } from "viem"
-import type { StackupPaymasterRpcSchema } from "../types/stackup.js"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler.js"
+import type { StackupPaymasterRpcSchema } from "../types/stackup"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 import {
     type StackupPaymasterClientActions,
     stackupPaymasterActions
-} from "./decorators/stackup.js"
+} from "./decorators/stackup"
 
 export type StackupPaymasterClient = Client<
     Transport,

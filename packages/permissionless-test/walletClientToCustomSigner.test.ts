@@ -1,10 +1,10 @@
 import dotenv from "dotenv"
+import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { UserOperation } from "permissionless/index.js"
 import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint.js"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
+import { EntryPointAbi } from "./abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     getBundlerClient,
     getCustomSignerToSimpleSmartAccount,
@@ -14,7 +14,7 @@ import {
     getSignerToSimpleSmartAccount,
     getSmartAccountClient,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 

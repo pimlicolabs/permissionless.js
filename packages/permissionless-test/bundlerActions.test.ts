@@ -15,7 +15,7 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { buildUserOp } from "./userOp.js"
+import { buildUserOp } from "./userOp"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -23,7 +23,7 @@ import {
     getPublicClient,
     getTestingChain,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 

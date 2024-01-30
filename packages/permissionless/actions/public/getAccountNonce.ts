@@ -1,7 +1,7 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { readContract } from "viem/actions"
-import type { Prettify } from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
+import type { Prettify } from "../../types/"
+import { getAction } from "../../utils/getAction"
 
 export type GetAccountNonceParams = {
     sender: Address

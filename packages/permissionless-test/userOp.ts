@@ -12,15 +12,15 @@ import {
     zeroAddress
 } from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount.js"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory.js"
+import { SimpleAccountAbi } from "./abis/SimpleAccount"
+import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
 import {
     getDummySignature,
     getEntryPoint,
     getFactoryAddress,
     getPublicClient,
     isAccountDeployed
-} from "./utils.js"
+} from "./utils"
 
 const getInitCode = async (
     factoryAddress: Address,

@@ -1,6 +1,6 @@
 import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { UserOperationWithBigIntAsHex } from "./userOperation.js"
+import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {

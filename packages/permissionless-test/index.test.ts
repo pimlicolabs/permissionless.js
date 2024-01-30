@@ -10,7 +10,7 @@ import {
 } from "permissionless/utils"
 import { Address, Hash, Hex } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { buildUserOp, getAccountInitCode } from "./userOp.js"
+import { buildUserOp, getAccountInitCode } from "./userOp"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -19,7 +19,7 @@ import {
     getPrivateKeyAccount,
     getPublicClient,
     getTestingChain
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 
