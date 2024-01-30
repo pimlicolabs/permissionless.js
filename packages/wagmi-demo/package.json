@@ -16,12 +16,12 @@
         "viem": "^2.0.0",
         "@tanstack/react-query": "5.0.5",
         "react": "^18.2.0",
-        "permissionless": "workspace:*",
+        "permissionless": "workspace:packages/permissionless",
         "vite": "^4.4.9",
         "@types/react": "^18.2.22",
         "@types/react-dom": "^18.2.7",
         "react-dom": "^18.2.0",
-        "@permissionless/wagmi": "workspace:*",
+        "@permissionless/wagmi": "workspace:packages/wagmi",
         "@vitejs/plugin-react": "^4.1.0"
     }
 }
