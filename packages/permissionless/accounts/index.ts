@@ -1,6 +1,7 @@
 import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount"
 
 import {
+    type SignerToSimpleSmartAccount,
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
 } from "./signerToSimpleSmartAccount"
@@ -46,5 +47,6 @@ export {
     type KernelEcdsaSmartAccount,
     signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
-    signerToBiconomySmartAccount
+    signerToBiconomySmartAccount,
+    type SignerToSimpleSmartAccount
 }
