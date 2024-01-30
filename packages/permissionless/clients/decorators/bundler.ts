@@ -1,4 +1,4 @@
-import type { Address } from "abitype"
+import type { Address } from "viem"
 import type { Client, Hash } from "viem"
 import { chainId } from "../../actions/bundler/chainId"
 import {

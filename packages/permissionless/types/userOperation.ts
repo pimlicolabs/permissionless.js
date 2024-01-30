@@ -1,4 +1,4 @@
-import type { Address } from "abitype"
+import type { Address } from "viem"
 import type { Hex } from "viem"
 
 export type TStatus = "success" | "reverted"
