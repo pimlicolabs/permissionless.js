@@ -1,9 +1,12 @@
-import React from "react"
+import { smartAccount } from "@permissionless/wagmi"
 import {
     createSmartAccountClient,
     walletClientToCustomSigner
 } from "permissionless"
 import { signerToSafeSmartAccount } from "permissionless/accounts"
+import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
+import React from "react"
+import { http, zeroAddress } from "viem"
 import {
     useAccount,
     useConfig,
@@ -11,10 +14,7 @@ import {
     useDisconnect,
     useSendTransaction
 } from "wagmi"
-import { http, zeroAddress } from "viem"
 import { getPublicClient, getWalletClient } from "wagmi/actions"
-import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
-import { smartAccount } from "@permissionless/wagmi"
 
 function App() {
     const account = useAccount()

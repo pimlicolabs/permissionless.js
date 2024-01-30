@@ -1,12 +1,12 @@
-import React from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Buffer } from "buffer"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import React from "react"
 import ReactDOM from "react-dom/client"
-import { WagmiProvider, createConfig, http } from "wagmi"
+import { http, WagmiProvider, createConfig } from "wagmi"
 import App from "./App.tsx"
 
-import "./index.css"
 import { sepolia } from "viem/chains"
+import "./index.css"
 
 globalThis.Buffer = Buffer
 
