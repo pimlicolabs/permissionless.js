@@ -9,8 +9,8 @@ export function smartAccount<
     account extends SmartAccount = SmartAccount
 >({
     smartAccountClient,
-    id = "smart-account",
-    name = "Smart Account",
+    id = smartAccountClient.uid,
+    name = smartAccountClient.name,
     type = "smart-account"
 }: {
     smartAccountClient: SmartAccountClient<transport, chain, account> & {
@@ -20,11 +20,13 @@ export function smartAccount<
     name?: string
     type?: string
 }) {
+    // Don't remove this, it is needed because wagmi has an opinion on always estimating gas:
+    // https://github.com/wevm/wagmi/blob/main/packages/core/src/actions/sendTransaction.ts#L77
     smartAccountClient.estimateGas = () => {
         return undefined
     }
 
-    return createConnector((_config) => ({
+    return createConnector((config) => ({
         id,
         name,
         type,
@@ -48,11 +50,17 @@ export function smartAccount<
         },
         async getProvider() {},
         async isAuthorized() {
-            return true
+            return !!smartAccountClient.account.address
         },
-        onAccountsChanged() {},
-        onChainChanged() {},
-        onDisconnect() {},
+        onAccountsChanged() {
+            // Not relevant
+        },
+        onChainChanged() {
+            // Not relevant because smart accounts only exist on single chain.
+        },
+        onDisconnect() {
+            config.emitter.emit("disconnect")
+        },
         async getClient({ chainId: requestedChainId }: { chainId: number }) {
             const chainId = await this.getChainId()
             if (requestedChainId !== chainId) {
