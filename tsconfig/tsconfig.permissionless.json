@@ -2,16 +2,16 @@
     // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
     "extends": "./tsconfig.base.json",
     "include": [
-        "packages/permissionless"
+        "../packages/permissionless"
     ],
     "exclude": [
-        "packages/permissionless/**/*.test.ts",
-        "packages/permissionless/**/*.test-d.ts",
-        "packages/permissionless/**/*.bench.ts"
+        "../packages/permissionless/**/*.test.ts",
+        "../packages/permissionless/**/*.test-d.ts",
+        "../packages/permissionless/**/*.bench.ts"
     ],
     "compilerOptions": {
         "moduleResolution": "node",
         "sourceMap": true,
-        "rootDir": "./packages/permissionless"
+        "rootDir": "../packages/permissionless"
     }
 }
