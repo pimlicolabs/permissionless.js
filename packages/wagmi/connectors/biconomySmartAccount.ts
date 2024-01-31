@@ -16,7 +16,7 @@ export type BiconomySmartAccountParameters<
     TAddress extends Address = Address
 > = Prettify<
     {
-        publicCLient: PublicClient<TTransport, TChain>
+        publicClient: PublicClient<TTransport, TChain>
         signer: SmartAccountSigner<TSource, TAddress>
         transport: TTransport
     } & Omit<
@@ -32,14 +32,14 @@ export async function biconomySmartAccount<
     TSource extends string = "custom",
     TAddress extends Address = Address
 >({
-    publicCLient,
+    publicClient,
     signer,
     transport,
     sponsorUserOperation,
     ...rest
 }: BiconomySmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
     const smartAccountClient = createSmartAccountClient({
-        account: await signerToBiconomySmartAccount(publicCLient, {
+        account: await signerToBiconomySmartAccount(publicClient, {
             ...rest,
             signer
         }),

@@ -16,7 +16,7 @@ export type SafeSmartAccountParameters<
     TAddress extends Address = Address
 > = Prettify<
     {
-        publicCLient: PublicClient<TTransport, TChain>
+        publicClient: PublicClient<TTransport, TChain>
         signer: SmartAccountSigner<TSource, TAddress>
         transport: TTransport
     } & Omit<SignerToSafeSmartAccountParameters<TSource, TAddress>, "signer"> &
@@ -29,14 +29,14 @@ export async function safeSmartAccount<
     TSource extends string = "custom",
     TAddress extends Address = Address
 >({
-    publicCLient,
+    publicClient,
     signer,
     transport,
     sponsorUserOperation,
     ...rest
 }: SafeSmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
     const smartAccountClient = createSmartAccountClient({
-        account: await signerToSafeSmartAccount(publicCLient, {
+        account: await signerToSafeSmartAccount(publicClient, {
             ...rest,
             signer
         }),

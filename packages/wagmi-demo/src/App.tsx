@@ -27,11 +27,11 @@ function App() {
     const smartAccounts = ["Simple", "Safe", "Biconomy", "Kernel"]
 
     const connectSmartAccount = async (smartAccount: string) => {
-        const publicCLient = getPublicClient(config)
+        const publicClient = getPublicClient(config)
         const walletClient = await getWalletClient(config)
 
-        if (!publicCLient) {
-            throw new Error("publicCLient not found")
+        if (!publicClient) {
+            throw new Error("publicClient not found")
         }
 
         const pimlicoClient = createPimlicoPaymasterClient({
@@ -43,7 +43,7 @@ function App() {
         switch (smartAccount) {
             case "Simple":
                 connector = await simpleSmartAccount({
-                    publicCLient: publicCLient,
+                    publicClient: publicClient,
                     transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     factoryAddress: import.meta.env
@@ -55,7 +55,7 @@ function App() {
                 break
             case "Safe":
                 connector = await safeSmartAccount({
-                    publicCLient: publicCLient,
+                    publicClient: publicClient,
                     transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     safeVersion: "1.4.1",
@@ -66,7 +66,7 @@ function App() {
                 break
             case "Biconomy":
                 connector = await biconomySmartAccount({
-                    publicCLient: publicCLient,
+                    publicClient: publicClient,
                     transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
@@ -77,7 +77,7 @@ function App() {
 
             case "Kernel":
                 connector = await kernelSmartAccount({
-                    publicCLient: publicCLient,
+                    publicClient: publicClient,
                     transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
