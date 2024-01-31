@@ -1,15 +1,15 @@
 import { createSmartAccountClient } from "permissionless"
 import {
-    type SignerToSimpleSmartAccountParameters,
+    type SignerToBiconomySmartAccountParameters,
     type SmartAccountSigner,
-    signerToSimpleSmartAccount
+    signerToBiconomySmartAccount
 } from "permissionless/accounts"
 import type { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import type { Prettify } from "permissionless/types"
 import type { Address, Chain, PublicClient, Transport } from "viem"
 import { smartAccount } from "./smartAccount"
 
-export type SimpleSmartAccountParameters<
+export type BiconomySmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -20,13 +20,13 @@ export type SimpleSmartAccountParameters<
         signer: SmartAccountSigner<TSource, TAddress>
         transport: TTransport
     } & Omit<
-        SignerToSimpleSmartAccountParameters<TSource, TAddress>,
+        SignerToBiconomySmartAccountParameters<TSource, TAddress>,
         "signer"
     > &
         SponsorUserOperationMiddleware
 >
 
-export async function simpleSmartAccount<
+export async function biconomySmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -37,9 +37,9 @@ export async function simpleSmartAccount<
     transport,
     sponsorUserOperation,
     ...rest
-}: SimpleSmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
+}: BiconomySmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
     const smartAccountClient = createSmartAccountClient({
-        account: await signerToSimpleSmartAccount(publicCLient, {
+        account: await signerToBiconomySmartAccount(publicCLient, {
             ...rest,
             signer
         }),

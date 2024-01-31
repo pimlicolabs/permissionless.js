@@ -1,13 +1,15 @@
-import { smartAccount } from "@permissionless/wagmi"
 import {
-    createSmartAccountClient,
-    walletClientToCustomSigner
-} from "permissionless"
-import { signerToSafeSmartAccount } from "permissionless/accounts"
+    biconomySmartAccount,
+    kernelSmartAccount,
+    simpleSmartAccount
+} from "@permissionless/wagmi"
+import { safeSmartAccount } from "@permissionless/wagmi"
 import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
+import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import React from "react"
-import { http, zeroAddress } from "viem"
+import { http, Address, zeroAddress } from "viem"
 import {
+    CreateConnectorFn,
     useAccount,
     useConfig,
     useConnect,
@@ -22,31 +24,68 @@ function App() {
     const { disconnect } = useDisconnect()
     const config = useConfig()
 
-    const connectSmartAccount = async () => {
-        const client = getPublicClient(config)
+    const smartAccounts = ["Simple", "Safe", "Biconomy", "Kernel"]
+
+    const connectSmartAccount = async (smartAccount: string) => {
+        const publicCLient = getPublicClient(config)
         const walletClient = await getWalletClient(config)
 
+        if (!publicCLient) {
+            throw new Error("publicCLient not found")
+        }
+
         const pimlicoClient = createPimlicoPaymasterClient({
-            transport: http(import.meta.env.PAYMASTER_URL)
+            transport: http(import.meta.env.VITE_PAYMASTER_URL as string)
         })
 
-        if (!walletClient) return
+        let connector: CreateConnectorFn
 
-        const smartAccountClient = createSmartAccountClient({
-            account: await signerToSafeSmartAccount(client, {
-                safeVersion: "1.4.1",
-                entryPoint: import.meta.env.ENTRY_POINT,
-                signer: walletClientToCustomSigner(walletClient)
-            }),
-            transport: http(import.meta.env.BUNDLER_URL),
-            sponsorUserOperation: pimlicoClient.sponsorUserOperation
-        })
+        switch (smartAccount) {
+            case "Simple":
+                connector = await simpleSmartAccount({
+                    publicCLient: publicCLient,
+                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    signer: walletClientToSmartAccountSigner(walletClient),
+                    factoryAddress: import.meta.env
+                        .VITE_FACTORY_ADDRESS as Address,
+                    entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
+                    sponsorUserOperation: pimlicoClient.sponsorUserOperation
+                })
+                connect({ connector })
+                break
+            case "Safe":
+                connector = await safeSmartAccount({
+                    publicCLient: publicCLient,
+                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    signer: walletClientToSmartAccountSigner(walletClient),
+                    safeVersion: "1.4.1",
+                    entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
+                    sponsorUserOperation: pimlicoClient.sponsorUserOperation
+                })
+                connect({ connector })
+                break
+            case "Biconomy":
+                connector = await biconomySmartAccount({
+                    publicCLient: publicCLient,
+                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    signer: walletClientToSmartAccountSigner(walletClient),
+                    entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
+                    sponsorUserOperation: pimlicoClient.sponsorUserOperation
+                })
+                connect({ connector })
+                break
 
-        const connector = smartAccount({
-            smartAccountClient: smartAccountClient
-        })
-
-        connect({ connector })
+            case "Kernel":
+                connector = await kernelSmartAccount({
+                    publicCLient: publicCLient,
+                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    signer: walletClientToSmartAccountSigner(walletClient),
+                    entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
+                    sponsorUserOperation: pimlicoClient.sponsorUserOperation
+                })
+                connect({ connector })
+                break
+        }
     }
 
     const {
@@ -106,23 +145,28 @@ function App() {
 
             <div>
                 <h2>Connect</h2>
-                <button
-                    key={"smartAccount"}
-                    onClick={() => connectSmartAccount()}
-                    type="button"
-                >
-                    Custom safe smart account
-                </button>
-                {connectors.map((connector) => (
-                    <button
-                        style={{ marginLeft: 12 }}
-                        key={connector.uid}
-                        onClick={() => connect({ connector })}
-                        type="button"
-                    >
-                        {connector.name}
-                    </button>
-                ))}
+                {account.status === "connected" &&
+                    smartAccounts.map((sa) => (
+                        <button
+                            style={{ marginLeft: 12 }}
+                            key={sa}
+                            onClick={() => connectSmartAccount(sa)}
+                            type="button"
+                        >
+                            Custom {sa} smart account
+                        </button>
+                    ))}
+                {account.status !== "connected" &&
+                    connectors.map((connector) => (
+                        <button
+                            style={{ marginLeft: 12 }}
+                            key={connector.uid}
+                            onClick={() => connect({ connector })}
+                            type="button"
+                        >
+                            {connector.name}
+                        </button>
+                    ))}
                 <div>{status}</div>
                 <div>{error?.message}</div>
             </div>

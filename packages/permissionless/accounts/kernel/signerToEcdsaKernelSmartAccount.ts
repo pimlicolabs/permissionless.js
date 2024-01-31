@@ -20,6 +20,7 @@ import {
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import type { Prettify } from "../../types"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import type { SmartAccount } from "../types"
@@ -199,6 +200,19 @@ const getAccountAddress = async <
     })
 }
 
+export type SignerToEcdsaKernelSmartAccountParameters<
+    TSource extends string = "custom",
+    TAddress extends Address = Address
+> = Prettify<{
+    signer: SmartAccountSigner<TSource, TAddress>
+    entryPoint: Address
+    address?: Address
+    index?: bigint
+    factoryAddress?: Address
+    accountLogicAddress?: Address
+    ecdsaValidatorAddress?: Address
+    deployedAccountAddress?: Address
+}>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
  * @param client
@@ -226,16 +240,7 @@ export async function signerToEcdsaKernelSmartAccount<
         accountLogicAddress = KERNEL_ADDRESSES.ACCOUNT_V2_2_LOGIC,
         ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR,
         deployedAccountAddress
-    }: {
-        signer: SmartAccountSigner<TSource, TAddress>
-        entryPoint: Address
-        address?: Address
-        index?: bigint
-        factoryAddress?: Address
-        accountLogicAddress?: Address
-        ecdsaValidatorAddress?: Address
-        deployedAccountAddress?: Address
-    }
+    }: SignerToEcdsaKernelSmartAccountParameters<TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<TTransport, TChain>> {
     // Get the private key related account
     const viemSigner: LocalAccount = {

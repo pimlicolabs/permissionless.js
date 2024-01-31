@@ -1,15 +1,15 @@
 import { createSmartAccountClient } from "permissionless"
 import {
-    type SignerToSimpleSmartAccountParameters,
+    type SignerToSafeSmartAccountParameters,
     type SmartAccountSigner,
-    signerToSimpleSmartAccount
+    signerToSafeSmartAccount
 } from "permissionless/accounts"
 import type { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import type { Prettify } from "permissionless/types"
 import type { Address, Chain, PublicClient, Transport } from "viem"
 import { smartAccount } from "./smartAccount"
 
-export type SimpleSmartAccountParameters<
+export type SafeSmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -19,14 +19,11 @@ export type SimpleSmartAccountParameters<
         publicCLient: PublicClient<TTransport, TChain>
         signer: SmartAccountSigner<TSource, TAddress>
         transport: TTransport
-    } & Omit<
-        SignerToSimpleSmartAccountParameters<TSource, TAddress>,
-        "signer"
-    > &
+    } & Omit<SignerToSafeSmartAccountParameters<TSource, TAddress>, "signer"> &
         SponsorUserOperationMiddleware
 >
 
-export async function simpleSmartAccount<
+export async function safeSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -37,9 +34,9 @@ export async function simpleSmartAccount<
     transport,
     sponsorUserOperation,
     ...rest
-}: SimpleSmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
+}: SafeSmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
     const smartAccountClient = createSmartAccountClient({
-        account: await signerToSimpleSmartAccount(publicCLient, {
+        account: await signerToSafeSmartAccount(publicCLient, {
             ...rest,
             signer
         }),

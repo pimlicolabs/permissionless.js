@@ -39,7 +39,7 @@
         "lint:fix": "bun run lint --apply",
         "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
         "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage",
-        "run:demo": "bun run --cwd packages/wagmi-demo dev",
+        "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
         "build:wagmi:cjs": "tsc --project ./tsconfig/tsconfig.wagmi.cjs.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/wagmi/_cjs/package.json",
         "build:wagmi:esm": "tsc --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
         "build:wagmi:types": "tsc --project ./tsconfig/tsconfig.wagmi.types.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.types.json"

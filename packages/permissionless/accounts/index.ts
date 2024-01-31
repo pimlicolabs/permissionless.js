@@ -1,30 +1,42 @@
-import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount"
+import {
+    type PrivateKeyToSimpleSmartAccountParameters,
+    privateKeyToSimpleSmartAccount
+} from "./simple/privateKeyToSimpleSmartAccount"
 
 import {
-    type SignerToSimpleSmartAccount,
+    type SignerToSimpleSmartAccountParameters,
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
-} from "./signerToSimpleSmartAccount"
+} from "./simple/signerToSimpleSmartAccount"
 
-import { privateKeyToSafeSmartAccount } from "./privateKeyToSafeSmartAccount"
+import {
+    type PrivateKeyToSafeSmartAccountParameters,
+    privateKeyToSafeSmartAccount
+} from "./safe/privateKeyToSafeSmartAccount"
 
 import {
     type SafeSmartAccount,
     type SafeVersion,
+    type SignerToSafeSmartAccountParameters,
     signerToSafeSmartAccount
-} from "./signerToSafeSmartAccount"
+} from "./safe/signerToSafeSmartAccount"
 
 import {
     type KernelEcdsaSmartAccount,
+    type SignerToEcdsaKernelSmartAccountParameters,
     signerToEcdsaKernelSmartAccount
 } from "./kernel/signerToEcdsaKernelSmartAccount"
 
 import {
     type BiconomySmartAccount,
+    type SignerToBiconomySmartAccountParameters,
     signerToBiconomySmartAccount
 } from "./biconomy/signerToBiconomySmartAccount"
 
-import { privateKeyToBiconomySmartAccount } from "./biconomy/privateKeyToBiconomySmartAccount"
+import {
+    type PrivateKeyToBiconomySmartAccountParameters,
+    privateKeyToBiconomySmartAccount
+} from "./biconomy/privateKeyToBiconomySmartAccount"
 
 import {
     SignTransactionNotSupportedBySmartAccount,
@@ -48,5 +60,11 @@ export {
     signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
     signerToBiconomySmartAccount,
-    type SignerToSimpleSmartAccount
+    type SignerToSimpleSmartAccountParameters,
+    type SignerToSafeSmartAccountParameters,
+    type PrivateKeyToSimpleSmartAccountParameters,
+    type PrivateKeyToSafeSmartAccountParameters,
+    type SignerToEcdsaKernelSmartAccountParameters,
+    type SignerToBiconomySmartAccountParameters,
+    type PrivateKeyToBiconomySmartAccountParameters
 }
