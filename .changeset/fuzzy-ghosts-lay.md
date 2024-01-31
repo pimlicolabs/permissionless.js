@@ -2,4 +2,4 @@
 "@permissionless/wagmi": patch
 ---
 
-Add account specific connectors
+Added account-specific connectors
