@@ -43,8 +43,10 @@ function App() {
         switch (smartAccount) {
             case "Simple":
                 connector = await simpleSmartAccount({
-                    publicClient: publicClient,
-                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    publicClient,
+                    bundlerTransport: http(
+                        import.meta.env.VITE_BUNDLER_RPC_HOST
+                    ),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     factoryAddress: import.meta.env
                         .VITE_FACTORY_ADDRESS as Address,
@@ -55,8 +57,10 @@ function App() {
                 break
             case "Safe":
                 connector = await safeSmartAccount({
-                    publicClient: publicClient,
-                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    publicClient,
+                    bundlerTransport: http(
+                        import.meta.env.VITE_BUNDLER_RPC_HOST
+                    ),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     safeVersion: "1.4.1",
                     entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
@@ -66,8 +70,10 @@ function App() {
                 break
             case "Biconomy":
                 connector = await biconomySmartAccount({
-                    publicClient: publicClient,
-                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    publicClient,
+                    bundlerTransport: http(
+                        import.meta.env.VITE_BUNDLER_RPC_HOST
+                    ),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
                     sponsorUserOperation: pimlicoClient.sponsorUserOperation
@@ -77,8 +83,10 @@ function App() {
 
             case "Kernel":
                 connector = await kernelSmartAccount({
-                    publicClient: publicClient,
-                    transport: http(import.meta.env.VITE_BUNDLER_RPC_HOST),
+                    publicClient,
+                    bundlerTransport: http(
+                        import.meta.env.VITE_BUNDLER_RPC_HOST
+                    ),
                     signer: walletClientToSmartAccountSigner(walletClient),
                     entryPoint: import.meta.env.VITE_ENTRY_POINT as Address,
                     sponsorUserOperation: pimlicoClient.sponsorUserOperation

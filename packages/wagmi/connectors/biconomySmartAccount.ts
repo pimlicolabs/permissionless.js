@@ -1,13 +1,13 @@
-import { createSmartAccountClient } from "permissionless"
 import {
     type SignerToBiconomySmartAccountParameters,
-    type SmartAccountSigner,
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
-import type { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import type { Prettify } from "permissionless/types"
-import type { Address, Chain, PublicClient, Transport } from "viem"
-import { smartAccount } from "./smartAccount"
+import type { Address, Chain, Transport } from "viem"
+import {
+    type SmartAccountParameters,
+    smartAccountConnectorHelper
+} from "./simpleSmartAccount"
 
 export type BiconomySmartAccountParameters<
     TTransport extends Transport = Transport,
@@ -15,15 +15,16 @@ export type BiconomySmartAccountParameters<
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<
-    {
-        publicClient: PublicClient<TTransport, TChain>
-        signer: SmartAccountSigner<TSource, TAddress>
-        transport: TTransport
-    } & Omit<
-        SignerToBiconomySmartAccountParameters<TSource, TAddress>,
-        "signer"
-    > &
-        SponsorUserOperationMiddleware
+    SmartAccountParameters<
+        Omit<
+            SignerToBiconomySmartAccountParameters<TSource, TAddress>,
+            "signer"
+        >,
+        TTransport,
+        TChain,
+        TSource,
+        TAddress
+    >
 >
 
 export async function biconomySmartAccount<
@@ -34,20 +35,19 @@ export async function biconomySmartAccount<
 >({
     publicClient,
     signer,
-    transport,
+    bundlerTransport,
     sponsorUserOperation,
     ...rest
-}: BiconomySmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
-    const smartAccountClient = createSmartAccountClient({
+}: Prettify<
+    BiconomySmartAccountParameters<TTransport, TChain, TSource, TAddress>
+>) {
+    return smartAccountConnectorHelper({
         account: await signerToBiconomySmartAccount(publicClient, {
             ...rest,
             signer
         }),
-        transport: transport,
+        publicClient,
+        bundlerTransport,
         sponsorUserOperation
-    })
-
-    return smartAccount({
-        smartAccountClient: smartAccountClient
     })
 }

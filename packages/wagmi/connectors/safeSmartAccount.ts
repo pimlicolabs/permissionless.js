@@ -1,13 +1,13 @@
-import { createSmartAccountClient } from "permissionless"
 import {
     type SignerToSafeSmartAccountParameters,
-    type SmartAccountSigner,
     signerToSafeSmartAccount
 } from "permissionless/accounts"
-import type { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import type { Prettify } from "permissionless/types"
-import type { Address, Chain, PublicClient, Transport } from "viem"
-import { smartAccount } from "./smartAccount"
+import type { Address, Chain, Transport } from "viem"
+import {
+    type SmartAccountParameters,
+    smartAccountConnectorHelper
+} from "./simpleSmartAccount"
 
 export type SafeSmartAccountParameters<
     TTransport extends Transport = Transport,
@@ -15,12 +15,13 @@ export type SafeSmartAccountParameters<
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<
-    {
-        publicClient: PublicClient<TTransport, TChain>
-        signer: SmartAccountSigner<TSource, TAddress>
-        transport: TTransport
-    } & Omit<SignerToSafeSmartAccountParameters<TSource, TAddress>, "signer"> &
-        SponsorUserOperationMiddleware
+    SmartAccountParameters<
+        Omit<SignerToSafeSmartAccountParameters<TSource, TAddress>, "signer">,
+        TTransport,
+        TChain,
+        TSource,
+        TAddress
+    >
 >
 
 export async function safeSmartAccount<
@@ -31,20 +32,19 @@ export async function safeSmartAccount<
 >({
     publicClient,
     signer,
-    transport,
+    bundlerTransport,
     sponsorUserOperation,
     ...rest
-}: SafeSmartAccountParameters<TTransport, TChain, TSource, TAddress>) {
-    const smartAccountClient = createSmartAccountClient({
+}: Prettify<
+    SafeSmartAccountParameters<TTransport, TChain, TSource, TAddress>
+>) {
+    return smartAccountConnectorHelper({
         account: await signerToSafeSmartAccount(publicClient, {
             ...rest,
             signer
         }),
-        transport: transport,
+        publicClient,
+        bundlerTransport,
         sponsorUserOperation
-    })
-
-    return smartAccount({
-        smartAccountClient: smartAccountClient
     })
 }
