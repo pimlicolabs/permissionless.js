@@ -1,6 +1,6 @@
 {
     "name": "@permissionless/wagmi",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless/wagmi",
     "repository": "github:pimlicolabs/permissionless.js",
@@ -11,7 +11,13 @@
     "type": "module",
     "sideEffects": false,
     "description": "A utility library for working with ERC-4337",
-    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
+    "keywords": [
+        "ethereum",
+        "erc-4337",
+        "eip-4337",
+        "paymaster",
+        "bundler"
+    ],
     "license": "MIT",
     "exports": {
         ".": {
@@ -23,6 +29,6 @@
     "peerDependencies": {
         "wagmi": "^2.5.1",
         "viem": "^2.0.0",
-        "permissionless": "^0.0.30"
+        "permissionless": "^0.0.35"
     }
 }

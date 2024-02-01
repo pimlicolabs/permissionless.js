@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.35
+
+### Patch Changes
+
+- 17ba362046c66642e908b7f8af0d0b4b4ef16de1: Added account parameters types
+
 ## 0.0.34
 
 ### Patch Changes
