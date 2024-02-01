@@ -12,15 +12,16 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
-import { getAccountNonce } from "../actions/public/getAccountNonce"
-import { getSenderAddress } from "../actions/public/getSenderAddress"
-import { getUserOperationHash } from "../utils/getUserOperationHash"
-import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import type { Prettify } from "../../types"
+import { getUserOperationHash } from "../../utils/getUserOperationHash"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types"
+} from "../types"
 
 export type SimpleSmartAccount<
     transport extends Transport = Transport,
@@ -93,6 +94,17 @@ const getAccountAddress = async <
     })
 }
 
+export type SignerToSimpleSmartAccountParameters<
+    TSource extends string = "custom",
+    TAddress extends Address = Address
+> = Prettify<{
+    signer: SmartAccountSigner<TSource, TAddress>
+    factoryAddress: Address
+    entryPoint: Address
+    index?: bigint
+    address?: Address
+}>
+
 /**
  * @description Creates an Simple Account from a private key.
  *
@@ -111,13 +123,7 @@ export async function signerToSimpleSmartAccount<
         entryPoint,
         index = 0n,
         address
-    }: {
-        signer: SmartAccountSigner<TSource, TAddress>
-        factoryAddress: Address
-        entryPoint: Address
-        index?: bigint
-        address?: Address
-    }
+    }: SignerToSimpleSmartAccountParameters<TSource, TAddress>
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
     const viemSigner: LocalAccount = {
         ...signer,

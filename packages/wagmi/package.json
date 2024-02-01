@@ -21,7 +21,7 @@
         }
     },
     "peerDependencies": {
-        "wagmi": "^0.0.0-canary-20240123224806",
+        "wagmi": "^2.5.1",
         "viem": "^2.0.0",
         "permissionless": "^0.0.30"
     }

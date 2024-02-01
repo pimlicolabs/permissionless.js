@@ -27,13 +27,14 @@ import {
     signMessage,
     signTypedData
 } from "viem/actions"
-import { getAccountNonce } from "../actions/public/getAccountNonce"
-import { isSmartAccountDeployed } from "../utils/isSmartAccountDeployed"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import type { Prettify } from "../../types"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types"
+} from "../types"
 
 export type SafeVersion = "1.4.1"
 
@@ -488,6 +489,31 @@ const getDefaultAddresses = (
     }
 }
 
+export type SignerToSafeSmartAccountParameters<
+    TSource extends string = "custom",
+    TAddress extends Address = Address
+> = Prettify<{
+    signer: SmartAccountSigner<TSource, TAddress>
+    safeVersion: SafeVersion
+    entryPoint: Address
+    address?: Address
+    addModuleLibAddress?: Address
+    safe4337ModuleAddress?: Address
+    safeProxyFactoryAddress?: Address
+    safeSingletonAddress?: Address
+    multiSendAddress?: Address
+    multiSendCallOnlyAddress?: Address
+    saltNonce?: bigint
+    validUntil?: number
+    validAfter?: number
+    setupTransactions?: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+    safeModules?: Address[]
+}>
+
 /**
  * @description Creates an Simple Account from a private key.
  *
@@ -516,27 +542,7 @@ export async function signerToSafeSmartAccount<
         validAfter = 0,
         safeModules = [],
         setupTransactions = []
-    }: {
-        signer: SmartAccountSigner<TSource, TAddress>
-        safeVersion: SafeVersion
-        entryPoint: Address
-        address?: Address
-        addModuleLibAddress?: Address
-        safe4337ModuleAddress?: Address
-        safeProxyFactoryAddress?: Address
-        safeSingletonAddress?: Address
-        multiSendAddress?: Address
-        multiSendCallOnlyAddress?: Address
-        saltNonce?: bigint
-        validUntil?: number
-        validAfter?: number
-        setupTransactions?: {
-            to: Address
-            data: Address
-            value: bigint
-        }[]
-        safeModules?: Address[]
-    }
+    }: SignerToSafeSmartAccountParameters<TSource, TAddress>
 ): Promise<SafeSmartAccount<TTransport, TChain>> {
     const chainId = await getChainId(client)
 
