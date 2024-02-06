@@ -27,7 +27,7 @@ export const createProject = async ({
     })
 
     // Select the appropriate boilerplate based on options
-    await selectBoilerplate({
+    selectBoilerplate({
         bundler,
         paymaster,
         signer,

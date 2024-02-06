@@ -6,6 +6,7 @@ import { type PackageJson } from "type-fest"
 
 import { runCli } from "./cli/index"
 import { createProject } from "./helpers/createProject"
+import { addPackageDependency } from "./utils/addPackageDependency"
 
 import { logger } from "./utils/logger"
 import { parseNameAndPath } from "./utils/parseNameAndPath"
@@ -47,6 +48,8 @@ const main = async () => {
     fs.writeJSONSync(path.join(projectDir, "package.json"), pkgJson, {
         spaces: 2
     })
+
+    addPackageDependency(signer, projectDir)
 
     process.exit(0)
 }
