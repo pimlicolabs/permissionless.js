@@ -224,7 +224,7 @@ const selectSignerHooks = (
                 "signer",
                 signer,
                 "hooks",
-                `usePrivyAuthWithSafeAccount.ts`
+                "usePrivyAuthWithSafeAccount.ts"
             )
 
             const destinationHookFile = path.join(

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import path from "path"
-import { execa } from "execa"
 import fs from "fs-extra"
 import { type PackageJson } from "type-fest"
 
 import { runCli } from "./cli/index"
 import { createProject } from "./helpers/createProject"
+import { installDependencies } from "./helpers/installDependencies"
 import { addPackageDependency } from "./utils/addPackageDependency"
 
 import { logger } from "./utils/logger"
@@ -50,6 +50,8 @@ const main = async () => {
     })
 
     addPackageDependency(signer, projectDir)
+
+    await installDependencies(projectDir)
 
     process.exit(0)
 }
