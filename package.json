@@ -3,6 +3,7 @@
     "private": true,
     "author": "Pimlico",
     "type": "module",
+    "version": "0.1.0",
     "sideEffects": false,
     "devDependencies": {
         "@biomejs/biome": "^1.0.0",
