@@ -33,7 +33,7 @@ export const parseNameAndPath = (rawInput: string) => {
 
     // If the first part is a @, it's a scoped package
     const indexOfDelimiter = paths.findIndex((p) => p.startsWith("@"))
-    if (paths.findIndex((p) => p.startsWith("@")) !== -1) {
+    if (indexOfDelimiter !== -1) {
         appName = paths.slice(indexOfDelimiter).join("/")
     }
 
