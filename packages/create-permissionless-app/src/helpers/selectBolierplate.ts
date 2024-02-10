@@ -28,17 +28,6 @@ const moduleDir = path.dirname(__filename)
 
 const templateExtrasDir = path.resolve(moduleDir, "../../template/extras")
 
-// Select base files
-// const selectCommonBase = (generatedBoilerplateDir: string) => {
-//   const templateExtrasDir = path.resolve(
-//     generatedBoilerplateDir,
-//     "../template/extras"
-//   );
-
-//   console.log("templateExtrasDir:", templateExtrasDir);
-//   copyFiles(path.join(templateExtrasDir, "base"), generatedBoilerplateDir);
-// };
-
 // Select bundler-specific files
 const selectBundlerConfigFile = (
     bundler: string,
@@ -179,6 +168,41 @@ const selectAppFile = (signer: string, generatedBoilerplateDir: string) => {
     }
 }
 
+const selectComponentFile = (
+    signer: string,
+    generatedBoilerplateDir: string
+) => {
+    try {
+        const sourcePath = path.join(
+            templateExtrasDir,
+            "components",
+            signer,
+            "PrivyAuth.tsx"
+        )
+
+        const destinationPath = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "components",
+            "PrivyAuth.tsx"
+        )
+
+        // Check if the source path exists before copying
+        if (fs.existsSync(sourcePath)) {
+            // Ensure the destination directory exists before copying
+            fs.ensureDirSync(path.dirname(destinationPath))
+
+            copyFiles(sourcePath, destinationPath)
+
+            console.log("Component files copied successfully")
+        } else {
+            console.error(`Component file not found for: ${signer}`)
+        }
+    } catch (error) {
+        console.error(`Error selecting Component Component: ${error.message}`)
+    }
+}
+
 // Select index.tsx content
 const selectIndexFile = (signer: string, generatedBoilerplateDir: string) => {
     try {
@@ -268,6 +292,7 @@ export const selectBoilerplate = ({
         selectPaymasterConfigFile(paymaster, generatedBoilerplateDir)
         selectSignerConfigFile(signer, generatedBoilerplateDir)
         selectAppFile(signer, generatedBoilerplateDir)
+        selectComponentFile(signer, generatedBoilerplateDir)
         selectIndexFile(signer, generatedBoilerplateDir)
         selectSignerHooks(signer, accountSystem, generatedBoilerplateDir)
 
