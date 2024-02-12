@@ -10,11 +10,11 @@ import { type SmartAccount } from "../accounts/types"
 import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest"
 import type { Prettify } from "../types/"
 import { type BundlerRpcSchema } from "../types/bundler"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 import {
     type SmartAccountActions,
     smartAccountActions
 } from "./decorators/smartAccount"
-import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 /**
  * TODO:

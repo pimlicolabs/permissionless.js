@@ -12,12 +12,12 @@ import {
 
 import { simulateContract } from "viem/actions"
 import type { Prettify } from "../../types/"
-import { getAction } from "../../utils/getAction"
 import type {
     DefaultEntryPoint,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
+import { getAction } from "../../utils/getAction"
 
 export type GetSenderAddressParams<entryPoint extends EntryPoint> =
     GetEntryPointVersion<entryPoint> extends "0.6"

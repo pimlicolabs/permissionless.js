@@ -20,6 +20,8 @@ import type {
     ENTRYPOINT_ADDRESS_0_7,
     Prettify
 } from "../../types"
+import type { EntryPoint } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
@@ -27,8 +29,6 @@ import {
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import type { EntryPoint } from "../../types/entrypoint"
-import { getEntryPointVersion } from "../../utils"
 
 export type SimpleSmartAccount<
     entryPoint extends EntryPoint = DefaultEntryPoint,

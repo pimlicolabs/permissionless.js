@@ -10,9 +10,9 @@ import type {
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types"
 import type { BundlerRpcSchema } from "../../types/bundler"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 import type { TStatus } from "../../types/userOperation"
 import { transactionReceiptStatus } from "../../utils/deepHexlify"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type GetUserOperationReceiptParameters = {
     hash: Hash

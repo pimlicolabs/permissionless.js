@@ -7,8 +7,8 @@ import type {
 } from "viem"
 import { createClient } from "viem"
 import type { BundlerRpcSchema } from "../types/bundler"
-import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
+import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 
 export type BundlerClient<
     entryPoint extends EntryPoint = DefaultEntryPoint,

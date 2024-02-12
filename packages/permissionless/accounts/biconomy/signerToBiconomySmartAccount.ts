@@ -7,19 +7,20 @@ import {
     type LocalAccount,
     type Transport,
     type TypedDataDefinition,
+    concatHex,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
     getContractAddress,
     hexToBigInt,
     keccak256,
-    parseAbiParameters,
-    concatHex
+    parseAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { DefaultEntryPoint, Prettify } from "../../types"
+import type { EntryPoint } from "../../types/entrypoint"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
@@ -31,7 +32,6 @@ import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi"
-import type { EntryPoint } from "../../types/entrypoint"
 
 export type BiconomySmartAccount<
     entryPoint extends EntryPoint = DefaultEntryPoint,

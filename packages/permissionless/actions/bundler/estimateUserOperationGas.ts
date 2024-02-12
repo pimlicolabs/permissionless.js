@@ -9,17 +9,17 @@ import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import {
     type GetEstimateUserOperationGasErrorReturnType,
     getEstimateUserOperationGasError
 } from "../../utils/errors/getEstimateUserOperationGasError"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
 
 export type EstimateUserOperationGasParameters<entryPoint extends EntryPoint> =
     {

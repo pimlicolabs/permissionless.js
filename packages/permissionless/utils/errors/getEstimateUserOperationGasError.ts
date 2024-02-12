@@ -5,12 +5,12 @@ import {
     type EstimateUserOperationGasErrorType
 } from "../../errors/estimateUserOperationGas"
 import { type ErrorType } from "../../errors/utils"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 import {
     type GetBundlerErrorParameters,
     type GetBundlerErrorReturnType,
     getBundlerError
 } from "./getBundlerError"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type GetEstimateUserOperationGasErrorReturnType<
     entryPoint extends EntryPoint = DefaultEntryPoint,

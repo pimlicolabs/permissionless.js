@@ -2,12 +2,12 @@ import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
-import type { UserOperation } from "../../types/userOperation"
 import type {
     DefaultEntryPoint,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
+import type { UserOperation } from "../../types/userOperation"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
 export type GetUserOperationByHashParameters = {

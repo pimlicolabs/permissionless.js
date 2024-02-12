@@ -1,11 +1,11 @@
 import { BaseError, UnknownNodeError } from "viem"
 import type { SendUserOperationParameters } from "../../actions/bundler/sendUserOperation"
 import { SendUserOperationError } from "../../errors"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 import {
     type GetBundlerErrorParameters,
     getBundlerError
 } from "./getBundlerError"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export function getSendUserOperationError<
     entryPoint extends EntryPoint = DefaultEntryPoint

@@ -11,13 +11,13 @@ import {
     encodeFunctionData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
 import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
 } from "./sendTransaction"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 /**
  * Executes a write function on a contract.

@@ -1,11 +1,11 @@
 import type { Address, Hash, Hex } from "viem"
 import { concat, encodeAbiParameters, keccak256, pad, toHex } from "viem"
-import type { UserOperation } from "../types/userOperation"
 import type {
     DefaultEntryPoint,
     EntryPoint,
     GetEntryPointVersion
 } from "../types"
+import type { UserOperation } from "../types/userOperation"
 import { getEntryPointVersion } from "./getEntryPointVersion"
 
 function packUserOp<entryPoint extends EntryPoint>({

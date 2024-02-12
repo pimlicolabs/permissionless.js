@@ -8,8 +8,8 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/stackup/sponsorUserOperation"
-import { type StackupPaymasterClient } from "../stackup"
 import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import { type StackupPaymasterClient } from "../stackup"
 
 export type StackupPaymasterClientActions<
     entryPoint extends EntryPoint = DefaultEntryPoint

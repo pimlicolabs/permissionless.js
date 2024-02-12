@@ -10,8 +10,8 @@ import {
 import type {
     DefaultEntryPoint,
     EntryPoint,
-    GetEntryPointVersion,
-    GetAccountParameterWithClient
+    GetAccountParameterWithClient,
+    GetEntryPointVersion
 } from "../types/"
 import type { UserOperation } from "../types/userOperation"
 import { parseAccount } from "./"

@@ -8,9 +8,6 @@ import type {
     UserOperation
 } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
-import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 import type {
     DefaultEntryPoint,
     ENTRYPOINT_ADDRESS_0_6,
@@ -18,7 +15,10 @@ import type {
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { getAction } from "../../utils/getAction"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
+import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
 export type SponsorUserOperationMiddleware<
     entryPoint extends EntryPoint = DefaultEntryPoint

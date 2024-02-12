@@ -21,8 +21,8 @@ import {
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation"
 import type { Prettify } from "../../types/"
-import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
 import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
 
 export type PimlicoBundlerActions = {
     /**

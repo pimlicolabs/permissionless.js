@@ -6,6 +6,7 @@ import type {
     Transport
 } from "viem"
 import { createClient } from "viem"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 import type {
     PimlicoBundlerRpcSchema,
     PimlicoPaymasterRpcSchema
@@ -17,7 +18,6 @@ import {
     pimlicoBundlerActions,
     pimlicoPaymasterActions
 } from "./decorators/pimlico"
-import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 export type PimlicoBundlerClient = Client<
     Transport,

@@ -1,7 +1,7 @@
 import { BaseError } from "viem"
 import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas"
-import { prettyPrint } from "./utils"
 import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
+import { prettyPrint } from "./utils"
 
 export type EstimateUserOperationGasErrorType<
     entryPoint extends EntryPoint = DefaultEntryPoint

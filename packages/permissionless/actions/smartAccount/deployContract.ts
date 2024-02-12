@@ -9,13 +9,13 @@ import type {
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type DeployContractParametersWithPaymaster<
     entryPoint extends EntryPoint,

@@ -1,7 +1,7 @@
 import type { Account, Chain, Client, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
-import type { BundlerRpcSchema } from "../../types/bundler"
 import type { DefaultEntryPoint, EntryPoint } from "../../types"
+import type { BundlerRpcSchema } from "../../types/bundler"
 
 /**
  * Returns the supported chain id by the bundler service

@@ -1,16 +1,16 @@
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 import type { StackupPaymasterContext } from "../../types/stackup"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
 export type SponsorUserOperationParameters<entryPoint extends EntryPoint> = {

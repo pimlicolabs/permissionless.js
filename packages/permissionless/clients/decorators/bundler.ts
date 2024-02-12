@@ -27,8 +27,8 @@ import {
 } from "../../actions/bundler/waitForUserOperationReceipt"
 import type { Prettify } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
-import type { BundlerClient } from "../createBundlerClient"
 import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { BundlerClient } from "../createBundlerClient"
 
 export type BundlerActions<entryPoint extends EntryPoint = DefaultEntryPoint> =
     {

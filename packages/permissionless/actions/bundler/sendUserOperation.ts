@@ -3,16 +3,16 @@ import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
 import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
+import type {
     UserOperation,
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
 
 export type SendUserOperationParameters<entryPoint extends EntryPoint> = {
     userOperation: UserOperation<GetEntryPointVersion<entryPoint>>

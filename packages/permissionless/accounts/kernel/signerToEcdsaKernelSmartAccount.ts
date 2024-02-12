@@ -7,9 +7,9 @@ import {
     type LocalAccount,
     type Transport,
     type TypedDataDefinition,
+    concatHex,
     encodeFunctionData,
-    isAddressEqual,
-    concatHex
+    isAddressEqual
 } from "viem"
 import { toAccount } from "viem/accounts"
 import {
@@ -26,6 +26,8 @@ import type {
     ENTRYPOINT_ADDRESS_0_7,
     Prettify
 } from "../../types"
+import type { EntryPoint } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import type { SmartAccount } from "../types"
@@ -34,8 +36,6 @@ import {
     type SmartAccountSigner
 } from "../types"
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
-import type { EntryPoint } from "../../types/entrypoint"
-import { getEntryPointVersion } from "../../utils"
 
 export type KernelEcdsaSmartAccount<
     entryPoint extends EntryPoint = DefaultEntryPoint,

@@ -1,17 +1,17 @@
 import type { Account, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { Prettify } from "../../types/"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
 export type PimlicoSponsorUserOperationParameters<

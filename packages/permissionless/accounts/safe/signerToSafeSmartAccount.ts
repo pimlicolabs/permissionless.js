@@ -29,14 +29,14 @@ import {
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { ENTRYPOINT_ADDRESS_0_6, Prettify } from "../../types"
+import type { EntryPoint } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import type { EntryPoint } from "../../types/entrypoint"
-import { getEntryPointVersion } from "../../utils"
 
 export type SafeVersion = "1.4.1"
 

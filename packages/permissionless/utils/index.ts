@@ -25,9 +25,9 @@ export function parseAccount(account: Address | Account): Account {
     return account
 }
 import {
-    getEntryPointVersion,
     ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7
+    ENTRYPOINT_ADDRESS_0_7,
+    getEntryPointVersion
 } from "./getEntryPointVersion"
 
 export {

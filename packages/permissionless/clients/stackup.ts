@@ -6,13 +6,13 @@ import {
     type Transport,
     createClient
 } from "viem"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 import type { StackupPaymasterRpcSchema } from "../types/stackup"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 import {
     type StackupPaymasterClientActions,
     stackupPaymasterActions
 } from "./decorators/stackup"
-import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 export type StackupPaymasterClient<
     entryPoint extends EntryPoint = DefaultEntryPoint

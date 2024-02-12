@@ -6,6 +6,11 @@ import type {
     Prettify,
     UserOperation
 } from "../../types/"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
@@ -13,11 +18,6 @@ import {
     type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
 } from "./prepareUserOperationRequest"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
 
 export type SendUserOperationParameters<
     entryPoint extends EntryPoint,
