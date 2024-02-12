@@ -8,14 +8,16 @@ import type {
 import { createClient } from "viem"
 import type { BundlerRpcSchema } from "../types/bundler"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 export type BundlerClient<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TChain extends Chain | undefined = Chain | undefined
 > = Client<
     Transport,
     TChain,
     Account | undefined,
-    BundlerRpcSchema,
+    BundlerRpcSchema<entryPoint>,
     BundlerActions
 >
 /**
@@ -39,10 +41,11 @@ export type BundlerClient<
  */
 export const createBundlerClient = <
     transport extends Transport,
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     chain extends Chain | undefined = undefined
 >(
     parameters: PublicClientConfig<transport, chain>
-): BundlerClient => {
+): BundlerClient<entryPoint> => {
     const { key = "public", name = "Bundler Client" } = parameters
     const client = createClient({
         ...parameters,

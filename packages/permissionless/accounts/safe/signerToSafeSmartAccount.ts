@@ -28,13 +28,15 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { Prettify } from "../../types"
+import type { ENTRYPOINT_ADDRESS_0_6, Prettify } from "../../types"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
+import type { EntryPoint } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 
 export type SafeVersion = "1.4.1"
 
@@ -172,9 +174,10 @@ const encodeMultiSend = (
 }
 
 export type SafeSmartAccount<
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<"SafeSmartAccount", transport, chain>
+> = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>
 
 const getInitializerCode = async ({
     owner,
@@ -292,7 +295,6 @@ const getAccountInitCode = async ({
     owner,
     addModuleLibAddress,
     safe4337ModuleAddress,
-    safeProxyFactoryAddress,
     safeSingletonAddress,
     multiSendAddress,
     saltNonce = 0n,
@@ -302,7 +304,6 @@ const getAccountInitCode = async ({
     owner: Address
     addModuleLibAddress: Address
     safe4337ModuleAddress: Address
-    safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
     saltNonce?: bigint
@@ -359,7 +360,7 @@ const getAccountInitCode = async ({
         args: [safeSingletonAddress, initializer, saltNonce]
     })
 
-    return concatHex([safeProxyFactoryAddress, initCodeCallData])
+    return initCodeCallData
 }
 
 const getAccountAddress = async <
@@ -495,7 +496,7 @@ export type SignerToSafeSmartAccountParameters<
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
     safeVersion: SafeVersion
-    entryPoint: Address
+    entryPoint: EntryPoint
     address?: Address
     addModuleLibAddress?: Address
     safe4337ModuleAddress?: Address
@@ -520,6 +521,7 @@ export type SignerToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSafeSmartAccount<
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -530,7 +532,7 @@ export async function signerToSafeSmartAccount<
         signer,
         address,
         safeVersion,
-        entryPoint,
+        entryPoint: entryPointAddress,
         addModuleLibAddress: _addModuleLibAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
@@ -543,7 +545,13 @@ export async function signerToSafeSmartAccount<
         safeModules = [],
         setupTransactions = []
     }: SignerToSafeSmartAccountParameters<TSource, TAddress>
-): Promise<SafeSmartAccount<TTransport, TChain>> {
+): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
+
+    if (entryPointVersion !== "0.6") {
+        throw new Error("Only EntryPoint 0.6 is supported")
+    }
+
     const chainId = await getChainId(client)
 
     const viemSigner: LocalAccount = {
@@ -651,12 +659,12 @@ export async function signerToSafeSmartAccount<
         ...account,
         client: client,
         publicKey: accountAddress,
-        entryPoint: entryPoint,
+        entryPoint: entryPointAddress,
         source: "SafeSmartAccount",
         async getNonce() {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPoint
+                entryPoint: entryPointAddress
             })
         },
         async signUserOperation(userOperation) {
@@ -674,7 +682,7 @@ export async function signerToSafeSmartAccount<
                         message: {
                             safe: accountAddress,
                             callData: userOperation.callData,
-                            entryPoint: entryPoint,
+                            entryPoint: entryPointAddress,
                             nonce: userOperation.nonce,
                             initCode: userOperation.initCode,
                             maxFeePerGas: userOperation.maxFeePerGas,
@@ -713,11 +721,39 @@ export async function signerToSafeSmartAccount<
 
             if (safeDeployed) return "0x"
 
-            return getAccountInitCode({
+            const initCodeCallData = await getAccountInitCode({
                 owner: viemSigner.address,
                 addModuleLibAddress,
                 safe4337ModuleAddress,
-                safeProxyFactoryAddress,
+                safeSingletonAddress,
+                multiSendAddress,
+                saltNonce,
+                setupTransactions,
+                safeModules
+            })
+
+            return concatHex([safeProxyFactoryAddress, initCodeCallData])
+        },
+        async getFactory() {
+            if (safeDeployed) return null
+
+            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
+
+            if (safeDeployed) return null
+
+            return safeProxyFactoryAddress
+        },
+        async getFactoryData() {
+            if (safeDeployed) return null
+
+            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
+
+            if (safeDeployed) return null
+
+            return await getAccountInitCode({
+                owner: viemSigner.address,
+                addModuleLibAddress,
+                safe4337ModuleAddress,
                 safeSingletonAddress,
                 multiSendAddress,
                 saltNonce,

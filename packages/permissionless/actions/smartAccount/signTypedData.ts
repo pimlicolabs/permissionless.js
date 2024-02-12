@@ -11,6 +11,7 @@ import {
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 /**
  * Signs typed data and calculates an Ethereum-specific signature in [https://eips.ethereum.org/EIPS/eip-712](https://eips.ethereum.org/EIPS/eip-712): `sign(keccak256("\x19\x01" ‖ domainSeparator ‖ hashStruct(message)))`
@@ -114,7 +115,8 @@ export async function signTypedData<
     const TTypedData extends TypedData | { [key: string]: unknown },
     TPrimaryType extends string,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined,
+    entryPoint extends EntryPoint = DefaultEntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
     {

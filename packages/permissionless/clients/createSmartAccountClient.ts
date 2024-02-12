@@ -14,6 +14,7 @@ import {
     type SmartAccountActions,
     smartAccountActions
 } from "./decorators/smartAccount"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 /**
  * TODO:
@@ -21,30 +22,36 @@ import {
  *  - Fix typing, 'accounts' is required to signMessage, signTypedData, signTransaction, but not needed here, since account is embedded in the client
  */
 export type SmartAccountClient<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount | undefined = SmartAccount | undefined
+    account extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 > = Prettify<
     Client<
         transport,
         chain,
         account,
-        BundlerRpcSchema,
-        SmartAccountActions<chain, account>
+        BundlerRpcSchema<entryPoint>,
+        SmartAccountActions<entryPoint, chain, account>
     >
 >
 
 export type SmartAccountClientConfig<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount | undefined = SmartAccount | undefined
+    account extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 > = Prettify<
     Pick<
         ClientConfig<transport, chain, account>,
         "cacheTime" | "chain" | "key" | "name" | "pollingInterval" | "transport"
     > & {
         account?: account
-    } & SponsorUserOperationMiddleware
+    } & SponsorUserOperationMiddleware<entryPoint>
 >
 
 /**
@@ -69,15 +76,17 @@ export type SmartAccountClientConfig<
 
 export function createSmartAccountClient<
     TTransport extends Transport,
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TChain extends Chain | undefined = undefined,
-    TSmartAccount extends SmartAccount | undefined = undefined
+    TSmartAccount extends SmartAccount<entryPoint> | undefined = undefined
 >(
-    parameters: SmartAccountClientConfig<TTransport, TChain, TSmartAccount>
-): SmartAccountClient<TTransport, TChain, TSmartAccount>
-
-export function createSmartAccountClient(
-    parameters: SmartAccountClientConfig
-): SmartAccountClient {
+    parameters: SmartAccountClientConfig<
+        entryPoint,
+        TTransport,
+        TChain,
+        TSmartAccount
+    >
+): SmartAccountClient<entryPoint, TTransport, TChain, TSmartAccount> {
     const {
         key = "Account",
         name = "Smart Account Client",
@@ -92,8 +101,8 @@ export function createSmartAccountClient(
     })
 
     return client.extend(
-        smartAccountActions({
+        smartAccountActions<entryPoint>({
             sponsorUserOperation: parameters.sponsorUserOperation
         })
-    )
+    ) as SmartAccountClient<entryPoint, TTransport, TChain, TSmartAccount>
 }

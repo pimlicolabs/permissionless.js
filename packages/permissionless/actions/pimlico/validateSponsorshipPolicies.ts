@@ -1,4 +1,4 @@
-import type { Account, Address, Chain, Client, Transport } from "viem"
+import type { Account, Chain, Client, Transport } from "viem"
 import type { Prettify } from "../../types/"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
@@ -6,10 +6,17 @@ import type {
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 
-export type ValidateSponsorshipPoliciesParameters = {
-    userOperation: UserOperation
-    entryPoint: Address
+export type ValidateSponsorshipPoliciesParameters<
+    entryPoint extends EntryPoint
+> = {
+    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+    entryPoint: entryPoint
     sponsorshipPolicyIds: string[]
 }
 
@@ -59,17 +66,25 @@ export type ValidateSponsorshipPolicies = {
  * ]
  */
 export const validateSponsorshipPolicies = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
-    args: Prettify<ValidateSponsorshipPoliciesParameters>
+    client: Client<
+        TTransport,
+        TChain,
+        TAccount,
+        PimlicoPaymasterRpcSchema<entryPoint>
+    >,
+    args: Prettify<ValidateSponsorshipPoliciesParameters<entryPoint>>
 ): Promise<Prettify<ValidateSponsorshipPolicies>[]> => {
     return await client.request({
         method: "pm_validateSponsorshipPolicies",
         params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex,
+            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex<
+                GetEntryPointVersion<entryPoint>
+            >,
             args.entryPoint,
             args.sponsorshipPolicyIds
         ]

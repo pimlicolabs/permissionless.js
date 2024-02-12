@@ -1,6 +1,5 @@
 import {
     type Account,
-    type Address,
     BaseError,
     type Chain,
     type Client,
@@ -16,14 +15,29 @@ import {
     type GetEstimateUserOperationGasErrorReturnType,
     getEstimateUserOperationGasError
 } from "../../utils/errors/getEstimateUserOperationGasError"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 
-export type EstimateUserOperationGasParameters = {
-    userOperation: PartialBy<
-        UserOperation,
-        "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
-    >
-    entryPoint: Address
-}
+export type EstimateUserOperationGasParameters<entryPoint extends EntryPoint> =
+    {
+        userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+            ? PartialBy<
+                  UserOperation<"0.6">,
+                  "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+              >
+            : PartialBy<
+                  UserOperation<"0.7">,
+                  | "callGasLimit"
+                  | "preVerificationGas"
+                  | "verificationGasLimit"
+                  | "paymasterVerificationGasLimit"
+                  | "paymasterPostOpGasLimit"
+              >
+        entryPoint: entryPoint
+    }
 
 export type EstimateUserOperationGasReturnType = {
     preVerificationGas: bigint
@@ -31,8 +45,9 @@ export type EstimateUserOperationGasReturnType = {
     callGasLimit: bigint
 }
 
-export type EstimateUserOperationErrorType =
-    GetEstimateUserOperationGasErrorReturnType
+export type EstimateUserOperationErrorType<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = GetEstimateUserOperationGasErrorReturnType<entryPoint>
 
 /**
  * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -62,12 +77,13 @@ export type EstimateUserOperationErrorType =
  *
  */
 export const estimateUserOperationGas = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    args: Prettify<EstimateUserOperationGasParameters>,
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema<entryPoint>>,
+    args: Prettify<EstimateUserOperationGasParameters<entryPoint>>,
     stateOverrides?: StateOverrides
 ): Promise<Prettify<EstimateUserOperationGasReturnType>> => {
     const { userOperation, entryPoint } = args

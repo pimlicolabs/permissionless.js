@@ -17,6 +17,7 @@ import {
     pimlicoBundlerActions,
     pimlicoPaymasterActions
 } from "./decorators/pimlico"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
 export type PimlicoBundlerClient = Client<
     Transport,
@@ -26,12 +27,14 @@ export type PimlicoBundlerClient = Client<
     PimlicoBundlerActions & BundlerActions
 >
 
-export type PimlicoPaymasterClient = Client<
+export type PimlicoPaymasterClient<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
-    PimlicoPaymasterRpcSchema,
-    PimlicoPaymasterClientActions
+    PimlicoPaymasterRpcSchema<entryPoint>,
+    PimlicoPaymasterClientActions<entryPoint>
 >
 
 /**
@@ -90,10 +93,11 @@ export const createPimlicoBundlerClient = <
  */
 export const createPimlicoPaymasterClient = <
     transport extends Transport,
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     chain extends Chain | undefined = undefined
 >(
     parameters: PublicClientConfig<transport, chain>
-): PimlicoPaymasterClient => {
+): PimlicoPaymasterClient<entryPoint> => {
     const { key = "public", name = "Pimlico Paymaster Client" } = parameters
     const client = createClient({
         ...parameters,
@@ -101,5 +105,5 @@ export const createPimlicoPaymasterClient = <
         name,
         type: "pimlicoPaymasterClient"
     })
-    return client.extend(pimlicoPaymasterActions)
+    return client.extend(pimlicoPaymasterActions<entryPoint>)
 }

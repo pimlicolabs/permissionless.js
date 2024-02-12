@@ -1,12 +1,16 @@
 import { BaseError } from "viem"
 import type { EstimateUserOperationGasParameters } from "../actions/bundler/estimateUserOperationGas"
 import { prettyPrint } from "./utils"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
-export type EstimateUserOperationGasErrorType =
-    EstimateUserOperationGasError & {
-        name: "EstimateUserOperationGasError"
-    }
-export class EstimateUserOperationGasError extends BaseError {
+export type EstimateUserOperationGasErrorType<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = EstimateUserOperationGasError<entryPoint> & {
+    name: "EstimateUserOperationGasError"
+}
+export class EstimateUserOperationGasError<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> extends BaseError {
     override cause: BaseError
 
     override name = "EstimateUserOperationGasError"
@@ -17,7 +21,7 @@ export class EstimateUserOperationGasError extends BaseError {
             userOperation,
             entryPoint,
             docsPath
-        }: EstimateUserOperationGasParameters & {
+        }: EstimateUserOperationGasParameters<entryPoint> & {
             docsPath?: string
         }
     ) {

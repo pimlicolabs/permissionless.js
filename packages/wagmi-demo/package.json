@@ -16,7 +16,7 @@
         "viem": "^2.0.0",
         "@tanstack/react-query": "5.0.5",
         "react": "^18.2.0",
-        "permissionless": "workspace:packages/permissionless",
+        "permissionless": "0.0.35",
         "vite": "^4.4.9",
         "@types/react": "^18.2.22",
         "@types/react-dom": "^18.2.7",

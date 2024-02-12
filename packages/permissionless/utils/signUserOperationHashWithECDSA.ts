@@ -1,6 +1,5 @@
 import {
     type Account,
-    type Address,
     BaseError,
     type Chain,
     type Client,
@@ -8,12 +7,18 @@ import {
     type Hex,
     type Transport
 } from "viem"
-import { type GetAccountParameterWithClient } from "../types/"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion,
+    GetAccountParameterWithClient
+} from "../types/"
 import type { UserOperation } from "../types/userOperation"
 import { parseAccount } from "./"
 import { getUserOperationHash } from "./getUserOperationHash"
 
 export type SignUserOperationHashWithECDSAParams<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
@@ -27,8 +32,8 @@ export type SignUserOperationHashWithECDSAParams<
           }
         | {
               hash?: undefined
-              userOperation: UserOperation
-              entryPoint: Address
+              userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+              entryPoint: entryPoint
               chainId: number
           }
     )
@@ -73,6 +78,7 @@ export class AccountOrClientNotFoundError extends BaseError {
  *
  */
 export const signUserOperationHashWithECDSA = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
@@ -82,8 +88,9 @@ export const signUserOperationHashWithECDSA = async <
     hash,
     userOperation,
     chainId,
-    entryPoint
+    entryPoint: entryPointAddress
 }: SignUserOperationHashWithECDSAParams<
+    entryPoint,
     TTransport,
     TChain,
     TAccount
@@ -99,10 +106,10 @@ export const signUserOperationHashWithECDSA = async <
     if (hash) {
         userOperationHash = hash
     } else {
-        userOperationHash = getUserOperationHash({
+        userOperationHash = getUserOperationHash<entryPoint>({
             userOperation,
             chainId,
-            entryPoint
+            entryPoint: entryPointAddress
         })
     }
 

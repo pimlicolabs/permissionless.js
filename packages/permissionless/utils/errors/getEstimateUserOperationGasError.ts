@@ -10,16 +10,19 @@ import {
     type GetBundlerErrorReturnType,
     getBundlerError
 } from "./getBundlerError"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
-export type GetEstimateUserOperationGasErrorReturnType<cause = ErrorType> =
-    Omit<EstimateUserOperationGasErrorType, "cause"> & {
-        cause: cause | GetBundlerErrorReturnType
-    }
+export type GetEstimateUserOperationGasErrorReturnType<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
+    cause = ErrorType
+> = Omit<EstimateUserOperationGasErrorType<entryPoint>, "cause"> & {
+    cause: cause | GetBundlerErrorReturnType
+}
 
-export function getEstimateUserOperationGasError<err extends ErrorType<string>>(
-    error: err,
-    args: EstimateUserOperationGasParameters
-) {
+export function getEstimateUserOperationGasError<
+    err extends ErrorType<string>,
+    entryPoint extends EntryPoint = DefaultEntryPoint
+>(error: err, args: EstimateUserOperationGasParameters<entryPoint>) {
     const cause = (() => {
         const cause = getBundlerError(
             // biome-ignore lint/complexity/noBannedTypes: <explanation>
@@ -33,5 +36,5 @@ export function getEstimateUserOperationGasError<err extends ErrorType<string>>(
 
     throw new EstimateUserOperationGasError(cause, {
         ...args
-    }) as GetEstimateUserOperationGasErrorReturnType<err>
+    }) as GetEstimateUserOperationGasErrorReturnType<entryPoint, err>
 }

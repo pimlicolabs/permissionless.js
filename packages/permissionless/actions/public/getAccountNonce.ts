@@ -2,10 +2,11 @@ import type { Address, Chain, Client, Transport } from "viem"
 import { readContract } from "viem/actions"
 import type { Prettify } from "../../types/"
 import { getAction } from "../../utils/getAction"
+import type { EntryPoint } from "../../types/entrypoint"
 
 export type GetAccountNonceParams = {
     sender: Address
-    entryPoint: Address
+    entryPoint: EntryPoint
     key?: bigint
 }
 

@@ -12,6 +12,7 @@ import type { Prettify } from "../../types"
 import type { BundlerRpcSchema } from "../../types/bundler"
 import type { TStatus } from "../../types/userOperation"
 import { transactionReceiptStatus } from "../../utils/deepHexlify"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type GetUserOperationReceiptParameters = {
     hash: Hash
@@ -73,11 +74,12 @@ export type GetUserOperationReceiptReturnType = {
  *
  */
 export const getUserOperationReceipt = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema<entryPoint>>,
     { hash }: Prettify<GetUserOperationReceiptParameters>
 ): Promise<Prettify<GetUserOperationReceiptReturnType> | null> => {
     const params: [Hash] = [hash]

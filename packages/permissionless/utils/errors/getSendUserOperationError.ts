@@ -5,11 +5,11 @@ import {
     type GetBundlerErrorParameters,
     getBundlerError
 } from "./getBundlerError"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
-export function getSendUserOperationError(
-    err: BaseError,
-    args: SendUserOperationParameters
-) {
+export function getSendUserOperationError<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+>(err: BaseError, args: SendUserOperationParameters<entryPoint>) {
     const cause = (() => {
         const cause = getBundlerError(
             err as BaseError,

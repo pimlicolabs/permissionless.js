@@ -9,8 +9,11 @@ import {
     sponsorUserOperation
 } from "../../actions/stackup/sponsorUserOperation"
 import { type StackupPaymasterClient } from "../stackup"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
-export type StackupPaymasterClientActions = {
+export type StackupPaymasterClientActions<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = {
     /**
      * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
      *
@@ -35,8 +38,8 @@ export type StackupPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: SponsorUserOperationParameters
-    ) => Promise<SponsorUserOperationReturnType>
+        args: SponsorUserOperationParameters<entryPoint>
+    ) => Promise<SponsorUserOperationReturnType<entryPoint>>
 
     /**
      * Returns all the Paymaster addresses associated with an EntryPoint that’s owned by this service.
@@ -63,11 +66,18 @@ export type StackupPaymasterClientActions = {
     accounts: (args: AccountsParameters) => Promise<Address[]>
 }
 
-export const stackupPaymasterActions = (
+export const stackupPaymasterActions = <
+    entryPoint extends EntryPoint = DefaultEntryPoint
+>(
     client: Client
-): StackupPaymasterClientActions => ({
-    sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
-        sponsorUserOperation(client as StackupPaymasterClient, args),
+): StackupPaymasterClientActions<entryPoint> => ({
+    sponsorUserOperation: async (
+        args: SponsorUserOperationParameters<entryPoint>
+    ) =>
+        sponsorUserOperation<entryPoint>(
+            client as StackupPaymasterClient<entryPoint>,
+            args
+        ),
     accounts: async (args: AccountsParameters) =>
         accounts(client as StackupPaymasterClient, args)
 })

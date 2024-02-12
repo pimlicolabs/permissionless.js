@@ -17,6 +17,7 @@ import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
 } from "./sendTransaction"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 /**
  * Executes a write function on a contract.
@@ -70,8 +71,11 @@ import {
  * const hash = await writeContract(client, request)
  */
 export type WriteContractWithPaymasterParameters<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<
         TAbi,
@@ -91,12 +95,13 @@ export type WriteContractWithPaymasterParameters<
     TAccount,
     TChainOverride
 > &
-    SponsorUserOperationMiddleware
+    SponsorUserOperationMiddleware<entryPoint>
 
 export async function writeContract<
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
+    TAccount extends SmartAccount<entryPoint> | undefined,
     const TAbi extends Abi | readonly unknown[],
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TFunctionName extends ContractFunctionName<
         TAbi,
         "nonpayable" | "payable"
@@ -117,6 +122,7 @@ export async function writeContract<
         functionName,
         ...request
     }: WriteContractWithPaymasterParameters<
+        entryPoint,
         TChain,
         TAccount,
         TAbi,
@@ -132,12 +138,13 @@ export async function writeContract<
     } as EncodeFunctionDataParameters<TAbi, TFunctionName>)
     const hash = await getAction(
         client,
-        sendTransaction<TChain, TAccount, TChainOverride>
+        sendTransaction<TChain, TAccount, entryPoint, TChainOverride>
     )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request
     } as unknown as SendTransactionWithPaymasterParameters<
+        entryPoint,
         TChain,
         TAccount,
         TChainOverride

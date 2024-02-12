@@ -22,6 +22,7 @@ import {
 } from "../../actions/pimlico/sponsorUserOperation"
 import type { Prettify } from "../../types/"
 import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type PimlicoBundlerActions = {
     /**
@@ -109,7 +110,9 @@ export const pimlicoBundlerActions = (
     ) => sendCompressedUserOperation(client as PimlicoBundlerClient, args)
 })
 
-export type PimlicoPaymasterClientActions = {
+export type PimlicoPaymasterClientActions<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = {
     /**
      * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
      *
@@ -134,11 +137,11 @@ export type PimlicoPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: Prettify<PimlicoSponsorUserOperationParameters>
-    ) => Promise<Prettify<SponsorUserOperationReturnType>>
+        args: Prettify<PimlicoSponsorUserOperationParameters<entryPoint>>
+    ) => Promise<Prettify<SponsorUserOperationReturnType<entryPoint>>>
 
     validateSponsorshipPolicies: (
-        args: Prettify<ValidateSponsorshipPoliciesParameters>
+        args: Prettify<ValidateSponsorshipPoliciesParameters<entryPoint>>
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
 }
 
@@ -177,14 +180,25 @@ export type PimlicoPaymasterClientActions = {
  *   }
  * ]
  */
-export const pimlicoPaymasterActions = (
+export const pimlicoPaymasterActions = <
+    entryPoint extends EntryPoint = DefaultEntryPoint
+>(
     client: Client
-): PimlicoPaymasterClientActions => ({
-    sponsorUserOperation: async (args: PimlicoSponsorUserOperationParameters) =>
-        sponsorUserOperation(client as PimlicoPaymasterClient, args),
+): PimlicoPaymasterClientActions<entryPoint> => ({
+    sponsorUserOperation: async (
+        args: PimlicoSponsorUserOperationParameters<entryPoint>
+    ) =>
+        sponsorUserOperation<entryPoint>(
+            client as PimlicoPaymasterClient,
+            args
+        ),
     validateSponsorshipPolicies: async (
-        args: ValidateSponsorshipPoliciesParameters
-    ) => validateSponsorshipPolicies(client as PimlicoPaymasterClient, args)
+        args: ValidateSponsorshipPoliciesParameters<entryPoint>
+    ) =>
+        validateSponsorshipPolicies<entryPoint>(
+            client as PimlicoPaymasterClient,
+            args
+        )
 })
 
 /**

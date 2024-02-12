@@ -1,4 +1,8 @@
-import { createBundlerClient, createSmartAccountClient } from "permissionless"
+import {
+    ENTRYPOINT_ADDRESS_0_6,
+    createBundlerClient,
+    createSmartAccountClient
+} from "permissionless"
 import {
     SmartAccount,
     SmartAccountSigner,
@@ -174,13 +178,7 @@ export const getSmartAccountClient = async ({
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation: async ({
-            userOperation,
-            entryPoint
-        }: {
-            userOperation: UserOperation
-            entryPoint: Address
-        }): Promise<UserOperation> => {
+        sponsorUserOperation: async ({ userOperation, entryPoint }) => {
             const gasPrice =
                 await pimlicoBundlerClient.getUserOperationGasPrice()
 
@@ -242,7 +240,7 @@ export const getEoaWalletClient = () => {
 export const getEntryPoint = () => {
     if (!process.env.ENTRYPOINT_ADDRESS)
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    return process.env.ENTRYPOINT_ADDRESS as Address
+    return ENTRYPOINT_ADDRESS_0_6
 }
 
 export const getPublicClient = async () => {

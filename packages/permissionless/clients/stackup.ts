@@ -12,13 +12,16 @@ import {
     type StackupPaymasterClientActions,
     stackupPaymasterActions
 } from "./decorators/stackup"
+import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
 
-export type StackupPaymasterClient = Client<
+export type StackupPaymasterClient<
+    entryPoint extends EntryPoint = DefaultEntryPoint
+> = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
-    StackupPaymasterRpcSchema,
-    StackupPaymasterClientActions & BundlerActions
+    StackupPaymasterRpcSchema<entryPoint>,
+    StackupPaymasterClientActions<entryPoint> & BundlerActions<entryPoint>
 >
 
 /**
@@ -42,10 +45,11 @@ export type StackupPaymasterClient = Client<
  */
 export const createStackupPaymasterClient = <
     transport extends Transport,
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     chain extends Chain | undefined = undefined
 >(
     parameters: PublicClientConfig<transport, chain>
-): StackupPaymasterClient => {
+): StackupPaymasterClient<entryPoint> => {
     const { key = "public", name = "Stackup Paymaster Client" } = parameters
     const client = createClient({
         ...parameters,
@@ -53,5 +57,7 @@ export const createStackupPaymasterClient = <
         name,
         type: "stackupPaymasterClient"
     })
-    return client.extend(bundlerActions).extend(stackupPaymasterActions)
+    return client
+        .extend(bundlerActions<entryPoint>)
+        .extend(stackupPaymasterActions<entryPoint>)
 }

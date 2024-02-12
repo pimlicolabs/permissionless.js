@@ -6,14 +6,33 @@ import {
     type ContractFunctionExecutionErrorType,
     type ContractFunctionRevertedErrorType,
     type Hex,
-    type Transport
+    type Transport,
+    concat
 } from "viem"
 
 import { simulateContract } from "viem/actions"
 import type { Prettify } from "../../types/"
 import { getAction } from "../../utils/getAction"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 
-export type GetSenderAddressParams = { initCode: Hex; entryPoint: Address }
+export type GetSenderAddressParams<entryPoint extends EntryPoint> =
+    GetEntryPointVersion<entryPoint> extends "0.6"
+        ? {
+              initCode: Hex
+              entryPoint: entryPoint
+              factory?: never
+              factoryData?: never
+          }
+        : {
+              entryPoint: entryPoint
+              factory: Address
+              factoryData: Hex
+              initCode?: never
+          }
 
 export class InvalidEntryPointError extends BaseError {
     override name = "InvalidEntryPointError"
@@ -59,13 +78,20 @@ export class InvalidEntryPointError extends BaseError {
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
 export const getSenderAddress = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
     client: Client<TTransport, TChain>,
-    args: Prettify<GetSenderAddressParams>
+    args: Prettify<GetSenderAddressParams<entryPoint>>
 ): Promise<Address> => {
-    const { initCode, entryPoint } = args
+    const { initCode, entryPoint, factory, factoryData } = args
+
+    if (!initCode && (!factory || !factoryData)) {
+        throw new Error(
+            "Either `initCode` or `factory` and `factoryData` must be provided"
+        )
+    }
 
     try {
         await getAction(
@@ -100,7 +126,7 @@ export const getSenderAddress = async <
                 }
             ],
             functionName: "getSenderAddress",
-            args: [initCode]
+            args: [initCode || concat([factory as Hex, factoryData as Hex])]
         })
     } catch (e) {
         const err = e as ContractFunctionExecutionErrorType

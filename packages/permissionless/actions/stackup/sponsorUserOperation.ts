@@ -1,4 +1,3 @@
-import type { Address } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup"
 import type { StackupPaymasterContext } from "../../types/stackup"
@@ -7,20 +6,33 @@ import type {
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
+import type {
+    DefaultEntryPoint,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
-export type SponsorUserOperationParameters = {
-    userOperation: PartialBy<
-        UserOperation,
-        | "callGasLimit"
-        | "preVerificationGas"
-        | "verificationGasLimit"
-        | "paymasterAndData"
-    >
-    entryPoint: Address
+export type SponsorUserOperationParameters<entryPoint extends EntryPoint> = {
+    userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+        ? PartialBy<
+              UserOperation<"0.6">,
+              "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+          >
+        : PartialBy<
+              UserOperation<"0.7">,
+              | "callGasLimit"
+              | "preVerificationGas"
+              | "verificationGasLimit"
+              | "paymasterVerificationGasLimit"
+              | "paymasterPostOpGasLimit"
+          >
+    entryPoint: entryPoint
     context: StackupPaymasterContext
 }
 
-export type SponsorUserOperationReturnType = UserOperation
+export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
+    UserOperation<GetEntryPointVersion<entryPoint>>
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
@@ -47,26 +59,49 @@ export type SponsorUserOperationReturnType = UserOperation
  * }})
  *
  */
-export const sponsorUserOperation = async (
-    client: StackupPaymasterClient,
-    args: SponsorUserOperationParameters
-): Promise<SponsorUserOperationReturnType> => {
+export const sponsorUserOperation = async <
+    entryPoint extends EntryPoint = DefaultEntryPoint
+>(
+    client: StackupPaymasterClient<entryPoint>,
+    args: SponsorUserOperationParameters<entryPoint>
+): Promise<SponsorUserOperationReturnType<entryPoint>> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
         params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex,
+            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex<
+                GetEntryPointVersion<entryPoint>
+            >,
             args.entryPoint,
             args.context
         ]
     })
 
-    const userOperation: UserOperation = {
-        ...args.userOperation,
-        paymasterAndData: response.paymasterAndData,
-        preVerificationGas: BigInt(response.preVerificationGas),
-        verificationGasLimit: BigInt(response.verificationGasLimit),
-        callGasLimit: BigInt(response.callGasLimit)
-    }
+    const entryPointVersion = getEntryPointVersion(args.entryPoint)
+
+    const userOperation: SponsorUserOperationReturnType<entryPoint> = (
+        entryPointVersion === "0.6"
+            ? {
+                  ...args.userOperation,
+                  paymasterAndData: response.paymasterAndData,
+                  preVerificationGas: BigInt(response.preVerificationGas),
+                  verificationGasLimit: BigInt(response.verificationGasLimit),
+                  callGasLimit: BigInt(response.callGasLimit)
+              }
+            : {
+                  ...args.userOperation,
+                  paymasterAndData: response.paymasterAndData,
+                  preVerificationGas: BigInt(response.preVerificationGas),
+                  verificationGasLimit: BigInt(response.verificationGasLimit),
+                  callGasLimit: BigInt(response.callGasLimit),
+                  paymasterVerificationGasLimit:
+                      response.paymasterVerificationGasLimit
+                          ? BigInt(response.paymasterVerificationGasLimit)
+                          : undefined,
+                  paymasterPostOpGasLimit: response.paymasterPostOpGasLimit
+                      ? BigInt(response.paymasterPostOpGasLimit)
+                      : undefined
+              }
+    ) as SponsorUserOperationReturnType<entryPoint>
 
     return userOperation
 }

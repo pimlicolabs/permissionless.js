@@ -7,19 +7,19 @@ import {
     type LocalAccount,
     type Transport,
     type TypedDataDefinition,
-    concatHex,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
     getContractAddress,
     hexToBigInt,
     keccak256,
-    parseAbiParameters
+    parseAbiParameters,
+    concatHex
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { Prettify } from "../../types"
+import type { DefaultEntryPoint, Prettify } from "../../types"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
@@ -31,12 +31,13 @@ import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi"
-// import Abis
+import type { EntryPoint } from "../../types/entrypoint"
 
 export type BiconomySmartAccount<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<"biconomySmartAccount", transport, chain>
+> = SmartAccount<entryPoint, "biconomySmartAccount", transport, chain>
 
 /**
  * The account creation ABI for Biconomy Smart Account (from the biconomy SmartAccountFactory)
@@ -104,12 +105,10 @@ const BICONOMY_PROXY_CREATION_CODE =
 const getAccountInitCode = async ({
     owner,
     index,
-    factoryAddress,
     ecdsaModuleAddress
 }: {
     owner: Address
     index: bigint
-    factoryAddress: Address
     ecdsaModuleAddress: Address
 }): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
@@ -122,14 +121,11 @@ const getAccountInitCode = async ({
     })
 
     // Build the account init code
-    return concatHex([
-        factoryAddress,
-        encodeFunctionData({
-            abi: createAccountAbi,
-            functionName: "deployCounterFactualAccount",
-            args: [ecdsaModuleAddress, ecdsaOwnershipInitData, index]
-        }) as Hex
-    ])
+    return encodeFunctionData({
+        abi: createAccountAbi,
+        functionName: "deployCounterFactualAccount",
+        args: [ecdsaModuleAddress, ecdsaOwnershipInitData, index]
+    })
 }
 
 const getAccountAddress = async ({
@@ -186,11 +182,12 @@ const getAccountAddress = async ({
 }
 
 export type SignerToBiconomySmartAccountParameters<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
-    entryPoint: Address
+    entryPoint: entryPoint
     address?: Address
     index?: bigint
     factoryAddress?: Address
@@ -210,6 +207,7 @@ export type SignerToBiconomySmartAccountParameters<
  * @param ecdsaModuleAddress
  */
 export async function signerToBiconomySmartAccount<
+    entryPoint extends EntryPoint = DefaultEntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -219,14 +217,14 @@ export async function signerToBiconomySmartAccount<
     {
         signer,
         address,
-        entryPoint,
+        entryPoint: entryPointAddress,
         index = 0n,
         factoryAddress = BICONOMY_ADDRESSES.FACTORY_ADDRESS,
         accountLogicAddress = BICONOMY_ADDRESSES.ACCOUNT_V2_0_LOGIC,
         fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
         ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
-    }: SignerToBiconomySmartAccountParameters<TSource, TAddress>
-): Promise<BiconomySmartAccount<TTransport, TChain>> {
+    }: SignerToBiconomySmartAccountParameters<entryPoint, TSource, TAddress>
+): Promise<BiconomySmartAccount<entryPoint, TTransport, TChain>> {
     // Get the private key related account
     const viemSigner: LocalAccount = {
         ...signer,
@@ -240,7 +238,6 @@ export async function signerToBiconomySmartAccount<
         getAccountInitCode({
             owner: viemSigner.address,
             index,
-            factoryAddress,
             ecdsaModuleAddress
         })
 
@@ -294,14 +291,14 @@ export async function signerToBiconomySmartAccount<
         ...account,
         client: client,
         publicKey: accountAddress,
-        entryPoint: entryPoint,
+        entryPoint: entryPointAddress,
         source: "biconomySmartAccount",
 
         // Get the nonce of the smart account
         async getNonce() {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPoint
+                entryPoint: entryPointAddress
             })
         },
 
@@ -312,7 +309,7 @@ export async function signerToBiconomySmartAccount<
                     ...userOperation,
                     signature: "0x"
                 },
-                entryPoint: entryPoint,
+                entryPoint: entryPointAddress,
                 chainId: chainId
             })
             const signature = await signMessage(client, {
@@ -327,6 +324,31 @@ export async function signerToBiconomySmartAccount<
             return signatureWithModuleAddress
         },
 
+        async getFactory() {
+            if (smartAccountDeployed) return null
+
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return null
+
+            return factoryAddress
+        },
+
+        async getFactoryData() {
+            if (smartAccountDeployed) return null
+
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return null
+            return generateInitCode()
+        },
+
         // Encode the init code
         async getInitCode() {
             if (smartAccountDeployed) return "0x"
@@ -338,7 +360,7 @@ export async function signerToBiconomySmartAccount<
 
             if (smartAccountDeployed) return "0x"
 
-            return generateInitCode()
+            return concatHex([factoryAddress, await generateInitCode()])
         },
 
         // Encode the deploy call data

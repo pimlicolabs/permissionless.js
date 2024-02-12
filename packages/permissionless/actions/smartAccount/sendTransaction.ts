@@ -12,13 +12,17 @@ import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
+import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
 
 export type SendTransactionWithPaymasterParameters<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = SendTransactionParameters<TChain, TAccount, TChainOverride> &
-    SponsorUserOperationMiddleware
+    SponsorUserOperationMiddleware<entryPoint>
 
 /**
  * Creates, signs, and sends a new transaction to the network.
@@ -68,12 +72,18 @@ export type SendTransactionWithPaymasterParameters<
  */
 export async function sendTransaction<
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
-    TChainOverride extends Chain | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined,
+    entryPoint extends EntryPoint = DefaultEntryPoint,
+    TChainOverride extends Chain | undefined = Chain | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
-        SendTransactionWithPaymasterParameters<TChain, TAccount, TChainOverride>
+        SendTransactionWithPaymasterParameters<
+            entryPoint,
+            TChain,
+            TAccount,
+            TChainOverride
+        >
     >
 ): Promise<Hash> {
     const {
@@ -93,7 +103,7 @@ export async function sendTransaction<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     if (!to) throw new Error("Missing to address")
 
@@ -109,11 +119,10 @@ export async function sendTransaction<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation
+        sendUserOperation<entryPoint>
     )({
         userOperation: {
             sender: account.address,
-            paymasterAndData: "0x",
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
             callData: callData,
