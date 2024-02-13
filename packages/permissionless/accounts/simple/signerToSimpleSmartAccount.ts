@@ -95,7 +95,7 @@ const getAccountAddress = async <
 }
 
 export type SignerToSimpleSmartAccountParameters<
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
@@ -113,7 +113,7 @@ export type SignerToSimpleSmartAccountParameters<
 export async function signerToSimpleSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain, undefined>,

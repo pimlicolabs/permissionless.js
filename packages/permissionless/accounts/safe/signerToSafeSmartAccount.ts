@@ -490,7 +490,7 @@ const getDefaultAddresses = (
 }
 
 export type SignerToSafeSmartAccountParameters<
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
@@ -522,7 +522,7 @@ export type SignerToSafeSmartAccountParameters<
 export async function signerToSafeSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain>,
