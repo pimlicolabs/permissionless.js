@@ -1,8 +1,10 @@
-import { pimlicoPaymaster } from "@/config/pimlicoConfig"
+import { pimlicoPaymasterConfig } from "@/config"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { usePrivyWagmi } from "@privy-io/wagmi-connector"
-import { createSmartAccountClient } from "permissionless"
-import { type SmartAccountClient } from "permissionless"
+import {
+    type SmartAccountClient,
+    createSmartAccountClient
+} from "permissionless"
 import {
     type SmartAccount,
     privateKeyToSafeSmartAccount
@@ -92,7 +94,8 @@ export const usePrivyFlow = (): PrivyFlowHook => {
                     account: safeAccount,
                     chain: sepolia,
                     transport: http(process.env.NEXT_PUBLIC_BUNDLER_RPC_HOST),
-                    sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+                    sponsorUserOperation:
+                        pimlicoPaymasterConfig.sponsorUserOperation
                 })
 
                 setSmartAccountClient(smartAccountClient)
