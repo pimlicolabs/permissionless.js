@@ -1,6 +1,6 @@
 import { type Chain, type Client, type Hex, type Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type { DefaultEntryPoint, EntryPoint, Prettify } from "../../types"
+import type { EntryPoint, Prettify } from "../../types"
 import {
     type BiconomySmartAccount,
     type SignerToBiconomySmartAccountParameters,
@@ -8,7 +8,7 @@ import {
 } from "./signerToBiconomySmartAccount"
 
 export type PrivateKeyToBiconomySmartAccountParameters<
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    entryPoint extends EntryPoint
 > = Prettify<
     {
         privateKey: Hex
@@ -21,7 +21,7 @@ export type PrivateKeyToBiconomySmartAccountParameters<
  * @returns A Private Key Biconomy Smart Account using ECDSA as default validation module.
  */
 export async function privateKeyToBiconomySmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(

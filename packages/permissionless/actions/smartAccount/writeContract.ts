@@ -11,7 +11,7 @@ import {
     encodeFunctionData
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
 import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
 import {
@@ -71,7 +71,7 @@ import {
  * const hash = await writeContract(client, request)
  */
 export type WriteContractWithPaymasterParameters<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
@@ -98,10 +98,10 @@ export type WriteContractWithPaymasterParameters<
     SponsorUserOperationMiddleware<entryPoint>
 
 export async function writeContract<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
     const TAbi extends Abi | readonly unknown[],
-    entryPoint extends EntryPoint = DefaultEntryPoint,
     TFunctionName extends ContractFunctionName<
         TAbi,
         "nonpayable" | "payable"

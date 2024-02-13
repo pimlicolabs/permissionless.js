@@ -1,10 +1,6 @@
 import type { Account, Chain, Client, Transport } from "viem"
 import type { Prettify } from "../../types/"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
+import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
     UserOperation,
@@ -66,7 +62,7 @@ export type ValidateSponsorshipPolicies = {
  * ]
  */
 export const validateSponsorshipPolicies = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

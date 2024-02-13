@@ -6,7 +6,7 @@ import type {
     Transport
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 
 /**
@@ -56,9 +56,9 @@ import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
  * })
  */
 export async function signMessage<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined,
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    TAccount extends SmartAccount<entryPoint> | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     {

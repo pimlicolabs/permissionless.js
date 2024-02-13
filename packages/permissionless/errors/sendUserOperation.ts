@@ -1,13 +1,14 @@
 import { BaseError } from "viem"
 import { type SendUserOperationParameters } from "../actions/bundler/sendUserOperation"
-import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
+import type { EntryPoint } from "../types/entrypoint"
 import { prettyPrint } from "./utils"
 
-export type SendUserOperationErrorType = SendUserOperationError & {
-    name: "SendUserOperationError"
-}
+export type SendUserOperationErrorType<entryPoint extends EntryPoint> =
+    SendUserOperationError<entryPoint> & {
+        name: "SendUserOperationError"
+    }
 export class SendUserOperationError<
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    entryPoint extends EntryPoint
 > extends BaseError {
     override cause: BaseError
 

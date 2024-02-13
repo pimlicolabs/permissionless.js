@@ -9,7 +9,7 @@ import type {
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
@@ -79,7 +79,7 @@ export type SendTransactionsWithPaymasterParameters<
 export async function sendTransactions<
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    entryPoint extends EntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<

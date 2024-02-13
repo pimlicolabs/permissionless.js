@@ -28,7 +28,7 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { ENTRYPOINT_ADDRESS_0_6, Prettify } from "../../types"
+import type { ENTRYPOINT_ADDRESS_0_6_TYPE, Prettify } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -174,7 +174,7 @@ const encodeMultiSend = (
 }
 
 export type SafeSmartAccount<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>
@@ -491,12 +491,13 @@ const getDefaultAddresses = (
 }
 
 export type SignerToSafeSmartAccountParameters<
+    entryPoint extends EntryPoint,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
     safeVersion: SafeVersion
-    entryPoint: EntryPoint
+    entryPoint: entryPoint
     address?: Address
     addModuleLibAddress?: Address
     safe4337ModuleAddress?: Address
@@ -521,7 +522,7 @@ export type SignerToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSafeSmartAccount<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -544,7 +545,7 @@ export async function signerToSafeSmartAccount<
         validAfter = 0,
         safeModules = [],
         setupTransactions = []
-    }: SignerToSafeSmartAccountParameters<TSource, TAddress>
+    }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
@@ -655,7 +656,7 @@ export async function signerToSafeSmartAccount<
         }
     })
 
-    return {
+    const safeSmartAccount: SafeSmartAccount<entryPoint, TTransport, TChain> = {
         ...account,
         client: client,
         publicKey: accountAddress,
@@ -834,4 +835,6 @@ export async function signerToSafeSmartAccount<
             return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         }
     }
+
+    return safeSmartAccount
 }

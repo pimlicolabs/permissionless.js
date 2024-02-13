@@ -9,11 +9,7 @@ import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
+import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import {
@@ -45,9 +41,8 @@ export type EstimateUserOperationGasReturnType = {
     callGasLimit: bigint
 }
 
-export type EstimateUserOperationErrorType<
-    entryPoint extends EntryPoint = DefaultEntryPoint
-> = GetEstimateUserOperationGasErrorReturnType<entryPoint>
+export type EstimateUserOperationErrorType<entryPoint extends EntryPoint> =
+    GetEstimateUserOperationGasErrorReturnType<entryPoint>
 
 /**
  * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -77,7 +72,7 @@ export type EstimateUserOperationErrorType<
  *
  */
 export const estimateUserOperationGas = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

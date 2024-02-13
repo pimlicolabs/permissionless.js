@@ -13,14 +13,13 @@ import {
 import { simulateContract } from "viem/actions"
 import type { Prettify } from "../../types/"
 import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    EntryPoint
 } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
 
 export type GetSenderAddressParams<entryPoint extends EntryPoint> =
-    GetEntryPointVersion<entryPoint> extends "0.6"
+    entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
         ? {
               initCode: Hex
               entryPoint: entryPoint
@@ -78,7 +77,7 @@ export class InvalidEntryPointError extends BaseError {
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
 export const getSenderAddress = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(

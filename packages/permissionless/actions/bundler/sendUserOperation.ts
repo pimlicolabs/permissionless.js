@@ -2,11 +2,7 @@ import type { Account, BaseError, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
+import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
@@ -45,7 +41,7 @@ export type SendUserOperationParameters<entryPoint extends EntryPoint> = {
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
  */
 export const sendUserOperation = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

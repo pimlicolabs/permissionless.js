@@ -1,20 +1,17 @@
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup"
 import type {
-    DefaultEntryPoint,
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
 import type { StackupPaymasterContext } from "../../types/stackup"
-import type {
-    UserOperation,
-    UserOperationWithBigIntAsHex
-} from "../../types/userOperation"
+import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
 export type SponsorUserOperationParameters<entryPoint extends EntryPoint> = {
-    userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
@@ -59,21 +56,13 @@ export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
  * }})
  *
  */
-export const sponsorUserOperation = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint
->(
+export const sponsorUserOperation = async <entryPoint extends EntryPoint>(
     client: StackupPaymasterClient<entryPoint>,
     args: SponsorUserOperationParameters<entryPoint>
 ): Promise<SponsorUserOperationReturnType<entryPoint>> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex<
-                GetEntryPointVersion<entryPoint>
-            >,
-            args.entryPoint,
-            args.context
-        ]
+        params: [deepHexlify(args.userOperation), args.entryPoint, args.context]
     })
 
     const entryPointVersion = getEntryPointVersion(args.entryPoint)

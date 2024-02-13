@@ -19,7 +19,7 @@ import {
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { DefaultEntryPoint, Prettify } from "../../types"
+import type { Prettify } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -34,7 +34,7 @@ import {
 } from "./abi/BiconomySmartAccountAbi"
 
 export type BiconomySmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "biconomySmartAccount", transport, chain>
@@ -182,7 +182,7 @@ const getAccountAddress = async ({
 }
 
 export type SignerToBiconomySmartAccountParameters<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
@@ -207,7 +207,7 @@ export type SignerToBiconomySmartAccountParameters<
  * @param ecdsaModuleAddress
  */
 export async function signerToBiconomySmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",

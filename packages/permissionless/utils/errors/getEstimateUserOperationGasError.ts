@@ -5,7 +5,7 @@ import {
     type EstimateUserOperationGasErrorType
 } from "../../errors/estimateUserOperationGas"
 import { type ErrorType } from "../../errors/utils"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import {
     type GetBundlerErrorParameters,
     type GetBundlerErrorReturnType,
@@ -13,7 +13,7 @@ import {
 } from "./getBundlerError"
 
 export type GetEstimateUserOperationGasErrorReturnType<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     cause = ErrorType
 > = Omit<EstimateUserOperationGasErrorType<entryPoint>, "cause"> & {
     cause: cause | GetBundlerErrorReturnType
@@ -21,13 +21,13 @@ export type GetEstimateUserOperationGasErrorReturnType<
 
 export function getEstimateUserOperationGasError<
     err extends ErrorType<string>,
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    entryPoint extends EntryPoint
 >(error: err, args: EstimateUserOperationGasParameters<entryPoint>) {
     const cause = (() => {
         const cause = getBundlerError(
             // biome-ignore lint/complexity/noBannedTypes: <explanation>
             error as {} as BaseError,
-            args as GetBundlerErrorParameters
+            args as GetBundlerErrorParameters<entryPoint>
         )
         // biome-ignore lint/complexity/noBannedTypes: <explanation>
         if (cause instanceof UnknownNodeError) return error as {} as BaseError

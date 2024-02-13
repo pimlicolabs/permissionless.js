@@ -15,9 +15,8 @@ import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type {
-    DefaultEntryPoint,
-    ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7,
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_0_7_TYPE,
     Prettify
 } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
@@ -31,7 +30,7 @@ import {
 } from "../types"
 
 export type SimpleSmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SimpleSmartAccount", transport, chain>
@@ -93,22 +92,22 @@ const getAccountAddress = async <
     const factoryData = await getAccountInitCode(owner, index)
 
     if (entryPointVersion === "0.6") {
-        return getSenderAddress<ENTRYPOINT_ADDRESS_0_6>(client, {
+        return getSenderAddress<ENTRYPOINT_ADDRESS_0_6_TYPE>(client, {
             initCode: concatHex([factoryAddress, factoryData]),
-            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_6
+            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_6_TYPE
         })
     }
 
     // Get the sender address based on the init code
-    return getSenderAddress<ENTRYPOINT_ADDRESS_0_7>(client, {
+    return getSenderAddress<ENTRYPOINT_ADDRESS_0_7_TYPE>(client, {
         factory: factoryAddress,
         factoryData,
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_7
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_7_TYPE
     })
 }
 
 export type SignerToSimpleSmartAccountParameters<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
@@ -125,7 +124,7 @@ export type SignerToSimpleSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSimpleSmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",

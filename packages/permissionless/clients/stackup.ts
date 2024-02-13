@@ -6,7 +6,7 @@ import {
     type Transport,
     createClient
 } from "viem"
-import type { DefaultEntryPoint, EntryPoint } from "../types/entrypoint"
+import type { EntryPoint } from "../types/entrypoint"
 import type { StackupPaymasterRpcSchema } from "../types/stackup"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 import {
@@ -14,9 +14,7 @@ import {
     stackupPaymasterActions
 } from "./decorators/stackup"
 
-export type StackupPaymasterClient<
-    entryPoint extends EntryPoint = DefaultEntryPoint
-> = Client<
+export type StackupPaymasterClient<entryPoint extends EntryPoint> = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
@@ -44,11 +42,13 @@ export type StackupPaymasterClient<
  * })
  */
 export const createStackupPaymasterClient = <
-    transport extends Transport,
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
+    transport extends Transport = Transport,
     chain extends Chain | undefined = undefined
 >(
-    parameters: PublicClientConfig<transport, chain>
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint
+    }
 ): StackupPaymasterClient<entryPoint> => {
     const { key = "public", name = "Stackup Paymaster Client" } = parameters
     const client = createClient({
@@ -58,6 +58,6 @@ export const createStackupPaymasterClient = <
         type: "stackupPaymasterClient"
     })
     return client
-        .extend(bundlerActions<entryPoint>)
+        .extend(bundlerActions(parameters.entryPoint))
         .extend(stackupPaymasterActions<entryPoint>)
 }

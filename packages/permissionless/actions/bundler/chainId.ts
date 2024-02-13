@@ -1,6 +1,6 @@
 import type { Account, Chain, Client, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
-import type { DefaultEntryPoint, EntryPoint } from "../../types"
+import type { EntryPoint } from "../../types"
 import type { BundlerRpcSchema } from "../../types/bundler"
 
 /**
@@ -26,7 +26,7 @@ import type { BundlerRpcSchema } from "../../types/bundler"
  *
  */
 export const chainId = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

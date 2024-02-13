@@ -1,7 +1,7 @@
 import type { Account, Chain, Client, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { BundlerRpcSchema } from "../../types/bundler"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 
 /**
  * Returns the supported entrypoints by the bundler service
@@ -26,7 +26,7 @@ import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
  *
  */
 export const supportedEntryPoints = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

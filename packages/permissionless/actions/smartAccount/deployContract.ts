@@ -9,7 +9,7 @@ import type {
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
@@ -57,9 +57,9 @@ export type DeployContractParametersWithPaymaster<
  * })
  */
 export async function deployContract<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined,
-    entryPoint extends EntryPoint = DefaultEntryPoint
+    TAccount extends SmartAccount<entryPoint> | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>

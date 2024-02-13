@@ -20,13 +20,12 @@ import {
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import type { Prettify } from "../../types"
 import type {
-    DefaultEntryPoint,
-    ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7,
-    Prettify
-} from "../../types"
-import type { EntryPoint } from "../../types/entrypoint"
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_0_7_TYPE,
+    EntryPoint
+} from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -38,7 +37,7 @@ import {
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
 
 export type KernelEcdsaSmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "kernelEcdsaSmartAccount", transport, chain>
@@ -202,22 +201,22 @@ const getAccountAddress = async <
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
     if (entryPointVersion === "0.6") {
-        return getSenderAddress<ENTRYPOINT_ADDRESS_0_6>(client, {
+        return getSenderAddress<ENTRYPOINT_ADDRESS_0_6_TYPE>(client, {
             initCode: concatHex([factoryAddress, factoryData]),
-            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_6
+            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_6_TYPE
         })
     }
 
     // Get the sender address based on the init code
-    return getSenderAddress<ENTRYPOINT_ADDRESS_0_7>(client, {
+    return getSenderAddress<ENTRYPOINT_ADDRESS_0_7_TYPE>(client, {
         factory: factoryAddress,
         factoryData,
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_7
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_7_TYPE
     })
 }
 
 export type SignerToEcdsaKernelSmartAccountParameters<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
@@ -242,7 +241,7 @@ export type SignerToEcdsaKernelSmartAccountParameters<
  * @param deployedAccountAddress
  */
 export async function signerToEcdsaKernelSmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",

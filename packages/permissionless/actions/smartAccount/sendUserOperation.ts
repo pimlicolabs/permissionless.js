@@ -7,7 +7,7 @@ import type {
     UserOperation
 } from "../../types/"
 import type {
-    DefaultEntryPoint,
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -25,7 +25,7 @@ export type SendUserOperationParameters<
         | SmartAccount<entryPoint>
         | undefined
 > = {
-    userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               | "sender"
@@ -60,7 +60,7 @@ export type SendUserOperationParameters<
     SponsorUserOperationMiddleware<entryPoint>
 
 export async function sendUserOperation<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =

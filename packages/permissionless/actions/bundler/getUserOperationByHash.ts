@@ -2,13 +2,9 @@ import type { Account, Address, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../types/entrypoint"
+import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type { UserOperation } from "../../types/userOperation"
-import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
+import { ENTRYPOINT_ADDRESS_0_6 } from "../../utils/getEntryPointVersion"
 
 export type GetUserOperationByHashParameters = {
     hash: Hash
@@ -45,7 +41,7 @@ export type GetUserOperationByHashReturnType<entryPoint extends EntryPoint> = {
  *
  */
 export const getUserOperationByHash = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
@@ -64,16 +60,14 @@ export const getUserOperationByHash = async <
 
     const {
         userOperation,
-        entryPoint,
+        entryPoint: entryPointAddress,
         transactionHash,
         blockHash,
         blockNumber
     } = response
 
-    const entryPointVersion = getEntryPointVersion(entryPoint)
-
     return {
-        userOperation: (entryPointVersion === "0.6"
+        userOperation: (entryPointAddress === ENTRYPOINT_ADDRESS_0_6
             ? {
                   ...userOperation,
                   nonce: BigInt(userOperation.nonce),
@@ -108,7 +102,7 @@ export const getUserOperationByHash = async <
                           ? BigInt(userOperation.paymasterPostOpGasLimit)
                           : undefined
               }) as UserOperation<GetEntryPointVersion<entryPoint>>,
-        entryPoint: entryPoint,
+        entryPoint: entryPointAddress,
         transactionHash: transactionHash,
         blockHash: blockHash,
         blockNumber: BigInt(blockNumber)

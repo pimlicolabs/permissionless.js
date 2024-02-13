@@ -10,7 +10,7 @@ import type {
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types"
 import type { BundlerRpcSchema } from "../../types/bundler"
-import type { DefaultEntryPoint, EntryPoint } from "../../types/entrypoint"
+import type { EntryPoint } from "../../types/entrypoint"
 import type { TStatus } from "../../types/userOperation"
 import { transactionReceiptStatus } from "../../utils/deepHexlify"
 
@@ -74,7 +74,7 @@ export type GetUserOperationReceiptReturnType = {
  *
  */
 export const getUserOperationReceipt = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

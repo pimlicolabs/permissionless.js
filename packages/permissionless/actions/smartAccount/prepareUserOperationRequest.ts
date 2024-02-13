@@ -9,9 +9,8 @@ import type {
 } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
 import type {
-    DefaultEntryPoint,
-    ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7,
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_0_7_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -20,9 +19,7 @@ import { getAction } from "../../utils/getAction"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
-export type SponsorUserOperationMiddleware<
-    entryPoint extends EntryPoint = DefaultEntryPoint
-> = {
+export type SponsorUserOperationMiddleware<entryPoint extends EntryPoint> = {
     sponsorUserOperation?: (args: {
         userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
         entryPoint: entryPoint
@@ -35,7 +32,7 @@ export type PrepareUserOperationRequestParameters<
         | SmartAccount<entryPoint>
         | undefined
 > = {
-    userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               | "sender"
@@ -74,7 +71,7 @@ export type PrepareUserOperationRequestReturnType<
 > = UserOperation<GetEntryPointVersion<entryPoint>>
 
 async function prepareUserOperationRequestEntryPointVersion0_6<
-    entryPoint extends ENTRYPOINT_ADDRESS_0_6,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
@@ -94,7 +91,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
 
     const account = parseAccount(
         account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_6>
+    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_6_TYPE>
 
     const [sender, nonce, initCode, callData, gasEstimation] =
         await Promise.all([
@@ -169,7 +166,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
 }
 
 async function prepareUserOperationRequestEntryPointVersion0_7<
-    entryPoint extends ENTRYPOINT_ADDRESS_0_7,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_7_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
@@ -189,7 +186,7 @@ async function prepareUserOperationRequestEntryPointVersion0_7<
 
     const account = parseAccount(
         account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_7>
+    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_7_TYPE>
 
     const [sender, nonce, factory, factoryData, callData, gasEstimation] =
         await Promise.all([
@@ -269,7 +266,7 @@ async function prepareUserOperationRequestEntryPointVersion0_7<
 }
 
 export async function prepareUserOperationRequest<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
@@ -289,29 +286,15 @@ export async function prepareUserOperationRequest<
 
     if (entryPointVersion === "0.6") {
         return prepareUserOperationRequestEntryPointVersion0_6(
-            client as Client<
-                TTransport,
-                TChain,
-                SmartAccount<ENTRYPOINT_ADDRESS_0_6> | undefined
-            >,
-            args as PrepareUserOperationRequestParameters<
-                ENTRYPOINT_ADDRESS_0_6,
-                SmartAccount<ENTRYPOINT_ADDRESS_0_6> | undefined
-            >,
+            client,
+            args,
             stateOverrides
         ) as Promise<PrepareUserOperationRequestReturnType<entryPoint>>
     }
 
     return prepareUserOperationRequestEntryPointVersion0_7(
-        client as Client<
-            TTransport,
-            TChain,
-            SmartAccount<ENTRYPOINT_ADDRESS_0_7> | undefined
-        >,
-        args as PrepareUserOperationRequestParameters<
-            ENTRYPOINT_ADDRESS_0_7,
-            SmartAccount<ENTRYPOINT_ADDRESS_0_7> | undefined
-        >,
+        client,
+        args,
         stateOverrides
     ) as Promise<PrepareUserOperationRequestReturnType<entryPoint>>
 }

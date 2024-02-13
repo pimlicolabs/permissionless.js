@@ -1,10 +1,6 @@
 import type { Address, Hash, Hex } from "viem"
 import { concat, encodeAbiParameters, keccak256, pad, toHex } from "viem"
-import type {
-    DefaultEntryPoint,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../types"
+import type { EntryPoint, GetEntryPointVersion } from "../types"
 import type { UserOperation } from "../types/userOperation"
 import { getEntryPointVersion } from "./getEntryPointVersion"
 
@@ -154,9 +150,7 @@ export type GetUserOperationHashParams<entryPoint extends EntryPoint> = {
  * // Returns "0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34"
  *
  */
-export const getUserOperationHash = <
-    entryPoint extends EntryPoint = DefaultEntryPoint
->({
+export const getUserOperationHash = <entryPoint extends EntryPoint>({
     userOperation,
     entryPoint: entryPointAddress,
     chainId

@@ -8,7 +8,6 @@ import {
     type Transport
 } from "viem"
 import type {
-    DefaultEntryPoint,
     EntryPoint,
     GetAccountParameterWithClient,
     GetEntryPointVersion
@@ -18,7 +17,7 @@ import { parseAccount } from "./"
 import { getUserOperationHash } from "./getUserOperationHash"
 
 export type SignUserOperationHashWithECDSAParams<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
@@ -78,7 +77,7 @@ export class AccountOrClientNotFoundError extends BaseError {
  *
  */
 export const signUserOperationHashWithECDSA = async <
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined

@@ -1,6 +1,6 @@
 import type {
-    ENTRYPOINT_ADDRESS_0_6 as ENTRYPOINT_ADDRESS_0_6_TYPE,
-    ENTRYPOINT_ADDRESS_0_7 as ENTRYPOINT_ADDRESS_0_7_TYPE
+    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_0_7_TYPE
 } from "../types"
 import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 

@@ -7,7 +7,7 @@ import {
     type LocalAccount
 } from "viem"
 import type { Chain, EncodeDeployDataParameters, Transport } from "viem"
-import type { DefaultEntryPoint, UserOperation } from "../types"
+import type { UserOperation } from "../types"
 import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
@@ -27,14 +27,14 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 }
 
 export type SmartAccount<
-    entryPoint extends EntryPoint = DefaultEntryPoint,
+    entryPoint extends EntryPoint,
     Name extends string = string,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<Name> & {
     client: Client<transport, chain>
-    entryPoint: EntryPoint
+    entryPoint: entryPoint
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
     getFactory: () => Promise<Address | null>
