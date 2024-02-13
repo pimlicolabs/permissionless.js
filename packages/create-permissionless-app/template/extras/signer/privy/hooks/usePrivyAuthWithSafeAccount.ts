@@ -26,7 +26,7 @@ import {
 } from "wagmi"
 import { sepolia } from "wagmi"
 
-interface PrivyFlowHook {
+interface PrivyAuthHook {
     isConnected: boolean
     showLoader: boolean
     smartAccountClient: SmartAccountClient | null
@@ -37,7 +37,7 @@ interface PrivyFlowHook {
     embeddedWallet: WalletClient
 }
 
-export const usePrivyFlow = (): PrivyFlowHook => {
+export const usePrivyAuth = (): PrivyAuthHook => {
     const { login } = usePrivy()
     const { isConnected } = useAccount()
     const [showLoader, setShowLoader] = useState<boolean>(false)
