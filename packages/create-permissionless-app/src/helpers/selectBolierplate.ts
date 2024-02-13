@@ -21,6 +21,47 @@ const overwriteFileContent = (sourceFile: string, destinationFile: string) => {
     fs.writeFileSync(destinationFile, content)
 }
 
+// Function to update index.ts files in target directory
+const updateIndexFile = (dirPath: string, moduleName: string) => {
+    const indexPath = path.join(dirPath, "index.ts")
+    try {
+        // Check if the index.ts file exists
+        if (fs.existsSync(indexPath)) {
+            // Read the existing index.ts file
+            let indexContent = fs.readFileSync(indexPath, "utf-8")
+
+            // Check if the module is already imported
+            if (
+                !indexContent.includes(
+                    `import { ${moduleName} } from "./${moduleName}";`
+                )
+            ) {
+                // Append import statement to index.ts
+                indexContent += `\nimport { ${moduleName} } from "./${moduleName}";`
+
+                // Update the export line to include the new module
+                indexContent = indexContent.replace(
+                    /(export\s*{)([^}]+)(})/,
+                    `$1$2, ${moduleName}$3`
+                )
+
+                // Write back the updated index.ts file
+                fs.writeFileSync(indexPath, indexContent)
+            }
+        } else {
+            let indexContent = ""
+            indexContent += `\nimport { ${moduleName} } from "./${moduleName}";`
+            indexContent += `\nexport { ${moduleName} };`
+
+            fs.writeFileSync(indexPath, indexContent)
+        }
+    } catch (error) {
+        console.error(
+            `Error updating index file for ${moduleName}: ${error.message}`
+        )
+    }
+}
+
 // Use import.meta.url to get the current module file path
 const __filename = fileURLToPath(import.meta.url)
 // Use path.dirname to get the currrent directory path
@@ -44,8 +85,9 @@ const selectBundlerConfigFile = (
             generatedBoilerplateDir,
             "src",
             "config",
-            "bundlerConfig.ts"
+            `${bundler}BundlerConfig.ts`
         )
+        const indexSource = path.join(generatedBoilerplateDir, "src", "config")
 
         // Check if the source path exists before copying
         if (fs.existsSync(sourcePath)) {
@@ -53,6 +95,7 @@ const selectBundlerConfigFile = (
             fs.ensureDirSync(path.dirname(destinationPath))
 
             copyFiles(sourcePath, destinationPath)
+            updateIndexFile(indexSource, `${bundler}BundlerConfig`)
 
             console.log(`Bundler files copied successfully: ${bundler}`)
         } else {
@@ -79,8 +122,9 @@ const selectPaymasterConfigFile = (
             generatedBoilerplateDir,
             "src",
             "config",
-            "paymasterConfig.ts"
+            `${paymaster}PaymasterConfig.ts`
         )
+        const indexSource = path.join(generatedBoilerplateDir, "src", "config")
 
         // Check if the source path exists before copying
         if (fs.existsSync(sourcePath)) {
@@ -88,6 +132,7 @@ const selectPaymasterConfigFile = (
             fs.ensureDirSync(path.dirname(destinationPath))
 
             copyFiles(sourcePath, destinationPath)
+            updateIndexFile(indexSource, `${paymaster}PaymasterConfig`)
 
             console.log(
                 `Paymaster config file copied successfully: ${paymaster}`
@@ -116,8 +161,10 @@ const selectSignerConfigFile = (
             generatedBoilerplateDir,
             "src",
             "config",
-            "signerConfig.ts"
+            `${signer}Config.ts`
         )
+
+        const indexSource = path.join(generatedBoilerplateDir, "src", "config")
 
         // Check if the source path exists before copying
         if (fs.existsSync(sourcePath)) {
@@ -125,6 +172,7 @@ const selectSignerConfigFile = (
             fs.ensureDirSync(path.dirname(destinationPath))
 
             copyFiles(sourcePath, destinationPath)
+            updateIndexFile(indexSource, `${signer}Config`)
 
             console.log(`Signer config file copied successfully: ${signer}`)
         } else {
@@ -187,12 +235,19 @@ const selectComponentFile = (
             "PrivyAuth.tsx"
         )
 
+        const indexSource = path.join(
+            generatedBoilerplateDir,
+            "src",
+            "components"
+        )
+
         // Check if the source path exists before copying
         if (fs.existsSync(sourcePath)) {
             // Ensure the destination directory exists before copying
             fs.ensureDirSync(path.dirname(destinationPath))
 
             copyFiles(sourcePath, destinationPath)
+            updateIndexFile(indexSource, "PrivyAuth")
 
             console.log("Component files copied successfully")
         } else {
@@ -258,11 +313,18 @@ const selectSignerHooks = (
                 "usePrivyAuth.ts"
             )
 
+            const indexSource = path.join(
+                generatedBoilerplateDir,
+                "src",
+                "hooks"
+            )
+
             if (fs.existsSync(sourceHookFile)) {
                 // Ensure the destination directory exists before copying
                 fs.ensureDirSync(path.dirname(destinationHookFile))
 
                 overwriteFileContent(sourceHookFile, destinationHookFile)
+                updateIndexFile(indexSource, "usePrivyAuth")
 
                 console.log(
                     `Hook file with account option  ${accountSystem} overwritten successfully`
