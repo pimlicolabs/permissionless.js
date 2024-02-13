@@ -2,7 +2,7 @@ import { createPimlicoBundlerClient } from "permissionless/clients/pimlico"
 import { http } from "viem"
 import { sepolia } from "viem/chains"
 
-export const bundlerClient = createPimlicoBundlerClient({
+export const pimlicoBundlerConfig = createPimlicoBundlerClient({
     chain: sepolia,
-    transport: http("https://api.pimlico.io/v1/sepolia/rpc?apikey=API_KEY")
+    transport: http(process.env.NEXT_PUBLIC_PIMLICO_BUNDLER_RPC_HOST)
 })
