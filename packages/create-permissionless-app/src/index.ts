@@ -26,7 +26,6 @@ const main = async () => {
         flags: { bundler, paymaster, signer, accountSystem }
     } = await runCli()
 
-    // e.g. dir/@mono/app returns ["@mono/app", "dir/app"]
     const [scopedAppName, appDir] = parseNameAndPath(appName)
 
     const projectDir = await createProject({
@@ -36,8 +35,6 @@ const main = async () => {
         signer,
         accountSystem
     })
-
-    console.log("projectDir:", projectDir)
 
     // Write name to package.json
     const pkgJson = fs.readJSONSync(
@@ -61,10 +58,7 @@ main().catch((err) => {
     if (err instanceof Error) {
         logger.error(err)
     } else {
-        logger.error(
-            "An unknown error has occurred. Please open an issue on github with the below:"
-        )
-        console.log(err)
+        logger.error("An unknown error has occurred!")
     }
     process.exit(1)
 })
