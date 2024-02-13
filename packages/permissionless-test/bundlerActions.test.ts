@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import {
     BundlerClient,
-    ENTRYPOINT_ADDRESS_0_7,
+    ENTRYPOINT_ADDRESS_V07,
     UserOperation,
     WaitForUserOperationReceiptTimeoutError,
     createBundlerClient,
@@ -10,7 +10,7 @@ import {
     walletClientToSmartAccountSigner
 } from "permissionless"
 import { signerToSimpleSmartAccount } from "permissionless/accounts"
-import { ENTRYPOINT_ADDRESS_0_7_TYPE } from "permissionless/types"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import { getUserOperationHash } from "permissionless/utils"
 import { http, Address, type Hash, parseEther } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -92,12 +92,12 @@ describe("BUNDLER ACTIONS", () => {
         const bundlerClient = createBundlerClient({
             chain: getTestingChain(),
             transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-            entryPoint: ENTRYPOINT_ADDRESS_0_7
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: walletClientToSmartAccountSigner(eoaWalletClient),
-            entryPoint: ENTRYPOINT_ADDRESS_0_7,
+            entryPoint: ENTRYPOINT_ADDRESS_V07,
             factoryAddress: process.env.FACTORY_ADDRESS as Address
         })
 
@@ -108,7 +108,7 @@ describe("BUNDLER ACTIONS", () => {
             sponsorUserOperation: async (args) => {
                 return args.userOperation
             },
-            entryPoint: ENTRYPOINT_ADDRESS_0_7
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         const userOperation =
@@ -149,7 +149,7 @@ describe("BUNDLER ACTIONS", () => {
 
         expect(userOperationFromUserOpHash).not.toBeNull()
         expect(userOperationFromUserOpHash?.entryPoint).toBe(
-            ENTRYPOINT_ADDRESS_0_7
+            ENTRYPOINT_ADDRESS_V07
         )
         expect(userOperationFromUserOpHash?.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash

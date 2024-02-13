@@ -1,5 +1,5 @@
 import {
-    ENTRYPOINT_ADDRESS_0_6,
+    ENTRYPOINT_ADDRESS_V06,
     createBundlerClient,
     createSmartAccountClient
 } from "permissionless"
@@ -240,7 +240,7 @@ export const getEoaWalletClient = () => {
 export const getEntryPoint = () => {
     if (!process.env.ENTRYPOINT_ADDRESS)
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    return ENTRYPOINT_ADDRESS_0_6
+    return ENTRYPOINT_ADDRESS_V06
 }
 
 export const getPublicClient = async () => {

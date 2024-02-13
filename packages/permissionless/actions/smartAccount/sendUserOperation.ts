@@ -7,7 +7,7 @@ import type {
     UserOperation
 } from "../../types/"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -25,7 +25,7 @@ export type SendUserOperationParameters<
         | SmartAccount<entryPoint>
         | undefined
 > = {
-    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               | "sender"

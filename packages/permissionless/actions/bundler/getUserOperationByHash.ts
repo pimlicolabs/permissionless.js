@@ -4,7 +4,7 @@ import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
 import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type { UserOperation } from "../../types/userOperation"
-import { ENTRYPOINT_ADDRESS_0_6 } from "../../utils/getEntryPointVersion"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../utils/getEntryPointVersion"
 
 export type GetUserOperationByHashParameters = {
     hash: Hash
@@ -67,7 +67,7 @@ export const getUserOperationByHash = async <
     } = response
 
     return {
-        userOperation: (entryPointAddress === ENTRYPOINT_ADDRESS_0_6
+        userOperation: (entryPointAddress === ENTRYPOINT_ADDRESS_V06
             ? {
                   ...userOperation,
                   nonce: BigInt(userOperation.nonce),

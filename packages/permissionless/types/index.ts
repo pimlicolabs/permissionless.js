@@ -6,8 +6,8 @@ import type { UserOperation } from "./userOperation"
 export type { UserOperation }
 export type {
     EntryPointVersion,
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
-    ENTRYPOINT_ADDRESS_0_7_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
     GetEntryPointVersion,
     EntryPoint
 } from "./entrypoint"

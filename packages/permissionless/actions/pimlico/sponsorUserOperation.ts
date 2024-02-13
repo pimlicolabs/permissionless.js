@@ -2,7 +2,7 @@ import type { Account, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { Prettify } from "../../types/"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -12,12 +12,12 @@ import type {
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
-import { ENTRYPOINT_ADDRESS_0_6 } from "../../utils/getEntryPointVersion"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../utils/getEntryPointVersion"
 
 export type PimlicoSponsorUserOperationParameters<
     entryPoint extends EntryPoint
 > = {
-    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
@@ -101,7 +101,7 @@ export const sponsorUserOperation = async <
     })
 
     const userOperation: SponsorUserOperationReturnType<entryPoint> = (
-        args.entryPoint === ENTRYPOINT_ADDRESS_0_6
+        args.entryPoint === ENTRYPOINT_ADDRESS_V06
             ? {
                   ...args.userOperation,
                   paymasterAndData: response.paymasterAndData,

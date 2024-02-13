@@ -28,7 +28,7 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { ENTRYPOINT_ADDRESS_0_6_TYPE, Prettify } from "../../types"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -174,7 +174,7 @@ const encodeMultiSend = (
 }
 
 export type SafeSmartAccount<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6_TYPE,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>

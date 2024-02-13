@@ -25,8 +25,8 @@ export function parseAccount(account: Address | Account): Account {
     return account
 }
 import {
-    ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7,
+    ENTRYPOINT_ADDRESS_V06,
+    ENTRYPOINT_ADDRESS_V07,
     getEntryPointVersion
 } from "./getEntryPointVersion"
 
@@ -46,6 +46,6 @@ export {
     providerToSmartAccountSigner,
     getAddressFromInitCodeOrPaymasterAndData,
     getEntryPointVersion,
-    ENTRYPOINT_ADDRESS_0_6,
-    ENTRYPOINT_ADDRESS_0_7
+    ENTRYPOINT_ADDRESS_V06,
+    ENTRYPOINT_ADDRESS_V07
 }

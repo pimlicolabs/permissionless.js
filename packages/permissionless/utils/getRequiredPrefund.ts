@@ -1,5 +1,5 @@
 import type { EntryPoint, GetEntryPointVersion, UserOperation } from "../types"
-import { ENTRYPOINT_ADDRESS_0_6 } from "./getEntryPointVersion"
+import { ENTRYPOINT_ADDRESS_V06 } from "./getEntryPointVersion"
 
 export type GetRequiredPrefundReturnType<entryPoint extends EntryPoint> = {
     userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
@@ -24,7 +24,7 @@ export const getRequiredPrefund = <entryPoint extends EntryPoint>({
     userOperation,
     entryPoint: entryPointAddress
 }: GetRequiredPrefundReturnType<entryPoint>): bigint => {
-    if (entryPointAddress === ENTRYPOINT_ADDRESS_0_6) {
+    if (entryPointAddress === ENTRYPOINT_ADDRESS_V06) {
         const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
         const multiplier =
             userOperationVersion0_6.paymasterAndData.length > 2 ? 3n : 1n

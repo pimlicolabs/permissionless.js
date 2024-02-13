@@ -1,7 +1,7 @@
 import type { PartialBy } from "viem/types/utils"
 import { type StackupPaymasterClient } from "../../clients/stackup"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -11,7 +11,7 @@ import { deepHexlify } from "../../utils/deepHexlify"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 
 export type SponsorUserOperationParameters<entryPoint extends EntryPoint> = {
-    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               "callGasLimit" | "preVerificationGas" | "verificationGasLimit"

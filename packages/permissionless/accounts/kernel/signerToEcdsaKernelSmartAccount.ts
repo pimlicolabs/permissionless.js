@@ -22,8 +22,8 @@ import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type { Prettify } from "../../types"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
-    ENTRYPOINT_ADDRESS_0_7_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint
 } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
@@ -201,17 +201,17 @@ const getAccountAddress = async <
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
     if (entryPointVersion === "0.6") {
-        return getSenderAddress<ENTRYPOINT_ADDRESS_0_6_TYPE>(client, {
+        return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
             initCode: concatHex([factoryAddress, factoryData]),
-            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_6_TYPE
+            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
         })
     }
 
     // Get the sender address based on the init code
-    return getSenderAddress<ENTRYPOINT_ADDRESS_0_7_TYPE>(client, {
+    return getSenderAddress<ENTRYPOINT_ADDRESS_V07_TYPE>(client, {
         factory: factoryAddress,
         factoryData,
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_0_7_TYPE
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V07_TYPE
     })
 }
 

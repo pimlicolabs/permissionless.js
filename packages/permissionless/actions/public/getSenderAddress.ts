@@ -13,13 +13,13 @@ import {
 import { simulateContract } from "viem/actions"
 import type { Prettify } from "../../types/"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
 } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
 
 export type GetSenderAddressParams<entryPoint extends EntryPoint> =
-    entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? {
               initCode: Hex
               entryPoint: entryPoint

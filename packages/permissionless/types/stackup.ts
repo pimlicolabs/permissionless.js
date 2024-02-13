@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { ENTRYPOINT_ADDRESS_0_6_TYPE, EntryPoint } from "./entrypoint"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE, EntryPoint } from "./entrypoint"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 interface StackupPaymasterContextType {
@@ -15,7 +15,7 @@ export type StackupPaymasterRpcSchema<entryPoint extends EntryPoint> = [
     {
         Method: "pm_sponsorUserOperation"
         Parameters: [
-            userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+            userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
                 ? PartialBy<
                       UserOperationWithBigIntAsHex<"0.6">,
                       | "callGasLimit"
@@ -33,7 +33,7 @@ export type StackupPaymasterRpcSchema<entryPoint extends EntryPoint> = [
             entryPoint: entryPoint,
             context: StackupPaymasterContext
         ]
-        ReturnType: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+        ReturnType: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
             ? {
                   paymasterAndData: Hex
                   preVerificationGas: Hex

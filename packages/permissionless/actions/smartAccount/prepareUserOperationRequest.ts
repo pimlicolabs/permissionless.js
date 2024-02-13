@@ -9,8 +9,8 @@ import type {
 } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
 import type {
-    ENTRYPOINT_ADDRESS_0_6_TYPE,
-    ENTRYPOINT_ADDRESS_0_7_TYPE,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
@@ -32,7 +32,7 @@ export type PrepareUserOperationRequestParameters<
         | SmartAccount<entryPoint>
         | undefined
 > = {
-    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_0_6_TYPE
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
               UserOperation<"0.6">,
               | "sender"
@@ -71,7 +71,7 @@ export type PrepareUserOperationRequestReturnType<
 > = UserOperation<GetEntryPointVersion<entryPoint>>
 
 async function prepareUserOperationRequestEntryPointVersion0_6<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_6_TYPE,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
@@ -91,7 +91,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
 
     const account = parseAccount(
         account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_6_TYPE>
+    ) as SmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE>
 
     const [sender, nonce, initCode, callData, gasEstimation] =
         await Promise.all([
@@ -166,7 +166,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
 }
 
 async function prepareUserOperationRequestEntryPointVersion0_7<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_0_7_TYPE,
+    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V07_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
@@ -186,7 +186,7 @@ async function prepareUserOperationRequestEntryPointVersion0_7<
 
     const account = parseAccount(
         account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_0_7_TYPE>
+    ) as SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
 
     const [sender, nonce, factory, factoryData, callData, gasEstimation] =
         await Promise.all([
