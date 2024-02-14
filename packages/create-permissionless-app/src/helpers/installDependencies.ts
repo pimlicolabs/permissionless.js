@@ -1,37 +1,51 @@
 import path from "path"
 import chalk from "chalk"
-import { execa } from "execa"
-import ora from "ora"
+import { type StdioOption, execa } from "execa"
+import ora, { type Ora } from "ora"
+
 import {
     type PackageManager,
     detectPackageManager
 } from "../utils/detectPackageManager"
+import { logger } from "../utils/logger"
+
+const runInstallCommand = async (
+    projectDir: string,
+    packageManager: PackageManager
+): Promise<Ora | null> => {
+    const spinner = ora(`Running ${packageManager} install...`).start()
+    try {
+        const stdioOption: StdioOption =
+            process.platform === "win32" ? "inherit" : "pipe"
+        const { stdout } = await execa(packageManager, ["install"], {
+            cwd: projectDir,
+            stdio: stdioOption
+        })
+        spinner.succeed(chalk.cyan(`${stdout.length} packages installed!`))
+        return null
+    } catch (error) {
+        spinner.fail(chalk.red("Failed to install dependencies."))
+        console.error(chalk.red("Error:"), error)
+        return spinner
+    }
+}
 
 export const installDependencies = async (projectDir: string) => {
-    const boilerplateDir = path.resolve(process.cwd(), projectDir)
-
     try {
-        // Change directory to the generated boilerplate directory
+        const boilerplateDir = path.resolve(process.cwd(), projectDir)
         process.chdir(boilerplateDir)
-
-        // Detect the package manager being used
+        logger.info("Installing dependencies...")
         const packageManager: PackageManager = detectPackageManager()
-
-        // Start spinner to notify users
-        const spinner = ora({
-            text: `Installing dependencies using ${packageManager}...`,
-            spinner: "dots"
-        }).start()
-
-        // Install dependencies using the detected package manager
-        await execa(packageManager, ["install"], { stdio: "inherit" })
-
-        // Stop spinner and notify users
-        spinner.succeed(chalk.green("Dependencies installed successfully."))
-    } catch (error) {
-        console.error(
-            chalk.red("Failed to install dependencies:"),
-            error.message
+        const installSpinner = await runInstallCommand(
+            boilerplateDir,
+            packageManager
         )
+        if (installSpinner === null) {
+            logger.success("Successfully installed all dependencies!")
+        } else {
+            logger.error("Failed to install dependencies.")
+        }
+    } catch (error) {
+        logger.error("An error occurred:", error)
     }
 }
