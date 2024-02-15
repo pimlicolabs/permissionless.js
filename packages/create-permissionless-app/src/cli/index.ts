@@ -3,10 +3,17 @@ import * as p from "@clack/prompts"
 import { Command } from "commander"
 
 import { CREATE_PERMISSIONLESS_APP, DEFAULT_APP_NAME } from "../constants"
+import {
+    type PackageManager,
+    detectPackageManager
+} from "../utils/detectPackageManager"
 import { logger } from "../utils/logger"
 import { validateAppName } from "../utils/validateAppName"
 
 interface CliFlags {
+    noInstall: boolean
+    default: boolean
+
     bundler: string
     paymaster: string
     signer: string
@@ -21,6 +28,8 @@ interface CliResults {
 const defaultOptions: CliResults = {
     appName: DEFAULT_APP_NAME,
     flags: {
+        noInstall: false,
+        default: false,
         bundler: "pimlico",
         paymaster: "pimlico",
         signer: "privy",
@@ -37,6 +46,16 @@ export const runCli = async (): Promise<CliResults> => {
         .argument(
             "[dir]",
             "The name of the application, as well as the name of the directory to create"
+        )
+        .option(
+            "--noInstall",
+            "Explicitly tell the CLI to not run the package manager's install command",
+            false
+        )
+        .option(
+            "-y, --default",
+            "Bypass the CLI and use all default options to bootstrap a new permissionless app",
+            false
         )
 
         /** START CI-FLAGS
@@ -73,6 +92,7 @@ export const runCli = async (): Promise<CliResults> => {
     cliResults.flags = program.opts()
 
     try {
+        const packageManager: PackageManager = detectPackageManager()
         const project = await p.group(
             {
                 ...(!cliProvidedName && {
@@ -110,7 +130,19 @@ export const runCli = async (): Promise<CliResults> => {
                         options: [{ value: "privy", label: "Privy" }],
                         initialValue: cliResults.flags.signer
                     })
-                }
+                },
+                ...(!cliResults.flags.noInstall && {
+                    install: () => {
+                        return p.confirm({
+                            message: `Should we run '${packageManager}${
+                                packageManager === "yarn"
+                                    ? `'?`
+                                    : ` install' for you?`
+                            }`,
+                            initialValue: !defaultOptions.flags.noInstall
+                        })
+                    }
+                })
             },
             {
                 onCancel() {
@@ -123,6 +155,7 @@ export const runCli = async (): Promise<CliResults> => {
             appName: project.name ?? cliResults.appName,
             flags: {
                 ...cliResults.flags,
+                noInstall: !project.install || cliResults.flags.noInstall,
                 signer: project.signer ?? cliResults.flags.signer,
                 paymaster: project.paymaster ?? cliResults.flags.paymaster,
                 bundler: project.bundler ?? cliResults.flags.bundler,

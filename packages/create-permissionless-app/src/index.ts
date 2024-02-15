@@ -23,7 +23,7 @@ const main = async () => {
 
     const {
         appName,
-        flags: { bundler, paymaster, signer, accountSystem }
+        flags: { noInstall, bundler, paymaster, signer, accountSystem }
     } = await runCli()
 
     const [scopedAppName, appDir] = parseNameAndPath(appName)
@@ -48,7 +48,9 @@ const main = async () => {
 
     addPackageDependency(signer, projectDir)
 
-    await installDependencies(projectDir)
+    if (!noInstall) {
+        await installDependencies(projectDir)
+    }
 
     process.exit(0)
 }
