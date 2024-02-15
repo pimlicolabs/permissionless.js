@@ -22,8 +22,6 @@ export const addPackageDependency = (signer: string, baseDir: string) => {
         // Write back the updated package.json
         packageJson.dependencies = dependencies
         fs.writeJsonSync(packageJsonPath, packageJson, { spaces: 2 })
-
-        console.log("Package.json updated successfully.")
     } catch (error) {
         console.error("Failed to update package.json:", error.message)
     }

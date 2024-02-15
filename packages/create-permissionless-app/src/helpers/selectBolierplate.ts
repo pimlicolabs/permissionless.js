@@ -1,6 +1,9 @@
 import path from "path"
 import { fileURLToPath } from "url"
+import chalk from "chalk"
 import fs from "fs-extra"
+import ora, { type Ora } from "ora"
+import { logger } from "../utils/logger"
 
 interface SelectBoilerplateOptions {
     bundler: string
@@ -72,7 +75,8 @@ const templateExtrasDir = path.resolve(moduleDir, "../../template/extras")
 // Select bundler-specific files
 const selectBundlerConfigFile = (
     bundler: string,
-    generatedBoilerplateDir: string
+    generatedBoilerplateDir: string,
+    spinner: Ora
 ) => {
     try {
         const sourcePath = path.join(
@@ -97,19 +101,32 @@ const selectBundlerConfigFile = (
             copyFiles(sourcePath, destinationPath)
             updateIndexFile(indexSource, `${bundler}BundlerConfig`)
 
-            console.log(`Bundler files copied successfully: ${bundler}`)
+            spinner.succeed(
+                chalk.green(
+                    `Successfully setup boilerplate for ${chalk.green.bold(
+                        bundler
+                    )} bundler!`
+                )
+            )
         } else {
-            console.error(`Bundler files not found for: ${bundler}`)
+            spinner.fail(
+                chalk.red(
+                    `Bundler config files not found for: ${chalk.green.bold(
+                        bundler
+                    )}!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting bundler files: ${error.message}`)
+        logger.error(`Error selecting bundler files: ${error.message}`)
     }
 }
 
 // Select paymaster-specific files
 const selectPaymasterConfigFile = (
     paymaster: string,
-    generatedBoilerplateDir: string
+    generatedBoilerplateDir: string,
+    spinner: Ora
 ) => {
     try {
         const sourcePath = path.join(
@@ -134,21 +151,32 @@ const selectPaymasterConfigFile = (
             copyFiles(sourcePath, destinationPath)
             updateIndexFile(indexSource, `${paymaster}PaymasterConfig`)
 
-            console.log(
-                `Paymaster config file copied successfully: ${paymaster}`
+            spinner.succeed(
+                chalk.green(
+                    `Successfully setup boilerplate for ${chalk.green.bold(
+                        paymaster
+                    )} paymaster!`
+                )
             )
         } else {
-            console.error(`Paymaster config file not found for: ${paymaster}`)
+            spinner.fail(
+                chalk.red(
+                    `Paymaster config files not found for: ${chalk.green.bold(
+                        paymaster
+                    )}!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting bundler file: ${error.message}`)
+        logger.error(`Error selecting bundler file: ${error.message}`)
     }
 }
 
 // Select signer-specific files
 const selectSignerConfigFile = (
     signer: string,
-    generatedBoilerplateDir: string
+    generatedBoilerplateDir: string,
+    spinner: Ora
 ) => {
     try {
         const sourcePath = path.join(
@@ -174,17 +202,33 @@ const selectSignerConfigFile = (
             copyFiles(sourcePath, destinationPath)
             updateIndexFile(indexSource, `${signer}Config`)
 
-            console.log(`Signer config file copied successfully: ${signer}`)
+            spinner.succeed(
+                chalk.green(
+                    `Successfully setup config for ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         } else {
-            console.error(`Signer config file not found for: ${signer}`)
+            spinner.fail(
+                chalk.red(
+                    `Config files not found for:  ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting signer config file: ${error.message}`)
+        logger.error(`Error selecting signer config file: ${error.message}`)
     }
 }
 
 // Select _app.tsx content
-const selectAppFile = (signer: string, generatedBoilerplateDir: string) => {
+const selectAppFile = (
+    signer: string,
+    generatedBoilerplateDir: string,
+    spinner: Ora
+) => {
     try {
         const sourcePath = path.join(
             templateExtrasDir,
@@ -207,18 +251,31 @@ const selectAppFile = (signer: string, generatedBoilerplateDir: string) => {
 
             overwriteFileContent(sourcePath, destinationPath)
 
-            console.log(`App file overwritten successfully: ${signer}`)
+            spinner.succeed(
+                chalk.green(
+                    `Successfully setup App component for ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         } else {
-            console.error(`App file not found for: ${signer}`)
+            spinner.fail(
+                chalk.red(
+                    `App file not found for:  ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting App file: ${error.message}`)
+        logger.error(`Error selecting App file: ${error.message}`)
     }
 }
 
 const selectComponentFile = (
     signer: string,
-    generatedBoilerplateDir: string
+    generatedBoilerplateDir: string,
+    spinner: Ora
 ) => {
     try {
         const sourcePath = path.join(
@@ -249,17 +306,33 @@ const selectComponentFile = (
             copyFiles(sourcePath, destinationPath)
             updateIndexFile(indexSource, "PrivyAuth")
 
-            console.log("Component files copied successfully")
+            spinner.succeed(
+                chalk.green(
+                    `Successfully add necessary components for ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         } else {
-            console.error(`Component file not found for: ${signer}`)
+            spinner.fail(
+                chalk.red(
+                    `Component files not found for:  ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting Component Component: ${error.message}`)
+        logger.error(`Error selecting Component files: ${error.message}`)
     }
 }
 
 // Select index.tsx content
-const selectIndexFile = (signer: string, generatedBoilerplateDir: string) => {
+const selectIndexFile = (
+    signer: string,
+    generatedBoilerplateDir: string,
+    spinner: Ora
+) => {
     try {
         const sourcePath = path.join(
             templateExtrasDir,
@@ -281,12 +354,24 @@ const selectIndexFile = (signer: string, generatedBoilerplateDir: string) => {
 
             overwriteFileContent(sourcePath, destinationPath)
 
-            console.log(`Index file overwritten successfully: ${signer}`)
+            spinner.succeed(
+                chalk.green(
+                    `Successfully setup index file for ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         } else {
-            console.error(`Index file not found for: ${signer}`)
+            spinner.fail(
+                chalk.red(
+                    `Index file not found for:  ${chalk.green.bold(
+                        signer
+                    )} signer!`
+                )
+            )
         }
     } catch (error) {
-        console.error(`Error selecting Index file: ${error.message}`)
+        logger.error(`Error selecting Index file: ${error.message}`)
     }
 }
 
@@ -294,7 +379,8 @@ const selectIndexFile = (signer: string, generatedBoilerplateDir: string) => {
 const selectSignerHooks = (
     signer: string,
     accountSystem: string,
-    generatedBoilerplateDir: string
+    generatedBoilerplateDir: string,
+    spinner: Ora
 ) => {
     try {
         if (signer === "privy" && accountSystem === "safe") {
@@ -326,15 +412,25 @@ const selectSignerHooks = (
                 overwriteFileContent(sourceHookFile, destinationHookFile)
                 updateIndexFile(indexSource, "usePrivyAuth")
 
-                console.log(
-                    `Hook file with account option  ${accountSystem} overwritten successfully`
+                spinner.succeed(
+                    chalk.green(
+                        `Successfully add necessary hooks for ${chalk.green.bold(
+                            signer
+                        )} signer!`
+                    )
                 )
             } else {
-                console.error(`Hook file not found for:  ${accountSystem} `)
+                spinner.fail(
+                    chalk.red(
+                        `Hooks not found for:  ${chalk.green.bold(
+                            signer
+                        )} signer!`
+                    )
+                )
             }
         }
     } catch (error) {
-        console.error(`Failed to select signer hooks: ${error.message}`)
+        logger.error(`Failed to select signer hooks: ${error.message}`)
     }
 }
 
@@ -347,19 +443,23 @@ export const selectBoilerplate = ({
     projectDir
 }: SelectBoilerplateOptions) => {
     try {
+        logger.info("Setting up boilerplate...")
         const generatedBoilerplateDir = path.resolve(process.cwd(), projectDir)
+        const spinner = ora().start()
 
-        // selectCommonBase(generatedBoilerplateDir);
-        selectBundlerConfigFile(bundler, generatedBoilerplateDir)
-        selectPaymasterConfigFile(paymaster, generatedBoilerplateDir)
-        selectSignerConfigFile(signer, generatedBoilerplateDir)
-        selectAppFile(signer, generatedBoilerplateDir)
-        selectComponentFile(signer, generatedBoilerplateDir)
-        selectIndexFile(signer, generatedBoilerplateDir)
-        selectSignerHooks(signer, accountSystem, generatedBoilerplateDir)
-
-        console.log("Boilerplate selection successful!")
+        selectBundlerConfigFile(bundler, generatedBoilerplateDir, spinner)
+        selectPaymasterConfigFile(paymaster, generatedBoilerplateDir, spinner)
+        selectSignerConfigFile(signer, generatedBoilerplateDir, spinner)
+        selectAppFile(signer, generatedBoilerplateDir, spinner)
+        selectComponentFile(signer, generatedBoilerplateDir, spinner)
+        selectIndexFile(signer, generatedBoilerplateDir, spinner)
+        selectSignerHooks(
+            signer,
+            accountSystem,
+            generatedBoilerplateDir,
+            spinner
+        )
     } catch (error) {
-        console.error("Boilerplate selection failed:", error.message)
+        console.error("Boilerplate generation failed:", error.message)
     }
 }
