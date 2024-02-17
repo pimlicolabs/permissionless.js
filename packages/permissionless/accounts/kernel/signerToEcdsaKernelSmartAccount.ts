@@ -200,7 +200,7 @@ const getAccountAddress = async <
 
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
-    if (entryPointVersion === "0.6") {
+    if (entryPointVersion === "v0.6") {
         return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
             initCode: concatHex([factoryAddress, factoryData]),
             entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE

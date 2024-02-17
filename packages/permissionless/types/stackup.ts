@@ -17,13 +17,13 @@ export type StackupPaymasterRpcSchema<entryPoint extends EntryPoint> = [
         Parameters: [
             userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
                 ? PartialBy<
-                      UserOperationWithBigIntAsHex<"0.6">,
+                      UserOperationWithBigIntAsHex<"v0.6">,
                       | "callGasLimit"
                       | "preVerificationGas"
                       | "verificationGasLimit"
                   >
                 : PartialBy<
-                      UserOperationWithBigIntAsHex<"0.7">,
+                      UserOperationWithBigIntAsHex<"v0.7">,
                       | "callGasLimit"
                       | "preVerificationGas"
                       | "verificationGasLimit"

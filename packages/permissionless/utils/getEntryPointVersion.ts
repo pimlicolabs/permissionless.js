@@ -12,4 +12,4 @@ export const ENTRYPOINT_ADDRESS_V07: ENTRYPOINT_ADDRESS_V07_TYPE =
 export const getEntryPointVersion = (
     entryPoint: EntryPoint
 ): GetEntryPointVersion<EntryPoint> =>
-    entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.6" : "0.7"
+    entryPoint === ENTRYPOINT_ADDRESS_V06 ? "v0.6" : "v0.7"

@@ -19,13 +19,13 @@ import {
 
 export type EstimateUserOperationGasParameters<entryPoint extends EntryPoint> =
     {
-        userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+        userOperation: GetEntryPointVersion<entryPoint> extends "v0.6"
             ? PartialBy<
-                  UserOperation<"0.6">,
+                  UserOperation<"v0.6">,
                   "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
               >
             : PartialBy<
-                  UserOperation<"0.7">,
+                  UserOperation<"v0.7">,
                   | "callGasLimit"
                   | "preVerificationGas"
                   | "verificationGasLimit"

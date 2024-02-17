@@ -27,7 +27,7 @@ export type SendUserOperationParameters<
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
-              UserOperation<"0.6">,
+              UserOperation<"v0.6">,
               | "sender"
               | "nonce"
               | "initCode"
@@ -40,7 +40,7 @@ export type SendUserOperationParameters<
               | "signature"
           >
         : PartialBy<
-              UserOperation<"0.7">,
+              UserOperation<"v0.7">,
               | "sender"
               | "nonce"
               | "factory"

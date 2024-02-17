@@ -13,8 +13,8 @@ function packUserOp<entryPoint extends EntryPoint>({
 }): Hex {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
-    if (entryPointVersion === "0.6") {
-        const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
+    if (entryPointVersion === "v0.6") {
+        const userOperationVersion0_6 = userOperation as UserOperation<"v0.6">
         const hashedInitCode = keccak256(userOperationVersion0_6.initCode)
         const hashedCallData = keccak256(userOperationVersion0_6.callData)
         const hashedPaymasterAndData = keccak256(
@@ -49,7 +49,7 @@ function packUserOp<entryPoint extends EntryPoint>({
         )
     }
 
-    const userOperationVersion0_7 = userOperation as UserOperation<"0.7">
+    const userOperationVersion0_7 = userOperation as UserOperation<"v0.7">
     const hashedInitCode =
         userOperationVersion0_7.factory && userOperationVersion0_7.factoryData
             ? keccak256(

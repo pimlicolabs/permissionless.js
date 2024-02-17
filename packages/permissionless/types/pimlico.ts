@@ -56,15 +56,15 @@ export type PimlicoPaymasterRpcSchema<entryPoint extends EntryPoint> = [
     {
         Method: "pm_sponsorUserOperation"
         Parameters: [
-            userOperation: GetEntryPointVersion<entryPoint> extends "0.6"
+            userOperation: GetEntryPointVersion<entryPoint> extends "v0.6"
                 ? PartialBy<
-                      UserOperationWithBigIntAsHex<"0.6">,
+                      UserOperationWithBigIntAsHex<"v0.6">,
                       | "callGasLimit"
                       | "preVerificationGas"
                       | "verificationGasLimit"
                   >
                 : PartialBy<
-                      UserOperationWithBigIntAsHex<"0.7">,
+                      UserOperationWithBigIntAsHex<"v0.7">,
                       | "callGasLimit"
                       | "preVerificationGas"
                       | "verificationGasLimit"
@@ -76,7 +76,7 @@ export type PimlicoPaymasterRpcSchema<entryPoint extends EntryPoint> = [
                 sponsorshipPolicyId?: string
             }
         ]
-        ReturnType: GetEntryPointVersion<entryPoint> extends "0.6"
+        ReturnType: GetEntryPointVersion<entryPoint> extends "v0.6"
             ? {
                   paymasterAndData: Hex
                   preVerificationGas: Hex

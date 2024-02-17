@@ -53,7 +53,7 @@ describe("BUNDLER ACTIONS", () => {
         bundlerClient = getBundlerClient()
     })
 
-    test.skip("Supported entry points request", async () => {
+    test("Supported entry points request", async () => {
         const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
         expectTypeOf(supportedEntryPoints).toBeArray()
@@ -61,7 +61,7 @@ describe("BUNDLER ACTIONS", () => {
         expect(supportedEntryPoints.includes(getEntryPoint())).toBe(true)
     })
 
-    test.skip("Chain id call", async () => {
+    test("Chain id call", async () => {
         const chainId = await bundlerClient.chainId()
         const chain = getTestingChain()
 
@@ -70,7 +70,7 @@ describe("BUNDLER ACTIONS", () => {
         expect(chainId === chain.id).toBe(true)
     })
 
-    test.skip("Estimate user operation gas", async () => {
+    test("Estimate user operation gas", async () => {
         const eoaWalletClient = getEoaWalletClient()
 
         const userOperation = await buildUserOp(eoaWalletClient)
@@ -170,7 +170,7 @@ describe("BUNDLER ACTIONS", () => {
         // expect(newNonce).toBe(userOperation.nonce + BigInt(1))
     }, 100000)
 
-    test.skip("wait for user operation receipt fail", async () => {
+    test("wait for user operation receipt fail", async () => {
         const eoaWalletClient = getEoaWalletClient()
         const userOperation = await buildUserOp(eoaWalletClient)
 

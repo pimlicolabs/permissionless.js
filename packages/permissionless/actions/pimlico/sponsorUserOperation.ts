@@ -19,11 +19,11 @@ export type PimlicoSponsorUserOperationParameters<
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
-              UserOperation<"0.6">,
+              UserOperation<"v0.6">,
               "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
           >
         : PartialBy<
-              UserOperation<"0.7">,
+              UserOperation<"v0.7">,
               | "callGasLimit"
               | "preVerificationGas"
               | "verificationGasLimit"

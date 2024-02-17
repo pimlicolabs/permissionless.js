@@ -34,7 +34,7 @@ export type PrepareUserOperationRequestParameters<
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? PartialBy<
-              UserOperation<"0.6">,
+              UserOperation<"v0.6">,
               | "sender"
               | "nonce"
               | "initCode"
@@ -47,7 +47,7 @@ export type PrepareUserOperationRequestParameters<
               | "signature"
           >
         : PartialBy<
-              UserOperation<"0.7">,
+              UserOperation<"v0.7">,
               | "sender"
               | "nonce"
               | "factory"
@@ -70,7 +70,7 @@ export type PrepareUserOperationRequestReturnType<
     entryPoint extends EntryPoint
 > = UserOperation<GetEntryPointVersion<entryPoint>>
 
-async function prepareUserOperationRequestEntryPointVersion0_6<
+async function prepareUserOperationRequestForEntryPointV0_6<
     entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
@@ -105,7 +105,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
                 : undefined
         ])
 
-    let userOperation: UserOperation<"0.6"> = {
+    let userOperation: UserOperation<"v0.6"> = {
         sender,
         nonce,
         initCode,
@@ -136,7 +136,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as UserOperation<"0.6">
+        })) as UserOperation<"v0.6">
     } else if (
         !userOperation.callGasLimit ||
         !userOperation.verificationGasLimit ||
@@ -153,8 +153,7 @@ async function prepareUserOperationRequestEntryPointVersion0_6<
             stateOverrides
         )
 
-        userOperation.callGasLimit =
-            userOperation.callGasLimit || gasParameters.callGasLimit
+        userOperation.callGasLimit |= gasParameters.callGasLimit
         userOperation.verificationGasLimit =
             userOperation.verificationGasLimit ||
             gasParameters.verificationGasLimit
@@ -201,7 +200,7 @@ async function prepareUserOperationRequestEntryPointVersion0_7<
                 : undefined
         ])
 
-    let userOperation: UserOperation<"0.7"> = {
+    let userOperation: UserOperation<"v0.7"> = {
         sender,
         nonce,
         factory: factory || undefined,
@@ -236,7 +235,7 @@ async function prepareUserOperationRequestEntryPointVersion0_7<
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as UserOperation<"0.7">
+        })) as UserOperation<"v0.7">
     } else if (
         !userOperation.callGasLimit ||
         !userOperation.verificationGasLimit ||
@@ -284,8 +283,8 @@ export async function prepareUserOperationRequest<
 
     const entryPointVersion = getEntryPointVersion(account.entryPoint)
 
-    if (entryPointVersion === "0.6") {
-        return prepareUserOperationRequestEntryPointVersion0_6(
+    if (entryPointVersion === "v0.6") {
+        return prepareUserOperationRequestForEntryPointV0_6(
             client,
             args,
             stateOverrides

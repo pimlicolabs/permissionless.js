@@ -549,7 +549,7 @@ export async function signerToSafeSmartAccount<
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
-    if (entryPointVersion !== "0.6") {
+    if (entryPointVersion !== "v0.6") {
         throw new Error("Only EntryPoint 0.6 is supported")
     }
 

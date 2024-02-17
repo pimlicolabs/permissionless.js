@@ -6,7 +6,7 @@ export type TStatus = "success" | "reverted"
 
 export type UserOperationWithBigIntAsHex<
     entryPointVersion extends EntryPointVersion
-> = entryPointVersion extends "0.6"
+> = entryPointVersion extends "v0.6"
     ? {
           sender: Address
           nonce: Hex
@@ -47,7 +47,7 @@ export type UserOperationWithBigIntAsHex<
       }
 
 export type UserOperation<entryPointVersion extends EntryPointVersion> =
-    entryPointVersion extends "0.6"
+    entryPointVersion extends "v0.6"
         ? {
               sender: Address
               nonce: bigint

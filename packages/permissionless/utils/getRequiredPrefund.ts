@@ -25,7 +25,7 @@ export const getRequiredPrefund = <entryPoint extends EntryPoint>({
     entryPoint: entryPointAddress
 }: GetRequiredPrefundReturnType<entryPoint>): bigint => {
     if (entryPointAddress === ENTRYPOINT_ADDRESS_V06) {
-        const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
+        const userOperationVersion0_6 = userOperation as UserOperation<"v0.6">
         const multiplier =
             userOperationVersion0_6.paymasterAndData.length > 2 ? 3n : 1n
         const requiredGas =
@@ -38,7 +38,7 @@ export const getRequiredPrefund = <entryPoint extends EntryPoint>({
         )
     }
 
-    const userOperationVersion0_7 = userOperation as UserOperation<"0.7">
+    const userOperationVersion0_7 = userOperation as UserOperation<"v0.7">
     const multiplier = userOperationVersion0_7.paymaster ? 3n : 1n
 
     const verificationGasLimit =
