@@ -784,13 +784,13 @@ export async function signerToSafeSmartAccount<
                                 type: "uint8"
                             }
                         ],
-                        name: "executeUserOp",
+                        name: "executeUserOpWithErrorString",
                         outputs: [],
                         stateMutability: "nonpayable",
                         type: "function"
                     }
                 ],
-                functionName: "executeUserOp",
+                functionName: "executeUserOpWithErrorString",
                 args: [to, value, data, operationType]
             })
         },
