@@ -1,5 +1,12 @@
 # @permissionless/wagmi
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [049a82c05d946b308849877b941e4b03baf0ec62]
+  - permissionless@0.0.36
+
 ## 0.0.3
 
 ### Patch Changes
