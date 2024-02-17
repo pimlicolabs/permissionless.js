@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.0.36
+
+### Patch Changes
+
+- 049a82c05d946b308849877b941e4b03baf0ec62: Safe accounts will revert with error string if calldata reverts
+
 ## 0.0.35
 
 ### Patch Changes
