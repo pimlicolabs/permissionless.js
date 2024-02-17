@@ -223,7 +223,6 @@ describe("Safe Account", () => {
         })
 
         const response = await erc20Token.write.transfer([zeroAddress, 10n])
-        console.log(response)
 
         // const response = await smartAccountClient.sendTransaction({
         //     to: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
