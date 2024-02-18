@@ -6,9 +6,9 @@ export type SendUserOperationErrorType = SendUserOperationError & {
     name: "SendUserOperationError"
 }
 export class SendUserOperationError extends BaseError {
-    override cause: BaseError
+    cause: BaseError
 
-    override name = "SendUserOperationError"
+    name = "SendUserOperationError"
 
     constructor(
         cause: BaseError,
