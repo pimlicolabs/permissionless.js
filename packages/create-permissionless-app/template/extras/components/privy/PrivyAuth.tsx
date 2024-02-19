@@ -1,4 +1,4 @@
-import { usePrivyFlow } from "@/hooks/usePrivyFlow"
+import { usePrivyAuth } from "@/hooks/usePrivyAuth"
 import React from "react"
 
 export const PrivyAuth: React.FC = () => {
@@ -9,7 +9,7 @@ export const PrivyAuth: React.FC = () => {
         signIn,
         signOut,
         embeddedWallet
-    } = usePrivyFlow()
+    } = usePrivyAuth()
 
     if (isConnected && smartAccountClient && embeddedWallet) {
         return (
