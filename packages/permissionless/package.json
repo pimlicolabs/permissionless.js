@@ -1,6 +1,6 @@
 {
     "name": "permissionless",
-    "version": "0.0.31",
+    "version": "0.0.36",
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless",
     "repository": "github:pimlicolabs/permissionless.js",
@@ -69,6 +69,11 @@
             "types": "./_types/utils/index.d.ts",
             "import": "./_esm/utils/index.js",
             "default": "./_cjs/utils/index.js"
+        },
+        "./errors": {
+            "types": "./_types/errors/index.d.ts",
+            "import": "./_esm/errors/index.js",
+            "default": "./_cjs/errors/index.js"
         }
     },
     "peerDependencies": {

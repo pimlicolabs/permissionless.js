@@ -7,13 +7,13 @@ import {
     type Transport,
     stringify
 } from "viem"
-import type { Prettify } from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
-import { observe } from "../../utils/observe.js"
+import type { Prettify } from "../../types/"
+import { getAction } from "../../utils/getAction"
+import { observe } from "../../utils/observe"
 import {
     type GetUserOperationReceiptReturnType,
     getUserOperationReceipt
-} from "./getUserOperationReceipt.js"
+} from "./getUserOperationReceipt"
 
 export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"

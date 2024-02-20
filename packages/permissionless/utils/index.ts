@@ -1,21 +1,23 @@
 import type { Account, Address } from "viem"
-import { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
-import { getAction } from "./getAction.js"
+import { deepHexlify, transactionReceiptStatus } from "./deepHexlify"
+import { getAction } from "./getAction"
+import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData"
 import {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
-} from "./getRequiredPrefund.js"
+} from "./getRequiredPrefund"
 import {
     type GetUserOperationHashParams,
     getUserOperationHash
-} from "./getUserOperationHash.js"
-import { isSmartAccountDeployed } from "./isSmartAccountDeployed.js"
+} from "./getUserOperationHash"
+import { isSmartAccountDeployed } from "./isSmartAccountDeployed"
+import { providerToSmartAccountSigner } from "./providerToSmartAccountSigner"
 import {
     AccountOrClientNotFoundError,
     type SignUserOperationHashWithECDSAParams,
     signUserOperationHashWithECDSA
-} from "./signUserOperationHashWithECDSA.js"
-import { walletClientToCustomSigner } from "./walletClientToCustomSigner.js"
+} from "./signUserOperationHashWithECDSA"
+import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner"
 
 export function parseAccount(account: Address | Account): Account {
     if (typeof account === "string")
@@ -29,11 +31,13 @@ export {
     getAction,
     getUserOperationHash,
     getRequiredPrefund,
-    walletClientToCustomSigner,
+    walletClientToSmartAccountSigner,
     type GetRequiredPrefundReturnType,
     type GetUserOperationHashParams,
     signUserOperationHashWithECDSA,
     type SignUserOperationHashWithECDSAParams,
     AccountOrClientNotFoundError,
-    isSmartAccountDeployed
+    isSmartAccountDeployed,
+    providerToSmartAccountSigner,
+    getAddressFromInitCodeOrPaymasterAndData
 }

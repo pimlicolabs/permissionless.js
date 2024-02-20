@@ -2,13 +2,13 @@ import type { Address, Client } from "viem"
 import {
     type AccountsParameters,
     accounts
-} from "../../actions/stackup/accounts.js"
+} from "../../actions/stackup/accounts"
 import {
     type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "../../actions/stackup/sponsorUserOperation.js"
-import { type StackupPaymasterClient } from "../stackup.js"
+} from "../../actions/stackup/sponsorUserOperation"
+import { type StackupPaymasterClient } from "../stackup"
 
 export type StackupPaymasterClientActions = {
     /**

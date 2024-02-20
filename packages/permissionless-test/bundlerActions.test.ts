@@ -1,11 +1,12 @@
 import dotenv from "dotenv"
 import {
     BundlerClient,
+    UserOperation,
     WaitForUserOperationReceiptTimeoutError,
     getAccountNonce
 } from "permissionless"
 import { getUserOperationHash } from "permissionless/utils"
-import { Address, type Hash } from "viem"
+import { Address, type Hash, parseEther } from "viem"
 import {
     beforeAll,
     beforeEach,
@@ -14,7 +15,7 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { buildUserOp } from "./userOp.js"
+import { buildUserOp } from "./userOp"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -22,7 +23,7 @@ import {
     getPublicClient,
     getTestingChain,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 

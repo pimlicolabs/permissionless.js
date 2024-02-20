@@ -1,4 +1,4 @@
-import type { TypedData } from "abitype"
+import type { TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -18,18 +18,19 @@ import {
 } from "viem"
 import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getUserOperationHash } from "../../utils/getUserOperationHash.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import type { Prettify } from "../../types"
+import { getUserOperationHash } from "../../utils/getUserOperationHash"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "../types.js"
+} from "../types"
 import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
-} from "./abi/BiconomySmartAccountAbi.js"
+} from "./abi/BiconomySmartAccountAbi"
 // import Abis
 
 export type BiconomySmartAccount<
@@ -184,6 +185,20 @@ const getAccountAddress = async ({
     })
 }
 
+export type SignerToBiconomySmartAccountParameters<
+    TSource extends string = "custom",
+    TAddress extends Address = Address
+> = Prettify<{
+    signer: SmartAccountSigner<TSource, TAddress>
+    entryPoint: Address
+    address?: Address
+    index?: bigint
+    factoryAddress?: Address
+    accountLogicAddress?: Address
+    fallbackHandlerAddress?: Address
+    ecdsaModuleAddress?: Address
+}>
+
 /**
  * Build a Biconomy modular smart account from a private key, that use the ECDSA signer behind the scene
  * @param client
@@ -210,16 +225,7 @@ export async function signerToBiconomySmartAccount<
         accountLogicAddress = BICONOMY_ADDRESSES.ACCOUNT_V2_0_LOGIC,
         fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
         ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
-    }: {
-        signer: SmartAccountSigner<TSource, TAddress>
-        entryPoint: Address
-        address?: Address
-        index?: bigint
-        factoryAddress?: Address
-        accountLogicAddress?: Address
-        fallbackHandlerAddress?: Address
-        ecdsaModuleAddress?: Address
-    }
+    }: SignerToBiconomySmartAccountParameters<TSource, TAddress>
 ): Promise<BiconomySmartAccount<TTransport, TChain>> {
     // Get the private key related account
     const viemSigner: LocalAccount = {

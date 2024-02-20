@@ -1,15 +1,17 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport
-} from "viem"
+import { type Chain, type Client, type Hex, type Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import type { Prettify } from "../../types"
 import {
+    type SignerToSimpleSmartAccountParameters,
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
-} from "./signerToSimpleSmartAccount.js"
+} from "./signerToSimpleSmartAccount"
+
+export type PrivateKeyToSimpleSmartAccountParameters = Prettify<
+    {
+        privateKey: Hex
+    } & Omit<SignerToSimpleSmartAccountParameters, "signer">
+>
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -21,24 +23,12 @@ export async function privateKeyToSimpleSmartAccount<
     TChain extends Chain | undefined = Chain | undefined
 >(
     client: Client<TTransport, TChain, undefined>,
-    {
-        privateKey,
-        factoryAddress,
-        entryPoint,
-        index = 0n
-    }: {
-        privateKey: Hex
-        factoryAddress: Address
-        entryPoint: Address
-        index?: bigint
-    }
+    { privateKey, ...rest }: PrivateKeyToSimpleSmartAccountParameters
 ): Promise<SimpleSmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
 
     return signerToSimpleSmartAccount(client, {
         signer: privateKeyAccount,
-        factoryAddress,
-        entryPoint,
-        index
+        ...rest
     })
 }

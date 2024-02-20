@@ -1,35 +1,48 @@
-import { privateKeyToSimpleSmartAccount } from "./privateKeyToSimpleSmartAccount.js"
+import {
+    type PrivateKeyToSimpleSmartAccountParameters,
+    privateKeyToSimpleSmartAccount
+} from "./simple/privateKeyToSimpleSmartAccount"
 
 import {
+    type SignerToSimpleSmartAccountParameters,
     type SimpleSmartAccount,
     signerToSimpleSmartAccount
-} from "./signerToSimpleSmartAccount.js"
+} from "./simple/signerToSimpleSmartAccount"
 
-import { privateKeyToSafeSmartAccount } from "./privateKeyToSafeSmartAccount.js"
+import {
+    type PrivateKeyToSafeSmartAccountParameters,
+    privateKeyToSafeSmartAccount
+} from "./safe/privateKeyToSafeSmartAccount"
 
 import {
     type SafeSmartAccount,
     type SafeVersion,
+    type SignerToSafeSmartAccountParameters,
     signerToSafeSmartAccount
-} from "./signerToSafeSmartAccount.js"
+} from "./safe/signerToSafeSmartAccount"
 
 import {
     type KernelEcdsaSmartAccount,
+    type SignerToEcdsaKernelSmartAccountParameters,
     signerToEcdsaKernelSmartAccount
-} from "./kernel/signerToEcdsaKernelSmartAccount.js"
+} from "./kernel/signerToEcdsaKernelSmartAccount"
 
 import {
     type BiconomySmartAccount,
+    type SignerToBiconomySmartAccountParameters,
     signerToBiconomySmartAccount
-} from "./biconomy/signerToBiconomySmartAccount.js"
+} from "./biconomy/signerToBiconomySmartAccount"
 
-import { privateKeyToBiconomySmartAccount } from "./biconomy/privateKeyToBiconomySmartAccount.js"
+import {
+    type PrivateKeyToBiconomySmartAccountParameters,
+    privateKeyToBiconomySmartAccount
+} from "./biconomy/privateKeyToBiconomySmartAccount"
 
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
-} from "./types.js"
+} from "./types"
 
 export {
     type SafeVersion,
@@ -46,5 +59,12 @@ export {
     type KernelEcdsaSmartAccount,
     signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
-    signerToBiconomySmartAccount
+    signerToBiconomySmartAccount,
+    type SignerToSimpleSmartAccountParameters,
+    type SignerToSafeSmartAccountParameters,
+    type PrivateKeyToSimpleSmartAccountParameters,
+    type PrivateKeyToSafeSmartAccountParameters,
+    type SignerToEcdsaKernelSmartAccountParameters,
+    type SignerToBiconomySmartAccountParameters,
+    type PrivateKeyToBiconomySmartAccountParameters
 }

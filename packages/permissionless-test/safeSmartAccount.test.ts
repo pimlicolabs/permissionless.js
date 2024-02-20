@@ -10,8 +10,8 @@ import {
     zeroAddress
 } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint.js"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter.js"
+import { EntryPointAbi } from "./abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     generateApproveCallData,
     getBundlerClient,
@@ -22,7 +22,7 @@ import {
     getSignerToSafeSmartAccount,
     getSmartAccountClient,
     waitForNonceUpdate
-} from "./utils.js"
+} from "./utils"
 
 dotenv.config()
 
@@ -172,11 +172,63 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
+
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
             data: "0x"
         })
+
+        expectTypeOf(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+
+        await new Promise((res) => {
+            setTimeout(res, 1000)
+        })
+        await waitForNonceUpdate()
+    }, 1000000)
+
+    test("safe Smart account client send transaction revert with string", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSafeSmartAccount()
+        })
+
+        const erc20Token = getContract({
+            abi: [
+                {
+                    inputs: [
+                        {
+                            internalType: "address",
+                            name: "to",
+                            type: "address"
+                        },
+                        {
+                            internalType: "uint256",
+                            name: "value",
+                            type: "uint256"
+                        }
+                    ],
+                    name: "transfer",
+                    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+                    stateMutability: "nonpayable",
+                    type: "function"
+                }
+            ],
+            address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+            client: {
+                public: await getPublicClient(),
+                wallet: smartAccountClient
+            }
+        })
+
+        const response = await erc20Token.write.transfer([zeroAddress, 10n])
+
+        // const response = await smartAccountClient.sendTransaction({
+        //     to: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        //     value: ,
+        //     data: "0x"
+        // })
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)

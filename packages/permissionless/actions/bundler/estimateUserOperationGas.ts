@@ -1,10 +1,21 @@
-import type { Account, Address, Chain, Client, Transport } from "viem"
+import {
+    type Account,
+    type Address,
+    BaseError,
+    type Chain,
+    type Client,
+    type Transport
+} from "viem"
 import type { PartialBy } from "viem/types/utils"
-import type { BundlerClient } from "../../clients/createBundlerClient.js"
-import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler.js"
-import type { Prettify } from "../../types/index.js"
-import type { UserOperation } from "../../types/userOperation.js"
-import { deepHexlify } from "../../utils/deepHexlify.js"
+import type { BundlerClient } from "../../clients/createBundlerClient"
+import type { Prettify } from "../../types/"
+import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"
+import type { UserOperation } from "../../types/userOperation"
+import { deepHexlify } from "../../utils/deepHexlify"
+import {
+    type GetEstimateUserOperationGasErrorReturnType,
+    getEstimateUserOperationGasError
+} from "../../utils/errors/getEstimateUserOperationGasError"
 
 export type EstimateUserOperationGasParameters = {
     userOperation: PartialBy<
@@ -19,6 +30,9 @@ export type EstimateUserOperationGasReturnType = {
     verificationGasLimit: bigint
     callGasLimit: bigint
 }
+
+export type EstimateUserOperationErrorType =
+    GetEstimateUserOperationGasErrorReturnType
 
 /**
  * Estimates preVerificationGas, verificationGasLimit and callGasLimit for user operation
@@ -61,20 +75,24 @@ export const estimateUserOperationGas = async <
     const userOperationWithBigIntAsHex = deepHexlify(userOperation)
     const stateOverridesWithBigIntAsHex = deepHexlify(stateOverrides)
 
-    const response = await client.request({
-        method: "eth_estimateUserOperationGas",
-        params: stateOverrides
-            ? [
-                  userOperationWithBigIntAsHex,
-                  entryPoint,
-                  stateOverridesWithBigIntAsHex
-              ]
-            : [userOperationWithBigIntAsHex, entryPoint]
-    })
+    try {
+        const response = await client.request({
+            method: "eth_estimateUserOperationGas",
+            params: stateOverrides
+                ? [
+                      userOperationWithBigIntAsHex,
+                      entryPoint,
+                      stateOverridesWithBigIntAsHex
+                  ]
+                : [userOperationWithBigIntAsHex, entryPoint]
+        })
 
-    return {
-        preVerificationGas: BigInt(response.preVerificationGas || 0),
-        verificationGasLimit: BigInt(response.verificationGasLimit || 0),
-        callGasLimit: BigInt(response.callGasLimit || 0)
+        return {
+            preVerificationGas: BigInt(response.preVerificationGas || 0),
+            verificationGasLimit: BigInt(response.verificationGasLimit || 0),
+            callGasLimit: BigInt(response.callGasLimit || 0)
+        }
+    } catch (err) {
+        throw getEstimateUserOperationGasError(err as BaseError, args)
     }
 }

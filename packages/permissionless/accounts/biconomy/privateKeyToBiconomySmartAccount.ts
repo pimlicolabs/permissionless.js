@@ -1,15 +1,17 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport
-} from "viem"
+import { type Chain, type Client, type Hex, type Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import type { Prettify } from "../../types"
 import {
     type BiconomySmartAccount,
+    type SignerToBiconomySmartAccountParameters,
     signerToBiconomySmartAccount
-} from "./signerToBiconomySmartAccount.js"
+} from "./signerToBiconomySmartAccount"
+
+export type PrivateKeyToBiconomySmartAccountParameters = Prettify<
+    {
+        privateKey: Hex
+    } & Omit<SignerToBiconomySmartAccountParameters, "signer">
+>
 
 /**
  * @description Creates a Biconomy Smart Account from a private key.
@@ -21,20 +23,11 @@ export async function privateKeyToBiconomySmartAccount<
     TChain extends Chain | undefined = Chain | undefined
 >(
     client: Client<TTransport, TChain, undefined>,
-    {
-        privateKey,
-        entryPoint,
-        index = 0n
-    }: {
-        privateKey: Hex
-        entryPoint: Address
-        index?: bigint
-    }
+    { privateKey, ...rest }: PrivateKeyToBiconomySmartAccountParameters
 ): Promise<BiconomySmartAccount<TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)
     return signerToBiconomySmartAccount(client, {
         signer: privateKeyAccount,
-        entryPoint,
-        index
+        ...rest
     })
 }

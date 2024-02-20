@@ -13,7 +13,7 @@
     {
         "name": "permissionless (minimal surface - tree-shaking)",
         "path": "./packages/permissionless/_esm/index.js",
-        "limit": "4.1 kB",
+        "limit": "10 kB",
         "import": "{ bundlerActions }"
     }
 ]

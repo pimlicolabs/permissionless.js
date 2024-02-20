@@ -1,21 +1,18 @@
 import type { Chain, Client, Hash, Transport } from "viem"
-import type { SmartAccount } from "../../accounts/types.js"
+import type { SmartAccount } from "../../accounts/types"
 import type {
     GetAccountParameter,
     PartialBy,
     Prettify,
     UserOperation
-} from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
-import {
-    AccountOrClientNotFoundError,
-    parseAccount
-} from "../../utils/index.js"
-import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation.js"
+} from "../../types/"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { getAction } from "../../utils/getAction"
+import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 import {
     type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
-} from "./prepareUserOperationRequest.js"
+} from "./prepareUserOperationRequest"
 
 export type SendUserOperationParameters<
     TAccount extends SmartAccount | undefined = SmartAccount | undefined

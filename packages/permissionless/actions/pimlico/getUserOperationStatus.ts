@@ -1,10 +1,10 @@
 import type { Account, Chain, Client, Hash, Transport } from "viem"
-import type { PimlicoBundlerClient } from "../../clients/pimlico.js"
-import type { Prettify } from "../../types/index.js"
+import type { PimlicoBundlerClient } from "../../clients/pimlico"
+import type { Prettify } from "../../types/"
 import type {
     PimlicoBundlerRpcSchema,
     PimlicoUserOperationStatus
-} from "../../types/pimlico.js"
+} from "../../types/pimlico"
 
 export type GetUserOperationStatusParameters = {
     hash: Hash

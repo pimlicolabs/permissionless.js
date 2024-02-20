@@ -12,29 +12,33 @@ import {
     zeroAddress
 } from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount.js"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory.js"
+import { SimpleAccountAbi } from "./abis/SimpleAccount"
+import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
 import {
     getDummySignature,
     getEntryPoint,
     getFactoryAddress,
     getPublicClient,
     isAccountDeployed
-} from "./utils.js"
+} from "./utils"
 
-const getInitCode = async (factoryAddress: Address, owner: WalletClient) => {
-    const accountAddress = await getAccountAddress(factoryAddress, owner)
+const getInitCode = async (
+    factoryAddress: Address,
+    owner: WalletClient,
+    index: bigint
+) => {
+    const accountAddress = await getAccountAddress(factoryAddress, owner, index)
     if (!accountAddress) throw new Error("Account address not found")
 
     if (await isAccountDeployed(accountAddress)) return "0x"
 
-    return getAccountInitCode(factoryAddress, owner)
+    return getAccountInitCode(factoryAddress, owner, index)
 }
 
 export const getAccountInitCode = async (
     factoryAddress: Address,
     owner: WalletClient,
-    index = 0n
+    index: bigint
 ): Promise<Hex> => {
     if (!owner.account) throw new Error("Owner account not found")
     return concatHex([
@@ -49,9 +53,10 @@ export const getAccountInitCode = async (
 
 const getAccountAddress = async (
     factoryAddress: Address,
-    owner: WalletClient
+    owner: WalletClient,
+    index: bigint
 ): Promise<Address | null> => {
-    const initCode = await getAccountInitCode(factoryAddress, owner)
+    const initCode = await getAccountInitCode(factoryAddress, owner, index)
     const publicClient = await getPublicClient()
     const entryPoint = getEntryPoint()
 
@@ -74,7 +79,8 @@ const encodeExecute = async (
 }
 
 export const buildUserOp = async (
-    eoaWalletClient: WalletClient
+    eoaWalletClient: WalletClient,
+    index = 0n
 ): Promise<UserOperation> => {
     await new Promise((resolve) => {
         setTimeout(() => {
@@ -89,7 +95,8 @@ export const buildUserOp = async (
 
     const accountAddress = await getAccountAddress(
         factoryAddress,
-        eoaWalletClient
+        eoaWalletClient,
+        index
     )
 
     if (!accountAddress) throw new Error("Account address not found")
@@ -105,7 +112,7 @@ export const buildUserOp = async (
     const userOperation: UserOperation = {
         sender: accountAddress,
         nonce: nonce,
-        initCode: await getInitCode(factoryAddress, eoaWalletClient),
+        initCode: await getInitCode(factoryAddress, eoaWalletClient, index),
         callData: await encodeExecute(zeroAddress as Hex, 0n, "0x" as Hex),
         paymasterAndData: "0x" as Hex,
         signature: getDummySignature(),

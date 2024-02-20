@@ -9,11 +9,8 @@ import {
     getTypesForEIP712Domain,
     validateTypedData
 } from "viem"
-import { type SmartAccount } from "../../accounts/types.js"
-import {
-    AccountOrClientNotFoundError,
-    parseAccount
-} from "../../utils/index.js"
+import { type SmartAccount } from "../../accounts/types"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 
 /**
  * Signs typed data and calculates an Ethereum-specific signature in [https://eips.ethereum.org/EIPS/eip-712](https://eips.ethereum.org/EIPS/eip-712): `sign(keccak256("\x19\x01" ‖ domainSeparator ‖ hashStruct(message)))`

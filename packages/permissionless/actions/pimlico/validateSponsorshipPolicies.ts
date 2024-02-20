@@ -1,11 +1,11 @@
 import type { Account, Address, Chain, Client, Transport } from "viem"
-import type { Prettify } from "../../types/index.js"
-import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico.js"
+import type { Prettify } from "../../types/"
+import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
-} from "../../types/userOperation.js"
-import { deepHexlify } from "../../utils/deepHexlify.js"
+} from "../../types/userOperation"
+import { deepHexlify } from "../../utils/deepHexlify"
 
 export type ValidateSponsorshipPoliciesParameters = {
     userOperation: UserOperation

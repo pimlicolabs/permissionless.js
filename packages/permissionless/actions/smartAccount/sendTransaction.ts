@@ -5,16 +5,13 @@ import type {
     SendTransactionParameters,
     Transport
 } from "viem"
-import { type SmartAccount } from "../../accounts/types.js"
-import type { Prettify } from "../../types/index.js"
-import { getAction } from "../../utils/getAction.js"
-import {
-    AccountOrClientNotFoundError,
-    parseAccount
-} from "../../utils/index.js"
-import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt.js"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest.js"
-import { sendUserOperation } from "./sendUserOperation.js"
+import { type SmartAccount } from "../../accounts/types"
+import type { Prettify } from "../../types/"
+import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import { getAction } from "../../utils/getAction"
+import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
+import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionWithPaymasterParameters<
     TChain extends Chain | undefined = Chain | undefined,

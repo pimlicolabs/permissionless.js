@@ -1,5 +1,37 @@
 # permissionless
 
+## 0.0.36
+
+### Patch Changes
+
+- 049a82c05d946b308849877b941e4b03baf0ec62: Safe accounts will revert with error string if calldata reverts
+
+## 0.0.35
+
+### Patch Changes
+
+- 17ba362046c66642e908b7f8af0d0b4b4ef16de1: Added account parameters types
+
+## 0.0.34
+
+### Patch Changes
+
+- 76c4031e4d5e42fd8ceadf7ed96ba55d2bf4ea06: Remove imports from abitype and move them to viem, fixes: issue#105
+
+## 0.0.33
+
+### Patch Changes
+
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Renamed walletClientToCustomSigner to walletClientToSmartAccountSigner
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Added providerToSmartAccountSigner
+- 14e2feed006653892f76548ae4e38f3ed5a1a948: Use tsc-alias to resolve full paths
+
+## 0.0.32
+
+### Patch Changes
+
+- 57dd176305078ab121e0289cdf6566dd063ca0e4: Added custom error types corresponding to AA errors
+
 ## 0.0.31
 
 ### Patch Changes
