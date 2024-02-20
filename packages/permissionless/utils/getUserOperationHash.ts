@@ -50,44 +50,37 @@ function packUserOp<entryPoint extends EntryPoint>({
     }
 
     const userOperationVersion0_7 = userOperation as UserOperation<"v0.7">
-    const hashedInitCode =
+    const hashedInitCode = keccak256(
         userOperationVersion0_7.factory && userOperationVersion0_7.factoryData
-            ? keccak256(
-                  concat([
-                      userOperationVersion0_7.factory,
-                      userOperationVersion0_7.factoryData
-                  ])
-              )
+            ? concat([
+                  userOperationVersion0_7.factory,
+                  userOperationVersion0_7.factoryData
+              ])
             : "0x"
+    )
     const hashedCallData = keccak256(userOperationVersion0_7.callData)
-    const hashedPaymasterAndData =
+    const hashedPaymasterAndData = keccak256(
         userOperationVersion0_7.paymaster &&
-        userOperationVersion0_7.paymasterVerificationGasLimit &&
-        userOperationVersion0_7.paymasterPostOpGasLimit &&
-        userOperationVersion0_7.paymasterData
-            ? keccak256(
-                  concat([
-                      userOperationVersion0_7.paymaster,
-                      pad(
-                          toHex(
-                              userOperationVersion0_7.paymasterVerificationGasLimit
-                          ),
-                          {
-                              size: 16
-                          }
+            userOperationVersion0_7.paymasterVerificationGasLimit &&
+            userOperationVersion0_7.paymasterPostOpGasLimit &&
+            userOperationVersion0_7.paymasterData
+            ? concat([
+                  userOperationVersion0_7.paymaster,
+                  pad(
+                      toHex(
+                          userOperationVersion0_7.paymasterVerificationGasLimit
                       ),
-                      pad(
-                          toHex(
-                              userOperationVersion0_7.paymasterPostOpGasLimit
-                          ),
-                          {
-                              size: 16
-                          }
-                      ),
-                      userOperationVersion0_7.paymasterData
-                  ])
-              )
+                      {
+                          size: 16
+                      }
+                  ),
+                  pad(toHex(userOperationVersion0_7.paymasterPostOpGasLimit), {
+                      size: 16
+                  }),
+                  userOperationVersion0_7.paymasterData
+              ])
             : "0x"
+    )
 
     return encodeAbiParameters(
         [

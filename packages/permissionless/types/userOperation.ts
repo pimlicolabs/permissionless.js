@@ -70,18 +70,18 @@ export type UserOperation<entryPointVersion extends EntryPointVersion> =
         : {
               sender: Address
               nonce: bigint
-              factory?: Address
-              factoryData?: Hex
+              factory: Address | null
+              factoryData: Hex | null
               callData: Hex
               callGasLimit: bigint
               verificationGasLimit: bigint
               preVerificationGas: bigint
               maxFeePerGas: bigint
               maxPriorityFeePerGas: bigint
-              paymaster?: Address
-              paymasterVerificationGasLimit?: bigint
-              paymasterPostOpGasLimit?: bigint
-              paymasterData?: Hex
+              paymaster: Address | null
+              paymasterVerificationGasLimit: bigint | null
+              paymasterPostOpGasLimit: bigint | null
+              paymasterData: Hex | null
               signature: Hex
               initCode?: never
               paymasterAndData?: never
