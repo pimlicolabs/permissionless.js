@@ -7,7 +7,8 @@ import {
 } from "permissionless"
 import {
     type SmartAccount,
-    privateKeyToSafeSmartAccount
+    SmartAccountSigner,
+    signerToSafeSmartAccount
 } from "permissionless/accounts"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -18,6 +19,7 @@ import {
     type Transport,
     type WalletClient
 } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import {
     useAccount,
     useDisconnect,
@@ -38,6 +40,7 @@ interface PrivyAuthHook {
 }
 
 export const usePrivyAuth = (): PrivyAuthHook => {
+    const signer = privateKeyToAccount("0xPRIVATE_KEY")
     const { login } = usePrivy()
     const { isConnected } = useAccount()
     const [showLoader, setShowLoader] = useState<boolean>(false)
@@ -77,12 +80,13 @@ export const usePrivyAuth = (): PrivyAuthHook => {
     useEffect(() => {
         ;(async () => {
             if (isConnected && walletClient && publicClient) {
-                // const customSigner = walletClientToCustomSigner(walletClient);
-
-                const safeAccount = await privateKeyToSafeSmartAccount(
+                const safeAccount = await signerToSafeSmartAccount(
                     publicClient,
                     {
-                        privateKey: "0xPRIVATE_KEY",
+                        signer: signer as SmartAccountSigner<
+                            "privateKey" | "custom",
+                            `0x${string}`
+                        >,
                         safeVersion: "1.4.1",
                         entryPoint: process.env
                             .NEXT_PUBLIC_ENTRYPOINT as Address,
@@ -101,7 +105,7 @@ export const usePrivyAuth = (): PrivyAuthHook => {
                 setSmartAccountClient(smartAccountClient)
             }
         })()
-    }, [isConnected, walletClient, publicClient])
+    }, [isConnected, walletClient, publicClient, signer])
 
     const onSendTransaction = (txHash: Hash) => {
         setTxHash(txHash)

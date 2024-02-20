@@ -1,4 +1,4 @@
-import { WagmiConfig, configureChains, createConfig, sepolia } from "wagmi"
+import { configureChains, createConfig, sepolia } from "wagmi"
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc"
 
 export const wagmiChainsConfig = configureChains(
