@@ -12,8 +12,8 @@ import {
     zeroAddress
 } from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
+import { SimpleAccountAbi } from "../abis/SimpleAccount"
+import { SimpleAccountFactoryAbi } from "../abis/SimpleAccountFactory"
 import {
     getDummySignature,
     getEntryPoint,
