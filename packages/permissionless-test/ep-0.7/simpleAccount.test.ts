@@ -80,7 +80,7 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
 
         const response = await smartAccountClient.signMessage({
             message: "hello world"
@@ -92,7 +92,7 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
 
         const response = await smartAccountClient.signTypedData({
             domain: {
@@ -120,7 +120,7 @@ describe("Simple Account", () => {
     })
 
     test("smart account client deploy contract", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
 
         await expect(async () =>
             smartAccountClient.deployContract({
@@ -133,7 +133,7 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client send multiple transactions", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -159,7 +159,7 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account write contract", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -195,7 +195,7 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -212,12 +212,13 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account client send transaction with address", async () => {
-        const oldSmartAccountClient = await getSmartAccountClient()
+        const oldSmartAccountClient = await getSmartAccountClient({ index: 5n })
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 address: oldSmartAccountClient.account.address
-            })
+            }),
+            index: 5n
         })
         await refillSmartAccount(
             walletClient,
@@ -237,7 +238,7 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("test prepareUserOperationRequest", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({ index: 5n })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -263,6 +264,7 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
@@ -320,6 +322,7 @@ describe("Simple Account", () => {
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation

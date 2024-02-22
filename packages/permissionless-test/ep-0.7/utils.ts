@@ -79,10 +79,12 @@ export const getTestingChain = () => {
 
 export const getSignerToSimpleSmartAccount = async ({
     signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
-    address
+    address,
+    index = 0n
 }: {
     signer?: SmartAccountSigner
     address?: Address
+    index?: bigint
 } = {}) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -93,7 +95,8 @@ export const getSignerToSimpleSmartAccount = async ({
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
         signer: signer,
-        address
+        address,
+        index: index
     })
 }
 
@@ -165,10 +168,12 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 export const getSmartAccountClient = async ({
     account,
     sponsorUserOperation,
-    preFund = false
+    preFund = false,
+    index = 0n
 }: SponsorUserOperationMiddleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
     account?: SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
     preFund?: boolean
+    index?: bigint
 } = {}) => {
     if (!process.env.BUNDLER_RPC_HOST)
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
@@ -179,7 +184,7 @@ export const getSmartAccountClient = async ({
 
     const smartAccountClient = createSmartAccountClient({
         entryPoint: getEntryPoint(),
-        account: account ?? (await getSignerToSimpleSmartAccount()),
+        account: account ?? (await getSignerToSimpleSmartAccount({ index })),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
         sponsorUserOperation: async ({ userOperation, entryPoint }) => {

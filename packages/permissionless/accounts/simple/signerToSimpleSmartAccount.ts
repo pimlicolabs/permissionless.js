@@ -265,6 +265,11 @@ export async function signerToSimpleSmartAccount<
                                     type: "address[]"
                                 },
                                 {
+                                    internalType: "uint256[]",
+                                    name: "value",
+                                    type: "uint256[]"
+                                },
+                                {
                                     internalType: "bytes[]",
                                     name: "func",
                                     type: "bytes[]"
@@ -279,6 +284,7 @@ export async function signerToSimpleSmartAccount<
                     functionName: "executeBatch",
                     args: [
                         argsArray.map((a) => a.to),
+                        argsArray.map((a) => a.value),
                         argsArray.map((a) => a.data)
                     ]
                 })
