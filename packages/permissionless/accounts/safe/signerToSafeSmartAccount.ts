@@ -174,7 +174,8 @@ const encodeMultiSend = (
 }
 
 export type SafeSmartAccount<
-    entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends
+        ENTRYPOINT_ADDRESS_V06_TYPE = ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>
@@ -522,7 +523,7 @@ export type SignerToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSafeSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
