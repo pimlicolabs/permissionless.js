@@ -1,24 +1,43 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    http,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
+    createWalletClient,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
 dotenv.config()
-
-let testPrivateKey: Hex
-let factoryAddress: Address
 
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS) {
@@ -33,12 +52,20 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
 describe("Simple Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
@@ -110,6 +137,10 @@ describe("Simple Account", () => {
 
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -132,7 +163,10 @@ describe("Simple Account", () => {
 
     test("Smart account write contract", async () => {
         const smartAccountClient = await getSmartAccountClient()
-
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const entryPointContract = getContract({
             abi: EntryPointAbi,
             address: getEntryPoint(),
@@ -165,6 +199,10 @@ describe("Simple Account", () => {
 
     test("Smart account client send transaction", async () => {
         const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
@@ -184,6 +222,10 @@ describe("Simple Account", () => {
                 address: oldSmartAccountClient.account.address
             })
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const response = await smartAccountClient.sendTransaction({
             to: smartAccountClient.account.address,
@@ -199,6 +241,10 @@ describe("Simple Account", () => {
 
     test("test prepareUserOperationRequest", async () => {
         const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const userOperation =
             await smartAccountClient.prepareUserOperationRequest({
@@ -211,7 +257,7 @@ describe("Simple Account", () => {
                 }
             })
 
-        // smartAccountClient.sendUserOperation()
+        smartAccountClient.sendUserOperation({ userOperation })
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
@@ -223,7 +269,7 @@ describe("Simple Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -280,7 +326,7 @@ describe("Simple Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

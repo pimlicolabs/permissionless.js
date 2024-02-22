@@ -1,8 +1,27 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    http,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
+    createWalletClient,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
@@ -10,9 +29,12 @@ import {
     getCustomSignerToSimpleSmartAccount,
     getEntryPoint,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
@@ -34,6 +56,17 @@ beforeAll(() => {
 })
 
 describe("Simple Account from walletClient", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
@@ -122,6 +155,11 @@ describe("Simple Account from walletClient", () => {
             })
         })
 
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -148,6 +186,11 @@ describe("Simple Account from walletClient", () => {
                 signer: await getCustomSignerToSimpleSmartAccount()
             })
         })
+
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const entryPointContract = getContract({
             abi: EntryPointAbi,
@@ -185,6 +228,10 @@ describe("Simple Account from walletClient", () => {
                 signer: await getCustomSignerToSimpleSmartAccount()
             })
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
@@ -208,7 +255,7 @@ describe("Simple Account from walletClient", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -268,7 +315,7 @@ describe("Simple Account from walletClient", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,

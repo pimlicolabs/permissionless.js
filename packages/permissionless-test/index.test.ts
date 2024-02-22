@@ -1,9 +1,11 @@
 import dotenv from "dotenv"
 import {
+    UserOperation,
     deepHexlify,
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/_types/types"
 import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA
@@ -82,7 +84,7 @@ describe("test public actions and utils", () => {
             eoaWalletClient
         )
         const publicClient = await getPublicClient()
-        const entryPoint = "0x0000000"
+        const entryPoint = getEntryPoint()
 
         await expect(async () =>
             getSenderAddress(publicClient, {
@@ -100,8 +102,7 @@ describe("test public actions and utils", () => {
         const userOperation = await buildUserOp(eoaWalletClient)
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: entryPoint
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -122,14 +123,14 @@ describe("test public actions and utils", () => {
     test("signUserOperationHashWithECDSA", async () => {
         const bundlerClient = getBundlerClient()
         const eoaWalletClient = getEoaWalletClient()
-        const userOperation = await buildUserOp(eoaWalletClient)
+        const userOperation: UserOperation<"v0.6"> =
+            await buildUserOp(eoaWalletClient)
 
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: getEntryPoint()
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -189,8 +190,7 @@ describe("test public actions and utils", () => {
         const userOperation = await buildUserOp(eoaWalletClient)
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: getEntryPoint()
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -198,7 +198,8 @@ describe("test public actions and utils", () => {
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
         const requiredGas = getRequiredPrefund({
-            userOperation
+            userOperation,
+            entryPoint: getEntryPoint()
         })
 
         expect(requiredGas).toBe(

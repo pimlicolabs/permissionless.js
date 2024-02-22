@@ -1,15 +1,28 @@
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
+    http,
+    Account,
     Address,
     BaseError,
+    Chain,
+    Transport,
+    WalletClient,
+    createWalletClient,
     decodeEventLog,
     getContract,
     hashMessage,
     hashTypedData,
     zeroAddress
 } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
@@ -18,9 +31,12 @@ import {
     getEntryPoint,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToSafeSmartAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
@@ -42,6 +58,17 @@ beforeAll(() => {
 })
 
 describe("Safe Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Safe Account address", async () => {
         const safeSmartAccount = await getSignerToSafeSmartAccount()
 
@@ -107,6 +134,11 @@ describe("Safe Account", () => {
             account: await getSignerToSafeSmartAccount()
         })
 
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
         const entryPointContract = getContract({
             abi: EntryPointAbi,
             address: getEntryPoint(),
@@ -141,6 +173,10 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
@@ -172,6 +208,10 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,

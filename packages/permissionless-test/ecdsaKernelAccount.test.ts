@@ -4,25 +4,45 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     signerToEcdsaKernelSmartAccount
 } from "permissionless/accounts"
-import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
+import {
+    http,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
+    createWalletClient,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToEcdsaKernelAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
 dotenv.config()
 
-let testPrivateKey: Hex
-let factoryAddress: Address
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS) {
         throw new Error("FACTORY_ADDRESS environment variable not set")
@@ -36,15 +56,23 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
 /**
  * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
  */
 describe("ECDSA kernel Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
 
@@ -125,6 +153,11 @@ describe("ECDSA kernel Account", () => {
             account: await getSignerToEcdsaKernelAccount()
         })
 
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -149,6 +182,10 @@ describe("ECDSA kernel Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const entryPointContract = getContract({
             abi: EntryPointAbi,
@@ -192,7 +229,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -255,7 +292,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -323,7 +360,7 @@ describe("ECDSA kernel Account", () => {
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
