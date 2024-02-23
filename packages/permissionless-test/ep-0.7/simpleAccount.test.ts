@@ -24,6 +24,7 @@ import { GreeterAbi, GreeterBytecode } from "../abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
+    getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPrivateKeyAccount,
     getPublicClient,
@@ -80,7 +81,32 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
 
         const response = await smartAccountClient.signMessage({
             message: "hello world"
@@ -92,7 +118,32 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
 
         const response = await smartAccountClient.signTypedData({
             domain: {
@@ -120,7 +171,32 @@ describe("Simple Account", () => {
     })
 
     test("smart account client deploy contract", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
 
         await expect(async () =>
             smartAccountClient.deployContract({
@@ -133,7 +209,33 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client send multiple transactions", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -159,7 +261,32 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account write contract", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -195,7 +322,32 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -214,12 +366,36 @@ describe("Simple Account", () => {
     test("Smart account client send transaction with address", async () => {
         const oldSmartAccountClient = await getSmartAccountClient({ index: 5n })
 
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 address: oldSmartAccountClient.account.address
             }),
-            index: 5n
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
         })
+
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
@@ -238,7 +414,32 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("test prepareUserOperationRequest", async () => {
-        const smartAccountClient = await getSmartAccountClient({ index: 5n })
+        const bundlerClient = getBundlerClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient({
+            index: 5n,
+            sponsorUserOperation: async (args) => {
+                const { userOperation } = args
+                const gasPrices =
+                    await pimlicoBundlerClient.getUserOperationGasPrice()
+
+                userOperation.maxFeePerGas = gasPrices.fast.maxFeePerGas
+                userOperation.maxPriorityFeePerGas =
+                    gasPrices.fast.maxPriorityFeePerGas
+
+                const gasEstimates =
+                    await bundlerClient.estimateUserOperationGas({
+                        userOperation: userOperation
+                    })
+                userOperation.callGasLimit = gasEstimates.callGasLimit
+                userOperation.preVerificationGas =
+                    gasEstimates.preVerificationGas
+                userOperation.verificationGasLimit =
+                    gasEstimates.verificationGasLimit
+
+                return userOperation
+            }
+        })
         await refillSmartAccount(
             walletClient,
             smartAccountClient.account.address
