@@ -35,11 +35,19 @@ export type BundlerRpcSchema<entryPoint extends EntryPoint> = [
             entryPoint: entryPoint,
             stateOverrides?: StateOverrides
         ]
-        ReturnType: {
-            preVerificationGas: Hex
-            verificationGasLimit: Hex
-            callGasLimit: Hex
-        }
+        ReturnType: GetEntryPointVersion<entryPoint> extends "v0.6"
+            ? {
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex
+              }
+            : {
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex | null
+                  paymasterVerificationGasLimit: Hex | null
+                  paymasterPostOpGasLimit: Hex | null
+              }
     },
     {
         Method: "eth_supportedEntryPoints"

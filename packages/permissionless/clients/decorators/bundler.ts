@@ -90,7 +90,7 @@ export type BundlerActions<entryPoint extends EntryPoint> = {
             Omit<EstimateUserOperationGasParameters<entryPoint>, "entryPoint">
         >,
         stateOverrides?: StateOverrides
-    ) => Promise<Prettify<EstimateUserOperationGasReturnType>>
+    ) => Promise<Prettify<EstimateUserOperationGasReturnType<entryPoint>>>
     /**
      *
      * Returns the supported entrypoints by the bundler service
