@@ -22,6 +22,23 @@ import {
 } from "./safe/signerToSafeSmartAccount"
 
 import {
+    type KernelEcdsaSmartAccount,
+    type SignerToEcdsaKernelSmartAccountParameters,
+    signerToEcdsaKernelSmartAccount
+} from "./kernel/signerToEcdsaKernelSmartAccount"
+
+import {
+    type BiconomySmartAccount,
+    type SignerToBiconomySmartAccountParameters,
+    signerToBiconomySmartAccount
+} from "./biconomy/signerToBiconomySmartAccount"
+
+import {
+    type PrivateKeyToBiconomySmartAccountParameters,
+    privateKeyToBiconomySmartAccount
+} from "./biconomy/privateKeyToBiconomySmartAccount"
+
+import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
@@ -35,11 +52,19 @@ export {
     type SimpleSmartAccount,
     signerToSimpleSmartAccount,
     SignTransactionNotSupportedBySmartAccount,
+    privateKeyToBiconomySmartAccount,
     privateKeyToSimpleSmartAccount,
     type SmartAccount,
     privateKeyToSafeSmartAccount,
+    type KernelEcdsaSmartAccount,
+    signerToEcdsaKernelSmartAccount,
+    type BiconomySmartAccount,
+    signerToBiconomySmartAccount,
     type SignerToSimpleSmartAccountParameters,
     type SignerToSafeSmartAccountParameters,
     type PrivateKeyToSimpleSmartAccountParameters,
-    type PrivateKeyToSafeSmartAccountParameters
+    type PrivateKeyToSafeSmartAccountParameters,
+    type SignerToEcdsaKernelSmartAccountParameters,
+    type SignerToBiconomySmartAccountParameters,
+    type PrivateKeyToBiconomySmartAccountParameters
 }
