@@ -86,7 +86,7 @@ export const getSenderAddress = async <
 ): Promise<Address> => {
     const { initCode, entryPoint, factory, factoryData } = args
 
-    if (!initCode && (!factory || !factoryData)) {
+    if (!initCode && !factory && !factoryData) {
         throw new Error(
             "Either `initCode` or `factory` and `factoryData` must be provided"
         )
