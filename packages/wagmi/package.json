@@ -21,7 +21,7 @@
         }
     },
     "dependencies": {
-        "permissionless": "0.0.36"
+        "permissionless": "^0.0.36"
     },
     "peerDependencies": {
         "wagmi": "^2.5.1",
