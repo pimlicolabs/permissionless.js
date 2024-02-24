@@ -130,7 +130,7 @@ describe("Pimlico Actions tests", () => {
             ).length.greaterThan(0)
             expectTypeOf(
                 sponsorUserOperationPaymasterAndData.paymaster
-            ).toMatchTypeOf<Address | null>()
+            ).toMatchTypeOf<Address | undefined>()
             await waitForNonceUpdate()
         }, 100000)
         test("Sending user op with paymaster and data", async () => {

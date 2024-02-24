@@ -737,20 +737,20 @@ export async function signerToSafeSmartAccount<
             return concatHex([safeProxyFactoryAddress, initCodeCallData])
         },
         async getFactory() {
-            if (safeDeployed) return null
+            if (safeDeployed) return undefined
 
             safeDeployed = await isSmartAccountDeployed(client, accountAddress)
 
-            if (safeDeployed) return null
+            if (safeDeployed) return undefined
 
             return safeProxyFactoryAddress
         },
         async getFactoryData() {
-            if (safeDeployed) return null
+            if (safeDeployed) return undefined
 
             safeDeployed = await isSmartAccountDeployed(client, accountAddress)
 
-            if (safeDeployed) return null
+            if (safeDeployed) return undefined
 
             return await getAccountInitCode({
                 owner: viemSigner.address,

@@ -37,8 +37,8 @@ export type SmartAccount<
     entryPoint: entryPoint
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
-    getFactory: () => Promise<Address | null>
-    getFactoryData: () => Promise<Hex | null>
+    getFactory: () => Promise<Address | undefined>
+    getFactoryData: () => Promise<Hex | undefined>
     encodeCallData: (
         args:
             | {

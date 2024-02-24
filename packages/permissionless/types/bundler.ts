@@ -44,9 +44,9 @@ export type BundlerRpcSchema<entryPoint extends EntryPoint> = [
             : {
                   preVerificationGas: Hex
                   verificationGasLimit: Hex
-                  callGasLimit: Hex | null
-                  paymasterVerificationGasLimit: Hex | null
-                  paymasterPostOpGasLimit: Hex | null
+                  callGasLimit: Hex | null | undefined
+                  paymasterVerificationGasLimit: Hex | null | undefined
+                  paymasterPostOpGasLimit: Hex | null | undefined
               }
     },
     {

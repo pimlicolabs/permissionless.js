@@ -362,27 +362,27 @@ export async function signerToEcdsaKernelSmartAccount<
         },
 
         async getFactory() {
-            if (smartAccountDeployed) return null
+            if (smartAccountDeployed) return undefined
 
             smartAccountDeployed = await isSmartAccountDeployed(
                 client,
                 accountAddress
             )
 
-            if (smartAccountDeployed) return null
+            if (smartAccountDeployed) return undefined
 
             return factoryAddress
         },
 
         async getFactoryData() {
-            if (smartAccountDeployed) return null
+            if (smartAccountDeployed) return undefined
 
             smartAccountDeployed = await isSmartAccountDeployed(
                 client,
                 accountAddress
             )
 
-            if (smartAccountDeployed) return null
+            if (smartAccountDeployed) return undefined
 
             return generateInitCode()
         },

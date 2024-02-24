@@ -203,8 +203,8 @@ async function prepareUserOperationRequestEntryPointV07<
     let userOperation: UserOperation<"v0.7"> = {
         sender,
         nonce,
-        factory: factory || null,
-        factoryData: factoryData || null,
+        factory: factory || undefined,
+        factoryData: factoryData || undefined,
         callData,
         callGasLimit: partialUserOperation.callGasLimit || 0n,
         verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
@@ -217,10 +217,10 @@ async function prepareUserOperationRequestEntryPointV07<
             partialUserOperation.maxPriorityFeePerGas ||
             gasEstimation?.maxPriorityFeePerGas ||
             0n,
-        paymaster: null,
-        paymasterVerificationGasLimit: null,
-        paymasterPostOpGasLimit: null,
-        paymasterData: null,
+        paymaster: undefined,
+        paymasterVerificationGasLimit: undefined,
+        paymasterPostOpGasLimit: undefined,
+        paymasterData: undefined,
         signature: partialUserOperation.signature || "0x"
     }
 
