@@ -11,6 +11,8 @@ import {
     SmartAccountInsufficientFundsError
 } from "permissionless"
 import { EstimateUserOperationErrorType } from "permissionless/actions"
+import { EstimateUserOperationGasErrorType } from "permissionless/errors"
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
 import {
@@ -56,11 +58,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationErrorType
+                const estimationError =
+                    err as EstimateUserOperationErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -83,11 +85,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasError<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -110,11 +112,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -166,11 +168,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -193,15 +195,15 @@ describe("estimateUserOperationGasError", async () => {
             try {
                 await bundlerClient.estimateUserOperationGas(
                     {
-                        userOperation,
-                        entryPoint: getEntryPoint()
+                        userOperation
                     },
                     {
                         [userOperation.sender]: { balance: 0n }
                     }
                 )
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -223,11 +225,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -250,11 +252,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }
@@ -277,11 +279,11 @@ describe("estimateUserOperationGasError", async () => {
         await expect(async () => {
             try {
                 await bundlerClient.estimateUserOperationGas({
-                    userOperation,
-                    entryPoint: getEntryPoint()
+                    userOperation
                 })
             } catch (err) {
-                const estimationError = err as EstimateUserOperationGasError
+                const estimationError =
+                    err as EstimateUserOperationGasErrorType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
                 throw estimationError.cause
             }

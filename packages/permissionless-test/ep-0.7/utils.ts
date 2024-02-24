@@ -100,28 +100,6 @@ export const getSignerToSimpleSmartAccount = async ({
     })
 }
 
-export const getSignerToSafeSmartAccount = async (args?: {
-    setupTransactions?: {
-        to: Address
-        data: Address
-        value: bigint
-    }[]
-}) => {
-    if (!process.env.TEST_PRIVATE_KEY)
-        throw new Error("TEST_PRIVATE_KEY environment variable not set")
-
-    const publicClient = await getPublicClient()
-
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
-
-    return await signerToSafeSmartAccount(publicClient, {
-        entryPoint: getEntryPoint(),
-        signer: signer,
-        safeVersion: "1.4.1",
-        saltNonce: 100n,
-        setupTransactions: args?.setupTransactions
-    })
-}
 export const getSignerToEcdsaKernelAccount = async () => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -246,8 +224,6 @@ export const getEoaWalletClient = () => {
 }
 
 export const getEntryPoint = () => {
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     return ENTRYPOINT_ADDRESS_V07
 }
 

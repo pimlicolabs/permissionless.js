@@ -1,12 +1,7 @@
 import dotenv from "dotenv"
-import { bundlerActions } from "permissionless"
 import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
 import { beforeAll, describe, test } from "vitest"
-import { buildUserOp } from "../userOp"
 import {
-    getBundlerClient,
-    getEntryPoint,
-    getEoaWalletClient,
     getPimlicoPaymasterClient,
     getSignerToSafeSmartAccount,
     getSmartAccountClient
