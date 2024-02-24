@@ -21,11 +21,7 @@ import {
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type { Prettify } from "../../types"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    EntryPoint
-} from "../../types/entrypoint"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -197,8 +193,6 @@ const getAccountAddress = async <
 
     // Find the init code for this account
     const factoryData = await initCodeProvider()
-
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
     return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
         initCode: concatHex([factoryAddress, factoryData]),

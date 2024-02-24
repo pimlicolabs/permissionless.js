@@ -1,10 +1,6 @@
 import { type Chain, type Client, type Hex, type Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint,
-    Prettify
-} from "../../types"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
 import {
     type BiconomySmartAccount,
     type SignerToBiconomySmartAccountParameters,

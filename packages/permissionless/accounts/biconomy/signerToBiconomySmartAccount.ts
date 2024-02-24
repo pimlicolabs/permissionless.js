@@ -20,10 +20,7 @@ import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { Prettify } from "../../types"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint
-} from "../../types/entrypoint"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
