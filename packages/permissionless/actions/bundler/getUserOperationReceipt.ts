@@ -10,6 +10,7 @@ import type {
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types"
 import type { BundlerRpcSchema } from "../../types/bundler"
+import type { EntryPoint } from "../../types/entrypoint"
 import type { TStatus } from "../../types/userOperation"
 import { transactionReceiptStatus } from "../../utils/deepHexlify"
 
@@ -73,11 +74,12 @@ export type GetUserOperationReceiptReturnType = {
  *
  */
 export const getUserOperationReceipt = async <
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema<entryPoint>>,
     { hash }: Prettify<GetUserOperationReceiptParameters>
 ): Promise<Prettify<GetUserOperationReceiptReturnType> | null> => {
     const params: [Hash] = [hash]

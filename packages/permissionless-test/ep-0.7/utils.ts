@@ -1,4 +1,8 @@
-import { createBundlerClient, createSmartAccountClient } from "permissionless"
+import {
+    ENTRYPOINT_ADDRESS_V07,
+    createBundlerClient,
+    createSmartAccountClient
+} from "permissionless"
 import {
     SmartAccount,
     SmartAccountSigner,
@@ -12,14 +16,17 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import { UserOperation } from "permissionless/types"
 import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import {
     http,
     Account,
     Address,
+    Chain,
     Hex,
     Transport,
+    WalletClient,
     createPublicClient,
     createWalletClient,
     defineChain,
@@ -72,10 +79,12 @@ export const getTestingChain = () => {
 
 export const getSignerToSimpleSmartAccount = async ({
     signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
-    address
+    address,
+    index = 0n
 }: {
     signer?: SmartAccountSigner
     address?: Address
+    index?: bigint
 } = {}) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -86,32 +95,11 @@ export const getSignerToSimpleSmartAccount = async ({
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
         signer: signer,
-        address
+        address,
+        index: index
     })
 }
 
-export const getSignerToSafeSmartAccount = async (args?: {
-    setupTransactions?: {
-        to: Address
-        data: Address
-        value: bigint
-    }[]
-}) => {
-    if (!process.env.TEST_PRIVATE_KEY)
-        throw new Error("TEST_PRIVATE_KEY environment variable not set")
-
-    const publicClient = await getPublicClient()
-
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
-
-    return await signerToSafeSmartAccount(publicClient, {
-        entryPoint: getEntryPoint(),
-        signer: signer,
-        safeVersion: "1.4.1",
-        saltNonce: 100n,
-        setupTransactions: args?.setupTransactions
-    })
-}
 export const getSignerToEcdsaKernelAccount = async () => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -158,10 +146,12 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 export const getSmartAccountClient = async ({
     account,
     sponsorUserOperation,
-    preFund = false
-}: SponsorUserOperationMiddleware & {
-    account?: SmartAccount
+    preFund = false,
+    index = 0n
+}: SponsorUserOperationMiddleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
+    account?: SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
     preFund?: boolean
+    index?: bigint
 } = {}) => {
     if (!process.env.BUNDLER_RPC_HOST)
         throw new Error("BUNDLER_RPC_HOST environment variable not set")
@@ -171,20 +161,15 @@ export const getSmartAccountClient = async ({
     const bundlerClient = getBundlerClient()
 
     const smartAccountClient = createSmartAccountClient({
-        account: account ?? (await getSignerToSimpleSmartAccount()),
+        entryPoint: getEntryPoint(),
+        account: account ?? (await getSignerToSimpleSmartAccount({ index })),
         chain,
         transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation: async ({
-            userOperation,
-            entryPoint
-        }: {
-            userOperation: UserOperation
-            entryPoint: Address
-        }): Promise<UserOperation> => {
+        sponsorUserOperation: async ({ userOperation, entryPoint }) => {
             const gasPrice =
                 await pimlicoBundlerClient.getUserOperationGasPrice()
 
-            let newUserOperation: UserOperation = {
+            let newUserOperation: UserOperation<"v0.7"> = {
                 ...userOperation,
                 maxFeePerGas: gasPrice.fast.maxFeePerGas,
                 maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
@@ -198,8 +183,7 @@ export const getSmartAccountClient = async ({
             }
 
             const gasLimits = await bundlerClient.estimateUserOperationGas({
-                userOperation: newUserOperation,
-                entryPoint
+                userOperation: newUserOperation
             })
 
             newUserOperation = {
@@ -240,9 +224,7 @@ export const getEoaWalletClient = () => {
 }
 
 export const getEntryPoint = () => {
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    return process.env.ENTRYPOINT_ADDRESS as Address
+    return ENTRYPOINT_ADDRESS_V07
 }
 
 export const getPublicClient = async () => {
@@ -273,7 +255,8 @@ export const getBundlerClient = () => {
 
     return createBundlerClient({
         chain: chain,
-        transport: http(`${process.env.BUNDLER_RPC_HOST}`)
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -285,7 +268,8 @@ export const getPimlicoBundlerClient = () => {
 
     return createPimlicoBundlerClient({
         chain: chain,
-        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`)
+        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -299,7 +283,8 @@ export const getPimlicoPaymasterClient = () => {
 
     return createPimlicoPaymasterClient({
         chain: chain,
-        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`)
+        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -351,4 +336,18 @@ export const generateApproveCallData = (paymasterAddress: Address) => {
     })
 
     return approveData
+}
+
+export const refillSmartAccount = async (
+    walletClient: WalletClient<Transport, Chain, Account>,
+    address
+) => {
+    const publicClient = await getPublicClient()
+    const balance = await publicClient.getBalance({ address })
+    if (balance === 0n) {
+        await walletClient.sendTransaction({
+            to: address,
+            value: parseEther("1")
+        })
+    }
 }

@@ -1,15 +1,8 @@
-import type {
-    Account,
-    Address,
-    BaseError,
-    Chain,
-    Client,
-    Hash,
-    Transport
-} from "viem"
+import type { Account, BaseError, Chain, Client, Hash, Transport } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema } from "../../types/bundler"
+import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
@@ -17,9 +10,9 @@ import type {
 import { deepHexlify } from "../../utils/deepHexlify"
 import { getSendUserOperationError } from "../../utils/errors/getSendUserOperationError"
 
-export type SendUserOperationParameters = {
-    userOperation: UserOperation
-    entryPoint: Address
+export type SendUserOperationParameters<entryPoint extends EntryPoint> = {
+    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+    entryPoint: entryPoint
 }
 
 /**
@@ -48,12 +41,13 @@ export type SendUserOperationParameters = {
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
  */
 export const sendUserOperation = async <
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema>,
-    args: Prettify<SendUserOperationParameters>
+    client: Client<TTransport, TChain, TAccount, BundlerRpcSchema<entryPoint>>,
+    args: Prettify<SendUserOperationParameters<entryPoint>>
 ): Promise<Hash> => {
     const { userOperation, entryPoint } = args
 
@@ -61,8 +55,10 @@ export const sendUserOperation = async <
         const userOperationHash = await client.request({
             method: "eth_sendUserOperation",
             params: [
-                deepHexlify(userOperation) as UserOperationWithBigIntAsHex,
-                entryPoint as Address
+                deepHexlify(userOperation) as UserOperationWithBigIntAsHex<
+                    GetEntryPointVersion<entryPoint>
+                >,
+                entryPoint
             ]
         })
 
@@ -70,7 +66,7 @@ export const sendUserOperation = async <
     } catch (err) {
         throw getSendUserOperationError(
             err as BaseError,
-            args as SendUserOperationParameters
+            args as SendUserOperationParameters<entryPoint>
         )
     }
 }

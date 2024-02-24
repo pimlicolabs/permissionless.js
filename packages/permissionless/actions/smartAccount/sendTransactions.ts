@@ -9,6 +9,7 @@ import type {
 } from "viem"
 import { type SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
+import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
@@ -16,11 +17,14 @@ import { type SponsorUserOperationMiddleware } from "./prepareUserOperationReque
 import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionsWithPaymasterParameters<
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+    entryPoint extends EntryPoint,
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
-} & GetAccountParameter<TAccount> &
-    SponsorUserOperationMiddleware & {
+} & GetAccountParameter<entryPoint, TAccount> &
+    SponsorUserOperationMiddleware<entryPoint> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
         nonce?: bigint
@@ -74,10 +78,13 @@ export type SendTransactionsWithPaymasterParameters<
  */
 export async function sendTransactions<
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined,
+    entryPoint extends EntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: Prettify<SendTransactionsWithPaymasterParameters<TAccount>>
+    args: Prettify<
+        SendTransactionsWithPaymasterParameters<entryPoint, TAccount>
+    >
 ): Promise<Hash> {
     const {
         account: account_ = client.account,
@@ -94,7 +101,7 @@ export async function sendTransactions<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     if (account.type !== "local") {
         throw new Error("RPC account type not supported")
@@ -113,11 +120,10 @@ export async function sendTransactions<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation
+        sendUserOperation<entryPoint>
     )({
         userOperation: {
             sender: account.address,
-            paymasterAndData: "0x",
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
             callData: callData,

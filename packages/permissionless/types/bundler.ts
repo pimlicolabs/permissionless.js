@@ -1,43 +1,53 @@
 import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { EntryPoint, GetEntryPointVersion } from "./entrypoint"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
-export type BundlerRpcSchema = [
+export type BundlerRpcSchema<entryPoint extends EntryPoint> = [
     {
         Method: "eth_sendUserOperation"
         Parameters: [
-            userOperation: UserOperationWithBigIntAsHex,
-            entryPoint: Address
+            userOperation: UserOperationWithBigIntAsHex<
+                GetEntryPointVersion<entryPoint>
+            >,
+            entryPoint: entryPoint
         ]
         ReturnType: Hash
     },
     {
         Method: "eth_estimateUserOperationGas"
         Parameters: [
-            userOperation: PartialBy<
-                UserOperationWithBigIntAsHex,
-                "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
-            >,
-            entryPoint: Address,
-            stateOverrides?: {
-                [x: string]: {
-                    balance?: Hex
-                    nonce?: Hex
-                    code?: Hex
-                    state?: {
-                        [x: Hex]: Hex
-                    }
-                    stateDiff?: {
-                        [x: Hex]: Hex
-                    }
-                }
-            }
+            userOperation: GetEntryPointVersion<entryPoint> extends "v0.6"
+                ? PartialBy<
+                      UserOperationWithBigIntAsHex<"v0.6">,
+                      | "callGasLimit"
+                      | "preVerificationGas"
+                      | "verificationGasLimit"
+                  >
+                : PartialBy<
+                      UserOperationWithBigIntAsHex<"v0.7">,
+                      | "callGasLimit"
+                      | "preVerificationGas"
+                      | "verificationGasLimit"
+                      | "paymasterVerificationGasLimit"
+                      | "paymasterPostOpGasLimit"
+                  >,
+            entryPoint: entryPoint,
+            stateOverrides?: StateOverrides
         ]
-        ReturnType: {
-            preVerificationGas: Hex
-            verificationGasLimit: Hex
-            callGasLimit: Hex
-        }
+        ReturnType: GetEntryPointVersion<entryPoint> extends "v0.6"
+            ? {
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex
+              }
+            : {
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex | null | undefined
+                  paymasterVerificationGasLimit: Hex | null | undefined
+                  paymasterPostOpGasLimit: Hex | null | undefined
+              }
     },
     {
         Method: "eth_supportedEntryPoints"
@@ -53,8 +63,10 @@ export type BundlerRpcSchema = [
         Method: "eth_getUserOperationByHash"
         Parameters: [hash: Hash]
         ReturnType: {
-            userOperation: UserOperationWithBigIntAsHex
-            entryPoint: Address
+            userOperation: UserOperationWithBigIntAsHex<
+                GetEntryPointVersion<entryPoint>
+            >
+            entryPoint: entryPoint
             transactionHash: Hash
             blockHash: Hash
             blockNumber: Hex

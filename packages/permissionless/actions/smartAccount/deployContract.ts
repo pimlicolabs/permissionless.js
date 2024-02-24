@@ -9,6 +9,7 @@ import type {
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
+import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
@@ -17,12 +18,15 @@ import { type SponsorUserOperationMiddleware } from "./prepareUserOperationReque
 import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
+    entryPoint extends EntryPoint,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined,
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
-    SponsorUserOperationMiddleware
+    SponsorUserOperationMiddleware<entryPoint>
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
@@ -53,11 +57,12 @@ export type DeployContractParametersWithPaymaster<
  * })
  */
 export async function deployContract<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: Prettify<DeployContractParametersWithPaymaster>
+    args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>
 ): Promise<Hash> {
     const {
         abi,
@@ -75,15 +80,14 @@ export async function deployContract<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation
+        sendUserOperation<entryPoint>
     )({
         userOperation: {
             sender: account.address,
-            paymasterAndData: "0x",
             maxFeePerGas: request.maxFeePerGas || 0n,
             maxPriorityFeePerGas: request.maxPriorityFeePerGas || 0n,
             callData: await account.encodeDeployCallData({

@@ -38,10 +38,14 @@ import {
     PaymasterValidityPeriodError,
     type PaymasterValidityPeriodErrorType
 } from "../../errors/paymaster"
-import type { UserOperation } from "../../types"
+import type {
+    EntryPoint,
+    GetEntryPointVersion,
+    UserOperation
+} from "../../types"
 
-export type GetBundlerErrorParameters = {
-    userOperation: Partial<UserOperation>
+export type GetBundlerErrorParameters<entryPoint extends EntryPoint> = {
+    userOperation: Partial<UserOperation<GetEntryPointVersion<entryPoint>>>
     entryPoint: Address
 }
 
@@ -63,9 +67,9 @@ export type GetBundlerErrorReturnType =
     | PaymasterValidationRevertedErrorType
     | PaymasterDataRejectedErrorType
 
-export function getBundlerError(
+export function getBundlerError<entryPoint extends EntryPoint>(
     err: BaseError,
-    args: GetBundlerErrorParameters
+    args: GetBundlerErrorParameters<entryPoint>
 ) {
     const message = (err.details || "").toLowerCase()
 

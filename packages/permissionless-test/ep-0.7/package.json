@@ -1,0 +1,25 @@
+{
+    "name": "test",
+    "author": "Pimlico",
+    "repository": "github:pimlicolabs/permissionless.js",
+    "homepage": "https://docs.pimlico.io/permissionless",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
+        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage"
+    },
+    "devDependencies": {
+        "vitest": "^1.2.0"
+    },
+    "dependencies": {
+        "@types/node": "^20.11.5",
+        "@viem/anvil": "^0.0.7",
+        "@vitest/coverage-v8": "^1.2.0",
+        "dotenv": "^16.3.1",
+        "execa": "^8.0.1",
+        "get-port": "^7.0.0",
+        "permissionless": "workspace:packages/permissionless",
+        "viem": "^2.0.0"
+    }
+}

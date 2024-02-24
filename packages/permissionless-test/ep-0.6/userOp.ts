@@ -12,8 +12,8 @@ import {
     zeroAddress
 } from "viem"
 import { PartialBy } from "viem/types/utils"
-import { SimpleAccountAbi } from "./abis/SimpleAccount"
-import { SimpleAccountFactoryAbi } from "./abis/SimpleAccountFactory"
+import { SimpleAccountAbi } from "../abis/SimpleAccount"
+import { SimpleAccountFactoryAbi } from "../abis/SimpleAccountFactory"
 import {
     getDummySignature,
     getEntryPoint,
@@ -38,7 +38,7 @@ const getInitCode = async (
 export const getAccountInitCode = async (
     factoryAddress: Address,
     owner: WalletClient,
-    index: bigint
+    index = 0n
 ): Promise<Hex> => {
     if (!owner.account) throw new Error("Owner account not found")
     return concatHex([
@@ -81,7 +81,7 @@ const encodeExecute = async (
 export const buildUserOp = async (
     eoaWalletClient: WalletClient,
     index = 0n
-): Promise<UserOperation> => {
+) => {
     await new Promise((resolve) => {
         setTimeout(() => {
             // wait for prev user op to be added to make sure we get correct nonce
@@ -109,7 +109,7 @@ export const buildUserOp = async (
     const { maxFeePerGas, maxPriorityFeePerGas } =
         await publicClient.estimateFeesPerGas()
 
-    const userOperation: UserOperation = {
+    const userOperation: UserOperation<"v0.6"> = {
         sender: accountAddress,
         nonce: nonce,
         initCode: await getInitCode(factoryAddress, eoaWalletClient, index),

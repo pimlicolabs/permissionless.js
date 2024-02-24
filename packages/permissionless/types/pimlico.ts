@@ -1,5 +1,6 @@
 import type { Address, Hash, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
+import type { EntryPoint, GetEntryPointVersion } from "./entrypoint"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
@@ -51,34 +52,59 @@ export type PimlicoBundlerRpcSchema = [
     }
 ]
 
-export type PimlicoPaymasterRpcSchema = [
+export type PimlicoPaymasterRpcSchema<entryPoint extends EntryPoint> = [
     {
         Method: "pm_sponsorUserOperation"
         Parameters: [
-            userOperation: PartialBy<
-                UserOperationWithBigIntAsHex,
-                | "callGasLimit"
-                | "preVerificationGas"
-                | "verificationGasLimit"
-                | "paymasterAndData"
-            >,
-            entryPoint: Address,
+            userOperation: GetEntryPointVersion<entryPoint> extends "v0.6"
+                ? PartialBy<
+                      UserOperationWithBigIntAsHex<"v0.6">,
+                      | "callGasLimit"
+                      | "preVerificationGas"
+                      | "verificationGasLimit"
+                  >
+                : PartialBy<
+                      UserOperationWithBigIntAsHex<"v0.7">,
+                      | "callGasLimit"
+                      | "preVerificationGas"
+                      | "verificationGasLimit"
+                      | "paymasterVerificationGasLimit"
+                      | "paymasterPostOpGasLimit"
+                  >,
+            entryPoint: entryPoint,
             metadata?: {
                 sponsorshipPolicyId?: string
             }
         ]
-        ReturnType: {
-            paymasterAndData: Hex
-            preVerificationGas: Hex
-            verificationGasLimit: Hex
-            callGasLimit: Hex
-        }
+        ReturnType: GetEntryPointVersion<entryPoint> extends "v0.6"
+            ? {
+                  paymasterAndData: Hex
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex
+                  paymaster?: never
+                  paymasterVerificationGasLimit?: never
+                  paymasterPostOpGasLimit?: never
+                  paymasterData?: never
+              }
+            : {
+                  preVerificationGas: Hex
+                  verificationGasLimit: Hex
+                  callGasLimit: Hex
+                  paymaster: Address
+                  paymasterVerificationGasLimit: Hex
+                  paymasterPostOpGasLimit: Hex
+                  paymasterData: Hex
+                  paymasterAndData?: never
+              }
     },
     {
         Method: "pm_validateSponsorshipPolicies"
         Parameters: [
-            userOperation: UserOperationWithBigIntAsHex,
-            entryPoint: Address,
+            userOperation: UserOperationWithBigIntAsHex<
+                GetEntryPointVersion<entryPoint>
+            >,
+            entryPoint: entryPoint,
             sponsorshipPolicyIds: string[]
         ]
         ReturnType: {

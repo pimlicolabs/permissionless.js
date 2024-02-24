@@ -5,26 +5,29 @@ import {
     type EstimateUserOperationGasErrorType
 } from "../../errors/estimateUserOperationGas"
 import { type ErrorType } from "../../errors/utils"
+import type { EntryPoint } from "../../types/entrypoint"
 import {
     type GetBundlerErrorParameters,
     type GetBundlerErrorReturnType,
     getBundlerError
 } from "./getBundlerError"
 
-export type GetEstimateUserOperationGasErrorReturnType<cause = ErrorType> =
-    Omit<EstimateUserOperationGasErrorType, "cause"> & {
-        cause: cause | GetBundlerErrorReturnType
-    }
+export type GetEstimateUserOperationGasErrorReturnType<
+    entryPoint extends EntryPoint,
+    cause = ErrorType
+> = Omit<EstimateUserOperationGasErrorType<entryPoint>, "cause"> & {
+    cause: cause | GetBundlerErrorReturnType
+}
 
-export function getEstimateUserOperationGasError<err extends ErrorType<string>>(
-    error: err,
-    args: EstimateUserOperationGasParameters
-) {
+export function getEstimateUserOperationGasError<
+    err extends ErrorType<string>,
+    entryPoint extends EntryPoint
+>(error: err, args: EstimateUserOperationGasParameters<entryPoint>) {
     const cause = (() => {
         const cause = getBundlerError(
             // biome-ignore lint/complexity/noBannedTypes: <explanation>
             error as {} as BaseError,
-            args as GetBundlerErrorParameters
+            args as GetBundlerErrorParameters<entryPoint>
         )
         // biome-ignore lint/complexity/noBannedTypes: <explanation>
         if (cause instanceof UnknownNodeError) return error as {} as BaseError
@@ -33,5 +36,5 @@ export function getEstimateUserOperationGasError<err extends ErrorType<string>>(
 
     throw new EstimateUserOperationGasError(cause, {
         ...args
-    }) as GetEstimateUserOperationGasErrorReturnType<err>
+    }) as GetEstimateUserOperationGasErrorReturnType<entryPoint, err>
 }

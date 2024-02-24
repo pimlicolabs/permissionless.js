@@ -4,6 +4,7 @@ import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import { getUserOperationHash } from "permissionless/utils"
 import { Hash, Hex } from "viem"
 import {
@@ -43,8 +44,8 @@ beforeAll(() => {
 })
 
 describe("Pimlico Actions tests", () => {
-    let pimlicoBundlerClient: PimlicoBundlerClient
-    let pimlicoPaymasterClient: PimlicoPaymasterClient
+    let pimlicoBundlerClient: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
+    let pimlicoPaymasterClient: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V06_TYPE>
 
     beforeEach(async () => {
         pimlicoBundlerClient = getPimlicoBundlerClient()
@@ -92,7 +93,7 @@ describe("Pimlico Actions tests", () => {
             const { maxFeePerGas, maxPriorityFeePerGas } =
                 await publicClient.estimateFeesPerGas()
             const partialUserOp = await buildUserOp(eoaWalletClient)
-            const userOperation: UserOperation = {
+            const userOperation: UserOperation<"v0.6"> = {
                 ...partialUserOp,
                 maxFeePerGas: maxFeePerGas || 0n,
                 maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
@@ -163,8 +164,7 @@ describe("Pimlico Actions tests", () => {
                 message: { raw: userOperationHash }
             })
             const userOpHash = await pimlicoBundlerClient.sendUserOperation({
-                userOperation: userOperation,
-                entryPoint: entryPoint
+                userOperation: userOperation
             })
             expectTypeOf(userOpHash).toBeString()
             expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
@@ -221,7 +221,7 @@ describe("Pimlico Actions tests", () => {
 
         const partialUserOp = await buildUserOp(eoaWalletClient)
 
-        const userOperation: UserOperation = {
+        const userOperation: UserOperation<"v0.6"> = {
             ...partialUserOp,
             maxFeePerGas: maxFeePerGas || 0n,
             maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,

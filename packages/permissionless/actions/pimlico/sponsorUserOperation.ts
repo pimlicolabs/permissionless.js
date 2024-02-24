@@ -1,26 +1,41 @@
-import type { Account, Address, Chain, Client, Transport } from "viem"
+import type { Account, Chain, Client, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { Prettify } from "../../types/"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    EntryPoint,
+    GetEntryPointVersion
+} from "../../types/entrypoint"
 import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
     UserOperation,
     UserOperationWithBigIntAsHex
 } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../utils/getEntryPointVersion"
 
-export type PimlicoSponsorUserOperationParameters = {
-    userOperation: PartialBy<
-        UserOperation,
-        | "callGasLimit"
-        | "preVerificationGas"
-        | "verificationGasLimit"
-        | "paymasterAndData"
-    >
-    entryPoint: Address
+export type PimlicoSponsorUserOperationParameters<
+    entryPoint extends EntryPoint
+> = {
+    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+        ? PartialBy<
+              UserOperation<"v0.6">,
+              "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+          >
+        : PartialBy<
+              UserOperation<"v0.7">,
+              | "callGasLimit"
+              | "preVerificationGas"
+              | "verificationGasLimit"
+              | "paymasterVerificationGasLimit"
+              | "paymasterPostOpGasLimit"
+          >
+    entryPoint: entryPoint
     sponsorshipPolicyId?: string
 }
 
-export type SponsorUserOperationReturnType = UserOperation
+export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
+    UserOperation<GetEntryPointVersion<entryPoint>>
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
@@ -48,20 +63,28 @@ export type SponsorUserOperationReturnType = UserOperation
  *
  */
 export const sponsorUserOperation = async <
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, TAccount, PimlicoPaymasterRpcSchema>,
-    args: Prettify<PimlicoSponsorUserOperationParameters>
-): Promise<Prettify<SponsorUserOperationReturnType>> => {
+    client: Client<
+        TTransport,
+        TChain,
+        TAccount,
+        PimlicoPaymasterRpcSchema<entryPoint>
+    >,
+    args: Prettify<PimlicoSponsorUserOperationParameters<entryPoint>>
+): Promise<Prettify<SponsorUserOperationReturnType<entryPoint>>> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",
         params: args.sponsorshipPolicyId
             ? [
                   deepHexlify(
                       args.userOperation
-                  ) as UserOperationWithBigIntAsHex,
+                  ) as UserOperationWithBigIntAsHex<
+                      GetEntryPointVersion<entryPoint>
+                  >,
                   args.entryPoint,
                   {
                       sponsorshipPolicyId: args.sponsorshipPolicyId
@@ -70,18 +93,37 @@ export const sponsorUserOperation = async <
             : [
                   deepHexlify(
                       args.userOperation
-                  ) as UserOperationWithBigIntAsHex,
+                  ) as UserOperationWithBigIntAsHex<
+                      GetEntryPointVersion<entryPoint>
+                  >,
                   args.entryPoint
               ]
     })
 
-    const userOperation: UserOperation = {
-        ...args.userOperation,
-        paymasterAndData: response.paymasterAndData,
-        preVerificationGas: BigInt(response.preVerificationGas),
-        verificationGasLimit: BigInt(response.verificationGasLimit),
-        callGasLimit: BigInt(response.callGasLimit)
-    }
+    const userOperation: SponsorUserOperationReturnType<entryPoint> = (
+        args.entryPoint === ENTRYPOINT_ADDRESS_V06
+            ? {
+                  ...args.userOperation,
+                  paymasterAndData: response.paymasterAndData,
+                  preVerificationGas: BigInt(response.preVerificationGas),
+                  verificationGasLimit: BigInt(response.verificationGasLimit),
+                  callGasLimit: BigInt(response.callGasLimit)
+              }
+            : {
+                  ...args.userOperation,
+                  paymasterAndData: response.paymasterAndData,
+                  preVerificationGas: BigInt(response.preVerificationGas),
+                  verificationGasLimit: BigInt(response.verificationGasLimit),
+                  callGasLimit: BigInt(response.callGasLimit),
+                  paymasterVerificationGasLimit:
+                      response.paymasterVerificationGasLimit
+                          ? BigInt(response.paymasterVerificationGasLimit)
+                          : undefined,
+                  paymasterPostOpGasLimit: response.paymasterPostOpGasLimit
+                      ? BigInt(response.paymasterPostOpGasLimit)
+                      : undefined
+              }
+    ) as SponsorUserOperationReturnType<entryPoint>
 
     return userOperation
 }

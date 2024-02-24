@@ -1,24 +1,47 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
-import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    SignTransactionNotSupportedBySmartAccount,
+    signerToEcdsaKernelSmartAccount
+} from "permissionless/accounts"
+import {
+    http,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
+    createWalletClient,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
 import { EntryPointAbi } from "./abis/EntryPoint"
 import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
-    getSignerToSimpleSmartAccount,
+    getSignerToEcdsaKernelAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
 dotenv.config()
-
-let testPrivateKey: Hex
-let factoryAddress: Address
 
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS) {
@@ -33,21 +56,32 @@ beforeAll(() => {
     if (!process.env.ENTRYPOINT_ADDRESS) {
         throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
-
-    testPrivateKey = process.env.TEST_PRIVATE_KEY as Hex
-    factoryAddress = process.env.FACTORY_ADDRESS as Address
 })
 
-describe("Simple Account", () => {
-    test("Simple Account address", async () => {
-        const simpleSmartAccount = await getSignerToSimpleSmartAccount()
+/**
+ * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
+ */
+describe("ECDSA kernel Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
 
-        expectTypeOf(simpleSmartAccount.address).toBeString()
-        expect(simpleSmartAccount.address).toHaveLength(42)
-        expect(simpleSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
+    test("Account address", async () => {
+        const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
+
+        expectTypeOf(ecdsaSmartAccount.address).toBeString()
+        expect(ecdsaSmartAccount.address).toHaveLength(42)
+        expect(ecdsaSmartAccount.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
 
         await expect(async () =>
-            simpleSmartAccount.signTransaction({
+            ecdsaSmartAccount.signTransaction({
                 to: zeroAddress,
                 value: 0n,
                 data: "0x"
@@ -55,8 +89,10 @@ describe("Simple Account", () => {
         ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
-    test("Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+    test("Client signMessage", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount()
+        })
 
         const response = await smartAccountClient.signMessage({
             message: "hello world"
@@ -68,7 +104,9 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount()
+        })
 
         const response = await smartAccountClient.signTypedData({
             domain: {
@@ -95,8 +133,10 @@ describe("Simple Account", () => {
         expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
     })
 
-    test("smart account client deploy contract", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+    test("Client deploy contract", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount()
+        })
 
         await expect(async () =>
             smartAccountClient.deployContract({
@@ -109,7 +149,15 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client send multiple transactions", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount()
+        })
+
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -130,8 +178,14 @@ describe("Simple Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Smart account write contract", async () => {
-        const smartAccountClient = await getSmartAccountClient()
+    test("Write contract", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount()
+        })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const entryPointContract = getContract({
             abi: EntryPointAbi,
@@ -163,67 +217,19 @@ describe("Simple Account", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("Smart account client send transaction", async () => {
-        const smartAccountClient = await getSmartAccountClient()
-        const response = await smartAccountClient.sendTransaction({
-            to: zeroAddress,
-            value: 0n,
-            data: "0x"
-        })
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(66)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
-    }, 1000000)
+    test("Client send Transaction with paymaster", async () => {
+        const account = await getSignerToEcdsaKernelAccount()
 
-    test("Smart account client send transaction with address", async () => {
-        const oldSmartAccountClient = await getSmartAccountClient()
-
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                address: oldSmartAccountClient.account.address
-            })
-        })
-
-        const response = await smartAccountClient.sendTransaction({
-            to: smartAccountClient.account.address,
-            data: "0x",
-            value: 0n
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(66)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-        await waitForNonceUpdate()
-    }, 1000000)
-
-    test("test prepareUserOperationRequest", async () => {
-        const smartAccountClient = await getSmartAccountClient()
-
-        const userOperation =
-            await smartAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await smartAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    })
-                }
-            })
-
-        // smartAccountClient.sendUserOperation()
-    }, 1000000)
-
-    test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            account,
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -251,36 +257,42 @@ describe("Simple Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            const event = decodeEventLog({
-                abi: EntryPointAbi,
-                ...log
-            })
-            if (event.eventName === "UserOperationEvent") {
-                eventFound = true
-                const userOperation =
-                    await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
-                    "0x"
-                )
-            }
+            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch {}
         }
 
         expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
     }, 1000000)
 
-    test("smart account client send multiple Transactions with paymaster", async () => {
+    test("Client send multiple Transactions with paymaster", async () => {
+        const account = await getSignerToEcdsaKernelAccount()
+
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
         const smartAccountClient = await getSmartAccountClient({
+            account,
             sponsorUserOperation: async ({
                 entryPoint: _entryPoint,
                 userOperation
-            }): Promise<UserOperation> => {
+            }) => {
                 const pimlicoPaymaster = getPimlicoPaymasterClient()
                 return pimlicoPaymaster.sponsorUserOperation({
                     userOperation,
@@ -317,23 +329,79 @@ describe("Simple Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
-            const event = decodeEventLog({
-                abi: EntryPointAbi,
-                ...log
-            })
-            if (event.eventName === "UserOperationEvent") {
-                eventFound = true
-                const userOperation =
-                    await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                expect(userOperation?.userOperation.paymasterAndData).not.toBe(
-                    "0x"
-                )
-            }
+            // Encapsulated inside a try catch since if a log isn't wanted from this abi it will throw an error
+            try {
+                const event = decodeEventLog({
+                    abi: EntryPointAbi,
+                    ...log
+                })
+                if (event.eventName === "UserOperationEvent") {
+                    eventFound = true
+                    const userOperation =
+                        await bundlerClient.getUserOperationByHash({
+                            hash: event.args.userOpHash
+                        })
+                    expect(
+                        userOperation?.userOperation.paymasterAndData
+                    ).not.toBe("0x")
+                }
+            } catch {}
         }
 
         expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
+    }, 1000000)
+
+    test("Can use a deployed account", async () => {
+        const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
+        const publicClient = await getPublicClient()
+        const smartAccountClient = await getSmartAccountClient({
+            account: initialEcdsaSmartAccount,
+            sponsorUserOperation: async ({
+                entryPoint: _entryPoint,
+                userOperation
+            }) => {
+                const pimlicoPaymaster = getPimlicoPaymasterClient()
+                return pimlicoPaymaster.sponsorUserOperation({
+                    userOperation,
+                    entryPoint: getEntryPoint()
+                })
+            }
+        })
+
+        // Send an initial tx to deploy the account
+        const hash = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+
+        // Wait for the tx to be done (so we are sure that the account is deployed)
+        await publicClient.waitForTransactionReceipt({ hash })
+        const deployedAccountAddress = initialEcdsaSmartAccount.address
+
+        // Build a new account with a valid owner
+        const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+        const alreadyDeployedEcdsaSmartAccount =
+            await signerToEcdsaKernelSmartAccount(publicClient, {
+                entryPoint: getEntryPoint(),
+                signer: signer,
+                deployedAccountAddress
+            })
+
+        // Ensure the two account have the same address
+        expect(alreadyDeployedEcdsaSmartAccount.address).toMatch(
+            initialEcdsaSmartAccount.address
+        )
+
+        // Ensure that it will fail with an invalid owner address
+        const invalidOwner = privateKeyToAccount(generatePrivateKey())
+        await expect(async () =>
+            signerToEcdsaKernelSmartAccount(publicClient, {
+                entryPoint: getEntryPoint(),
+                signer: invalidOwner,
+                deployedAccountAddress
+            })
+        ).rejects.toThrowError("Invalid owner for the already deployed account")
     }, 1000000)
 })

@@ -7,7 +7,8 @@ import {
     type LocalAccount
 } from "viem"
 import type { Chain, EncodeDeployDataParameters, Transport } from "viem"
-import { type UserOperation } from "../types"
+import type { UserOperation } from "../types"
+import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 
 export class SignTransactionNotSupportedBySmartAccount extends BaseError {
     override name = "SignTransactionNotSupportedBySmartAccount"
@@ -26,15 +27,18 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 }
 
 export type SmartAccount<
+    entryPoint extends EntryPoint,
     Name extends string = string,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<Name> & {
     client: Client<transport, chain>
-    entryPoint: Address
+    entryPoint: entryPoint
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
+    getFactory: () => Promise<Address | undefined>
+    getFactoryData: () => Promise<Hex | undefined>
     encodeCallData: (
         args:
             | {
@@ -48,13 +52,17 @@ export type SmartAccount<
                   data: Hex
               }[]
     ) => Promise<Hex>
-    getDummySignature(userOperation: UserOperation): Promise<Hex>
+    getDummySignature(
+        userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+    ): Promise<Hex>
     encodeDeployCallData: ({
         abi,
         args,
         bytecode
     }: EncodeDeployDataParameters<TAbi>) => Promise<Hex>
-    signUserOperation: (userOperation: UserOperation) => Promise<Hex>
+    signUserOperation: (
+        userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+    ) => Promise<Hex>
 }
 
 export type SmartAccountSigner<
