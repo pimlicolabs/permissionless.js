@@ -70,7 +70,7 @@ export type PrepareUserOperationRequestReturnType<
     entryPoint extends EntryPoint
 > = UserOperation<GetEntryPointVersion<entryPoint>>
 
-async function prepareUserOperationRequestForEntryPointV0_6<
+async function prepareUserOperationRequestForEntryPointV06<
     entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
@@ -164,7 +164,7 @@ async function prepareUserOperationRequestForEntryPointV0_6<
     return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
 }
 
-async function prepareUserOperationRequestEntryPointVersion0_7<
+async function prepareUserOperationRequestEntryPointV07<
     entryPoint extends EntryPoint = ENTRYPOINT_ADDRESS_V07_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
@@ -284,14 +284,14 @@ export async function prepareUserOperationRequest<
     const entryPointVersion = getEntryPointVersion(account.entryPoint)
 
     if (entryPointVersion === "v0.6") {
-        return prepareUserOperationRequestForEntryPointV0_6(
+        return prepareUserOperationRequestForEntryPointV06(
             client,
             args,
             stateOverrides
         ) as Promise<PrepareUserOperationRequestReturnType<entryPoint>>
     }
 
-    return prepareUserOperationRequestEntryPointVersion0_7(
+    return prepareUserOperationRequestEntryPointV07(
         client,
         args,
         stateOverrides
