@@ -5,6 +5,10 @@
     "homepage": "https://docs.pimlico.io/permissionless",
     "private": true,
     "type": "module",
+    "scripts": {
+        "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
+        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage"
+    },
     "devDependencies": {
         "vitest": "^1.2.0"
     },

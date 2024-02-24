@@ -37,7 +37,7 @@ import {
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
 
 export type KernelEcdsaSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "kernelEcdsaSmartAccount", transport, chain>
@@ -136,7 +136,7 @@ const getAccountInitCode = async ({
  * @param deployedAccountAddress
  */
 const getAccountAddress = async <
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
@@ -200,23 +200,14 @@ const getAccountAddress = async <
 
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
-    if (entryPointVersion === "v0.6") {
-        return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
-            initCode: concatHex([factoryAddress, factoryData]),
-            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
-        })
-    }
-
-    // Get the sender address based on the init code
-    return getSenderAddress<ENTRYPOINT_ADDRESS_V07_TYPE>(client, {
-        factory: factoryAddress,
-        factoryData,
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V07_TYPE
+    return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
+        initCode: concatHex([factoryAddress, factoryData]),
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
     })
 }
 
 export type SignerToEcdsaKernelSmartAccountParameters<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
@@ -241,7 +232,7 @@ export type SignerToEcdsaKernelSmartAccountParameters<
  * @param deployedAccountAddress
  */
 export async function signerToEcdsaKernelSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -259,6 +250,12 @@ export async function signerToEcdsaKernelSmartAccount<
         deployedAccountAddress
     }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
+
+    if (entryPointVersion !== "v0.6") {
+        throw new Error("Only EntryPoint 0.6 is supported")
+    }
+
     // Get the private key related account
     const viemSigner: LocalAccount = {
         ...signer,

@@ -20,7 +20,11 @@ import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { Prettify } from "../../types"
-import type { EntryPoint } from "../../types/entrypoint"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    EntryPoint
+} from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
@@ -34,7 +38,7 @@ import {
 } from "./abi/BiconomySmartAccountAbi"
 
 export type BiconomySmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "biconomySmartAccount", transport, chain>
@@ -182,7 +186,7 @@ const getAccountAddress = async ({
 }
 
 export type SignerToBiconomySmartAccountParameters<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TSource extends string = "custom",
     TAddress extends Address = Address
 > = Prettify<{
@@ -207,7 +211,7 @@ export type SignerToBiconomySmartAccountParameters<
  * @param ecdsaModuleAddress
  */
 export async function signerToBiconomySmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = "custom",
@@ -225,6 +229,12 @@ export async function signerToBiconomySmartAccount<
         ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
     }: SignerToBiconomySmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<BiconomySmartAccount<entryPoint, TTransport, TChain>> {
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
+
+    if (entryPointVersion !== "v0.6") {
+        throw new Error("Only EntryPoint 0.6 is supported")
+    }
+
     // Get the private key related account
     const viemSigner: LocalAccount = {
         ...signer,
