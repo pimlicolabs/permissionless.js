@@ -126,7 +126,6 @@ export const getSmartAccountClient = async ({
     const chain = getTestingChain()
 
     const pimlicoBundlerClient = getPimlicoBundlerClient()
-    const bundlerClient = getBundlerClient()
 
     const smartAccountClient = createSmartAccountClient({
         entryPoint: getEntryPoint(),

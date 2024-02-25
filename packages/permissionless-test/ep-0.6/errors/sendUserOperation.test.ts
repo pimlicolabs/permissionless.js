@@ -19,9 +19,6 @@ beforeAll(() => {
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
     }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
 })
 
 describe("sendUserOperation", async () => {
@@ -33,11 +30,12 @@ describe("sendUserOperation", async () => {
         const smartAccountClient = (
             await getSmartAccountClient({
                 account: safeSmartAccount,
-                sponsorUserOperation: async (args) => {
+                middleware: async (args) => {
                     const userOp =
                         await paymasterClient.sponsorUserOperation(args)
 
                     return {
+                        ...args.userOperation,
                         ...userOp,
                         initCode: "0x"
                     }

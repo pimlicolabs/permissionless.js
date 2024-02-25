@@ -223,8 +223,6 @@ export const getEoaWalletClient = () => {
 }
 
 export const getEntryPoint = () => {
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     return ENTRYPOINT_ADDRESS_V06
 }
 

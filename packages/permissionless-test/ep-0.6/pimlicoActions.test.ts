@@ -35,8 +35,6 @@ beforeAll(() => {
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
         throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     if (!process.env.ACTIVE_SPONSORSHIP_POLICY)
         throw new Error(
             "ACTIVE_SPONSORSHIP_POLICY environment variable not set"
