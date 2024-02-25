@@ -102,8 +102,7 @@ describe("Pimlico Actions tests", () => {
             const entryPoint = getEntryPoint()
             const sponsorUserOperationPaymasterAndData =
                 await pimlicoPaymasterClient.sponsorUserOperation({
-                    userOperation: userOperation,
-                    entryPoint: entryPoint
+                    userOperation: userOperation
                 })
             expect(sponsorUserOperationPaymasterAndData).not.toBeNull()
             expect(sponsorUserOperationPaymasterAndData).not.toBeUndefined()
@@ -141,8 +140,7 @@ describe("Pimlico Actions tests", () => {
             const userOperation = await buildUserOp(eoaWalletClient)
             const sponsorUserOperationPaymasterAndData =
                 await pimlicoPaymasterClient.sponsorUserOperation({
-                    userOperation: userOperation,
-                    entryPoint: entryPoint
+                    userOperation: userOperation
                 })
             userOperation.paymasterAndData =
                 sponsorUserOperationPaymasterAndData.paymasterAndData
