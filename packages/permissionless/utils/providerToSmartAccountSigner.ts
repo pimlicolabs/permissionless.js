@@ -6,10 +6,13 @@ import {
 } from "viem"
 import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner"
 
-export const providerToSmartAccountSigner = async (
-    provider: EIP1193Provider,
+export const providerToSmartAccountSigner = async ({
+    provider,
+    signerAddress
+}: {
+    provider: EIP1193Provider
     signerAddress?: Hex
-) => {
+}) => {
     let account: Hex
     if (!signerAddress) {
         ;[account] = await provider.request({ method: "eth_requestAccounts" })
