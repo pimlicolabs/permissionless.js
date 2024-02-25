@@ -95,7 +95,7 @@ export type PimlicoBundlerActions = {
      */
     sendCompressedUserOperation: (
         args: Prettify<
-            Omit<SendCompressedUserOperationParameters, "entrypoint">
+            Omit<SendCompressedUserOperationParameters, "entryPoint">
         >
     ) => Promise<Hash>
 }
@@ -115,7 +115,7 @@ export const pimlicoBundlerActions =
                 args
             ),
         sendCompressedUserOperation: async (
-            args: Omit<SendCompressedUserOperationParameters, "entrypoint">
+            args: Omit<SendCompressedUserOperationParameters, "entryPoint">
         ) =>
             sendCompressedUserOperation(
                 client as PimlicoBundlerClient<entryPoint>,
