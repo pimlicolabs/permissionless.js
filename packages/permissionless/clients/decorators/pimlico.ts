@@ -158,7 +158,12 @@ export type PimlicoPaymasterClientActions<entryPoint extends EntryPoint> = {
     ) => Promise<Prettify<SponsorUserOperationReturnType<entryPoint>>>
 
     validateSponsorshipPolicies: (
-        args: Prettify<ValidateSponsorshipPoliciesParameters<entryPoint>>
+        args: Prettify<
+            Omit<
+                ValidateSponsorshipPoliciesParameters<entryPoint>,
+                "entryPoint"
+            >
+        >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
 }
 
@@ -219,7 +224,7 @@ export const pimlicoPaymasterActions =
                 "entryPoint"
             >
         ) =>
-            validateSponsorshipPolicies<entryPoint>(
+            validateSponsorshipPolicies(
                 client as PimlicoPaymasterClient<entryPoint>,
                 { ...args, entryPoint: entryPointAddress }
             )
