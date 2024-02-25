@@ -72,7 +72,7 @@ export const createPimlicoBundlerClient = <
     })
     return client
         .extend(bundlerActions(parameters.entryPoint))
-        .extend(pimlicoBundlerActions)
+        .extend(pimlicoBundlerActions(parameters.entryPoint))
 }
 
 /**

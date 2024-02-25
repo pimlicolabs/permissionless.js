@@ -14,7 +14,7 @@ export type SmartAccountParameters<
     T,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = {
     publicClient: PublicClient<TTransport, TChain>
@@ -26,7 +26,7 @@ export type SmartAccountParameters<
 export type SimpleSmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<
     SmartAccountParameters<
@@ -42,7 +42,7 @@ export async function smartAccountConnectorHelper<
     X,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address,
     Name extends string = string
 >({
@@ -69,7 +69,7 @@ export async function smartAccountConnectorHelper<
 export async function simpleSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >({
     publicClient,

@@ -2,6 +2,7 @@ import dotenv from "dotenv"
 import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
 import { beforeAll, describe, test } from "vitest"
 import {
+    getEntryPoint,
     getPimlicoPaymasterClient,
     getSignerToSafeSmartAccount,
     getSmartAccountClient
@@ -41,7 +42,7 @@ describe("sendUserOperation", async () => {
                     }
                 }
             })
-        ).extend(pimlicoBundlerActions)
+        ).extend(pimlicoBundlerActions(getEntryPoint()))
 
         await smartAccountClient.sendTransaction({
             to: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",

@@ -231,7 +231,6 @@ describe("Pimlico Actions tests", () => {
         const validateSponsorshipPolicies =
             await pimlicoPaymasterClient.validateSponsorshipPolicies({
                 userOperation: userOperation,
-                entryPoint: entryPoint,
                 sponsorshipPolicyIds: [
                     process.env.ACTIVE_SPONSORSHIP_POLICY,
                     "sp_fake_policy"

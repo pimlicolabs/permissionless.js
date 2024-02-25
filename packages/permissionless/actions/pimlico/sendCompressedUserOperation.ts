@@ -32,7 +32,7 @@ export type SendCompressedUserOperationParameters = {
  * const bundlerClient = createClient({
  *      chain: goerli,
  *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
- * }).extend(pimlicoBundlerActions)
+ * }).extend(pimlicoBundlerActions(entryPoint))
  *
  * const userOpHash = await sendCompressedUserOperation(bundlerClient, {
  *     compressedUserOperation,

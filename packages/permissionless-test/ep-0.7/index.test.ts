@@ -101,8 +101,6 @@ describe("test public actions and utils", () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()
 
-        const simpleAccountClient = await getSmartAccountClient()
-
         const { factory, factoryData } = await getAccountInitCode(
             factoryAddress,
             eoaWalletClient

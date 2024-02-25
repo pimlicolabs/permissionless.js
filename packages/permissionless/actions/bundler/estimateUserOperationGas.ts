@@ -48,8 +48,8 @@ export type EstimateUserOperationGasReturnType<entryPoint extends EntryPoint> =
               preVerificationGas: bigint
               verificationGasLimit: bigint
               callGasLimit: bigint
-              paymasterVerificationGasLimit: bigint | undefined
-              paymasterPostOpGasLimit: bigint | undefined
+              paymasterVerificationGasLimit?: bigint
+              paymasterPostOpGasLimit?: bigint
           }
 
 export type EstimateUserOperationErrorType<entryPoint extends EntryPoint> =
@@ -131,8 +131,8 @@ export const estimateUserOperationGas = async <
             preVerificationGas: Hex
             verificationGasLimit: Hex
             callGasLimit: Hex
-            paymasterVerificationGasLimit: Hex | undefined
-            paymasterPostOpGasLimit: Hex | undefined
+            paymasterVerificationGasLimit?: Hex
+            paymasterPostOpGasLimit?: Hex
         }
 
         return {
