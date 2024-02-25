@@ -21,8 +21,8 @@ import {
     deployContract
 } from "../../actions/smartAccount/deployContract"
 import {
+    type Middleware,
     type PrepareUserOperationRequestReturnType,
-    type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
 } from "../../actions/smartAccount/prepareUserOperationRequest"
 import {
@@ -463,8 +463,8 @@ export type SmartAccountActions<
 }
 
 export function smartAccountActions<entryPoint extends EntryPoint>({
-    sponsorUserOperation
-}: SponsorUserOperationMiddleware<entryPoint>) {
+    middleware
+}: Middleware<entryPoint>) {
     return <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
@@ -479,19 +479,19 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 client,
                 {
                     ...args,
-                    sponsorUserOperation
+                    middleware
                 },
                 stateOverrides
             ),
         deployContract: (args) =>
             deployContract(client, {
                 ...args,
-                sponsorUserOperation
+                middleware
             } as DeployContractParametersWithPaymaster<entryPoint>),
         sendTransaction: (args) =>
             sendTransaction<TChain, TSmartAccount, entryPoint>(client, {
                 ...args,
-                sponsorUserOperation
+                middleware
             } as SendTransactionWithPaymasterParameters<
                 entryPoint,
                 TChain,
@@ -500,14 +500,14 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
         sendTransactions: (args) =>
             sendTransactions<TChain, TSmartAccount, entryPoint>(client, {
                 ...args,
-                sponsorUserOperation
+                middleware
             }),
         sendUserOperation: (args) =>
             sendUserOperation<entryPoint, TTransport, TChain, TSmartAccount>(
                 client,
                 {
                     ...args,
-                    sponsorUserOperation
+                    middleware
                 } as SendUserOperationParameters<entryPoint, TSmartAccount>
             ),
         signMessage: (args) =>
@@ -561,7 +561,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
         ) =>
             writeContract(client, {
                 ...args,
-                sponsorUserOperation
+                middleware
             } as WriteContractWithPaymasterParameters<
                 entryPoint,
                 TChain,

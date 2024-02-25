@@ -11,7 +11,7 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { type Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionWithPaymasterParameters<
@@ -22,7 +22,7 @@ export type SendTransactionWithPaymasterParameters<
         | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = SendTransactionParameters<TChain, TAccount, TChainOverride> &
-    SponsorUserOperationMiddleware<entryPoint>
+    Middleware<entryPoint>
 
 /**
  * Creates, signs, and sends a new transaction to the network.
@@ -94,7 +94,7 @@ export async function sendTransaction<
         to,
         value,
         nonce,
-        sponsorUserOperation
+        middleware
     } = args
 
     if (!account_) {
@@ -129,7 +129,7 @@ export async function sendTransaction<
             nonce: nonce ? BigInt(nonce) : undefined
         },
         account: account,
-        sponsorUserOperation
+        middleware
     })
 
     const userOperationReceipt = await getAction(

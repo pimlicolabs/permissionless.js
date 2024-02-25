@@ -52,9 +52,6 @@ beforeAll(() => {
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
     }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
 })
 
 describe("Safe Account", () => {
@@ -115,7 +112,9 @@ describe("Safe Account", () => {
                     }
                 ]
             }),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -180,7 +179,7 @@ describe("Safe Account", () => {
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
-        const gasPrices = await pimlicoBundlerClient.getUserOperationGasPrice()
+        const gasPrice = await pimlicoBundlerClient.getUserOperationGasPrice()
 
         const response = await smartAccountClient.sendTransactions({
             transactions: [
@@ -195,8 +194,8 @@ describe("Safe Account", () => {
                     data: "0x"
                 }
             ],
-            maxFeePerGas: gasPrices.fast.maxFeePerGas,
-            maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas
+            maxFeePerGas: gasPrice.fast.maxFeePerGas,
+            maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
         })
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
@@ -234,7 +233,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -290,7 +291,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransactions({

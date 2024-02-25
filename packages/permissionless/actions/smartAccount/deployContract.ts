@@ -14,7 +14,7 @@ import { parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { type Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
@@ -26,7 +26,7 @@ export type DeployContractParametersWithPaymaster<
         | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
-    SponsorUserOperationMiddleware<entryPoint>
+    Middleware<entryPoint>
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
@@ -68,7 +68,7 @@ export async function deployContract<
         abi,
         args: constructorArgs,
         bytecode,
-        sponsorUserOperation,
+        middleware,
         ...request
     } = args
 
@@ -97,7 +97,7 @@ export async function deployContract<
             } as EncodeDeployDataParameters)
         },
         account: account,
-        sponsorUserOperation
+        middleware
     })
 
     const userOperationReceipt = await getAction(

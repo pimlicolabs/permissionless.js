@@ -50,9 +50,6 @@ beforeAll(() => {
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
     }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
 })
 
 describe("Simple Account from walletClient", () => {
@@ -247,20 +244,14 @@ describe("Simple Account from walletClient", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 signer: await getCustomSignerToSimpleSmartAccount()
             }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -307,20 +298,14 @@ describe("Simple Account from walletClient", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 signer: await getCustomSignerToSimpleSmartAccount()
             }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 

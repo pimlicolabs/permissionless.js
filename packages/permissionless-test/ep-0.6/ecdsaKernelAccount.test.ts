@@ -1,5 +1,4 @@
 import dotenv from "dotenv"
-import { UserOperation } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToEcdsaKernelSmartAccount
@@ -26,8 +25,8 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
+import { EntryPointAbi } from "../abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "../abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -52,9 +51,6 @@ beforeAll(() => {
     }
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
-    }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     }
 })
 
@@ -223,18 +219,12 @@ describe("ECDSA kernel Account", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -286,18 +276,12 @@ describe("ECDSA kernel Account", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -355,17 +339,11 @@ describe("ECDSA kernel Account", () => {
     test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
         const publicClient = await getPublicClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
         const smartAccountClient = await getSmartAccountClient({
             account: initialEcdsaSmartAccount,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 

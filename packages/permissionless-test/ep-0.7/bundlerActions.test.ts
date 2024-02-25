@@ -55,8 +55,6 @@ beforeAll(() => {
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
         throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
 
 describe("BUNDLER ACTIONS", () => {
@@ -107,7 +105,7 @@ describe("BUNDLER ACTIONS", () => {
         const smartAccountClient = createSmartAccountClient({
             account: simpleAccount,
             chain: getTestingChain(),
-            transport: http(`${process.env.BUNDLER_RPC_HOST}`),
+            bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
             entryPoint: getEntryPoint()
         })
 
@@ -141,8 +139,8 @@ describe("BUNDLER ACTIONS", () => {
         const smartAccountClient = createSmartAccountClient({
             account: simpleAccount,
             chain: getTestingChain(),
-            transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-            sponsorUserOperation: async (args) => {
+            bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
+            middleware: async (args) => {
                 return args.userOperation
             },
             entryPoint: ENTRYPOINT_ADDRESS_V07

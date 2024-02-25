@@ -13,7 +13,7 @@ import {
 import { type SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { type Middleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction
@@ -95,7 +95,7 @@ export type WriteContractWithPaymasterParameters<
     TAccount,
     TChainOverride
 > &
-    SponsorUserOperationMiddleware<entryPoint>
+    Middleware<entryPoint>
 
 export async function writeContract<
     entryPoint extends EntryPoint,
