@@ -5,7 +5,6 @@ import {
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
-import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/_types/types"
 import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA

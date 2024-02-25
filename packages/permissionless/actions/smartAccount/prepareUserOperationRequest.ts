@@ -304,6 +304,21 @@ async function prepareUserOperationRequestEntryPointV07<
         })) as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
+    if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
+        const gasPrice = await middleware.gasPrice()
+        userOperation.maxFeePerGas = gasPrice.maxFeePerGas
+        userOperation.maxPriorityFeePerGas = gasPrice.maxPriorityFeePerGas
+    }
+
+    if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {
+        const estimateGas = await estimateFeesPerGas(account.client)
+        userOperation.maxFeePerGas =
+            userOperation.maxFeePerGas || estimateGas.maxFeePerGas
+        userOperation.maxPriorityFeePerGas =
+            userOperation.maxPriorityFeePerGas ||
+            estimateGas.maxPriorityFeePerGas
+    }
+
     if (
         middleware &&
         typeof middleware !== "function" &&
@@ -338,21 +353,6 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.paymasterPostOpGasLimit =
             sponsorUserOperationData.paymasterPostOpGasLimit
         userOperation.paymasterData = sponsorUserOperationData.paymasterData
-    }
-
-    if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
-        const gasPrice = await middleware.gasPrice()
-        userOperation.maxFeePerGas = gasPrice.maxFeePerGas
-        userOperation.maxPriorityFeePerGas = gasPrice.maxPriorityFeePerGas
-    }
-
-    if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {
-        const estimateGas = await estimateFeesPerGas(account.client)
-        userOperation.maxFeePerGas =
-            userOperation.maxFeePerGas || estimateGas.maxFeePerGas
-        userOperation.maxPriorityFeePerGas =
-            userOperation.maxPriorityFeePerGas ||
-            estimateGas.maxPriorityFeePerGas
     }
 
     if (
