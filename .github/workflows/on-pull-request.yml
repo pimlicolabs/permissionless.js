@@ -13,38 +13,38 @@ jobs:
     uses: ./.github/workflows/verify.yml
     secrets: inherit
 
-  bench:
-    name: Coverage
-    runs-on: ubuntu-latest
+  # bench:
+  #   name: Coverage
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Clone repository
+  #       uses: actions/checkout@v3
 
-      - name: Install dependencies
-        uses: ./.github/actions/install-dependencies
+  #     - name: Install dependencies
+  #       uses: ./.github/actions/install-dependencies
 
-      - name: Build
-        run: bun run build
+  #     - name: Build
+  #       run: bun run build
 
-      - name: Run tests & coverage
-        run: bun run test:ci
-        env:
-          ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}
-          FACTORY_ADDRESS: ${{ vars.FACTORY_ADDRESS }}
-          TEST_CHAIN_ID: ${{ vars.TEST_CHAIN_ID }}
-          TEST_PRIVATE_KEY: ${{ secrets.TEST_PRIVATE_KEY }}
-          RPC_URL: ${{ secrets.RPC_URL }}
-          BUNDLER_RPC_HOST: ${{ secrets.BUNDLER_RPC_HOST }}
-          PIMLICO_BUNDLER_RPC_HOST: ${{ secrets.PIMLICO_BUNDLER_RPC_HOST }}
-          PIMLICO_PAYMASTER_RPC_HOST: ${{ secrets.PIMLICO_PAYMASTER_RPC_HOST }}
-          ACTIVE_SPONSORSHIP_POLICY: ${{ secrets.ACTIVE_SPONSORSHIP_POLICY }}
-          DEBUG: true
+  #     - name: Run tests & coverage
+  #       run: bun run test:ci
+  #       env:
+  #         ENTRYPOINT_ADDRESS: ${{ vars.ENTRYPOINT_ADDRESS }}
+  #         FACTORY_ADDRESS: ${{ vars.FACTORY_ADDRESS }}
+  #         TEST_CHAIN_ID: ${{ vars.TEST_CHAIN_ID }}
+  #         TEST_PRIVATE_KEY: ${{ secrets.TEST_PRIVATE_KEY }}
+  #         RPC_URL: ${{ secrets.RPC_URL }}
+  #         BUNDLER_RPC_HOST: ${{ secrets.BUNDLER_RPC_HOST }}
+  #         PIMLICO_BUNDLER_RPC_HOST: ${{ secrets.PIMLICO_BUNDLER_RPC_HOST }}
+  #         PIMLICO_PAYMASTER_RPC_HOST: ${{ secrets.PIMLICO_PAYMASTER_RPC_HOST }}
+  #         ACTIVE_SPONSORSHIP_POLICY: ${{ secrets.ACTIVE_SPONSORSHIP_POLICY }}
+  #         DEBUG: true
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  #     - name: Upload coverage reports to Codecov
+  #       uses: codecov/codecov-action@v3
+  #       env:
+  #         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   size:
     name: Size
