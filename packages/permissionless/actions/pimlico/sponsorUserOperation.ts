@@ -36,23 +36,21 @@ export type PimlicoSponsorUserOperationParameters<
 
 export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
-        ? Pick<
-              UserOperation<"v0.6">,
-              | "callGasLimit"
-              | "verificationGasLimit"
-              | "preVerificationGas"
-              | "paymasterAndData"
-          >
-        : Pick<
-              UserOperation<"v0.7">,
-              | "callGasLimit"
-              | "verificationGasLimit"
-              | "preVerificationGas"
-              | "paymaster"
-              | "paymasterVerificationGasLimit"
-              | "paymasterPostOpGasLimit"
-              | "paymasterData"
-          >
+        ? {
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              paymasterAndData: Hex
+          }
+        : {
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              paymaster: Address
+              paymasterVerificationGasLimit: bigint
+              paymasterPostOpGasLimit: bigint
+              paymasterData: Hex
+          }
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
