@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.2
+
+### Patch Changes
+
+- 29773d05b0bae60266f2989bc1c1ed9fee688dc9: change providerToSmartAccountSigner signature
+
 ## 0.1.1
 
 ### Patch Changes
