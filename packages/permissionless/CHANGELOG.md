@@ -1,5 +1,14 @@
 # permissionless
 
+## 0.1.4
+
+### Patch Changes
+
+- 850b861cc25a72b06efa1e08c16044fe8f2e2fa6: pimlicoBundlerActions has entryPoint as an input now
+- c6f44aa5bc6a5dd85888b17214700f38ef369210: Make fields of userOpeartion v0.7 optional instead of undefined
+- 850b861cc25a72b06efa1e08c16044fe8f2e2fa6: Fix source types for safe accounts
+- 4392ac82d56325e7584b0cd48edb4e99081aa085: Fix signer types
+
 ## 0.1.3
 
 ### Patch Changes
