@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.1.0
+
+### Minor Changes
+
+- be2929a3ad655475510e136c4289269b86ce0714: Add EntryPoint v0.7 support
+- f860a3a0678418b820a84e222f444f5bd21f1782: providerToSmartAccountSigner accepts keyword args
+- dcf9d9dc5b018742ef93827974a67b77cc2cf702: Add support for middleware in createSmartAccountClient
+
 ## 0.0.36
 
 ### Patch Changes
