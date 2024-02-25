@@ -59,5 +59,5 @@ export const createStackupPaymasterClient = <
     })
     return client
         .extend(bundlerActions(parameters.entryPoint))
-        .extend(stackupPaymasterActions<entryPoint>)
+        .extend(stackupPaymasterActions(parameters.entryPoint))
 }

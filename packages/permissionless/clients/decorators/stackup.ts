@@ -36,7 +36,7 @@ export type StackupPaymasterClientActions<entryPoint extends EntryPoint> = {
      *
      */
     sponsorUserOperation: (
-        args: SponsorUserOperationParameters<entryPoint>
+        args: Omit<SponsorUserOperationParameters<entryPoint>, "entrypoint">
     ) => Promise<SponsorUserOperationReturnType<entryPoint>>
 
     /**
@@ -64,14 +64,14 @@ export type StackupPaymasterClientActions<entryPoint extends EntryPoint> = {
     accounts: (args: AccountsParameters<entryPoint>) => Promise<Address[]>
 }
 
-export const stackupPaymasterActions = <entryPoint extends EntryPoint>(
-    client: Client
-): StackupPaymasterClientActions<entryPoint> => ({
-    sponsorUserOperation: async (args) =>
-        sponsorUserOperation<entryPoint>(
-            client as StackupPaymasterClient<entryPoint>,
-            args
-        ),
-    accounts: async (args) =>
-        accounts(client as StackupPaymasterClient<entryPoint>, args)
-})
+export const stackupPaymasterActions =
+    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
+    (client: Client): StackupPaymasterClientActions<entryPoint> => ({
+        sponsorUserOperation: async (args) =>
+            sponsorUserOperation(client as StackupPaymasterClient<entryPoint>, {
+                ...args,
+                entryPoint: entryPointAddress
+            }),
+        accounts: async (args) =>
+            accounts(client as StackupPaymasterClient<entryPoint>, args)
+    })
