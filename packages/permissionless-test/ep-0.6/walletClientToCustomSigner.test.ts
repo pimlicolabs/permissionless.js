@@ -247,20 +247,14 @@ describe("Simple Account from walletClient", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 signer: await getCustomSignerToSimpleSmartAccount()
             }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -307,20 +301,14 @@ describe("Simple Account from walletClient", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSimpleSmartAccount({
                 signer: await getCustomSignerToSimpleSmartAccount()
             }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 

@@ -11,7 +11,7 @@ import {
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
-import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
+import { Middleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
@@ -164,9 +164,9 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 
 export const getSmartAccountClient = async ({
     account,
-    sponsorUserOperation,
+    middleware,
     preFund = false
-}: SponsorUserOperationMiddleware<ENTRYPOINT_ADDRESS_V06_TYPE> & {
+}: Middleware<ENTRYPOINT_ADDRESS_V06_TYPE> & {
     account?: SmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE>
     preFund?: boolean
 } = {}) => {
@@ -175,41 +175,23 @@ export const getSmartAccountClient = async ({
     const chain = getTestingChain()
 
     const pimlicoBundlerClient = getPimlicoBundlerClient()
-    const bundlerClient = getBundlerClient()
 
     const smartAccountClient = createSmartAccountClient({
         entryPoint: getEntryPoint(),
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
-        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation: async ({ userOperation, entryPoint }) => {
-            const gasPrice =
-                await pimlicoBundlerClient.getUserOperationGasPrice()
-
-            let newUserOperation: UserOperation<"v0.6"> = {
-                ...userOperation,
-                maxFeePerGas: gasPrice.fast.maxFeePerGas,
-                maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
-            }
-
-            if (sponsorUserOperation) {
-                return sponsorUserOperation({
-                    userOperation,
-                    entryPoint
-                })
-            }
-
-            const gasLimits = await bundlerClient.estimateUserOperationGas({
-                userOperation: newUserOperation
-            })
-
-            newUserOperation = {
-                ...newUserOperation,
-                ...gasLimits
-            }
-
-            return newUserOperation
-        }
+        bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
+        middleware:
+            typeof middleware === "function"
+                ? middleware
+                : {
+                      gasPrices: async () => {
+                          return (
+                              await pimlicoBundlerClient.getUserOperationGasPrice()
+                          ).fast
+                      },
+                      ...middleware
+                  }
     })
 
     if (preFund) {

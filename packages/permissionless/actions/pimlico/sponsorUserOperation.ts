@@ -1,4 +1,4 @@
-import type { Account, Chain, Client, Transport } from "viem"
+import type { Account, Address, Chain, Client, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { Prettify } from "../../types/"
 import type {
@@ -35,7 +35,24 @@ export type PimlicoSponsorUserOperationParameters<
 }
 
 export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
-    UserOperation<GetEntryPointVersion<entryPoint>>
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+        ? Pick<
+              UserOperation<"v0.6">,
+              | "callGasLimit"
+              | "verificationGasLimit"
+              | "preVerificationGas"
+              | "paymasterAndData"
+          >
+        : Pick<
+              UserOperation<"v0.7">,
+              | "callGasLimit"
+              | "verificationGasLimit"
+              | "preVerificationGas"
+              | "paymaster"
+              | "paymasterVerificationGasLimit"
+              | "paymasterPostOpGasLimit"
+              | "paymasterData"
+          >
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
@@ -100,30 +117,45 @@ export const sponsorUserOperation = async <
               ]
     })
 
-    const userOperation: SponsorUserOperationReturnType<entryPoint> = (
-        args.entryPoint === ENTRYPOINT_ADDRESS_V06
-            ? {
-                  ...args.userOperation,
-                  paymasterAndData: response.paymasterAndData,
-                  preVerificationGas: BigInt(response.preVerificationGas),
-                  verificationGasLimit: BigInt(response.verificationGasLimit),
-                  callGasLimit: BigInt(response.callGasLimit)
-              }
-            : {
-                  ...args.userOperation,
-                  paymasterAndData: response.paymasterAndData,
-                  preVerificationGas: BigInt(response.preVerificationGas),
-                  verificationGasLimit: BigInt(response.verificationGasLimit),
-                  callGasLimit: BigInt(response.callGasLimit),
-                  paymasterVerificationGasLimit:
-                      response.paymasterVerificationGasLimit
-                          ? BigInt(response.paymasterVerificationGasLimit)
-                          : undefined,
-                  paymasterPostOpGasLimit: response.paymasterPostOpGasLimit
-                      ? BigInt(response.paymasterPostOpGasLimit)
-                      : undefined
-              }
-    ) as SponsorUserOperationReturnType<entryPoint>
+    if (args.entryPoint === ENTRYPOINT_ADDRESS_V06) {
+        const responseV06 = response as {
+            paymasterAndData: Hex
+            preVerificationGas: Hex
+            verificationGasLimit: Hex
+            callGasLimit: Hex
+            paymaster?: never
+            paymasterVerificationGasLimit?: never
+            paymasterPostOpGasLimit?: never
+            paymasterData?: never
+        }
+        return {
+            paymasterAndData: responseV06.paymasterAndData,
+            preVerificationGas: BigInt(responseV06.preVerificationGas),
+            verificationGasLimit: BigInt(responseV06.verificationGasLimit),
+            callGasLimit: BigInt(responseV06.callGasLimit)
+        } as SponsorUserOperationReturnType<entryPoint>
+    }
 
-    return userOperation
+    const responseV07 = response as {
+        preVerificationGas: Hex
+        verificationGasLimit: Hex
+        callGasLimit: Hex
+        paymaster: Address
+        paymasterVerificationGasLimit: Hex
+        paymasterPostOpGasLimit: Hex
+        paymasterData: Hex
+        paymasterAndData?: never
+    }
+
+    return {
+        callGasLimit: BigInt(responseV07.callGasLimit),
+        verificationGasLimit: BigInt(responseV07.verificationGasLimit),
+        preVerificationGas: BigInt(responseV07.preVerificationGas),
+        paymaster: responseV07.paymaster,
+        paymasterVerificationGasLimit: BigInt(
+            responseV07.paymasterVerificationGasLimit
+        ),
+        paymasterPostOpGasLimit: BigInt(responseV07.paymasterPostOpGasLimit),
+        paymasterData: responseV07.paymasterData
+    } as SponsorUserOperationReturnType<entryPoint>
 }

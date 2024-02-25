@@ -11,7 +11,7 @@ import {
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
-import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
+import { Middleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
@@ -148,7 +148,7 @@ export const getSmartAccountClient = async ({
     sponsorUserOperation,
     preFund = false,
     index = 0n
-}: SponsorUserOperationMiddleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
+}: Middleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
     account?: SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
     preFund?: boolean
     index?: bigint

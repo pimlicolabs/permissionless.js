@@ -115,7 +115,9 @@ describe("Safe Account", () => {
                     }
                 ]
             }),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -234,7 +236,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -290,7 +294,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransactions({

@@ -25,8 +25,8 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
+import { EntryPointAbi } from "../abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "../abis/Greeter"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -220,18 +220,12 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -283,18 +277,12 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
             account,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -352,17 +340,11 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount()
         const publicClient = await getPublicClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
         const smartAccountClient = await getSmartAccountClient({
             account: initialEcdsaSmartAccount,
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }) => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 

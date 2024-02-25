@@ -13,7 +13,7 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type SponsorUserOperationMiddleware } from "./prepareUserOperationRequest"
+import { type Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionsWithPaymasterParameters<
@@ -24,7 +24,7 @@ export type SendTransactionsWithPaymasterParameters<
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
 } & GetAccountParameter<entryPoint, TAccount> &
-    SponsorUserOperationMiddleware<entryPoint> & {
+    Middleware<entryPoint> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
         nonce?: bigint
@@ -89,7 +89,7 @@ export async function sendTransactions<
     const {
         account: account_ = client.account,
         transactions,
-        sponsorUserOperation,
+        middleware,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce
@@ -130,7 +130,7 @@ export async function sendTransactions<
             nonce: nonce
         },
         account: account,
-        sponsorUserOperation
+        middleware
     })
 
     const userOperationReceipt = await getAction(

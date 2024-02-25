@@ -15,7 +15,7 @@ import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 import {
-    type SponsorUserOperationMiddleware,
+    type Middleware,
     prepareUserOperationRequest
 } from "./prepareUserOperationRequest"
 
@@ -57,7 +57,7 @@ export type SendUserOperationParameters<
               | "signature"
           >
 } & GetAccountParameter<entryPoint, TAccount> &
-    SponsorUserOperationMiddleware<entryPoint>
+    Middleware<entryPoint>
 
 export async function sendUserOperation<
     entryPoint extends EntryPoint,

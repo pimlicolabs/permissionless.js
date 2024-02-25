@@ -7,7 +7,7 @@ import type {
 } from "viem"
 import { createClient } from "viem"
 import { type SmartAccount } from "../accounts/types"
-import { type SponsorUserOperationMiddleware } from "../actions/smartAccount/prepareUserOperationRequest"
+import { type Middleware } from "../actions/smartAccount/prepareUserOperationRequest"
 import type { Prettify } from "../types/"
 import { type BundlerRpcSchema } from "../types/bundler"
 import type { EntryPoint } from "../types/entrypoint"
@@ -48,10 +48,11 @@ export type SmartAccountClientConfig<
 > = Prettify<
     Pick<
         ClientConfig<transport, chain, account>,
-        "cacheTime" | "chain" | "key" | "name" | "pollingInterval" | "transport"
+        "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
     > & {
         account?: account
-    } & SponsorUserOperationMiddleware<entryPoint> & {
+        bundlerTransport: Transport
+    } & Middleware<entryPoint> & {
             entryPoint: entryPoint
         }
 >
@@ -94,19 +95,19 @@ export function createSmartAccountClient<
     const {
         key = "Account",
         name = "Smart Account Client",
-        transport
+        bundlerTransport
     } = parameters
     const client = createClient({
         ...parameters,
         key,
         name,
-        transport: (opts) => transport({ ...opts, retryCount: 0 }),
+        transport: bundlerTransport,
         type: "smartAccountClient"
     })
 
     return client.extend(
         smartAccountActions({
-            sponsorUserOperation: parameters.sponsorUserOperation
+            middleware: parameters.middleware
         })
     ) as SmartAccountClient<entryPoint, TTransport, TChain, TSmartAccount>
 }

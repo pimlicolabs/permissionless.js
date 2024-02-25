@@ -19,11 +19,41 @@ import { getAction } from "../../utils/getAction"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
-export type SponsorUserOperationMiddleware<entryPoint extends EntryPoint> = {
-    sponsorUserOperation?: (args: {
-        userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-        entryPoint: entryPoint
-    }) => Promise<UserOperation<GetEntryPointVersion<entryPoint>>>
+export type Middleware<entryPoint extends EntryPoint> = {
+    middleware?:
+        | ((args: {
+              userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+              entryPoint: entryPoint
+          }) => Promise<UserOperation<GetEntryPointVersion<entryPoint>>>)
+        | {
+              gasPrices?: () => Promise<{
+                  maxFeePerGas: bigint
+                  maxPriorityFeePerGas: bigint
+              }>
+              sponsorUserOperation?: (args: {
+                  userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+                  entryPoint: entryPoint
+              }) => Promise<
+                  entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+                      ? Pick<
+                              UserOperation<"v0.6">,
+                              | "callGasLimit"
+                              | "verificationGasLimit"
+                              | "preVerificationGas"
+                              | "paymasterAndData"
+                          >
+                      : Pick<
+                              UserOperation<"v0.7">,
+                              | "callGasLimit"
+                              | "verificationGasLimit"
+                              | "preVerificationGas"
+                              | "paymaster"
+                              | "paymasterVerificationGasLimit"
+                              | "paymasterPostOpGasLimit"
+                              | "paymasterData"
+                          >
+              >
+          }
 }
 
 export type PrepareUserOperationRequestParameters<
@@ -64,7 +94,7 @@ export type PrepareUserOperationRequestParameters<
               | "signature"
           >
 } & GetAccountParameter<entryPoint, TAccount> &
-    SponsorUserOperationMiddleware<entryPoint>
+    Middleware<entryPoint>
 
 export type PrepareUserOperationRequestReturnType<
     entryPoint extends EntryPoint
@@ -85,7 +115,7 @@ async function prepareUserOperationRequestForEntryPointV06<
     const {
         account: account_ = client.account,
         userOperation: partialUserOperation,
-        sponsorUserOperation
+        middleware
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
@@ -93,33 +123,22 @@ async function prepareUserOperationRequestForEntryPointV06<
         account_
     ) as SmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE>
 
-    const [sender, nonce, initCode, callData, gasEstimation] =
-        await Promise.all([
-            partialUserOperation.sender || account.address,
-            partialUserOperation.nonce || account.getNonce(),
-            partialUserOperation.initCode || account.getInitCode(),
-            partialUserOperation.callData,
-            !partialUserOperation.maxFeePerGas ||
-            !partialUserOperation.maxPriorityFeePerGas
-                ? estimateFeesPerGas(account.client)
-                : undefined
-        ])
+    const [sender, nonce, initCode, callData] = await Promise.all([
+        partialUserOperation.sender || account.address,
+        partialUserOperation.nonce || account.getNonce(),
+        partialUserOperation.initCode || account.getInitCode(),
+        partialUserOperation.callData
+    ])
 
-    let userOperation: UserOperation<"v0.6"> = {
+    const userOperation: UserOperation<"v0.6"> = {
         sender,
         nonce,
         initCode,
         callData,
         paymasterAndData: "0x",
         signature: partialUserOperation.signature || "0x",
-        maxFeePerGas:
-            partialUserOperation.maxFeePerGas ||
-            gasEstimation?.maxFeePerGas ||
-            0n,
-        maxPriorityFeePerGas:
-            partialUserOperation.maxPriorityFeePerGas ||
-            gasEstimation?.maxPriorityFeePerGas ||
-            0n,
+        maxFeePerGas: partialUserOperation.maxFeePerGas || 0n,
+        maxPriorityFeePerGas: partialUserOperation.maxPriorityFeePerGas || 0n,
         callGasLimit: partialUserOperation.callGasLimit || 0n,
         verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
         preVerificationGas: partialUserOperation.preVerificationGas || 0n
@@ -129,15 +148,66 @@ async function prepareUserOperationRequestForEntryPointV06<
         userOperation.signature = await account.getDummySignature(userOperation)
     }
 
-    if (sponsorUserOperation) {
-        userOperation = (await sponsorUserOperation({
+    if (typeof middleware === "function") {
+        return (await middleware({
             userOperation,
             entryPoint: account.entryPoint
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as UserOperation<"v0.6">
-    } else if (
+        })) as PrepareUserOperationRequestReturnType<entryPoint>
+    }
+
+    if (
+        middleware &&
+        typeof middleware !== "function" &&
+        middleware.gasPrices
+    ) {
+        const gasPrices = await middleware.gasPrices()
+        userOperation.maxFeePerGas = gasPrices.maxFeePerGas
+        userOperation.maxPriorityFeePerGas = gasPrices.maxPriorityFeePerGas
+    }
+
+    if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {
+        const estimateGas = await estimateFeesPerGas(account.client)
+        userOperation.maxFeePerGas =
+            userOperation.maxFeePerGas || estimateGas.maxFeePerGas
+        userOperation.maxPriorityFeePerGas =
+            userOperation.maxPriorityFeePerGas ||
+            estimateGas.maxPriorityFeePerGas
+    }
+
+    if (
+        middleware &&
+        typeof middleware !== "function" &&
+        middleware.sponsorUserOperation
+    ) {
+        const sponsorUserOperationData = (await middleware.sponsorUserOperation(
+            {
+                userOperation,
+                entryPoint: account.entryPoint
+            } as {
+                userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+                entryPoint: entryPoint
+            }
+        )) as Pick<
+            UserOperation<"v0.6">,
+            | "callGasLimit"
+            | "verificationGasLimit"
+            | "preVerificationGas"
+            | "paymasterAndData"
+        >
+
+        userOperation.callGasLimit = sponsorUserOperationData.callGasLimit
+        userOperation.verificationGasLimit =
+            sponsorUserOperationData.verificationGasLimit
+        userOperation.preVerificationGas =
+            sponsorUserOperationData.preVerificationGas
+        userOperation.paymasterAndData =
+            sponsorUserOperationData.paymasterAndData
+    }
+
+    if (
         !userOperation.callGasLimit ||
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
@@ -179,7 +249,7 @@ async function prepareUserOperationRequestEntryPointV07<
     const {
         account: account_ = client.account,
         userOperation: partialUserOperation,
-        sponsorUserOperation
+        middleware
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
@@ -200,7 +270,7 @@ async function prepareUserOperationRequestEntryPointV07<
                 : undefined
         ])
 
-    let userOperation: UserOperation<"v0.7"> = {
+    const userOperation: UserOperation<"v0.7"> = {
         sender,
         nonce,
         factory: factory || undefined,
@@ -228,15 +298,72 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.signature = await account.getDummySignature(userOperation)
     }
 
-    if (sponsorUserOperation) {
-        userOperation = (await sponsorUserOperation({
+    if (typeof middleware === "function") {
+        return (await middleware({
             userOperation,
             entryPoint: account.entryPoint
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as UserOperation<"v0.7">
-    } else if (
+        })) as PrepareUserOperationRequestReturnType<entryPoint>
+    }
+
+    if (
+        middleware &&
+        typeof middleware !== "function" &&
+        middleware.sponsorUserOperation
+    ) {
+        const sponsorUserOperationData = (await middleware.sponsorUserOperation(
+            {
+                userOperation,
+                entryPoint: account.entryPoint
+            } as {
+                userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+                entryPoint: entryPoint
+            }
+        )) as Pick<
+            UserOperation<"v0.7">,
+            | "callGasLimit"
+            | "verificationGasLimit"
+            | "preVerificationGas"
+            | "paymaster"
+            | "paymasterVerificationGasLimit"
+            | "paymasterPostOpGasLimit"
+            | "paymasterData"
+        >
+        userOperation.callGasLimit = sponsorUserOperationData.callGasLimit
+        userOperation.verificationGasLimit =
+            sponsorUserOperationData.verificationGasLimit
+        userOperation.preVerificationGas =
+            sponsorUserOperationData.preVerificationGas
+        userOperation.paymaster = sponsorUserOperationData.paymaster
+        userOperation.paymasterVerificationGasLimit =
+            sponsorUserOperationData.paymasterVerificationGasLimit
+        userOperation.paymasterPostOpGasLimit =
+            sponsorUserOperationData.paymasterPostOpGasLimit
+        userOperation.paymasterData = sponsorUserOperationData.paymasterData
+    }
+
+    if (
+        middleware &&
+        typeof middleware !== "function" &&
+        middleware.gasPrices
+    ) {
+        const gasPrices = await middleware.gasPrices()
+        userOperation.maxFeePerGas = gasPrices.maxFeePerGas
+        userOperation.maxPriorityFeePerGas = gasPrices.maxPriorityFeePerGas
+    }
+
+    if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {
+        const estimateGas = await estimateFeesPerGas(account.client)
+        userOperation.maxFeePerGas =
+            userOperation.maxFeePerGas || estimateGas.maxFeePerGas
+        userOperation.maxPriorityFeePerGas =
+            userOperation.maxPriorityFeePerGas ||
+            estimateGas.maxPriorityFeePerGas
+    }
+
+    if (
         !userOperation.callGasLimit ||
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
@@ -252,8 +379,7 @@ async function prepareUserOperationRequestEntryPointV07<
             stateOverrides
         )
 
-        userOperation.callGasLimit =
-            userOperation.callGasLimit || gasParameters.callGasLimit
+        userOperation.callGasLimit |= gasParameters.callGasLimit
         userOperation.verificationGasLimit =
             userOperation.verificationGasLimit ||
             gasParameters.verificationGasLimit
