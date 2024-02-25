@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.1
+
+### Patch Changes
+
+- 2b2c29026cd593fd4f887c8f8340a6eb0d2b94b9: fix prepareUserOperationRequest for entryPoint 0.7
+
 ## 0.1.0
 
 ### Minor Changes
