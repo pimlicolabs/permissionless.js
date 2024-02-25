@@ -185,7 +185,7 @@ export const getSmartAccountClient = async ({
             typeof middleware === "function"
                 ? middleware
                 : {
-                      gasPrices: async () => {
+                      gasPrice: async () => {
                           return (
                               await pimlicoBundlerClient.getUserOperationGasPrice()
                           ).fast
@@ -345,7 +345,7 @@ export const refillSmartAccount = async (
 ) => {
     const publicClient = await getPublicClient()
     const balance = await publicClient.getBalance({ address })
-    if (balance === 0n) {
+    if (balance < 1000000000000000n) {
         await walletClient.sendTransaction({
             to: address,
             value: parseEther("1")

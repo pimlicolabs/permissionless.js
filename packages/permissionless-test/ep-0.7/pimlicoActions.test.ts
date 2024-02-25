@@ -155,8 +155,8 @@ describe("Pimlico Actions tests", () => {
                     userOperation: userOperation,
                     entryPoint: entryPoint
                 })
-            userOperation.paymasterAndData =
-                sponsorUserOperationPaymasterAndData.paymasterAndData
+            userOperation.paymasterData =
+                sponsorUserOperationPaymasterAndData.paymasterData
             userOperation.callGasLimit =
                 sponsorUserOperationPaymasterAndData.callGasLimit
             userOperation.verificationGasLimit =

@@ -26,7 +26,7 @@ export type Middleware<entryPoint extends EntryPoint> = {
               entryPoint: entryPoint
           }) => Promise<UserOperation<GetEntryPointVersion<entryPoint>>>)
         | {
-              gasPrices?: () => Promise<{
+              gasPrice?: () => Promise<{
                   maxFeePerGas: bigint
                   maxPriorityFeePerGas: bigint
               }>
@@ -158,14 +158,10 @@ async function prepareUserOperationRequestForEntryPointV06<
         })) as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
-    if (
-        middleware &&
-        typeof middleware !== "function" &&
-        middleware.gasPrices
-    ) {
-        const gasPrices = await middleware.gasPrices()
-        userOperation.maxFeePerGas = gasPrices.maxFeePerGas
-        userOperation.maxPriorityFeePerGas = gasPrices.maxPriorityFeePerGas
+    if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
+        const gasPrice = await middleware.gasPrice()
+        userOperation.maxFeePerGas = gasPrice.maxFeePerGas
+        userOperation.maxPriorityFeePerGas = gasPrice.maxPriorityFeePerGas
     }
 
     if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {
@@ -344,14 +340,10 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.paymasterData = sponsorUserOperationData.paymasterData
     }
 
-    if (
-        middleware &&
-        typeof middleware !== "function" &&
-        middleware.gasPrices
-    ) {
-        const gasPrices = await middleware.gasPrices()
-        userOperation.maxFeePerGas = gasPrices.maxFeePerGas
-        userOperation.maxPriorityFeePerGas = gasPrices.maxPriorityFeePerGas
+    if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
+        const gasPrice = await middleware.gasPrice()
+        userOperation.maxFeePerGas = gasPrice.maxFeePerGas
+        userOperation.maxPriorityFeePerGas = gasPrice.maxPriorityFeePerGas
     }
 
     if (!userOperation.maxFeePerGas || !userOperation.maxPriorityFeePerGas) {

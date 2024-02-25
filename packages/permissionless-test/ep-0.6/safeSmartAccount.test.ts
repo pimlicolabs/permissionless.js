@@ -182,7 +182,7 @@ describe("Safe Account", () => {
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
-        const gasPrices = await pimlicoBundlerClient.getUserOperationGasPrice()
+        const gasPrice = await pimlicoBundlerClient.getUserOperationGasPrice()
 
         const response = await smartAccountClient.sendTransactions({
             transactions: [
@@ -197,8 +197,8 @@ describe("Safe Account", () => {
                     data: "0x"
                 }
             ],
-            maxFeePerGas: gasPrices.fast.maxFeePerGas,
-            maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas
+            maxFeePerGas: gasPrice.fast.maxFeePerGas,
+            maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
         })
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)

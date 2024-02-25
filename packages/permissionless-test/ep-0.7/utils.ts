@@ -6,9 +6,6 @@ import {
 import {
     SmartAccount,
     SmartAccountSigner,
-    signerToBiconomySmartAccount,
-    signerToEcdsaKernelSmartAccount,
-    signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
 import { Middleware } from "permissionless/actions/smartAccount"
@@ -17,7 +14,6 @@ import {
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
 import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
-import { UserOperation } from "permissionless/types"
 import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import {
     http,
@@ -100,34 +96,6 @@ export const getSignerToSimpleSmartAccount = async ({
     })
 }
 
-export const getSignerToEcdsaKernelAccount = async () => {
-    if (!process.env.TEST_PRIVATE_KEY)
-        throw new Error("TEST_PRIVATE_KEY environment variable not set")
-
-    const publicClient = await getPublicClient()
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
-
-    return await signerToEcdsaKernelSmartAccount(publicClient, {
-        entryPoint: getEntryPoint(),
-        signer: signer,
-        index: 100n
-    })
-}
-
-export const getSignerToBiconomyAccount = async () => {
-    if (!process.env.TEST_PRIVATE_KEY)
-        throw new Error("TEST_PRIVATE_KEY environment variable not set")
-
-    const publicClient = await getPublicClient()
-    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
-
-    return await signerToBiconomySmartAccount(publicClient, {
-        entryPoint: getEntryPoint(),
-        signer: signer,
-        index: 0n
-    })
-}
-
 export const getCustomSignerToSimpleSmartAccount = async () => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -145,7 +113,7 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 
 export const getSmartAccountClient = async ({
     account,
-    sponsorUserOperation,
+    middleware,
     preFund = false,
     index = 0n
 }: Middleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
@@ -164,35 +132,18 @@ export const getSmartAccountClient = async ({
         entryPoint: getEntryPoint(),
         account: account ?? (await getSignerToSimpleSmartAccount({ index })),
         chain,
-        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation: async ({ userOperation, entryPoint }) => {
-            const gasPrice =
-                await pimlicoBundlerClient.getUserOperationGasPrice()
-
-            let newUserOperation: UserOperation<"v0.7"> = {
-                ...userOperation,
-                maxFeePerGas: gasPrice.fast.maxFeePerGas,
-                maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
-            }
-
-            if (sponsorUserOperation) {
-                return sponsorUserOperation({
-                    userOperation,
-                    entryPoint
-                })
-            }
-
-            const gasLimits = await bundlerClient.estimateUserOperationGas({
-                userOperation: newUserOperation
-            })
-
-            newUserOperation = {
-                ...newUserOperation,
-                ...gasLimits
-            }
-
-            return newUserOperation
-        }
+        bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
+        middleware:
+            typeof middleware === "function"
+                ? middleware
+                : {
+                      gasPrice: async () => {
+                          return (
+                              await pimlicoBundlerClient.getUserOperationGasPrice()
+                          ).fast
+                      },
+                      ...middleware
+                  }
     })
 
     if (preFund) {
