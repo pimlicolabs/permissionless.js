@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.1.3
+
+### Patch Changes
+
+- 5e935d0b1ae3ccee546800e0536e8d48746cb416: Fix SponsorUserOperationReturnType with no undefined values
+- b173cf9d5f32e480b2209483968536c231bebb25: Remoive entryPoint params when calling sponsorUserOperation from client
+
 ## 0.1.2
 
 ### Patch Changes
