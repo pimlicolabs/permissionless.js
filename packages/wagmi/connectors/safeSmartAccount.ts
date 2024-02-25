@@ -12,7 +12,7 @@ import {
 export type SafeSmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<
     SmartAccountParameters<
@@ -27,7 +27,7 @@ export type SafeSmartAccountParameters<
 export async function safeSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >({
     publicClient,

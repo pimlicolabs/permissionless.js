@@ -202,7 +202,7 @@ const getAccountAddress = async <
 
 export type SignerToEcdsaKernelSmartAccountParameters<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
@@ -229,7 +229,7 @@ export async function signerToEcdsaKernelSmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain, undefined>,
