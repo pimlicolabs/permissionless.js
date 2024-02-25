@@ -94,28 +94,37 @@ export type PimlicoBundlerActions = {
      * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
      */
     sendCompressedUserOperation: (
-        args: Prettify<SendCompressedUserOperationParameters>
+        args: Prettify<
+            Omit<SendCompressedUserOperationParameters, "entrypoint">
+        >
     ) => Promise<Hash>
 }
 
-export const pimlicoBundlerActions = <entryPoint extends EntryPoint>(
-    client: Client
-): PimlicoBundlerActions => ({
-    getUserOperationGasPrice: async () =>
-        getUserOperationGasPrice(client as PimlicoBundlerClient<entryPoint>),
-    getUserOperationStatus: async (args: GetUserOperationStatusParameters) =>
-        getUserOperationStatus(
-            client as PimlicoBundlerClient<entryPoint>,
-            args
-        ),
-    sendCompressedUserOperation: async (
-        args: SendCompressedUserOperationParameters
-    ) =>
-        sendCompressedUserOperation(
-            client as PimlicoBundlerClient<entryPoint>,
-            args
-        )
-})
+export const pimlicoBundlerActions =
+    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
+    (client: Client): PimlicoBundlerActions => ({
+        getUserOperationGasPrice: async () =>
+            getUserOperationGasPrice(
+                client as PimlicoBundlerClient<entryPoint>
+            ),
+        getUserOperationStatus: async (
+            args: GetUserOperationStatusParameters
+        ) =>
+            getUserOperationStatus(
+                client as PimlicoBundlerClient<entryPoint>,
+                args
+            ),
+        sendCompressedUserOperation: async (
+            args: Omit<SendCompressedUserOperationParameters, "entrypoint">
+        ) =>
+            sendCompressedUserOperation(
+                client as PimlicoBundlerClient<entryPoint>,
+                {
+                    ...args,
+                    entryPoint: entryPointAddress
+                }
+            )
+    })
 
 export type PimlicoPaymasterClientActions<entryPoint extends EntryPoint> = {
     /**
