@@ -2,18 +2,18 @@ import { pimlicoPaymasterConfig } from "@/config"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { usePrivyWagmi } from "@privy-io/wagmi-connector"
 import {
+    ENTRYPOINT_ADDRESS_V06,
     type SmartAccountClient,
     createSmartAccountClient
 } from "permissionless"
 import {
     type SmartAccount,
-    SmartAccountSigner,
+    type SmartAccountSigner,
     signerToSafeSmartAccount
 } from "permissionless/accounts"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     http,
-    type Address,
     type Chain,
     type Hash,
     type Transport,
@@ -21,26 +21,16 @@ import {
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import {
+    sepolia,
     useAccount,
     useDisconnect,
     usePublicClient,
     useWalletClient
 } from "wagmi"
-import { sepolia } from "wagmi"
 
-interface PrivyAuthHook {
-    isConnected: boolean
-    showLoader: boolean
-    smartAccountClient: SmartAccountClient | null
-    txHash: Hash | null
-    signIn: () => Promise<void>
-    signOut: () => Promise<void>
-    onSendTransaction: (txHash: Hash) => void
-    embeddedWallet: WalletClient
-}
-
-export const usePrivyAuth = (): PrivyAuthHook => {
-    const signer = privateKeyToAccount("0xPRIVATE_KEY")
+export const usePrivyAuth = () => {
+    const signer: SmartAccountSigner<"privateKey" | "custom", `0x${string}`> =
+        privateKeyToAccount("0xPRIVATE_KEY")
     const { login } = usePrivy()
     const { isConnected } = useAccount()
     const [showLoader, setShowLoader] = useState<boolean>(false)
@@ -49,7 +39,6 @@ export const usePrivyAuth = (): PrivyAuthHook => {
         useState<SmartAccountClient<Transport, Chain, SmartAccount> | null>(
             null
         )
-
     const { disconnect } = useDisconnect()
     const publicClient = usePublicClient()
 
@@ -83,23 +72,24 @@ export const usePrivyAuth = (): PrivyAuthHook => {
                 const safeAccount = await signerToSafeSmartAccount(
                     publicClient,
                     {
-                        signer: signer as SmartAccountSigner<
-                            "privateKey" | "custom",
-                            `0x${string}`
-                        >,
+                        signer: signer,
                         safeVersion: "1.4.1",
-                        entryPoint: process.env
-                            .NEXT_PUBLIC_ENTRYPOINT as Address,
+                        entryPoint: ENTRYPOINT_ADDRESS_V06,
                         saltNonce: 0n // optional
                     }
                 )
 
                 const smartAccountClient = createSmartAccountClient({
                     account: safeAccount,
+                    entryPoint: ENTRYPOINT_ADDRESS_V06,
                     chain: sepolia,
-                    transport: http(process.env.NEXT_PUBLIC_BUNDLER_RPC_HOST),
-                    sponsorUserOperation:
-                        pimlicoPaymasterConfig.sponsorUserOperation
+                    bundlerTransport: http(
+                        process.env.NEXT_PUBLIC_BUNDLER_RPC_HOST
+                    ),
+                    middleware: {
+                        sponsorUserOperation:
+                            pimlicoPaymasterConfig.sponsorUserOperation // optional
+                    }
                 })
 
                 setSmartAccountClient(smartAccountClient)
