@@ -28,36 +28,41 @@ const overwriteFileContent = (sourceFile: string, destinationFile: string) => {
 const updateIndexFile = (dirPath: string, moduleName: string) => {
     const indexPath = path.join(dirPath, "index.ts")
     try {
+        let indexContent = ""
+
         // Check if the index.ts file exists
         if (fs.existsSync(indexPath)) {
             // Read the existing index.ts file
-            let indexContent = fs.readFileSync(indexPath, "utf-8")
+            indexContent = fs.readFileSync(indexPath, "utf-8")
 
-            // Check if the module is already imported
-            if (
-                !indexContent.includes(
-                    `import { ${moduleName} } from "./${moduleName}";`
-                )
-            ) {
-                // Append import statement to index.ts
-                indexContent += `\nimport { ${moduleName} } from "./${moduleName}";`
+            // Find the position to insert the new import statements
+            const exportIndex = indexContent.indexOf("export {")
 
-                // Update the export line to include the new module
-                indexContent = indexContent.replace(
-                    /(export\s*{)([^}]+)(})/,
-                    `$1$2, ${moduleName}$3`
-                )
-
-                // Write back the updated index.ts file
-                fs.writeFileSync(indexPath, indexContent)
-            }
+            // Append import statement to indexContent after the existing imports
+            indexContent = `${indexContent.slice(0, exportIndex).trim()}
+            import { ${moduleName} } from "./${moduleName}"
+            ${indexContent.slice(exportIndex)}`.trim()
         } else {
-            let indexContent = ""
-            indexContent += `\nimport { ${moduleName} } from "./${moduleName}";`
-            indexContent += `\nexport { ${moduleName} };`
-
-            fs.writeFileSync(indexPath, indexContent)
+            // If the file doesn't exist, create it with the import statement
+            indexContent = `import { ${moduleName} } from "./${moduleName}"\n`
+            indexContent += `export { ${moduleName} }`
         }
+
+        // Update export statement to include the new module
+        indexContent = indexContent.replace(
+            /export\s*{\s*([^}]*)\s*}/,
+            (_, existingExports) => {
+                const exportsArray = existingExports
+                    .split(",")
+                    .map((e) => e.trim())
+                if (!exportsArray.includes(moduleName)) {
+                    exportsArray.push(moduleName)
+                }
+                return `\nexport { ${exportsArray.join(", ")} }`
+            }
+        )
+
+        fs.writeFileSync(indexPath, indexContent)
     } catch (error) {
         console.error(
             `Error updating index file for ${moduleName}: ${error.message}`
