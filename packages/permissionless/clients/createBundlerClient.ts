@@ -7,16 +7,18 @@ import type {
 } from "viem"
 import { createClient } from "viem"
 import type { BundlerRpcSchema } from "../types/bundler"
+import type { EntryPoint } from "../types/entrypoint"
 import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 
 export type BundlerClient<
+    entryPoint extends EntryPoint,
     TChain extends Chain | undefined = Chain | undefined
 > = Client<
     Transport,
     TChain,
     Account | undefined,
-    BundlerRpcSchema,
-    BundlerActions
+    BundlerRpcSchema<entryPoint>,
+    BundlerActions<entryPoint>
 >
 /**
  * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
@@ -38,11 +40,14 @@ export type BundlerClient<
  * })
  */
 export const createBundlerClient = <
-    transport extends Transport,
+    entryPoint extends EntryPoint,
+    transport extends Transport = Transport,
     chain extends Chain | undefined = undefined
 >(
-    parameters: PublicClientConfig<transport, chain>
-): BundlerClient => {
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint
+    }
+): BundlerClient<entryPoint> => {
     const { key = "public", name = "Bundler Client" } = parameters
     const client = createClient({
         ...parameters,
@@ -50,5 +55,5 @@ export const createBundlerClient = <
         name,
         type: "bundlerClient"
     })
-    return client.extend(bundlerActions)
+    return client.extend(bundlerActions(parameters.entryPoint))
 }

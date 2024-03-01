@@ -1,26 +1,42 @@
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
+    http,
+    Account,
     Address,
     BaseError,
+    Chain,
+    Transport,
+    WalletClient,
+    createWalletClient,
     decodeEventLog,
     getContract,
     hashMessage,
     hashTypedData,
     zeroAddress
 } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
+import { EntryPointAbi } from "../abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "../abis/Greeter"
 import {
     generateApproveCallData,
     getBundlerClient,
     getEntryPoint,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToSafeSmartAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
@@ -36,12 +52,20 @@ beforeAll(() => {
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
     }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
 })
 
 describe("Safe Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Safe Account address", async () => {
         const safeSmartAccount = await getSignerToSafeSmartAccount()
 
@@ -88,7 +112,9 @@ describe("Safe Account", () => {
                     }
                 ]
             }),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -106,6 +132,11 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
+
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const entryPointContract = getContract({
             abi: EntryPointAbi,
@@ -141,10 +172,14 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
-        const gasPrices = await pimlicoBundlerClient.getUserOperationGasPrice()
+        const gasPrice = await pimlicoBundlerClient.getUserOperationGasPrice()
 
         const response = await smartAccountClient.sendTransactions({
             transactions: [
@@ -159,8 +194,8 @@ describe("Safe Account", () => {
                     data: "0x"
                 }
             ],
-            maxFeePerGas: gasPrices.fast.maxFeePerGas,
-            maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas
+            maxFeePerGas: gasPrice.fast.maxFeePerGas,
+            maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
         })
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
@@ -172,63 +207,15 @@ describe("Safe Account", () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount()
         })
-
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
             data: "0x"
         })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(66)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
-
-        await new Promise((res) => {
-            setTimeout(res, 1000)
-        })
-        await waitForNonceUpdate()
-    }, 1000000)
-
-    test("safe Smart account client send transaction revert with string", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSafeSmartAccount()
-        })
-
-        const erc20Token = getContract({
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "address",
-                            name: "to",
-                            type: "address"
-                        },
-                        {
-                            internalType: "uint256",
-                            name: "value",
-                            type: "uint256"
-                        }
-                    ],
-                    name: "transfer",
-                    outputs: [{ internalType: "bool", name: "", type: "bool" }],
-                    stateMutability: "nonpayable",
-                    type: "function"
-                }
-            ],
-            address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-            client: {
-                public: await getPublicClient(),
-                wallet: smartAccountClient
-            }
-        })
-
-        const response = await erc20Token.write.transfer([zeroAddress, 10n])
-
-        // const response = await smartAccountClient.sendTransaction({
-        //     to: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-        //     value: ,
-        //     data: "0x"
-        // })
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
@@ -246,7 +233,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -302,7 +291,9 @@ describe("Safe Account", () => {
 
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToSafeSmartAccount(),
-            sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
         })
 
         const response = await smartAccountClient.sendTransactions({

@@ -6,6 +6,7 @@ import type {
     Transport
 } from "viem"
 import { createClient } from "viem"
+import type { EntryPoint } from "../types/entrypoint"
 import type {
     PimlicoBundlerRpcSchema,
     PimlicoPaymasterRpcSchema
@@ -18,20 +19,20 @@ import {
     pimlicoPaymasterActions
 } from "./decorators/pimlico"
 
-export type PimlicoBundlerClient = Client<
+export type PimlicoBundlerClient<entryPoint extends EntryPoint> = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
     PimlicoBundlerRpcSchema,
-    PimlicoBundlerActions & BundlerActions
+    PimlicoBundlerActions & BundlerActions<entryPoint>
 >
 
-export type PimlicoPaymasterClient = Client<
+export type PimlicoPaymasterClient<entryPoint extends EntryPoint> = Client<
     Transport,
     Chain | undefined,
     Account | undefined,
-    PimlicoPaymasterRpcSchema,
-    PimlicoPaymasterClientActions
+    PimlicoPaymasterRpcSchema<entryPoint>,
+    PimlicoPaymasterClientActions<entryPoint>
 >
 
 /**
@@ -54,11 +55,14 @@ export type PimlicoPaymasterClient = Client<
  * })
  */
 export const createPimlicoBundlerClient = <
-    transport extends Transport,
+    entryPoint extends EntryPoint,
+    transport extends Transport = Transport,
     chain extends Chain | undefined = undefined
 >(
-    parameters: PublicClientConfig<transport, chain>
-): PimlicoBundlerClient => {
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint
+    }
+): PimlicoBundlerClient<entryPoint> => {
     const { key = "public", name = "Pimlico Bundler Client" } = parameters
     const client = createClient({
         ...parameters,
@@ -66,7 +70,9 @@ export const createPimlicoBundlerClient = <
         name,
         type: "pimlicoBundlerClient"
     })
-    return client.extend(bundlerActions).extend(pimlicoBundlerActions)
+    return client
+        .extend(bundlerActions(parameters.entryPoint))
+        .extend(pimlicoBundlerActions(parameters.entryPoint))
 }
 
 /**
@@ -89,11 +95,14 @@ export const createPimlicoBundlerClient = <
  * })
  */
 export const createPimlicoPaymasterClient = <
-    transport extends Transport,
+    entryPoint extends EntryPoint,
+    transport extends Transport = Transport,
     chain extends Chain | undefined = undefined
 >(
-    parameters: PublicClientConfig<transport, chain>
-): PimlicoPaymasterClient => {
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint
+    }
+): PimlicoPaymasterClient<entryPoint> => {
     const { key = "public", name = "Pimlico Paymaster Client" } = parameters
     const client = createClient({
         ...parameters,
@@ -101,5 +110,5 @@ export const createPimlicoPaymasterClient = <
         name,
         type: "pimlicoPaymasterClient"
     })
-    return client.extend(pimlicoPaymasterActions)
+    return client.extend(pimlicoPaymasterActions(parameters.entryPoint))
 }

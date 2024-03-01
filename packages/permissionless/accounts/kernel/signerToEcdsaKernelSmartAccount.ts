@@ -21,6 +21,8 @@ import {
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type { Prettify } from "../../types"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import type { SmartAccount } from "../types"
@@ -31,9 +33,10 @@ import {
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
 
 export type KernelEcdsaSmartAccount<
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<"kernelEcdsaSmartAccount", transport, chain>
+> = SmartAccount<entryPoint, "kernelEcdsaSmartAccount", transport, chain>
 
 /**
  * The account creation ABI for a kernel smart account (from the KernelFactory)
@@ -94,13 +97,11 @@ const KERNEL_ADDRESSES: {
 const getAccountInitCode = async ({
     owner,
     index,
-    factoryAddress,
     accountLogicAddress,
     ecdsaValidatorAddress
 }: {
     owner: Address
     index: bigint
-    factoryAddress: Address
     accountLogicAddress: Address
     ecdsaValidatorAddress: Address
 }): Promise<Hex> => {
@@ -114,14 +115,11 @@ const getAccountInitCode = async ({
     })
 
     // Build the account init code
-    return concatHex([
-        factoryAddress,
-        encodeFunctionData({
-            abi: createAccountAbi,
-            functionName: "createAccount",
-            args: [accountLogicAddress, initialisationData, index]
-        }) as Hex
-    ])
+    return encodeFunctionData({
+        abi: createAccountAbi,
+        functionName: "createAccount",
+        args: [accountLogicAddress, initialisationData, index]
+    })
 }
 
 /**
@@ -134,20 +132,23 @@ const getAccountInitCode = async ({
  * @param deployedAccountAddress
  */
 const getAccountAddress = async <
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
     client,
     owner,
-    entryPoint,
+    entryPoint: entryPointAddress,
     initCodeProvider,
     ecdsaValidatorAddress,
-    deployedAccountAddress
+    deployedAccountAddress,
+    factoryAddress
 }: {
     client: Client<TTransport, TChain>
     owner: Address
     initCodeProvider: () => Promise<Hex>
-    entryPoint: Address
+    factoryAddress: Address
+    entryPoint: entryPoint
     ecdsaValidatorAddress: Address
     deployedAccountAddress?: Address
 }): Promise<Address> => {
@@ -191,21 +192,21 @@ const getAccountAddress = async <
     }
 
     // Find the init code for this account
-    const initCode = await initCodeProvider()
+    const factoryData = await initCodeProvider()
 
-    // Get the sender address based on the init code
-    return getSenderAddress(client, {
-        initCode,
-        entryPoint
+    return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
+        initCode: concatHex([factoryAddress, factoryData]),
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
     })
 }
 
 export type SignerToEcdsaKernelSmartAccountParameters<
-    TSource extends string = "custom",
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
-    entryPoint: Address
+    entryPoint: entryPoint
     address?: Address
     index?: bigint
     factoryAddress?: Address
@@ -225,23 +226,30 @@ export type SignerToEcdsaKernelSmartAccountParameters<
  * @param deployedAccountAddress
  */
 export async function signerToEcdsaKernelSmartAccount<
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
         address,
-        entryPoint,
+        entryPoint: entryPointAddress,
         index = 0n,
         factoryAddress = KERNEL_ADDRESSES.FACTORY_ADDRESS,
         accountLogicAddress = KERNEL_ADDRESSES.ACCOUNT_V2_2_LOGIC,
         ecdsaValidatorAddress = KERNEL_ADDRESSES.ECDSA_VALIDATOR,
         deployedAccountAddress
-    }: SignerToEcdsaKernelSmartAccountParameters<TSource, TAddress>
-): Promise<KernelEcdsaSmartAccount<TTransport, TChain>> {
+    }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
+): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
+
+    if (entryPointVersion !== "v0.6") {
+        throw new Error("Only EntryPoint 0.6 is supported")
+    }
+
     // Get the private key related account
     const viemSigner: LocalAccount = {
         ...signer,
@@ -255,7 +263,6 @@ export async function signerToEcdsaKernelSmartAccount<
         getAccountInitCode({
             owner: viemSigner.address,
             index,
-            factoryAddress,
             accountLogicAddress,
             ecdsaValidatorAddress
         })
@@ -263,13 +270,14 @@ export async function signerToEcdsaKernelSmartAccount<
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
         address ??
-            getAccountAddress<TTransport, TChain>({
+            getAccountAddress<entryPoint, TTransport, TChain>({
                 client,
-                entryPoint,
+                entryPoint: entryPointAddress,
                 owner: viemSigner.address,
                 ecdsaValidatorAddress,
                 initCodeProvider: generateInitCode,
-                deployedAccountAddress
+                deployedAccountAddress,
+                factoryAddress
             }),
         getChainId(client)
     ])
@@ -310,14 +318,14 @@ export async function signerToEcdsaKernelSmartAccount<
         ...account,
         client: client,
         publicKey: accountAddress,
-        entryPoint: entryPoint,
+        entryPoint: entryPointAddress,
         source: "kernelEcdsaSmartAccount",
 
         // Get the nonce of the smart account
         async getNonce() {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPoint
+                entryPoint: entryPointAddress
             })
         },
 
@@ -328,7 +336,7 @@ export async function signerToEcdsaKernelSmartAccount<
                     ...userOperation,
                     signature: "0x"
                 },
-                entryPoint: entryPoint,
+                entryPoint: entryPointAddress,
                 chainId: chainId
             })
             const signature = await signMessage(client, {
@@ -349,6 +357,32 @@ export async function signerToEcdsaKernelSmartAccount<
             )
 
             if (smartAccountDeployed) return "0x"
+
+            return concatHex([factoryAddress, await generateInitCode()])
+        },
+
+        async getFactory() {
+            if (smartAccountDeployed) return undefined
+
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return undefined
+
+            return factoryAddress
+        },
+
+        async getFactoryData() {
+            if (smartAccountDeployed) return undefined
+
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+
+            if (smartAccountDeployed) return undefined
 
             return generateInitCode()
         },

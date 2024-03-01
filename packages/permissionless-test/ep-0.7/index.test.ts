@@ -1,5 +1,6 @@
 import dotenv from "dotenv"
 import {
+    UserOperation,
     deepHexlify,
     getSenderAddress,
     getUserOperationHash
@@ -8,9 +9,16 @@ import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
-import { Address, Hash, Hex } from "viem"
+import {
+    Address,
+    Hash,
+    Hex,
+    WalletClient,
+    encodeFunctionData,
+    zeroAddress
+} from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { buildUserOp, getAccountInitCode } from "./userOp"
+import { SimpleAccountFactoryAbi } from "../abis/SimpleAccountFactory"
 import {
     getBundlerClient,
     getEntryPoint,
@@ -18,10 +26,27 @@ import {
     getFactoryAddress,
     getPrivateKeyAccount,
     getPublicClient,
+    getSmartAccountClient,
     getTestingChain
 } from "./utils"
 
 dotenv.config()
+
+export const getAccountInitCode = async (
+    factoryAddress: Address,
+    owner: WalletClient,
+    index = 0n
+) => {
+    if (!owner.account) throw new Error("Owner account not found")
+    return {
+        factory: factoryAddress,
+        factoryData: encodeFunctionData({
+            abi: SimpleAccountFactoryAbi,
+            functionName: "createAccount",
+            args: [owner.account.address, index]
+        })
+    }
+}
 
 beforeAll(() => {
     if (!process.env.FACTORY_ADDRESS)
@@ -30,8 +55,6 @@ beforeAll(() => {
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
         throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
 })
 
 describe("test public actions and utils", () => {
@@ -56,7 +79,7 @@ describe("test public actions and utils", () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()
 
-        const initCode = await getAccountInitCode(
+        const { factory, factoryData } = await getAccountInitCode(
             factoryAddress,
             eoaWalletClient
         )
@@ -64,7 +87,8 @@ describe("test public actions and utils", () => {
         const entryPoint = getEntryPoint()
 
         const sender = await getSenderAddress(publicClient, {
-            initCode,
+            factory,
+            factoryData,
             entryPoint
         })
 
@@ -77,31 +101,41 @@ describe("test public actions and utils", () => {
         const eoaWalletClient = getEoaWalletClient()
         const factoryAddress = getFactoryAddress()
 
-        const initCode = await getAccountInitCode(
+        const { factory, factoryData } = await getAccountInitCode(
             factoryAddress,
             eoaWalletClient
         )
         const publicClient = await getPublicClient()
-        const entryPoint = "0x0000000"
+        const entryPoint = getEntryPoint()
 
         await expect(async () =>
             getSenderAddress(publicClient, {
-                initCode,
+                factory,
+                factoryData,
                 entryPoint
             })
         ).rejects.toThrow()
     })
 
     test("getUserOperationHash", async () => {
-        const eoaWalletClient = getEoaWalletClient()
         const chain = getTestingChain()
         const entryPoint = getEntryPoint()
         const bundlerClient = getBundlerClient()
-        const userOperation = await buildUserOp(eoaWalletClient)
+        const simpleAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await simpleAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await simpleAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: entryPoint
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -121,15 +155,24 @@ describe("test public actions and utils", () => {
 
     test("signUserOperationHashWithECDSA", async () => {
         const bundlerClient = getBundlerClient()
-        const eoaWalletClient = getEoaWalletClient()
-        const userOperation = await buildUserOp(eoaWalletClient)
+        const simpleAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await simpleAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await simpleAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
 
         const entryPoint = getEntryPoint()
         const chain = getTestingChain()
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: getEntryPoint()
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -143,7 +186,7 @@ describe("test public actions and utils", () => {
         })
 
         userOperation.signature = await signUserOperationHashWithECDSA({
-            client: eoaWalletClient,
+            client: simpleAccountClient,
             userOperation,
             entryPoint: entryPoint,
             chainId: chain.id
@@ -153,17 +196,17 @@ describe("test public actions and utils", () => {
         expectTypeOf(userOperation.signature).toMatchTypeOf<Hex>()
 
         const signature = await signUserOperationHashWithECDSA({
-            client: eoaWalletClient,
+            client: simpleAccountClient,
             hash: userOpHash
         })
 
         await signUserOperationHashWithECDSA({
-            account: eoaWalletClient.account,
+            account: simpleAccountClient.account,
             hash: userOpHash
         })
 
         await signUserOperationHashWithECDSA({
-            account: eoaWalletClient.account,
+            account: simpleAccountClient.account,
             userOperation,
             entryPoint: entryPoint,
             chainId: chain.id
@@ -185,12 +228,21 @@ describe("test public actions and utils", () => {
 
     test("getRequiredGas", async () => {
         const bundlerClient = getBundlerClient()
-        const eoaWalletClient = getEoaWalletClient()
-        const userOperation = await buildUserOp(eoaWalletClient)
+        const simpleAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await simpleAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await simpleAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
 
         const gasParameters = await bundlerClient.estimateUserOperationGas({
-            userOperation,
-            entryPoint: getEntryPoint()
+            userOperation
         })
 
         userOperation.callGasLimit = gasParameters.callGasLimit
@@ -198,7 +250,8 @@ describe("test public actions and utils", () => {
         userOperation.preVerificationGas = gasParameters.preVerificationGas
 
         const requiredGas = getRequiredPrefund({
-            userOperation
+            userOperation,
+            entryPoint: getEntryPoint()
         })
 
         expect(requiredGas).toBe(

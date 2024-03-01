@@ -1,9 +1,16 @@
 import type { Account, Chain, Client, Transport } from "viem"
+import type { IsUndefined } from "viem/types/utils"
 import type { SmartAccount } from "../accounts/types"
+import type { EntryPoint } from "./entrypoint"
 import type { UserOperation } from "./userOperation"
 export type { UserOperation }
-
-export type IsUndefined<T> = [undefined] extends [T] ? true : false
+export type {
+    EntryPointVersion,
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
+    GetEntryPointVersion,
+    EntryPoint
+} from "./entrypoint"
 
 export type GetAccountParameterWithClient<
     TTransport extends Transport = Transport,
@@ -14,10 +21,13 @@ export type GetAccountParameterWithClient<
     : { client: Client<TTransport, TChain, TAccount>; account?: Account }
 
 export type GetAccountParameter<
-    TAccount extends SmartAccount | undefined = SmartAccount | undefined
+    entryPoint extends EntryPoint,
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 > = IsUndefined<TAccount> extends true
-    ? { account: SmartAccount }
-    : { account?: SmartAccount }
+    ? { account: SmartAccount<entryPoint> }
+    : { account?: SmartAccount<entryPoint> }
 
 export type Prettify<T> = {
     [K in keyof T]: T[K]

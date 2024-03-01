@@ -12,7 +12,7 @@ import {
 export type BiconomySmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<
     SmartAccountParameters<
@@ -30,7 +30,7 @@ export type BiconomySmartAccountParameters<
 export async function biconomySmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >({
     publicClient,

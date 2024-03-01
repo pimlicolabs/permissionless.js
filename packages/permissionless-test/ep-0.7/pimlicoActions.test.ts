@@ -1,11 +1,10 @@
 import dotenv from "dotenv"
-import { UserOperation } from "permissionless"
 import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import { getUserOperationHash } from "permissionless/utils"
-import { Hash, Hex } from "viem"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
+import { Address, Hash, zeroAddress } from "viem"
 import {
     beforeAll,
     beforeEach,
@@ -14,14 +13,12 @@ import {
     expectTypeOf,
     test
 } from "vitest"
-import { buildUserOp } from "./userOp"
 import {
     getEntryPoint,
-    getEoaWalletClient,
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    getTestingChain,
+    getSmartAccountClient,
     waitForNonceUpdate
 } from "./utils"
 
@@ -34,8 +31,6 @@ beforeAll(() => {
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
         throw new Error("RPC_URL environment variable not set")
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
     if (!process.env.ACTIVE_SPONSORSHIP_POLICY)
         throw new Error(
             "ACTIVE_SPONSORSHIP_POLICY environment variable not set"
@@ -43,8 +38,8 @@ beforeAll(() => {
 })
 
 describe("Pimlico Actions tests", () => {
-    let pimlicoBundlerClient: PimlicoBundlerClient
-    let pimlicoPaymasterClient: PimlicoPaymasterClient
+    let pimlicoBundlerClient: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
+    let pimlicoPaymasterClient: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V07_TYPE>
 
     beforeEach(async () => {
         pimlicoBundlerClient = getPimlicoBundlerClient()
@@ -87,24 +82,24 @@ describe("Pimlico Actions tests", () => {
 
     describe("Pimlico paymaster actions ", () => {
         test("Fetching paymaster and data", async () => {
-            const eoaWalletClient = getEoaWalletClient()
-            const publicClient = await getPublicClient()
-            const { maxFeePerGas, maxPriorityFeePerGas } =
-                await publicClient.estimateFeesPerGas()
-            const partialUserOp = await buildUserOp(eoaWalletClient)
-            const userOperation: UserOperation = {
-                ...partialUserOp,
-                maxFeePerGas: maxFeePerGas || 0n,
-                maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-                callGasLimit: 0n,
-                verificationGasLimit: 0n,
-                preVerificationGas: 0n
-            }
+            const simpleAccountClient = await getSmartAccountClient()
+
+            const userOperation =
+                await simpleAccountClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData:
+                            await simpleAccountClient.account.encodeCallData({
+                                to: zeroAddress,
+                                value: 0n,
+                                data: "0x"
+                            })
+                    }
+                })
+
             const entryPoint = getEntryPoint()
             const sponsorUserOperationPaymasterAndData =
                 await pimlicoPaymasterClient.sponsorUserOperation({
-                    userOperation: userOperation,
-                    entryPoint: entryPoint
+                    userOperation: userOperation
                 })
             expect(sponsorUserOperationPaymasterAndData).not.toBeNull()
             expect(sponsorUserOperationPaymasterAndData).not.toBeUndefined()
@@ -128,43 +123,48 @@ describe("Pimlico Actions tests", () => {
                 sponsorUserOperationPaymasterAndData.verificationGasLimit
             ).toBeGreaterThan(BigInt(0))
             expect(
-                sponsorUserOperationPaymasterAndData.paymasterAndData
+                sponsorUserOperationPaymasterAndData.paymasterData
             ).length.greaterThan(0)
             expectTypeOf(
-                sponsorUserOperationPaymasterAndData.paymasterAndData
-            ).toMatchTypeOf<Hex>()
+                sponsorUserOperationPaymasterAndData.paymaster
+            ).toMatchTypeOf<Address | undefined>()
             await waitForNonceUpdate()
         }, 100000)
         test("Sending user op with paymaster and data", async () => {
             const entryPoint = getEntryPoint()
-            const eoaWalletClient = getEoaWalletClient()
-            const chain = getTestingChain()
-            const userOperation = await buildUserOp(eoaWalletClient)
+
+            const simpleAccountClient = await getSmartAccountClient()
+
+            const userOperation =
+                await simpleAccountClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData:
+                            await simpleAccountClient.account.encodeCallData({
+                                to: zeroAddress,
+                                value: 0n,
+                                data: "0x"
+                            })
+                    }
+                })
+
             const sponsorUserOperationPaymasterAndData =
                 await pimlicoPaymasterClient.sponsorUserOperation({
-                    userOperation: userOperation,
-                    entryPoint: entryPoint
+                    userOperation: userOperation
                 })
-            userOperation.paymasterAndData =
-                sponsorUserOperationPaymasterAndData.paymasterAndData
+            userOperation.paymasterData =
+                sponsorUserOperationPaymasterAndData.paymasterData
             userOperation.callGasLimit =
                 sponsorUserOperationPaymasterAndData.callGasLimit
             userOperation.verificationGasLimit =
                 sponsorUserOperationPaymasterAndData.verificationGasLimit
             userOperation.preVerificationGas =
                 sponsorUserOperationPaymasterAndData.preVerificationGas
-            const userOperationHash = getUserOperationHash({
-                userOperation,
-                entryPoint,
-                chainId: chain.id
-            })
-            userOperation.signature = await eoaWalletClient.signMessage({
-                account: eoaWalletClient.account,
-                message: { raw: userOperationHash }
-            })
+            userOperation.signature =
+                await simpleAccountClient.account.signUserOperation(
+                    userOperation
+                )
             const userOpHash = await pimlicoBundlerClient.sendUserOperation({
-                userOperation: userOperation,
-                entryPoint: entryPoint
+                userOperation: userOperation
             })
             expectTypeOf(userOpHash).toBeString()
             expectTypeOf(userOpHash).toMatchTypeOf<Hash>()
@@ -209,33 +209,31 @@ describe("Pimlico Actions tests", () => {
     })
 
     test("Validating sponsorship policies", async () => {
-        const eoaWalletClient = getEoaWalletClient()
         const publicClient = await getPublicClient()
-        const { maxFeePerGas, maxPriorityFeePerGas } =
-            await publicClient.estimateFeesPerGas()
 
         if (!process.env.ACTIVE_SPONSORSHIP_POLICY)
             throw new Error(
                 "ACTIVE_SPONSORSHIP_POLICY environment variable not set"
             )
 
-        const partialUserOp = await buildUserOp(eoaWalletClient)
+        const simpleAccountClient = await getSmartAccountClient()
 
-        const userOperation: UserOperation = {
-            ...partialUserOp,
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
-            callGasLimit: 0n,
-            verificationGasLimit: 0n,
-            preVerificationGas: 0n
-        }
+        const userOperation =
+            await simpleAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await simpleAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
 
         const entryPoint = getEntryPoint()
 
         const validateSponsorshipPolicies =
             await pimlicoPaymasterClient.validateSponsorshipPolicies({
                 userOperation: userOperation,
-                entryPoint: entryPoint,
                 sponsorshipPolicyIds: [
                     process.env.ACTIVE_SPONSORSHIP_POLICY,
                     "sp_fake_policy"

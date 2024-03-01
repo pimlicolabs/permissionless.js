@@ -8,13 +8,15 @@ import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSi
 
 export const providerToSmartAccountSigner = async (
     provider: EIP1193Provider,
-    signerAddress?: Hex
+    params?: {
+        signerAddress: Hex
+    }
 ) => {
     let account: Hex
-    if (!signerAddress) {
+    if (!params) {
         ;[account] = await provider.request({ method: "eth_requestAccounts" })
     } else {
-        account = signerAddress
+        account = params.signerAddress
     }
     const walletClient = createWalletClient({
         account: account as Hex,

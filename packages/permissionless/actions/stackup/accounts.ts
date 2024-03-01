@@ -1,8 +1,9 @@
 import type { Address } from "viem"
 import type { StackupPaymasterClient } from "../../clients/stackup"
+import type { EntryPoint } from "../../types"
 
-export type AccountsParameters = {
-    entryPoint: Address
+export type AccountsParameters<entryPoint extends EntryPoint> = {
+    entryPoint: entryPoint
 }
 
 /**
@@ -27,13 +28,13 @@ export type AccountsParameters = {
  * }})
  *
  */
-export const accounts = async (
-    client: StackupPaymasterClient,
-    { entryPoint }: AccountsParameters
+export const accounts = async <entryPoint extends EntryPoint>(
+    client: StackupPaymasterClient<entryPoint>,
+    { entryPoint: entryPointAddress }: AccountsParameters<entryPoint>
 ): Promise<Address[]> => {
     const response = await client.request({
         method: "pm_accounts",
-        params: [entryPoint]
+        params: [entryPointAddress]
     })
 
     return response

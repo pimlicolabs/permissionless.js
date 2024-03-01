@@ -14,7 +14,13 @@ import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import type { Prettify } from "../../types"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
+    Prettify
+} from "../../types"
+import type { EntryPoint } from "../../types/entrypoint"
+import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
@@ -24,83 +30,90 @@ import {
 } from "../types"
 
 export type SimpleSmartAccount<
+    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<"SimpleSmartAccount", transport, chain>
+> = SmartAccount<entryPoint, "SimpleSmartAccount", transport, chain>
 
-const getAccountInitCode = async (
-    factoryAddress: Address,
-    owner: Address,
-    index = 0n
-): Promise<Hex> => {
+const getAccountInitCode = async (owner: Address, index = 0n): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
 
-    return concatHex([
-        factoryAddress,
-        encodeFunctionData({
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "address",
-                            name: "owner",
-                            type: "address"
-                        },
-                        {
-                            internalType: "uint256",
-                            name: "salt",
-                            type: "uint256"
-                        }
-                    ],
-                    name: "createAccount",
-                    outputs: [
-                        {
-                            internalType: "contract SimpleAccount",
-                            name: "ret",
-                            type: "address"
-                        }
-                    ],
-                    stateMutability: "nonpayable",
-                    type: "function"
-                }
-            ],
-            functionName: "createAccount",
-            args: [owner, index]
-        }) as Hex
-    ])
+    return encodeFunctionData({
+        abi: [
+            {
+                inputs: [
+                    {
+                        internalType: "address",
+                        name: "owner",
+                        type: "address"
+                    },
+                    {
+                        internalType: "uint256",
+                        name: "salt",
+                        type: "uint256"
+                    }
+                ],
+                name: "createAccount",
+                outputs: [
+                    {
+                        internalType: "contract SimpleAccount",
+                        name: "ret",
+                        type: "address"
+                    }
+                ],
+                stateMutability: "nonpayable",
+                type: "function"
+            }
+        ],
+        functionName: "createAccount",
+        args: [owner, index]
+    })
 }
 
 const getAccountAddress = async <
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
     client,
     factoryAddress,
-    entryPoint,
+    entryPoint: entryPointAddress,
     owner,
     index = 0n
 }: {
     client: Client<TTransport, TChain>
     factoryAddress: Address
     owner: Address
-    entryPoint: Address
+    entryPoint: entryPoint
     index?: bigint
 }): Promise<Address> => {
-    const initCode = await getAccountInitCode(factoryAddress, owner, index)
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
-    return getSenderAddress(client, {
-        initCode,
-        entryPoint
+    const factoryData = await getAccountInitCode(owner, index)
+
+    if (entryPointVersion === "v0.6") {
+        return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
+            initCode: concatHex([factoryAddress, factoryData]),
+            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
+        })
+    }
+
+    // Get the sender address based on the init code
+    return getSenderAddress<ENTRYPOINT_ADDRESS_V07_TYPE>(client, {
+        factory: factoryAddress,
+        factoryData,
+        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V07_TYPE
     })
 }
 
 export type SignerToSimpleSmartAccountParameters<
-    TSource extends string = "custom",
+    entryPoint extends EntryPoint,
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
     factoryAddress: Address
-    entryPoint: Address
+    entryPoint: entryPoint
     index?: bigint
     address?: Address
 }>
@@ -111,20 +124,21 @@ export type SignerToSimpleSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSimpleSmartAccount<
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >(
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
         factoryAddress,
-        entryPoint,
+        entryPoint: entryPointAddress,
         index = 0n,
         address
-    }: SignerToSimpleSmartAccountParameters<TSource, TAddress>
-): Promise<SimpleSmartAccount<TTransport, TChain>> {
+    }: SignerToSimpleSmartAccountParameters<entryPoint, TSource, TAddress>
+): Promise<SimpleSmartAccount<entryPoint, TTransport, TChain>> {
     const viemSigner: LocalAccount = {
         ...signer,
         signTransaction: (_, __) => {
@@ -134,10 +148,10 @@ export async function signerToSimpleSmartAccount<
 
     const [accountAddress, chainId] = await Promise.all([
         address ??
-            getAccountAddress<TTransport, TChain>({
+            getAccountAddress<entryPoint, TTransport, TChain>({
                 client,
                 factoryAddress,
-                entryPoint,
+                entryPoint: entryPointAddress,
                 owner: viemSigner.address,
                 index
             }),
@@ -179,12 +193,12 @@ export async function signerToSimpleSmartAccount<
         ...account,
         client: client,
         publicKey: accountAddress,
-        entryPoint: entryPoint,
+        entryPoint: entryPointAddress,
         source: "SimpleSmartAccount",
         async getNonce() {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPoint
+                entryPoint: entryPointAddress
             })
         },
         async signUserOperation(userOperation) {
@@ -192,7 +206,7 @@ export async function signerToSimpleSmartAccount<
                 message: {
                     raw: getUserOperationHash({
                         userOperation,
-                        entryPoint: entryPoint,
+                        entryPoint: entryPointAddress,
                         chainId: chainId
                     })
                 }
@@ -208,7 +222,28 @@ export async function signerToSimpleSmartAccount<
 
             if (smartAccountDeployed) return "0x"
 
-            return getAccountInitCode(factoryAddress, viemSigner.address, index)
+            return concatHex([
+                factoryAddress,
+                await getAccountInitCode(viemSigner.address, index)
+            ])
+        },
+        async getFactory() {
+            if (smartAccountDeployed) return undefined
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+            if (smartAccountDeployed) return undefined
+            return factoryAddress
+        },
+        async getFactoryData() {
+            if (smartAccountDeployed) return undefined
+            smartAccountDeployed = await isSmartAccountDeployed(
+                client,
+                accountAddress
+            )
+            if (smartAccountDeployed) return undefined
+            return getAccountInitCode(viemSigner.address, index)
         },
         async encodeDeployCallData(_) {
             throw new Error("Simple account doesn't support account deployment")
@@ -220,6 +255,36 @@ export async function signerToSimpleSmartAccount<
                     value: bigint
                     data: Hex
                 }[]
+
+                if (getEntryPointVersion(entryPointAddress) === "v0.6") {
+                    return encodeFunctionData({
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address[]",
+                                        name: "dest",
+                                        type: "address[]"
+                                    },
+                                    {
+                                        internalType: "bytes[]",
+                                        name: "func",
+                                        type: "bytes[]"
+                                    }
+                                ],
+                                name: "executeBatch",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
+                        functionName: "executeBatch",
+                        args: [
+                            argsArray.map((a) => a.to),
+                            argsArray.map((a) => a.data)
+                        ]
+                    })
+                }
                 return encodeFunctionData({
                     abi: [
                         {
@@ -228,6 +293,11 @@ export async function signerToSimpleSmartAccount<
                                     internalType: "address[]",
                                     name: "dest",
                                     type: "address[]"
+                                },
+                                {
+                                    internalType: "uint256[]",
+                                    name: "value",
+                                    type: "uint256[]"
                                 },
                                 {
                                     internalType: "bytes[]",
@@ -244,6 +314,7 @@ export async function signerToSimpleSmartAccount<
                     functionName: "executeBatch",
                     args: [
                         argsArray.map((a) => a.to),
+                        argsArray.map((a) => a.value),
                         argsArray.map((a) => a.data)
                     ]
                 })

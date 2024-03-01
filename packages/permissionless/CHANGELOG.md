@@ -1,5 +1,41 @@
 # permissionless
 
+## 0.1.4
+
+### Patch Changes
+
+- 850b861cc25a72b06efa1e08c16044fe8f2e2fa6: pimlicoBundlerActions has entryPoint as an input now
+- c6f44aa5bc6a5dd85888b17214700f38ef369210: Make fields of userOpeartion v0.7 optional instead of undefined
+- 850b861cc25a72b06efa1e08c16044fe8f2e2fa6: Fix source types for safe accounts
+- 4392ac82d56325e7584b0cd48edb4e99081aa085: Fix signer types
+
+## 0.1.3
+
+### Patch Changes
+
+- 5e935d0b1ae3ccee546800e0536e8d48746cb416: Fix SponsorUserOperationReturnType with no undefined values
+- b173cf9d5f32e480b2209483968536c231bebb25: Remoive entryPoint params when calling sponsorUserOperation from client
+
+## 0.1.2
+
+### Patch Changes
+
+- 29773d05b0bae60266f2989bc1c1ed9fee688dc9: change providerToSmartAccountSigner signature
+
+## 0.1.1
+
+### Patch Changes
+
+- 2b2c29026cd593fd4f887c8f8340a6eb0d2b94b9: fix prepareUserOperationRequest for entryPoint 0.7
+
+## 0.1.0
+
+### Minor Changes
+
+- be2929a3ad655475510e136c4289269b86ce0714: Add EntryPoint v0.7 support
+- f860a3a0678418b820a84e222f444f5bd21f1782: providerToSmartAccountSigner accepts keyword args
+- dcf9d9dc5b018742ef93827974a67b77cc2cf702: Add support for middleware in createSmartAccountClient
+
 ## 0.0.36
 
 ### Patch Changes

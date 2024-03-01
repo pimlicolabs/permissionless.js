@@ -1,4 +1,8 @@
-import { createBundlerClient, createSmartAccountClient } from "permissionless"
+import {
+    ENTRYPOINT_ADDRESS_V06,
+    createBundlerClient,
+    createSmartAccountClient
+} from "permissionless"
 import {
     SmartAccount,
     SmartAccountSigner,
@@ -7,19 +11,22 @@ import {
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
-import { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
+import { Middleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import { UserOperation } from "permissionless/types"
 import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import {
     http,
     Account,
     Address,
+    Chain,
     Hex,
     Transport,
+    WalletClient,
     createPublicClient,
     createWalletClient,
     defineChain,
@@ -157,10 +164,10 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
 
 export const getSmartAccountClient = async ({
     account,
-    sponsorUserOperation,
+    middleware,
     preFund = false
-}: SponsorUserOperationMiddleware & {
-    account?: SmartAccount
+}: Middleware<ENTRYPOINT_ADDRESS_V06_TYPE> & {
+    account?: SmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE>
     preFund?: boolean
 } = {}) => {
     if (!process.env.BUNDLER_RPC_HOST)
@@ -168,47 +175,23 @@ export const getSmartAccountClient = async ({
     const chain = getTestingChain()
 
     const pimlicoBundlerClient = getPimlicoBundlerClient()
-    const bundlerClient = getBundlerClient()
 
     const smartAccountClient = createSmartAccountClient({
+        entryPoint: getEntryPoint(),
         account: account ?? (await getSignerToSimpleSmartAccount()),
         chain,
-        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-        sponsorUserOperation: async ({
-            userOperation,
-            entryPoint
-        }: {
-            userOperation: UserOperation
-            entryPoint: Address
-        }): Promise<UserOperation> => {
-            const gasPrice =
-                await pimlicoBundlerClient.getUserOperationGasPrice()
-
-            let newUserOperation: UserOperation = {
-                ...userOperation,
-                maxFeePerGas: gasPrice.fast.maxFeePerGas,
-                maxPriorityFeePerGas: gasPrice.fast.maxPriorityFeePerGas
-            }
-
-            if (sponsorUserOperation) {
-                return sponsorUserOperation({
-                    userOperation,
-                    entryPoint
-                })
-            }
-
-            const gasLimits = await bundlerClient.estimateUserOperationGas({
-                userOperation: newUserOperation,
-                entryPoint
-            })
-
-            newUserOperation = {
-                ...newUserOperation,
-                ...gasLimits
-            }
-
-            return newUserOperation
-        }
+        bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
+        middleware:
+            typeof middleware === "function"
+                ? middleware
+                : {
+                      gasPrice: async () => {
+                          return (
+                              await pimlicoBundlerClient.getUserOperationGasPrice()
+                          ).fast
+                      },
+                      ...middleware
+                  }
     })
 
     if (preFund) {
@@ -240,9 +223,7 @@ export const getEoaWalletClient = () => {
 }
 
 export const getEntryPoint = () => {
-    if (!process.env.ENTRYPOINT_ADDRESS)
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    return process.env.ENTRYPOINT_ADDRESS as Address
+    return ENTRYPOINT_ADDRESS_V06
 }
 
 export const getPublicClient = async () => {
@@ -273,7 +254,8 @@ export const getBundlerClient = () => {
 
     return createBundlerClient({
         chain: chain,
-        transport: http(`${process.env.BUNDLER_RPC_HOST}`)
+        transport: http(`${process.env.BUNDLER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -285,7 +267,8 @@ export const getPimlicoBundlerClient = () => {
 
     return createPimlicoBundlerClient({
         chain: chain,
-        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`)
+        transport: http(`${process.env.PIMLICO_BUNDLER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -299,7 +282,8 @@ export const getPimlicoPaymasterClient = () => {
 
     return createPimlicoPaymasterClient({
         chain: chain,
-        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`)
+        transport: http(`${process.env.PIMLICO_PAYMASTER_RPC_HOST}`),
+        entryPoint: getEntryPoint()
     })
 }
 
@@ -351,4 +335,18 @@ export const generateApproveCallData = (paymasterAddress: Address) => {
     })
 
     return approveData
+}
+
+export const refillSmartAccount = async (
+    walletClient: WalletClient<Transport, Chain, Account>,
+    address
+) => {
+    const publicClient = await getPublicClient()
+    const balance = await publicClient.getBalance({ address })
+    if (balance < 1000000000000000n) {
+        await walletClient.sendTransaction({
+            to: address,
+            value: parseEther("1")
+        })
+    }
 }

@@ -45,25 +45,23 @@ export const getUserOperationGasPrice = async <
 >(
     client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>
 ): Promise<Prettify<GetUserOperationGasPriceReturnType>> => {
-    const gasPrices = await client.request({
+    const gasPrice = await client.request({
         method: "pimlico_getUserOperationGasPrice",
         params: []
     })
 
     return {
         slow: {
-            maxFeePerGas: BigInt(gasPrices.slow.maxFeePerGas),
-            maxPriorityFeePerGas: BigInt(gasPrices.slow.maxPriorityFeePerGas)
+            maxFeePerGas: BigInt(gasPrice.slow.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(gasPrice.slow.maxPriorityFeePerGas)
         },
         standard: {
-            maxFeePerGas: BigInt(gasPrices.standard.maxFeePerGas),
-            maxPriorityFeePerGas: BigInt(
-                gasPrices.standard.maxPriorityFeePerGas
-            )
+            maxFeePerGas: BigInt(gasPrice.standard.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(gasPrice.standard.maxPriorityFeePerGas)
         },
         fast: {
-            maxFeePerGas: BigInt(gasPrices.fast.maxFeePerGas),
-            maxPriorityFeePerGas: BigInt(gasPrices.fast.maxPriorityFeePerGas)
+            maxFeePerGas: BigInt(gasPrice.fast.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(gasPrice.fast.maxPriorityFeePerGas)
         }
     }
 }

@@ -4,9 +4,9 @@ import {
 } from "./smartAccount/deployContract"
 
 import {
+    type Middleware,
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
-    type SponsorUserOperationMiddleware,
     prepareUserOperationRequest
 } from "./smartAccount/prepareUserOperationRequest"
 
@@ -46,7 +46,7 @@ export {
     signMessage,
     signTypedData,
     type SendTransactionWithPaymasterParameters,
-    type SponsorUserOperationMiddleware,
+    type Middleware,
     sendTransactions,
     type SendTransactionsWithPaymasterParameters,
     type WriteContractWithPaymasterParameters,

@@ -12,7 +12,7 @@ import {
 export type KernelSmartAccountParameters<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<
     SmartAccountParameters<
@@ -30,7 +30,7 @@ export type KernelSmartAccountParameters<
 export async function kernelSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSource extends string = "custom",
+    TSource extends string = string,
     TAddress extends Address = Address
 >({
     publicClient,

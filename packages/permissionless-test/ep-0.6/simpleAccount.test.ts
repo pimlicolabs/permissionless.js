@@ -1,18 +1,39 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { Address, Hex, decodeEventLog, getContract, zeroAddress } from "viem"
-import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
-import { EntryPointAbi } from "./abis/EntryPoint"
-import { GreeterAbi, GreeterBytecode } from "./abis/Greeter"
+import {
+    http,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
+    createWalletClient,
+    decodeEventLog,
+    getContract,
+    zeroAddress
+} from "viem"
+import {
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    expectTypeOf,
+    test
+} from "vitest"
+import { EntryPointAbi } from "../abis/EntryPoint"
+import { GreeterAbi, GreeterBytecode } from "../abis/Greeter"
 import {
     getBundlerClient,
-    getCustomSignerToSimpleSmartAccount,
     getEntryPoint,
     getPimlicoPaymasterClient,
+    getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
     getSmartAccountClient,
+    getTestingChain,
+    refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
 
@@ -28,12 +49,20 @@ beforeAll(() => {
     if (!process.env.RPC_URL) {
         throw new Error("RPC_URL environment variable not set")
     }
-    if (!process.env.ENTRYPOINT_ADDRESS) {
-        throw new Error("ENTRYPOINT_ADDRESS environment variable not set")
-    }
 })
 
-describe("Simple Account from walletClient", () => {
+describe("Simple Account", () => {
+    let walletClient: WalletClient<Transport, Chain, Account>
+
+    beforeEach(async () => {
+        const owner = getPrivateKeyAccount()
+        walletClient = createWalletClient({
+            account: owner,
+            chain: getTestingChain(),
+            transport: http(process.env.RPC_URL as string)
+        })
+    })
+
     test("Simple Account address", async () => {
         const simpleSmartAccount = await getSignerToSimpleSmartAccount()
 
@@ -47,15 +76,11 @@ describe("Simple Account from walletClient", () => {
                 value: 0n,
                 data: "0x"
             })
-        ).rejects.toThrow(new SignTransactionNotSupportedBySmartAccount())
+        ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
     })
 
     test("Smart account client signMessage", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
+        const smartAccountClient = await getSmartAccountClient()
 
         const response = await smartAccountClient.signMessage({
             message: "hello world"
@@ -67,11 +92,7 @@ describe("Simple Account from walletClient", () => {
     })
 
     test("Smart account client signTypedData", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
+        const smartAccountClient = await getSmartAccountClient()
 
         const response = await smartAccountClient.signTypedData({
             domain: {
@@ -99,11 +120,7 @@ describe("Simple Account from walletClient", () => {
     })
 
     test("smart account client deploy contract", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
+        const smartAccountClient = await getSmartAccountClient()
 
         await expect(async () =>
             smartAccountClient.deployContract({
@@ -116,12 +133,11 @@ describe("Simple Account from walletClient", () => {
     })
 
     test("Smart account client send multiple transactions", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
-
+        const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransactions({
             transactions: [
                 {
@@ -143,12 +159,11 @@ describe("Simple Account from walletClient", () => {
     }, 1000000)
 
     test("Smart account write contract", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
-
+        const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const entryPointContract = getContract({
             abi: EntryPointAbi,
             address: getEntryPoint(),
@@ -180,11 +195,11 @@ describe("Simple Account from walletClient", () => {
     }, 1000000)
 
     test("Smart account client send transaction", async () => {
-        const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            })
-        })
+        const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
@@ -196,24 +211,61 @@ describe("Simple Account from walletClient", () => {
         await waitForNonceUpdate()
     }, 1000000)
 
+    test("Smart account client send transaction with address", async () => {
+        const oldSmartAccountClient = await getSmartAccountClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSimpleSmartAccount({
+                address: oldSmartAccountClient.account.address
+            })
+        })
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
+        const response = await smartAccountClient.sendTransaction({
+            to: smartAccountClient.account.address,
+            data: "0x",
+            value: 0n
+        })
+
+        expectTypeOf(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
+    }, 1000000)
+
+    test("test prepareUserOperationRequest", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
+        const userOperation =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        smartAccountClient.sendUserOperation({ userOperation })
+    }, 1000000)
+
     test("smart account client send Transaction with paymaster", async () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }): Promise<UserOperation> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 
@@ -260,20 +312,11 @@ describe("Simple Account from walletClient", () => {
         const publicClient = await getPublicClient()
 
         const bundlerClient = getBundlerClient()
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
 
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSimpleSmartAccount({
-                signer: await getCustomSignerToSimpleSmartAccount()
-            }),
-            sponsorUserOperation: async ({
-                entryPoint: _entryPoint,
-                userOperation
-            }): Promise<UserOperation> => {
-                const pimlicoPaymaster = getPimlicoPaymasterClient()
-                return pimlicoPaymaster.sponsorUserOperation({
-                    userOperation,
-                    entryPoint: getEntryPoint()
-                })
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
             }
         })
 

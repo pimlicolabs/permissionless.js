@@ -1,4 +1,3 @@
-import type { Address } from "viem"
 import type { Client, Hash } from "viem"
 import { chainId } from "../../actions/bundler/chainId"
 import {
@@ -27,9 +26,10 @@ import {
 } from "../../actions/bundler/waitForUserOperationReceipt"
 import type { Prettify } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
+import type { EntryPoint } from "../../types/entrypoint"
 import type { BundlerClient } from "../createBundlerClient"
 
-export type BundlerActions = {
+export type BundlerActions<entryPoint extends EntryPoint> = {
     /**
      *
      * Sends user operation to the bundler
@@ -56,7 +56,9 @@ export type BundlerActions = {
      * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
      */
     sendUserOperation: (
-        args: Prettify<SendUserOperationParameters>
+        args: Prettify<
+            Omit<SendUserOperationParameters<entryPoint>, "entryPoint">
+        >
     ) => Promise<Hash>
     /**
      *
@@ -84,9 +86,11 @@ export type BundlerActions = {
      * // Return {preVerificationGas: 43492n, verificationGasLimit: 59436n, callGasLimit: 9000n}
      */
     estimateUserOperationGas: (
-        args: Prettify<EstimateUserOperationGasParameters>,
+        args: Prettify<
+            Omit<EstimateUserOperationGasParameters<entryPoint>, "entryPoint">
+        >,
         stateOverrides?: StateOverrides
-    ) => Promise<Prettify<EstimateUserOperationGasReturnType>>
+    ) => Promise<Prettify<EstimateUserOperationGasReturnType<entryPoint>>>
     /**
      *
      * Returns the supported entrypoints by the bundler service
@@ -108,7 +112,7 @@ export type BundlerActions = {
      *
      * // Return ['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']
      */
-    supportedEntryPoints: () => Promise<Address[]>
+    supportedEntryPoints: () => Promise<EntryPoint[]>
     /**
      *
      * Returns the supported chain id by the bundler service
@@ -153,7 +157,7 @@ export type BundlerActions = {
      */
     getUserOperationByHash: (
         args: Prettify<GetUserOperationByHashParameters>
-    ) => Promise<Prettify<GetUserOperationByHashReturnType> | null>
+    ) => Promise<Prettify<GetUserOperationByHashReturnType<entryPoint>> | null>
     /**
      *
      * Returns the user operation receipt from userOpHash
@@ -205,25 +209,45 @@ export type BundlerActions = {
     ) => Promise<Prettify<GetUserOperationReceiptReturnType>>
 }
 
-const bundlerActions = (client: Client): BundlerActions => ({
-    sendUserOperation: async (
-        args: SendUserOperationParameters
-    ): Promise<Hash> => sendUserOperation(client as BundlerClient, args),
-    estimateUserOperationGas: (
-        args: EstimateUserOperationGasParameters,
-        stateOverrides
-    ) =>
-        estimateUserOperationGas(client as BundlerClient, args, stateOverrides),
-    supportedEntryPoints: (): Promise<Address[]> =>
-        supportedEntryPoints(client as BundlerClient),
-    chainId: () => chainId(client as BundlerClient),
-    getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
-        getUserOperationByHash(client as BundlerClient, args),
-    getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
-        getUserOperationReceipt(client as BundlerClient, args),
-    waitForUserOperationReceipt: (
-        args: WaitForUserOperationReceiptParameters
-    ) => waitForUserOperationReceipt(client as BundlerClient, args)
-})
+const bundlerActions =
+    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
+    (client: Client): BundlerActions<entryPoint> => ({
+        sendUserOperation: async (
+            args: Omit<SendUserOperationParameters<entryPoint>, "entryPoint">
+        ): Promise<Hash> =>
+            sendUserOperation<entryPoint>(client as BundlerClient<entryPoint>, {
+                ...args,
+                entryPoint: entryPointAddress
+            }),
+        estimateUserOperationGas: (
+            args: Omit<
+                EstimateUserOperationGasParameters<entryPoint>,
+                "entryPoint"
+            >,
+            stateOverrides?: StateOverrides
+        ) =>
+            estimateUserOperationGas<entryPoint>(
+                client as BundlerClient<entryPoint>,
+                { ...args, entryPoint: entryPointAddress },
+                stateOverrides
+            ),
+        supportedEntryPoints: (): Promise<EntryPoint[]> =>
+            supportedEntryPoints(client as BundlerClient<entryPoint>),
+        chainId: () => chainId(client as BundlerClient<entryPoint>),
+        getUserOperationByHash: (args: GetUserOperationByHashParameters) =>
+            getUserOperationByHash<entryPoint>(
+                client as BundlerClient<entryPoint>,
+                args
+            ),
+        getUserOperationReceipt: (args: GetUserOperationReceiptParameters) =>
+            getUserOperationReceipt(client as BundlerClient<entryPoint>, args),
+        waitForUserOperationReceipt: (
+            args: WaitForUserOperationReceiptParameters
+        ) =>
+            waitForUserOperationReceipt(
+                client as BundlerClient<entryPoint>,
+                args
+            )
+    })
 
 export { bundlerActions }

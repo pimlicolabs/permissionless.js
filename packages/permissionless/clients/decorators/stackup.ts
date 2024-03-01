@@ -8,9 +8,10 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/stackup/sponsorUserOperation"
+import type { EntryPoint } from "../../types/entrypoint"
 import { type StackupPaymasterClient } from "../stackup"
 
-export type StackupPaymasterClientActions = {
+export type StackupPaymasterClientActions<entryPoint extends EntryPoint> = {
     /**
      * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
      *
@@ -35,8 +36,8 @@ export type StackupPaymasterClientActions = {
      *
      */
     sponsorUserOperation: (
-        args: SponsorUserOperationParameters
-    ) => Promise<SponsorUserOperationReturnType>
+        args: Omit<SponsorUserOperationParameters<entryPoint>, "entrypoint">
+    ) => Promise<SponsorUserOperationReturnType<entryPoint>>
 
     /**
      * Returns all the Paymaster addresses associated with an EntryPoint that’s owned by this service.
@@ -60,14 +61,17 @@ export type StackupPaymasterClientActions = {
      * }})
      *
      */
-    accounts: (args: AccountsParameters) => Promise<Address[]>
+    accounts: (args: AccountsParameters<entryPoint>) => Promise<Address[]>
 }
 
-export const stackupPaymasterActions = (
-    client: Client
-): StackupPaymasterClientActions => ({
-    sponsorUserOperation: async (args: SponsorUserOperationParameters) =>
-        sponsorUserOperation(client as StackupPaymasterClient, args),
-    accounts: async (args: AccountsParameters) =>
-        accounts(client as StackupPaymasterClient, args)
-})
+export const stackupPaymasterActions =
+    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
+    (client: Client): StackupPaymasterClientActions<entryPoint> => ({
+        sponsorUserOperation: async (args) =>
+            sponsorUserOperation(client as StackupPaymasterClient<entryPoint>, {
+                ...args,
+                entryPoint: entryPointAddress
+            }),
+        accounts: async (args) =>
+            accounts(client as StackupPaymasterClient<entryPoint>, args)
+    })
