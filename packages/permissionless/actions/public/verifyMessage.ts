@@ -7,7 +7,7 @@ import {
     encodeDeployData,
     hashMessage
 } from "viem"
-import { call } from "viem/actions/public/call"
+import { call } from "viem/actions"
 import { getAction } from "../../utils/getAction"
 
 export const verifyMessage = async <
