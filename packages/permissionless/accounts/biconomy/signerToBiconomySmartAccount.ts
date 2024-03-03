@@ -16,7 +16,6 @@ import {
     keccak256,
     parseAbiParameters
 } from "viem"
-import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { Prettify } from "../../types"
@@ -27,7 +26,8 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner
+    type SmartAccountSigner,
+    toSmartAccount
 } from "../types"
 import {
     BiconomyExecuteAbi,
@@ -269,8 +269,7 @@ export async function signerToBiconomySmartAccount<
         accountAddress
     )
 
-    // Build the EOA Signer
-    const account = toAccount({
+    return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
             return signMessage(client, { account: viemSigner, message })
@@ -291,11 +290,7 @@ export async function signerToBiconomySmartAccount<
                     ...typedData
                 }
             )
-        }
-    })
-
-    return {
-        ...account,
+        },
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
@@ -415,5 +410,5 @@ export async function signerToBiconomySmartAccount<
             const dynamicPart = moduleAddress.substring(2).padEnd(40, "0")
             return `0x0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000${dynamicPart}000000000000000000000000000000000000000000000000000000000000004181d4b4981670cb18f99f0b4a66446df1bf5b204d24cfcb659bf38ba27a4359b5711649ec2423c5e1247245eba2964679b6a1dbb85c992ae40b9b00c6935b02ff1b00000000000000000000000000000000000000000000000000000000000000`
         }
-    }
+    })
 }

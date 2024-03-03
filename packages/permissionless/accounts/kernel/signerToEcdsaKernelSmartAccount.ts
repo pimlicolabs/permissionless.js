@@ -11,7 +11,6 @@ import {
     encodeFunctionData,
     isAddressEqual
 } from "viem"
-import { toAccount } from "viem/accounts"
 import {
     getChainId,
     readContract,
@@ -28,7 +27,8 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import type { SmartAccount } from "../types"
 import {
     SignTransactionNotSupportedBySmartAccount,
-    type SmartAccountSigner
+    type SmartAccountSigner,
+    toSmartAccount
 } from "../types"
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
 
@@ -289,8 +289,7 @@ export async function signerToEcdsaKernelSmartAccount<
         accountAddress
     )
 
-    // Build the EOA Signer
-    const account = toAccount({
+    return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
             return signMessage(client, { account: viemSigner, message })
@@ -311,11 +310,7 @@ export async function signerToEcdsaKernelSmartAccount<
                     ...typedData
                 }
             )
-        }
-    })
-
-    return {
-        ...account,
+        },
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
@@ -420,5 +415,5 @@ export async function signerToEcdsaKernelSmartAccount<
         async getDummySignature(_userOperation) {
             return "0x00000000fffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
-    }
+    })
 }

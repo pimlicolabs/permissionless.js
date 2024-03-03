@@ -20,7 +20,6 @@ import {
     toBytes,
     zeroAddress
 } from "viem"
-import { toAccount } from "viem/accounts"
 import {
     getChainId,
     readContract,
@@ -35,7 +34,8 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner
+    type SmartAccountSigner,
+    toSmartAccount
 } from "../types"
 
 export type SafeVersion = "1.4.1"
@@ -598,46 +598,11 @@ export async function signerToSafeSmartAccount<
 
     let safeDeployed = await isSmartAccountDeployed(client, accountAddress)
 
-    const account = toAccount({
-        address: accountAddress,
-        async signMessage({ message }) {
-            const messageHash = hashTypedData({
-                domain: {
-                    chainId: chainId,
-                    verifyingContract: accountAddress
-                },
-                types: {
-                    SafeMessage: [{ name: "message", type: "bytes" }]
-                },
-                primaryType: "SafeMessage",
-                message: {
-                    message: generateSafeMessageMessage(message)
-                }
-            })
-
-            return adjustVInSignature(
-                "eth_sign",
-                await signMessage(client, {
-                    account: viemSigner,
-                    message: {
-                        raw: toBytes(messageHash)
-                    }
-                })
-            )
-        },
-        async signTransaction(_, __) {
-            throw new SignTransactionNotSupportedBySmartAccount()
-        },
-        async signTypedData<
-            const TTypedData extends TypedData | Record<string, unknown>,
-            TPrimaryType extends
-                | keyof TTypedData
-                | "EIP712Domain" = keyof TTypedData
-        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            return adjustVInSignature(
-                "eth_signTypedData",
-                await signTypedData(client, {
-                    account: viemSigner,
+    const safeSmartAccount: SafeSmartAccount<entryPoint, TTransport, TChain> =
+        toSmartAccount({
+            address: accountAddress,
+            async signMessage({ message }) {
+                const messageHash = hashTypedData({
                     domain: {
                         chainId: chainId,
                         verifyingContract: accountAddress
@@ -647,195 +612,239 @@ export async function signerToSafeSmartAccount<
                     },
                     primaryType: "SafeMessage",
                     message: {
-                        message: generateSafeMessageMessage<
-                            TTypedData,
-                            TPrimaryType
-                        >(typedData)
+                        message: generateSafeMessageMessage(message)
                     }
                 })
-            )
-        }
-    })
 
-    const safeSmartAccount: SafeSmartAccount<entryPoint, TTransport, TChain> = {
-        ...account,
-        client: client,
-        publicKey: accountAddress,
-        entryPoint: entryPointAddress,
-        source: "SafeSmartAccount",
-        async getNonce() {
-            return getAccountNonce(client, {
-                sender: accountAddress,
-                entryPoint: entryPointAddress
-            })
-        },
-        async signUserOperation(userOperation) {
-            const signatures = [
-                {
-                    signer: viemSigner.address,
-                    data: await signTypedData(client, {
+                return adjustVInSignature(
+                    "eth_sign",
+                    await signMessage(client, {
+                        account: viemSigner,
+                        message: {
+                            raw: toBytes(messageHash)
+                        }
+                    })
+                )
+            },
+            async signTransaction(_, __) {
+                throw new SignTransactionNotSupportedBySmartAccount()
+            },
+            async signTypedData<
+                const TTypedData extends TypedData | Record<string, unknown>,
+                TPrimaryType extends
+                    | keyof TTypedData
+                    | "EIP712Domain" = keyof TTypedData
+            >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+                return adjustVInSignature(
+                    "eth_signTypedData",
+                    await signTypedData(client, {
                         account: viemSigner,
                         domain: {
                             chainId: chainId,
-                            verifyingContract: safe4337ModuleAddress
+                            verifyingContract: accountAddress
                         },
-                        types: EIP712_SAFE_OPERATION_TYPE,
-                        primaryType: "SafeOp",
+                        types: {
+                            SafeMessage: [{ name: "message", type: "bytes" }]
+                        },
+                        primaryType: "SafeMessage",
                         message: {
-                            safe: accountAddress,
-                            callData: userOperation.callData,
-                            entryPoint: entryPointAddress,
-                            nonce: userOperation.nonce,
-                            initCode: userOperation.initCode,
-                            maxFeePerGas: userOperation.maxFeePerGas,
-                            maxPriorityFeePerGas:
-                                userOperation.maxPriorityFeePerGas,
-                            preVerificationGas:
-                                userOperation.preVerificationGas,
-                            verificationGasLimit:
-                                userOperation.verificationGasLimit,
-                            callGasLimit: userOperation.callGasLimit,
-                            paymasterAndData: userOperation.paymasterAndData,
-                            validAfter: validAfter,
-                            validUntil: validUntil
+                            message: generateSafeMessageMessage<
+                                TTypedData,
+                                TPrimaryType
+                            >(typedData)
                         }
                     })
-                }
-            ]
-
-            signatures.sort((left, right) =>
-                left.signer
-                    .toLowerCase()
-                    .localeCompare(right.signer.toLowerCase())
-            )
-
-            const signatureBytes = concat(signatures.map((sig) => sig.data))
-
-            return encodePacked(
-                ["uint48", "uint48", "bytes"],
-                [validAfter, validUntil, signatureBytes]
-            )
-        },
-        async getInitCode() {
-            if (safeDeployed) return "0x"
-
-            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
-
-            if (safeDeployed) return "0x"
-
-            const initCodeCallData = await getAccountInitCode({
-                owner: viemSigner.address,
-                addModuleLibAddress,
-                safe4337ModuleAddress,
-                safeSingletonAddress,
-                multiSendAddress,
-                saltNonce,
-                setupTransactions,
-                safeModules
-            })
-
-            return concatHex([safeProxyFactoryAddress, initCodeCallData])
-        },
-        async getFactory() {
-            if (safeDeployed) return undefined
-
-            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
-
-            if (safeDeployed) return undefined
-
-            return safeProxyFactoryAddress
-        },
-        async getFactoryData() {
-            if (safeDeployed) return undefined
-
-            safeDeployed = await isSmartAccountDeployed(client, accountAddress)
-
-            if (safeDeployed) return undefined
-
-            return await getAccountInitCode({
-                owner: viemSigner.address,
-                addModuleLibAddress,
-                safe4337ModuleAddress,
-                safeSingletonAddress,
-                multiSendAddress,
-                saltNonce,
-                setupTransactions,
-                safeModules
-            })
-        },
-        async encodeDeployCallData(_) {
-            throw new Error("Safe account doesn't support account deployment")
-        },
-        async encodeCallData(args) {
-            let to: Address
-            let value: bigint
-            let data: Hex
-            let operationType = 0
-
-            if (Array.isArray(args)) {
-                const argsArray = args as {
-                    to: Address
-                    value: bigint
-                    data: Hex
-                }[]
-
-                to = multiSendCallOnlyAddress
-                value = 0n
-
-                data = encodeMultiSend(
-                    argsArray.map((tx) => ({ ...tx, operation: 0 }))
                 )
-                operationType = 1
-            } else {
-                const singleTransaction = args as {
-                    to: Address
-                    value: bigint
-                    data: Hex
-                }
-                to = singleTransaction.to
-                data = singleTransaction.data
-                value = singleTransaction.value
-            }
-
-            return encodeFunctionData({
-                abi: [
+            },
+            client: client,
+            publicKey: accountAddress,
+            entryPoint: entryPointAddress,
+            source: "SafeSmartAccount",
+            async getNonce() {
+                return getAccountNonce(client, {
+                    sender: accountAddress,
+                    entryPoint: entryPointAddress
+                })
+            },
+            async signUserOperation(userOperation) {
+                const signatures = [
                     {
-                        inputs: [
-                            {
-                                internalType: "address",
-                                name: "to",
-                                type: "address"
+                        signer: viemSigner.address,
+                        data: await signTypedData(client, {
+                            account: viemSigner,
+                            domain: {
+                                chainId: chainId,
+                                verifyingContract: safe4337ModuleAddress
                             },
-                            {
-                                internalType: "uint256",
-                                name: "value",
-                                type: "uint256"
-                            },
-                            {
-                                internalType: "bytes",
-                                name: "data",
-                                type: "bytes"
-                            },
-                            {
-                                internalType: "uint8",
-                                name: "operation",
-                                type: "uint8"
+                            types: EIP712_SAFE_OPERATION_TYPE,
+                            primaryType: "SafeOp",
+                            message: {
+                                safe: accountAddress,
+                                callData: userOperation.callData,
+                                entryPoint: entryPointAddress,
+                                nonce: userOperation.nonce,
+                                initCode: userOperation.initCode,
+                                maxFeePerGas: userOperation.maxFeePerGas,
+                                maxPriorityFeePerGas:
+                                    userOperation.maxPriorityFeePerGas,
+                                preVerificationGas:
+                                    userOperation.preVerificationGas,
+                                verificationGasLimit:
+                                    userOperation.verificationGasLimit,
+                                callGasLimit: userOperation.callGasLimit,
+                                paymasterAndData:
+                                    userOperation.paymasterAndData,
+                                validAfter: validAfter,
+                                validUntil: validUntil
                             }
-                        ],
-                        name: "executeUserOpWithErrorString",
-                        outputs: [],
-                        stateMutability: "nonpayable",
-                        type: "function"
+                        })
                     }
-                ],
-                functionName: "executeUserOpWithErrorString",
-                args: [to, value, data, operationType]
-            })
-        },
-        async getDummySignature(_userOperation) {
-            return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-        }
-    }
+                ]
+
+                signatures.sort((left, right) =>
+                    left.signer
+                        .toLowerCase()
+                        .localeCompare(right.signer.toLowerCase())
+                )
+
+                const signatureBytes = concat(signatures.map((sig) => sig.data))
+
+                return encodePacked(
+                    ["uint48", "uint48", "bytes"],
+                    [validAfter, validUntil, signatureBytes]
+                )
+            },
+            async getInitCode() {
+                if (safeDeployed) return "0x"
+
+                safeDeployed = await isSmartAccountDeployed(
+                    client,
+                    accountAddress
+                )
+
+                if (safeDeployed) return "0x"
+
+                const initCodeCallData = await getAccountInitCode({
+                    owner: viemSigner.address,
+                    addModuleLibAddress,
+                    safe4337ModuleAddress,
+                    safeSingletonAddress,
+                    multiSendAddress,
+                    saltNonce,
+                    setupTransactions,
+                    safeModules
+                })
+
+                return concatHex([safeProxyFactoryAddress, initCodeCallData])
+            },
+            async getFactory() {
+                if (safeDeployed) return undefined
+
+                safeDeployed = await isSmartAccountDeployed(
+                    client,
+                    accountAddress
+                )
+
+                if (safeDeployed) return undefined
+
+                return safeProxyFactoryAddress
+            },
+            async getFactoryData() {
+                if (safeDeployed) return undefined
+
+                safeDeployed = await isSmartAccountDeployed(
+                    client,
+                    accountAddress
+                )
+
+                if (safeDeployed) return undefined
+
+                return await getAccountInitCode({
+                    owner: viemSigner.address,
+                    addModuleLibAddress,
+                    safe4337ModuleAddress,
+                    safeSingletonAddress,
+                    multiSendAddress,
+                    saltNonce,
+                    setupTransactions,
+                    safeModules
+                })
+            },
+            async encodeDeployCallData(_) {
+                throw new Error(
+                    "Safe account doesn't support account deployment"
+                )
+            },
+            async encodeCallData(args) {
+                let to: Address
+                let value: bigint
+                let data: Hex
+                let operationType = 0
+
+                if (Array.isArray(args)) {
+                    const argsArray = args as {
+                        to: Address
+                        value: bigint
+                        data: Hex
+                    }[]
+
+                    to = multiSendCallOnlyAddress
+                    value = 0n
+
+                    data = encodeMultiSend(
+                        argsArray.map((tx) => ({ ...tx, operation: 0 }))
+                    )
+                    operationType = 1
+                } else {
+                    const singleTransaction = args as {
+                        to: Address
+                        value: bigint
+                        data: Hex
+                    }
+                    to = singleTransaction.to
+                    data = singleTransaction.data
+                    value = singleTransaction.value
+                }
+
+                return encodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address",
+                                    name: "to",
+                                    type: "address"
+                                },
+                                {
+                                    internalType: "uint256",
+                                    name: "value",
+                                    type: "uint256"
+                                },
+                                {
+                                    internalType: "bytes",
+                                    name: "data",
+                                    type: "bytes"
+                                },
+                                {
+                                    internalType: "uint8",
+                                    name: "operation",
+                                    type: "uint8"
+                                }
+                            ],
+                            name: "executeUserOpWithErrorString",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
+                    functionName: "executeUserOpWithErrorString",
+                    args: [to, value, data, operationType]
+                })
+            },
+            async getDummySignature(_userOperation) {
+                return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+        })
 
     return safeSmartAccount
 }

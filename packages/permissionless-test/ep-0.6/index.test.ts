@@ -206,4 +206,6 @@ describe("test public actions and utils", () => {
                 userOperation.maxFeePerGas
         )
     })
+
+    test("verifySignature", async () => {})
 })

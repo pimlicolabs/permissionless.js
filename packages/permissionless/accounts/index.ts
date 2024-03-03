@@ -41,7 +41,8 @@ import {
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner
+    type SmartAccountSigner,
+    toSmartAccount
 } from "./types"
 
 export {
@@ -60,6 +61,7 @@ export {
     signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
     signerToBiconomySmartAccount,
+    toSmartAccount,
     type SignerToSimpleSmartAccountParameters,
     type SignerToSafeSmartAccountParameters,
     type PrivateKeyToSimpleSmartAccountParameters,

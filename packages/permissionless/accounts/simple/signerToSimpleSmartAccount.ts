@@ -10,7 +10,6 @@ import {
     concatHex,
     encodeFunctionData
 } from "viem"
-import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
@@ -26,7 +25,8 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner
+    type SmartAccountSigner,
+    toSmartAccount
 } from "../types"
 
 export type SimpleSmartAccount<
@@ -165,20 +165,22 @@ export async function signerToSimpleSmartAccount<
         accountAddress
     )
 
-    const account = toAccount({
+    return toSmartAccount({
         address: accountAddress,
-        async signMessage({ message }) {
+        signMessage: async ({ message }) => {
             return signMessage(client, { account: viemSigner, message })
         },
-        async signTransaction(_, __) {
+        signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        async signTypedData<
+        signTypedData: async <
             const TTypedData extends TypedData | Record<string, unknown>,
             TPrimaryType extends
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
-        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+        >(
+            typedData: TypedDataDefinition<TTypedData, TPrimaryType>
+        ) => {
             return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
                 client,
                 {
@@ -186,11 +188,7 @@ export async function signerToSimpleSmartAccount<
                     ...typedData
                 }
             )
-        }
-    })
-
-    return {
-        ...account,
+        },
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
@@ -202,7 +200,8 @@ export async function signerToSimpleSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            return account.signMessage({
+            return signMessage(client, {
+                account: viemSigner,
                 message: {
                     raw: getUserOperationHash({
                         userOperation,
@@ -359,5 +358,5 @@ export async function signerToSimpleSmartAccount<
         async getDummySignature(_userOperation) {
             return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
-    }
+    })
 }
