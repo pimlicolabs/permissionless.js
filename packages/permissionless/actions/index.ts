@@ -30,7 +30,6 @@ import {
 } from "./bundler/waitForUserOperationReceipt"
 import type { GetAccountNonceParams } from "./public/getAccountNonce"
 import { getAccountNonce } from "./public/getAccountNonce"
-import { verifyMessage } from "./public/verifyMessage"
 
 export type {
     SendUserOperationParameters,
@@ -55,7 +54,6 @@ export {
     getUserOperationReceipt,
     getSenderAddress,
     getAccountNonce,
-    verifyMessage,
     InvalidEntryPointError,
     waitForUserOperationReceipt,
     WaitForUserOperationReceiptTimeoutError

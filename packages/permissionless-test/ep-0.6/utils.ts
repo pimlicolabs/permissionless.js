@@ -125,7 +125,9 @@ export const getSignerToSafeSmartAccount = async (args?: {
         setupTransactions: args?.setupTransactions
     })
 }
-export const getSignerToEcdsaKernelAccount = async () => {
+export const getSignerToEcdsaKernelAccount = async (
+    { index }: { index: bigint } = { index: 100n }
+) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -135,7 +137,7 @@ export const getSignerToEcdsaKernelAccount = async () => {
     return await signerToEcdsaKernelSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         signer: signer,
-        index: 100n
+        index
     })
 }
 

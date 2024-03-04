@@ -21,6 +21,9 @@ import {
     type SmartAccount
 } from "./types"
 
+const MAGIC_BYTES =
+    "0x6492649264926492649264926492649264926492649264926492649264926492"
+
 export function toSmartAccount<
     TAccountSource extends CustomSource,
     TEntryPoint extends EntryPoint,
@@ -80,12 +83,9 @@ export function toSmartAccount<
         address: address,
         signMessage: async ({ message }: { message: SignableMessage }) => {
             const isDeployed = await isSmartAccountDeployed(client, address)
-            if (isDeployed) return signMessage({ message })
-
             const signature = await signMessage({ message })
 
-            const magicBytes =
-                "0x6492649264926492649264926492649264926492649264926492649264926492"
+            if (isDeployed) return signature
 
             const abiEncodedMessage = encodeAbiParameters(
                 [
@@ -109,10 +109,39 @@ export function toSmartAccount<
                 ]
             )
 
-            return concat([abiEncodedMessage, magicBytes])
+            return concat([abiEncodedMessage, MAGIC_BYTES])
         },
         signTypedData: async (typedData) => {
-            return signTypedData(typedData as TypedDataDefinition)
+            const isDeployed = await isSmartAccountDeployed(client, address)
+            const signature = await signTypedData(
+                typedData as TypedDataDefinition
+            )
+
+            if (isDeployed) return signature
+
+            const abiEncodedMessage = encodeAbiParameters(
+                [
+                    {
+                        type: "address",
+                        name: "create2Factory"
+                    },
+                    {
+                        type: "bytes",
+                        name: "factoryCalldata"
+                    },
+                    {
+                        type: "bytes",
+                        name: "originalERC1271Signature"
+                    }
+                ],
+                [
+                    (await getFactory()) ?? "0x", // "0x should never happen if it's deployed"
+                    (await getFactoryData()) ?? "0x", // "0x should never happen if it's deployed"
+                    signature
+                ]
+            )
+
+            return concat([abiEncodedMessage, MAGIC_BYTES])
         },
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -123,6 +152,7 @@ export function toSmartAccount<
         ...account,
         source,
         client,
+        type: "local",
         entryPoint,
         publicKey: address,
         getNonce,

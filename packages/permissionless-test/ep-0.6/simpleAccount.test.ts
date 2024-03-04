@@ -1,7 +1,6 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
-import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
@@ -81,41 +80,37 @@ describe("Simple Account", () => {
     test("Smart account client signMessage", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
-        const response = await smartAccountClient.signMessage({
-            message: "hello world"
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signMessage({
+                message: "hello world"
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("Smart account client signTypedData", async () => {
         const smartAccountClient = await getSmartAccountClient()
 
-        const response = await smartAccountClient.signTypedData({
-            domain: {
-                chainId: 1,
-                name: "Test",
-                verifyingContract: zeroAddress
-            },
-            primaryType: "Test",
-            types: {
-                Test: [
-                    {
-                        name: "test",
-                        type: "string"
-                    }
-                ]
-            },
-            message: {
-                test: "hello world"
-            }
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signTypedData({
+                domain: {
+                    chainId: 1,
+                    name: "Test",
+                    verifyingContract: zeroAddress
+                },
+                primaryType: "Test",
+                types: {
+                    Test: [
+                        {
+                            name: "test",
+                            type: "string"
+                        }
+                    ]
+                },
+                message: {
+                    test: "hello world"
+                }
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("smart account client deploy contract", async () => {
@@ -387,17 +382,11 @@ describe("Simple Account", () => {
         })
 
         const publicClient = await getPublicClient()
-        const isVerified = await verifyMessage(publicClient, {
+        const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
             message,
             signature
         })
-
-        console.log(
-            "isVerified=",
-            isVerified,
-            smartAccountClient.account.address
-        )
 
         expect(isVerified).toBeTruthy()
     }, 1000000)

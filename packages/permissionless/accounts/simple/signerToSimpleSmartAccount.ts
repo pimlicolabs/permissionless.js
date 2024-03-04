@@ -1,4 +1,3 @@
-import type { TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -6,11 +5,10 @@ import {
     type Hex,
     type LocalAccount,
     type Transport,
-    type TypedDataDefinition,
     concatHex,
     encodeFunctionData
 } from "viem"
-import { getChainId, signMessage, signTypedData } from "viem/actions"
+import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type {
@@ -167,27 +165,14 @@ export async function signerToSimpleSmartAccount<
 
     return toSmartAccount({
         address: accountAddress,
-        signMessage: async ({ message }) => {
-            return signMessage(client, { account: viemSigner, message })
+        signMessage: async (_) => {
+            throw new Error("Simple account isn't 1271 compliant")
         },
         signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        signTypedData: async <
-            const TTypedData extends TypedData | Record<string, unknown>,
-            TPrimaryType extends
-                | keyof TTypedData
-                | "EIP712Domain" = keyof TTypedData
-        >(
-            typedData: TypedDataDefinition<TTypedData, TPrimaryType>
-        ) => {
-            return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
-                client,
-                {
-                    account: viemSigner,
-                    ...typedData
-                }
-            )
+        signTypedData: async (_) => {
+            throw new Error("Simple account isn't 1271 compliant")
         },
         client: client,
         publicKey: accountAddress,
