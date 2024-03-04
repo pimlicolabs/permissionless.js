@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.5
+
+### Patch Changes
+
+- b4ee5ecd43bab87a521b6223b9df129ffd0f4e5c: Make smart accounts eip 6492 compliant
+
 ## 0.1.4
 
 ### Patch Changes
