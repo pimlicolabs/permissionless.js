@@ -39,6 +39,7 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
+import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 
@@ -533,5 +534,28 @@ describe("Safe Account", () => {
         })
 
         expect(response).toBe("0x1626ba7e")
+    })
+
+    test("verifySignature", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToSafeSmartAccount({
+                saltNonce: 1n
+            })
+        })
+        const message = "hello world"
+
+        const signature = await smartAccountClient.signMessage({
+            message
+        })
+
+        const publicClient = await getPublicClient()
+
+        const isVerified = await verifyMessage(publicClient, {
+            address: smartAccountClient.account.address,
+            message,
+            signature
+        })
+
+        expect(isVerified).toBe(true)
     })
 })

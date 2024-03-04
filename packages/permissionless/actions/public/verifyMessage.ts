@@ -24,7 +24,7 @@ export const verifyMessage = async <
         message: string
         signature: Hex
     }
-) => {
+): Promise<boolean> => {
     const hash = hashMessage(message)
 
     const validateSigOffChain = encodeDeployData({
@@ -56,12 +56,16 @@ export const verifyMessage = async <
         args: [address, hash, signature]
     })
 
-    const isValid = getAction(
-        client,
-        call
-    )({
-        data: validateSigOffChain
-    })
+    try {
+        const result = await getAction(
+            client,
+            call
+        )({
+            data: validateSigOffChain
+        })
 
-    console.log(isValid)
+        return Boolean(result.data)
+    } catch (error) {
+        return false
+    }
 }

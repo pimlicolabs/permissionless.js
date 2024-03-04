@@ -27,10 +27,10 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import type { SmartAccount } from "../types"
 import {
     SignTransactionNotSupportedBySmartAccount,
-    type SmartAccountSigner,
-    toSmartAccount
+    type SmartAccountSigner
 } from "../types"
 import { KernelExecuteAbi, KernelInitAbi } from "./abi/KernelAccountAbi"
+import { toSmartAccount } from "../toSmartAccount"
 
 export type KernelEcdsaSmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,

@@ -14,7 +14,8 @@ import {
     createWalletClient,
     decodeEventLog,
     getContract,
-    zeroAddress
+    zeroAddress,
+    hashMessage
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import {
@@ -39,6 +40,7 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
+import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 
@@ -368,4 +370,41 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             initialEcdsaSmartAccount.address
         )
     }, 1000000)
+
+    test("verifySignature", async () => {
+        const initialEcdsaSmartAccount = await getSignerToBiconomyAccount({
+            index: 0n
+        })
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: initialEcdsaSmartAccount
+        })
+        const message = "hello world"
+
+        const signature = await smartAccountClient.signMessage({
+            message
+        })
+
+        const hash = hashMessage(message)
+
+        console.log({
+            address: smartAccountClient.account.address,
+            signature,
+            hash
+        })
+
+        const publicClient = await getPublicClient()
+
+        const isVerified = await verifyMessage(publicClient, {
+            address: smartAccountClient.account.address,
+            message,
+            signature
+        })
+
+        console.log(
+            "isVerified=",
+            isVerified,
+            smartAccountClient.account.address
+        )
+    })
 })

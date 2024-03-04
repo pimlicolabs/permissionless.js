@@ -12,7 +12,8 @@ import {
     createWalletClient,
     decodeEventLog,
     getContract,
-    zeroAddress
+    zeroAddress,
+    hashMessage
 } from "viem"
 import {
     beforeAll,
@@ -36,6 +37,7 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
+import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 
@@ -366,5 +368,48 @@ describe("Simple Account", () => {
 
         expect(eventFound).toBeTruthy()
         await waitForNonceUpdate()
+    }, 1000000)
+
+    test("verifySignature", async () => {
+        const initialEcdsaSmartAccount = await getSignerToSimpleSmartAccount({
+            index: 0n
+        })
+        const pimlicoPaymaster = getPimlicoPaymasterClient()
+
+        const smartAccountClient = await getSmartAccountClient({
+            account: initialEcdsaSmartAccount,
+            middleware: {
+                sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation
+            }
+        })
+
+        const message = "hello world"
+
+        const signature = await smartAccountClient.signMessage({
+            message
+        })
+
+        const hash = hashMessage(message)
+
+        console.log({
+            address: smartAccountClient.account.address,
+            signature,
+            hash
+        })
+
+        const publicClient = await getPublicClient()
+        const isVerified = await verifyMessage(publicClient, {
+            address: smartAccountClient.account.address,
+            message,
+            signature
+        })
+
+        console.log(
+            "isVerified=",
+            isVerified,
+            smartAccountClient.account.address
+        )
+
+        expect(isVerified).toBeTruthy()
     }, 1000000)
 })

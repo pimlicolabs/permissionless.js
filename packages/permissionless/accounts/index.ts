@@ -41,9 +41,10 @@ import {
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner,
-    toSmartAccount
+    type SmartAccountSigner
 } from "./types"
+
+import { toSmartAccount } from "./toSmartAccount"
 
 export {
     type SafeVersion,

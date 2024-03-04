@@ -26,13 +26,13 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner,
-    toSmartAccount
+    type SmartAccountSigner
 } from "../types"
 import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi"
+import { toSmartAccount } from "../toSmartAccount"
 
 export type BiconomySmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,

@@ -25,9 +25,9 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
-    type SmartAccountSigner,
-    toSmartAccount
+    type SmartAccountSigner
 } from "../types"
+import { toSmartAccount } from "../toSmartAccount"
 
 export type SimpleSmartAccount<
     entryPoint extends EntryPoint,
