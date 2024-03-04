@@ -77,13 +77,17 @@ export const getTestingChain = () => {
     })
 }
 
-export const getSignerToSimpleSmartAccount = async ({
-    signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
-    address
-}: {
-    signer?: SmartAccountSigner
-    address?: Address
-} = {}) => {
+export const getSignerToSimpleSmartAccount = async (
+    {
+        signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
+        address,
+        index
+    }: {
+        signer?: SmartAccountSigner
+        address?: Address
+        index?: bigint
+    } = { index: 0n }
+) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -93,11 +97,13 @@ export const getSignerToSimpleSmartAccount = async ({
         entryPoint: getEntryPoint(),
         factoryAddress: getFactoryAddress(),
         signer: signer,
-        address
+        address,
+        index: index
     })
 }
 
 export const getSignerToSafeSmartAccount = async (args?: {
+    saltNonce?: bigint
     setupTransactions?: {
         to: Address
         data: Address
@@ -115,11 +121,13 @@ export const getSignerToSafeSmartAccount = async (args?: {
         entryPoint: getEntryPoint(),
         signer: signer,
         safeVersion: "1.4.1",
-        saltNonce: 100n,
+        saltNonce: args?.saltNonce ?? 100n,
         setupTransactions: args?.setupTransactions
     })
 }
-export const getSignerToEcdsaKernelAccount = async () => {
+export const getSignerToEcdsaKernelAccount = async (
+    { index }: { index: bigint } = { index: 100n }
+) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -129,11 +137,13 @@ export const getSignerToEcdsaKernelAccount = async () => {
     return await signerToEcdsaKernelSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         signer: signer,
-        index: 100n
+        index
     })
 }
 
-export const getSignerToBiconomyAccount = async () => {
+export const getSignerToBiconomyAccount = async (
+    { index }: { index: bigint } = { index: 0n }
+) => {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
@@ -143,7 +153,7 @@ export const getSignerToBiconomyAccount = async () => {
     return await signerToBiconomySmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
         signer: signer,
-        index: 0n
+        index: index
     })
 }
 

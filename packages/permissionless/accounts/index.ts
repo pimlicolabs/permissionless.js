@@ -44,6 +44,8 @@ import {
     type SmartAccountSigner
 } from "./types"
 
+import { toSmartAccount } from "./toSmartAccount"
+
 export {
     type SafeVersion,
     type SmartAccountSigner,
@@ -60,6 +62,7 @@ export {
     signerToEcdsaKernelSmartAccount,
     type BiconomySmartAccount,
     signerToBiconomySmartAccount,
+    toSmartAccount,
     type SignerToSimpleSmartAccountParameters,
     type SignerToSafeSmartAccountParameters,
     type PrivateKeyToSimpleSmartAccountParameters,

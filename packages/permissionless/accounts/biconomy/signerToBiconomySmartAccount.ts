@@ -16,7 +16,6 @@ import {
     keccak256,
     parseAbiParameters
 } from "viem"
-import { toAccount } from "viem/accounts"
 import { getChainId, signMessage, signTypedData } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { Prettify } from "../../types"
@@ -24,6 +23,7 @@ import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import { toSmartAccount } from "../toSmartAccount"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -269,11 +269,22 @@ export async function signerToBiconomySmartAccount<
         accountAddress
     )
 
-    // Build the EOA Signer
-    const account = toAccount({
+    return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            return signMessage(client, { account: viemSigner, message })
+            let signature = await signMessage(client, {
+                account: viemSigner,
+                message
+            })
+            const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
+            if (![27, 28].includes(potentiallyIncorrectV)) {
+                const correctV = potentiallyIncorrectV + 27
+                signature = signature.slice(0, -2) + correctV.toString(16)
+            }
+            return encodeAbiParameters(
+                [{ type: "bytes" }, { type: "address" }],
+                [signature as Hex, ecdsaModuleAddress]
+            )
         },
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -284,18 +295,25 @@ export async function signerToBiconomySmartAccount<
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
         >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
-                client,
-                {
-                    account: viemSigner,
-                    ...typedData
-                }
+            let signature = await signTypedData<
+                TTypedData,
+                TPrimaryType,
+                TChain,
+                undefined
+            >(client, {
+                account: viemSigner,
+                ...typedData
+            })
+            const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
+            if (![27, 28].includes(potentiallyIncorrectV)) {
+                const correctV = potentiallyIncorrectV + 27
+                signature = signature.slice(0, -2) + correctV.toString(16)
+            }
+            return encodeAbiParameters(
+                [{ type: "bytes" }, { type: "address" }],
+                [signature as Hex, ecdsaModuleAddress]
             )
-        }
-    })
-
-    return {
-        ...account,
+        },
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
@@ -415,5 +433,5 @@ export async function signerToBiconomySmartAccount<
             const dynamicPart = moduleAddress.substring(2).padEnd(40, "0")
             return `0x0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000${dynamicPart}000000000000000000000000000000000000000000000000000000000000004181d4b4981670cb18f99f0b4a66446df1bf5b204d24cfcb659bf38ba27a4359b5711649ec2423c5e1247245eba2964679b6a1dbb85c992ae40b9b00c6935b02ff1b00000000000000000000000000000000000000000000000000000000000000`
         }
-    }
+    })
 }
