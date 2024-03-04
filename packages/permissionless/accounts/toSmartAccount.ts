@@ -1,18 +1,21 @@
-import type {
-    Abi,
-    Address,
-    Chain,
-    Client,
-    CustomSource,
-    EncodeDeployDataParameters,
-    Hex,
-    SignableMessage,
-    Transport,
-    TypedDataDefinition
+import {
+    type Abi,
+    type Address,
+    type Chain,
+    type Client,
+    type CustomSource,
+    type EncodeDeployDataParameters,
+    type Hex,
+    type SignableMessage,
+    type Transport,
+    type TypedDataDefinition,
+    concat,
+    encodeAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
 import type { UserOperation } from "../types"
 import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
+import { isSmartAccountDeployed } from "../utils"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount
@@ -75,8 +78,38 @@ export function toSmartAccount<
 }): SmartAccount<TEntryPoint, TSource, transport, chain, TAbi> {
     const account = toAccount({
         address: address,
-        signMessage: ({ message }: { message: SignableMessage }) => {
-            return signMessage({ message })
+        signMessage: async ({ message }: { message: SignableMessage }) => {
+            const isDeployed = await isSmartAccountDeployed(client, address)
+            if (isDeployed) return signMessage({ message })
+
+            const signature = await signMessage({ message })
+
+            const magicBytes =
+                "0x6492649264926492649264926492649264926492649264926492649264926492"
+
+            const abiEncodedMessage = encodeAbiParameters(
+                [
+                    {
+                        type: "address",
+                        name: "create2Factory"
+                    },
+                    {
+                        type: "bytes",
+                        name: "factoryCalldata"
+                    },
+                    {
+                        type: "bytes",
+                        name: "originalERC1271Signature"
+                    }
+                ],
+                [
+                    (await getFactory()) ?? "0x", // "0x should never happen if it's deployed"
+                    (await getFactoryData()) ?? "0x", // "0x should never happen if it's deployed"
+                    signature
+                ]
+            )
+
+            return concat([abiEncodedMessage, magicBytes])
         },
         signTypedData: async (typedData) => {
             return signTypedData(typedData as TypedDataDefinition)

@@ -10,7 +10,6 @@ import {
     type TypedDataDefinition,
     concat,
     concatHex,
-    encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
     getContractAddress,
@@ -599,81 +598,33 @@ export async function signerToSafeSmartAccount<
 
     let safeDeployed = await isSmartAccountDeployed(client, accountAddress)
 
-    const safeSignMessage = async ({
-        message
-    }: { message: SignableMessage }) => {
-        const messageHash = hashTypedData({
-            domain: {
-                chainId: chainId,
-                verifyingContract: accountAddress
-            },
-            types: {
-                SafeMessage: [{ name: "message", type: "bytes" }]
-            },
-            primaryType: "SafeMessage",
-            message: {
-                message: generateSafeMessageMessage(message)
-            }
-        })
-
-        return adjustVInSignature(
-            "eth_sign",
-            await signMessage(client, {
-                account: viemSigner,
-                message: {
-                    raw: toBytes(messageHash)
-                }
-            })
-        )
-    }
-
     const safeSmartAccount: SafeSmartAccount<entryPoint, TTransport, TChain> =
         toSmartAccount({
             address: accountAddress,
             async signMessage({ message }) {
-                const isDeployed = await isSmartAccountDeployed(
-                    client,
-                    accountAddress
-                )
-                if (isDeployed) return safeSignMessage({ message })
+                const messageHash = hashTypedData({
+                    domain: {
+                        chainId: chainId,
+                        verifyingContract: accountAddress
+                    },
+                    types: {
+                        SafeMessage: [{ name: "message", type: "bytes" }]
+                    },
+                    primaryType: "SafeMessage",
+                    message: {
+                        message: generateSafeMessageMessage(message)
+                    }
+                })
 
-                const signature = await safeSignMessage({ message })
-
-                const magicBytes =
-                    "0x6492649264926492649264926492649264926492649264926492649264926492"
-
-                const abiEncodedMessage = encodeAbiParameters(
-                    [
-                        {
-                            type: "address",
-                            name: "create2Factory"
-                        },
-                        {
-                            type: "bytes",
-                            name: "factoryCalldata"
-                        },
-                        {
-                            type: "bytes",
-                            name: "originalERC1271Signature"
+                return adjustVInSignature(
+                    "eth_sign",
+                    await signMessage(client, {
+                        account: viemSigner,
+                        message: {
+                            raw: toBytes(messageHash)
                         }
-                    ],
-                    [
-                        safeProxyFactoryAddress,
-                        await getAccountInitCode({
-                            owner: viemSigner.address,
-                            addModuleLibAddress,
-                            safe4337ModuleAddress,
-                            safeSingletonAddress,
-                            multiSendAddress,
-                            saltNonce,
-                            setupTransactions,
-                            safeModules
-                        }),
-                        signature
-                    ]
+                    })
                 )
-
-                return concat([abiEncodedMessage, magicBytes])
             },
             async signTransaction(_, __) {
                 throw new SignTransactionNotSupportedBySmartAccount()
