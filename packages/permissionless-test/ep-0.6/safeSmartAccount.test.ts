@@ -4,7 +4,6 @@ import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
-    Address,
     BaseError,
     Chain,
     Transport,

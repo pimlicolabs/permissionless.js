@@ -7,7 +7,6 @@ import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
-    Address,
     Chain,
     Hex,
     Transport,
@@ -15,7 +14,6 @@ import {
     createWalletClient,
     decodeEventLog,
     getContract,
-    hashMessage,
     zeroAddress
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -385,14 +383,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             message
         })
 
-        const hash = hashMessage(message)
-
-        console.log({
-            address: smartAccountClient.account.address,
-            signature,
-            hash
-        })
-
         const publicClient = await getPublicClient()
 
         const isVerified = await verifyMessage(publicClient, {
@@ -401,10 +391,6 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             signature
         })
 
-        console.log(
-            "isVerified=",
-            isVerified,
-            smartAccountClient.account.address
-        )
+        expect(isVerified).toBeTruthy()
     })
 })

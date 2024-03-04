@@ -272,7 +272,19 @@ export async function signerToBiconomySmartAccount<
     return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            return signMessage(client, { account: viemSigner, message })
+            let signature = await signMessage(client, {
+                account: viemSigner,
+                message
+            })
+            const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
+            if (![27, 28].includes(potentiallyIncorrectV)) {
+                const correctV = potentiallyIncorrectV + 27
+                signature = signature.slice(0, -2) + correctV.toString(16)
+            }
+            return encodeAbiParameters(
+                [{ type: "bytes" }, { type: "address" }],
+                [signature as Hex, ecdsaModuleAddress]
+            )
         },
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()

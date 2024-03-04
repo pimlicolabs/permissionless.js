@@ -5,15 +5,12 @@ import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
-    Address,
     Chain,
-    Hex,
     Transport,
     WalletClient,
     createWalletClient,
     decodeEventLog,
     getContract,
-    hashMessage,
     zeroAddress
 } from "viem"
 import {
@@ -387,14 +384,6 @@ describe("Simple Account", () => {
 
         const signature = await smartAccountClient.signMessage({
             message
-        })
-
-        const hash = hashMessage(message)
-
-        console.log({
-            address: smartAccountClient.account.address,
-            signature,
-            hash
         })
 
         const publicClient = await getPublicClient()
