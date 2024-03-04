@@ -22,12 +22,12 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import { toSmartAccount } from "../toSmartAccount"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import { toSmartAccount } from "../toSmartAccount"
 
 export type SimpleSmartAccount<
     entryPoint extends EntryPoint,

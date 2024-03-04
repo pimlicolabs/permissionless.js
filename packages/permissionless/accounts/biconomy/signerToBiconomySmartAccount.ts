@@ -23,6 +23,7 @@ import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import { toSmartAccount } from "../toSmartAccount"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -32,7 +33,6 @@ import {
     BiconomyExecuteAbi,
     BiconomyInitAbi
 } from "./abi/BiconomySmartAccountAbi"
-import { toSmartAccount } from "../toSmartAccount"
 
 export type BiconomySmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,

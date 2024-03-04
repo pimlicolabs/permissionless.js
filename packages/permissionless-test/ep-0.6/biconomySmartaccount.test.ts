@@ -3,6 +3,7 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
+import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
@@ -14,8 +15,8 @@ import {
     createWalletClient,
     decodeEventLog,
     getContract,
-    zeroAddress,
-    hashMessage
+    hashMessage,
+    zeroAddress
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import {
@@ -40,7 +41,6 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
-import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 

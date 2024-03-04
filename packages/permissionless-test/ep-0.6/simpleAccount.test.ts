@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
+import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
@@ -12,8 +13,8 @@ import {
     createWalletClient,
     decodeEventLog,
     getContract,
-    zeroAddress,
-    hashMessage
+    hashMessage,
+    zeroAddress
 } from "viem"
 import {
     beforeAll,
@@ -37,7 +38,6 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
-import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 

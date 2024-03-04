@@ -10,6 +10,7 @@ import {
     type TypedDataDefinition,
     concat,
     concatHex,
+    encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
     getContractAddress,
@@ -18,8 +19,7 @@ import {
     hexToBigInt,
     keccak256,
     toBytes,
-    zeroAddress,
-    encodeAbiParameters
+    zeroAddress
 } from "viem"
 import {
     getChainId,
@@ -32,12 +32,12 @@ import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import { toSmartAccount } from "../toSmartAccount"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import { toSmartAccount } from "../toSmartAccount"
 
 export type SafeVersion = "1.4.1"
 

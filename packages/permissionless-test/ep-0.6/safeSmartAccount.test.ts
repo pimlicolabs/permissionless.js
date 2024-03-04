@@ -1,5 +1,6 @@
 import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
+import { verifyMessage } from "permissionless/actions"
 import {
     http,
     Account,
@@ -39,7 +40,6 @@ import {
     refillSmartAccount,
     waitForNonceUpdate
 } from "./utils"
-import { verifyMessage } from "permissionless/actions"
 
 dotenv.config()
 

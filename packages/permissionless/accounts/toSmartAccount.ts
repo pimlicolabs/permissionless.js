@@ -11,8 +11,8 @@ import type {
     TypedDataDefinition
 } from "viem"
 import { toAccount } from "viem/accounts"
-import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 import type { UserOperation } from "../types"
+import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount
