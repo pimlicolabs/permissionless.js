@@ -128,7 +128,6 @@ export const getSmartAccountClient = async ({
     const pimlicoBundlerClient = getPimlicoBundlerClient()
 
     const smartAccountClient = createSmartAccountClient({
-        entryPoint: getEntryPoint(),
         account: account ?? (await getSignerToSimpleSmartAccount({ index })),
         chain,
         bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
