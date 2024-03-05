@@ -77,12 +77,12 @@ export type SmartAccountClientConfig<
  */
 
 export function createSmartAccountClient<
-    TEntryPoint extends EntryPoint = EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
-        | undefined,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = undefined
+    TChain extends Chain | undefined = undefined,
+    TEntryPoint extends EntryPoint = TSmartAccount extends SmartAccount<infer U>
+        ? U
+        : never
 >(
     parameters: SmartAccountClientConfig<
         TEntryPoint,
