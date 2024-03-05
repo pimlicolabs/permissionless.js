@@ -57,18 +57,26 @@ const main = async () => {
     }
 
     // Display next steps for the user
-    logger.info("Next steps:")
-    scopedAppName !== "." && logger.info(`  cd ${scopedAppName}`)
+    logger.info("\n Next steps:")
+    scopedAppName !== "." && logger.info(`  - cd ${scopedAppName}`)
     if (noInstall) {
         // To reflect yarn's default behavior of installing packages when no additional args provided
         if (packageManager === "yarn") {
-            logger.info(`  ${packageManager}`)
+            logger.info(`  - ${packageManager}`)
         } else {
-            logger.info(`  ${packageManager} install`)
+            logger.info(`  - ${packageManager} install`)
         }
     }
 
-    // Thank you note and apology for beta issues
+    logger.info("  - provide a private key in the usePrivyAuth hook")
+    logger.info("  - setup necessary envs")
+
+    if (packageManager === "yarn") {
+        logger.info(`  - ${packageManager} dev`)
+    } else {
+        logger.info(`  - ${packageManager} run dev`)
+    }
+
     logger.info("\nThank you for using our CLI tool!")
     logger.info(
         "As we launch the first version, please pardon any issues during beta testing."
