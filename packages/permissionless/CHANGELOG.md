@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.7
+
+### Patch Changes
+
+- d790f83e2cf05e2bad7c89f87ed4e057bef6322a: Add missing 'types' export in the package.json
+
 ## 0.1.6
 
 ### Patch Changes
