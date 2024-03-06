@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.6
+
+### Patch Changes
+
+- 68a207f8976a78b8c765dd8b10b105a629c9d4d6: Remove unused `entrypoint` parameter on the method `createSmartAccountClient`
+
 ## 0.1.5
 
 ### Patch Changes
