@@ -53,6 +53,8 @@ export type SmartAccountClientConfig<
         Middleware<entryPoint> & {
             account: account
             bundlerTransport: Transport
+        } & {
+            entryPoint?: entryPoint
         }
 >
 
