@@ -188,6 +188,7 @@ export const getSmartAccountClient = async ({
 
     const smartAccountClient = createSmartAccountClient({
         account: account ?? (await getSignerToSimpleSmartAccount()),
+        entryPoint: getEntryPoint(),
         chain,
         bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
         middleware:
