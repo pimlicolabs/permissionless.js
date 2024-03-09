@@ -1,13 +1,16 @@
 import {
     type Address,
     BaseError,
+    type CallExecutionErrorType,
     type Chain,
     type Client,
     type ContractFunctionExecutionErrorType,
     type ContractFunctionRevertedErrorType,
     type Hex,
+    type RpcRequestErrorType,
     type Transport,
-    concat
+    concat,
+    decodeErrorResult
 } from "viem"
 
 import { simulateContract } from "viem/actions"
@@ -139,6 +142,37 @@ export const getSenderAddress = async <
                 revertError.data?.args[0]
             ) {
                 return revertError.data?.args[0] as Address
+            }
+        }
+
+        if (err.cause.name === "CallExecutionError") {
+            const callExecutionError = err.cause as CallExecutionErrorType
+            if (callExecutionError.cause.name === "RpcRequestError") {
+                const revertError =
+                    callExecutionError.cause as RpcRequestErrorType
+                // biome-ignore lint/suspicious/noExplicitAny: fuse issues
+                const data = (revertError as unknown as any).cause.data.split(
+                    " "
+                )[1]
+
+                const error = decodeErrorResult({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address",
+                                    name: "sender",
+                                    type: "address"
+                                }
+                            ],
+                            name: "SenderAddressResult",
+                            type: "error"
+                        }
+                    ],
+                    data
+                })
+
+                return error.args[0] as Address
             }
         }
 
