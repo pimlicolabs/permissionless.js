@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.8
+
+### Patch Changes
+
+- 5743fc2dbf7345af732b91e4c9e7016af09ab8e0: Fix special case for fuse
+
 ## 0.1.7
 
 ### Patch Changes
