@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.9
+
+### Patch Changes
+
+- d8b3578ff812f8c63ed8c37ea9468d2cc1b1c9a3: Made signature type explicit to fix type error for biconomy smart account
+
 ## 0.1.8
 
 ### Patch Changes
