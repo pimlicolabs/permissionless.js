@@ -307,11 +307,12 @@ export async function signerToBiconomySmartAccount<
             const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
             if (![27, 28].includes(potentiallyIncorrectV)) {
                 const correctV = potentiallyIncorrectV + 27
-                signature = signature.slice(0, -2) + correctV.toString(16)
+                signature = (signature.slice(0, -2) +
+                    correctV.toString(16)) as Hex
             }
             return encodeAbiParameters(
                 [{ type: "bytes" }, { type: "address" }],
-                [signature as Hex, ecdsaModuleAddress]
+                [signature, ecdsaModuleAddress]
             )
         },
         client: client,
