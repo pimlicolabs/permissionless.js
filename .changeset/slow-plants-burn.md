@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Fixed signature type error for biconomy smart account
+Made signature type explicit to fix type error for biconomy smart account
