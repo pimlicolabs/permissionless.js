@@ -295,7 +295,7 @@ export async function signerToBiconomySmartAccount<
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
         >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            let signature = await signTypedData<
+            let signature: Hex = await signTypedData<
                 TTypedData,
                 TPrimaryType,
                 TChain,
