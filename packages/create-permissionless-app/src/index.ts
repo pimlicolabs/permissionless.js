@@ -68,8 +68,9 @@ const main = async () => {
         }
     }
 
-    logger.info("  - provide a private key in the usePrivyAuth hook")
-    logger.info("  - setup necessary envs")
+    logger.info(
+        "  - create a .env file in the root dir based on the .env.example template and provide the necessary values"
+    )
 
     if (packageManager === "yarn") {
         logger.info(`  - ${packageManager} dev`)
