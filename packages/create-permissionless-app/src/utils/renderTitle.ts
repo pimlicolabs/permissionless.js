@@ -1,6 +1,7 @@
+import figlet from "figlet"
 import gradient from "gradient-string"
 
-import { TITLE_TEXT } from "../constants"
+import { CREATE_PERMISSIONLESS_APP } from "../constants"
 
 const poimandresTheme = {
     blue: "#add7ff",
@@ -11,7 +12,9 @@ const poimandresTheme = {
     yellow: "#fffac2"
 }
 
-export const renderTitle = () => {
-    const t3Gradient = gradient(Object.values(poimandresTheme))
-    console.log(t3Gradient.multiline(TITLE_TEXT))
+export const renderTitle = async () => {
+    const t3Gradient = await gradient(Object.values(poimandresTheme))
+    await figlet(CREATE_PERMISSIONLESS_APP, (err, data: string) => {
+        console.log(t3Gradient(`${data}\n`))
+    })
 }

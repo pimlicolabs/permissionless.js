@@ -22,7 +22,7 @@ type CPAPackageJSON = PackageJson & {
 }
 
 const main = async () => {
-    renderTitle()
+    await renderTitle()
 
     const {
         appName,
