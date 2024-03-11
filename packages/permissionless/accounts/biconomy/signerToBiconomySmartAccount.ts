@@ -272,7 +272,7 @@ export async function signerToBiconomySmartAccount<
     return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            let signature = await signMessage(client, {
+            let signature: Hex = await signMessage(client, {
                 account: viemSigner,
                 message
             })
@@ -284,7 +284,7 @@ export async function signerToBiconomySmartAccount<
             }
             return encodeAbiParameters(
                 [{ type: "bytes" }, { type: "address" }],
-                [signature as Hex, ecdsaModuleAddress]
+                [signature, ecdsaModuleAddress]
             )
         },
         async signTransaction(_, __) {
