@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.10
+
+### Patch Changes
+
+- 565e1ffa8645e10f55aea408f642dfd95aef0d04: Fixed signature type issue for typescript 5.2.2 and viem 2.7.8
+
 ## 0.1.9
 
 ### Patch Changes
