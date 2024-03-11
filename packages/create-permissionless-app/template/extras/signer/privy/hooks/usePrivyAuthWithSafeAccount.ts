@@ -4,11 +4,11 @@ import { usePrivyWagmi } from "@privy-io/wagmi-connector"
 import {
     ENTRYPOINT_ADDRESS_V06,
     type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    walletClientToSmartAccountSigner
 } from "permissionless"
 import {
     type SmartAccount,
-    type SmartAccountSigner,
     signerToSafeSmartAccount
 } from "permissionless/accounts"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -19,7 +19,6 @@ import {
     type Transport,
     type WalletClient
 } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
 import {
     sepolia,
     useAccount,
@@ -29,8 +28,6 @@ import {
 } from "wagmi"
 
 export const usePrivyAuth = () => {
-    const signer: SmartAccountSigner<"privateKey" | "custom", `0x${string}`> =
-        privateKeyToAccount("0xPRIVATE_KEY")
     const { login } = usePrivy()
     const { isConnected } = useAccount()
     const [showLoader, setShowLoader] = useState<boolean>(false)
@@ -69,6 +66,7 @@ export const usePrivyAuth = () => {
     useEffect(() => {
         ;(async () => {
             if (isConnected && walletClient && publicClient) {
+                const signer = walletClientToSmartAccountSigner(walletClient)
                 const safeAccount = await signerToSafeSmartAccount(
                     publicClient,
                     {
@@ -95,7 +93,7 @@ export const usePrivyAuth = () => {
                 setSmartAccountClient(smartAccountClient)
             }
         })()
-    }, [isConnected, walletClient, publicClient, signer])
+    }, [isConnected, walletClient, publicClient])
 
     const onSendTransaction = (txHash: Hash) => {
         setTxHash(txHash)
