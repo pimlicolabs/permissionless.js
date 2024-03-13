@@ -1,5 +1,5 @@
-// import fs from "fs";
 import path from "path"
+import { createEnv } from "./createEnv"
 import { scaffoldProject } from "./scaffoldProject"
 import { selectBoilerplate } from "./selectBolierplate"
 
@@ -9,6 +9,10 @@ interface CreateProjectOptions {
     paymaster: string
     signer: string
     accountSystem: string
+
+    pimlicoApiKey: string
+    privyAppId: string
+    publicRPCUrl: string
 }
 
 export const createProject = async ({
@@ -16,7 +20,10 @@ export const createProject = async ({
     bundler,
     paymaster,
     signer,
-    accountSystem
+    accountSystem,
+    privyAppId,
+    pimlicoApiKey,
+    publicRPCUrl
 }: CreateProjectOptions) => {
     const projectDir = path.resolve(process.cwd(), projectName)
 
@@ -34,6 +41,22 @@ export const createProject = async ({
         accountSystem,
         projectDir
     })
+
+    createEnv(projectDir, "PRIVY_APP_ID", privyAppId)
+
+    createEnv(projectDir, "RPC_URL", publicRPCUrl)
+
+    createEnv(
+        projectDir,
+        "PIMLICO_PAYMASTER_RPC_HOST",
+        `https://api.pimlico.io/v1/sepolia/rpc?apikey=${pimlicoApiKey}`
+    )
+
+    createEnv(
+        projectDir,
+        "PIMLICO_BUNDLER_RPC_HOST",
+        `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`
+    )
 
     return projectDir
 }

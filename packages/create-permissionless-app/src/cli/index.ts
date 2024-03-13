@@ -1,5 +1,4 @@
 import * as p from "@clack/prompts"
-// import chalk from "chalk";
 import { Command } from "commander"
 
 import { CREATE_PERMISSIONLESS_APP, DEFAULT_APP_NAME } from "../constants"
@@ -18,6 +17,10 @@ interface CliFlags {
     paymaster: string
     signer: string
     accountSystem: string
+
+    pimlicoApiKey: string
+    privyAppId: string
+    publicRPCUrl: string
 }
 
 interface CliResults {
@@ -33,7 +36,10 @@ const defaultOptions: CliResults = {
         bundler: "pimlico",
         paymaster: "pimlico",
         signer: "privy",
-        accountSystem: "safe"
+        accountSystem: "safe",
+        pimlicoApiKey: "",
+        privyAppId: "",
+        publicRPCUrl: ""
     }
 }
 
@@ -117,6 +123,19 @@ export const runCli = async (): Promise<CliResults> => {
                         initialValue: cliResults.flags.paymaster
                     })
                 },
+
+                ...(cliResults.flags.bundler === "pimlico" ||
+                cliResults.flags.paymaster === "pimlico"
+                    ? {
+                          pimlicoApiKey: () => {
+                              return p.text({
+                                  message:
+                                      "Please provide the Pimlico API key for your project configuration",
+                                  defaultValue: cliResults.flags.pimlicoApiKey
+                              })
+                          }
+                      }
+                    : {}),
                 accountSystem: () => {
                     return p.select({
                         message: "Pick your account system",
@@ -129,6 +148,24 @@ export const runCli = async (): Promise<CliResults> => {
                         message: "Pick your signer",
                         options: [{ value: "privy", label: "Privy" }],
                         initialValue: cliResults.flags.signer
+                    })
+                },
+                ...(cliResults.flags.signer === "privy"
+                    ? {
+                          privyAppId: () => {
+                              return p.text({
+                                  message:
+                                      "Please provide the Privy API ID for your project configuration",
+                                  defaultValue: cliResults.flags.publicRPCUrl
+                              })
+                          }
+                      }
+                    : {}),
+                publicRPCUrl: () => {
+                    return p.text({
+                        message:
+                            "Please provide the sepolia testnet rpc url for your project configuration",
+                        defaultValue: cliResults.flags.publicRPCUrl
                     })
                 },
                 ...(!cliResults.flags.noInstall && {
@@ -160,7 +197,12 @@ export const runCli = async (): Promise<CliResults> => {
                 paymaster: project.paymaster ?? cliResults.flags.paymaster,
                 bundler: project.bundler ?? cliResults.flags.bundler,
                 accountSystem:
-                    project.accountSystem ?? cliResults.flags.accountSystem
+                    project.accountSystem ?? cliResults.flags.accountSystem,
+                privyAppId: project.privyAppId ?? cliResults.flags.privyAppId,
+                pimlicoApiKey:
+                    project.pimlicoApiKey ?? cliResults.flags.pimlicoApiKey,
+                publicRPCUrl:
+                    project.publicRPCUrl ?? cliResults.flags.publicRPCUrl
             }
         }
     } catch (err) {

@@ -26,7 +26,16 @@ const main = async () => {
 
     const {
         appName,
-        flags: { noInstall, bundler, paymaster, signer, accountSystem }
+        flags: {
+            noInstall,
+            bundler,
+            paymaster,
+            signer,
+            accountSystem,
+            privyAppId,
+            pimlicoApiKey,
+            publicRPCUrl
+        }
     } = await runCli()
     const packageManager: PackageManager = detectPackageManager()
 
@@ -37,7 +46,10 @@ const main = async () => {
         bundler,
         paymaster,
         signer,
-        accountSystem
+        accountSystem,
+        privyAppId,
+        pimlicoApiKey,
+        publicRPCUrl
     })
 
     // Write name to package.json
