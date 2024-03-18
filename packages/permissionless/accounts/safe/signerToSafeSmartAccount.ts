@@ -17,10 +17,10 @@ import {
     hashTypedData,
     hexToBigInt,
     keccak256,
-    toBytes,
-    zeroAddress,
     pad,
-    toHex
+    toBytes,
+    toHex,
+    zeroAddress
 } from "viem"
 import {
     getChainId,
@@ -35,6 +35,11 @@ import type {
     Prettify
 } from "../../types"
 import type { EntryPoint, UserOperation } from "../../types"
+import {
+    getEntryPointVersion,
+    isUserOperationVersion06,
+    isUserOperationVersion07
+} from "../../utils/getEntryPointVersion"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import { toSmartAccount } from "../toSmartAccount"
 import {
@@ -42,11 +47,6 @@ import {
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import {
-    getEntryPointVersion,
-    isUserOperationVersion06,
-    isUserOperationVersion07
-} from "../../utils/getEntryPointVersion"
 
 export type SafeVersion = "1.4.1"
 
