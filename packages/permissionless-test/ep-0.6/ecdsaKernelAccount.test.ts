@@ -144,6 +144,27 @@ describe("ECDSA kernel Account", () => {
         )
     })
 
+    test("Smart account client send transaction", async () => {
+        const smartAccountClient = await getSmartAccountClient({
+            account: await getSignerToEcdsaKernelAccount({ index: 69n })
+        })
+
+        await refillSmartAccount(
+            walletClient,
+            smartAccountClient.account.address
+        )
+
+        const response = await smartAccountClient.sendTransaction({
+            to: zeroAddress,
+            value: 0n,
+            data: "0x"
+        })
+        expectTypeOf(response).toBeString()
+        expect(response).toHaveLength(66)
+        expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)
+        await waitForNonceUpdate()
+    }, 1000000)
+
     test("Smart account client send multiple transactions", async () => {
         const smartAccountClient = await getSmartAccountClient({
             account: await getSignerToEcdsaKernelAccount()
