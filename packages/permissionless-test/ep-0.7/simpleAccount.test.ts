@@ -78,52 +78,39 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signMessage", async () => {
-        const bundlerClient = getBundlerClient()
-        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient()
 
-        const smartAccountClient = await getSmartAccountClient({
-            index: 5n
-        })
-
-        const response = await smartAccountClient.signMessage({
-            message: "hello world"
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signMessage({
+                message: "hello world"
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("Smart account client signTypedData", async () => {
-        const bundlerClient = getBundlerClient()
-        const pimlicoBundlerClient = getPimlicoBundlerClient()
-        const smartAccountClient = await getSmartAccountClient({
-            index: 5n
-        })
+        const smartAccountClient = await getSmartAccountClient()
 
-        const response = await smartAccountClient.signTypedData({
-            domain: {
-                chainId: 1,
-                name: "Test",
-                verifyingContract: zeroAddress
-            },
-            primaryType: "Test",
-            types: {
-                Test: [
-                    {
-                        name: "test",
-                        type: "string"
-                    }
-                ]
-            },
-            message: {
-                test: "hello world"
-            }
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signTypedData({
+                domain: {
+                    chainId: 1,
+                    name: "Test",
+                    verifyingContract: zeroAddress
+                },
+                primaryType: "Test",
+                types: {
+                    Test: [
+                        {
+                            name: "test",
+                            type: "string"
+                        }
+                    ]
+                },
+                message: {
+                    test: "hello world"
+                }
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("smart account client deploy contract", async () => {

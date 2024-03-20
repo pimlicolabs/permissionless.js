@@ -17,7 +17,9 @@ import {
     hashTypedData,
     hexToBigInt,
     keccak256,
+    pad,
     toBytes,
+    toHex,
     zeroAddress
 } from "viem"
 import {
@@ -27,9 +29,17 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
-import type { EntryPoint } from "../../types/entrypoint"
-import { getEntryPointVersion } from "../../utils"
+import type {
+    EntryPointVersion,
+    GetEntryPointVersion,
+    Prettify
+} from "../../types"
+import type { EntryPoint, UserOperation } from "../../types"
+import {
+    getEntryPointVersion,
+    isUserOperationVersion06,
+    isUserOperationVersion07
+} from "../../utils/getEntryPointVersion"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import { toSmartAccount } from "../toSmartAccount"
 import {
@@ -40,7 +50,7 @@ import {
 
 export type SafeVersion = "1.4.1"
 
-const EIP712_SAFE_OPERATION_TYPE = {
+const EIP712_SAFE_OPERATION_TYPE_V06 = {
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "uint256", name: "nonce" },
@@ -58,25 +68,63 @@ const EIP712_SAFE_OPERATION_TYPE = {
     ]
 }
 
+const EIP712_SAFE_OPERATION_TYPE_V07 = {
+    SafeOp: [
+        { type: "address", name: "safe" },
+        { type: "uint256", name: "nonce" },
+        { type: "bytes", name: "initCode" },
+        { type: "bytes", name: "callData" },
+        { type: "uint128", name: "verificationGasLimit" },
+        { type: "uint128", name: "callGasLimit" },
+        { type: "uint256", name: "preVerificationGas" },
+        { type: "uint128", name: "maxPriorityFeePerGas" },
+        { type: "uint128", name: "maxFeePerGas" },
+        { type: "bytes", name: "paymasterAndData" },
+        { type: "uint48", name: "validAfter" },
+        { type: "uint48", name: "validUntil" },
+        { type: "address", name: "entryPoint" }
+    ]
+}
+
 const SAFE_VERSION_TO_ADDRESSES_MAP: {
     [key in SafeVersion]: {
-        ADD_MODULES_LIB_ADDRESS: Address
-        SAFE_4337_MODULE_ADDRESS: Address
-        SAFE_PROXY_FACTORY_ADDRESS: Address
-        SAFE_SINGLETON_ADDRESS: Address
-        MULTI_SEND_ADDRESS: Address
-        MULTI_SEND_CALL_ONLY_ADDRESS: Address
+        [key in EntryPointVersion]: {
+            SAFE_MODULE_SETUP_ADDRESS: Address
+            SAFE_4337_MODULE_ADDRESS: Address
+            SAFE_PROXY_FACTORY_ADDRESS: Address
+            SAFE_SINGLETON_ADDRESS: Address
+            MULTI_SEND_ADDRESS: Address
+            MULTI_SEND_CALL_ONLY_ADDRESS: Address
+        }
     }
 } = {
     "1.4.1": {
-        ADD_MODULES_LIB_ADDRESS: "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb",
-        SAFE_4337_MODULE_ADDRESS: "0xa581c4A4DB7175302464fF3C06380BC3270b4037",
-        SAFE_PROXY_FACTORY_ADDRESS:
-            "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
-        SAFE_SINGLETON_ADDRESS: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
-        MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
-        MULTI_SEND_CALL_ONLY_ADDRESS:
-            "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+        "v0.6": {
+            SAFE_MODULE_SETUP_ADDRESS:
+                "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb",
+            SAFE_4337_MODULE_ADDRESS:
+                "0xa581c4A4DB7175302464fF3C06380BC3270b4037",
+            SAFE_PROXY_FACTORY_ADDRESS:
+                "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+            SAFE_SINGLETON_ADDRESS:
+                "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+            MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+            MULTI_SEND_CALL_ONLY_ADDRESS:
+                "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+        },
+        "v0.7": {
+            SAFE_MODULE_SETUP_ADDRESS:
+                "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47",
+            SAFE_4337_MODULE_ADDRESS:
+                "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226",
+            SAFE_PROXY_FACTORY_ADDRESS:
+                "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+            SAFE_SINGLETON_ADDRESS:
+                "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+            MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+            MULTI_SEND_CALL_ONLY_ADDRESS:
+                "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+        }
     }
 }
 
@@ -174,22 +222,21 @@ const encodeMultiSend = (
 }
 
 export type SafeSmartAccount<
-    entryPoint extends
-        ENTRYPOINT_ADDRESS_V06_TYPE = ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>
 
 const getInitializerCode = async ({
     owner,
-    addModuleLibAddress,
+    safeModuleSetupAddress,
     safe4337ModuleAddress,
     multiSendAddress,
     setupTransactions = [],
     safeModules = []
 }: {
     owner: Address
-    addModuleLibAddress: Address
+    safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     multiSendAddress: Address
     setupTransactions?: {
@@ -201,7 +248,7 @@ const getInitializerCode = async ({
 }) => {
     const multiSendCallData = encodeMultiSend([
         {
-            to: addModuleLibAddress,
+            to: safeModuleSetupAddress,
             data: encodeFunctionData({
                 abi: [
                     {
@@ -292,9 +339,29 @@ const getInitializerCode = async ({
     })
 }
 
+function getPaymasterAndData(unpackedUserOperation: UserOperation<"v0.7">) {
+    return unpackedUserOperation.paymaster
+        ? concat([
+              unpackedUserOperation.paymaster,
+              pad(
+                  toHex(
+                      unpackedUserOperation.paymasterVerificationGasLimit || 0n
+                  ),
+                  {
+                      size: 16
+                  }
+              ),
+              pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
+                  size: 16
+              }),
+              unpackedUserOperation.paymasterData || ("0x" as Hex)
+          ])
+        : "0x"
+}
+
 const getAccountInitCode = async ({
     owner,
-    addModuleLibAddress,
+    safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
     multiSendAddress,
@@ -303,7 +370,7 @@ const getAccountInitCode = async ({
     safeModules = []
 }: {
     owner: Address
-    addModuleLibAddress: Address
+    safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
@@ -318,7 +385,7 @@ const getAccountInitCode = async ({
     if (!owner) throw new Error("Owner account not found")
     const initializer = await getInitializerCode({
         owner,
-        addModuleLibAddress,
+        safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
         setupTransactions,
@@ -370,7 +437,7 @@ const getAccountAddress = async <
 >({
     client,
     owner,
-    addModuleLibAddress,
+    safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
     safeSingletonAddress,
@@ -381,7 +448,7 @@ const getAccountAddress = async <
 }: {
     client: Client<TTransport, TChain>
     owner: Address
-    addModuleLibAddress: Address
+    safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
@@ -421,7 +488,7 @@ const getAccountAddress = async <
 
     const initializer = await getInitializerCode({
         owner,
-        addModuleLibAddress,
+        safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
         setupTransactions,
@@ -445,8 +512,10 @@ const getAccountAddress = async <
 
 const getDefaultAddresses = (
     safeVersion: SafeVersion,
+    entryPointAddress: EntryPoint,
     {
         addModuleLibAddress: _addModuleLibAddress,
+        safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
@@ -454,6 +523,7 @@ const getDefaultAddresses = (
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress
     }: {
         addModuleLibAddress?: Address
+        safeModuleSetupAddress?: Address
         safe4337ModuleAddress?: Address
         safeProxyFactoryAddress?: Address
         safeSingletonAddress?: Address
@@ -461,28 +531,38 @@ const getDefaultAddresses = (
         multiSendCallOnlyAddress?: Address
     }
 ) => {
-    const addModuleLibAddress =
+    const entryPointVersion = getEntryPointVersion(entryPointAddress)
+
+    const safeModuleSetupAddress =
+        _safeModuleSetupAddress ??
         _addModuleLibAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].ADD_MODULES_LIB_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+            .SAFE_MODULE_SETUP_ADDRESS
     const safe4337ModuleAddress =
         _safe4337ModuleAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_4337_MODULE_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+            .SAFE_4337_MODULE_ADDRESS
     const safeProxyFactoryAddress =
         _safeProxyFactoryAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_PROXY_FACTORY_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+            .SAFE_PROXY_FACTORY_ADDRESS
     const safeSingletonAddress =
         _safeSingletonAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].SAFE_SINGLETON_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+            .SAFE_SINGLETON_ADDRESS
     const multiSendAddress =
         _multiSendAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+            .MULTI_SEND_ADDRESS
 
     const multiSendCallOnlyAddress =
         _multiSendCallOnlyAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion].MULTI_SEND_CALL_ONLY_ADDRESS
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][
+            getEntryPointVersion(entryPointAddress)
+        ].MULTI_SEND_CALL_ONLY_ADDRESS
 
     return {
-        addModuleLibAddress,
+        safeModuleSetupAddress,
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
         safeSingletonAddress,
@@ -500,7 +580,7 @@ export type SignerToSafeSmartAccountParameters<
     safeVersion: SafeVersion
     entryPoint: entryPoint
     address?: Address
-    addModuleLibAddress?: Address
+    safeModuleSetupAddress?: Address
     safe4337ModuleAddress?: Address
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
@@ -523,7 +603,7 @@ export type SignerToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function signerToSafeSmartAccount<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = string,
@@ -535,7 +615,7 @@ export async function signerToSafeSmartAccount<
         address,
         safeVersion,
         entryPoint: entryPointAddress,
-        addModuleLibAddress: _addModuleLibAddress,
+        safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
@@ -548,12 +628,6 @@ export async function signerToSafeSmartAccount<
         setupTransactions = []
     }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-
-    if (entryPointVersion !== "v0.6") {
-        throw new Error("Only EntryPoint 0.6 is supported")
-    }
-
     const chainId = await getChainId(client)
 
     const viemSigner: LocalAccount = {
@@ -564,14 +638,14 @@ export async function signerToSafeSmartAccount<
     } as LocalAccount
 
     const {
-        addModuleLibAddress,
+        safeModuleSetupAddress,
         safe4337ModuleAddress,
         safeProxyFactoryAddress,
         safeSingletonAddress,
         multiSendAddress,
         multiSendCallOnlyAddress
-    } = getDefaultAddresses(safeVersion, {
-        addModuleLibAddress: _addModuleLibAddress,
+    } = getDefaultAddresses(safeVersion, entryPointAddress, {
+        safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
@@ -584,7 +658,7 @@ export async function signerToSafeSmartAccount<
         (await getAccountAddress<TTransport, TChain>({
             client,
             owner: viemSigner.address,
-            addModuleLibAddress,
+            safeModuleSetupAddress,
             safe4337ModuleAddress,
             safeProxyFactoryAddress,
             safeSingletonAddress,
@@ -666,7 +740,44 @@ export async function signerToSafeSmartAccount<
                     entryPoint: entryPointAddress
                 })
             },
-            async signUserOperation(userOperation) {
+            async signUserOperation(
+                userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+            ) {
+                const message = {
+                    safe: accountAddress,
+                    callData: userOperation.callData,
+                    nonce: userOperation.nonce,
+                    initCode: userOperation.initCode ?? "0x",
+                    maxFeePerGas: userOperation.maxFeePerGas,
+                    maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
+                    preVerificationGas: userOperation.preVerificationGas,
+                    verificationGasLimit: userOperation.verificationGasLimit,
+                    callGasLimit: userOperation.callGasLimit,
+                    paymasterAndData: userOperation.paymasterAndData ?? "0x",
+                    validAfter: validAfter,
+                    validUntil: validUntil,
+                    entryPoint: entryPointAddress
+                }
+
+                if (
+                    isUserOperationVersion06(entryPointAddress, userOperation)
+                ) {
+                    message.paymasterAndData = userOperation.paymasterAndData
+                }
+
+                if (
+                    isUserOperationVersion07(entryPointAddress, userOperation)
+                ) {
+                    if (userOperation.factory && userOperation.factoryData) {
+                        message.initCode = concatHex([
+                            userOperation.factory,
+                            userOperation.factoryData
+                        ])
+                    }
+                    message.paymasterAndData =
+                        getPaymasterAndData(userOperation)
+                }
+
                 const signatures = [
                     {
                         signer: viemSigner.address,
@@ -676,27 +787,13 @@ export async function signerToSafeSmartAccount<
                                 chainId: chainId,
                                 verifyingContract: safe4337ModuleAddress
                             },
-                            types: EIP712_SAFE_OPERATION_TYPE,
+                            types:
+                                getEntryPointVersion(entryPointAddress) ===
+                                "v0.6"
+                                    ? EIP712_SAFE_OPERATION_TYPE_V06
+                                    : EIP712_SAFE_OPERATION_TYPE_V07,
                             primaryType: "SafeOp",
-                            message: {
-                                safe: accountAddress,
-                                callData: userOperation.callData,
-                                entryPoint: entryPointAddress,
-                                nonce: userOperation.nonce,
-                                initCode: userOperation.initCode,
-                                maxFeePerGas: userOperation.maxFeePerGas,
-                                maxPriorityFeePerGas:
-                                    userOperation.maxPriorityFeePerGas,
-                                preVerificationGas:
-                                    userOperation.preVerificationGas,
-                                verificationGasLimit:
-                                    userOperation.verificationGasLimit,
-                                callGasLimit: userOperation.callGasLimit,
-                                paymasterAndData:
-                                    userOperation.paymasterAndData,
-                                validAfter: validAfter,
-                                validUntil: validUntil
-                            }
+                            message: message
                         })
                     }
                 ]
@@ -715,53 +812,36 @@ export async function signerToSafeSmartAccount<
                 )
             },
             async getInitCode() {
-                if (safeDeployed) return "0x"
-
-                safeDeployed = await isSmartAccountDeployed(
-                    client,
-                    accountAddress
-                )
+                safeDeployed =
+                    safeDeployed ||
+                    (await isSmartAccountDeployed(client, accountAddress))
 
                 if (safeDeployed) return "0x"
 
-                const initCodeCallData = await getAccountInitCode({
-                    owner: viemSigner.address,
-                    addModuleLibAddress,
-                    safe4337ModuleAddress,
-                    safeSingletonAddress,
-                    multiSendAddress,
-                    saltNonce,
-                    setupTransactions,
-                    safeModules
-                })
-
-                return concatHex([safeProxyFactoryAddress, initCodeCallData])
+                return concatHex([
+                    (await this.getFactory()) ?? "0x",
+                    (await this.getFactoryData()) ?? "0x"
+                ])
             },
             async getFactory() {
-                if (safeDeployed) return undefined
-
-                safeDeployed = await isSmartAccountDeployed(
-                    client,
-                    accountAddress
-                )
+                safeDeployed =
+                    safeDeployed ||
+                    (await isSmartAccountDeployed(client, accountAddress))
 
                 if (safeDeployed) return undefined
 
                 return safeProxyFactoryAddress
             },
             async getFactoryData() {
-                if (safeDeployed) return undefined
-
-                safeDeployed = await isSmartAccountDeployed(
-                    client,
-                    accountAddress
-                )
+                safeDeployed =
+                    safeDeployed ||
+                    (await isSmartAccountDeployed(client, accountAddress))
 
                 if (safeDeployed) return undefined
 
                 return await getAccountInitCode({
                     owner: viemSigner.address,
-                    addModuleLibAddress,
+                    safeModuleSetupAddress,
                     safe4337ModuleAddress,
                     safeSingletonAddress,
                     multiSendAddress,
