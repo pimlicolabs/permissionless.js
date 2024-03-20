@@ -125,6 +125,7 @@ export const getSignerToSafeSmartAccount = async (args?: {
         setupTransactions: args?.setupTransactions
     })
 }
+
 export const getSignerToEcdsaKernelAccount = async (
     { index }: { index: bigint } = { index: 100n }
 ) => {

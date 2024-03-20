@@ -6,6 +6,7 @@ import {
 import {
     SmartAccount,
     SmartAccountSigner,
+    signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
 import { Middleware } from "permissionless/actions/smartAccount"
@@ -109,6 +110,30 @@ export const getCustomSignerToSimpleSmartAccount = async () => {
     })
 
     return walletClientToSmartAccountSigner(walletClient)
+}
+
+export const getSignerToSafeSmartAccount = async (args?: {
+    saltNonce?: bigint
+    setupTransactions?: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+}) => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = await getPublicClient()
+
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToSafeSmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        signer: signer,
+        safeVersion: "1.4.1",
+        saltNonce: args?.saltNonce ?? 100n,
+        setupTransactions: args?.setupTransactions
+    })
 }
 
 export const getSmartAccountClient = async ({
