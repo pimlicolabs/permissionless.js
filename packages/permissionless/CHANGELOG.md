@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.11
+
+### Patch Changes
+
+- cbe0339486338f001c879e2406399ab845859c84: Added entryPoint 0.7 support for Safe
+
 ## 0.1.10
 
 ### Patch Changes
