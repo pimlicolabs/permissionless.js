@@ -1,23 +1,25 @@
 import "@/styles/globals.css"
+import { WagmiProvider } from "@privy-io/wagmi"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { AppProps, AppType } from "next/app"
-import { WagmiConfig } from "wagmi"
 
-import { privyConfig, wagmiChainsConfig, wagmiConfig } from "@/config"
+import { privyConfig, wagmiConfig } from "@/config"
 import { PrivyProvider } from "@privy-io/react-auth"
-import { PrivyWagmiConnector } from "@privy-io/wagmi-connector"
+
+const queryClient = new QueryClient()
 
 const App: AppType = ({ Component, pageProps }: AppProps) => {
     return (
-        <WagmiConfig config={wagmiConfig}>
-            <PrivyProvider
-                appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
-                config={privyConfig}
-            >
-                <PrivyWagmiConnector wagmiChainsConfig={wagmiChainsConfig}>
+        <PrivyProvider
+            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
+            config={privyConfig}
+        >
+            <QueryClientProvider client={queryClient}>
+                <WagmiProvider config={wagmiConfig}>
                     <Component {...pageProps} />
-                </PrivyWagmiConnector>
-            </PrivyProvider>
-        </WagmiConfig>
+                </WagmiProvider>
+            </QueryClientProvider>
+        </PrivyProvider>
     )
 }
 

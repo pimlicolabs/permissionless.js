@@ -15,8 +15,8 @@ export const addPackageDependency = (signer: string, baseDir: string) => {
 
         // Add packages based on signer option
         if (signer === "privy") {
-            dependencies["@privy-io/wagmi-connector"] = "^0.1.12"
-            dependencies["@privy-io/react-auth"] = "^1.54.0"
+            dependencies["@privy-io/react-auth"] = "^1.59.5"
+            dependencies["@privy-io/wagmi"] = "^0.2.1"
         }
 
         // Write back the updated package.json

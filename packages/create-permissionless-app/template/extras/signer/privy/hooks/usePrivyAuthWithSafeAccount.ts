@@ -1,26 +1,18 @@
 import { pimlicoPaymasterConfig } from "@/config"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
-import { usePrivyWagmi } from "@privy-io/wagmi-connector"
+import { useSetActiveWallet } from "@privy-io/wagmi"
+import { useCallback, useEffect, useMemo, useState } from "react"
+
 import {
     ENTRYPOINT_ADDRESS_V06,
     type SmartAccountClient,
     createSmartAccountClient,
     walletClientToSmartAccountSigner
 } from "permissionless"
+import { signerToSafeSmartAccount } from "permissionless/accounts"
+import { http, type Hash } from "viem"
+import { sepolia } from "viem/chains"
 import {
-    type SmartAccount,
-    signerToSafeSmartAccount
-} from "permissionless/accounts"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-    http,
-    type Chain,
-    type Hash,
-    type Transport,
-    type WalletClient
-} from "viem"
-import {
-    sepolia,
     useAccount,
     useDisconnect,
     usePublicClient,
@@ -32,26 +24,22 @@ export const usePrivyAuth = () => {
     const { isConnected } = useAccount()
     const [showLoader, setShowLoader] = useState<boolean>(false)
     const [txHash, setTxHash] = useState<Hash | null>(null)
-    const [smartAccountClient, setSmartAccountClient] =
-        useState<SmartAccountClient<Transport, Chain, SmartAccount> | null>(
-            null
-        )
+
+    const [smartAccountClient, setSmartAccountClient] = useState<
+        SmartAccountClient<typeof ENTRYPOINT_ADDRESS_V06> | undefined
+    >()
+
     const { disconnect } = useDisconnect()
     const publicClient = usePublicClient()
 
     const { wallets } = useWallets()
 
     const { data: walletClient } = useWalletClient()
-    const { setActiveWallet } = usePrivyWagmi()
+    const { setActiveWallet } = useSetActiveWallet()
 
-    const embeddedWallet = useMemo(
-        () => wallets.find((wallet) => wallet.walletClientType === "privy"),
-        [wallets]
+    const embeddedWallet = wallets.find(
+        (wallet) => wallet.walletClientType === "privy"
     )
-
-    useEffect(() => {
-        setActiveWallet(embeddedWallet)
-    }, [embeddedWallet, setActiveWallet])
 
     const signIn = useCallback(async () => {
         setShowLoader(true)
@@ -65,7 +53,8 @@ export const usePrivyAuth = () => {
 
     useEffect(() => {
         ;(async () => {
-            if (isConnected && walletClient && publicClient) {
+            if (isConnected && walletClient && publicClient && embeddedWallet) {
+                setActiveWallet(embeddedWallet)
                 const signer = walletClientToSmartAccountSigner(walletClient)
                 const safeAccount = await signerToSafeSmartAccount(
                     publicClient,
@@ -93,7 +82,13 @@ export const usePrivyAuth = () => {
                 setSmartAccountClient(smartAccountClient)
             }
         })()
-    }, [isConnected, walletClient, publicClient])
+    }, [
+        isConnected,
+        walletClient,
+        publicClient,
+        embeddedWallet,
+        setActiveWallet
+    ])
 
     const onSendTransaction = (txHash: Hash) => {
         setTxHash(txHash)

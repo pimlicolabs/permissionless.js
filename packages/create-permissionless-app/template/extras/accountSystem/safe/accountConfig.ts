@@ -5,10 +5,9 @@ import {
     type SafeSmartAccount,
     privateKeyToSafeSmartAccount
 } from "permissionless/accounts"
-import { http, type Address, type Chain } from "viem"
+import { http, type Address } from "viem"
 import { type PublicClient } from "viem"
-import { usePublicClient } from "wagmi"
-import { sepolia } from "wagmi"
+import { sepolia } from "viem/chains"
 
 export const createSafeAccount = async (publicClient: PublicClient) => {
     const safeAccount: SafeSmartAccount = await privateKeyToSafeSmartAccount(

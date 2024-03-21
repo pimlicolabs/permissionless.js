@@ -1,6 +1,6 @@
 import { pimlicoPaymaster } from "@/config/pimlicoConfig"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
-import { usePrivyWagmi } from "@privy-io/wagmi-connector"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 import {
     createSmartAccountClient,
     walletClientToCustomSigner
@@ -19,13 +19,13 @@ import {
     type Transport,
     type WalletClient
 } from "viem"
+import { sepolia } from "viem/chains"
 import {
     useAccount,
     useDisconnect,
     usePublicClient,
     useWalletClient
 } from "wagmi"
-import { sepolia } from "wagmi"
 
 interface PrivyAuthHook {
     isConnected: boolean
@@ -54,7 +54,7 @@ export const usePrivyAuth = (): PrivyAuthHook => {
     const { wallets } = useWallets()
 
     const { data: walletClient } = useWalletClient()
-    const { setActiveWallet } = usePrivyWagmi()
+    const { setActiveWallet } = useSetActiveWallet()
 
     const embeddedWallet = useMemo(
         () => wallets.find((wallet) => wallet.walletClientType === "privy"),
