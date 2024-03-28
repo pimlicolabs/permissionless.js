@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.12
+
+### Patch Changes
+
+- 9f88457a6458bd10d44241e8d78b2918adbc3042: Added ganache support for getSenderAddress
+
 ## 0.1.11
 
 ### Patch Changes
