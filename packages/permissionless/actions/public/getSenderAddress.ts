@@ -173,13 +173,14 @@ export const getSenderAddress = async <
                 })
 
                 return error.args[0] as Address
-            } 
-            
+            }
+
             if (callExecutionError.cause.name === "InvalidInputRpcError") {
                 //Ganache local testing returns "InvalidInputRpcError" with data in regular format
-                const revertError = callExecutionError.cause as RpcRequestErrorType;
+                const revertError =
+                    callExecutionError.cause as RpcRequestErrorType
                 // biome-ignore lint/suspicious/noExplicitAny: fuse issues
-                const data = (revertError as unknown as any).cause.data;
+                const data = (revertError as unknown as any).cause.data
 
                 const error = decodeErrorResult({
                     abi: [
@@ -188,17 +189,17 @@ export const getSenderAddress = async <
                                 {
                                     internalType: "address",
                                     name: "sender",
-                                    type: "address",
-                                },
+                                    type: "address"
+                                }
                             ],
                             name: "SenderAddressResult",
-                            type: "error",
-                        },
+                            type: "error"
+                        }
                     ],
-                    data,
-                });
+                    data
+                })
 
-                return error.args[0] as Address;
+                return error.args[0] as Address
             }
         }
 
