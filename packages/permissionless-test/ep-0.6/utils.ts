@@ -37,9 +37,9 @@ import { privateKeyToAccount } from "viem/accounts"
 import * as allChains from "viem/chains"
 
 export const getFactoryAddress = () => {
-    if (!process.env.FACTORY_ADDRESS)
-        throw new Error("FACTORY_ADDRESS environment variable not set")
-    const factoryAddress = process.env.FACTORY_ADDRESS as Address
+    if (!process.env.FACTORY_ADDRESS_V06)
+        throw new Error("FACTORY_ADDRESS_V06 environment variable not set")
+    const factoryAddress = process.env.FACTORY_ADDRESS_V06 as Address
     return factoryAddress
 }
 

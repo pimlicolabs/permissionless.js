@@ -51,8 +51,8 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.FACTORY_ADDRESS)
-        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.FACTORY_ADDRESS_V06)
+        throw new Error("FACTORY_ADDRESS_V06 environment variable not set")
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
@@ -100,7 +100,7 @@ describe("BUNDLER ACTIONS", () => {
                 process.env.TEST_PRIVATE_KEY as Address
             ),
             entryPoint: getEntryPoint(),
-            factoryAddress: process.env.FACTORY_ADDRESS as Address,
+            factoryAddress: process.env.FACTORY_ADDRESS_V06 as Address,
             index: 3n
         })
 
@@ -134,7 +134,7 @@ describe("BUNDLER ACTIONS", () => {
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: walletClientToSmartAccountSigner(eoaWalletClient),
             entryPoint: ENTRYPOINT_ADDRESS_V06,
-            factoryAddress: process.env.FACTORY_ADDRESS as Address
+            factoryAddress: process.env.FACTORY_ADDRESS_V06 as Address
         })
 
         const pimlicoBundlerClient = getPimlicoBundlerClient()

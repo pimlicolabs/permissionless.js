@@ -49,8 +49,8 @@ export const getAccountInitCode = async (
 }
 
 beforeAll(() => {
-    if (!process.env.FACTORY_ADDRESS)
-        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.FACTORY_ADDRESS_V07)
+        throw new Error("FACTORY_ADDRESS_V07 environment variable not set")
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
