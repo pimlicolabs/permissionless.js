@@ -49,13 +49,23 @@ export const getPrivateKeyAccount = () => {
     return privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 }
 
+export const getPublicClient = () => {
+    if (!process.env.RPC_URL)
+        throw new Error("RPC_URL environment variable not set")
+
+    const publicClient = createPublicClient({
+        transport: http(process.env.RPC_URL as string)
+    })
+
+    return publicClient
+}
+
+const publicClient = getPublicClient()
+const chainId = await publicClient.getChainId()
+
 export const getTestingChain = () => {
     // If custom chain specified in environment variable, use that
 
-    if (!process.env.TEST_CHAIN_ID)
-        throw new Error("TEST_CHAIN_ID environment variable not set")
-
-    const chainId = parseInt(process.env.TEST_CHAIN_ID)
     const chain = Object.values(allChains).find((chain) => chain.id === chainId)
     if (chain) return chain
 
@@ -91,7 +101,7 @@ export const getSignerToSimpleSmartAccount = async (
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
 
     return await signerToSimpleSmartAccount(publicClient, {
         entryPoint: getEntryPoint(),
@@ -113,7 +123,7 @@ export const getSignerToSafeSmartAccount = async (args?: {
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
 
     const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 
@@ -132,7 +142,7 @@ export const getSignerToEcdsaKernelAccount = async (
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
     const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 
     return await signerToEcdsaKernelSmartAccount(publicClient, {
@@ -148,7 +158,7 @@ export const getSignerToBiconomyAccount = async (
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
 
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
     const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
 
     return await signerToBiconomySmartAccount(publicClient, {
@@ -207,7 +217,7 @@ export const getSmartAccountClient = async ({
 
     if (preFund) {
         const walletClient = getEoaWalletClient()
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const balance = await publicClient.getBalance({
             address: smartAccountClient.account.address
@@ -235,26 +245,6 @@ export const getEoaWalletClient = () => {
 
 export const getEntryPoint = () => {
     return ENTRYPOINT_ADDRESS_V06
-}
-
-export const getPublicClient = async () => {
-    if (!process.env.RPC_URL)
-        throw new Error("RPC_URL environment variable not set")
-
-    const publicClient = createPublicClient({
-        transport: http(process.env.RPC_URL as string)
-    })
-
-    const chainId = await publicClient.getChainId()
-
-    if (chainId !== getTestingChain().id)
-        throw new Error(
-            `Testing Chain ID: ${
-                getTestingChain().id
-            } not supported by RPC URL, RPC Chain ID: ${chainId}`
-        )
-
-    return publicClient
 }
 
 export const getBundlerClient = () => {
@@ -299,7 +289,7 @@ export const getPimlicoPaymasterClient = () => {
 }
 
 export const isAccountDeployed = async (accountAddress: Address) => {
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
 
     const contractCode = await publicClient.getBytecode({
         address: accountAddress
@@ -352,7 +342,7 @@ export const refillSmartAccount = async (
     walletClient: WalletClient<Transport, Chain, Account>,
     address
 ) => {
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
     const balance = await publicClient.getBalance({ address })
     if (balance < 1000000000000000n) {
         await walletClient.sendTransaction({

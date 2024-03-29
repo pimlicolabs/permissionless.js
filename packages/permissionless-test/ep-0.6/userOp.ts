@@ -57,7 +57,7 @@ const getAccountAddress = async (
     index: bigint
 ): Promise<Address | null> => {
     const initCode = await getAccountInitCode(factoryAddress, owner, index)
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
     const entryPoint = getEntryPoint()
 
     return getSenderAddress(publicClient, {
@@ -90,7 +90,7 @@ export const buildUserOp = async (
     })
 
     const factoryAddress = getFactoryAddress()
-    const publicClient = await getPublicClient()
+    const publicClient = getPublicClient()
     const entryPoint = getEntryPoint()
 
     const accountAddress = await getAccountAddress(

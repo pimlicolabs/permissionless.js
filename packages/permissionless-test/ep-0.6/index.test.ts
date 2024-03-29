@@ -59,7 +59,7 @@ describe("test public actions and utils", () => {
             factoryAddress,
             eoaWalletClient
         )
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const entryPoint = getEntryPoint()
 
         const sender = await getSenderAddress(publicClient, {
@@ -80,7 +80,7 @@ describe("test public actions and utils", () => {
             factoryAddress,
             eoaWalletClient
         )
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const entryPoint = getEntryPoint()
 
         await expect(async () =>

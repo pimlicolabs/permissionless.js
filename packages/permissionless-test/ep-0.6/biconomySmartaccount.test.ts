@@ -140,7 +140,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             abi: EntryPointAbi,
             address: getEntryPoint(),
             client: {
-                public: await getPublicClient(),
+                public: getPublicClient(),
                 wallet: smartAccountClient
             }
         })
@@ -169,7 +169,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     test("Client send Transaction with paymaster", async () => {
         const account = await getSignerToBiconomyAccount()
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -226,7 +226,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
     test("Client send multiple Transactions with paymaster", async () => {
         const account = await getSignerToBiconomyAccount()
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -291,7 +291,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount()
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
         const smartAccountClient = await getSmartAccountClient({
             account: initialEcdsaSmartAccount,
@@ -338,7 +338,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -363,7 +363,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -415,7 +415,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,
@@ -495,7 +495,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,

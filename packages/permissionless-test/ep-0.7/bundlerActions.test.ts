@@ -89,7 +89,7 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Estimate user operation gas", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const eoaWalletClient = getEoaWalletClient()
 
@@ -120,7 +120,7 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Sending user operation", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const eoaWalletClient = getEoaWalletClient()
 
         const bundlerClient = createBundlerClient({

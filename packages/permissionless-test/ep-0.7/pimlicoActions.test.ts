@@ -209,7 +209,7 @@ describe("Pimlico Actions tests", () => {
     })
 
     test("Validating sponsorship policies", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         if (!process.env.ACTIVE_SPONSORSHIP_POLICY)
             throw new Error(

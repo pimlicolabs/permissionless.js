@@ -38,6 +38,7 @@ import {
     getBundlerClient,
     getEntryPoint,
     getEoaWalletClient,
+    getPimlicoBundlerClient,
     getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
@@ -89,7 +90,7 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Estimate user operation gas", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const eoaWalletClient = getEoaWalletClient()
 
@@ -120,7 +121,7 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Sending user operation", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const eoaWalletClient = getEoaWalletClient()
 
         const bundlerClient = createBundlerClient({
@@ -135,12 +136,18 @@ describe("BUNDLER ACTIONS", () => {
             factoryAddress: process.env.FACTORY_ADDRESS as Address
         })
 
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+
         const smartAccountClient = createSmartAccountClient({
             account: simpleAccount,
             chain: getTestingChain(),
             bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
-            middleware: async (args) => {
-                return args.userOperation
+            middleware: {
+                gasPrice: async () => {
+                    return (
+                        await pimlicoBundlerClient.getUserOperationGasPrice()
+                    ).fast
+                }
             }
         })
 

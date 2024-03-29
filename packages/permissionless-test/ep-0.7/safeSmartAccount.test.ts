@@ -141,7 +141,7 @@ describe("Safe Account", () => {
             abi: EntryPointAbi,
             address: getEntryPoint(),
             client: {
-                public: await getPublicClient(),
+                public: getPublicClient(),
                 wallet: smartAccountClient
             }
         })
@@ -226,7 +226,7 @@ describe("Safe Account", () => {
     }, 1000000)
 
     test("safe smart account client send Transaction with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const pimlicoPaymaster = getPimlicoPaymasterClient()
 
@@ -283,7 +283,7 @@ describe("Safe Account", () => {
     }, 1000000)
 
     test("safe smart account client send Transaction with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -362,7 +362,7 @@ describe("Safe Account", () => {
         expect(signature).toHaveLength(132)
         expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const response = await publicClient.readContract({
             address: smartAccountClient.account.address,
@@ -452,7 +452,7 @@ describe("Safe Account", () => {
         expect(signature).toHaveLength(132)
         expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/)
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const response = await publicClient.readContract({
             address: smartAccountClient.account.address,
@@ -546,7 +546,7 @@ describe("Safe Account", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -569,7 +569,7 @@ describe("Safe Account", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -619,7 +619,7 @@ describe("Safe Account", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,
@@ -697,7 +697,7 @@ describe("Safe Account", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,

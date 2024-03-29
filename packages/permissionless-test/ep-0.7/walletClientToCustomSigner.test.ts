@@ -193,7 +193,7 @@ describe("Simple Account from walletClient", () => {
             abi: EntryPointAbi,
             address: getEntryPoint(),
             client: {
-                public: await getPublicClient(),
+                public: getPublicClient(),
                 wallet: smartAccountClient
             }
         })
@@ -241,7 +241,7 @@ describe("Simple Account from walletClient", () => {
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -295,7 +295,7 @@ describe("Simple Account from walletClient", () => {
     }, 1000000)
 
     test("smart account client send multiple Transactions with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()

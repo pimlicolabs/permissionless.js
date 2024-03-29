@@ -208,7 +208,7 @@ describe("ECDSA kernel Account", () => {
             abi: EntryPointAbi,
             address: getEntryPoint(),
             client: {
-                public: await getPublicClient(),
+                public: getPublicClient(),
                 wallet: smartAccountClient
             }
         })
@@ -237,7 +237,7 @@ describe("ECDSA kernel Account", () => {
     test("Client send Transaction with paymaster", async () => {
         const account = await getSignerToEcdsaKernelAccount()
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -294,7 +294,7 @@ describe("ECDSA kernel Account", () => {
     test("Client send multiple Transactions with paymaster", async () => {
         const account = await getSignerToEcdsaKernelAccount()
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
@@ -359,7 +359,7 @@ describe("ECDSA kernel Account", () => {
 
     test("Can use a deployed account", async () => {
         const initialEcdsaSmartAccount = await getSignerToEcdsaKernelAccount()
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const pimlicoPaymaster = getPimlicoPaymasterClient()
         const smartAccountClient = await getSmartAccountClient({
             account: initialEcdsaSmartAccount,
@@ -418,7 +418,7 @@ describe("ECDSA kernel Account", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -443,7 +443,7 @@ describe("ECDSA kernel Account", () => {
             message
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyMessage({
             address: smartAccountClient.account.address,
@@ -495,7 +495,7 @@ describe("ECDSA kernel Account", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,
@@ -575,7 +575,7 @@ describe("ECDSA kernel Account", () => {
             }
         })
 
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const isVerified = await publicClient.verifyTypedData({
             address: smartAccountClient.account.address,

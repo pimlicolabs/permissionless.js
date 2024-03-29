@@ -87,7 +87,7 @@ describe("Pimlico Actions tests", () => {
     describe("Pimlico paymaster actions ", () => {
         test("Fetching paymaster and data", async () => {
             const eoaWalletClient = getEoaWalletClient()
-            const publicClient = await getPublicClient()
+            const publicClient = getPublicClient()
             const { maxFeePerGas, maxPriorityFeePerGas } =
                 await publicClient.estimateFeesPerGas()
             const partialUserOp = await buildUserOp(eoaWalletClient)
@@ -206,7 +206,7 @@ describe("Pimlico Actions tests", () => {
 
     test("Validating sponsorship policies", async () => {
         const eoaWalletClient = getEoaWalletClient()
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const { maxFeePerGas, maxPriorityFeePerGas } =
             await publicClient.estimateFeesPerGas()
 
