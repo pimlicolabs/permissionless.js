@@ -156,6 +156,9 @@ describe("BUNDLER ACTIONS", () => {
                 }
             })
 
+        userOperation.signature =
+            await smartAccountClient.account.signUserOperation(userOperation)
+
         const userOpHash = await bundlerClient.sendUserOperation({
             userOperation: userOperation
         })

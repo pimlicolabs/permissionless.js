@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import {
     BundlerClient,
+    ENTRYPOINT_ADDRESS_V06,
     ENTRYPOINT_ADDRESS_V07,
     UserOperation,
     WaitForUserOperationReceiptTimeoutError,
@@ -118,7 +119,7 @@ describe("BUNDLER ACTIONS", () => {
             to: zeroAddress,
             value: 0n
         })
-    })
+    }, 100000)
 
     test("Sending user operation", async () => {
         const publicClient = getPublicClient()
@@ -127,12 +128,12 @@ describe("BUNDLER ACTIONS", () => {
         const bundlerClient = createBundlerClient({
             chain: getTestingChain(),
             transport: http(`${process.env.BUNDLER_RPC_HOST}`),
-            entryPoint: ENTRYPOINT_ADDRESS_V07
+            entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: walletClientToSmartAccountSigner(eoaWalletClient),
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
+            entryPoint: ENTRYPOINT_ADDRESS_V06,
             factoryAddress: process.env.FACTORY_ADDRESS as Address
         })
 
@@ -162,6 +163,9 @@ describe("BUNDLER ACTIONS", () => {
                     callData: "0x"
                 }
             })
+
+        userOperation.signature =
+            await smartAccountClient.account.signUserOperation(userOperation)
 
         const userOpHash = await bundlerClient.sendUserOperation({
             userOperation: userOperation
@@ -194,7 +198,7 @@ describe("BUNDLER ACTIONS", () => {
 
         expect(userOperationFromUserOpHash).not.toBeNull()
         expect(userOperationFromUserOpHash?.entryPoint).toBe(
-            ENTRYPOINT_ADDRESS_V07
+            ENTRYPOINT_ADDRESS_V06
         )
         expect(userOperationFromUserOpHash?.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
