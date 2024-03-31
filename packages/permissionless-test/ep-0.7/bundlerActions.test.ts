@@ -37,6 +37,8 @@ import {
     getBundlerClient,
     getEntryPoint,
     getEoaWalletClient,
+    getPimlicoBundlerClient,
+    getPimlicoPaymasterClient,
     getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
@@ -91,8 +93,6 @@ describe("BUNDLER ACTIONS", () => {
     test("Estimate user operation gas", async () => {
         const publicClient = getPublicClient()
 
-        const eoaWalletClient = getEoaWalletClient()
-
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: privateKeyToAccount(
                 process.env.TEST_PRIVATE_KEY as Address
@@ -102,22 +102,34 @@ describe("BUNDLER ACTIONS", () => {
             index: 3n
         })
 
+        // const paymasterClient = getPimlicoPaymasterClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
+
         const smartAccountClient = createSmartAccountClient({
             account: simpleAccount,
             chain: getTestingChain(),
-            bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`)
+            bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
+            middleware: {
+                gasPrice: async () => {
+                    const gasPrices =
+                        await pimlicoBundlerClient.getUserOperationGasPrice()
+                    return gasPrices.fast
+                }
+                // sponsorUserOperation: paymasterClient.sponsorUserOperation
+            }
         })
 
-        await eoaWalletClient.sendTransaction({
-            to: simpleAccount.address,
-            value: parseEther("1")
-        })
+        // await eoaWalletClient.sendTransaction({
+        //     to: simpleAccount.address,
+        //     value: parseEther("1")
+        // })
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n
         })
-    })
+        console.log(`Transaction hash: ${response}`)
+    }, 100000)
 
     test("Sending user operation", async () => {
         const publicClient = getPublicClient()
