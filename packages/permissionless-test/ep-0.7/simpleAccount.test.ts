@@ -38,8 +38,8 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.FACTORY_ADDRESS) {
-        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.FACTORY_ADDRESS_V07) {
+        throw new Error("FACTORY_ADDRESS_V07 environment variable not set")
     }
     if (!process.env.TEST_PRIVATE_KEY) {
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
@@ -78,52 +78,39 @@ describe("Simple Account", () => {
     })
 
     test("Smart account client signMessage", async () => {
-        const bundlerClient = getBundlerClient()
-        const pimlicoBundlerClient = getPimlicoBundlerClient()
+        const smartAccountClient = await getSmartAccountClient()
 
-        const smartAccountClient = await getSmartAccountClient({
-            index: 5n
-        })
-
-        const response = await smartAccountClient.signMessage({
-            message: "hello world"
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signMessage({
+                message: "hello world"
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("Smart account client signTypedData", async () => {
-        const bundlerClient = getBundlerClient()
-        const pimlicoBundlerClient = getPimlicoBundlerClient()
-        const smartAccountClient = await getSmartAccountClient({
-            index: 5n
-        })
+        const smartAccountClient = await getSmartAccountClient()
 
-        const response = await smartAccountClient.signTypedData({
-            domain: {
-                chainId: 1,
-                name: "Test",
-                verifyingContract: zeroAddress
-            },
-            primaryType: "Test",
-            types: {
-                Test: [
-                    {
-                        name: "test",
-                        type: "string"
-                    }
-                ]
-            },
-            message: {
-                test: "hello world"
-            }
-        })
-
-        expectTypeOf(response).toBeString()
-        expect(response).toHaveLength(132)
-        expect(response).toMatch(/^0x[0-9a-fA-F]{130}$/)
+        await expect(async () =>
+            smartAccountClient.signTypedData({
+                domain: {
+                    chainId: 1,
+                    name: "Test",
+                    verifyingContract: zeroAddress
+                },
+                primaryType: "Test",
+                types: {
+                    Test: [
+                        {
+                            name: "test",
+                            type: "string"
+                        }
+                    ]
+                },
+                message: {
+                    test: "hello world"
+                }
+            })
+        ).rejects.toThrowError("Simple account isn't 1271 compliant")
     })
 
     test("smart account client deploy contract", async () => {
@@ -185,7 +172,7 @@ describe("Simple Account", () => {
             abi: EntryPointAbi,
             address: getEntryPoint(),
             client: {
-                public: await getPublicClient(),
+                public: getPublicClient(),
                 wallet: smartAccountClient
             }
         })
@@ -287,7 +274,7 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("smart account client send Transaction with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
 
@@ -335,7 +322,7 @@ describe("Simple Account", () => {
     }, 1000000)
 
     test("smart account client send multiple Transactions with paymaster", async () => {
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
 
         const bundlerClient = getBundlerClient()
 

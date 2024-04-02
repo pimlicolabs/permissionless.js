@@ -1,5 +1,53 @@
 # permissionless
 
+## 0.1.12
+
+### Patch Changes
+
+- 9f88457a6458bd10d44241e8d78b2918adbc3042: Added ganache support for getSenderAddress
+
+## 0.1.11
+
+### Patch Changes
+
+- cbe0339486338f001c879e2406399ab845859c84: Added entryPoint 0.7 support for Safe
+
+## 0.1.10
+
+### Patch Changes
+
+- 565e1ffa8645e10f55aea408f642dfd95aef0d04: Fixed signature type issue for typescript 5.2.2 and viem 2.7.8
+
+## 0.1.9
+
+### Patch Changes
+
+- d8b3578ff812f8c63ed8c37ea9468d2cc1b1c9a3: Made signature type explicit to fix type error for biconomy smart account
+
+## 0.1.8
+
+### Patch Changes
+
+- 5743fc2dbf7345af732b91e4c9e7016af09ab8e0: Fix special case for fuse
+
+## 0.1.7
+
+### Patch Changes
+
+- d790f83e2cf05e2bad7c89f87ed4e057bef6322a: Add missing 'types' export in the package.json
+
+## 0.1.6
+
+### Patch Changes
+
+- 68a207f8976a78b8c765dd8b10b105a629c9d4d6: Remove unused `entrypoint` parameter on the method `createSmartAccountClient`
+
+## 0.1.5
+
+### Patch Changes
+
+- b4ee5ecd43bab87a521b6223b9df129ffd0f4e5c: Make smart accounts eip 6492 compliant
+
 ## 0.1.4
 
 ### Patch Changes

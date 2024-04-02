@@ -1,5 +1,7 @@
 {
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/*"
+    ],
     "private": true,
     "author": "Pimlico",
     "type": "module",

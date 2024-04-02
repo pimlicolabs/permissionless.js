@@ -1,4 +1,3 @@
-import type { TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -6,12 +5,10 @@ import {
     type Hex,
     type LocalAccount,
     type Transport,
-    type TypedDataDefinition,
     concatHex,
     encodeFunctionData
 } from "viem"
-import { toAccount } from "viem/accounts"
-import { getChainId, signMessage, signTypedData } from "viem/actions"
+import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type {
@@ -23,6 +20,7 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
+import { toSmartAccount } from "../toSmartAccount"
 import {
     SignTransactionNotSupportedBySmartAccount,
     type SmartAccount,
@@ -165,32 +163,17 @@ export async function signerToSimpleSmartAccount<
         accountAddress
     )
 
-    const account = toAccount({
+    return toSmartAccount({
         address: accountAddress,
-        async signMessage({ message }) {
-            return signMessage(client, { account: viemSigner, message })
+        signMessage: async (_) => {
+            throw new Error("Simple account isn't 1271 compliant")
         },
-        async signTransaction(_, __) {
+        signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        async signTypedData<
-            const TTypedData extends TypedData | Record<string, unknown>,
-            TPrimaryType extends
-                | keyof TTypedData
-                | "EIP712Domain" = keyof TTypedData
-        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
-                client,
-                {
-                    account: viemSigner,
-                    ...typedData
-                }
-            )
-        }
-    })
-
-    return {
-        ...account,
+        signTypedData: async (_) => {
+            throw new Error("Simple account isn't 1271 compliant")
+        },
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
@@ -202,7 +185,8 @@ export async function signerToSimpleSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            return account.signMessage({
+            return signMessage(client, {
+                account: viemSigner,
                 message: {
                     raw: getUserOperationHash({
                         userOperation,
@@ -359,5 +343,5 @@ export async function signerToSimpleSmartAccount<
         async getDummySignature(_userOperation) {
             return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
-    }
+    })
 }

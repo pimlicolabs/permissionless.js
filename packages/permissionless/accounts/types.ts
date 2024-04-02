@@ -28,11 +28,11 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 
 export type SmartAccount<
     entryPoint extends EntryPoint,
-    Name extends string = string,
+    TSource extends string = string,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
-> = LocalAccount<Name> & {
+> = LocalAccount<TSource> & {
     client: Client<transport, chain>
     entryPoint: entryPoint
     getNonce: () => Promise<bigint>

@@ -37,6 +37,8 @@ import {
     getBundlerClient,
     getEntryPoint,
     getEoaWalletClient,
+    getPimlicoBundlerClient,
+    getPimlicoPaymasterClient,
     getPrivateKeyAccount,
     getPublicClient,
     getSignerToSimpleSmartAccount,
@@ -49,8 +51,8 @@ import {
 dotenv.config()
 
 beforeAll(() => {
-    if (!process.env.FACTORY_ADDRESS)
-        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.FACTORY_ADDRESS_V07)
+        throw new Error("FACTORY_ADDRESS_V07 environment variable not set")
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
@@ -71,7 +73,7 @@ describe("BUNDLER ACTIONS", () => {
         bundlerClient = getBundlerClient()
     })
 
-    test.skip("Supported entry points request", async () => {
+    test("Supported entry points request", async () => {
         const supportedEntryPoints = await bundlerClient.supportedEntryPoints()
 
         expectTypeOf(supportedEntryPoints).toBeArray()
@@ -79,7 +81,7 @@ describe("BUNDLER ACTIONS", () => {
         expect(supportedEntryPoints.includes(getEntryPoint())).toBe(true)
     })
 
-    test.skip("Chain id call", async () => {
+    test("Chain id call", async () => {
         const chainId = await bundlerClient.chainId()
         const chain = getTestingChain()
 
@@ -89,39 +91,48 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("Estimate user operation gas", async () => {
-        const publicClient = await getPublicClient()
-
-        const eoaWalletClient = getEoaWalletClient()
+        const publicClient = getPublicClient()
 
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: privateKeyToAccount(
                 process.env.TEST_PRIVATE_KEY as Address
             ),
             entryPoint: getEntryPoint(),
-            factoryAddress: process.env.FACTORY_ADDRESS as Address,
+            factoryAddress: process.env.FACTORY_ADDRESS_V07 as Address,
             index: 3n
         })
+
+        // const paymasterClient = getPimlicoPaymasterClient()
+        const pimlicoBundlerClient = getPimlicoBundlerClient()
 
         const smartAccountClient = createSmartAccountClient({
             account: simpleAccount,
             chain: getTestingChain(),
             bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
-            entryPoint: getEntryPoint()
+            middleware: {
+                gasPrice: async () => {
+                    const gasPrices =
+                        await pimlicoBundlerClient.getUserOperationGasPrice()
+                    return gasPrices.fast
+                }
+                // sponsorUserOperation: paymasterClient.sponsorUserOperation
+            }
         })
 
-        await eoaWalletClient.sendTransaction({
-            to: simpleAccount.address,
-            value: parseEther("1")
-        })
+        // await eoaWalletClient.sendTransaction({
+        //     to: simpleAccount.address,
+        //     value: parseEther("1")
+        // })
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n
         })
-    })
+        console.log(`Transaction hash: ${response}`)
+    }, 100000)
 
-    test.skip("Sending user operation", async () => {
-        const publicClient = await getPublicClient()
+    test("Sending user operation", async () => {
+        const publicClient = getPublicClient()
         const eoaWalletClient = getEoaWalletClient()
 
         const bundlerClient = createBundlerClient({
@@ -133,7 +144,7 @@ describe("BUNDLER ACTIONS", () => {
         const simpleAccount = await signerToSimpleSmartAccount(publicClient, {
             signer: walletClientToSmartAccountSigner(eoaWalletClient),
             entryPoint: ENTRYPOINT_ADDRESS_V07,
-            factoryAddress: process.env.FACTORY_ADDRESS as Address
+            factoryAddress: process.env.FACTORY_ADDRESS_V07 as Address
         })
 
         const smartAccountClient = createSmartAccountClient({
@@ -142,8 +153,7 @@ describe("BUNDLER ACTIONS", () => {
             bundlerTransport: http(`${process.env.BUNDLER_RPC_HOST}`),
             middleware: async (args) => {
                 return args.userOperation
-            },
-            entryPoint: ENTRYPOINT_ADDRESS_V07
+            }
         })
 
         await refillSmartAccount(
@@ -157,6 +167,9 @@ describe("BUNDLER ACTIONS", () => {
                     callData: "0x"
                 }
             })
+
+        userOperation.signature =
+            await smartAccountClient.account.signUserOperation(userOperation)
 
         const userOpHash = await bundlerClient.sendUserOperation({
             userOperation: userOperation
@@ -210,7 +223,7 @@ describe("BUNDLER ACTIONS", () => {
         // expect(newNonce).toBe(userOperation.nonce + BigInt(1))
     }, 100000)
 
-    test.skip("wait for user operation receipt fail", async () => {
+    test("wait for user operation receipt fail", async () => {
         const simpleAccountClient = await getSmartAccountClient()
 
         const userOperation =
