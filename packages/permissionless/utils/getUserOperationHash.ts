@@ -2,7 +2,7 @@ import type { Address, Hash, Hex } from "viem"
 import { concat, encodeAbiParameters, keccak256, pad, toHex } from "viem"
 import type { EntryPoint, GetEntryPointVersion } from "../types"
 import type { UserOperation } from "../types/userOperation"
-import { getEntryPointVersion } from "./getEntryPointVersion"
+import { isUserOperationVersion06 } from "./getEntryPointVersion"
 
 function packUserOp<entryPoint extends EntryPoint>({
     userOperation,
@@ -11,15 +11,10 @@ function packUserOp<entryPoint extends EntryPoint>({
     userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
     entryPoint: entryPoint
 }): Hex {
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-
-    if (entryPointVersion === "v0.6") {
-        const userOperationVersion0_6 = userOperation as UserOperation<"v0.6">
-        const hashedInitCode = keccak256(userOperationVersion0_6.initCode)
-        const hashedCallData = keccak256(userOperationVersion0_6.callData)
-        const hashedPaymasterAndData = keccak256(
-            userOperationVersion0_6.paymasterAndData
-        )
+    if (isUserOperationVersion06(entryPointAddress, userOperation)) {
+        const hashedInitCode = keccak256(userOperation.initCode)
+        const hashedCallData = keccak256(userOperation.callData)
+        const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData)
 
         return encodeAbiParameters(
             [
@@ -35,49 +30,40 @@ function packUserOp<entryPoint extends EntryPoint>({
                 { type: "bytes32" }
             ],
             [
-                userOperationVersion0_6.sender as Address,
-                userOperationVersion0_6.nonce,
+                userOperation.sender as Address,
+                userOperation.nonce,
                 hashedInitCode,
                 hashedCallData,
-                userOperationVersion0_6.callGasLimit,
-                userOperationVersion0_6.verificationGasLimit,
-                userOperationVersion0_6.preVerificationGas,
-                userOperationVersion0_6.maxFeePerGas,
-                userOperationVersion0_6.maxPriorityFeePerGas,
+                userOperation.callGasLimit,
+                userOperation.verificationGasLimit,
+                userOperation.preVerificationGas,
+                userOperation.maxFeePerGas,
+                userOperation.maxPriorityFeePerGas,
                 hashedPaymasterAndData
             ]
         )
     }
 
-    const userOperationVersion0_7 = userOperation as UserOperation<"v0.7">
     const hashedInitCode = keccak256(
-        userOperationVersion0_7.factory && userOperationVersion0_7.factoryData
-            ? concat([
-                  userOperationVersion0_7.factory,
-                  userOperationVersion0_7.factoryData
-              ])
+        userOperation.factory && userOperation.factoryData
+            ? concat([userOperation.factory, userOperation.factoryData])
             : "0x"
     )
-    const hashedCallData = keccak256(userOperationVersion0_7.callData)
+    const hashedCallData = keccak256(userOperation.callData)
     const hashedPaymasterAndData = keccak256(
-        userOperationVersion0_7.paymaster &&
-            userOperationVersion0_7.paymasterVerificationGasLimit &&
-            userOperationVersion0_7.paymasterPostOpGasLimit &&
-            userOperationVersion0_7.paymasterData
+        userOperation.paymaster &&
+            userOperation.paymasterVerificationGasLimit &&
+            userOperation.paymasterPostOpGasLimit &&
+            userOperation.paymasterData
             ? concat([
-                  userOperationVersion0_7.paymaster,
-                  pad(
-                      toHex(
-                          userOperationVersion0_7.paymasterVerificationGasLimit
-                      ),
-                      {
-                          size: 16
-                      }
-                  ),
-                  pad(toHex(userOperationVersion0_7.paymasterPostOpGasLimit), {
+                  userOperation.paymaster,
+                  pad(toHex(userOperation.paymasterVerificationGasLimit), {
                       size: 16
                   }),
-                  userOperationVersion0_7.paymasterData
+                  pad(toHex(userOperation.paymasterPostOpGasLimit), {
+                      size: 16
+                  }),
+                  userOperation.paymasterData
               ])
             : "0x"
     )
@@ -94,22 +80,22 @@ function packUserOp<entryPoint extends EntryPoint>({
             { type: "bytes32" }
         ],
         [
-            userOperationVersion0_7.sender as Address,
-            userOperationVersion0_7.nonce,
+            userOperation.sender as Address,
+            userOperation.nonce,
             hashedInitCode,
             hashedCallData,
             concat([
-                pad(toHex(userOperationVersion0_7.verificationGasLimit), {
+                pad(toHex(userOperation.verificationGasLimit), {
                     size: 16
                 }),
-                pad(toHex(userOperationVersion0_7.callGasLimit), { size: 16 })
+                pad(toHex(userOperation.callGasLimit), { size: 16 })
             ]),
-            userOperationVersion0_7.preVerificationGas,
+            userOperation.preVerificationGas,
             concat([
-                pad(toHex(userOperationVersion0_7.maxPriorityFeePerGas), {
+                pad(toHex(userOperation.maxPriorityFeePerGas), {
                     size: 16
                 }),
-                pad(toHex(userOperationVersion0_7.maxFeePerGas), { size: 16 })
+                pad(toHex(userOperation.maxFeePerGas), { size: 16 })
             ]),
             hashedPaymasterAndData
         ]

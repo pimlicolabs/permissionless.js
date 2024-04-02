@@ -25,17 +25,7 @@ export class SendUserOperationError<
         }
     ) {
         const prettyArgs = prettyPrint({
-            sender: userOperation.sender,
-            nonce: userOperation.nonce,
-            initCode: userOperation.initCode,
-            callData: userOperation.callData,
-            callGasLimit: userOperation.callGasLimit,
-            verificationGasLimit: userOperation.verificationGasLimit,
-            preVerificationGas: userOperation.preVerificationGas,
-            maxFeePerGas: userOperation.maxFeePerGas,
-            maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
-            paymasterAndData: userOperation.paymasterAndData,
-            signature: userOperation.signature,
+            ...userOperation,
             entryPoint
         })
 

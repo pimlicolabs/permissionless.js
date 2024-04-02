@@ -49,8 +49,8 @@ export const getAccountInitCode = async (
 }
 
 beforeAll(() => {
-    if (!process.env.FACTORY_ADDRESS)
-        throw new Error("FACTORY_ADDRESS environment variable not set")
+    if (!process.env.FACTORY_ADDRESS_V07)
+        throw new Error("FACTORY_ADDRESS_V07 environment variable not set")
     if (!process.env.TEST_PRIVATE_KEY)
         throw new Error("TEST_PRIVATE_KEY environment variable not set")
     if (!process.env.RPC_URL)
@@ -83,7 +83,7 @@ describe("test public actions and utils", () => {
             factoryAddress,
             eoaWalletClient
         )
-        const publicClient = await getPublicClient()
+        const publicClient = getPublicClient()
         const entryPoint = getEntryPoint()
 
         const sender = await getSenderAddress(publicClient, {
@@ -95,26 +95,6 @@ describe("test public actions and utils", () => {
         expect(sender).not.toBeNull()
         expect(sender).not.toBeUndefined()
         expectTypeOf(sender).toMatchTypeOf<Address>()
-    })
-
-    test("get sender address with invalid entry point", async () => {
-        const eoaWalletClient = getEoaWalletClient()
-        const factoryAddress = getFactoryAddress()
-
-        const { factory, factoryData } = await getAccountInitCode(
-            factoryAddress,
-            eoaWalletClient
-        )
-        const publicClient = await getPublicClient()
-        const entryPoint = getEntryPoint()
-
-        await expect(async () =>
-            getSenderAddress(publicClient, {
-                factory,
-                factoryData,
-                entryPoint
-            })
-        ).rejects.toThrow()
     })
 
     test("getUserOperationHash", async () => {

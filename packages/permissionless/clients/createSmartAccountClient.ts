@@ -49,11 +49,12 @@ export type SmartAccountClientConfig<
     Pick<
         ClientConfig<transport, chain, account>,
         "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
-    > & {
-        account?: account
-        bundlerTransport: Transport
-    } & Middleware<entryPoint> & {
-            entryPoint: entryPoint
+    > &
+        Middleware<entryPoint> & {
+            account: account
+            bundlerTransport: Transport
+        } & {
+            entryPoint?: entryPoint
         }
 >
 
@@ -78,20 +79,20 @@ export type SmartAccountClientConfig<
  */
 
 export function createSmartAccountClient<
-    entryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = undefined
+    TChain extends Chain | undefined = undefined,
+    TEntryPoint extends EntryPoint = TSmartAccount extends SmartAccount<infer U>
+        ? U
+        : never
 >(
     parameters: SmartAccountClientConfig<
-        entryPoint,
+        TEntryPoint,
         TTransport,
         TChain,
         TSmartAccount
     >
-): SmartAccountClient<entryPoint, TTransport, TChain, TSmartAccount> {
+): SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount> {
     const {
         key = "Account",
         name = "Smart Account Client",
@@ -109,5 +110,5 @@ export function createSmartAccountClient<
         smartAccountActions({
             middleware: parameters.middleware
         })
-    ) as SmartAccountClient<entryPoint, TTransport, TChain, TSmartAccount>
+    ) as SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount>
 }
