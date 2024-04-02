@@ -90,15 +90,6 @@ const main = async () => {
         logger.info(`  - ${packageManager} run dev`)
     }
 
-    logger.info("\nThank you for using our CLI tool!")
-    logger.info(
-        "As we launch the first version, please pardon any issues during beta testing."
-    )
-    logger.info(
-        "Your feedback helps us improve. If you encounter any bugs or have suggestions, please let us know."
-    )
-    logger.info("We appreciate your support!")
-
     // Thank you note and apology for beta issues
     logger.info("\nThank you for using our CLI tool!")
     logger.info(
