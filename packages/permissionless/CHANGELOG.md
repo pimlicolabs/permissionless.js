@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.13
+
+### Patch Changes
+
+- 22fadbe5122d8676cc0d2d8b6fd61e90ab516498: Fixed prepareUserOperation when either of paymaster gas limits is zero
+
 ## 0.1.12
 
 ### Patch Changes
