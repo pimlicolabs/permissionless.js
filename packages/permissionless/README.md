@@ -1,6 +1,6 @@
 <p align="center"><a href="https://docs.pimlico/permissionless"><img width="1000" title="Permissionless" src='https://raw.githubusercontent.com/pimlicolabs/permissionless.js/main/assets/banner.png' /></a></p>
 
-# Permissionless.js
+# permissionless.js
 
 ![Node Version](https://img.shields.io/badge/node-20.x-green)
 
