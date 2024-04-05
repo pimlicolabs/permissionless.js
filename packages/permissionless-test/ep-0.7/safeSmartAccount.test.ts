@@ -203,18 +203,41 @@ describe("Safe Account", () => {
     }, 1000000)
 
     test("safe Smart account client send transaction", async () => {
+        const bundlerClient = getBundlerClient()
+        const erc20PaymasterAddress =
+            "0x000000000041F3aFe8892B48D88b6862efe0ec8d"
+
         const smartAccountClient = await getSmartAccountClient({
-            account: await getSignerToSafeSmartAccount()
+            account: await getSignerToSafeSmartAccount(),
+            middleware: {
+                sponsorUserOperation: async (args) => {
+                    const gasEstimates =
+                        await bundlerClient.estimateUserOperationGas({
+                            userOperation: {
+                                ...args.userOperation,
+                                paymaster: erc20PaymasterAddress
+                            }
+                        })
+
+                    return {
+                        ...gasEstimates,
+                        paymaster: erc20PaymasterAddress
+                    }
+                }
+            }
         })
-        await refillSmartAccount(
-            walletClient,
-            smartAccountClient.account.address
-        )
+        // await refillSmartAccount(
+        //     walletClient,
+        //     smartAccountClient.account.address
+        // )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
             value: 0n,
             data: "0x"
         })
+
+        console.log(`Transaction hash: ${response}`)
+
         expectTypeOf(response).toBeString()
         expect(response).toHaveLength(66)
         expect(response).toMatch(/^0x[0-9a-fA-F]{64}$/)

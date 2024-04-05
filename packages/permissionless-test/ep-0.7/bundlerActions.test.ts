@@ -102,7 +102,7 @@ describe("BUNDLER ACTIONS", () => {
             index: 3n
         })
 
-        // const paymasterClient = getPimlicoPaymasterClient()
+        const paymasterClient = getPimlicoPaymasterClient()
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
         const smartAccountClient = createSmartAccountClient({
@@ -114,8 +114,8 @@ describe("BUNDLER ACTIONS", () => {
                     const gasPrices =
                         await pimlicoBundlerClient.getUserOperationGasPrice()
                     return gasPrices.fast
-                }
-                // sponsorUserOperation: paymasterClient.sponsorUserOperation
+                },
+                sponsorUserOperation: paymasterClient.sponsorUserOperation
             }
         })
 
@@ -128,7 +128,6 @@ describe("BUNDLER ACTIONS", () => {
             to: zeroAddress,
             value: 0n
         })
-        console.log(`Transaction hash: ${response}`)
     }, 100000)
 
     test("Sending user operation", async () => {

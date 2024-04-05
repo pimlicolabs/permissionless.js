@@ -127,7 +127,6 @@ describe("BUNDLER ACTIONS", () => {
             to: zeroAddress,
             value: 0n
         })
-        console.log(`Transaction hash: ${response}`)
     }, 100000)
 
     test("Sending user operation", async () => {
