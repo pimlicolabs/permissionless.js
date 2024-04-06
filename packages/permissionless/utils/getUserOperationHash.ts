@@ -51,19 +51,19 @@ function packUserOp<entryPoint extends EntryPoint>({
     )
     const hashedCallData = keccak256(userOperation.callData)
     const hashedPaymasterAndData = keccak256(
-        userOperation.paymaster &&
-            userOperation.paymasterVerificationGasLimit &&
-            userOperation.paymasterPostOpGasLimit &&
-            userOperation.paymasterData
+        userOperation.paymaster
             ? concat([
                   userOperation.paymaster,
-                  pad(toHex(userOperation.paymasterVerificationGasLimit), {
+                  pad(
+                      toHex(userOperation.paymasterVerificationGasLimit || 0n),
+                      {
+                          size: 16
+                      }
+                  ),
+                  pad(toHex(userOperation.paymasterPostOpGasLimit || 0n), {
                       size: 16
                   }),
-                  pad(toHex(userOperation.paymasterPostOpGasLimit), {
-                      size: 16
-                  }),
-                  userOperation.paymasterData
+                  userOperation.paymasterData || "0x"
               ])
             : "0x"
     )
