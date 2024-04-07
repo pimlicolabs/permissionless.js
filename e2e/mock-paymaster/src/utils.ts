@@ -1,14 +1,14 @@
 import type { UserOperation } from "permissionless"
-import { type Hex, concat, pad, toHex, createWalletClient, http } from "viem"
-import { foundry } from "viem/chains"
+import { http, type Hex, concat, createWalletClient, pad, toHex } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
+import { foundry } from "viem/chains"
 
 function getInitCode(unpackedUserOperation: UserOperation<"v0.7">) {
     return unpackedUserOperation.factory
         ? concat([
-            unpackedUserOperation.factory,
-            unpackedUserOperation.factoryData || ("0x" as Hex)
-        ])
+              unpackedUserOperation.factory,
+              unpackedUserOperation.factoryData || ("0x" as Hex)
+          ])
         : "0x"
 }
 
@@ -37,20 +37,20 @@ export function getPaymasterAndData(
 ) {
     return unpackedUserOperation.paymaster
         ? concat([
-            unpackedUserOperation.paymaster,
-            pad(
-                toHex(
-                    unpackedUserOperation.paymasterVerificationGasLimit || 0n
-                ),
-                {
-                    size: 16
-                }
-            ),
-            pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
-                size: 16
-            }),
-            unpackedUserOperation.paymasterData || ("0x" as Hex)
-        ])
+              unpackedUserOperation.paymaster,
+              pad(
+                  toHex(
+                      unpackedUserOperation.paymasterVerificationGasLimit || 0n
+                  ),
+                  {
+                      size: 16
+                  }
+              ),
+              pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
+                  size: 16
+              }),
+              unpackedUserOperation.paymasterData || ("0x" as Hex)
+          ])
         : "0x"
 }
 

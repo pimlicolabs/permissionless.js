@@ -1,23 +1,14 @@
 import {
-    type Chain,
-    type Transport,
-    createWalletClient,
-    http,
-    createPublicClient,
-    parseEther,
-    type Address,
-    type WalletClient,
-    type Account
-} from "viem"
-import { generatePrivateKey, mnemonicToAccount } from "viem/accounts"
-import { foundry } from "viem/chains"
-import {
     type BundlerClient,
+    type SmartAccountClient,
     createBundlerClient,
     createSmartAccountClient,
-    getEntryPointVersion,
-    type SmartAccountClient
+    getEntryPointVersion
 } from "permissionless"
+import {
+    type SmartAccount,
+    privateKeyToSimpleSmartAccount
+} from "permissionless/accounts"
 import {
     type PimlicoPaymasterClient,
     createPimlicoBundlerClient,
@@ -25,12 +16,21 @@ import {
 } from "permissionless/clients/pimlico"
 import type { EntryPoint } from "permissionless/types"
 import {
-    type SmartAccount,
-    privateKeyToSimpleSmartAccount
-} from "permissionless/accounts"
+    http,
+    type Account,
+    type Address,
+    type Chain,
+    type Transport,
+    type WalletClient,
+    createPublicClient,
+    createWalletClient,
+    parseEther
+} from "viem"
+import { generatePrivateKey, mnemonicToAccount } from "viem/accounts"
+import { foundry } from "viem/chains"
 import {
-    SIMPLE_ACCOUNT_FACTORY_V07,
-    SIMPLE_ACCOUNT_FACTORY_V06
+    SIMPLE_ACCOUNT_FACTORY_V06,
+    SIMPLE_ACCOUNT_FACTORY_V07
 } from "./constants"
 
 export const fund = async (
