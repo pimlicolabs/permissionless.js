@@ -1,0 +1,17 @@
+{
+    "name": "test-cases",
+    "version": "0.0.0",
+    "scripts": {
+        "start": "jest"
+    },
+    "dependencies": {
+        "viem": "^2.9.9"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.12",
+        "@types/node": "^20.12.4",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.2",
+        "ts-node": "^10.9.2"
+    }
+}
