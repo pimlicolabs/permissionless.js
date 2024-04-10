@@ -13,7 +13,7 @@ dependencies:
     version: 4.26.2
   permissionless:
     specifier: ^0.1.0
-    version: 0.1.12(viem@2.7.12)
+    version: link:../../packages/permissionless
   tslib:
     specifier: ^2.6.2
     version: 2.6.2
@@ -464,14 +464,6 @@ packages:
   /on-exit-leak-free@2.1.2:
     resolution: {integrity: sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA==}
     engines: {node: '>=14.0.0'}
-    dev: false
-
-  /permissionless@0.1.12(viem@2.7.12):
-    resolution: {integrity: sha512-lB12zgMbQDdBlx7GZAdrZQUWBtDxT9D13aqLzwMe7o5SGUw62IR2rCnYVoU+iCFYnotZ6BdI3Q1YusktXsSebw==}
-    peerDependencies:
-      viem: ^2.0.0
-    dependencies:
-      viem: 2.7.12(typescript@5.4.2)(zod@3.22.4)
     dev: false
 
   /pino-abstract-transport@1.1.0:

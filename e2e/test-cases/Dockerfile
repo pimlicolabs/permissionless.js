@@ -15,6 +15,4 @@ RUN pnpm fetch
 RUN pnpm install
 
 # start app
-#ENTRYPOINT ["pnpm", "run", "start"]
-#CMD tail -f /dev/null
-ENTRYPOINT pnpm link /app/permissionless && pnpm run start
+ENTRYPOINT pnpm install /app/permissionless && pnpm run start

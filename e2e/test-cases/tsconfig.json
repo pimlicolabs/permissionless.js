@@ -1,6 +1,20 @@
 {
     "compilerOptions": {
-        "target": "es2022",
-        "module": "commonjs"
-    }
+        "target": "ES2022",
+        "module": "CommonJS",
+        "strict": true,
+        "allowJs": true,
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "declaration": false,
+        "outDir": "dist/lib"
+    },
+    "include": ["src/**/*.ts", "anvilSetup/**/*.ts"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
 }

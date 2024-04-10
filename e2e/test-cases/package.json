@@ -5,6 +5,8 @@
         "start": "jest"
     },
     "dependencies": {
+        "permissionless": "link:../../packages/permissionless",
+        "tslib": "^2.6.2",
         "viem": "^2.0.0"
     },
     "devDependencies": {
