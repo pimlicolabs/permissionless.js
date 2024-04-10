@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.15
+
+### Patch Changes
+
+- 9cb81f6156383381b35753b54adf8c16cc0dba4f: Performance improvement - reduced network call for chain id
+
 ## 0.1.14
 
 ### Patch Changes
