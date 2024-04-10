@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.16
+
+### Patch Changes
+
+- 84d841d9f5474c0c5dc806ec6e8177551b2307e8: Added util function getPackedUserOperation
+
 ## 0.1.15
 
 ### Patch Changes
