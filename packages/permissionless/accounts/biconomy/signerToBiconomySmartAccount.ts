@@ -259,7 +259,7 @@ export async function signerToBiconomySmartAccount<
                 fallbackHandlerAddress,
                 index
             }),
-        getChainId(client)
+        client.chain?.id ?? getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")

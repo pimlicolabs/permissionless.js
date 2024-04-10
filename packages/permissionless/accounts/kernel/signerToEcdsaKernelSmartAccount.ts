@@ -279,7 +279,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 deployedAccountAddress,
                 factoryAddress
             }),
-        getChainId(client)
+        client.chain?.id ?? getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
