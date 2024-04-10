@@ -628,7 +628,7 @@ export async function signerToSafeSmartAccount<
         setupTransactions = []
     }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
-    const chainId = await getChainId(client)
+    const chainId = client.chain?.id ?? (await getChainId(client))
 
     const viemSigner: LocalAccount = {
         ...signer,
