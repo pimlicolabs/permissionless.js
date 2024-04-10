@@ -5,10 +5,11 @@ import {
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
+import type { PackedUserOperation } from "permissionless/types"
 import {
+    getPackedUserOperation,
     getRequiredPrefund,
-    signUserOperationHashWithECDSA,
-    getPackedUserOperation
+    signUserOperationHashWithECDSA
 } from "permissionless/utils"
 import {
     type Address,
@@ -30,7 +31,6 @@ import {
     getSmartAccountClient,
     getTestingChain
 } from "./utils"
-import type { PackedUserOperation } from "permissionless/types"
 
 dotenv.config()
 
