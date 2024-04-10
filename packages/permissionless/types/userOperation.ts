@@ -86,3 +86,17 @@ export type UserOperation<entryPointVersion extends EntryPointVersion> =
               initCode?: never
               paymasterAndData?: never
           }
+
+export type Hex32 = `0x${string & { length: 64 }}`
+
+export type PackedUserOperation = {
+    sender: Address
+    nonce: bigint
+    initCode: Hex
+    callData: Hex
+    accountGasLimits: Hex32
+    preVerificationGas: bigint
+    gasFees: Hex32
+    paymasterAndData: Hex
+    signature: Hex
+}
