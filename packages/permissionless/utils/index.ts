@@ -30,6 +30,8 @@ import {
     getEntryPointVersion
 } from "./getEntryPointVersion"
 
+import { getPackedUserOperation } from "./getPackedUserOperation"
+
 export {
     transactionReceiptStatus,
     deepHexlify,
@@ -45,6 +47,7 @@ export {
     isSmartAccountDeployed,
     providerToSmartAccountSigner,
     getAddressFromInitCodeOrPaymasterAndData,
+    getPackedUserOperation,
     getEntryPointVersion,
     ENTRYPOINT_ADDRESS_V06,
     ENTRYPOINT_ADDRESS_V07

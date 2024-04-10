@@ -7,13 +7,14 @@ import {
 } from "permissionless"
 import {
     getRequiredPrefund,
-    signUserOperationHashWithECDSA
+    signUserOperationHashWithECDSA,
+    getPackedUserOperation
 } from "permissionless/utils"
 import {
-    Address,
-    Hash,
-    Hex,
-    WalletClient,
+    type Address,
+    type Hash,
+    type Hex,
+    type WalletClient,
     encodeFunctionData,
     zeroAddress
 } from "viem"
@@ -29,6 +30,7 @@ import {
     getSmartAccountClient,
     getTestingChain
 } from "./utils"
+import type { PackedUserOperation } from "permissionless/types"
 
 dotenv.config()
 
@@ -240,5 +242,24 @@ describe("test public actions and utils", () => {
                 gasParameters.preVerificationGas) *
                 userOperation.maxFeePerGas
         )
+    })
+
+    test("getPackedUserOperation", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        const packedUserOperation = getPackedUserOperation(userOperation)
+
+        expectTypeOf(packedUserOperation).toMatchTypeOf<PackedUserOperation>()
     })
 })

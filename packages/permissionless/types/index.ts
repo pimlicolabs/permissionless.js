@@ -12,6 +12,8 @@ export type {
     EntryPoint
 } from "./entrypoint"
 
+export type { PackedUserOperation } from "./userOperation"
+
 export type GetAccountParameterWithClient<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
