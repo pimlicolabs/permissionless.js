@@ -78,7 +78,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         await expect(async () =>
             ecdsaSmartAccount.signTransaction({
                 to: zeroAddress,
-                value: 0n,
+                value: BigInt(0),
                 data: "0x"
             })
         ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
@@ -111,12 +111,12 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]
@@ -152,7 +152,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         const txHash = await entryPointContract.write.depositTo(
             [smartAccountClient.account.address],
             {
-                value: 10n
+                value: BigInt(10)
             }
         )
 
@@ -183,7 +183,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
 
@@ -242,12 +242,12 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]
@@ -303,7 +303,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
         // Send an initial tx to deploy the account
         const hash = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
 
@@ -326,7 +326,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("verifySignature of deployed", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount({
-            index: 0n
+            index: BigInt(0)
         })
 
         const smartAccountClient = await getSmartAccountClient({
@@ -351,7 +351,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("verifySignature of not deployed", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount({
-            index: 10000n
+            index: BigInt(10000)
         })
 
         const smartAccountClient = await getSmartAccountClient({
@@ -376,7 +376,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("verifySignature with signTypedData", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount({
-            index: 0n
+            index: BigInt(0)
         })
 
         const smartAccountClient = await getSmartAccountClient({
@@ -456,7 +456,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
     test("verifySignature with signTypedData for not deployed", async () => {
         const initialEcdsaSmartAccount = await getSignerToBiconomyAccount({
-            index: 1000000n
+            index: BigInt(1000000)
         })
 
         const smartAccountClient = await getSmartAccountClient({

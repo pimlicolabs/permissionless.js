@@ -9,7 +9,7 @@ import {
     getTypesForEIP712Domain,
     validateTypedData
 } from "viem"
-import { type SmartAccount } from "../../accounts/types"
+import type { SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 

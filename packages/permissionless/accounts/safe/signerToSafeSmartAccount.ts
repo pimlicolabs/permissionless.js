@@ -268,7 +268,7 @@ const getInitializerCode = async ({
                 functionName: "enableModules",
                 args: [[safe4337ModuleAddress, ...safeModules]]
             }),
-            value: 0n,
+            value: BigInt(0),
             operation: 1
         },
         ...setupTransactions.map((tx) => ({ ...tx, operation: 0 as 0 | 1 }))
@@ -328,12 +328,12 @@ const getInitializerCode = async ({
         functionName: "setup",
         args: [
             [owner],
-            1n,
+            BigInt(1),
             multiSendAddress,
             multiSendCallData,
             safe4337ModuleAddress,
             zeroAddress,
-            0n,
+            BigInt(0),
             zeroAddress
         ]
     })
@@ -345,15 +345,21 @@ function getPaymasterAndData(unpackedUserOperation: UserOperation<"v0.7">) {
               unpackedUserOperation.paymaster,
               pad(
                   toHex(
-                      unpackedUserOperation.paymasterVerificationGasLimit || 0n
+                      unpackedUserOperation.paymasterVerificationGasLimit ||
+                          BigInt(0)
                   ),
                   {
                       size: 16
                   }
               ),
-              pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
-                  size: 16
-              }),
+              pad(
+                  toHex(
+                      unpackedUserOperation.paymasterPostOpGasLimit || BigInt(0)
+                  ),
+                  {
+                      size: 16
+                  }
+              ),
               unpackedUserOperation.paymasterData || ("0x" as Hex)
           ])
         : "0x"
@@ -365,7 +371,7 @@ const getAccountInitCode = async ({
     safe4337ModuleAddress,
     safeSingletonAddress,
     multiSendAddress,
-    saltNonce = 0n,
+    saltNonce = BigInt(0),
     setupTransactions = [],
     safeModules = []
 }: {
@@ -444,7 +450,7 @@ const getAccountAddress = async <
     multiSendAddress,
     setupTransactions = [],
     safeModules = [],
-    saltNonce = 0n
+    saltNonce = BigInt(0)
 }: {
     client: Client<TTransport, TChain>
     owner: Address
@@ -621,7 +627,7 @@ export async function signerToSafeSmartAccount<
         safeSingletonAddress: _safeSingletonAddress,
         multiSendAddress: _multiSendAddress,
         multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
-        saltNonce = 0n,
+        saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
         safeModules = [],
@@ -869,7 +875,7 @@ export async function signerToSafeSmartAccount<
                     }[]
 
                     to = multiSendCallOnlyAddress
-                    value = 0n
+                    value = BigInt(0)
 
                     data = encodeMultiSend(
                         argsArray.map((tx) => ({ ...tx, operation: 0 }))
