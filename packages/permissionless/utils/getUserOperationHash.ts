@@ -55,14 +55,20 @@ function packUserOp<entryPoint extends EntryPoint>({
             ? concat([
                   userOperation.paymaster,
                   pad(
-                      toHex(userOperation.paymasterVerificationGasLimit || 0n),
+                      toHex(
+                          userOperation.paymasterVerificationGasLimit ||
+                              BigInt(0)
+                      ),
                       {
                           size: 16
                       }
                   ),
-                  pad(toHex(userOperation.paymasterPostOpGasLimit || 0n), {
-                      size: 16
-                  }),
+                  pad(
+                      toHex(userOperation.paymasterPostOpGasLimit || BigInt(0)),
+                      {
+                          size: 16
+                      }
+                  ),
                   userOperation.paymasterData || "0x"
               ])
             : "0x"

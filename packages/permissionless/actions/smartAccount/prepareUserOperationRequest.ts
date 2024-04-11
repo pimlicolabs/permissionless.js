@@ -137,11 +137,13 @@ async function prepareUserOperationRequestForEntryPointV06<
         callData,
         paymasterAndData: "0x",
         signature: partialUserOperation.signature || "0x",
-        maxFeePerGas: partialUserOperation.maxFeePerGas || 0n,
-        maxPriorityFeePerGas: partialUserOperation.maxPriorityFeePerGas || 0n,
-        callGasLimit: partialUserOperation.callGasLimit || 0n,
-        verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
-        preVerificationGas: partialUserOperation.preVerificationGas || 0n
+        maxFeePerGas: partialUserOperation.maxFeePerGas || BigInt(0),
+        maxPriorityFeePerGas:
+            partialUserOperation.maxPriorityFeePerGas || BigInt(0),
+        callGasLimit: partialUserOperation.callGasLimit || BigInt(0),
+        verificationGasLimit:
+            partialUserOperation.verificationGasLimit || BigInt(0),
+        preVerificationGas: partialUserOperation.preVerificationGas || BigInt(0)
     }
 
     if (userOperation.signature === "0x") {
@@ -273,17 +275,19 @@ async function prepareUserOperationRequestEntryPointV07<
         factory: factory,
         factoryData: factoryData,
         callData,
-        callGasLimit: partialUserOperation.callGasLimit || 0n,
-        verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
-        preVerificationGas: partialUserOperation.preVerificationGas || 0n,
+        callGasLimit: partialUserOperation.callGasLimit || BigInt(0),
+        verificationGasLimit:
+            partialUserOperation.verificationGasLimit || BigInt(0),
+        preVerificationGas:
+            partialUserOperation.preVerificationGas || BigInt(0),
         maxFeePerGas:
             partialUserOperation.maxFeePerGas ||
             gasEstimation?.maxFeePerGas ||
-            0n,
+            BigInt(0),
         maxPriorityFeePerGas:
             partialUserOperation.maxPriorityFeePerGas ||
             gasEstimation?.maxPriorityFeePerGas ||
-            0n,
+            BigInt(0),
         signature: partialUserOperation.signature || "0x"
     }
 

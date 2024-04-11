@@ -99,7 +99,7 @@ describe("BUNDLER ACTIONS", () => {
             ),
             entryPoint: getEntryPoint(),
             factoryAddress: process.env.FACTORY_ADDRESS_V07 as Address,
-            index: 3n
+            index: BigInt(3)
         })
 
         const paymasterClient = getPimlicoPaymasterClient()
@@ -126,7 +126,7 @@ describe("BUNDLER ACTIONS", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n
+            value: BigInt(0)
         })
     }, 100000)
 
@@ -230,7 +230,7 @@ describe("BUNDLER ACTIONS", () => {
                 userOperation: {
                     callData: await simpleAccountClient.account.encodeCallData({
                         to: zeroAddress,
-                        value: 0n,
+                        value: BigInt(0),
                         data: "0x"
                     })
                 }

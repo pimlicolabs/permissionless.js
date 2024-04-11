@@ -87,7 +87,7 @@ export const getTestingChain = () => {
 export const getSignerToSimpleSmartAccount = async ({
     signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex),
     address,
-    index = 0n
+    index = BigInt(0)
 }: {
     signer?: SmartAccountSigner
     address?: Address
@@ -141,7 +141,7 @@ export const getSignerToSafeSmartAccount = async (args?: {
         entryPoint: getEntryPoint(),
         signer: signer,
         safeVersion: "1.4.1",
-        saltNonce: args?.saltNonce ?? 100n,
+        saltNonce: args?.saltNonce ?? BigInt(100),
         setupTransactions: args?.setupTransactions
     })
 }
@@ -150,7 +150,7 @@ export const getSmartAccountClient = async ({
     account,
     middleware,
     preFund = false,
-    index = 0n
+    index = BigInt(0)
 }: Middleware<ENTRYPOINT_ADDRESS_V07_TYPE> & {
     account?: SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
     preFund?: boolean
@@ -308,7 +308,7 @@ export const refillSmartAccount = async (
 ) => {
     const publicClient = getPublicClient()
     const balance = await publicClient.getBalance({ address })
-    if (balance === 0n) {
+    if (balance === BigInt(0)) {
         await walletClient.sendTransaction({
             to: address,
             value: parseEther("1")

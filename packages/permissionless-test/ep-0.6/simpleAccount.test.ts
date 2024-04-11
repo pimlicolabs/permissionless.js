@@ -71,7 +71,7 @@ describe("Simple Account", () => {
         await expect(async () =>
             simpleSmartAccount.signTransaction({
                 to: zeroAddress,
-                value: 0n,
+                value: BigInt(0),
                 data: "0x"
             })
         ).rejects.toThrow(SignTransactionNotSupportedBySmartAccount)
@@ -136,12 +136,12 @@ describe("Simple Account", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]
@@ -174,7 +174,7 @@ describe("Simple Account", () => {
         const txHash = await entryPointContract.write.depositTo(
             [smartAccountClient.account.address],
             {
-                value: 10n
+                value: BigInt(10)
             }
         )
 
@@ -196,7 +196,7 @@ describe("Simple Account", () => {
         )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
         expectTypeOf(response).toBeString()
@@ -221,7 +221,7 @@ describe("Simple Account", () => {
         const response = await smartAccountClient.sendTransaction({
             to: smartAccountClient.account.address,
             data: "0x",
-            value: 0n
+            value: BigInt(0)
         })
 
         expectTypeOf(response).toBeString()
@@ -242,7 +242,7 @@ describe("Simple Account", () => {
                 userOperation: {
                     callData: await smartAccountClient.account.encodeCallData({
                         to: zeroAddress,
-                        value: 0n,
+                        value: BigInt(0),
                         data: "0x"
                     })
                 }
@@ -265,7 +265,7 @@ describe("Simple Account", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
 
@@ -318,12 +318,12 @@ describe("Simple Account", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]
@@ -364,7 +364,7 @@ describe("Simple Account", () => {
 
     test("verifySignature", async () => {
         const initialEcdsaSmartAccount = await getSignerToSimpleSmartAccount({
-            index: 0n
+            index: BigInt(0)
         })
         const pimlicoPaymaster = getPimlicoPaymasterClient()
 

@@ -16,7 +16,7 @@ if (process.env.VITE_ANVIL_BLOCK_NUMBER_OPTIMISM) {
         Number(process.env.VITE_ANVIL_BLOCK_NUMBER_OPTIMISM)
     )
 } else {
-    forkBlockNumberOptimism = 115197387n
+    forkBlockNumberOptimism = BigInt(115197387)
     warn(
         `\`VITE_ANVIL_BLOCK_NUMBER_OPTIMISM\` not found. Falling back to \`${forkBlockNumberOptimism}\`.`
     )

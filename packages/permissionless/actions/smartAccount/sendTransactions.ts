@@ -112,7 +112,7 @@ export async function sendTransactions<
             if (!to) throw new Error("Missing to address")
             return {
                 to,
-                value: value || 0n,
+                value: value || BigInt(0),
                 data: data || "0x"
             }
         })
@@ -124,8 +124,8 @@ export async function sendTransactions<
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: maxFeePerGas || 0n,
-            maxPriorityFeePerGas: maxPriorityFeePerGas || 0n,
+            maxFeePerGas: maxFeePerGas || BigInt(0),
+            maxPriorityFeePerGas: maxPriorityFeePerGas || BigInt(0),
             callData: callData,
             nonce: nonce
         },

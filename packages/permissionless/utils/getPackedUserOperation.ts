@@ -66,15 +66,21 @@ export function getPaymasterAndData(
               unpackedUserOperation.paymaster,
               pad(
                   toHex(
-                      unpackedUserOperation.paymasterVerificationGasLimit || 0n
+                      unpackedUserOperation.paymasterVerificationGasLimit ||
+                          BigInt(0)
                   ),
                   {
                       size: 16
                   }
               ),
-              pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
-                  size: 16
-              }),
+              pad(
+                  toHex(
+                      unpackedUserOperation.paymasterPostOpGasLimit || BigInt(0)
+                  ),
+                  {
+                      size: 16
+                  }
+              ),
               unpackedUserOperation.paymasterData || ("0x" as Hex)
           ])
         : "0x"
