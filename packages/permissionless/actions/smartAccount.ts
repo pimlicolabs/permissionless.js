@@ -7,6 +7,7 @@ import {
     type Middleware,
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
+    type SponsorUserOperationReturnType,
     prepareUserOperationRequest
 } from "./smartAccount/prepareUserOperationRequest"
 
@@ -40,6 +41,7 @@ export {
     prepareUserOperationRequest,
     type PrepareUserOperationRequestParameters,
     type PrepareUserOperationRequestReturnType,
+    type SponsorUserOperationReturnType,
     sendTransaction,
     sendUserOperation,
     type SendUserOperationParameters,
