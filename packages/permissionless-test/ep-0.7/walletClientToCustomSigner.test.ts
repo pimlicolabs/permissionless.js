@@ -3,12 +3,12 @@ import { UserOperation } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
     http,
-    Account,
+    type Account,
     Address,
-    Chain,
+    type Chain,
     Hex,
-    Transport,
-    WalletClient,
+    type Transport,
+    type WalletClient,
     createWalletClient,
     decodeEventLog,
     getContract,

@@ -31,9 +31,9 @@ import {
     createBundlerClient
 } from "./clients/createBundlerClient"
 import { createSmartAccountClient } from "./clients/createSmartAccountClient"
-import {
-    type SmartAccountClient,
-    type SmartAccountClientConfig
+import type {
+    SmartAccountClient,
+    SmartAccountClientConfig
 } from "./clients/createSmartAccountClient"
 import type { BundlerActions } from "./clients/decorators/bundler"
 import { bundlerActions } from "./clients/decorators/bundler"
@@ -78,7 +78,7 @@ export {
 }
 import type { UserOperation } from "./types/userOperation"
 
-export { type UserOperation }
+export type { UserOperation }
 
 import type { GetUserOperationHashParams } from "./utils/getUserOperationHash"
 import { getUserOperationHash } from "./utils/getUserOperationHash"

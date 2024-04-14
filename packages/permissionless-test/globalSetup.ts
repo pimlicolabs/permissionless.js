@@ -1,7 +1,7 @@
 import { Pool, createAnvil } from "@viem/anvil"
 
 import { forkBlockNumber, forkUrl } from "./src/constants"
-import { Alto, createAlto } from "./src/createAlto"
+import { type Alto, createAlto } from "./src/createAlto"
 
 export default async function () {
     if (process.env.SKIP_GLOBAL_SETUP) return

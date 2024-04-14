@@ -11,12 +11,12 @@ import {
     type WalletClient,
     decodeEventLog,
     getContract,
+    hashMessage,
+    hashTypedData,
     isAddress,
     isHash,
     parseEther,
-    zeroAddress,
-    hashMessage,
-    hashTypedData
+    zeroAddress
 } from "viem"
 import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
 import {
@@ -202,6 +202,7 @@ describe("Safe Account", () => {
 
         for (const log of transactionReceipt.logs) {
             try {
+                // biome-ignore lint/suspicious/noExplicitAny:
                 let event: any
                 try {
                     event = decodeEventLog({
@@ -263,6 +264,7 @@ describe("Safe Account", () => {
 
         for (const log of transactionReceipt.logs) {
             try {
+                // biome-ignore lint/suspicious/noExplicitAny:
                 let event: any
                 try {
                     event = decodeEventLog({

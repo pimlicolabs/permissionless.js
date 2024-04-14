@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
     ENTRYPOINT_ADDRESS_V07,
-    getPackedUserOperation,
-    type EstimateUserOperationGasReturnType
+    type EstimateUserOperationGasReturnType,
+    getPackedUserOperation
 } from "permissionless"
 import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 import type {
@@ -10,6 +10,7 @@ import type {
     ENTRYPOINT_ADDRESS_V07_TYPE,
     UserOperation
 } from "permissionless/types"
+import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
 import {
     type Account,
     type Chain,
@@ -35,7 +36,6 @@ import {
     pmSponsorUserOperationParamsSchema,
     returnInvalidRequestParams
 } from "./helpers/schema"
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
 import { isVersion06, isVersion07 } from "./helpers/utils"
 
 const handleMethodV06 = async (

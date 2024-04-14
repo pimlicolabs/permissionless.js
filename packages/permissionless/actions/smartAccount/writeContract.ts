@@ -10,10 +10,10 @@ import {
     type WriteContractParameters,
     encodeFunctionData
 } from "viem"
-import { type SmartAccount } from "../../accounts/types"
+import type { SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { getAction } from "../../utils/getAction"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction

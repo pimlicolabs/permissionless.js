@@ -281,6 +281,7 @@ describe("Simple Smart Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
+            // biome-ignore lint/suspicious/noExplicitAny:
             let event: any
             try {
                 event = decodeEventLog({
@@ -337,6 +338,7 @@ describe("Simple Smart Account", () => {
         let eventFound = false
 
         for (const log of transactionReceipt.logs) {
+            // biome-ignore lint/suspicious/noExplicitAny:
             let event: any
             try {
                 event = decodeEventLog({

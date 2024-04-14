@@ -1,4 +1,5 @@
 import type { BundlerClient } from "permissionless"
+import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     UserOperation
@@ -7,8 +8,8 @@ import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
 import {
     type Account,
     type Chain,
-    type Transport,
     type PublicClient,
+    type Transport,
     type WalletClient,
     isHash,
     isHex
@@ -22,7 +23,6 @@ import {
     getPublicClient,
     setupSimpleSmartAccountClient
 } from "../utils"
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 
 describe("Pimlico Actions tests", () => {
     let publicClient: PublicClient<Transport, Chain>
@@ -59,7 +59,7 @@ describe("Pimlico Actions tests", () => {
             expect(typeof gasPrice.fast.maxPriorityFeePerGas).toBe("bigint")
             expect(gasPrice.fast.maxPriorityFeePerGas).toBeGreaterThan(0n)
         })
-        test("fetch user operation status", async () => { })
+        test("fetch user operation status", async () => {})
     })
 
     describe("Pimlico paymaster actions ", () => {

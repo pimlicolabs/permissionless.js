@@ -11,8 +11,8 @@ import {
     type Transport,
     type WalletClient,
     isAddress,
-    zeroAddress,
-    isHash
+    isHash,
+    zeroAddress
 } from "viem"
 import {
     getAnvilWalletClient,
@@ -61,7 +61,7 @@ describe("Pimlico Actions tests", () => {
             expect(typeof gasPrice.fast.maxPriorityFeePerGas).toBe("bigint")
             expect(gasPrice.fast.maxPriorityFeePerGas).toBeGreaterThan(0n)
         })
-        test("fetch user operation status", async () => { })
+        test("fetch user operation status", async () => {})
     })
 
     describe("Pimlico paymaster actions ", () => {

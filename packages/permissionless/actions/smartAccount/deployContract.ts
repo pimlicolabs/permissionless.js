@@ -14,7 +14,7 @@ import { parseAccount } from "../../utils/"
 import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<

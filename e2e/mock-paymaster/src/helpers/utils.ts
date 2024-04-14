@@ -2,7 +2,7 @@ import type { UserOperation } from "permissionless"
 import { http, createWalletClient } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
-import type { UserOperationV7, UserOperationV6 } from "./schema"
+import type { UserOperationV6, UserOperationV7 } from "./schema"
 
 // Type predicate to check if the UserOperation is V07.
 export function isVersion07(

@@ -10,10 +10,10 @@ import {
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
 import {
-    Address,
-    Hash,
-    Hex,
-    WalletClient,
+    type Address,
+    type Hash,
+    type Hex,
+    type WalletClient,
     encodeFunctionData,
     zeroAddress
 } from "viem"

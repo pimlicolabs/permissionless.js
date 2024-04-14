@@ -2,6 +2,7 @@ import {
     type BundlerClient,
     WaitForUserOperationReceiptTimeoutError
 } from "permissionless"
+import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     UserOperation
@@ -13,11 +14,11 @@ import {
 import {
     type Account,
     type Chain,
+    type PublicClient,
     type Transport,
     type WalletClient,
-    zeroAddress,
-    type PublicClient,
-    isHash
+    isHash,
+    zeroAddress
 } from "viem"
 import { foundry } from "viem/chains"
 import {
@@ -28,7 +29,6 @@ import {
     getPublicClient,
     setupSimpleSmartAccountClient
 } from "../utils"
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 
 describe("BUNDLER ACTIONS", () => {
     let publicClient: PublicClient<Transport, Chain>

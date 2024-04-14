@@ -1,4 +1,5 @@
 import {
+    http,
     type Account,
     type Address,
     type Chain,
@@ -6,17 +7,16 @@ import {
     type Transport,
     type WalletClient,
     concat,
+    createPublicClient,
     getContract,
     getContractAddress,
     pad,
     parseEther,
-    slice,
-    createPublicClient,
-    http
+    slice
 } from "viem"
-import { VERIFYING_PAYMASTER_V06_ABI, VERIFYING_PAYMASTER_V07_ABI } from "./abi"
 import { waitForTransactionReceipt } from "viem/actions"
 import { foundry } from "viem/chains"
+import { VERIFYING_PAYMASTER_V06_ABI, VERIFYING_PAYMASTER_V07_ABI } from "./abi"
 
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 

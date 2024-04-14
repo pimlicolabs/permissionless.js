@@ -1,33 +1,33 @@
+import { type BundlerClient, ENTRYPOINT_ADDRESS_V06 } from "permissionless"
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount
 } from "permissionless/accounts"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import {
     type Account,
+    type BaseError,
     type Chain,
+    type PublicClient,
     type Transport,
     type WalletClient,
     decodeEventLog,
     getContract,
-    zeroAddress,
-    type PublicClient,
     isAddress,
     isHash,
     parseEther,
-    type BaseError
+    zeroAddress
 } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
 import {
+    fund,
+    getAnvilWalletClient,
     getBundlerClient,
     getPimlicoPaymasterClient,
-    getAnvilWalletClient,
     getPublicClient,
-    setupEcdsaBiconomySmartAccountClient,
-    fund
+    setupEcdsaBiconomySmartAccountClient
 } from "../utils"
-import { ENTRYPOINT_ADDRESS_V06, type BundlerClient } from "permissionless"
-import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 
 /**
  * TODO: Should generify the basics test for every smart account & smart account client (address, signature, etc)
@@ -152,6 +152,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         for (const log of transactionReceipt.logs) {
             try {
+                // biome-ignore lint/suspicious/noExplicitAny:
                 let event: any
                 try {
                     event = decodeEventLog({
@@ -212,6 +213,7 @@ describe("Biconomy Modular Smart Account (ECDSA module)", () => {
 
         for (const log of transactionReceipt.logs) {
             try {
+                // biome-ignore lint/suspicious/noExplicitAny:
                 let event: any
                 try {
                     event = decodeEventLog({
