@@ -2,11 +2,11 @@ import dotenv from "dotenv"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import {
     http,
-    type Account,
-    type BaseError,
-    type Chain,
-    type Transport,
-    type WalletClient,
+    Account,
+    BaseError,
+    Chain,
+    Transport,
+    WalletClient,
     createWalletClient,
     decodeEventLog,
     getContract,

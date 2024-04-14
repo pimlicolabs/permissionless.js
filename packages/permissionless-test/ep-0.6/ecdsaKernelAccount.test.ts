@@ -5,12 +5,12 @@ import {
 } from "permissionless/accounts"
 import {
     http,
-    type Account,
+    Account,
     Address,
-    type Chain,
-    type Hex,
-    type Transport,
-    type WalletClient,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
     createWalletClient,
     decodeEventLog,
     getContract,

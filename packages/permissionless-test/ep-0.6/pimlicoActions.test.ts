@@ -1,12 +1,12 @@
 import dotenv from "dotenv"
-import type { UserOperation } from "permissionless"
-import type {
+import { UserOperation } from "permissionless"
+import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
+import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import { getUserOperationHash } from "permissionless/utils"
-import type { Hash, Hex } from "viem"
+import { Hash, Hex } from "viem"
 import {
     beforeAll,
     beforeEach,

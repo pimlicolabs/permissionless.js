@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import {
-    type UserOperation,
+    UserOperation,
     deepHexlify,
     getSenderAddress,
     getUserOperationHash
@@ -9,7 +9,7 @@ import {
     getRequiredPrefund,
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
-import type { Address, Hash, Hex } from "viem"
+import { Address, Hash, Hex } from "viem"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "./userOp"
 import {

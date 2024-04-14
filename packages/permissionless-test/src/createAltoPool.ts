@@ -1,5 +1,5 @@
-import type { CreatePoolOptions, Pool } from "@viem/anvil"
-import { type Alto, type CreateAltoOptions, createAlto } from "./createAlto"
+import { CreatePoolOptions, Pool } from "@viem/anvil"
+import { Alto, CreateAltoOptions, createAlto } from "./createAlto"
 
 export type CustomPool<TKey = number> = Pool<TKey> & {
     start(id: TKey, options?: CreateAltoOptions): Promise<Alto>

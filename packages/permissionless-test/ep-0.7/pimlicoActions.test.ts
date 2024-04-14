@@ -1,10 +1,10 @@
 import dotenv from "dotenv"
-import type {
+import {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
-import { type Address, type Hash, zeroAddress } from "viem"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
+import { Address, Hash, zeroAddress } from "viem"
 import {
     beforeAll,
     beforeEach,

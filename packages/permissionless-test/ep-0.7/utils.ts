@@ -4,26 +4,26 @@ import {
     createSmartAccountClient
 } from "permissionless"
 import {
-    type SmartAccount,
-    type SmartAccountSigner,
+    SmartAccount,
+    SmartAccountSigner,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
-import type { Middleware } from "permissionless/actions/smartAccount"
+import { Middleware } from "permissionless/actions/smartAccount"
 import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import {
     http,
-    type Account,
-    type Address,
-    type Chain,
-    type Hex,
-    type Transport,
-    type WalletClient,
+    Account,
+    Address,
+    Chain,
+    Hex,
+    Transport,
+    WalletClient,
     createPublicClient,
     createWalletClient,
     defineChain,

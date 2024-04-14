@@ -1,4 +1,4 @@
-import { type BaseError, UnknownNodeError } from "viem"
+import { BaseError, UnknownNodeError } from "viem"
 import type { SendUserOperationParameters } from "../../actions/bundler/sendUserOperation"
 import { SendUserOperationError } from "../../errors"
 import type { EntryPoint } from "../../types/entrypoint"

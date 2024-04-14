@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import {
-    type BundlerClient,
+    BundlerClient,
     ENTRYPOINT_ADDRESS_V07,
     UserOperation,
     WaitForUserOperationReceiptTimeoutError,
@@ -10,16 +10,16 @@ import {
     walletClientToSmartAccountSigner
 } from "permissionless"
 import { signerToSimpleSmartAccount } from "permissionless/accounts"
-import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
+import { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import { getUserOperationHash } from "permissionless/utils"
 import {
     http,
-    type Account,
-    type Address,
-    type Chain,
+    Account,
+    Address,
+    Chain,
     type Hash,
-    type Transport,
-    type WalletClient,
+    Transport,
+    WalletClient,
     createWalletClient,
     parseEther,
     zeroAddress
