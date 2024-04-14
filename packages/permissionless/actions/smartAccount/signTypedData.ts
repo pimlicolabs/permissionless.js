@@ -7,7 +7,8 @@ import {
     type TypedData,
     type TypedDataDefinition,
     getTypesForEIP712Domain,
-    validateTypedData
+    validateTypedData,
+    type TypedDataDomain
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
@@ -136,7 +137,9 @@ export async function signTypedData<
     const account = parseAccount(account_)
 
     const types = {
-        EIP712Domain: getTypesForEIP712Domain({ domain }),
+        EIP712Domain: getTypesForEIP712Domain({ domain } as {
+            domain: TypedDataDomain
+        }),
         ...(types_ as TTypedData)
     }
 

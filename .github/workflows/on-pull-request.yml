@@ -25,17 +25,14 @@ jobs:
         uses: ./.github/actions/install-dependencies
 
       - name: Build
-        run: bun run build
+        run: bun run build:permissionless
 
       - name: Start Docker e2e tests
         run: docker compose -f "e2e/docker-compose.yml" up --abort-on-container-exit test-cases
 
-      - name: Print logs
-        run: docker compose logs
-
       - name: Stop containers
         if: always()
-        run: docker-compose -f "e2e/docker-compose.yml" down
+        run: docker compose -f "e2e/docker-compose.yml" down
 
 
         #- name: Upload coverage reports to Codecov
