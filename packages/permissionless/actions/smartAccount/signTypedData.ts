@@ -6,9 +6,9 @@ import {
     type Transport,
     type TypedData,
     type TypedDataDefinition,
+    type TypedDataDomain,
     getTypesForEIP712Domain,
-    validateTypedData,
-    type TypedDataDomain
+    validateTypedData
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
