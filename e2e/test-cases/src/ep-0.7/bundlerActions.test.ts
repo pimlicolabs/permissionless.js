@@ -7,15 +7,14 @@ import {
 } from "permissionless"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import {
-    isHash,
     type Account,
     type Chain,
     type Transport,
-    type WalletClient
+    type WalletClient,
+    isHash
 } from "viem"
 import { foundry } from "viem/chains"
 import {
-    ensureAltoReady,
     fund,
     getAnvilWalletClient,
     getBundlerClient,
@@ -28,9 +27,8 @@ describe("v0.7 Bundler Actions", () => {
     let walletClient: WalletClient<Transport, Chain, Account>
 
     beforeAll(async () => {
-        walletClient = getAnvilWalletClient()
+        walletClient = getAnvilWalletClient(96)
         bundlerClient = getBundlerClient(ENTRYPOINT_ADDRESS_V07)
-        await ensureAltoReady(bundlerClient)
     })
 
     test("supports eth_supportedEntryPoints", async () => {
@@ -84,22 +82,21 @@ describe("v0.7 Bundler Actions", () => {
     }, 100000)
 
     //test.only("Supports eth_sendUserOperation", async () => {
-    //    const smartAccountClient = await setupSimpleSmartAccountClient(
-    //        ENTRYPOINT_ADDRESS_V07
-    //    )
+    //    const smartAccountClient = await setupSimpleSmartAccountClient({
+    //        entryPoint: ENTRYPOINT_ADDRESS_V07
+    //    })
 
     //    fund(smartAccountClient.account.address, walletClient)
 
     //    const op = await smartAccountClient.prepareUserOperationRequest({
     //        userOperation: {
     //            callData: await smartAccountClient.account.encodeCallData({
-    //                to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
+    //                to: "0x1111111111111111111111111111111111111111",
     //                data: "0x",
     //                value: 0n
     //            })
     //        }
     //    })
-
     //    op.signature = await smartAccountClient.account.signUserOperation(op)
 
     //    const opHash = await bundlerClient.sendUserOperation({
@@ -128,7 +125,7 @@ describe("v0.7 Bundler Actions", () => {
     //    const userOperationFromUserOpHash =
     //        await bundlerClient.getUserOperationByHash({ hash: opHash })
 
-    //    expect(userOperationFromUserOpHash).not.toBeNull()
+    //    expect(userOperationFromUserOpHash).toBeNull()
     //    expect(userOperationFromUserOpHash?.entryPoint).toBe(
     //        ENTRYPOINT_ADDRESS_V07
     //    )

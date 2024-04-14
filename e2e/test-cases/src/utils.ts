@@ -3,32 +3,37 @@ import {
     type SmartAccountClient,
     createBundlerClient,
     createSmartAccountClient,
-    getEntryPointVersion
+    getEntryPointVersion,
+    ENTRYPOINT_ADDRESS_V06
 } from "permissionless"
 import {
+    type SafeSmartAccount,
     type SmartAccount,
     privateKeyToSimpleSmartAccount,
     signerToSafeSmartAccount,
-    type SafeSmartAccount
+    signerToBiconomySmartAccount
 } from "permissionless/accounts"
 import {
+    type PimlicoBundlerClient,
     type PimlicoPaymasterClient,
     createPimlicoBundlerClient,
-    createPimlicoPaymasterClient,
-    type PimlicoBundlerClient
+    createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import type { EntryPoint } from "permissionless/types"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    EntryPoint
+} from "permissionless/types"
 import {
     http,
+    type Account,
     type Address,
     type Chain,
+    type Hex,
     type Transport,
     type WalletClient,
     createPublicClient,
     createWalletClient,
-    parseEther,
-    type Account,
-    type Hex
+    parseEther
 } from "viem"
 import {
     generatePrivateKey,
@@ -41,17 +46,22 @@ import {
     SIMPLE_ACCOUNT_FACTORY_V07
 } from "./constants"
 
-export const getAnvilWalletClient = () => {
+export const getAnvilWalletClient = (addressIndex: number) => {
     return createWalletClient({
         account: mnemonicToAccount(
-            "test test test test test test test test test test test junk"
+            "test test test test test test test test test test test junk",
+            {
+                addressIndex
+            }
         ),
         chain: foundry,
         transport: http(process.env.ANVIL_RPC)
     })
 }
 
-export const getPimlicoPaymasterClient = (entryPoint: EntryPoint) => {
+export const getPimlicoPaymasterClient = <T extends EntryPoint>(
+    entryPoint: T
+): PimlicoPaymasterClient<T> => {
     return createPimlicoPaymasterClient({
         chain: foundry,
         transport: http(process.env.PAYMASTER_RPC),
@@ -86,17 +96,6 @@ export const getPublicClient = () => {
 
 const publicClient = getPublicClient()
 
-export const ensureAltoReady = async <T extends EntryPoint>(
-    bundlerClient: BundlerClient<T>
-) => {
-    try {
-        await bundlerClient.chainId()
-    } catch {
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        ensureAltoReady(bundlerClient)
-    }
-}
-
 export const fund = async (
     to: Address,
     funder: WalletClient<Transport, Chain, Account>
@@ -129,11 +128,13 @@ export const getFactoryAddress = (
 export const setupSimpleSmartAccountClient = async <T extends EntryPoint>({
     entryPoint,
     privateKey = generatePrivateKey(),
-    paymasterClient
+    paymasterClient,
+    pimlicoBundlerClient
 }: {
     entryPoint: T
     privateKey?: Hex
     paymasterClient?: PimlicoPaymasterClient<T>
+    pimlicoBundlerClient?: PimlicoBundlerClient<T>
 }): Promise<SmartAccountClient<T, Transport, Chain, SmartAccount<T>>> => {
     const smartAccount = await privateKeyToSimpleSmartAccount<
         T,
@@ -149,6 +150,37 @@ export const setupSimpleSmartAccountClient = async <T extends EntryPoint>({
     return createSmartAccountClient({
         chain: foundry,
         account: smartAccount,
+        bundlerTransport: http(process.env.ALTO_RPC),
+        middleware: {
+            gasPrice: pimlicoBundlerClient
+                ? async () => {
+                      return (
+                          await pimlicoBundlerClient.getUserOperationGasPrice()
+                      ).fast
+                  }
+                : undefined,
+            // @ts-ignore
+            sponsorUserOperation: paymasterClient?.sponsorUserOperation
+        }
+    })
+}
+
+// Only supports v0.6 for now
+export const setupEcdsaBiconomySmartAccountClient = async ({
+    paymasterClient,
+    privateKey = generatePrivateKey()
+}: {
+    paymasterClient?: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V06_TYPE>
+    privateKey?: Hex
+}) => {
+    const ecdsaSmartAccount = await signerToBiconomySmartAccount(publicClient, {
+        entryPoint: ENTRYPOINT_ADDRESS_V06,
+        signer: privateKeyToAccount(privateKey)
+    })
+
+    return createSmartAccountClient({
+        account: ecdsaSmartAccount,
+        chain: foundry,
         bundlerTransport: http(process.env.ALTO_RPC),
         middleware: {
             // @ts-ignore

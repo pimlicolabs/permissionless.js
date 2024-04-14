@@ -1,73 +1,25 @@
 import type { UserOperation } from "permissionless"
-import { http, type Hex, concat, createWalletClient, pad, toHex } from "viem"
+import { http, createWalletClient } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
+import type { UserOperationV7, UserOperationV6 } from "./schema"
 
-function getInitCode(unpackedUserOperation: UserOperation<"v0.7">) {
-    return unpackedUserOperation.factory
-        ? concat([
-              unpackedUserOperation.factory,
-              unpackedUserOperation.factoryData || ("0x" as Hex)
-          ])
-        : "0x"
+// Type predicate to check if the UserOperation is V07.
+export function isVersion07(
+    operation: UserOperationV6 | UserOperationV7
+): operation is UserOperation<"v0.7"> {
+    return (
+        "factory" in operation ||
+        "paymaster" in operation ||
+        "factoryData" in operation
+    )
 }
 
-export function getAccountGasLimits(
-    unpackedUserOperation: UserOperation<"v0.7">
-) {
-    return concat([
-        pad(toHex(unpackedUserOperation.verificationGasLimit), {
-            size: 16
-        }),
-        pad(toHex(unpackedUserOperation.callGasLimit), { size: 16 })
-    ])
-}
-
-export function getGasLimits(unpackedUserOperation: UserOperation<"v0.7">) {
-    return concat([
-        pad(toHex(unpackedUserOperation.maxPriorityFeePerGas), {
-            size: 16
-        }),
-        pad(toHex(unpackedUserOperation.maxFeePerGas), { size: 16 })
-    ])
-}
-
-export function getPaymasterAndData(
-    unpackedUserOperation: UserOperation<"v0.7">
-) {
-    return unpackedUserOperation.paymaster
-        ? concat([
-              unpackedUserOperation.paymaster,
-              pad(
-                  toHex(
-                      unpackedUserOperation.paymasterVerificationGasLimit || 0n
-                  ),
-                  {
-                      size: 16
-                  }
-              ),
-              pad(toHex(unpackedUserOperation.paymasterPostOpGasLimit || 0n), {
-                  size: 16
-              }),
-              unpackedUserOperation.paymasterData || ("0x" as Hex)
-          ])
-        : "0x"
-}
-
-export function toPackedUserOperation(
-    unpackedUserOperation: UserOperation<"v0.7">
-) {
-    return {
-        sender: unpackedUserOperation.sender,
-        nonce: unpackedUserOperation.nonce,
-        initCode: getInitCode(unpackedUserOperation),
-        callData: unpackedUserOperation.callData,
-        accountGasLimits: getAccountGasLimits(unpackedUserOperation),
-        preVerificationGas: unpackedUserOperation.preVerificationGas,
-        gasFees: getGasLimits(unpackedUserOperation),
-        paymasterAndData: getPaymasterAndData(unpackedUserOperation),
-        signature: unpackedUserOperation.signature
-    }
+// Type predicate check if the UserOperation is V06.
+export function isVersion06(
+    operation: UserOperationV6 | UserOperationV7
+): operation is UserOperation<"v0.6"> {
+    return "initCode" in operation || "paymasterAndData" in operation
 }
 
 export const getAnvilWalletClient = () => {

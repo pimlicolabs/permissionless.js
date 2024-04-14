@@ -1,6 +1,6 @@
 import type { FastifyReply } from "fastify"
 import { type Hex, getAddress } from "viem"
-import { z } from "zod"
+import { z, type infer as zodInfer } from "zod"
 
 export const returnInvalidRequestParams = (
     reply: FastifyReply,
@@ -67,6 +67,33 @@ export const hexDataSchema = z
     .regex(hexDataPattern, { message: "not valid hex data" })
     .transform((val) => val.toLowerCase() as Hex)
 
+const userOperationSchemaPaymasterV6 = z
+    .object({
+        sender: addressSchema,
+        nonce: hexNumberSchema,
+        initCode: hexDataSchema,
+        callData: hexDataSchema,
+        callGasLimit: hexNumberSchema.default(1n),
+        verificationGasLimit: hexNumberSchema.default(1n),
+        preVerificationGas: hexNumberSchema.default(1n),
+        maxPriorityFeePerGas: hexNumberSchema,
+        maxFeePerGas: hexNumberSchema,
+        paymasterAndData: hexDataSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? undefined),
+        signature: hexDataSchema.optional().transform((val) => {
+            if (val === undefined) {
+                return "0x"
+            }
+            return val
+        })
+    })
+    .strict()
+    .transform((val) => {
+        return val
+    })
+
 const userOperationSchemaPaymasterV7 = z
     .object({
         sender: addressSchema,
@@ -127,6 +154,9 @@ export const jsonRpcSchema = z
     .strict()
 
 export const pmSponsorUserOperationParamsSchema = z.tuple([
-    userOperationSchemaPaymasterV7,
+    z.union([userOperationSchemaPaymasterV6, userOperationSchemaPaymasterV7]),
     addressSchema
 ])
+
+export type UserOperationV7 = zodInfer<typeof userOperationSchemaPaymasterV7>
+export type UserOperationV6 = zodInfer<typeof userOperationSchemaPaymasterV6>
