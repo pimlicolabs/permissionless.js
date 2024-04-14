@@ -99,10 +99,10 @@ describe("BUNDLER ACTIONS", () => {
             ),
             entryPoint: getEntryPoint(),
             factoryAddress: process.env.FACTORY_ADDRESS_V07 as Address,
-            index: 3n
+            index: BigInt(3)
         })
 
-        // const paymasterClient = getPimlicoPaymasterClient()
+        const paymasterClient = getPimlicoPaymasterClient()
         const pimlicoBundlerClient = getPimlicoBundlerClient()
 
         const smartAccountClient = createSmartAccountClient({
@@ -114,8 +114,8 @@ describe("BUNDLER ACTIONS", () => {
                     const gasPrices =
                         await pimlicoBundlerClient.getUserOperationGasPrice()
                     return gasPrices.fast
-                }
-                // sponsorUserOperation: paymasterClient.sponsorUserOperation
+                },
+                sponsorUserOperation: paymasterClient.sponsorUserOperation
             }
         })
 
@@ -126,9 +126,8 @@ describe("BUNDLER ACTIONS", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n
+            value: BigInt(0)
         })
-        console.log(`Transaction hash: ${response}`)
     }, 100000)
 
     test("Sending user operation", async () => {
@@ -231,7 +230,7 @@ describe("BUNDLER ACTIONS", () => {
                 userOperation: {
                     callData: await simpleAccountClient.account.encodeCallData({
                         to: zeroAddress,
-                        value: 0n,
+                        value: BigInt(0),
                         data: "0x"
                     })
                 }

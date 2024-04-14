@@ -33,7 +33,10 @@ export type SimpleSmartAccount<
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SimpleSmartAccount", transport, chain>
 
-const getAccountInitCode = async (owner: Address, index = 0n): Promise<Hex> => {
+const getAccountInitCode = async (
+    owner: Address,
+    index = BigInt(0)
+): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
 
     return encodeFunctionData({
@@ -77,7 +80,7 @@ const getAccountAddress = async <
     factoryAddress,
     entryPoint: entryPointAddress,
     owner,
-    index = 0n
+    index = BigInt(0)
 }: {
     client: Client<TTransport, TChain>
     factoryAddress: Address
@@ -133,7 +136,7 @@ export async function signerToSimpleSmartAccount<
         signer,
         factoryAddress,
         entryPoint: entryPointAddress,
-        index = 0n,
+        index = BigInt(0),
         address
     }: SignerToSimpleSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SimpleSmartAccount<entryPoint, TTransport, TChain>> {
@@ -153,7 +156,7 @@ export async function signerToSimpleSmartAccount<
                 owner: viemSigner.address,
                 index
             }),
-        getChainId(client)
+        client.chain?.id ?? getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")

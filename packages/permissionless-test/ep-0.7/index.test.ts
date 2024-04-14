@@ -5,7 +5,9 @@ import {
     getSenderAddress,
     getUserOperationHash
 } from "permissionless"
+import type { PackedUserOperation } from "permissionless/types"
 import {
+    getPackedUserOperation,
     getRequiredPrefund,
     signUserOperationHashWithECDSA
 } from "permissionless/utils"
@@ -240,5 +242,24 @@ describe("test public actions and utils", () => {
                 gasParameters.preVerificationGas) *
                 userOperation.maxFeePerGas
         )
+    })
+
+    test("getPackedUserOperation", async () => {
+        const smartAccountClient = await getSmartAccountClient()
+
+        const userOperation =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        const packedUserOperation = getPackedUserOperation(userOperation)
+
+        expectTypeOf(packedUserOperation).toMatchTypeOf<PackedUserOperation>()
     })
 })

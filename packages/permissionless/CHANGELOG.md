@@ -1,5 +1,29 @@
 # permissionless
 
+## 0.1.16
+
+### Patch Changes
+
+- 84d841d9f5474c0c5dc806ec6e8177551b2307e8: Added util function getPackedUserOperation
+
+## 0.1.15
+
+### Patch Changes
+
+- 9cb81f6156383381b35753b54adf8c16cc0dba4f: Performance improvement - reduced network call for chain id
+
+## 0.1.14
+
+### Patch Changes
+
+- 7db5e1f99b5e757cfe73962f933a640be7c591b2: Fixed packUserOp when paymaster gas limits are 0
+
+## 0.1.13
+
+### Patch Changes
+
+- 22fadbe5122d8676cc0d2d8b6fd61e90ab516498: Fixed prepareUserOperation when either of paymaster gas limits is zero
+
 ## 0.1.12
 
 ### Patch Changes

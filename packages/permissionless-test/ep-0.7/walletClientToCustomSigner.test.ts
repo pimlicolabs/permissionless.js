@@ -74,7 +74,7 @@ describe("Simple Account from walletClient", () => {
         await expect(async () =>
             simpleSmartAccount.signTransaction({
                 to: zeroAddress,
-                value: 0n,
+                value: BigInt(0),
                 data: "0x"
             })
         ).rejects.toThrow(new SignTransactionNotSupportedBySmartAccount())
@@ -161,12 +161,12 @@ describe("Simple Account from walletClient", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]
@@ -205,7 +205,7 @@ describe("Simple Account from walletClient", () => {
         const txHash = await entryPointContract.write.depositTo(
             [smartAccountClient.account.address],
             {
-                value: 10n
+                value: BigInt(10)
             }
         )
 
@@ -231,7 +231,7 @@ describe("Simple Account from walletClient", () => {
         )
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
         expectTypeOf(response).toBeString()
@@ -257,7 +257,7 @@ describe("Simple Account from walletClient", () => {
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,
-            value: 0n,
+            value: BigInt(0),
             data: "0x"
         })
 
@@ -313,12 +313,12 @@ describe("Simple Account from walletClient", () => {
             transactions: [
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 },
                 {
                     to: zeroAddress,
-                    value: 0n,
+                    value: BigInt(0),
                     data: "0x"
                 }
             ]

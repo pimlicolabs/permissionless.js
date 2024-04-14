@@ -323,7 +323,7 @@ export class InvalidSmartAccountNonceError extends BaseError {
         docsPath?: string
         nonce: bigint
     }) {
-        const nonceKey = nonce >> 64n // first 192 bits of nonce
+        const nonceKey = nonce >> BigInt(64) // first 192 bits of nonce
         const nonceSequence = nonce & 0xffffffffffffffffn // last 64 bits of nonce
 
         super(

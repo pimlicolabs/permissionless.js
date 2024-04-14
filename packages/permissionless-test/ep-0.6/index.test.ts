@@ -40,11 +40,11 @@ describe("test public actions and utils", () => {
         expect(deepHexlify(null)).toBe(null)
         expect(deepHexlify(true)).toBe(true)
         expect(deepHexlify(false)).toBe(false)
-        expect(deepHexlify(1n)).toBe("0x1")
+        expect(deepHexlify(BigInt(1))).toBe("0x1")
         expect(
             deepHexlify({
                 name: "Garvit",
-                balance: 1n
+                balance: BigInt(1)
             })
         ).toEqual({
             name: "Garvit",

@@ -137,11 +137,13 @@ async function prepareUserOperationRequestForEntryPointV06<
         callData,
         paymasterAndData: "0x",
         signature: partialUserOperation.signature || "0x",
-        maxFeePerGas: partialUserOperation.maxFeePerGas || 0n,
-        maxPriorityFeePerGas: partialUserOperation.maxPriorityFeePerGas || 0n,
-        callGasLimit: partialUserOperation.callGasLimit || 0n,
-        verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
-        preVerificationGas: partialUserOperation.preVerificationGas || 0n
+        maxFeePerGas: partialUserOperation.maxFeePerGas || BigInt(0),
+        maxPriorityFeePerGas:
+            partialUserOperation.maxPriorityFeePerGas || BigInt(0),
+        callGasLimit: partialUserOperation.callGasLimit || BigInt(0),
+        verificationGasLimit:
+            partialUserOperation.verificationGasLimit || BigInt(0),
+        preVerificationGas: partialUserOperation.preVerificationGas || BigInt(0)
     }
 
     if (userOperation.signature === "0x") {
@@ -149,13 +151,13 @@ async function prepareUserOperationRequestForEntryPointV06<
     }
 
     if (typeof middleware === "function") {
-        return (await middleware({
+        return middleware({
             userOperation,
             entryPoint: account.entryPoint
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as PrepareUserOperationRequestReturnType<entryPoint>
+        }) as Promise<PrepareUserOperationRequestReturnType<entryPoint>>
     }
 
     if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
@@ -201,6 +203,7 @@ async function prepareUserOperationRequestForEntryPointV06<
             sponsorUserOperationData.preVerificationGas
         userOperation.paymasterAndData =
             sponsorUserOperationData.paymasterAndData
+        return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
     if (
@@ -272,17 +275,19 @@ async function prepareUserOperationRequestEntryPointV07<
         factory: factory,
         factoryData: factoryData,
         callData,
-        callGasLimit: partialUserOperation.callGasLimit || 0n,
-        verificationGasLimit: partialUserOperation.verificationGasLimit || 0n,
-        preVerificationGas: partialUserOperation.preVerificationGas || 0n,
+        callGasLimit: partialUserOperation.callGasLimit || BigInt(0),
+        verificationGasLimit:
+            partialUserOperation.verificationGasLimit || BigInt(0),
+        preVerificationGas:
+            partialUserOperation.preVerificationGas || BigInt(0),
         maxFeePerGas:
             partialUserOperation.maxFeePerGas ||
             gasEstimation?.maxFeePerGas ||
-            0n,
+            BigInt(0),
         maxPriorityFeePerGas:
             partialUserOperation.maxPriorityFeePerGas ||
             gasEstimation?.maxPriorityFeePerGas ||
-            0n,
+            BigInt(0),
         signature: partialUserOperation.signature || "0x"
     }
 
@@ -291,13 +296,13 @@ async function prepareUserOperationRequestEntryPointV07<
     }
 
     if (typeof middleware === "function") {
-        return (await middleware({
+        return middleware({
             userOperation,
             entryPoint: account.entryPoint
         } as {
             userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
             entryPoint: entryPoint
-        })) as PrepareUserOperationRequestReturnType<entryPoint>
+        }) as Promise<PrepareUserOperationRequestReturnType<entryPoint>>
     }
 
     if (middleware && typeof middleware !== "function" && middleware.gasPrice) {
@@ -349,6 +354,8 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.paymasterPostOpGasLimit =
             sponsorUserOperationData.paymasterPostOpGasLimit
         userOperation.paymasterData = sponsorUserOperationData.paymasterData
+
+        return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
     if (
@@ -356,13 +363,13 @@ async function prepareUserOperationRequestEntryPointV07<
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
     ) {
-        const gasParameters = await getAction(client, estimateUserOperationGas)(
+        const gasParameters = await getAction(
+            client,
+            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>
+        )(
             {
                 userOperation,
                 entryPoint: account.entryPoint
-            } as {
-                userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-                entryPoint: entryPoint
             },
             stateOverrides
         )
@@ -373,6 +380,13 @@ async function prepareUserOperationRequestEntryPointV07<
             gasParameters.verificationGasLimit
         userOperation.preVerificationGas =
             userOperation.preVerificationGas || gasParameters.preVerificationGas
+
+        userOperation.paymasterPostOpGasLimit =
+            userOperation.paymasterPostOpGasLimit ||
+            gasParameters.paymasterPostOpGasLimit
+        userOperation.paymasterPostOpGasLimit =
+            userOperation.paymasterPostOpGasLimit ||
+            gasParameters.paymasterPostOpGasLimit
     }
 
     return userOperation as PrepareUserOperationRequestReturnType<entryPoint>

@@ -135,7 +135,7 @@ const getAccountAddress = async ({
     fallbackHandlerAddress,
     ecdsaModuleAddress,
     owner,
-    index = 0n
+    index = BigInt(0)
 }: {
     factoryAddress: Address
     accountLogicAddress: Address
@@ -219,7 +219,7 @@ export async function signerToBiconomySmartAccount<
         signer,
         address,
         entryPoint: entryPointAddress,
-        index = 0n,
+        index = BigInt(0),
         factoryAddress = BICONOMY_ADDRESSES.FACTORY_ADDRESS,
         accountLogicAddress = BICONOMY_ADDRESSES.ACCOUNT_V2_0_LOGIC,
         fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
@@ -259,7 +259,7 @@ export async function signerToBiconomySmartAccount<
                 fallbackHandlerAddress,
                 index
             }),
-        getChainId(client)
+        client.chain?.id ?? getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
