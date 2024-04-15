@@ -223,7 +223,7 @@ async function prepareUserOperationRequestForEntryPointV06<
                 userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                 entryPoint: entryPoint
             },
-            // @ts-ignore geetAcrtion takes only two params but when compiled this will work
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 
@@ -377,7 +377,7 @@ async function prepareUserOperationRequestEntryPointV07<
                 userOperation,
                 entryPoint: account.entryPoint
             },
-            // @ts-ignore geetAcrtion takes only two params but when compiled this will work
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 
