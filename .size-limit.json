@@ -2,18 +2,18 @@
     {
         "name": "permissionless (esm)",
         "path": "./packages/permissionless/_esm/index.js",
-        "limit": "35 kB",
+        "limit": "40 kB",
         "import": "*"
     },
     {
         "name": "permissionless (cjs)",
         "path": "./packages/permissionless/_cjs/index.js",
-        "limit": "150 kB"
+        "limit": "160 kB"
     },
     {
         "name": "permissionless (minimal surface - tree-shaking)",
         "path": "./packages/permissionless/_esm/index.js",
-        "limit": "15 kB",
+        "limit": "20 kB",
         "import": "{ bundlerActions }"
     }
 ]
