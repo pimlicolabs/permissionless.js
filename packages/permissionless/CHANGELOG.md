@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.1.17
+
+### Patch Changes
+
+- 8652af7665f15e77e65cb62682dd36d8acecc204: Fixed use of BigInt literals for targeting lower than ES2020
+- 3651f6c57c2e05aab66967295d1b510ece220949: fix getAction for cases where minifier changes function names
+
 ## 0.1.16
 
 ### Patch Changes
