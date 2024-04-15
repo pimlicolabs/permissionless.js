@@ -20,6 +20,6 @@
         "execa": "^8.0.1",
         "get-port": "^7.0.0",
         "permissionless": "workspace:packages/permissionless",
-        "viem": "^2.0.0"
+        "viem": "2.9.17"
     }
 }

@@ -7,8 +7,8 @@ import {
     type Transport,
     stringify
 } from "viem"
+import { getAction } from "viem/utils"
 import type { Prettify } from "../../types/"
-import { getAction } from "../../utils/getAction"
 import { observe } from "../../utils/observe"
 import {
     type GetUserOperationReceiptReturnType,
@@ -94,7 +94,8 @@ export const waitForUserOperationReceipt = <
                     try {
                         const _userOperationReceipt = await getAction(
                             bundlerClient,
-                            getUserOperationReceipt
+                            getUserOperationReceipt,
+                            "getUserOperationReceipt"
                         )({ hash })
 
                         if (_userOperationReceipt !== null) {

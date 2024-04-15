@@ -1,5 +1,6 @@
 import type { Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type {
     GetAccountParameter,
@@ -15,7 +16,6 @@ import type {
     GetEntryPointVersion
 } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
 
@@ -211,7 +211,11 @@ async function prepareUserOperationRequestForEntryPointV06<
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
     ) {
-        const gasParameters = await getAction(client, estimateUserOperationGas)(
+        const gasParameters = await getAction(
+            client,
+            estimateUserOperationGas,
+            "estimateUserOperationGas"
+        )(
             {
                 userOperation,
                 entryPoint: account.entryPoint
@@ -219,6 +223,7 @@ async function prepareUserOperationRequestForEntryPointV06<
                 userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                 entryPoint: entryPoint
             },
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 
@@ -365,12 +370,14 @@ async function prepareUserOperationRequestEntryPointV07<
     ) {
         const gasParameters = await getAction(
             client,
-            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>
+            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>,
+            "estimateUserOperationGas"
         )(
             {
                 userOperation,
                 entryPoint: account.entryPoint
             },
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 

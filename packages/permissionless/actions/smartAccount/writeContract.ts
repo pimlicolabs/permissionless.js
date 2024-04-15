@@ -10,9 +10,9 @@ import {
     type WriteContractParameters,
     encodeFunctionData
 } from "viem"
+import { getAction } from "viem/utils"
 import { type SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
-import { getAction } from "../../utils/getAction"
 import { type Middleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
@@ -138,7 +138,8 @@ export async function writeContract<
     } as EncodeFunctionDataParameters<TAbi, TFunctionName>)
     const hash = await getAction(
         client,
-        sendTransaction<TChain, TAccount, entryPoint, TChainOverride>
+        sendTransaction<TChain, TAccount, entryPoint, TChainOverride>,
+        "sendTransaction"
     )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
