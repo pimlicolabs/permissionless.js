@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.18
+
+### Patch Changes
+
+- ace8a11af38488a305419e4ea8245eb7890fd5f3: Changed sponsorUserOperation action return type to include maxFeePerGas and maxPriorityFeePerGas if returned by paymaster and return it as part of userOperation from prepareUserOperationRequest action
+
 ## 0.1.17
 
 ### Patch Changes
