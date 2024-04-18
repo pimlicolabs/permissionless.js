@@ -1,4 +1,5 @@
 import type { Chain, Client, Hash, Transport } from "viem"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type {
     GetAccountParameter,
@@ -12,7 +13,6 @@ import type {
     GetEntryPointVersion
 } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 import {
     type Middleware,
@@ -77,7 +77,8 @@ export async function sendUserOperation<
 
     const userOperation = await getAction(
         client,
-        prepareUserOperationRequest<entryPoint, TTransport, TChain, TAccount>
+        prepareUserOperationRequest<entryPoint, TTransport, TChain, TAccount>,
+        "prepareUserOperationRequest"
     )(args)
 
     userOperation.signature = await account.signUserOperation(

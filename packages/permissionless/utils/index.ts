@@ -1,6 +1,5 @@
 import type { Account, Address } from "viem"
 import { deepHexlify, transactionReceiptStatus } from "./deepHexlify"
-import { getAction } from "./getAction"
 import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData"
 import {
     type GetRequiredPrefundReturnType,
@@ -35,7 +34,6 @@ import { getPackedUserOperation } from "./getPackedUserOperation"
 export {
     transactionReceiptStatus,
     deepHexlify,
-    getAction,
     getUserOperationHash,
     getRequiredPrefund,
     walletClientToSmartAccountSigner,

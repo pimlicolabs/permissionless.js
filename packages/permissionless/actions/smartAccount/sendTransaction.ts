@@ -5,11 +5,11 @@ import type {
     SendTransactionParameters,
     Transport
 } from "viem"
+import { getAction } from "viem/utils"
 import { type SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import { type Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
@@ -119,7 +119,8 @@ export async function sendTransaction<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>
+        sendUserOperation<entryPoint>,
+        "sendUserOperation"
     )({
         userOperation: {
             sender: account.address,
@@ -134,7 +135,8 @@ export async function sendTransaction<
 
     const userOperationReceipt = await getAction(
         client,
-        waitForUserOperationReceipt
+        waitForUserOperationReceipt,
+        "waitForUserOperationReceipt"
     )({
         hash: userOpHash
     })

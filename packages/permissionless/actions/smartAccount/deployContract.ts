@@ -7,11 +7,11 @@ import type {
     Hash,
     Transport
 } from "viem"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import { type Middleware } from "./prepareUserOperationRequest"
@@ -84,7 +84,8 @@ export async function deployContract<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>
+        sendUserOperation<entryPoint>,
+        "sendUserOperation"
     )({
         userOperation: {
             sender: account.address,
@@ -102,7 +103,8 @@ export async function deployContract<
 
     const userOperationReceipt = await getAction(
         client,
-        waitForUserOperationReceipt
+        waitForUserOperationReceipt,
+        "waitForUserOperationReceipt"
     )({
         hash: userOpHash
     })

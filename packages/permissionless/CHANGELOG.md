@@ -1,5 +1,18 @@
 # permissionless
 
+## 0.1.18
+
+### Patch Changes
+
+- ace8a11af38488a305419e4ea8245eb7890fd5f3: Changed sponsorUserOperation action return type to include maxFeePerGas and maxPriorityFeePerGas if returned by paymaster and return it as part of userOperation from prepareUserOperationRequest action
+
+## 0.1.17
+
+### Patch Changes
+
+- 8652af7665f15e77e65cb62682dd36d8acecc204: Fixed use of BigInt literals for targeting lower than ES2020
+- 3651f6c57c2e05aab66967295d1b510ece220949: fix getAction for cases where minifier changes function names
+
 ## 0.1.16
 
 ### Patch Changes

@@ -1,6 +1,8 @@
 import type { Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
+import type { PartialPick } from "../../types"
 import type {
     GetAccountParameter,
     PartialBy,
@@ -15,9 +17,40 @@ import type {
     GetEntryPointVersion
 } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
-import { getAction } from "../../utils/getAction"
 import { getEntryPointVersion } from "../../utils/getEntryPointVersion"
 import { estimateUserOperationGas } from "../bundler/estimateUserOperationGas"
+
+export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+        ? Prettify<
+              Pick<
+                  UserOperation<"v0.6">,
+                  | "callGasLimit"
+                  | "verificationGasLimit"
+                  | "preVerificationGas"
+                  | "paymasterAndData"
+              > &
+                  PartialPick<
+                      UserOperation<"v0.6">,
+                      "maxFeePerGas" | "maxPriorityFeePerGas"
+                  >
+          >
+        : Prettify<
+              Pick<
+                  UserOperation<"v0.7">,
+                  | "callGasLimit"
+                  | "verificationGasLimit"
+                  | "preVerificationGas"
+                  | "paymaster"
+                  | "paymasterVerificationGasLimit"
+                  | "paymasterPostOpGasLimit"
+                  | "paymasterData"
+              > &
+                  PartialPick<
+                      UserOperation<"v0.7">,
+                      "maxFeePerGas" | "maxPriorityFeePerGas"
+                  >
+          >
 
 export type Middleware<entryPoint extends EntryPoint> = {
     middleware?:
@@ -33,26 +66,7 @@ export type Middleware<entryPoint extends EntryPoint> = {
               sponsorUserOperation?: (args: {
                   userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                   entryPoint: entryPoint
-              }) => Promise<
-                  entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
-                      ? Pick<
-                              UserOperation<"v0.6">,
-                              | "callGasLimit"
-                              | "verificationGasLimit"
-                              | "preVerificationGas"
-                              | "paymasterAndData"
-                          >
-                      : Pick<
-                              UserOperation<"v0.7">,
-                              | "callGasLimit"
-                              | "verificationGasLimit"
-                              | "preVerificationGas"
-                              | "paymaster"
-                              | "paymasterVerificationGasLimit"
-                              | "paymasterPostOpGasLimit"
-                              | "paymasterData"
-                          >
-              >
+              }) => Promise<SponsorUserOperationReturnType<entryPoint>>
           }
 }
 
@@ -188,13 +202,7 @@ async function prepareUserOperationRequestForEntryPointV06<
                 userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                 entryPoint: entryPoint
             }
-        )) as Pick<
-            UserOperation<"v0.6">,
-            | "callGasLimit"
-            | "verificationGasLimit"
-            | "preVerificationGas"
-            | "paymasterAndData"
-        >
+        )) as SponsorUserOperationReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
         userOperation.callGasLimit = sponsorUserOperationData.callGasLimit
         userOperation.verificationGasLimit =
@@ -203,6 +211,11 @@ async function prepareUserOperationRequestForEntryPointV06<
             sponsorUserOperationData.preVerificationGas
         userOperation.paymasterAndData =
             sponsorUserOperationData.paymasterAndData
+        userOperation.maxFeePerGas =
+            sponsorUserOperationData.maxFeePerGas || userOperation.maxFeePerGas
+        userOperation.maxPriorityFeePerGas =
+            sponsorUserOperationData.maxPriorityFeePerGas ||
+            userOperation.maxPriorityFeePerGas
         return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
@@ -211,7 +224,11 @@ async function prepareUserOperationRequestForEntryPointV06<
         !userOperation.verificationGasLimit ||
         !userOperation.preVerificationGas
     ) {
-        const gasParameters = await getAction(client, estimateUserOperationGas)(
+        const gasParameters = await getAction(
+            client,
+            estimateUserOperationGas,
+            "estimateUserOperationGas"
+        )(
             {
                 userOperation,
                 entryPoint: account.entryPoint
@@ -219,6 +236,7 @@ async function prepareUserOperationRequestForEntryPointV06<
                 userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                 entryPoint: entryPoint
             },
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 
@@ -333,16 +351,8 @@ async function prepareUserOperationRequestEntryPointV07<
                 userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
                 entryPoint: entryPoint
             }
-        )) as Pick<
-            UserOperation<"v0.7">,
-            | "callGasLimit"
-            | "verificationGasLimit"
-            | "preVerificationGas"
-            | "paymaster"
-            | "paymasterVerificationGasLimit"
-            | "paymasterPostOpGasLimit"
-            | "paymasterData"
-        >
+        )) as SponsorUserOperationReturnType<ENTRYPOINT_ADDRESS_V07_TYPE>
+
         userOperation.callGasLimit = sponsorUserOperationData.callGasLimit
         userOperation.verificationGasLimit =
             sponsorUserOperationData.verificationGasLimit
@@ -354,6 +364,11 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.paymasterPostOpGasLimit =
             sponsorUserOperationData.paymasterPostOpGasLimit
         userOperation.paymasterData = sponsorUserOperationData.paymasterData
+        userOperation.maxFeePerGas =
+            sponsorUserOperationData.maxFeePerGas || userOperation.maxFeePerGas
+        userOperation.maxPriorityFeePerGas =
+            sponsorUserOperationData.maxPriorityFeePerGas ||
+            userOperation.maxPriorityFeePerGas
 
         return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
@@ -365,12 +380,14 @@ async function prepareUserOperationRequestEntryPointV07<
     ) {
         const gasParameters = await getAction(
             client,
-            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>
+            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>,
+            "estimateUserOperationGas"
         )(
             {
                 userOperation,
                 entryPoint: account.entryPoint
             },
+            // @ts-ignore getAction takes only two params but when compiled this will work
             stateOverrides
         )
 

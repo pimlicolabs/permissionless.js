@@ -1,8 +1,8 @@
 import type { Address, Chain, Client, Transport } from "viem"
 import { readContract } from "viem/actions"
+import { getAction } from "viem/utils"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
-import { getAction } from "../../utils/getAction"
 
 export type GetAccountNonceParams = {
     sender: Address
@@ -47,7 +47,8 @@ export const getAccountNonce = async <
 
     return await getAction(
         client,
-        readContract
+        readContract,
+        "readContract"
     )({
         address: entryPoint,
         abi: [
