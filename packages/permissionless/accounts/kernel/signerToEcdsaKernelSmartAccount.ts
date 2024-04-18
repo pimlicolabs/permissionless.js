@@ -99,7 +99,7 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
         ECDSA_VALIDATOR: Address
         ACCOUNT_LOGIC: Address
         FACTORY_ADDRESS: Address
-        META_FACTORY?: Address
+        META_FACTORY_ADDRESS?: Address
     }
 } = {
     "0.2.2": {
@@ -111,7 +111,7 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
         ECDSA_VALIDATOR: "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43",
         ACCOUNT_LOGIC: "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27",
         FACTORY_ADDRESS: "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
-        META_FACTORY: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
+        META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
     }
 }
 
@@ -156,7 +156,7 @@ const getDefaultAddresses = <entryPoint extends EntryPoint>(
     const accountLogicAddress = _accountLogicAddress ?? addresses.ACCOUNT_LOGIC
     const factoryAddress = _factoryAddress ?? addresses.FACTORY_ADDRESS
     const metaFactoryAddress =
-        _metaFactoryAddress ?? addresses?.META_FACTORY ?? zeroAddress // Meta Factory doesn't exists for Kernel v2.2
+        _metaFactoryAddress ?? addresses?.META_FACTORY_ADDRESS ?? zeroAddress // Meta Factory doesn't exists for Kernel v2.2
 
     return {
         ecdsaValidatorAddress,
