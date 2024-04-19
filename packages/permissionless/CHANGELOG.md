@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.19
+
+### Patch Changes
+
+- 597013e2d08d5ecece99570244e783aba2ef64e9: Added eth_accounts as a fallback in providerToSmartAccountSigner
+
 ## 0.1.18
 
 ### Patch Changes
