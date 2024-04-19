@@ -71,7 +71,6 @@ describe("ECDSA kernel Account", () => {
 
     test("Account address", async () => {
         const ecdsaSmartAccount = await getSignerToEcdsaKernelAccount()
-        console.log({ address: ecdsaSmartAccount.address })
 
         expectTypeOf(ecdsaSmartAccount.address).toBeString()
         expect(ecdsaSmartAccount.address).toHaveLength(42)

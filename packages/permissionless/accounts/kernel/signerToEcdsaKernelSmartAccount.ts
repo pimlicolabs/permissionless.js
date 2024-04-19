@@ -26,7 +26,7 @@ import type {
     Prettify
 } from "../../types"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
-import { getEntryPointVersion } from "../../utils"
+import { ENTRYPOINT_ADDRESS_V06, getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import { toSmartAccount } from "../toSmartAccount"
@@ -120,9 +120,7 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
  * @param entryPoint
  */
 const getKernelVersion = (entryPoint: EntryPoint): KernelVersion => {
-    return entryPoint === "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
-        ? "0.2.2"
-        : "0.3.0-beta"
+    return entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
 }
 
 type KERNEL_ADDRESSES = {
@@ -166,11 +164,10 @@ const getDefaultAddresses = <entryPoint extends EntryPoint>(
     }
 }
 
-export const getEcdsaRootIdentifierForKernelV3 = () => {
-    const ecdsaValidatorAddress =
-        KERNEL_VERSION_TO_ADDRESSES_MAP["0.3.0-beta"].ECDSA_VALIDATOR
-
-    return concatHex([VALIDATOR_TYPE.VALIDATOR, ecdsaValidatorAddress])
+export const getEcdsaRootIdentifierForKernelV3 = (
+    validatorAddress: Address
+) => {
+    return concatHex([VALIDATOR_TYPE.VALIDATOR, validatorAddress])
 }
 
 /**
@@ -202,7 +199,7 @@ const getInitialisationData = <entryPoint extends EntryPoint>({
         abi: KernelV3InitAbi,
         functionName: "initialize",
         args: [
-            getEcdsaRootIdentifierForKernelV3(),
+            getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
             zeroAddress /* hookAddress */,
             owner,
             "0x" /* hookData */
@@ -456,13 +453,18 @@ export async function signerToEcdsaKernelSmartAccount<
     return toSmartAccount({
         address: accountAddress,
         async signMessage({ message }) {
-            return signMessage(client, {
+            const signature = await signMessage(client, {
                 account: viemSigner,
                 message,
                 accountAddress,
                 accountVersion: kernelVersion,
                 chainId
             })
+
+            return concatHex([
+                getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
+                signature
+            ])
         },
         async signTransaction(_, __) {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -473,16 +475,22 @@ export async function signerToEcdsaKernelSmartAccount<
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
         >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            return signTypedData<TTypedData, TPrimaryType, TChain, undefined>(
-                client,
-                {
-                    account: viemSigner,
-                    ...typedData,
-                    accountAddress,
-                    accountVersion: kernelVersion,
-                    chainId
-                }
-            )
+            const signature = await signTypedData<
+                TTypedData,
+                TPrimaryType,
+                TChain,
+                undefined
+            >(client, {
+                account: viemSigner,
+                ...typedData,
+                accountAddress,
+                accountVersion: kernelVersion,
+                chainId
+            })
+            return concatHex([
+                getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
+                signature
+            ])
         },
         client: client,
         publicKey: accountAddress,
@@ -492,7 +500,8 @@ export async function signerToEcdsaKernelSmartAccount<
         // Get the nonce of the smart account
         async getNonce() {
             const key = getNonceKeyWithEncoding(
-                kernelVersion
+                kernelVersion,
+                ecdsaValidatorAddress
                 // @dev specify the custom nonceKey here when integrating the said feature
                 /*, nonceKey */
             )

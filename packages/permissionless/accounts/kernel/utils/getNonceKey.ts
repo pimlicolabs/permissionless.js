@@ -1,12 +1,10 @@
-import { concatHex, maxUint16, pad, toHex } from "viem"
+import { type Address, concatHex, maxUint16, pad, toHex } from "viem"
 import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants"
-import {
-    KERNEL_VERSION_TO_ADDRESSES_MAP,
-    type KernelVersion
-} from "../signerToEcdsaKernelSmartAccount"
+import { type KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 
 export const getNonceKeyWithEncoding = (
     accountVerion: KernelVersion,
+    validatorAddress: Address,
     nonceKey = 0n
 ) => {
     if (accountVerion === "0.2.2") {
@@ -18,15 +16,13 @@ export const getNonceKeyWithEncoding = (
             `nonce key must be equal or less than 2 bytes(maxUint16) for Kernel version ${accountVerion}`
         )
 
-    const ecdsaValidatorAddress =
-        KERNEL_VERSION_TO_ADDRESSES_MAP["0.3.0-beta"].ECDSA_VALIDATOR // Just use ECDSA as root validator
     const validatorMode = VALIDATOR_MODE.DEFAULT
     const validatorType = VALIDATOR_TYPE.ROOT
     const encoding = pad(
         concatHex([
             validatorMode, // 1 byte
             validatorType, // 1 byte
-            ecdsaValidatorAddress, // 20 bytes
+            validatorAddress, // 20 bytes
             toHex(nonceKey, { size: 2 }) // 2 byte
         ]),
         { size: 24 }
