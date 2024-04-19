@@ -31,9 +31,9 @@ import {
     createBundlerClient
 } from "./clients/createBundlerClient"
 import { createSmartAccountClient } from "./clients/createSmartAccountClient"
-import {
-    type SmartAccountClient,
-    type SmartAccountClientConfig
+import type {
+    SmartAccountClient,
+    SmartAccountClientConfig
 } from "./clients/createSmartAccountClient"
 import type { BundlerActions } from "./clients/decorators/bundler"
 import { bundlerActions } from "./clients/decorators/bundler"
