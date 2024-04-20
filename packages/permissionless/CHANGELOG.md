@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.20
+
+### Patch Changes
+
+- 00ecd59fc5915d0667e8f597f9b9537307b6da59: Added Kernel v0.3.0 smart account implementation which is ERC-7579 and EntryPoint v0.7 compliant including relevant testcases
+
 ## 0.1.19
 
 ### Patch Changes
