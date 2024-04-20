@@ -70,7 +70,6 @@ const client = createPublicClient({
 
 const main = async () => {
     let nonce = 0
-    await anvilClient.setAutomine(true)
 
     walletClient
         .sendTransaction({
@@ -271,6 +270,14 @@ const main = async () => {
             nonce: nonce++
         })
         .then(() => console.log("[KERNEL] Deploying Kernel Factory"))
+
+    let onchainNonce = 0
+    do {
+        onchainNonce = await client.getTransactionCount({
+            address: walletClient.account.address
+        })
+        await new Promise((resolve) => setTimeout(resolve, 500))
+    } while (onchainNonce !== nonce)
 
     // ==== SETUP KERNEL CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"

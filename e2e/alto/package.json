@@ -1,0 +1,19 @@
+{
+    "name": "alto + contract-deployer",
+    "private": true,
+    "scripts": {
+        "start": "pnpm run start:deploy-contracts && pnpm run install:alto && pnpm run start:alto",
+        "install:alto": "cd node_modules/alto && pnpm install",
+        "start:deploy-contracts": "wait-port anvil:8545 && ts-node src/index.ts",
+        "start:alto": "pnpm alto run --config ./alto-config.json"
+    },
+    "dependencies": {
+        "alto": "github:pimlicolabs/alto",
+        "viem": "^2.9.9"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.4",
+        "ts-node": "^10.9.2",
+        "wait-port": "^1.1.0"
+    }
+}

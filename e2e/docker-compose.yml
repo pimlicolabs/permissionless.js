@@ -4,12 +4,6 @@ services:
     ports: [ "8545:8545" ]
     entrypoint: [ "anvil", "--host", "0.0.0.0", "--block-time", "0.1", "--accounts", "100", "--silent"]
 
-  deploy-contracts:
-    build: ./contract-deployer
-    environment:
-      - ANVIL_RPC=http://anvil:8545
-
-
   mock-paymaster:
     build: ./mock-paymaster
     ports: [ "3000:3000" ]
@@ -18,28 +12,10 @@ services:
       - ANVIL_RPC=http://anvil:8545
 
   alto:
-    image: ghcr.io/pimlicolabs/alto/tmp:main-8567ac1-1712699144
+    build: ./alto
     ports: [ "4337:4337" ]
-    depends_on:
-      deploy-contracts:
-        condition: service_completed_successfully
     environment:
-      ALTO_NETWORK_NAME: "local"
-      ALTO_ENTRYPOINTS: "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789,0x0000000071727De22E5E9d8BAf0edAc6f37da032"
-      ALTO_BALANCE_OVERRIDE_ENABLED: "true"
-      ALTO_ENTRYPOINT_SIMULATION_CONTRACT: "0xb02456A0eC77837B22156CBA2FF53E662b326713"
-      ALTO_API_VERSION: "v1,v2"
-      ALTO_NO_ETH_CALL_OVERRIDE_SUPPORT: "true"
-      ALTO_RPC_URL: "http://anvil:8545"
-      ALTO_MIN_BALANCE: "0"
-      ALTO_UTILITY_PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97" # anvil account 8
-      ALTO_EXECUTOR_PRIVATE_KEYS: "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6,0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356,0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e,0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba,0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a" # anvil account 9
-      ALTO_MAX_BLOCK_RANGE: 10000
-      ALTO_SAFE_MODE: false
-      ALTO_PORT: 4337
-      ALTO_LOG_LEVEL: "fatal"
-      ALTO_PUBLIC_CLIENT_LOG_LEVEL: "error"
-      ALTO_WALLET_CLIENT_LOG_LEVEL: "error"
+      ANVIL_RPC: "http://anvil:8545"
 
   test-cases:
     build: ./test-cases
@@ -50,7 +26,6 @@ services:
     volumes:
       - ../packages/permissionless/:/app/permissionless
     depends_on:
+      - anvil
       - alto
       - mock-paymaster
-      - anvil
-      - deploy-contracts
