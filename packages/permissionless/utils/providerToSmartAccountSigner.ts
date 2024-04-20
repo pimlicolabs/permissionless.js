@@ -14,7 +14,15 @@ export const providerToSmartAccountSigner = async (
 ) => {
     let account: Hex
     if (!params) {
-        ;[account] = await provider.request({ method: "eth_requestAccounts" })
+        try {
+            ;[account] = await provider.request({
+                method: "eth_requestAccounts"
+            })
+        } catch {
+            ;[account] = await provider.request({
+                method: "eth_accounts"
+            })
+        }
     } else {
         account = params.signerAddress
     }

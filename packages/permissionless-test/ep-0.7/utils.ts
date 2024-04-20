@@ -6,6 +6,7 @@ import {
 import {
     SmartAccount,
     SmartAccountSigner,
+    signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -81,6 +82,22 @@ export const getTestingChain = () => {
             }
         },
         testnet: true
+    })
+}
+
+export const getSignerToEcdsaKernelAccount = async (
+    { index }: { index: bigint } = { index: 100n }
+) => {
+    if (!process.env.TEST_PRIVATE_KEY)
+        throw new Error("TEST_PRIVATE_KEY environment variable not set")
+
+    const publicClient = getPublicClient()
+    const signer = privateKeyToAccount(process.env.TEST_PRIVATE_KEY as Hex)
+
+    return await signerToEcdsaKernelSmartAccount(publicClient, {
+        entryPoint: getEntryPoint(),
+        signer: signer,
+        index
     })
 }
 
