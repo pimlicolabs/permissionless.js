@@ -1,4 +1,3 @@
-import type { TypedData } from "abitype"
 import {
     type Account,
     type Chain,
@@ -7,6 +6,7 @@ import {
     type SignTypedDataParameters,
     type SignTypedDataReturnType,
     type Transport,
+    TypedData,
     getTypesForEIP712Domain,
     hashTypedData,
     publicActions,
