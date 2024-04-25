@@ -1,4 +1,3 @@
-import type { TypedData } from "abitype"
 import {
     type Account,
     type Chain,
@@ -7,11 +6,13 @@ import {
     type SignTypedDataParameters,
     type SignTypedDataReturnType,
     type Transport,
+    type TypedData,
     getTypesForEIP712Domain,
     hashTypedData,
     publicActions,
     validateTypedData
 } from "viem"
+
 import {
     signMessage as _signMessage,
     signTypedData as _signTypedData
