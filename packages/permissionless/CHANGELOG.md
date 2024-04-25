@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.21
+
+### Patch Changes
+
+- c239d910a48d680823f8712a5a67e117689f907e: Fixed TypedData import from abitype to import from viem
+
 ## 0.1.20
 
 ### Patch Changes
