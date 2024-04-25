@@ -6,12 +6,13 @@ import {
     type SignTypedDataParameters,
     type SignTypedDataReturnType,
     type Transport,
-    TypedData,
+    type TypedData,
     getTypesForEIP712Domain,
     hashTypedData,
     publicActions,
     validateTypedData
 } from "viem"
+
 import {
     signMessage as _signMessage,
     signTypedData as _signTypedData
