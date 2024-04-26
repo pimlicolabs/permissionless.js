@@ -81,11 +81,14 @@ export type BundlerRpcSchema<entryPoint extends EntryPoint> = [
 
 type UserOperationReceiptWithBigIntAsHex = {
     userOpHash: Hash
+    entryPoint: Address
     sender: Address
     nonce: Hex
+    paymaster?: Address | undefined
     actualGasUsed: Hex
     actualGasCost: Hex
     success: boolean
+    reason?: string | undefined
     receipt: {
         transactionHash: Hex
         transactionIndex: Hex
