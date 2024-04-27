@@ -23,11 +23,11 @@ export type GetUserOperationReceiptReturnType = {
     entryPoint: Address
     sender: Address
     nonce: bigint
-    paymaster?: Address | undefined
+    paymaster?: Address
     actualGasUsed: bigint
     actualGasCost: bigint
     success: boolean
-    reason?: string | undefined
+    reason?: string
     receipt: {
         transactionHash: Hex
         transactionIndex: bigint

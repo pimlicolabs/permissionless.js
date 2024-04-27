@@ -84,11 +84,11 @@ type UserOperationReceiptWithBigIntAsHex = {
     entryPoint: Address
     sender: Address
     nonce: Hex
-    paymaster?: Address | undefined
+    paymaster?: Address
     actualGasUsed: Hex
     actualGasCost: Hex
     success: boolean
-    reason?: string | undefined
+    reason?: string
     receipt: {
         transactionHash: Hex
         transactionIndex: Hex
