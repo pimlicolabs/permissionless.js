@@ -33,7 +33,7 @@ import {
     getFactoryAddress,
     getPimlicoPaymasterClient,
     getPublicClient,
-    setupSimpleSmartAccountClient
+    getSimpleAccountClient
 } from "../utils"
 
 describe("Simple Smart Account", () => {
@@ -48,7 +48,7 @@ describe("Simple Smart Account", () => {
     })
 
     test("signTransaction should throw", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
         const simpleSmartAccount = smartAccountClient.account
@@ -65,7 +65,7 @@ describe("Simple Smart Account", () => {
     })
 
     test("signMessage should throw", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -77,7 +77,7 @@ describe("Simple Smart Account", () => {
     })
 
     test("signTypedData should throw", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -105,7 +105,7 @@ describe("Simple Smart Account", () => {
     })
 
     test("deployContract should throw", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -120,7 +120,7 @@ describe("Simple Smart Account", () => {
     })
 
     test("can send multiple transactions", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -145,7 +145,7 @@ describe("Simple Smart Account", () => {
     }, 10000)
 
     test("can write contract", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -177,7 +177,7 @@ describe("Simple Smart Account", () => {
     }, 10000)
 
     test("can send transaction", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -195,7 +195,7 @@ describe("Simple Smart Account", () => {
     test("signerToSimpleSmartAccount should work with existing (deployed) smart account", async () => {
         const privateKey = generatePrivateKey()
 
-        const existingSimpleClient = await setupSimpleSmartAccountClient({
+        const existingSimpleClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             privateKey
         })
@@ -230,7 +230,7 @@ describe("Simple Smart Account", () => {
     }, 25000)
 
     test("can handle prepareUserOperationRequest", async () => {
-        const simpleClient = await setupSimpleSmartAccountClient({
+        const simpleClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -253,7 +253,7 @@ describe("Simple Smart Account", () => {
     }, 10000)
 
     test("can send transaction with paymaster", async () => {
-        const simpleClient = await setupSimpleSmartAccountClient({
+        const simpleClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
         })
@@ -301,7 +301,7 @@ describe("Simple Smart Account", () => {
     }, 10000)
 
     test("smart account client send multiple Transactions with paymaster", async () => {
-        const simpleClient = await setupSimpleSmartAccountClient({
+        const simpleClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
         })

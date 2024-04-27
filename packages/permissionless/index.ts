@@ -78,7 +78,7 @@ export {
 }
 import type { UserOperation } from "./types/userOperation"
 
-export { type UserOperation }
+export type { UserOperation }
 
 import type { GetUserOperationHashParams } from "./utils/getUserOperationHash"
 import { getUserOperationHash } from "./utils/getUserOperationHash"

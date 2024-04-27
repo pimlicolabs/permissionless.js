@@ -7,9 +7,9 @@
         "test": "jest --verbose --detectOpenHandles --forceExit"
     },
     "dependencies": {
-        "permissionless": "link:../../packages/permissionless",
+        "permissionless": "link:../../../permissionless",
         "tslib": "^2.6.2",
-        "viem": "^2.0.0"
+        "viem": "^2.9.17"
     },
     "devDependencies": {
         "@types/jest": "^29.5.12",

@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import {
-    EstimateUserOperationGasError,
+    type EstimateUserOperationGasError,
     InitCodeRevertedError,
     InvalidSmartAccountNonceError,
     PaymasterDepositTooLowError,
@@ -10,9 +10,9 @@ import {
     SenderNotDeployedError,
     SmartAccountInsufficientFundsError
 } from "permissionless"
-import { EstimateUserOperationErrorType } from "permissionless/actions"
-import { EstimateUserOperationGasErrorType } from "permissionless/errors"
-import { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
+import type { EstimateUserOperationErrorType } from "permissionless/actions"
+import type { EstimateUserOperationGasErrorType } from "permissionless/errors"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
 import { beforeAll, describe, expect, test } from "vitest"
 import { buildUserOp, getAccountInitCode } from "../userOp"
 import {

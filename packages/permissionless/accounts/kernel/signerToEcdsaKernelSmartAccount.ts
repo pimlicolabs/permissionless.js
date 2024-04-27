@@ -14,9 +14,9 @@ import {
     zeroAddress
 } from "viem"
 import {
+    signMessage as _signMessage,
     getChainId,
-    readContract,
-    signMessage as _signMessage
+    readContract
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"

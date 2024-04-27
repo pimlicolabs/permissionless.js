@@ -21,7 +21,7 @@ import {
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    setupSimpleSmartAccountClient
+    getSimpleAccountClient
 } from "../utils"
 
 describe("Pimlico Actions tests", () => {
@@ -67,7 +67,7 @@ describe("Pimlico Actions tests", () => {
             const { maxFeePerGas, maxPriorityFeePerGas } =
                 await publicClient.estimateFeesPerGas()
 
-            const simpleAccountClient = await setupSimpleSmartAccountClient({
+            const simpleAccountClient = await getSimpleAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             })
 
@@ -114,7 +114,7 @@ describe("Pimlico Actions tests", () => {
         }, 100000)
 
         test("can send userOperation with paymaster and data", async () => {
-            const smartClient = await setupSimpleSmartAccountClient({
+            const smartClient = await getSimpleAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V06,
                 paymasterClient: getPimlicoPaymasterClient(
                     ENTRYPOINT_ADDRESS_V06
@@ -179,7 +179,7 @@ describe("Pimlico Actions tests", () => {
     })
 
     test("Validating sponsorship policies", async () => {
-        const simpleAccountClient = await setupSimpleSmartAccountClient({
+        const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06),
             pimlicoBundlerClient

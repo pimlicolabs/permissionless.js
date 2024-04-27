@@ -20,7 +20,7 @@ import {
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    setupSimpleSmartAccountClient
+    getSimpleAccountClient
 } from "../utils"
 
 describe("Pimlico Actions tests", () => {
@@ -66,7 +66,7 @@ describe("Pimlico Actions tests", () => {
 
     describe("Pimlico paymaster actions ", () => {
         test("can fetching paymaster and data", async () => {
-            const simpleAccountClient = await setupSimpleSmartAccountClient({
+            const simpleAccountClient = await getSimpleAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V07
             })
 
@@ -100,7 +100,7 @@ describe("Pimlico Actions tests", () => {
         }, 100000)
 
         test("can send userOperation with returned paymaster and data", async () => {
-            const simpleAccountClient = await setupSimpleSmartAccountClient({
+            const simpleAccountClient = await getSimpleAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V07
             })
 
@@ -171,7 +171,7 @@ describe("Pimlico Actions tests", () => {
     })
 
     test("Validating sponsorship policies", async () => {
-        const simpleAccountClient = await setupSimpleSmartAccountClient({
+        const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 

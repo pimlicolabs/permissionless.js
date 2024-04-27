@@ -2,7 +2,6 @@ import {
     type BundlerClient,
     WaitForUserOperationReceiptTimeoutError
 } from "permissionless"
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     UserOperation
@@ -14,7 +13,6 @@ import {
 import {
     type Account,
     type Chain,
-    type PublicClient,
     type Transport,
     type WalletClient,
     isHash,
@@ -25,22 +23,16 @@ import {
     fund,
     getAnvilWalletClient,
     getBundlerClient,
-    getPimlicoBundlerClient,
-    getPublicClient,
-    setupSimpleSmartAccountClient
+    getSimpleAccountClient
 } from "../utils"
 
 describe("BUNDLER ACTIONS", () => {
-    let publicClient: PublicClient<Transport, Chain>
     let walletClient: WalletClient<Transport, Chain, Account>
     let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
-    let pimlicoBundlerClient: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
 
     beforeAll(async () => {
-        publicClient = getPublicClient()
         walletClient = getAnvilWalletClient(94)
         bundlerClient = getBundlerClient(ENTRYPOINT_ADDRESS_V06)
-        pimlicoBundlerClient = getPimlicoBundlerClient(ENTRYPOINT_ADDRESS_V06)
     })
 
     test("can handle eth_supportedEntryPoints", async () => {
@@ -59,7 +51,7 @@ describe("BUNDLER ACTIONS", () => {
     })
 
     test("can handle eth_estimateUserOperationGas", async () => {
-        const simpleAccountClient = await setupSimpleSmartAccountClient({
+        const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -85,7 +77,7 @@ describe("BUNDLER ACTIONS", () => {
     }, 10000)
 
     test("can handle eth_sendUserOperation", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
@@ -147,7 +139,7 @@ describe("BUNDLER ACTIONS", () => {
     }, 10000)
 
     test("wait for user operation receipt fail", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 

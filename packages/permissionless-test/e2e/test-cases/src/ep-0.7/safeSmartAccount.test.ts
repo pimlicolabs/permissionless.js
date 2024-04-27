@@ -1,7 +1,7 @@
-import { type BundlerClient, ENTRYPOINT_ADDRESS_V06 } from "permissionless"
+import { type BundlerClient, ENTRYPOINT_ADDRESS_V07 } from "permissionless"
 import { SignTransactionNotSupportedBySmartAccount } from "permissionless/accounts"
 import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
+import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import {
     type Account,
     type BaseError,
@@ -18,7 +18,7 @@ import {
     parseEther,
     zeroAddress
 } from "viem"
-import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
+import { ENTRYPOINT_V07_ABI } from "../../abi/entryPointV07Abi"
 import {
     fund,
     getAnvilWalletClient,
@@ -26,25 +26,25 @@ import {
     getPimlicoBundlerClient,
     getPimlicoPaymasterClient,
     getPublicClient,
-    setupSafeSmartAccountClient
+    getSafeClient
 } from "../utils"
 
 describe("Safe Account", () => {
     let publicClient: PublicClient<Transport, Chain>
     let walletClient: WalletClient<Transport, Chain, Account>
-    let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
-    let pimlicoBundlerClient: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
+    let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE, Chain>
+    let pimlicoBundlerClient: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
 
     beforeAll(async () => {
         publicClient = getPublicClient()
-        walletClient = getAnvilWalletClient(92)
-        bundlerClient = getBundlerClient(ENTRYPOINT_ADDRESS_V06)
-        pimlicoBundlerClient = getPimlicoBundlerClient(ENTRYPOINT_ADDRESS_V06)
+        walletClient = getAnvilWalletClient(98)
+        bundlerClient = getBundlerClient(ENTRYPOINT_ADDRESS_V07)
+        pimlicoBundlerClient = getPimlicoBundlerClient(ENTRYPOINT_ADDRESS_V07)
     })
 
     test("signTransaction should throw", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
         const smartAccount = smartAccountClient.account
 
@@ -60,8 +60,8 @@ describe("Safe Account", () => {
     })
 
     test("attempt at deploying contract should throw", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         await expect(() =>
@@ -73,8 +73,8 @@ describe("Safe Account", () => {
     })
 
     test("can deploy with setup transaction", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07,
             setupTransactions: [
                 {
                     to: zeroAddress,
@@ -82,7 +82,7 @@ describe("Safe Account", () => {
                     value: 0n
                 }
             ],
-            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
+            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V07)
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -92,18 +92,18 @@ describe("Safe Account", () => {
         })
 
         expect(isHash(response)).toBe(true)
-    }, 10000)
+    }, 1000000)
 
     test("can write contract", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         await fund(smartAccountClient.account.address, walletClient)
 
         const entryPointContract = getContract({
-            abi: ENTRYPOINT_V06_ABI,
-            address: ENTRYPOINT_ADDRESS_V06,
+            abi: ENTRYPOINT_V07_ABI,
+            address: ENTRYPOINT_ADDRESS_V07,
             client: {
                 public: publicClient,
                 wallet: smartAccountClient
@@ -127,15 +127,14 @@ describe("Safe Account", () => {
             smartAccountClient.account.address
         ])
 
-        //@ts-ignore
         expect(newBalance - oldBalance).toBeGreaterThanOrEqual(
             parseEther("0.25")
         )
-    }, 10000)
+    }, 1000000)
 
     test("can send multiple transactions", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         await fund(smartAccountClient.account.address, walletClient)
@@ -160,11 +159,11 @@ describe("Safe Account", () => {
         })
 
         expect(isHash(response)).toBe(true)
-    }, 10000)
+    }, 1000000)
 
     test("can send transaction", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         await fund(smartAccountClient.account.address, walletClient)
@@ -176,12 +175,12 @@ describe("Safe Account", () => {
         })
 
         expect(isHash(response)).toBe(true)
-    }, 10000)
+    }, 1000000)
 
     test("can send transaction with paymaster", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07,
+            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V07)
         })
 
         const response = await smartAccountClient.sendTransaction({
@@ -206,7 +205,7 @@ describe("Safe Account", () => {
                 let event: any
                 try {
                     event = decodeEventLog({
-                        abi: ENTRYPOINT_V06_ABI,
+                        abi: ENTRYPOINT_V07_ABI,
                         ...log
                     })
                 } catch {
@@ -229,12 +228,12 @@ describe("Safe Account", () => {
         }
 
         expect(eventFound).toBeTruthy()
-    }, 10000)
+    }, 1000000)
 
     test("can send multiple transaction with paymaster", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07,
+            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V07)
         })
 
         const response = await smartAccountClient.sendTransactions({
@@ -268,7 +267,7 @@ describe("Safe Account", () => {
                 let event: any
                 try {
                     event = decodeEventLog({
-                        abi: ENTRYPOINT_V06_ABI,
+                        abi: ENTRYPOINT_V07_ABI,
                         ...log
                     })
                 } catch {
@@ -291,17 +290,19 @@ describe("Safe Account", () => {
         }
 
         expect(eventFound).toBeTruthy()
-    }, 10000)
+    }, 1000000)
 
     //test("can signMessage", async () => {
     //    const smartAccountClient = await setupSafeSmartAccountClient({
-    //        entryPoint: ENTRYPOINT_ADDRESS_V06
+    //        entryPoint: ENTRYPOINT_ADDRESS_V07
     //    })
 
     //    const messageToSign = "hello world"
     //    const signature = await smartAccountClient.signMessage({
     //        message: messageToSign
     //    })
+
+    //    console.log(`signature: ${signature}`)
 
     //    expect(isHash(signature)).toBe(true)
 
@@ -368,7 +369,7 @@ describe("Safe Account", () => {
 
     //test("can sign TypedData", async () => {
     //    const smartAccountClient = await setupSafeSmartAccountClient({
-    //        entryPoint: ENTRYPOINT_ADDRESS_V06
+    //        entryPoint: ENTRYPOINT_ADDRESS_V07
     //    })
 
     //    const signature = await smartAccountClient.signTypedData({
@@ -474,8 +475,8 @@ describe("Safe Account", () => {
     //})
 
     test("signature should be verifiably valid", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         const message = "hello world"
@@ -494,8 +495,8 @@ describe("Safe Account", () => {
     })
 
     test("verifySignature with signTypedData", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         const signature = await smartAccountClient.signTypedData({
@@ -520,7 +521,7 @@ describe("Safe Account", () => {
             message: {
                 from: {
                     name: "Cow",
-                    wallet: "0xCD2a3D9f938E13Cd946eC05ABC6Fe634dF8dd826"
+                    wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
                 },
                 to: {
                     name: "Bob",
@@ -553,7 +554,7 @@ describe("Safe Account", () => {
             message: {
                 from: {
                     name: "Cow",
-                    wallet: "0xCD2a3D9f938E13Cd946eC05ABC6Fe634dF8dd826"
+                    wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
                 },
                 to: {
                     name: "Bob",
@@ -568,8 +569,8 @@ describe("Safe Account", () => {
     })
 
     test("verifySignature with signTypedData of not deployed", async () => {
-        const smartAccountClient = await setupSafeSmartAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const smartAccountClient = await getSafeClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
         const signature = await smartAccountClient.signTypedData({
@@ -594,7 +595,7 @@ describe("Safe Account", () => {
             message: {
                 from: {
                     name: "Cow",
-                    wallet: "0xCD2a3D9f938E13Cd946eC05ABC6Fe634dF8dd826"
+                    wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
                 },
                 to: {
                     name: "Bob",
@@ -627,7 +628,7 @@ describe("Safe Account", () => {
             message: {
                 from: {
                     name: "Cow",
-                    wallet: "0xCD2a3D9f938E13Cd946eC05ABC6Fe634dF8dd826"
+                    wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
                 },
                 to: {
                     name: "Bob",

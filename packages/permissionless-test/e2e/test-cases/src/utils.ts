@@ -11,8 +11,10 @@ import {
     type SmartAccount,
     privateKeyToSimpleSmartAccount,
     signerToBiconomySmartAccount,
+    signerToEcdsaKernelSmartAccount,
     signerToSafeSmartAccount
 } from "permissionless/accounts"
+import type { KernelEcdsaSmartAccount } from "permissionless/accounts"
 import {
     type PimlicoBundlerClient,
     type PimlicoPaymasterClient,
@@ -125,7 +127,7 @@ export const getFactoryAddress = (
     throw new Error("Parameters not recongized")
 }
 
-export const setupSimpleSmartAccountClient = async <T extends EntryPoint>({
+export const getSimpleAccountClient = async <T extends EntryPoint>({
     entryPoint,
     privateKey = generatePrivateKey(),
     paymasterClient,
@@ -166,7 +168,7 @@ export const setupSimpleSmartAccountClient = async <T extends EntryPoint>({
 }
 
 // Only supports v0.6 for now
-export const setupEcdsaBiconomySmartAccountClient = async ({
+export const getBiconomyClient = async ({
     paymasterClient,
     privateKey = generatePrivateKey()
 }: {
@@ -178,6 +180,7 @@ export const setupEcdsaBiconomySmartAccountClient = async ({
         signer: privateKeyToAccount(privateKey)
     })
 
+    // @ts-ignore
     return createSmartAccountClient({
         account: ecdsaSmartAccount,
         chain: foundry,
@@ -189,7 +192,36 @@ export const setupEcdsaBiconomySmartAccountClient = async ({
     })
 }
 
-export const setupSafeSmartAccountClient = async <T extends EntryPoint>({
+export const getKernelEcdsaClient = async <T extends EntryPoint>({
+    entryPoint,
+    paymasterClient
+}: {
+    entryPoint: T
+    paymasterClient?: PimlicoPaymasterClient<T>
+}): Promise<
+    SmartAccountClient<T, Transport, Chain, KernelEcdsaSmartAccount<T>>
+> => {
+    const kernelEcdsaAccount = await signerToEcdsaKernelSmartAccount(
+        publicClient,
+        {
+            entryPoint,
+            signer: privateKeyToAccount(generatePrivateKey())
+        }
+    )
+
+    // @ts-ignore
+    return createSmartAccountClient({
+        chain: foundry,
+        account: kernelEcdsaAccount,
+        bundlerTransport: http(process.env.ALTO_RPC),
+        middleware: {
+            // @ts-ignore
+            sponsorUserOperation: paymasterClient?.sponsorUserOperation
+        }
+    })
+}
+
+export const getSafeClient = async <T extends EntryPoint>({
     setupTransactions = [],
     entryPoint,
     paymasterClient

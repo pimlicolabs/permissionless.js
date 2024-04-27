@@ -19,7 +19,7 @@ import {
     getAnvilWalletClient,
     getBundlerClient,
     getPimlicoPaymasterClient,
-    setupSimpleSmartAccountClient
+    getSimpleAccountClient
 } from "../utils"
 
 describe("v0.7 Bundler Actions", () => {
@@ -48,7 +48,7 @@ describe("v0.7 Bundler Actions", () => {
     })
 
     test("supports eth_estimateUserOperationGas", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V07,
             paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V07)
         })
@@ -141,7 +141,7 @@ describe("v0.7 Bundler Actions", () => {
     //}, 100000)
 
     test("should handle eth_sendUserOperation failures", async () => {
-        const smartAccountClient = await setupSimpleSmartAccountClient({
+        const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V07
         })
 
