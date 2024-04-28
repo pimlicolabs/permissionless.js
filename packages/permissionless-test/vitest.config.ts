@@ -18,7 +18,8 @@ export default defineConfig({
         },
         fileParallelism: true,
         environment: "node",
-        testTimeout: 60_000
+        testTimeout: 60_000,
+        hookTimeout: 45_000
         // setupFiles: [join(__dirname, "./setup.ts")],
         // globalSetup: [join(__dirname, "./globalSetup.ts")]
     }
