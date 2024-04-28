@@ -5,20 +5,20 @@
     "type": "module",
     "sideEffects": false,
     "devDependencies": {
+        "vitest": "^1.2.0",
+        "@vitest/coverage-v8": "^1.2.0",
         "@biomejs/biome": "^1.0.0",
         "@changesets/changelog-git": "^0.1.14",
         "@changesets/changelog-github": "^0.4.8",
         "@changesets/cli": "^2.26.2",
         "@size-limit/esbuild-why": "^9.0.0",
         "@size-limit/preset-small-lib": "^9.0.0",
-        "@vitest/coverage-v8": "^1.2.0",
         "bun-types": "^1.0.7",
         "rimraf": "^5.0.1",
         "simple-git-hooks": "^2.9.0",
         "size-limit": "^9.0.0",
         "tslib": "^2.6.2",
-        "typescript": "^5.2.2",
-        "vitest": "^1.2.0"
+        "typescript": "^5.2.2"
     },
     "description": "",
     "keywords": [],
@@ -39,8 +39,8 @@
         "format": "biome format . --write",
         "lint": "biome check .",
         "lint:fix": "bun run lint --apply",
-        "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
-        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage",
+        "test": "bun run --cwd packages/permissionless-test test",
+        "test:ci": "bun run --cwd packages/permissionless-test test:ci",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
         "build:wagmi:cjs": "tsc --project ./tsconfig/tsconfig.wagmi.cjs.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/wagmi/_cjs/package.json",
         "build:wagmi:esm": "tsc --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
@@ -51,7 +51,6 @@
     },
     "dependencies": {
         "get-port": "^7.0.0",
-        "permissionless.js": "link:",
         "tsc-alias": "^1.8.8"
     }
 }

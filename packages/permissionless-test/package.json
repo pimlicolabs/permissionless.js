@@ -1,25 +1,23 @@
 {
-    "name": "test",
-    "author": "Pimlico",
-    "repository": "github:pimlicolabs/permissionless.js",
-    "homepage": "https://docs.pimlico.io/permissionless",
-    "private": true,
+    "name": "test-cases",
+    "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "test": "vitest dev -c ./packages/permissionless-test/vitest.config.ts",
-        "test:ci": "CI=true vitest -c ./packages/permissionless-test/vitest.config.ts --coverage"
-    },
-    "devDependencies": {
-        "vitest": "^1.2.0"
+        "start": "pnpm run wait-for-setup && pnpm run test",
+        "wait-for-setup": "wait-port localhost:4337",
+        "test": "pnpm run wait-for-setup && vitest dev -c ./vitest.config.ts",
+        "test:ci": "CI=true && pnpm run wait-for-setup && vitest -c ./vitest.config.ts --coverage"
     },
     "dependencies": {
-        "@types/node": "^20.11.5",
-        "@viem/anvil": "^0.0.7",
+        "tslib": "^2.6.2",
+        "viem": "^2.9.17",
+        "permissionless": "workspace:packages/permissionless"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.4",
         "@vitest/coverage-v8": "^1.2.0",
-        "dotenv": "^16.3.1",
-        "execa": "^8.0.1",
-        "get-port": "^7.0.0",
-        "permissionless": "workspace:packages/permissionless",
-        "viem": "2.9.17"
+        "ts-node": "^10.9.2",
+        "vitest": "^1.5.2",
+        "wait-port": "^1.1.0"
     }
 }

@@ -27,18 +27,20 @@ jobs:
       - name: Build
         run: bun run build:permissionless
 
-      - name: Start Docker e2e tests
-        run: docker compose -f "e2e/docker-compose.yml" up --abort-on-container-exit test-cases
+      - name: Start Docker
+        run: docker compose -f "packages/permissionless-test/mock-aa-infra/docker-compose.yml" up -d
+
+      - name: Run tests & coverage
+        run: bun run test:ci
 
       - name: Stop containers
         if: always()
-        run: docker compose -f "e2e/docker-compose.yml" down
+        run: docker compose -f "packages/permissionless-test/mock-aa-infra/docker-compose.yml" down
 
-
-        #- name: Upload coverage reports to Codecov
-        #  uses: codecov/codecov-action@v3
-        #  env:
-        #    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   size:
     name: Size
