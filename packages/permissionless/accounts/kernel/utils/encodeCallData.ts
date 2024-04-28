@@ -9,7 +9,7 @@ import {
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi"
 import { KernelV3ExecuteAbi } from "../abi/KernelV3AccountAbi"
 import { CALL_TYPE, EXEC_TYPE } from "../constants"
-import { type KernelVersion } from "../signerToEcdsaKernelSmartAccount"
+import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 import { getExecMode } from "./getExecMode"
 
 export const encodeCallData = (
