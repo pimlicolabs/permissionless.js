@@ -6,27 +6,33 @@ import {
 import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount,
-    signerToSimpleSmartAccount,
     signerToEcdsaKernelSmartAccount,
-    signerToSafeSmartAccount
+    signerToSafeSmartAccount,
+    signerToSimpleSmartAccount
 } from "permissionless/accounts"
+import type { PimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
+import { getUserOperationHash } from "permissionless/utils"
 import {
+    http,
     type BaseError,
     type Chain,
     type PublicClient,
     type Transport,
     decodeEventLog,
+    getAddress,
     getContract,
     isAddress,
     isHash,
     parseEther,
-    zeroAddress,
-    http,
-    getAddress
+    zeroAddress
 } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { foundry } from "viem/chains"
+import { beforeAll, describe, expect, test } from "vitest"
 import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
+import { SIMPLE_ACCOUNT_FACTORY_V06 } from "../constants"
+import type { AAParamType, ExistingSignerParamType } from "../types"
 import {
     ALTO_RPC,
     ensureBundlerIsReady,
@@ -40,12 +46,6 @@ import {
     getSafeClient,
     getSimpleAccountClient
 } from "../utils"
-import type { AAParamType, ExistingSignerParamType } from "../types"
-import { describe, beforeAll, test, expect } from "vitest"
-import type { PimlicoPaymasterClient } from "permissionless/clients/pimlico"
-import { SIMPLE_ACCOUNT_FACTORY_V06 } from "../constants"
-import { foundry } from "viem/chains"
-import { getUserOperationHash } from "permissionless/utils"
 
 describe.each([
     {

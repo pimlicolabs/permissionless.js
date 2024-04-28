@@ -5,7 +5,7 @@ import type {
 } from "permissionless/clients/pimlico"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
 import { isAddress, isHash, zeroAddress } from "viem"
-import { describe, beforeAll, test, expect } from "vitest"
+import { beforeAll, describe, expect, test } from "vitest"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,

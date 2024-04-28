@@ -17,12 +17,18 @@ import {
     type Hash,
     type Hex,
     type WalletClient,
-    encodeFunctionData,
-    zeroAddress,
     concat,
-    parseAbi
+    encodeFunctionData,
+    parseAbi,
+    zeroAddress
 } from "viem"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { foundry } from "viem/chains"
 import { beforeAll, describe, expect, expectTypeOf, test } from "vitest"
+import {
+    SIMPLE_ACCOUNT_FACTORY_V06,
+    SIMPLE_ACCOUNT_FACTORY_V07
+} from "../constants"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,
@@ -31,12 +37,6 @@ import {
     getPublicClient,
     getSafeClient
 } from "../utils"
-import {
-    SIMPLE_ACCOUNT_FACTORY_V06,
-    SIMPLE_ACCOUNT_FACTORY_V07
-} from "../constants"
-import { foundry } from "viem/chains"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 
 const getAccountInitCode = async (
     factoryAddress: Address,

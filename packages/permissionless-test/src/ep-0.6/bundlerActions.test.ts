@@ -12,6 +12,7 @@ import {
 } from "permissionless/utils"
 import { type Chain, isHash, zeroAddress } from "viem"
 import { foundry } from "viem/chains"
+import { beforeAll, describe, expect, test } from "vitest"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,
@@ -19,7 +20,6 @@ import {
     getBundlerClient,
     getSimpleAccountClient
 } from "../utils"
-import { describe, beforeAll, test, expect } from "vitest"
 
 describe("V0.6 Bundler Actions", () => {
     let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>

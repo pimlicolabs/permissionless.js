@@ -11,6 +11,7 @@ import {
     isHash,
     isHex
 } from "viem"
+import { beforeAll, describe, expect, test } from "vitest"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,
@@ -20,7 +21,6 @@ import {
     getPublicClient,
     getSimpleAccountClient
 } from "../utils"
-import { describe, beforeAll, test, expect } from "vitest"
 
 describe("Pimlico Actions tests", () => {
     let publicClient: PublicClient<Transport, Chain>
