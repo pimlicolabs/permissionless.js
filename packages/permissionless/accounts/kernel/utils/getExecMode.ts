@@ -1,5 +1,5 @@
 import { type Hex, concatHex, pad } from "viem"
-import type { CALL_TYPE, EXEC_TYPE } from "../constants"
+import { CALL_TYPE, EXEC_TYPE } from "../constants"
 
 export const getExecMode = ({
     callType,

@@ -7,9 +7,9 @@ import { safeSmartAccount } from "@permissionless/wagmi"
 import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import { walletClientToSmartAccountSigner } from "permissionless/utils"
 import React from "react"
-import { http, type Address, zeroAddress } from "viem"
+import { http, Address, zeroAddress } from "viem"
 import {
-    type CreateConnectorFn,
+    CreateConnectorFn,
     useAccount,
     useConfig,
     useConnect,
