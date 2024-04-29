@@ -148,6 +148,9 @@ export const fund = async (to: Address) => {
         funder = availableFunders[randomIndex]
     } while (!funder)
 
+    // mark the funder as used
+    usedWallets.add(funder.account.address)
+
     const hash = await funder.sendTransaction({
         to,
         value: parseEther("1")
@@ -155,9 +158,6 @@ export const fund = async (to: Address) => {
 
     // wait for funding confirmation
     await publicClient.waitForTransactionReceipt({ hash })
-
-    // mark the funder as used
-    usedWallets.add(funder.account.address)
 }
 
 export const getFactoryAddress = (
