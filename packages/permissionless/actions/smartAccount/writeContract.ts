@@ -11,9 +11,9 @@ import {
     encodeFunctionData
 } from "viem"
 import { getAction } from "viem/utils"
-import type { SmartAccount } from "../../accounts/types"
+import { type SmartAccount } from "../../accounts/types"
 import type { EntryPoint } from "../../types/entrypoint"
-import type { Middleware } from "./prepareUserOperationRequest"
+import { type Middleware } from "./prepareUserOperationRequest"
 import {
     type SendTransactionWithPaymasterParameters,
     sendTransaction

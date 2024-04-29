@@ -5,7 +5,7 @@ import {
     type SmartAccountSigner,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
-import type { SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
+import { type SponsorUserOperationMiddleware } from "permissionless/actions/smartAccount"
 import type { Prettify } from "permissionless/types"
 import type { Address, Chain, PublicClient, Transport } from "viem"
 import { smartAccount } from "./smartAccount"

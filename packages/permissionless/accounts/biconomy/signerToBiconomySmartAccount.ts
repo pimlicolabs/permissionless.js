@@ -276,10 +276,7 @@ export async function signerToBiconomySmartAccount<
                 account: viemSigner,
                 message
             })
-            const potentiallyIncorrectV = Number.parseInt(
-                signature.slice(-2),
-                16
-            )
+            const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
             if (![27, 28].includes(potentiallyIncorrectV)) {
                 const correctV = potentiallyIncorrectV + 27
                 signature = (signature.slice(0, -2) +
@@ -308,10 +305,7 @@ export async function signerToBiconomySmartAccount<
                 account: viemSigner,
                 ...typedData
             })
-            const potentiallyIncorrectV = Number.parseInt(
-                signature.slice(-2),
-                16
-            )
+            const potentiallyIncorrectV = parseInt(signature.slice(-2), 16)
             if (![27, 28].includes(potentiallyIncorrectV)) {
                 const correctV = potentiallyIncorrectV + 27
                 signature = (signature.slice(0, -2) +
