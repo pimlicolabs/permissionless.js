@@ -1,38 +1,13 @@
-const messages = new Map()
+import type { Address } from "viem"
 
-export function warn(message: string) {
-    if (!messages.has(message)) {
-        messages.set(message, true)
-        console.warn(message)
-    }
-}
+/* ========= V07 RELATED ========= */
 
-export let forkUrl: string
-if (process.env.VITE_ANVIL_FORK_URL) {
-    forkUrl = process.env.VITE_ANVIL_FORK_URL
-} else {
-    forkUrl = "https://cloudflare-eth.com"
-    warn(`\`VITE_ANVIL_FORK_URL\` not found. Falling back to \`${forkUrl}\`.`)
-}
+export const SIMPLE_ACCOUNT_FACTORY_V07: Address =
+    "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
 
-export let forkBlockNumber: bigint
-if (process.env.VITE_ANVIL_BLOCK_NUMBER) {
-    forkBlockNumber = BigInt(Number(process.env.VITE_ANVIL_BLOCK_NUMBER))
-} else {
-    forkBlockNumber = BigInt(10419392)
-    warn(
-        `\`VITE_ANVIL_BLOCK_NUMBER\` not found. Falling back to \`${forkBlockNumber}\`.`
-    )
-}
+/* ========= V06 RELATED ========= */
 
-export let anvilPort: number
-if (process.env.VITE_ANVIL_PORT) {
-    anvilPort = Number(process.env.VITE_ANVIL_PORT)
-} else {
-    anvilPort = 8545
-    warn(`\`VITE_ANVIL_PORT\` not found. Falling back to \`${anvilPort}\`.`)
-}
+export const SIMPLE_ACCOUNT_FACTORY_V06: Address =
+    "0x9406Cc6185a346906296840746125a0E44976454"
 
-export const poolId = Number(process.env.VITEST_POOL_ID ?? 1)
-export const localHttpUrl = `http://127.0.0.1:${anvilPort}/${poolId}`
-export const localWsUrl = `ws://127.0.0.1:${anvilPort}/${poolId}`
+/* */

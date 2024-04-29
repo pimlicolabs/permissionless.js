@@ -461,6 +461,10 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId
             })
 
+            if (kernelVersion === "0.2.2") {
+                return signature
+            }
+
             return concatHex([
                 getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
                 signature
@@ -487,6 +491,11 @@ export async function signerToEcdsaKernelSmartAccount<
                 accountVersion: kernelVersion,
                 chainId
             })
+
+            if (kernelVersion === "0.2.2") {
+                return signature
+            }
+
             return concatHex([
                 getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
                 signature

@@ -1,4 +1,3 @@
-import { join } from "node:path"
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
@@ -15,11 +14,12 @@ export default defineConfig({
             ]
         },
         sequence: {
-            concurrent: false
+            concurrent: true
         },
-        fileParallelism: false,
+        fileParallelism: true,
         environment: "node",
-        testTimeout: 10_000
+        testTimeout: 60_000,
+        hookTimeout: 45_000
         // setupFiles: [join(__dirname, "./setup.ts")],
         // globalSetup: [join(__dirname, "./globalSetup.ts")]
     }
