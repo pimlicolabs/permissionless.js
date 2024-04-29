@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.22
+
+### Patch Changes
+
+- 04e34ad51bd8284c18088237d896411e9224510c: Added missing entryPoint, paymaster and reason types in user operation receipt
+
 ## 0.1.21
 
 ### Patch Changes
