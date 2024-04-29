@@ -24,3 +24,6 @@ act -W .github/workflows/on-pull-request.yml
 mock-aa-infra/        => mock paymaster and alto instance
 src/                  => test cases found here
 ```
+
+#### Adding new tests
+Add a new entry to either `src/ep-0.6/coreSmartClientActions.test.ts` and or `src/ep-0.7/coreSmartClientActions.test.ts` to ensure that the new smart account handles all core functions.
