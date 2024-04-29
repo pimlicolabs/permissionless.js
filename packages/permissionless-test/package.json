@@ -7,7 +7,7 @@
         "start": "bun run wait-for-setup && pnpm run test",
         "wait-for-setup": "wait-port localhost:4337",
         "test": "bun run wait-for-setup && vitest dev -c ./vitest.config.ts",
-        "test:ci": "CI=true && bun run wait-for-setup && vitest -c ./vitest.config.ts --coverage"
+        "test:ci": "CI=true && bun run wait-for-setup && vitest -c ./vitest.config.ts --coverage --pool=forks"
     },
     "dependencies": {
         "tslib": "^2.6.2",
