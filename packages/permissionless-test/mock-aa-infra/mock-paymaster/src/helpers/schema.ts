@@ -1,6 +1,6 @@
 import type { FastifyReply } from "fastify"
 import { type Hex, getAddress } from "viem"
-import { z, type infer as zodInfer } from "zod"
+import { type infer as zodInfer, z } from "zod"
 
 export const returnInvalidRequestParams = (
     reply: FastifyReply,
