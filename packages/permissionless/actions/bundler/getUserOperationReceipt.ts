@@ -20,11 +20,14 @@ export type GetUserOperationReceiptParameters = {
 
 export type GetUserOperationReceiptReturnType = {
     userOpHash: Hash
+    entryPoint: Address
     sender: Address
     nonce: bigint
+    paymaster?: Address
     actualGasUsed: bigint
     actualGasCost: bigint
     success: boolean
+    reason?: string
     receipt: {
         transactionHash: Hex
         transactionIndex: bigint
@@ -93,11 +96,14 @@ export const getUserOperationReceipt = async <
 
     const userOperationReceipt: GetUserOperationReceiptReturnType = {
         userOpHash: response.userOpHash,
+        entryPoint: response.entryPoint,
         sender: response.sender,
         nonce: BigInt(response.nonce),
+        paymaster: response.paymaster,
         actualGasUsed: BigInt(response.actualGasUsed),
         actualGasCost: BigInt(response.actualGasCost),
         success: response.success,
+        reason: response.reason,
         receipt: {
             transactionHash: response.receipt.transactionHash,
             transactionIndex: BigInt(response.receipt.transactionIndex),
