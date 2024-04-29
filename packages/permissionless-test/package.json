@@ -2,6 +2,7 @@
     "name": "test-cases",
     "version": "0.0.0",
     "type": "module",
+    "private": true,
     "scripts": {
         "start": "bun run wait-for-setup && pnpm run test",
         "wait-for-setup": "wait-port localhost:4337",
