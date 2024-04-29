@@ -431,11 +431,6 @@ describe.each([
         }, 25000)
 
         test("Can sign and verify message", async () => {
-            if (name === "Kernel") {
-                // Kernel is failing to sign + verify for some reason :(
-                return
-            }
-
             const smartClient = await getSmartAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             })
@@ -462,11 +457,6 @@ describe.each([
         })
 
         test("Can sign and verify typed data", async () => {
-            if (name === "Kernel") {
-                // Kernel is failing to sign + verify for some reason :(
-                return
-            }
-
             const smartClient = await getSmartAccountClient({
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             })
