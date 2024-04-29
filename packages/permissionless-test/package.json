@@ -3,10 +3,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "start": "pnpm run wait-for-setup && pnpm run test",
+        "start": "bun run wait-for-setup && pnpm run test",
         "wait-for-setup": "wait-port localhost:4337",
-        "test": "pnpm run wait-for-setup && vitest dev -c ./vitest.config.ts",
-        "test:ci": "CI=true && pnpm run wait-for-setup && vitest -c ./vitest.config.ts --coverage"
+        "test": "bun run wait-for-setup && vitest dev -c ./vitest.config.ts",
+        "test:ci": "CI=true && bun run wait-for-setup && vitest -c ./vitest.config.ts --coverage"
     },
     "dependencies": {
         "tslib": "^2.6.2",
