@@ -6,12 +6,12 @@ import type {
     Transport
 } from "viem"
 import { getAction } from "viem/utils"
-import { type SmartAccount } from "../../accounts/types"
+import type { SmartAccount } from "../../accounts/types"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionWithPaymasterParameters<

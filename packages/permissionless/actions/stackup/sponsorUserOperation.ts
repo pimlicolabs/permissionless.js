@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem"
 import type { PartialBy } from "viem/types/utils"
-import { type StackupPaymasterClient } from "../../clients/stackup"
+import type { StackupPaymasterClient } from "../../clients/stackup"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
