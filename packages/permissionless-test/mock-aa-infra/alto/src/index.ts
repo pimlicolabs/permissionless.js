@@ -25,6 +25,7 @@ import {
     KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
     KERNEL_V07_FACTORY_CREATECALL,
     KERNEL_V07_META_FACTORY_CREATECALL,
+    LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
     SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
     SAFE_MULTI_SEND_CREATECALL,
     SAFE_PROXY_FACTORY_CREATECALL,
@@ -310,6 +311,14 @@ const main = async () => {
             nonce: nonce++
         })
         .then(() => console.log("[KERNEL] Deploying V0.7 META FACTORY"))
+    
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }).then(() => console.log("[LIGHT ACCOUNT] Deploying V0.7 LightAccount Factory"))
 
     let onchainNonce = 0
     do {
@@ -354,6 +363,27 @@ const main = async () => {
         address: kernelFactoryOwner
     })
 
+    // ==== SETUP ALCHEMY LIGHT ACCOUNT CONTRACTS ==== //
+    const alchemyLightClientOwner = "0xDdF32240B4ca3184De7EC8f0D5Aba27dEc8B7A5C"
+    await anvilClient.setBalance({
+        address: alchemyLightClientOwner,
+        value: parseEther("100")
+    })
+
+    await anvilClient.impersonateAccount({
+        address: alchemyLightClientOwner
+    })
+
+    await sendTransaction(walletClient, {
+        account: alchemyLightClientOwner,
+        to: "0x0000000000400CdFef5E2714E63d8040b700BC24" /* light account v2.0.0 factory */,
+        data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000"
+    })
+    
+    await anvilClient.stopImpersonatingAccount({
+        address: alchemyLightClientOwner
+    })
+
     await verifyDeployed([
         "0x4e59b44847b379578588920ca78fbf26c0b4956c",
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7",
@@ -381,7 +411,8 @@ const main = async () => {
         "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43",
         "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27",
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
-        "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
+        "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "0x0000000000400CdFef5E2714E63d8040b700BC24",
     ])
 }
 
