@@ -10,8 +10,8 @@ import {
 } from "./simple/signerToSimpleSmartAccount"
 
 import {
-    type SignerToLightSmartAccountParameters,
     type LightSmartAccount,
+    type SignerToLightSmartAccountParameters,
     signerToLightSmartAccount
 } from "./light/signerToLightSmartAccount"
 

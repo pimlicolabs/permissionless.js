@@ -5,9 +5,12 @@ import {
     type Hex,
     type LocalAccount,
     type Transport,
+    type TypedData,
+    type TypedDataDefinition,
     concatHex,
     encodeFunctionData,
-    hashMessage
+    hashMessage,
+    hashTypedData
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
@@ -33,6 +36,7 @@ export type LightSmartAccount<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "LightSmartAccount", transport, chain>
+
 
 const getAccountInitCode = async (
     owner: Address,
@@ -120,6 +124,34 @@ export type SignerToLightSmartAccountParameters<
     address?: Address
 }>
 
+async function signWith1271WrapperV1<
+    TSource extends string = string,
+    TAddress extends Address = Address
+>(
+    signer: SmartAccountSigner<TSource, TAddress>,
+    chainId: number,
+    accountAddress: Address,
+    hashedMessage: Hex
+): Promise<Hex> {
+    return signer.signTypedData({
+      // EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)
+      // https://github.com/alchemyplatform/light-account/blob/main/src/LightAccount.sol#L236
+      domain: {
+        chainId: Number(chainId),
+        name: 'LightAccount',
+        verifyingContract: accountAddress,
+        version: "1",
+      },
+      types: {
+        LightAccountMessage: [{ name: "message", type: "bytes" }],
+      },
+      message: {
+        message: hashedMessage,
+      },
+      primaryType: "LightAccountMessage",
+    });
+};
+
 /**
  * @description Creates an Light Account from a private key.
  *
@@ -170,33 +202,28 @@ export async function signerToLightSmartAccount<
     return toSmartAccount({
         address: accountAddress,
         signMessage: async ({ message }) => {
-            // return signMessage(client, {
-            //     account: viemSigner,
-            //     message
-            // })
-            return signer.signTypedData({
-                // EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)
-                // https://github.com/alchemyplatform/light-account/blob/main/src/LightAccount.sol#L236
-                domain: {
-                  chainId: Number(chainId),
-                  name: 'LightAccount',
-                  verifyingContract: accountAddress,
-                  version: "1",
-                },
-                types: {
-                  LightAccountMessage: [{ name: "message", type: "bytes" }],
-                },
-                message: {
-                  message: hashMessage(message),
-                },
-                primaryType: "LightAccountMessage",
-              });
+            return signWith1271WrapperV1<TSource, TAddress>(
+                signer,
+                chainId,
+                accountAddress,
+                hashMessage(message)
+            );
         },
         signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
         },
-        signTypedData: async (_) => {
-            throw new Error("Light account isn't 1271 compliant")
+        async signTypedData<
+            const TTypedData extends TypedData | Record<string, unknown>,
+            TPrimaryType extends
+                | keyof TTypedData
+                | "EIP712Domain" = keyof TTypedData
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+            return signWith1271WrapperV1<TSource, TAddress>(
+                signer,
+                chainId,
+                accountAddress,
+                hashTypedData(typedData)
+            );
         },
         client: client,
         publicKey: accountAddress,
