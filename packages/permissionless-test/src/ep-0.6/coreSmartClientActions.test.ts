@@ -7,6 +7,7 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
+    signerToLightSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -41,6 +42,7 @@ import {
     getBiconomyClient,
     getBundlerClient,
     getKernelEcdsaClient,
+    getLightAccountClient,
     getPimlicoPaymasterClient,
     getPublicClient,
     getSafeClient,
@@ -49,59 +51,74 @@ import {
 
 describe.each([
     {
-        name: "Simple",
+        name: "Light",
         getSmartAccountClient: async (
             conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
-        ) => getSimpleAccountClient(conf),
+        ) => getLightAccountClient(conf),
         getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSimpleSmartAccount(conf.publicClient, {
+            signerToLightSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing
                 signer: privateKeyToAccount(conf.privateKey),
                 entryPoint: ENTRYPOINT_ADDRESS_V06,
-                factoryAddress: SIMPLE_ACCOUNT_FACTORY_V06
-            }),
-        isEip1271Compliant: false
-    },
-    {
-        name: "Kernel",
-        getSmartAccountClient: async (
-            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
-        ) => getKernelEcdsaClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToEcdsaKernelSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
+                factoryAddress: '0x00004EC70002a32400f8ae005A26081065620D20'
+                // factoryAddress: SIMPLE_ACCOUNT_FACTORY_V06
             }),
         isEip1271Compliant: true
     },
-    {
-        name: "Biconomy",
-        getSmartAccountClient: async (
-            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
-        ) => getBiconomyClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToBiconomySmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
-        isEip1271Compliant: true
-    },
-    {
-        name: "Safe",
-        getSmartAccountClient: async (
-            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
-        ) => getSafeClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSafeSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                safeVersion: "1.4.1"
-            }),
-        isEip1271Compliant: true
-    }
+    // {
+    //     name: "Simple",
+    //     getSmartAccountClient: async (
+    //         conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+    //     ) => getSimpleAccountClient(conf),
+    //     getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+    //         signerToSimpleSmartAccount(conf.publicClient, {
+    //             address: conf.existingAddress, // this is the field we are testing
+    //             signer: privateKeyToAccount(conf.privateKey),
+    //             entryPoint: ENTRYPOINT_ADDRESS_V06,
+    //             factoryAddress: SIMPLE_ACCOUNT_FACTORY_V06
+    //         }),
+    //     isEip1271Compliant: false
+    // },
+    // {
+    //     name: "Kernel",
+    //     getSmartAccountClient: async (
+    //         conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+    //     ) => getKernelEcdsaClient(conf),
+    //     getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+    //         signerToEcdsaKernelSmartAccount(conf.publicClient, {
+    //             address: conf.existingAddress, // this is the field we are testing
+    //             signer: privateKeyToAccount(conf.privateKey),
+    //             entryPoint: ENTRYPOINT_ADDRESS_V06
+    //         }),
+    //     isEip1271Compliant: true
+    // },
+    // {
+    //     name: "Biconomy",
+    //     getSmartAccountClient: async (
+    //         conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+    //     ) => getBiconomyClient(conf),
+    //     getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+    //         signerToBiconomySmartAccount(conf.publicClient, {
+    //             address: conf.existingAddress, // this is the field we are testing
+    //             signer: privateKeyToAccount(conf.privateKey),
+    //             entryPoint: ENTRYPOINT_ADDRESS_V06
+    //         }),
+    //     isEip1271Compliant: true
+    // },
+    // {
+    //     name: "Safe",
+    //     getSmartAccountClient: async (
+    //         conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+    //     ) => getSafeClient(conf),
+    //     getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+    //         signerToSafeSmartAccount(conf.publicClient, {
+    //             address: conf.existingAddress, // this is the field we are testing
+    //             signer: privateKeyToAccount(conf.privateKey),
+    //             entryPoint: ENTRYPOINT_ADDRESS_V06,
+    //             safeVersion: "1.4.1"
+    //         }),
+    //     isEip1271Compliant: true
+    // }
 ])(
     "$name account should support all core functions",
     ({

@@ -11,6 +11,7 @@ import {
     type SmartAccount,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
+    signerToLightSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -204,6 +205,37 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
     })
 }
 
+export const getLightAccountClient = async <T extends EntryPoint>({
+    entryPoint,
+    paymasterClient,
+    privateKey = generatePrivateKey()
+}: AAParamType<T>): Promise<
+    SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
+> => {
+    console.log('signer');
+    console.log(privateKeyToAccount(privateKey));
+    const smartAccount = await signerToLightSmartAccount<T, Transport, Chain>(
+        publicClient,
+        {
+            entryPoint,
+            signer: privateKeyToAccount(privateKey),
+            // factoryAddress: getFactoryAddress(entryPoint, "simple")
+            factoryAddress: '0x00004EC70002a32400f8ae005A26081065620D20'
+            // factoryAddress: '0x0000000000400CdFef5E2714E63d8040b700BC24'
+        }
+    )
+
+    // @ts-ignore
+    return createSmartAccountClient({
+        chain: foundry,
+        account: smartAccount,
+        bundlerTransport: http(ALTO_RPC),
+        middleware: {
+            // @ts-ignore
+            sponsorUserOperation: paymasterClient?.sponsorUserOperation
+        }
+    })
+}
 // Only supports v0.6 for now
 export const getBiconomyClient = async ({
     paymasterClient,

@@ -7,7 +7,7 @@ import {
     parseEther
 } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
-import { sendTransaction } from "viem/actions"
+import { getTransactionReceipt, sendTransaction } from "viem/actions"
 import { foundry } from "viem/chains"
 import {
     BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
@@ -25,7 +25,9 @@ import {
     KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
     KERNEL_V07_FACTORY_CREATECALL,
     KERNEL_V07_META_FACTORY_CREATECALL,
+    LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+    LIGHT_ACCOUNT_IMPLEMENTATION_V200_CREATECALL,
     SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
     SAFE_MULTI_SEND_CREATECALL,
     SAFE_PROXY_FACTORY_CREATECALL,
@@ -320,6 +322,22 @@ const main = async () => {
             nonce: nonce++
         }).then(() => console.log("[LIGHT ACCOUNT] Deploying V0.7 LightAccount Factory"))
 
+    // walletClient
+    //     .sendTransaction({
+    //         to: DETERMINISTIC_DEPLOYER,
+    //         data: LIGHT_ACCOUNT_IMPLEMENTATION_V200_CREATECALL,
+    //         gas: 15_000_000n,
+    //         nonce: nonce++
+    //     }).then(() => console.log("[LIGHT ACCOUNT] Deploying V0.7 LightAccount Implementation"))
+
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }).then(() => console.log("[LIGHT ACCOUNT] Deploying V1.1.0 LightAccount Factory"))
+
     let onchainNonce = 0
     do {
         onchainNonce = await client.getTransactionCount({
@@ -374,11 +392,23 @@ const main = async () => {
         address: alchemyLightClientOwner
     })
 
-    await sendTransaction(walletClient, {
+    const tx = await sendTransaction(walletClient, {
         account: alchemyLightClientOwner,
         to: "0x0000000000400CdFef5E2714E63d8040b700BC24" /* light account v2.0.0 factory */,
-        data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000"
+        data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000",
+        value: parseEther("0.1"),
     })
+
+    await anvilClient.mine({
+        blocks: 1
+    })
+
+    // console.log('stake light account factory');
+    // console.log(tx);
+    // const r = await getTransactionReceipt(walletClient, {
+    //     hash: tx
+    // })
+    // console.log(r);
     
     await anvilClient.stopImpersonatingAccount({
         address: alchemyLightClientOwner
@@ -413,6 +443,8 @@ const main = async () => {
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
         "0x0000000000400CdFef5E2714E63d8040b700BC24",
+        "0x8E8e658E22B12ada97B402fF0b044D6A325013C7",
+        "0x00004EC70002a32400f8ae005A26081065620D20",
     ])
 }
 
