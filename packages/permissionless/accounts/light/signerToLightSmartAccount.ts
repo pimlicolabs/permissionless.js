@@ -6,7 +6,8 @@ import {
     type LocalAccount,
     type Transport,
     concatHex,
-    encodeFunctionData
+    encodeFunctionData,
+    hashMessage
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
@@ -169,11 +170,27 @@ export async function signerToLightSmartAccount<
     return toSmartAccount({
         address: accountAddress,
         signMessage: async ({ message }) => {
-            // throw new Error("Light account isn't 1271 compliant")
-            return signMessage(client, {
-                account: viemSigner,
-                message,
-            })
+            // return signMessage(client, {
+            //     account: viemSigner,
+            //     message
+            // })
+            return signer.signTypedData({
+                // EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)
+                // https://github.com/alchemyplatform/light-account/blob/main/src/LightAccount.sol#L236
+                domain: {
+                  chainId: Number(chainId),
+                  name: 'LightAccount',
+                  verifyingContract: accountAddress,
+                  version: "1",
+                },
+                types: {
+                  LightAccountMessage: [{ name: "message", type: "bytes" }],
+                },
+                message: {
+                  message: hashMessage(message),
+                },
+                primaryType: "LightAccountMessage",
+              });
         },
         signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -192,7 +209,6 @@ export async function signerToLightSmartAccount<
             })
         },
         async signUserOperation(userOperation) {
-            console.log('user operation')
             return signMessage(client, {
                 account: viemSigner,
                 message: {
