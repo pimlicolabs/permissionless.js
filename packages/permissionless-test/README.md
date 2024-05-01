@@ -21,14 +21,14 @@ act -W .github/workflows/on-pull-request.yml
 
 ### Directory Breakdown
 ```
-mock-aa-infra/        => mock paymaster and alto bundler instance
-src/                  => test cases found here
+mock-aa-infra/        => Mock paymaster and alto bundler instance
+src/                  => Test cases found here
 ```
 
 ### Mock AA Environment
 The test cases are ran against a mock environment that is spun up using `docker-compose`.
 
-Environment setup procedure:
+#### Environment setup procedure:
 1) Start up a local anvil instance
 2) Deploy and setup all AA related contracts (EntryPoints, Smart Account Factories, Verifying Paymasters, ...)
 3) Start a local [alto](https://github.com/pimlicolabs/alto) bundler instance
@@ -36,9 +36,9 @@ Environment setup procedure:
 5) Run test cases
 
 When docker-compose is running, the AA related services will be accessible through following ports:
-- `anvil` at `localhost:8545`
-- `alto` at `localhost:4337`
-- `mock paymaster` at `localhost:3000`
+- __Anvil__ at `localhost:8545`
+- __Alto__ at `localhost:4337`
+- __MockPaymaster__ at `localhost:3000`
 
 ### Adding new tests
 1. Add a smart account client builder helper in `src/utils.ts` for the new smart account.
