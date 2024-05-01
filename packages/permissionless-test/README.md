@@ -28,7 +28,7 @@ src/                  => Test cases found here
 ### Mock AA Environment
 The test cases are ran against a mock environment that is spun up using `docker-compose`.
 
-#### Environment setup procedure:
+#### Docker-compose environment setup procedure:
 1) Start up a local anvil instance
 2) Deploy and setup all AA related contracts (EntryPoints, Smart Account Factories, Verifying Paymasters, ...)
 3) Start a local [alto](https://github.com/pimlicolabs/alto) bundler instance
