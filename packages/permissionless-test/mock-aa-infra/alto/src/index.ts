@@ -320,7 +320,7 @@ const main = async () => {
             nonce: nonce++
         })
         .then(() =>
-            console.log("[LIGHT ACCOUNT] Deploying V1.1.0 LightAccount Factory")
+            console.log("[LIGHT ACCOUNT] Deploying v1.1.0 LightAccount Factory")
         )
 
     let onchainNonce = 0
@@ -416,8 +416,8 @@ const main = async () => {
         "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27",
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
-        "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory V1.1.0
-        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba" // LightAccount V1.1.0 implementation
+        "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
+        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba" // LightAccount v1.1.0 implementation
     ])
 }
 
