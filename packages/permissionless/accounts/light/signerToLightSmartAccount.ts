@@ -37,7 +37,6 @@ export type LightSmartAccount<
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "LightSmartAccount", transport, chain>
 
-
 const getAccountInitCode = async (
     owner: Address,
     index = BigInt(0)
@@ -112,14 +111,17 @@ const getAccountAddress = async <
     })
 }
 
+export type LightVersion = "v1.1.0" | "v2.0.0"
+
 export type SignerToLightSmartAccountParameters<
     entryPoint extends EntryPoint,
     TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
-    factoryAddress: Address
+    lightVersion: LightVersion
     entryPoint: entryPoint
+    factoryAddress?: Address
     index?: bigint
     address?: Address
 }>
@@ -134,23 +136,51 @@ async function signWith1271WrapperV1<
     hashedMessage: Hex
 ): Promise<Hex> {
     return signer.signTypedData({
-      // EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)
-      // https://github.com/alchemyplatform/light-account/blob/main/src/LightAccount.sol#L236
-      domain: {
-        chainId: Number(chainId),
-        name: 'LightAccount',
-        verifyingContract: accountAddress,
-        version: "1",
-      },
-      types: {
-        LightAccountMessage: [{ name: "message", type: "bytes" }],
-      },
-      message: {
-        message: hashedMessage,
-      },
-      primaryType: "LightAccountMessage",
-    });
-};
+        domain: {
+            chainId: Number(chainId),
+            name: "LightAccount",
+            verifyingContract: accountAddress,
+            version: "1"
+        },
+        types: {
+            LightAccountMessage: [{ name: "message", type: "bytes" }]
+        },
+        message: {
+            message: hashedMessage
+        },
+        primaryType: "LightAccountMessage"
+    })
+}
+
+const LIGHT_VERSION_TO_ADDRESSES_MAP: {
+    [key in LightVersion]: {
+        factoryAddress: Address
+    }
+} = {
+    "v1.1.0": {
+        factoryAddress: "0x00004EC70002a32400f8ae005A26081065620D20"
+    },
+    "v2.0.0": {
+        factoryAddress: "0x0000000000400CdFef5E2714E63d8040b700BC24"
+    }
+}
+
+const getDefaultAddresses = (
+    lightVersion: LightVersion,
+    {
+        factoryAddress: _factoryAddress
+    }: {
+        factoryAddress?: Address
+    }
+) => {
+    const factoryAddress =
+        _factoryAddress ??
+        LIGHT_VERSION_TO_ADDRESSES_MAP[lightVersion].factoryAddress
+
+    return {
+        factoryAddress
+    }
+}
 
 /**
  * @description Creates an Light Account from a private key.
@@ -167,10 +197,11 @@ export async function signerToLightSmartAccount<
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
-        factoryAddress,
+        address,
+        lightVersion,
         entryPoint: entryPointAddress,
         index = BigInt(0),
-        address
+        factoryAddress: _factoryAddress
     }: SignerToLightSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<LightSmartAccount<entryPoint, TTransport, TChain>> {
     const viemSigner: LocalAccount = {
@@ -179,6 +210,16 @@ export async function signerToLightSmartAccount<
             throw new SignTransactionNotSupportedBySmartAccount()
         }
     } as LocalAccount
+
+    if (lightVersion === "v2.0.0") {
+        throw new Error(
+            "LightSmartAccount v2.0.0 is not supported yet due to the bug in the implementation contract"
+        )
+    }
+
+    const { factoryAddress } = getDefaultAddresses(lightVersion, {
+        factoryAddress: _factoryAddress
+    })
 
     const [accountAddress, chainId] = await Promise.all([
         address ??
@@ -207,7 +248,7 @@ export async function signerToLightSmartAccount<
                 chainId,
                 accountAddress,
                 hashMessage(message)
-            );
+            )
         },
         signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -223,7 +264,7 @@ export async function signerToLightSmartAccount<
                 chainId,
                 accountAddress,
                 hashTypedData(typedData)
-            );
+            )
         },
         client: client,
         publicKey: accountAddress,
@@ -394,5 +435,102 @@ export async function signerToLightSmartAccount<
         async getDummySignature(_userOperation) {
             return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         }
+        // async encodeTransferOwnershipData(newOwner: Address) {
+        //     return encodeFunctionData({
+        //         abi: [
+        //             {
+        //                 inputs: [
+        //                     {
+        //                         internalType: "address",
+        //                         name: "newOwner",
+        //                         type: "address"
+        //                     }
+        //                 ],
+        //                 name: "transferOwnership",
+        //                 outputs: [],
+        //                 stateMutability: "nonpayable",
+        //                 type: "function"
+        //             }
+        //         ],
+        //         functionName: "transferOwnership",
+        //         args: [newOwner]
+        //     })
+        // },
+        // async encodeUpgradeToData(newImplementation: Address) {
+        //     return encodeFunctionData({
+        //         abi: [
+        //             {
+        //                 inputs: [
+        //                     {
+        //                         internalType: "address",
+        //                         name: "newImplementation",
+        //                         type: "address"
+        //                     }
+        //                 ],
+        //                 name: "upgradeTo",
+        //                 outputs: [],
+        //                 stateMutability: "nonpayable",
+        //                 type: "function"
+        //             }
+        //         ],
+        //         functionName: "upgradeTo",
+        //         args: [newImplementation]
+        //     })
+        // },
+        // async encodeUpgradeToAndCallData(
+        //     newImplementation: Address,
+        //     data: Hex
+        // ) {
+        //     return encodeFunctionData({
+        //         abi: [
+        //             {
+        //                 inputs: [
+        //                     {
+        //                         internalType: "address",
+        //                         name: "newImplementation",
+        //                         type: "address"
+        //                     },
+        //                     {
+        //                         internalType: "bytes",
+        //                         name: "data",
+        //                         type: "bytes"
+        //                     }
+        //                 ],
+        //                 name: "upgradeToAndCall",
+        //                 outputs: [],
+        //                 stateMutability: "payable",
+        //                 type: "function"
+        //             }
+        //         ],
+        //         functionName: "upgradeToAndCall",
+        //         args: [newImplementation, data]
+        //     })
+        // },
+        // async getOwner(): Promise<Address> {
+        //     return getAction(
+        //         client,
+        //         readContract,
+        //         "readContract"
+        //     )({
+        //         address: accountAddress,
+        //         abi: [
+        //             {
+        //                 inputs: [],
+        //                 name: "owner",
+        //                 outputs: [
+        //                     {
+        //                         internalType: "address",
+        //                         name: "",
+        //                         type: "address"
+        //                     }
+        //                 ],
+        //                 stateMutability: "view",
+        //                 type: "function"
+        //             }
+        //         ],
+        //         functionName: "owner",
+        //         args: []
+        //     })
+        // }
     })
 }

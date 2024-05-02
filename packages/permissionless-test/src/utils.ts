@@ -217,9 +217,7 @@ export const getLightAccountClient = async <T extends EntryPoint>({
         {
             entryPoint,
             signer: privateKeyToAccount(privateKey),
-            // factoryAddress: getFactoryAddress(entryPoint, "simple")
-            factoryAddress: "0x00004EC70002a32400f8ae005A26081065620D20"
-            // factoryAddress: '0x0000000000400CdFef5E2714E63d8040b700BC24'
+            lightVersion: "v1.1.0"
         }
     )
 
