@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.0
+
+### Minor Changes
+
+- 976884bf550c0ee355974bb8e85a2feb6aa2aaa2: Added Alchemy's LightAccount support v1.1.0
+
 ## 0.1.22
 
 ### Patch Changes
