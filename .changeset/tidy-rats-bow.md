@@ -2,4 +2,4 @@
 "permissionless": minor
 ---
 
-Add Alchemy's LightAccount support V1.1.0
+Added Alchemy's LightAccount support v1.1.0
