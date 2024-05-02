@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.24
+
+### Patch Changes
+
+- ab93d86ab40b59533653cc1efb6b824683145ee2: Changed LightVersion to LightAccountVersion before release
+
 ## 0.1.23
 
 ### Patch Changes
