@@ -322,7 +322,7 @@ export async function signerToLightSmartAccount<
             return getAccountInitCode(viemSigner.address, index)
         },
         async encodeDeployCallData(_) {
-            throw new Error("Simple account doesn't support account deployment")
+            throw new Error("Light account doesn't support account deployment")
         },
         async encodeCallData(args) {
             if (Array.isArray(args)) {
@@ -332,35 +332,6 @@ export async function signerToLightSmartAccount<
                     data: Hex
                 }[]
 
-                if (getEntryPointVersion(entryPointAddress) === "v0.6") {
-                    return encodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address[]",
-                                        name: "dest",
-                                        type: "address[]"
-                                    },
-                                    {
-                                        internalType: "bytes[]",
-                                        name: "func",
-                                        type: "bytes[]"
-                                    }
-                                ],
-                                name: "executeBatch",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
-                        functionName: "executeBatch",
-                        args: [
-                            argsArray.map((a) => a.to),
-                            argsArray.map((a) => a.data)
-                        ]
-                    })
-                }
                 return encodeFunctionData({
                     abi: [
                         {
