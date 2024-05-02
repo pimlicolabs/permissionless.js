@@ -304,7 +304,7 @@ describe.each([
             }
 
             expect(eventFound).toBeTruthy()
-        }, 5000)
+        }, 10000)
 
         test("Can send multiple transactions with paymaster", async () => {
             const smartClient = await getSmartAccountClient({

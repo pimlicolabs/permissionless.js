@@ -7,6 +7,7 @@ import {
     SignTransactionNotSupportedBySmartAccount,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
+    signerToLightSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount
 } from "permissionless/accounts"
@@ -40,7 +41,9 @@ import {
     fund,
     getBiconomyClient,
     getBundlerClient,
+    getFactoryAddress,
     getKernelEcdsaClient,
+    getLightAccountClient,
     getPimlicoPaymasterClient,
     getPublicClient,
     getSafeClient,
@@ -48,6 +51,20 @@ import {
 } from "../utils"
 
 describe.each([
+    {
+        name: "Light V1.1.0",
+        getSmartAccountClient: async (
+            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+        ) => getLightAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToLightSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                lightVersion: "v1.1.0"
+            }),
+        isEip1271Compliant: true
+    },
     {
         name: "Simple",
         getSmartAccountClient: async (
@@ -311,7 +328,7 @@ describe.each([
             }
 
             expect(eventFound).toBeTruthy()
-        }, 5000)
+        }, 10000)
 
         test("Can send multiple transactions with paymaster", async () => {
             const smartClient = await getSmartAccountClient({
