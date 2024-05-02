@@ -52,7 +52,7 @@ import {
 
 describe.each([
     {
-        name: "Light V1.1.0",
+        name: "LightAccount v1.1.0",
         getSmartAccountClient: async (
             conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
         ) => getLightAccountClient(conf),
@@ -61,7 +61,7 @@ describe.each([
                 address: conf.existingAddress, // this is the field we are testing
                 signer: privateKeyToAccount(conf.privateKey),
                 entryPoint: ENTRYPOINT_ADDRESS_V06,
-                lightVersion: "v1.1.0"
+                lightAccountVersion: "1.1.0"
             }),
         isEip1271Compliant: true
     },

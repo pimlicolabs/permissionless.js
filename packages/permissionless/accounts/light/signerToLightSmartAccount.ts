@@ -111,7 +111,7 @@ const getAccountAddress = async <
     })
 }
 
-export type LightVersion = "v1.1.0"
+export type LightAccountVersion = "1.1.0"
 
 export type SignerToLightSmartAccountParameters<
     entryPoint extends EntryPoint,
@@ -119,7 +119,7 @@ export type SignerToLightSmartAccountParameters<
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
-    lightVersion: LightVersion
+    lightAccountVersion: LightAccountVersion
     entryPoint: entryPoint
     factoryAddress?: Address
     index?: bigint
@@ -153,17 +153,17 @@ async function signWith1271WrapperV1<
 }
 
 const LIGHT_VERSION_TO_ADDRESSES_MAP: {
-    [key in LightVersion]: {
+    [key in LightAccountVersion]: {
         factoryAddress: Address
     }
 } = {
-    "v1.1.0": {
+    "1.1.0": {
         factoryAddress: "0x00004EC70002a32400f8ae005A26081065620D20"
     }
 }
 
 const getDefaultAddresses = (
-    lightVersion: LightVersion,
+    lightAccountVersion: LightAccountVersion,
     {
         factoryAddress: _factoryAddress
     }: {
@@ -172,7 +172,7 @@ const getDefaultAddresses = (
 ) => {
     const factoryAddress =
         _factoryAddress ??
-        LIGHT_VERSION_TO_ADDRESSES_MAP[lightVersion].factoryAddress
+        LIGHT_VERSION_TO_ADDRESSES_MAP[lightAccountVersion].factoryAddress
 
     return {
         factoryAddress
@@ -195,7 +195,7 @@ export async function signerToLightSmartAccount<
     {
         signer,
         address,
-        lightVersion,
+        lightAccountVersion,
         entryPoint: entryPointAddress,
         index = BigInt(0),
         factoryAddress: _factoryAddress
@@ -208,13 +208,13 @@ export async function signerToLightSmartAccount<
         }
     } as LocalAccount
 
-    if (lightVersion !== "v1.1.0") {
+    if (lightAccountVersion !== "1.1.0") {
         throw new Error(
-            "Only Light Account version v1.1.0 is supported at the moment"
+            "Only Light Account version 1.1.0 is supported at the moment"
         )
     }
 
-    const { factoryAddress } = getDefaultAddresses(lightVersion, {
+    const { factoryAddress } = getDefaultAddresses(lightAccountVersion, {
         factoryAddress: _factoryAddress
     })
 

@@ -217,7 +217,7 @@ export const getLightAccountClient = async <T extends EntryPoint>({
         {
             entryPoint,
             signer: privateKeyToAccount(privateKey),
-            lightVersion: "v1.1.0"
+            lightAccountVersion: "1.1.0"
         }
     )
 
