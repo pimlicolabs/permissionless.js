@@ -111,7 +111,7 @@ const getAccountAddress = async <
     })
 }
 
-export type LightVersion = "v1.1.0" | "v2.0.0"
+export type LightVersion = "v1.1.0"
 
 export type SignerToLightSmartAccountParameters<
     entryPoint extends EntryPoint,
@@ -159,9 +159,6 @@ const LIGHT_VERSION_TO_ADDRESSES_MAP: {
 } = {
     "v1.1.0": {
         factoryAddress: "0x00004EC70002a32400f8ae005A26081065620D20"
-    },
-    "v2.0.0": {
-        factoryAddress: "0x0000000000400CdFef5E2714E63d8040b700BC24"
     }
 }
 
@@ -211,9 +208,9 @@ export async function signerToLightSmartAccount<
         }
     } as LocalAccount
 
-    if (lightVersion === "v2.0.0") {
+    if (lightVersion !== "v1.1.0") {
         throw new Error(
-            "LightSmartAccount v2.0.0 is not supported yet due to the bug in the implementation contract"
+            "Only Light Account version v1.1.0 is supported at the moment"
         )
     }
 
