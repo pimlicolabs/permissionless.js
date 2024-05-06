@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.25
+
+### Patch Changes
+
+- be6d2a3d4b394939e3601f12a075bdfe16276dde: Added experimental EIP 7677 support
+
 ## 0.1.24
 
 ### Patch Changes
