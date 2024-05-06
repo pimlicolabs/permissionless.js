@@ -38,11 +38,9 @@ export type GetRpcPaymasterDataParameters<entryPoint extends EntryPoint> = [
 export type GetRpcPaymasterDataReturnType<entryPoint extends EntryPoint> =
     GetEntryPointVersion<entryPoint> extends "v0.6"
         ? {
-              sponsor?: { name: string; icon: string }
               paymasterAndData: Hex
           }
         : {
-              sponsor?: { name: string; icon: string }
               paymaster: Hex
               paymasterData: Hex
           }
