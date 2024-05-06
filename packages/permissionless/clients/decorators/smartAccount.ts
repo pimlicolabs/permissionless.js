@@ -300,7 +300,7 @@ export type SmartAccountActions<
                 TChainOverride
             >
         >
-    ) => ReturnType<typeof deployContract<entryPoint, TChain, TSmartAccount>>
+    ) => Promise<Hash>
     /**
      * Executes a write function on a contract.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
