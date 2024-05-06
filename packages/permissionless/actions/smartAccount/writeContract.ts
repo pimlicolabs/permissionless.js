@@ -12,7 +12,6 @@ import {
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import type { Eip7677Client } from "../../experimental"
 import type { EntryPoint } from "../../types/entrypoint"
 import type { Middleware } from "./prepareUserOperationRequest"
 import {
@@ -77,9 +76,6 @@ export type WriteContractWithPaymasterParameters<
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
         | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
-        | undefined,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<
         TAbi,
@@ -99,16 +95,13 @@ export type WriteContractWithPaymasterParameters<
     TAccount,
     TChainOverride
 > &
-    Middleware<entryPoint, TEip7677Client>
+    Middleware<entryPoint>
 
 export async function writeContract<
     entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
     const TAbi extends Abi | readonly unknown[],
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
-        | undefined,
     TFunctionName extends ContractFunctionName<
         TAbi,
         "nonpayable" | "payable"
@@ -132,7 +125,6 @@ export async function writeContract<
         entryPoint,
         TChain,
         TAccount,
-        TEip7677Client,
         TAbi,
         TFunctionName,
         TArgs,

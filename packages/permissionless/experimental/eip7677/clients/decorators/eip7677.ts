@@ -11,7 +11,7 @@ import {
     type GetPaymasterStubDataReturnType,
     getPaymasterStubData
 } from "../../actions/getPaymasterStubData"
-import type { Eip7677Client } from "../createEip7677Client"
+import type { Eip7677RpcSchema } from "../../types/paymaster"
 
 export type Eip7677Actions<
     TEntryPoint extends EntryPoint,
@@ -52,19 +52,35 @@ const eip7677Actions =
         client: Client<TTransport, TChain>
     ): Eip7677Actions<TEntryPoint, TChain> => ({
         getPaymasterData: (args) =>
-            getPaymasterData(client as Eip7677Client<TEntryPoint, TChain>, {
-                userOperation: args.userOperation,
-                context: args.context,
-                chain: args.chain,
-                entryPoint
-            }),
+            getPaymasterData(
+                client as Client<
+                    TTransport,
+                    TChain,
+                    undefined,
+                    Eip7677RpcSchema<TEntryPoint>
+                >,
+                {
+                    userOperation: args.userOperation,
+                    context: args.context,
+                    chain: args.chain,
+                    entryPoint
+                }
+            ),
         getPaymasterStubData: async (args) =>
-            getPaymasterStubData(client as Eip7677Client<TEntryPoint, TChain>, {
-                userOperation: args.userOperation,
-                context: args.context,
-                chain: args.chain,
-                entryPoint
-            })
+            getPaymasterStubData(
+                client as Client<
+                    TTransport,
+                    TChain,
+                    undefined,
+                    Eip7677RpcSchema<TEntryPoint>
+                >,
+                {
+                    userOperation: args.userOperation,
+                    context: args.context,
+                    chain: args.chain,
+                    entryPoint
+                }
+            )
     })
 
 export { eip7677Actions }

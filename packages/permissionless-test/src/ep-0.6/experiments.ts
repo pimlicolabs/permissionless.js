@@ -3,14 +3,22 @@ import {
     createSmartAccountClient
 } from "permissionless"
 import { privateKeyToSafeSmartAccount } from "permissionless/accounts"
-import type { Eip7677Client } from "permissionless/experimental"
+import { Eip7677Actions, eip7677Actions } from "permissionless/experimental"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
-import { http, type Chain, zeroAddress } from "viem"
+import {
+    http,
+    type Chain,
+    Client,
+    Transport,
+    createClient,
+    zeroAddress
+} from "viem"
 import { generatePrivateKey } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { beforeAll, describe, test } from "vitest"
 import type { AAParamType } from "../types"
 import {
+    PAYMASTER_RPC,
     getEip7677Client,
     getPimlicoPaymasterClient,
     getPublicClient,
@@ -26,14 +34,6 @@ describe.each([
         ) => getSafeClient(conf)
     }
 ])("$name test", ({ name, getSmartAccountClient }) => {
-    let eip7677Client: Eip7677Client<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
-
-    beforeAll(async () => {
-        eip7677Client = await getEip7677Client({
-            entryPoint: ENTRYPOINT_ADDRESS_V06
-        })
-    })
-
     test("Can get stab data", async () => {
         const publicClient = getPublicClient()
 
@@ -51,8 +51,27 @@ describe.each([
         const smartAccountClient = createSmartAccountClient({
             chain: foundry,
             account: smartAccount,
-            bundlerTransport: http(ALTO_RPC),
-            eip7677Client: eip7677Client
+            bundlerTransport: http(ALTO_RPC)
+        })
+
+        const userOperaton =
+            await smartAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await smartAccountClient.account.encodeCallData({
+                        to: zeroAddress,
+                        value: 0n,
+                        data: "0x"
+                    })
+                }
+            })
+
+        const eip7677Client = createClient({
+            chain: foundry,
+            transport: http(PAYMASTER_RPC)
+        }).extend(eip7677Actions({ entryPoint: ENTRYPOINT_ADDRESS_V06 }))
+
+        const response = await eip7677Client.getPaymasterData({
+            userOperation: userOperaton
         })
 
         // await eip7677Client.getPaymasterStubData({

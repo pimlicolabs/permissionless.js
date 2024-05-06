@@ -22,10 +22,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import {
-    type Eip7677Client,
-    createEip7677Client
-} from "permissionless/experimental"
+import { type Eip7677Client, eip7677Actions } from "permissionless/experimental"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
@@ -38,6 +35,7 @@ import {
     type Hex,
     type Transport,
     type WalletClient,
+    createClient,
     createPublicClient,
     createWalletClient,
     parseEther
@@ -56,7 +54,7 @@ import type { AAParamType } from "./types"
 
 export const ALTO_RPC = "http://localhost:4337"
 const ANVIL_RPC = "http://localhost:8545"
-const PAYMASTER_RPC = "http://localhost:3000"
+export const PAYMASTER_RPC = "http://localhost:3000"
 
 export const ensureBundlerIsReady = async () => {
     const bundlerClient = getBundlerClient(ENTRYPOINT_ADDRESS_V06)
@@ -321,9 +319,10 @@ export const getSafeClient = async <T extends EntryPoint>({
 export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
     entryPoint
 }: { entryPoint: TEntryPoint }) => {
-    return createEip7677Client({
+    const client = createClient({
         chain: foundry,
-        entryPoint,
         transport: http(PAYMASTER_RPC)
-    })
+    }).extend(eip7677Actions({ entryPoint }))
+
+    return client
 }

@@ -7,7 +7,6 @@ import type {
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import type { Eip7677Client } from "../../experimental"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
@@ -21,12 +20,9 @@ export type SendTransactionWithPaymasterParameters<
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
         | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
-        | undefined
+    TChainOverride extends Chain | undefined = Chain | undefined
 > = SendTransactionParameters<TChain, TAccount, TChainOverride> &
-    Middleware<entryPoint, TEip7677Client>
+    Middleware<entryPoint>
 
 /**
  * Creates, signs, and sends a new transaction to the network.
@@ -78,10 +74,7 @@ export async function sendTransaction<
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
     entryPoint extends EntryPoint,
-    TChainOverride extends Chain | undefined = Chain | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
-        | undefined
+    TChainOverride extends Chain | undefined = Chain | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
@@ -89,8 +82,7 @@ export async function sendTransaction<
             entryPoint,
             TChain,
             TAccount,
-            TChainOverride,
-            TEip7677Client
+            TChainOverride
         >
     >
 ): Promise<Hash> {
@@ -102,8 +94,7 @@ export async function sendTransaction<
         to,
         value,
         nonce,
-        middleware,
-        eip7677Client
+        middleware
     } = args
 
     if (!account_) {
@@ -139,7 +130,6 @@ export async function sendTransaction<
             nonce: nonce ? BigInt(nonce) : undefined
         },
         account: account,
-        eip7677Client,
         middleware
     })
 

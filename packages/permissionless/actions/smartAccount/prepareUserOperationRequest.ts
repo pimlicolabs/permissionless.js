@@ -1,13 +1,7 @@
 import type { Chain, Client, Transport } from "viem"
 import { estimateFeesPerGas } from "viem/actions"
-import type { IsUndefined } from "viem/types/utils"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import {
-    type Eip7677Client,
-    getPaymasterData,
-    getPaymasterStubData
-} from "../../experimental"
 import type { PartialPick } from "../../types"
 import type {
     GetAccountParameter,
@@ -58,56 +52,28 @@ export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
                   >
           >
 
-type MiddlewareFunction<entryPoint extends EntryPoint> = (args: {
-    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-    entryPoint: entryPoint
-}) => Promise<UserOperation<GetEntryPointVersion<entryPoint>>>
-
-type MiddlewareObject<
-    entryPoint extends EntryPoint,
-    TEip7677Client extends Eip7677Client<entryPoint> | undefined
-> = IsUndefined<TEip7677Client> extends true
-    ?
-          | MiddlewareFunction<entryPoint>
-          | {
-                  gasPrice?: () => Promise<{
-                      maxFeePerGas: bigint
-                      maxPriorityFeePerGas: bigint
-                  }>
-                  sponsorUserOperation?: (args: {
-                      userOperation: UserOperation<
-                          GetEntryPointVersion<entryPoint>
-                      >
-                      entryPoint: entryPoint
-                  }) => Promise<SponsorUserOperationReturnType<entryPoint>>
-              }
-    :
-          | MiddlewareFunction<entryPoint>
-          | {
-                  gasPrice?: () => Promise<{
-                      maxFeePerGas: bigint
-                      maxPriorityFeePerGas: bigint
-                  }>
-                  sponsorUserOperation: never
-              }
-
-export type Middleware<
-    entryPoint extends EntryPoint,
-    TEip7677Client extends Eip7677Client<entryPoint> | undefined =
-        | Eip7677Client<entryPoint>
-        | undefined
-> = {
-    eip7677Client?: TEip7677Client
-    middleware?: MiddlewareObject<entryPoint, TEip7677Client>
+export type Middleware<entryPoint extends EntryPoint> = {
+    middleware?:
+        | ((args: {
+              userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+              entryPoint: entryPoint
+          }) => Promise<UserOperation<GetEntryPointVersion<entryPoint>>>)
+        | {
+              gasPrice?: () => Promise<{
+                  maxFeePerGas: bigint
+                  maxPriorityFeePerGas: bigint
+              }>
+              sponsorUserOperation?: (args: {
+                  userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
+                  entryPoint: entryPoint
+              }) => Promise<SponsorUserOperationReturnType<entryPoint>>
+          }
 }
 
 export type PrepareUserOperationRequestParameters<
     entryPoint extends EntryPoint,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint> | undefined =
-        | Eip7677Client<entryPoint>
         | undefined
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
@@ -142,7 +108,7 @@ export type PrepareUserOperationRequestParameters<
               | "signature"
           >
 } & GetAccountParameter<entryPoint, TAccount> &
-    Middleware<entryPoint, TEip7677Client>
+    Middleware<entryPoint>
 
 export type PrepareUserOperationRequestReturnType<
     entryPoint extends EntryPoint
@@ -154,26 +120,16 @@ async function prepareUserOperationRequestForEntryPointV06<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint> | undefined =
-        | Eip7677Client<entryPoint>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<
-        PrepareUserOperationRequestParameters<
-            entryPoint,
-            TAccount,
-            TEip7677Client
-        >
-    >,
+    args: Prettify<PrepareUserOperationRequestParameters<entryPoint, TAccount>>,
     stateOverrides?: StateOverrides
 ): Promise<Prettify<PrepareUserOperationRequestReturnType<entryPoint>>> {
     const {
         account: account_ = client.account,
         userOperation: partialUserOperation,
-        middleware,
-        eip7677Client
+        middleware
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
@@ -231,54 +187,6 @@ async function prepareUserOperationRequestForEntryPointV06<
         userOperation.maxPriorityFeePerGas =
             userOperation.maxPriorityFeePerGas ||
             estimateGas.maxPriorityFeePerGas
-    }
-
-    if (eip7677Client) {
-        const stubPaymasterData = await getAction(
-            eip7677Client,
-            getPaymasterStubData<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>,
-            "getPaymasterStubData"
-        )({
-            userOperation,
-            entryPoint: account.entryPoint
-        })
-
-        userOperation.paymasterAndData = stubPaymasterData.paymasterAndData
-
-        const gasParameters = await getAction(
-            client,
-            estimateUserOperationGas,
-            "estimateUserOperationGas"
-        )(
-            {
-                userOperation,
-                entryPoint: account.entryPoint
-            } as {
-                userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-                entryPoint: entryPoint
-            },
-            // @ts-ignore getAction takes only two params but when compiled this will work
-            stateOverrides
-        )
-
-        userOperation.callGasLimit |= gasParameters.callGasLimit
-        userOperation.verificationGasLimit =
-            userOperation.verificationGasLimit ||
-            gasParameters.verificationGasLimit
-        userOperation.preVerificationGas =
-            userOperation.preVerificationGas || gasParameters.preVerificationGas
-
-        const { paymasterAndData } = await getAction(
-            eip7677Client,
-            getPaymasterData<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>,
-            "getPaymasterData"
-        )({
-            userOperation,
-            entryPoint: account.entryPoint
-        })
-
-        userOperation.paymasterAndData = paymasterAndData
-        return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
     if (
@@ -349,26 +257,16 @@ async function prepareUserOperationRequestEntryPointV07<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<
-        PrepareUserOperationRequestParameters<
-            entryPoint,
-            TAccount,
-            TEip7677Client
-        >
-    >,
+    args: Prettify<PrepareUserOperationRequestParameters<entryPoint, TAccount>>,
     stateOverrides?: StateOverrides
 ): Promise<Prettify<PrepareUserOperationRequestReturnType<entryPoint>>> {
     const {
         account: account_ = client.account,
         userOperation: partialUserOperation,
-        middleware,
-        eip7677Client
+        middleware
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
@@ -438,63 +336,6 @@ async function prepareUserOperationRequestEntryPointV07<
         userOperation.maxPriorityFeePerGas =
             userOperation.maxPriorityFeePerGas ||
             estimateGas.maxPriorityFeePerGas
-    }
-
-    if (eip7677Client) {
-        const stubPaymasterData = await getAction(
-            eip7677Client,
-            getPaymasterStubData<ENTRYPOINT_ADDRESS_V07_TYPE, Chain>,
-            "getPaymasterStubData"
-        )({
-            userOperation,
-            entryPoint: account.entryPoint
-        })
-        userOperation.paymaster = stubPaymasterData.paymaster
-        userOperation.paymasterData = stubPaymasterData.paymasterData
-        userOperation.paymasterVerificationGasLimit =
-            stubPaymasterData.paymasterVerificationGasLimit
-        userOperation.paymasterPostOpGasLimit =
-            stubPaymasterData.paymasterPostOpGasLimit
-
-        const gasParameters = await getAction(
-            client,
-            estimateUserOperationGas<ENTRYPOINT_ADDRESS_V07_TYPE>,
-            "estimateUserOperationGas"
-        )(
-            {
-                userOperation,
-                entryPoint: account.entryPoint
-            },
-            // @ts-ignore getAction takes only two params but when compiled this will work
-            stateOverrides
-        )
-
-        userOperation.callGasLimit |= gasParameters.callGasLimit
-        userOperation.verificationGasLimit =
-            userOperation.verificationGasLimit ||
-            gasParameters.verificationGasLimit
-        userOperation.preVerificationGas =
-            userOperation.preVerificationGas || gasParameters.preVerificationGas
-
-        userOperation.paymasterPostOpGasLimit =
-            userOperation.paymasterPostOpGasLimit ||
-            gasParameters.paymasterPostOpGasLimit
-        userOperation.paymasterPostOpGasLimit =
-            userOperation.paymasterPostOpGasLimit ||
-            gasParameters.paymasterPostOpGasLimit
-
-        const { paymasterData, paymaster } = await getAction(
-            eip7677Client,
-            getPaymasterData<ENTRYPOINT_ADDRESS_V07_TYPE, Chain>,
-            "getPaymasterData"
-        )({
-            userOperation,
-            entryPoint: account.entryPoint
-        })
-
-        userOperation.paymaster = paymaster
-        userOperation.paymasterData = paymasterData
-        return userOperation as PrepareUserOperationRequestReturnType<entryPoint>
     }
 
     if (
@@ -574,19 +415,10 @@ export async function prepareUserOperationRequest<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<
-        PrepareUserOperationRequestParameters<
-            entryPoint,
-            TAccount,
-            TEip7677Client
-        >
-    >,
+    args: Prettify<PrepareUserOperationRequestParameters<entryPoint, TAccount>>,
     stateOverrides?: StateOverrides
 ): Promise<Prettify<PrepareUserOperationRequestReturnType<entryPoint>>> {
     const { account: account_ = client.account } = args

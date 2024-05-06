@@ -9,7 +9,6 @@ import type {
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import type { Eip7677Client } from "../../experimental"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
@@ -21,14 +20,11 @@ export type SendTransactionsWithPaymasterParameters<
     entryPoint extends EntryPoint,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
 } & GetAccountParameter<entryPoint, TAccount> &
-    Middleware<entryPoint, TEip7677Client> & {
+    Middleware<entryPoint> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
         nonce?: bigint
@@ -83,25 +79,17 @@ export type SendTransactionsWithPaymasterParameters<
 export async function sendTransactions<
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
-    entryPoint extends EntryPoint,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
-        | undefined
+    entryPoint extends EntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
-        SendTransactionsWithPaymasterParameters<
-            entryPoint,
-            TAccount,
-            TEip7677Client
-        >
+        SendTransactionsWithPaymasterParameters<entryPoint, TAccount>
     >
 ): Promise<Hash> {
     const {
         account: account_ = client.account,
         transactions,
         middleware,
-        eip7677Client,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce
@@ -143,7 +131,6 @@ export async function sendTransactions<
             nonce: nonce
         },
         account: account,
-        eip7677Client,
         middleware
     })
 

@@ -8,7 +8,6 @@ import type {
 import { createClient } from "viem"
 import { type SmartAccount } from "../accounts/types"
 import { type Middleware } from "../actions/smartAccount/prepareUserOperationRequest"
-import { type Eip7677Client } from "../experimental"
 import type { Prettify } from "../types/"
 import { type BundlerRpcSchema } from "../types/bundler"
 import type { EntryPoint } from "../types/entrypoint"
@@ -45,16 +44,13 @@ export type SmartAccountClientConfig<
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 > = Prettify<
     Pick<
         ClientConfig<transport, chain, account>,
         "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
     > &
-        Middleware<entryPoint, TEip7677Client> & {
+        Middleware<entryPoint> & {
             account: account
             bundlerTransport: Transport
         } & {
@@ -88,17 +84,13 @@ export function createSmartAccountClient<
     TChain extends Chain | undefined = undefined,
     TEntryPoint extends EntryPoint = TSmartAccount extends SmartAccount<infer U>
         ? U
-        : never,
-    TEip7677Client extends Eip7677Client<TEntryPoint, Chain> | undefined =
-        | Eip7677Client<TEntryPoint, Chain>
-        | undefined
+        : never
 >(
     parameters: SmartAccountClientConfig<
         TEntryPoint,
         TTransport,
         TChain,
-        TSmartAccount,
-        TEip7677Client
+        TSmartAccount
     >
 ): SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount> {
     const {
@@ -116,7 +108,6 @@ export function createSmartAccountClient<
 
     return client.extend(
         smartAccountActions({
-            eip7677Client: parameters.eip7677Client,
             middleware: parameters.middleware
         })
     ) as SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount>

@@ -1,7 +1,6 @@
 import type { Chain, Client, Hash, Transport } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import type { Eip7677Client } from "../../experimental"
 import type {
     GetAccountParameter,
     PartialBy,
@@ -24,9 +23,6 @@ export type SendUserOperationParameters<
     entryPoint extends EntryPoint,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
@@ -61,7 +57,7 @@ export type SendUserOperationParameters<
               | "signature"
           >
 } & GetAccountParameter<entryPoint, TAccount> &
-    Middleware<entryPoint, TEip7677Client>
+    Middleware<entryPoint>
 
 export async function sendUserOperation<
     entryPoint extends EntryPoint,
@@ -69,15 +65,10 @@ export async function sendUserOperation<
     TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
-        | undefined,
-    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
-        | Eip7677Client<entryPoint, Chain>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<
-        SendUserOperationParameters<entryPoint, TAccount, TEip7677Client>
-    >
+    args: Prettify<SendUserOperationParameters<entryPoint, TAccount>>
 ): Promise<Hash> {
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()
@@ -86,13 +77,7 @@ export async function sendUserOperation<
 
     const userOperation = await getAction(
         client,
-        prepareUserOperationRequest<
-            entryPoint,
-            TTransport,
-            TChain,
-            TAccount,
-            TEip7677Client
-        >,
+        prepareUserOperationRequest<entryPoint, TTransport, TChain, TAccount>,
         "prepareUserOperationRequest"
     )(args)
 
