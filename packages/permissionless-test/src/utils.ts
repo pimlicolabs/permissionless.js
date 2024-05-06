@@ -22,7 +22,7 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
-import { type Eip7677Client, eip7677Actions } from "permissionless/experimental"
+import { paymasterActionsEip7677 } from "permissionless/experimental"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
@@ -322,7 +322,7 @@ export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
     const client = createClient({
         chain: foundry,
         transport: http(PAYMASTER_RPC)
-    }).extend(eip7677Actions({ entryPoint }))
+    }).extend(paymasterActionsEip7677({ entryPoint }))
 
     return client
 }

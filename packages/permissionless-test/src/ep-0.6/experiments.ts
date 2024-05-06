@@ -3,23 +3,15 @@ import {
     createSmartAccountClient
 } from "permissionless"
 import { privateKeyToSafeSmartAccount } from "permissionless/accounts"
-import { Eip7677Actions, eip7677Actions } from "permissionless/experimental"
+import { paymasterActionsEip7677 } from "permissionless/experimental"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
-import {
-    http,
-    type Chain,
-    Client,
-    Transport,
-    createClient,
-    zeroAddress
-} from "viem"
+import { http, createClient, zeroAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
 import { foundry } from "viem/chains"
-import { beforeAll, describe, test } from "vitest"
+import { describe, test } from "vitest"
 import type { AAParamType } from "../types"
 import {
     PAYMASTER_RPC,
-    getEip7677Client,
     getPimlicoPaymasterClient,
     getPublicClient,
     getSafeClient
@@ -68,7 +60,9 @@ describe.each([
         const eip7677Client = createClient({
             chain: foundry,
             transport: http(PAYMASTER_RPC)
-        }).extend(eip7677Actions({ entryPoint: ENTRYPOINT_ADDRESS_V06 }))
+        }).extend(
+            paymasterActionsEip7677({ entryPoint: ENTRYPOINT_ADDRESS_V06 })
+        )
 
         const response = await eip7677Client.getPaymasterData({
             userOperation: userOperaton

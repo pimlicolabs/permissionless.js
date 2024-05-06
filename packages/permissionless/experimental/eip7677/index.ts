@@ -9,9 +9,9 @@ import {
     getPaymasterStubData
 } from "./actions/getPaymasterStubData"
 import {
-    type Eip7677Actions,
-    eip7677Actions
-} from "./clients/decorators/eip7677"
+    type PaymasterActionsEip7677,
+    paymasterActionsEip7677
+} from "./clients/decorators/paymasterActionsEip7677"
 import type { Eip7677RpcSchema } from "./types/paymaster"
 
 export {
@@ -21,7 +21,7 @@ export {
     type GetPaymasterDataReturnType,
     type GetPaymasterDataParameters,
     getPaymasterData,
-    type Eip7677Actions,
-    eip7677Actions,
+    type PaymasterActionsEip7677,
+    paymasterActionsEip7677,
     type Eip7677RpcSchema
 }
