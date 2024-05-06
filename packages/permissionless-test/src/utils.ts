@@ -209,6 +209,7 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
 
 export const getLightAccountClient = async <T extends EntryPoint>({
     entryPoint,
+    paymasterClient,
     privateKey = generatePrivateKey()
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
