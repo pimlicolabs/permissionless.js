@@ -1,5 +1,5 @@
 import { BaseError } from "viem"
-import { type SendUserOperationParameters } from "../actions/bundler/sendUserOperation"
+import type { SendUserOperationParameters } from "../actions/bundler/sendUserOperation"
 import type { EntryPoint } from "../types/entrypoint"
 import { prettyPrint } from "./utils"
 

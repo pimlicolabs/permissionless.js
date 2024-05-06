@@ -8,23 +8,27 @@ import type {
     Transport
 } from "viem"
 import { getAction } from "viem/utils"
-import { type SmartAccount } from "../../accounts/types"
+import type { SmartAccount } from "../../accounts/types"
+import type { Eip7677Client } from "../../experimental"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionsWithPaymasterParameters<
     entryPoint extends EntryPoint,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
+        | undefined,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
         | undefined
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
 } & GetAccountParameter<entryPoint, TAccount> &
-    Middleware<entryPoint> & {
+    Middleware<entryPoint, TEip7677Client> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
         nonce?: bigint
@@ -79,17 +83,25 @@ export type SendTransactionsWithPaymasterParameters<
 export async function sendTransactions<
     TChain extends Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined,
-    entryPoint extends EntryPoint
+    entryPoint extends EntryPoint,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
-        SendTransactionsWithPaymasterParameters<entryPoint, TAccount>
+        SendTransactionsWithPaymasterParameters<
+            entryPoint,
+            TAccount,
+            TEip7677Client
+        >
     >
 ): Promise<Hash> {
     const {
         account: account_ = client.account,
         transactions,
         middleware,
+        eip7677Client,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce
@@ -131,6 +143,7 @@ export async function sendTransactions<
             nonce: nonce
         },
         account: account,
+        eip7677Client,
         middleware
     })
 

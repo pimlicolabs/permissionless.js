@@ -9,24 +9,28 @@ import type {
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
+import type { Eip7677Client } from "../../experimental"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
     entryPoint extends EntryPoint,
-    TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-    TChain extends Chain | undefined = Chain | undefined,
     TAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
         | undefined,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
+        | undefined,
+    TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+    TChain extends Chain | undefined = Chain | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
-    Middleware<entryPoint>
+    Middleware<entryPoint, TEip7677Client>
 
 /**
  * Deploys a contract to the network, given bytecode and constructor arguments.
@@ -59,16 +63,26 @@ export type DeployContractParametersWithPaymaster<
 export async function deployContract<
     entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>
+    args: Prettify<
+        DeployContractParametersWithPaymaster<
+            entryPoint,
+            TAccount,
+            TEip7677Client
+        >
+    >
 ): Promise<Hash> {
     const {
         abi,
         args: constructorArgs,
         bytecode,
         middleware,
+        eip7677Client,
         ...request
     } = args
 
@@ -98,6 +112,7 @@ export async function deployContract<
             } as EncodeDeployDataParameters)
         },
         account: account,
+        eip7677Client,
         middleware
     })
 

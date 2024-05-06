@@ -79,6 +79,11 @@
             "types": "./_types/types/index.d.ts",
             "import": "./_esm/types/index.js",
             "default": "./_cjs/types/index.js"
+        },
+        "./experimental/": {
+            "types": "./_types/experimental/index.d.ts",
+            "import": "./_esm/experimental/index.js",
+            "default": "./_cjs/experimental/index.js"
         }
     },
     "peerDependencies": {

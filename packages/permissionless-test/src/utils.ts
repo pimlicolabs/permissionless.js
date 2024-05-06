@@ -22,6 +22,10 @@ import {
     createPimlicoBundlerClient,
     createPimlicoPaymasterClient
 } from "permissionless/clients/pimlico"
+import {
+    type Eip7677Client,
+    createEip7677Client
+} from "permissionless/experimental"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
@@ -207,25 +211,22 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
 
 export const getLightAccountClient = async <T extends EntryPoint>({
     entryPoint,
-    paymasterClient,
     privateKey = generatePrivateKey()
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
 > => {
-    const smartAccount = await signerToLightSmartAccount<T, Transport, Chain>(
-        publicClient,
-        {
-            entryPoint,
-            signer: privateKeyToAccount(privateKey),
-            lightAccountVersion: "1.1.0"
-        }
-    )
+    const smartAccount = await signerToLightSmartAccount(publicClient, {
+        entryPoint,
+        signer: privateKeyToAccount(privateKey),
+        lightAccountVersion: "1.1.0"
+    })
 
-    // @ts-ignore
     return createSmartAccountClient({
         chain: foundry,
         account: smartAccount,
         bundlerTransport: http(ALTO_RPC),
+        entryPoint: entryPoint,
+        // eip7677Client: await getEip7677Client({ entryPoint }),
         middleware: {
             // @ts-ignore
             sponsorUserOperation: paymasterClient?.sponsorUserOperation
@@ -314,5 +315,15 @@ export const getSafeClient = async <T extends EntryPoint>({
             // @ts-ignore
             sponsorUserOperation: paymasterClient?.sponsorUserOperation
         }
+    })
+}
+
+export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
+    entryPoint
+}: { entryPoint: TEntryPoint }) => {
+    return createEip7677Client({
+        chain: foundry,
+        entryPoint,
+        transport: http(PAYMASTER_RPC)
     })
 }

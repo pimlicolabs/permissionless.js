@@ -39,6 +39,7 @@ import {
     type WriteContractWithPaymasterParameters,
     writeContract
 } from "../../actions/smartAccount/writeContract"
+import type { Eip7677Client } from "../../experimental"
 import type { Prettify } from "../../types/"
 import type { StateOverrides } from "../../types/bundler"
 import type { EntryPoint } from "../../types/entrypoint"
@@ -48,6 +49,9 @@ export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,
     TSmartAccount extends SmartAccount<entryPoint> | undefined =
         | SmartAccount<entryPoint>
+        | undefined,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
         | undefined
 > = {
     /**
@@ -300,7 +304,7 @@ export type SmartAccountActions<
                 TChainOverride
             >
         >
-    ) => ReturnType<typeof deployContract<entryPoint, TChain, TSmartAccount>>
+    ) => Promise<Hash>
     /**
      * Executes a write function on a contract.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -376,6 +380,7 @@ export type SmartAccountActions<
             TChain,
             TSmartAccount,
             TAbi,
+            TEip7677Client,
             TFunctionName,
             TArgs,
             TChainOverride
@@ -388,7 +393,8 @@ export type SmartAccountActions<
                     entryPoint,
                     TTransport,
                     TChain,
-                    TSmartAccount
+                    TSmartAccount,
+                    TEip7677Client
                 >
             >[1]
         >,
@@ -401,7 +407,8 @@ export type SmartAccountActions<
                     entryPoint,
                     TTransport,
                     TChain,
-                    TSmartAccount
+                    TSmartAccount,
+                    TEip7677Client
                 >
             >[1]
         >
@@ -457,14 +464,21 @@ export type SmartAccountActions<
      */
     sendTransactions: (
         args: Prettify<
-            SendTransactionsWithPaymasterParameters<entryPoint, TSmartAccount>
+            SendTransactionsWithPaymasterParameters<
+                entryPoint,
+                TSmartAccount,
+                TEip7677Client
+            >
         >
     ) => ReturnType<typeof sendTransactions<TChain, TSmartAccount, entryPoint>>
 }
 
-export function smartAccountActions<entryPoint extends EntryPoint>({
-    middleware
-}: Middleware<entryPoint>) {
+export function smartAccountActions<
+    entryPoint extends EntryPoint,
+    TEip7677Client extends Eip7677Client<entryPoint, Chain> | undefined =
+        | Eip7677Client<entryPoint, Chain>
+        | undefined
+>({ eip7677Client, middleware }: Middleware<entryPoint, TEip7677Client>) {
     return <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
@@ -479,18 +493,28 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 client,
                 {
                     ...args,
+                    eip7677Client,
                     middleware
                 },
                 stateOverrides
             ),
         deployContract: (args) =>
-            deployContract(client, {
-                ...args,
-                middleware
-            } as DeployContractParametersWithPaymaster<entryPoint>),
+            deployContract<entryPoint, TChain, TSmartAccount, TEip7677Client>(
+                client,
+                {
+                    ...args,
+                    eip7677Client,
+                    middleware
+                } as unknown as DeployContractParametersWithPaymaster<
+                    entryPoint,
+                    TSmartAccount,
+                    TEip7677Client
+                >
+            ),
         sendTransaction: (args) =>
             sendTransaction<TChain, TSmartAccount, entryPoint>(client, {
                 ...args,
+                eip7677Client,
                 middleware
             } as SendTransactionWithPaymasterParameters<
                 entryPoint,
@@ -500,6 +524,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
         sendTransactions: (args) =>
             sendTransactions<TChain, TSmartAccount, entryPoint>(client, {
                 ...args,
+                eip7677Client,
                 middleware
             }),
         sendUserOperation: (args) =>
@@ -507,6 +532,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 client,
                 {
                     ...args,
+                    eip7677Client,
                     middleware
                 } as SendUserOperationParameters<entryPoint, TSmartAccount>
             ),
@@ -561,11 +587,13 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
         ) =>
             writeContract(client, {
                 ...args,
+                eip7677Client,
                 middleware
             } as WriteContractWithPaymasterParameters<
                 entryPoint,
                 TChain,
                 TSmartAccount,
+                TEip7677Client,
                 TAbi
             >)
     })
