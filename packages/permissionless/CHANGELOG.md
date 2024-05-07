@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.26
+
+### Patch Changes
+
+- 40cb35dbffc1034df61598adaf5c8320fe4772f3: Loosened the types for 7677 functions
+
 ## 0.1.25
 
 ### Patch Changes
