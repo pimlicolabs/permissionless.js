@@ -7,6 +7,7 @@ import {
     type Transport,
     toHex
 } from "viem"
+import type { PartialBy } from "viem/types/utils"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     ENTRYPOINT_ADDRESS_V07_TYPE,
@@ -28,7 +29,12 @@ export type GetPaymasterDataParameters<
     TChain extends Chain | undefined = Chain | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = {
-    userOperation: UserOperation<GetEntryPointVersion<TEntryPoint>>
+    userOperation: GetEntryPointVersion<TEntryPoint> extends "v0.6"
+        ? PartialBy<UserOperation<"v0.6">, "paymasterAndData" | "signature">
+        : PartialBy<
+              UserOperation<"v0.7">,
+              "signature" | "paymaster" | "paymasterData"
+          >
     entryPoint: TEntryPoint
     context?: Record<string, unknown>
 } & GetChainParameter<TChain, TChainOverride>
