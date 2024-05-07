@@ -1,5 +1,4 @@
 import {
-    Address,
     type Chain,
     ChainNotFoundError,
     type Client,
