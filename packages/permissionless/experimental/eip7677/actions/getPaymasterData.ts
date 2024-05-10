@@ -34,7 +34,10 @@ export type GetPaymasterDataParameters<
         : PartialBy<
               UserOperation<"v0.7">,
               "signature" | "paymaster" | "paymasterData"
-          >
+          > & {
+              paymasterVerificationGasLimit: bigint
+              paymasterPostOpGasLimit: bigint
+          }
     entryPoint: TEntryPoint
     context?: Record<string, unknown>
 } & GetChainParameter<TChain, TChainOverride>
