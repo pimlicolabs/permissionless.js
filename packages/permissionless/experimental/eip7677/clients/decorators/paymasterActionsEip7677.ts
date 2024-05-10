@@ -34,12 +34,9 @@ export type PaymasterActionsEip7677<
     ) => Promise<GetPaymasterStubDataReturnType<TEntryPoint>>
 }
 
-const paymasterActionsEip7677 = <TEntryPoint extends EntryPoint>(
-    params: TEntryPoint | { entryPoint: TEntryPoint }
-) => {
-    const entryPoint = typeof params === "object" ? params.entryPoint : params
-
-    return <
+const paymasterActionsEip7677 =
+    <TEntryPoint extends EntryPoint>(entryPoint: TEntryPoint) =>
+    <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined
     >(
@@ -76,6 +73,5 @@ const paymasterActionsEip7677 = <TEntryPoint extends EntryPoint>(
                 }
             )
     })
-}
 
 export { paymasterActionsEip7677 }
