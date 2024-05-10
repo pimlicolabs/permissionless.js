@@ -1,5 +1,4 @@
 import type { Chain, Client, Transport } from "viem"
-import type { Prettify } from "viem/types/utils"
 import type { EntryPoint } from "../../../../types/entrypoint"
 import {
     type GetPaymasterDataParameters,
