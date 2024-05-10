@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.28
+
+### Patch Changes
+
+- 27ac3a7ba8f52653f4704558f1fd89f028e50a96: Fixed types for paymasterActionsEip7677
+
 ## 0.1.27
 
 ### Patch Changes
