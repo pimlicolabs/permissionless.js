@@ -1,5 +1,4 @@
 import type { Chain, Client, Transport } from "viem"
-import type { Prettify } from "viem/types/utils"
 import type { EntryPoint } from "../../../../types/entrypoint"
 import {
     type GetPaymasterDataParameters,
@@ -28,25 +27,16 @@ export type PaymasterActionsEip7677<
     getPaymasterStubData: <
         TChainOverride extends Chain | undefined = Chain | undefined
     >(
-        args: Prettify<
-            Omit<
-                GetPaymasterStubDataParameters<
-                    TEntryPoint,
-                    TChain,
-                    TChainOverride
-                >,
-                "entryPoint"
-            >
+        args: Omit<
+            GetPaymasterStubDataParameters<TEntryPoint, TChain, TChainOverride>,
+            "entryPoint"
         >
     ) => Promise<GetPaymasterStubDataReturnType<TEntryPoint>>
 }
 
-const paymasterActionsEip7677 = <TEntryPoint extends EntryPoint>(
-    params: TEntryPoint | { entryPoint: TEntryPoint }
-) => {
-    const entryPoint = typeof params === "object" ? params.entryPoint : params
-
-    return <
+const paymasterActionsEip7677 =
+    <TEntryPoint extends EntryPoint>(entryPoint: TEntryPoint) =>
+    <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined
     >(
@@ -83,6 +73,5 @@ const paymasterActionsEip7677 = <TEntryPoint extends EntryPoint>(
                 }
             )
     })
-}
 
 export { paymasterActionsEip7677 }
