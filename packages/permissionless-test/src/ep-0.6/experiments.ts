@@ -60,11 +60,9 @@ describe.each([
         const eip7677Client = createClient({
             chain: foundry,
             transport: http(PAYMASTER_RPC)
-        }).extend(
-            paymasterActionsEip7677({ entryPoint: ENTRYPOINT_ADDRESS_V06 })
-        )
+        }).extend(paymasterActionsEip7677(ENTRYPOINT_ADDRESS_V06))
 
-        const response = await eip7677Client.getPaymasterData({
+        await eip7677Client.getPaymasterData({
             userOperation: userOperaton
         })
 

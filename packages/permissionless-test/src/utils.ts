@@ -323,7 +323,7 @@ export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
     const client = createClient({
         chain: foundry,
         transport: http(PAYMASTER_RPC)
-    }).extend(paymasterActionsEip7677({ entryPoint }))
+    }).extend(paymasterActionsEip7677(entryPoint))
 
     return client
 }
