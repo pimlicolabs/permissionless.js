@@ -1,5 +1,5 @@
 import {
-    Address,
+    type Address,
     type Chain,
     ChainNotFoundError,
     type Client,
@@ -8,17 +8,13 @@ import {
     type Transport,
     toHex
 } from "viem"
-import type { PartialBy } from "viem/types/utils"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../../types/entrypoint"
-import type {
-    UserOperation,
-    UserOperationWithBigIntAsHex
-} from "../../../types/userOperation"
+import type { UserOperationWithBigIntAsHex } from "../../../types/userOperation"
 import { deepHexlify, getEntryPointVersion } from "../../../utils"
 import type {
     Eip7677RpcSchema,
