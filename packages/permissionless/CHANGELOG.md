@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.27
+
+### Patch Changes
+
+- 7d7cc66b6ec55feb2bc5ac5de065020247d14299: Changed signature of paymasterActionsEip7677 to paymasterActionsEip7677(entryPoint)
+
 ## 0.1.26
 
 ### Patch Changes
