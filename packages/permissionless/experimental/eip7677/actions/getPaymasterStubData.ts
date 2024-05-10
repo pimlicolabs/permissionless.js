@@ -1,4 +1,5 @@
 import {
+    Address,
     type Chain,
     ChainNotFoundError,
     type Client,
@@ -30,15 +31,43 @@ export type GetPaymasterStubDataParameters<
     TChainOverride extends Chain | undefined = Chain | undefined
 > = {
     userOperation: GetEntryPointVersion<TEntryPoint> extends "v0.6"
-        ? PartialBy<UserOperation<"v0.6">, "paymasterAndData" | "signature">
-        : PartialBy<
-              UserOperation<"v0.7">,
-              | "signature"
-              | "paymaster"
-              | "paymasterData"
-              | "paymasterVerificationGasLimit"
-              | "paymasterPostOpGasLimit"
-          >
+        ? {
+              sender: Address
+              nonce: bigint
+              initCode: Hex
+              callData: Hex
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              maxFeePerGas: bigint
+              maxPriorityFeePerGas: bigint
+              paymasterAndData?: Hex
+              signature?: Hex
+              factory?: never
+              factoryData?: never
+              paymaster?: never
+              paymasterVerificationGasLimit?: never
+              paymasterPostOpGasLimit?: never
+              paymasterData?: never
+          }
+        : {
+              sender: Address
+              nonce: bigint
+              factory?: Address
+              factoryData?: Hex
+              callData: Hex
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              maxFeePerGas: bigint
+              maxPriorityFeePerGas: bigint
+              paymaster?: Address
+              paymasterData?: Hex
+              signature?: Hex
+              paymasterAndData?: never
+              paymasterVerificationGasLimit?: bigint
+              paymasterPostOpGasLimit?: bigint
+          }
     entryPoint: TEntryPoint
     context?: Record<string, unknown>
 } & GetChainParameter<TChain, TChainOverride>

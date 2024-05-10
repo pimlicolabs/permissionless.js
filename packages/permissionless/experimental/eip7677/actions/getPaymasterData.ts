@@ -1,4 +1,5 @@
 import {
+    type Address,
     type Chain,
     ChainNotFoundError,
     type Client,
@@ -7,17 +8,13 @@ import {
     type Transport,
     toHex
 } from "viem"
-import type { PartialBy } from "viem/types/utils"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../../types/entrypoint"
-import type {
-    UserOperation,
-    UserOperationWithBigIntAsHex
-} from "../../../types/userOperation"
+import type { UserOperationWithBigIntAsHex } from "../../../types/userOperation"
 import { deepHexlify, getEntryPointVersion } from "../../../utils"
 import type {
     Eip7677RpcSchema,
@@ -30,11 +27,40 @@ export type GetPaymasterDataParameters<
     TChainOverride extends Chain | undefined = Chain | undefined
 > = {
     userOperation: GetEntryPointVersion<TEntryPoint> extends "v0.6"
-        ? PartialBy<UserOperation<"v0.6">, "paymasterAndData" | "signature">
-        : PartialBy<
-              UserOperation<"v0.7">,
-              "signature" | "paymaster" | "paymasterData"
-          > & {
+        ? {
+              sender: Address
+              nonce: bigint
+              initCode: Hex
+              callData: Hex
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              maxFeePerGas: bigint
+              maxPriorityFeePerGas: bigint
+              paymasterAndData?: Hex
+              signature?: Hex
+              factory?: never
+              factoryData?: never
+              paymaster?: never
+              paymasterVerificationGasLimit?: never
+              paymasterPostOpGasLimit?: never
+              paymasterData?: never
+          }
+        : {
+              sender: Address
+              nonce: bigint
+              factory?: Address
+              factoryData?: Hex
+              callData: Hex
+              callGasLimit: bigint
+              verificationGasLimit: bigint
+              preVerificationGas: bigint
+              maxFeePerGas: bigint
+              maxPriorityFeePerGas: bigint
+              paymaster?: Address
+              paymasterData?: Hex
+              signature?: Hex
+              paymasterAndData?: never
               paymasterVerificationGasLimit: bigint
               paymasterPostOpGasLimit: bigint
           }
