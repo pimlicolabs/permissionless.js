@@ -66,6 +66,10 @@ describe.each([
             userOperation: userOperaton
         })
 
+        await eip7677Client.getPaymasterStubData({
+            userOperation: userOperaton
+        })
+
         // await eip7677Client.getPaymasterStubData({
         //     userOperation: await smartClient.prepareUserOperationRequest({
         //         userOperation: {

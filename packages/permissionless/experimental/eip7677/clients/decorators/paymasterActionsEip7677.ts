@@ -28,15 +28,9 @@ export type PaymasterActionsEip7677<
     getPaymasterStubData: <
         TChainOverride extends Chain | undefined = Chain | undefined
     >(
-        args: Prettify<
-            Omit<
-                GetPaymasterStubDataParameters<
-                    TEntryPoint,
-                    TChain,
-                    TChainOverride
-                >,
-                "entryPoint"
-            >
+        args: Omit<
+            GetPaymasterStubDataParameters<TEntryPoint, TChain, TChainOverride>,
+            "entryPoint"
         >
     ) => Promise<GetPaymasterStubDataReturnType<TEntryPoint>>
 }
