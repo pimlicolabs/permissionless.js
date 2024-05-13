@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.29
+
+### Patch Changes
+
+- 5fa31f23672dfb8f6f2ae6f00c16cb6179822970: Made type of waitForUserOperationReceipt.logs consistent with Log from viem
+
 ## 0.1.28
 
 ### Patch Changes
