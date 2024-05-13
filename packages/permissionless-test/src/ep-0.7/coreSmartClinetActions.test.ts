@@ -153,128 +153,235 @@ describe.each([
             ).rejects.toThrowError(/^.*doesn't support account deployment.*$/i)
         })
 
-        test("Can send transaction", async () => {
-            const smartClient = await getSmartAccountClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07
-            })
-
-            await fund(smartClient.account.address)
-
-            const response = await smartClient.sendTransaction({
-                to: zeroAddress,
-                value: 0n,
-                data: "0x"
-            })
-
-            expect(isHash(response)).toBeTruthy()
-        }, 50000)
-
-        test("Can send multiple transactions", async () => {
-            const smartClient = await getSmartAccountClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07
-            })
-
-            await fund(smartClient.account.address)
-
-            const response = await smartClient.sendTransactions({
-                transactions: [
-                    {
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    },
-                    {
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    }
-                ]
-            })
-
-            expect(isHash(response)).toBe(true)
-        }, 50000)
-
-        test("Can write contract", async () => {
-            const smartClient = await getSmartAccountClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07
-            })
-
-            await fund(smartClient.account.address)
-
-            const entryPointContract = getContract({
-                abi: ENTRYPOINT_V07_ABI,
-                address: ENTRYPOINT_ADDRESS_V07,
-                client: {
-                    public: getPublicClient(),
-                    wallet: smartClient
-                }
-            })
-
-            const oldBalance = await entryPointContract.read.balanceOf([
-                smartClient.account.address
-            ])
-
-            // @ts-ignore
-            const txHash = await entryPointContract.write.depositTo(
-                [smartClient.account.address],
-                {
-                    value: parseEther("0.25")
-                }
-            )
-
-            expect(isHash(txHash)).toBe(true)
-
-            const newBalance = await entryPointContract.read.balanceOf([
-                smartClient.account.address
-            ])
-
-            //@ts-ignore
-            expect(newBalance - oldBalance).toBeGreaterThanOrEqual(
-                parseEther("0.25")
-            )
-        }, 50000)
-
-        test("Can send transaction with paymaster", async () => {
-            const smartClient = await getSmartAccountClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07,
-                paymasterClient
-            })
-
-            // derive expected hash so that we can search for it in logs
-            const op = await smartClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await smartClient.account.encodeCallData({
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    })
-                }
-            })
-            op.signature = await smartClient.account.signUserOperation(op)
-
-            const expectedHash = getUserOperationHash({
-                userOperation: op,
-                entryPoint: ENTRYPOINT_ADDRESS_V07,
-                chainId: foundry.id
-            })
-
-            const response = await smartClient.sendTransaction({
-                to: zeroAddress,
-                value: 0n,
-                data: "0x"
-            })
-
-            expect(isHash(response)).toBe(true)
-
-            const transactionReceipt =
-                await publicClient.waitForTransactionReceipt({
-                    hash: response
+        test.sequential(
+            "Can send transaction",
+            async () => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07
                 })
 
-            let eventFound = false
+                await fund(smartClient.account.address)
 
-            for (const log of transactionReceipt.logs) {
-                try {
+                const response = await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                })
+
+                expect(isHash(response)).toBeTruthy()
+            },
+            50000
+        )
+
+        test.sequential(
+            "Can send multiple transactions",
+            async () => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07
+                })
+
+                await fund(smartClient.account.address)
+
+                const response = await smartClient.sendTransactions({
+                    transactions: [
+                        {
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        },
+                        {
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        }
+                    ]
+                })
+
+                expect(isHash(response)).toBe(true)
+            },
+            50000
+        )
+
+        test.sequential(
+            "Can write contract",
+            async () => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07
+                })
+
+                await fund(smartClient.account.address)
+
+                const entryPointContract = getContract({
+                    abi: ENTRYPOINT_V07_ABI,
+                    address: ENTRYPOINT_ADDRESS_V07,
+                    client: {
+                        public: getPublicClient(),
+                        wallet: smartClient
+                    }
+                })
+
+                const oldBalance = await entryPointContract.read.balanceOf([
+                    smartClient.account.address
+                ])
+
+                // @ts-ignore
+                const txHash = await entryPointContract.write.depositTo(
+                    [smartClient.account.address],
+                    {
+                        value: parseEther("0.25")
+                    }
+                )
+
+                expect(isHash(txHash)).toBe(true)
+
+                const newBalance = await entryPointContract.read.balanceOf([
+                    smartClient.account.address
+                ])
+
+                //@ts-ignore
+                expect(newBalance - oldBalance).toBeGreaterThanOrEqual(
+                    parseEther("0.25")
+                )
+            },
+            50000
+        )
+
+        test.sequential(
+            "Can send transaction with paymaster",
+            async () => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    paymasterClient
+                })
+
+                // derive expected hash so that we can search for it in logs
+                const op = await smartClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData: await smartClient.account.encodeCallData({
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        })
+                    }
+                })
+                op.signature = await smartClient.account.signUserOperation(op)
+
+                const expectedHash = getUserOperationHash({
+                    userOperation: op,
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    chainId: foundry.id
+                })
+
+                const response = await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
+                })
+
+                expect(isHash(response)).toBe(true)
+
+                const transactionReceipt =
+                    await publicClient.waitForTransactionReceipt({
+                        hash: response
+                    })
+
+                let eventFound = false
+
+                for (const log of transactionReceipt.logs) {
+                    try {
+                        // biome-ignore lint/suspicious/noExplicitAny:
+                        let event: any
+                        try {
+                            event = decodeEventLog({
+                                abi: ENTRYPOINT_V07_ABI,
+                                ...log
+                            })
+                        } catch {
+                            continue
+                        }
+                        if (
+                            event.eventName === "UserOperationEvent" &&
+                            event.args.userOpHash === expectedHash
+                        ) {
+                            eventFound = true
+                            const op =
+                                await bundlerClient.getUserOperationByHash({
+                                    hash: event.args.userOpHash
+                                })
+                            expect(op?.userOperation.paymasterAndData).not.toBe(
+                                "0x"
+                            )
+                        }
+                    } catch (e) {
+                        const error = e as BaseError
+                        if (error.name !== "AbiEventSignatureNotFoundError")
+                            throw e
+                    }
+                }
+
+                expect(eventFound).toBeTruthy()
+            },
+            10000
+        )
+
+        test.sequential(
+            "Can send multiple transactions with paymaster",
+            async () => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    paymasterClient
+                })
+
+                // derive expected hash so that we can search for it in logs
+                const op = await smartClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData: await smartClient.account.encodeCallData([
+                            {
+                                to: zeroAddress,
+                                value: 0n,
+                                data: "0x"
+                            },
+                            {
+                                to: zeroAddress,
+                                value: 0n,
+                                data: "0x"
+                            }
+                        ])
+                    }
+                })
+                op.signature = await smartClient.account.signUserOperation(op)
+
+                const expectedHash = getUserOperationHash({
+                    userOperation: op,
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    chainId: foundry.id
+                })
+
+                const response = await smartClient.sendTransactions({
+                    transactions: [
+                        {
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        },
+                        {
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        }
+                    ]
+                })
+
+                expect(isHash(response)).toBeTruthy()
+
+                const transactionReceipt =
+                    await publicClient.waitForTransactionReceipt({
+                        hash: response
+                    })
+
+                let eventFound = false
+
+                for (const log of transactionReceipt.logs) {
                     // biome-ignore lint/suspicious/noExplicitAny:
                     let event: any
                     try {
@@ -297,95 +404,12 @@ describe.each([
                             "0x"
                         )
                     }
-                } catch (e) {
-                    const error = e as BaseError
-                    if (error.name !== "AbiEventSignatureNotFoundError") throw e
                 }
-            }
 
-            expect(eventFound).toBeTruthy()
-        }, 10000)
-
-        test("Can send multiple transactions with paymaster", async () => {
-            const smartClient = await getSmartAccountClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07,
-                paymasterClient
-            })
-
-            // derive expected hash so that we can search for it in logs
-            const op = await smartClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await smartClient.account.encodeCallData([
-                        {
-                            to: zeroAddress,
-                            value: 0n,
-                            data: "0x"
-                        },
-                        {
-                            to: zeroAddress,
-                            value: 0n,
-                            data: "0x"
-                        }
-                    ])
-                }
-            })
-            op.signature = await smartClient.account.signUserOperation(op)
-
-            const expectedHash = getUserOperationHash({
-                userOperation: op,
-                entryPoint: ENTRYPOINT_ADDRESS_V07,
-                chainId: foundry.id
-            })
-
-            const response = await smartClient.sendTransactions({
-                transactions: [
-                    {
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    },
-                    {
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    }
-                ]
-            })
-
-            expect(isHash(response)).toBeTruthy()
-
-            const transactionReceipt =
-                await publicClient.waitForTransactionReceipt({
-                    hash: response
-                })
-
-            let eventFound = false
-
-            for (const log of transactionReceipt.logs) {
-                // biome-ignore lint/suspicious/noExplicitAny:
-                let event: any
-                try {
-                    event = decodeEventLog({
-                        abi: ENTRYPOINT_V07_ABI,
-                        ...log
-                    })
-                } catch {
-                    continue
-                }
-                if (
-                    event.eventName === "UserOperationEvent" &&
-                    event.args.userOpHash === expectedHash
-                ) {
-                    eventFound = true
-                    const op = await bundlerClient.getUserOperationByHash({
-                        hash: event.args.userOpHash
-                    })
-                    expect(op?.userOperation.paymasterAndData).not.toBe("0x")
-                }
-            }
-
-            expect(eventFound).toBeTruthy()
-        }, 50000)
+                expect(eventFound).toBeTruthy()
+            },
+            50000
+        )
 
         test("Should work with existing (deployed) smart account", async () => {
             const privateKey = generatePrivateKey()
