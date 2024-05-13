@@ -5,6 +5,7 @@ import type {
     Client,
     Hash,
     Hex,
+    Log,
     Transport
 } from "viem"
 import type { BundlerClient } from "../../clients/createBundlerClient"
@@ -42,16 +43,7 @@ export type GetUserOperationReceiptReturnType = {
         logsBloom: Hex
         effectiveGasPrice: bigint
     }
-    logs: {
-        data: Hex
-        blockNumber: bigint
-        blockHash: Hash
-        transactionHash: Hash
-        logIndex: bigint
-        transactionIndex: bigint
-        address: Address
-        topics: Hex[]
-    }[]
+    logs: Log[]
 }
 
 /**
@@ -123,10 +115,11 @@ export const getUserOperationReceipt = async <
             blockNumber: BigInt(log.blockNumber),
             blockHash: log.blockHash,
             transactionHash: log.transactionHash,
-            logIndex: BigInt(log.logIndex),
-            transactionIndex: BigInt(log.transactionIndex),
+            logIndex: Number(log.logIndex),
+            transactionIndex: Number(log.transactionIndex),
             address: log.address,
-            topics: log.topics
+            topics: log.topics,
+            removed: log.removed
         }))
     }
 
