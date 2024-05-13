@@ -111,7 +111,8 @@ type UserOperationReceiptWithBigIntAsHex = {
         logIndex: Hex
         transactionIndex: Hex
         address: Address
-        topics: Hex[]
+        topics: [Hex, ...Hex[]] | []
+        removed: boolean
     }[]
 }
 
