@@ -441,6 +441,28 @@ const main = async () => {
         address: kernelFactoryOwner
     })
 
+    // ==== SETUP ALCHEMY LIGHT ACCOUNT CONTRACTS ==== //
+    const alchemyLightClientOwner = "0xDdF32240B4ca3184De7EC8f0D5Aba27dEc8B7A5C"
+    await anvilClient.setBalance({
+        address: alchemyLightClientOwner,
+        value: parseEther("100")
+    })
+
+    await anvilClient.impersonateAccount({
+        address: alchemyLightClientOwner
+    })
+
+    await sendTransaction(walletClient, {
+        account: alchemyLightClientOwner,
+        to: "0x0000000000400CdFef5E2714E63d8040b700BC24" /* light account v2.0.0 factory */,
+        data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000",
+        value: parseEther("0.1")
+    })
+
+    await anvilClient.stopImpersonatingAccount({
+        address: alchemyLightClientOwner
+    })
+
     await verifyDeployed([
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory

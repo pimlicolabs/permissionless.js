@@ -18,7 +18,7 @@ import {
     type SmartAccountSigner
 } from "../types"
 
-import type { EntryPoint, Prettify } from "../../types"
+import type { EntryPoint } from "../../types"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 
 import { encodeCallData } from "./utils/encodeCallData"
@@ -50,14 +50,14 @@ export type SignerToTrustSmartAccountParameters<
     entryPoint extends EntryPoint,
     TSource extends string = string,
     TAddress extends Address = Address
-> = Prettify<{
+> = {
     signer: SmartAccountSigner<TSource, TAddress>
     factoryAddress: Address
     entryPoint: entryPoint
     index?: bigint
     address?: Address
     secp256k1VerificationFacetAddress?: Address
-}>
+}
 
 /**
  * @description Creates an Trust Smart Account from a private key.
