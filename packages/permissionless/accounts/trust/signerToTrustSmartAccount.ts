@@ -86,10 +86,6 @@ export async function signerToTrustSmartAccount<
         }
     }
 
-    console.log('deriving sender');
-    console.log(viemSigner.publicKey);
-    console.log(viemSigner.address);
-
     const [accountAddress, chainId] = await Promise.all([
         address ??
             getAccountAddress(client, {
@@ -101,9 +97,6 @@ export async function signerToTrustSmartAccount<
             }),
         getChainId(client)
     ])
-
-    console.log('account addess');
-    console.log(accountAddress);
 
     if (!accountAddress) throw new Error("Account address not found")
 

@@ -21,8 +21,8 @@ import {
 } from "./light/signerToLightSmartAccount"
 
 import {
-    type TrustSmartAccount,
     type SignerToTrustSmartAccountParameters,
+    type TrustSmartAccount,
     signerToTrustSmartAccount
 } from "./trust/signerToTrustSmartAccount"
 

@@ -35,10 +35,6 @@ export const getAccountAddress = async <
         index
     })
 
-    console.log('getAccountAddress')
-    console.log(factoryAddress);
-    console.log(factoryData);
-
     return getSenderAddress(client, {
         initCode: concatHex([factoryAddress, factoryData]),
         entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE

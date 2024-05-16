@@ -246,7 +246,7 @@ export const getTrustAccountClient = async <T extends EntryPoint>({
         {
             entryPoint,
             signer: privateKeyToAccount(privateKey),
-            factoryAddress: '0x729c310186a57833f622630a16d13f710b83272a'
+            factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
         }
     )
 
@@ -260,7 +260,6 @@ export const getTrustAccountClient = async <T extends EntryPoint>({
             sponsorUserOperation: paymasterClient?.sponsorUserOperation
         }
     })
-
 }
 
 // Only supports v0.6 for now
