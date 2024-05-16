@@ -21,6 +21,12 @@ import {
 } from "./light/signerToLightSmartAccount"
 
 import {
+    type TrustSmartAccount,
+    type SignerToTrustSmartAccountParameters,
+    signerToTrustSmartAccount
+} from "./trust/signerToTrustSmartAccount"
+
+import {
     type PrivateKeyToSafeSmartAccountParameters,
     privateKeyToSafeSmartAccount
 } from "./safe/privateKeyToSafeSmartAccount"
@@ -66,6 +72,8 @@ export {
     signerToSimpleSmartAccount,
     type LightSmartAccount,
     signerToLightSmartAccount,
+    type TrustSmartAccount,
+    signerToTrustSmartAccount,
     SignTransactionNotSupportedBySmartAccount,
     privateKeyToBiconomySmartAccount,
     privateKeyToSimpleSmartAccount,
@@ -85,5 +93,6 @@ export {
     type PrivateKeyToSafeSmartAccountParameters,
     type SignerToEcdsaKernelSmartAccountParameters,
     type SignerToBiconomySmartAccountParameters,
-    type PrivateKeyToBiconomySmartAccountParameters
+    type PrivateKeyToBiconomySmartAccountParameters,
+    type SignerToTrustSmartAccountParameters
 }

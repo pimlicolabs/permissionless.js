@@ -4,7 +4,8 @@ import {
     createPublicClient,
     createTestClient,
     createWalletClient,
-    parseEther
+    parseEther,
+    zeroAddress
 } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { sendTransaction } from "viem/actions"
@@ -36,7 +37,15 @@ import {
     SAFE_V07_MODULE_CREATECALL,
     SAFE_V07_MODULE_SETUP_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
-    SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL
+    SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+    TRUST_ACCOUNT_FACET_CREATE_CALL,
+    TRUST_DEFAULT_FALLBACK_HANDLER,
+    TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+    TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+    TRUST_FACET_REGISTRY_CREATE_CALL,
+    TRUST_FACTORY_V06_CREATECALL,
+    TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+    TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL
 } from "./constants"
 
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
@@ -322,6 +331,92 @@ const main = async () => {
         .then(() =>
             console.log("[LIGHT ACCOUNT] Deploying v1.1.0 LightAccount Factory")
         )
+    
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_FACTORY_V06_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() => console.log("[TRUST] Deploying V0.6 Trust Factory"))
+
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust Secp256k1 Verification Facet")
+        )
+
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_ACCOUNT_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust AccountFacet")
+        )
+    
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust DiamondCutFacet")
+        )
+    
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust TokenReceiverFacet")
+        )
+
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust DiamondLoupeFacet")
+        )
+
+    walletClient
+        .sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DEFAULT_FALLBACK_HANDLER,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+        .then(() =>
+            console.log("[TRUST] Deploying Trust default fallback handler")
+        )
+
+    // walletClient
+    //     .sendTransaction({
+    //         to: zeroAddress,
+    //         data: TRUST_FACET_REGISTRY_CREATE_CALL,
+    //         gas: 15_000_000n,
+    //         nonce: nonce++
+    //     })
+    //     .then(() =>
+    //         console.log("[TRUST] Deploying Trust FacetRegistry")
+    //     )
 
     let onchainNonce = 0
     do {
@@ -366,26 +461,28 @@ const main = async () => {
         address: kernelFactoryOwner
     })
 
-    // ==== SETUP ALCHEMY LIGHT ACCOUNT CONTRACTS ==== //
-    const alchemyLightClientOwner = "0xDdF32240B4ca3184De7EC8f0D5Aba27dEc8B7A5C"
+    // ==== SETUP TRUST v0.6 CONTRACTS ==== //
+    const trustDeployer = "0xb33654322bD3803821031624f5922eb14C9b8d18"
     await anvilClient.setBalance({
-        address: alchemyLightClientOwner,
+        address: trustDeployer,
         value: parseEther("100")
     })
-
     await anvilClient.impersonateAccount({
-        address: alchemyLightClientOwner
+        address: trustDeployer
+    })
+
+    await anvilClient.setNonce({
+        address: trustDeployer,
+        nonce: 1
     })
 
     await sendTransaction(walletClient, {
-        account: alchemyLightClientOwner,
-        to: "0x0000000000400CdFef5E2714E63d8040b700BC24" /* light account v2.0.0 factory */,
-        data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000",
-        value: parseEther("0.1")
+        account: trustDeployer,
+        to: zeroAddress,
+        data: TRUST_FACET_REGISTRY_CREATE_CALL
     })
-
     await anvilClient.stopImpersonatingAccount({
-        address: alchemyLightClientOwner
+        address: trustDeployer,
     })
 
     await verifyDeployed([
@@ -417,7 +514,17 @@ const main = async () => {
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f", // Kernel v0.3.0 Factory
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 Meta Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
-        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba" // LightAccount v1.1.0 implementation
+        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
+        // "0x6A3D989dcd0F461F86D3CdC4e411C472B8de8a40",
+        "0x03f82fa254b123282542efc2b477f30add2ca111", // Trust Secp256k1VerificationFacetAddress
+        "0x729c310186a57833f622630a16d13f710b83272a", // Trust factory
+
+        "0xFde53272dcd7938d16E031A6989753c321728332", // Trust AccountFacet
+        "0x0B9504140771C3688Ff041917192277D2f52E1e0", // Trust DiamondCutFacet
+        "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
+        "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
+        "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
+        // "0xAfCb70e6e9514E2A15B23A01d2a9b9f7A34f2c33", // Trust FacetRegistry
     ])
 }
 
