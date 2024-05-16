@@ -56,6 +56,7 @@ export type SignerToTrustSmartAccountParameters<
     entryPoint: entryPoint
     index?: bigint
     address?: Address
+    secp256k1VerificationFacetAddress?: Address
 }>
 
 /**
@@ -76,6 +77,7 @@ export async function signerToTrustSmartAccount<
         factoryAddress,
         entryPoint: entryPointAddress,
         index = 0n,
+        secp256k1VerificationFacetAddress = TRUST_ADDRESSES.Secp256k1VerificationFacetAddress,
         address
     }: SignerToTrustSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<TrustSmartAccount<entryPoint, TTransport, TChain>> {
@@ -90,6 +92,7 @@ export async function signerToTrustSmartAccount<
         address ??
             getAccountAddress(client, {
                 factoryAddress,
+                secp256k1VerificationFacetAddress,
                 entryPoint: entryPointAddress,
                 bytes: viemSigner.publicKey,
                 owner: viemSigner.address,
@@ -155,6 +158,7 @@ export async function signerToTrustSmartAccount<
                 await getFactoryData({
                     account: viemSigner,
                     bytes: viemSigner.publicKey,
+                    secp256k1VerificationFacetAddress,
                     index
                 })
             ])
@@ -178,6 +182,7 @@ export async function signerToTrustSmartAccount<
             return getFactoryData({
                 account: viemSigner,
                 bytes: viemSigner.publicKey,
+                secp256k1VerificationFacetAddress,
                 index
             })
         },

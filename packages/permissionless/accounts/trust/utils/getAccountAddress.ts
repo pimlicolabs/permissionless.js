@@ -20,19 +20,22 @@ export const getAccountAddress = async <
         entryPoint: entryPointAddress,
         owner,
         bytes,
+        secp256k1VerificationFacetAddress,
         index = 0n
     }: {
         factoryAddress: Address
         owner: Address
         bytes: `0x${string}`
         entryPoint: entryPoint
-        index?: bigint
+        secp256k1VerificationFacetAddress: Address,
+        index?: bigint,
     }
 ): Promise<Address> => {
     const factoryData = await getFactoryData({
         account: { address: owner, type: "json-rpc" },
         bytes,
-        index
+        index,
+        secp256k1VerificationFacetAddress
     })
 
     return getSenderAddress(client, {

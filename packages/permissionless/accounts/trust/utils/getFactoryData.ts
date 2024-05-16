@@ -1,6 +1,5 @@
-import type { Account } from "viem"
+import type { Account, Address } from "viem"
 import { encodeFunctionData } from "viem"
-import { TRUST_ADDRESSES } from "../signerToTrustSmartAccount"
 
 /**
  * Wrapped this function to minimize the call to check if account is deployed
@@ -8,11 +7,13 @@ import { TRUST_ADDRESSES } from "../signerToTrustSmartAccount"
 export const getFactoryData = async ({
     account,
     bytes,
-    index
+    index,
+    secp256k1VerificationFacetAddress
 }: {
     account: Account
     bytes: `0x${string}`
     index: bigint
+    secp256k1VerificationFacetAddress: Address
 }) => {
     if (!account.address) throw new Error("Owner account not found")
 
@@ -49,6 +50,6 @@ export const getFactoryData = async ({
             }
         ],
         functionName: "createAccount",
-        args: [TRUST_ADDRESSES.Secp256k1VerificationFacetAddress, bytes, index]
+        args: [secp256k1VerificationFacetAddress, bytes, index]
     })
 }
