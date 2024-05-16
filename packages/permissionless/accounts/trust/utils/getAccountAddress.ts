@@ -27,8 +27,8 @@ export const getAccountAddress = async <
         owner: Address
         bytes: `0x${string}`
         entryPoint: entryPoint
-        secp256k1VerificationFacetAddress: Address,
-        index?: bigint,
+        secp256k1VerificationFacetAddress: Address
+        index?: bigint
     }
 ): Promise<Address> => {
     const factoryData = await getFactoryData({
