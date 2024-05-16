@@ -1,5 +1,5 @@
 ---
-"permissionless": minor
+"permissionless": patch
 ---
 
 Added Trust account support
