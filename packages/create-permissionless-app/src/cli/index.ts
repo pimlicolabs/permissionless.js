@@ -10,6 +10,7 @@ import { logger } from "../utils/logger"
 import { validateAppName } from "../utils/validateAppName"
 
 interface CliFlags {
+    noGit: boolean
     noInstall: boolean
     default: boolean
 
@@ -31,6 +32,7 @@ interface CliResults {
 const defaultOptions: CliResults = {
     appName: DEFAULT_APP_NAME,
     flags: {
+        noGit: false,
         noInstall: false,
         default: false,
         bundler: "pimlico",
@@ -52,6 +54,11 @@ export const runCli = async (): Promise<CliResults> => {
         .argument(
             "[dir]",
             "The name of the application, as well as the name of the directory to create"
+        )
+        .option(
+            "--noGit",
+            "Explicitly tell the CLI to not initialize a new git repo in the project",
+            false
         )
         .option(
             "--noInstall",
@@ -168,6 +175,15 @@ export const runCli = async (): Promise<CliResults> => {
                         defaultValue: cliResults.flags.publicRPCUrl
                     })
                 },
+                ...(!cliResults.flags.noGit && {
+                    git: () => {
+                        return p.confirm({
+                            message:
+                                "Should we initialize a Git repository and stage the changes?",
+                            initialValue: !defaultOptions.flags.noGit
+                        })
+                    }
+                }),
                 ...(!cliResults.flags.noInstall && {
                     install: () => {
                         return p.confirm({
@@ -192,6 +208,7 @@ export const runCli = async (): Promise<CliResults> => {
             appName: project.name ?? cliResults.appName,
             flags: {
                 ...cliResults.flags,
+                noGit: !project.git || cliResults.flags.noGit,
                 noInstall: !project.install || cliResults.flags.noInstall,
                 signer: project.signer ?? cliResults.flags.signer,
                 paymaster: project.paymaster ?? cliResults.flags.paymaster,

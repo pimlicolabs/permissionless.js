@@ -5,6 +5,7 @@ import { type PackageJson } from "type-fest"
 
 import { runCli } from "./cli/index"
 import { createProject } from "./helpers/createProject"
+import { initializeGit } from "./helpers/git"
 import { installDependencies } from "./helpers/installDependencies"
 import { addPackageDependency } from "./utils/addPackageDependency"
 import {
@@ -27,6 +28,7 @@ const main = async () => {
     const {
         appName,
         flags: {
+            noGit,
             noInstall,
             bundler,
             paymaster,
@@ -66,6 +68,10 @@ const main = async () => {
 
     if (!noInstall) {
         await installDependencies(projectDir)
+    }
+
+    if (!noGit) {
+        await initializeGit(projectDir)
     }
 
     // Display next steps for the user
