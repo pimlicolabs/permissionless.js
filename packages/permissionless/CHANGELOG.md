@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.30
+
+### Patch Changes
+
+- 7f0b5b906b236d8ef0881a06c24462c50995d96b: Improved support for non-EIP1559 networks
+
 ## 0.1.29
 
 ### Patch Changes
