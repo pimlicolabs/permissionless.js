@@ -274,14 +274,13 @@ async function prepareUserOperationRequestEntryPointV07<
         account_
     ) as SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
 
-    const [sender, nonce, factory, factoryData, callData] =
-        await Promise.all([
-            partialUserOperation.sender || account.address,
-            partialUserOperation.nonce || account.getNonce(),
-            partialUserOperation.factory || account.getFactory(),
-            partialUserOperation.factoryData || account.getFactoryData(),
-            partialUserOperation.callData,
-        ])
+    const [sender, nonce, factory, factoryData, callData] = await Promise.all([
+        partialUserOperation.sender || account.address,
+        partialUserOperation.nonce || account.getNonce(),
+        partialUserOperation.factory || account.getFactory(),
+        partialUserOperation.factoryData || account.getFactoryData(),
+        partialUserOperation.callData
+    ])
 
     const userOperation: UserOperation<"v0.7"> = {
         sender,
