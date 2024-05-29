@@ -274,17 +274,13 @@ async function prepareUserOperationRequestEntryPointV07<
         account_
     ) as SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
 
-    const [sender, nonce, factory, factoryData, callData, gasEstimation] =
+    const [sender, nonce, factory, factoryData, callData] =
         await Promise.all([
             partialUserOperation.sender || account.address,
             partialUserOperation.nonce || account.getNonce(),
             partialUserOperation.factory || account.getFactory(),
             partialUserOperation.factoryData || account.getFactoryData(),
             partialUserOperation.callData,
-            !partialUserOperation.maxFeePerGas ||
-            !partialUserOperation.maxPriorityFeePerGas
-                ? estimateFeesPerGas(account.client)
-                : undefined
         ])
 
     const userOperation: UserOperation<"v0.7"> = {
@@ -298,14 +294,9 @@ async function prepareUserOperationRequestEntryPointV07<
             partialUserOperation.verificationGasLimit || BigInt(0),
         preVerificationGas:
             partialUserOperation.preVerificationGas || BigInt(0),
-        maxFeePerGas:
-            partialUserOperation.maxFeePerGas ||
-            gasEstimation?.maxFeePerGas ||
-            BigInt(0),
+        maxFeePerGas: partialUserOperation.maxFeePerGas || BigInt(0),
         maxPriorityFeePerGas:
-            partialUserOperation.maxPriorityFeePerGas ||
-            gasEstimation?.maxPriorityFeePerGas ||
-            BigInt(0),
+            partialUserOperation.maxPriorityFeePerGas || BigInt(0),
         signature: partialUserOperation.signature || "0x"
     }
 
