@@ -38,9 +38,18 @@ import type {
 import type { BundlerActions } from "./clients/decorators/bundler"
 import { bundlerActions } from "./clients/decorators/bundler"
 import {
+    type EtherspotAccountActions,
+    etherspotAccountActions
+} from "./clients/decorators/etherspot"
+import {
     type SmartAccountActions,
     smartAccountActions
 } from "./clients/decorators/smartAccount"
+import { createEtherspotBundlerClient } from "./clients/etherspot"
+import type {
+    EtherspotBundlerClient,
+    EtherspotBundlerClientConfig
+} from "./clients/etherspot"
 
 export type {
     SendUserOperationParameters,
@@ -57,7 +66,10 @@ export type {
     WaitForUserOperationReceiptParameters,
     SmartAccountClient,
     SmartAccountClientConfig,
-    SmartAccountActions
+    SmartAccountActions,
+    EtherspotAccountActions,
+    EtherspotBundlerClient,
+    EtherspotBundlerClientConfig
 }
 
 export {
@@ -74,7 +86,9 @@ export {
     bundlerActions,
     WaitForUserOperationReceiptTimeoutError,
     createSmartAccountClient,
-    smartAccountActions
+    etherspotAccountActions,
+    smartAccountActions,
+    createEtherspotBundlerClient
 }
 import type { UserOperation } from "./types/userOperation"
 
