@@ -113,11 +113,22 @@ export type SignerToSimpleSmartAccountParameters<
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
-    factoryAddress: Address
+    factoryAddress?: Address
     entryPoint: entryPoint
     index?: bigint
     address?: Address
 }>
+
+const getDefaultAddresses = (
+    entryPoint: EntryPoint,
+    factoryAddress?: Address
+): Address => {
+    if (factoryAddress) return factoryAddress
+    if (getEntryPointVersion(entryPoint) === "v0.6") {
+        return "0x9406Cc6185a346906296840746125a0E44976454"
+    }
+    return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
+}
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -134,7 +145,7 @@ export async function signerToSimpleSmartAccount<
     client: Client<TTransport, TChain, undefined>,
     {
         signer,
-        factoryAddress,
+        factoryAddress: _factoryAddress,
         entryPoint: entryPointAddress,
         index = BigInt(0),
         address
@@ -146,6 +157,11 @@ export async function signerToSimpleSmartAccount<
             throw new SignTransactionNotSupportedBySmartAccount()
         }
     } as LocalAccount
+
+    const factoryAddress = getDefaultAddresses(
+        entryPointAddress,
+        _factoryAddress
+    )
 
     const [accountAddress, chainId] = await Promise.all([
         address ??
