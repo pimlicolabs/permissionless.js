@@ -119,7 +119,7 @@ export type SignerToSimpleSmartAccountParameters<
     address?: Address
 }>
 
-const getDefaultAddresses = (
+const getFactoryAddress = (
     entryPoint: EntryPoint,
     factoryAddress?: Address
 ): Address => {
@@ -158,10 +158,7 @@ export async function signerToSimpleSmartAccount<
         }
     } as LocalAccount
 
-    const factoryAddress = getDefaultAddresses(
-        entryPointAddress,
-        _factoryAddress
-    )
+    const factoryAddress = getFactoryAddress(entryPointAddress, _factoryAddress)
 
     const [accountAddress, chainId] = await Promise.all([
         address ??
