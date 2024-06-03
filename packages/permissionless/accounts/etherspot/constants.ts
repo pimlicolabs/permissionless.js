@@ -26,6 +26,8 @@ export enum VALIDATOR_MODE {
     ENABLE = "0x01"
 }
 
+export const supportedNetworks = [11155111]
+
 export const Networks: {
     [key: number]: {
         modularEtherspotWalletFactory: Address

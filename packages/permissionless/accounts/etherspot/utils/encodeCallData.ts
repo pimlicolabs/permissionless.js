@@ -11,7 +11,7 @@ import { CALL_TYPE, EXEC_TYPE } from "../constants"
 import { getExecMode } from "./getExecMode"
 
 export const encodeCallData = (
-    _tx:
+    tx:
         | {
               to: Address
               value: bigint
@@ -23,7 +23,7 @@ export const encodeCallData = (
               data: Hex
           }[]
 ) => {
-    if (Array.isArray(_tx)) {
+    if (Array.isArray(tx)) {
         // Encode a batched call
         const calldata = encodeAbiParameters(
             [
@@ -47,7 +47,7 @@ export const encodeCallData = (
                 }
             ],
             [
-                _tx.map((arg) => {
+                tx.map((arg) => {
                     return {
                         target: arg.to,
                         value: arg.value,
@@ -69,11 +69,7 @@ export const encodeCallData = (
         })
     }
 
-    const calldata = concatHex([
-        _tx.to,
-        toHex(_tx.value, { size: 32 }),
-        _tx.data
-    ])
+    const calldata = concatHex([tx.to, toHex(tx.value, { size: 32 }), tx.data])
 
     return encodeFunctionData({
         abi: EtherspotExecuteAbi,

@@ -19,7 +19,7 @@ import {
     signMessage as _signMessage
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type { EntryPoint, Prettify } from "../../types"
+import type { ENTRYPOINT_ADDRESS_V07_TYPE, Prettify } from "../../types"
 import { getEntryPointVersion } from "../../utils"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
@@ -30,7 +30,12 @@ import {
     type SmartAccountSigner
 } from "../types"
 import { EtherspotWalletFactoryAbi } from "./abi/EtherspotWalletFactoryAbi"
-import { DUMMY_ECDSA_SIGNATURE, Networks, VALIDATOR_TYPE } from "./constants"
+import {
+    DUMMY_ECDSA_SIGNATURE,
+    Networks,
+    VALIDATOR_TYPE,
+    supportedNetworks
+} from "./constants"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getInitMSAData } from "./utils/getInitMSAData"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
@@ -38,7 +43,7 @@ import { signMessage } from "./utils/signMessage"
 import { signTypedData } from "./utils/signTypedData"
 
 export type EtherspotSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "etherspotSmartAccount", transport, chain>
@@ -73,12 +78,12 @@ const createAccountAbi = [
     }
 ] as const
 
-type KERNEL_ADDRESSES = {
+type CONTRACT_ADDRESSES = {
     ecdsaValidatorAddress: Address
-    accountLogicAddress: Address
-    factoryAddress: Address
     metaFactoryAddress: Address
     bootstrapAddress: Address
+    accountLogicAddress?: Address
+    factoryAddress?: Address
 }
 
 /**
@@ -96,15 +101,15 @@ const getDefaultAddresses = (
         accountLogicAddress: _accountLogicAddress,
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress
-    }: Partial<KERNEL_ADDRESSES>
-): KERNEL_ADDRESSES => {
+    }: Partial<CONTRACT_ADDRESSES>
+): CONTRACT_ADDRESSES => {
+    if (!supportedNetworks.includes(chainId)) {
+        throw new Error(`Unsupported network with chainId: ${chainId}`)
+    }
+
     const addresses = Networks[chainId]
     const ecdsaValidatorAddress =
         _ecdsaValidatorAddress ?? addresses.multipleOwnerECDSAValidator
-    const accountLogicAddress =
-        _accountLogicAddress ?? addresses.modularEtherspotWallet
-    const factoryAddress =
-        _factoryAddress ?? addresses.modularEtherspotWalletFactory
     const metaFactoryAddress =
         _metaFactoryAddress ??
         addresses?.modularEtherspotWalletFactory ??
@@ -113,14 +118,12 @@ const getDefaultAddresses = (
 
     return {
         ecdsaValidatorAddress,
-        accountLogicAddress,
-        factoryAddress,
         metaFactoryAddress,
         bootstrapAddress
     }
 }
 
-export const getEcdsaRootIdentifier = (validatorAddress: Address) => {
+export const getEcdsaValidatorIdentifier = (validatorAddress: Address) => {
     return concatHex([VALIDATOR_TYPE.VALIDATOR, validatorAddress])
 }
 
@@ -130,7 +133,7 @@ export const getEcdsaRootIdentifier = (validatorAddress: Address) => {
  * @param owner
  * @param ecdsaValidatorAddress
  */
-const getInitialisationData = <entryPoint extends EntryPoint>({
+const getInitialisationData = <entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE>({
     entryPoint: entryPointAddress,
     owner,
     ecdsaValidatorAddress,
@@ -166,14 +169,14 @@ const getInitialisationData = <entryPoint extends EntryPoint>({
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
  */
-const getAccountInitCode = async <entryPoint extends EntryPoint>({
+const getAccountInitCode = async ({
     entryPoint: entryPointAddress,
     owner,
     index,
     ecdsaValidatorAddress,
     bootstrapAddress
 }: {
-    entryPoint: entryPoint
+    entryPoint: ENTRYPOINT_ADDRESS_V07_TYPE
     owner: Address
     index: bigint
     ecdsaValidatorAddress: Address
@@ -207,7 +210,7 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
  * @param factoryAddress
  */
 const getAccountAddress = async <
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >({
@@ -243,7 +246,7 @@ const getAccountAddress = async <
 }
 
 export type SignerToEtherspotSmartAccountParameters<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
     TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
@@ -269,7 +272,7 @@ export type SignerToEtherspotSmartAccountParameters<
  * @param deployedAccountAddress
  */
 export async function signerToEtherspotSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = string,
@@ -293,9 +296,9 @@ export async function signerToEtherspotSmartAccount<
         throw new Error("Only EntryPoint 0.7 is supported")
     }
 
-    const chainID = await getChainId(client)
+    const chainId = client.chain?.id ?? (await getChainId(client))
     const { ecdsaValidatorAddress, metaFactoryAddress, bootstrapAddress } =
-        getDefaultAddresses(chainID, {
+        getDefaultAddresses(chainId, {
             ecdsaValidatorAddress: _ecdsaValidatorAddress,
             accountLogicAddress: _accountLogicAddress,
             factoryAddress: _factoryAddress,
@@ -320,20 +323,18 @@ export async function signerToEtherspotSmartAccount<
             bootstrapAddress
         })
 
-    // Fetch account address and chain id
-    const [accountAddress, chainId] = await Promise.all([
+    // Fetch account address
+    const accountAddress =
         address ??
-            getAccountAddress<entryPoint, TTransport, TChain>({
-                client,
-                entryPoint: entryPointAddress,
-                owner: viemSigner.address,
-                ecdsaValidatorAddress,
-                factoryAddress: metaFactoryAddress,
-                bootstrapAddress,
-                index
-            }),
-        client.chain?.id ?? getChainId(client)
-    ])
+        (await getAccountAddress<entryPoint, TTransport, TChain>({
+            client,
+            entryPoint: entryPointAddress,
+            owner: viemSigner.address,
+            ecdsaValidatorAddress,
+            factoryAddress: metaFactoryAddress,
+            bootstrapAddress,
+            index
+        }))
 
     if (!accountAddress) throw new Error("Account address not found")
 
@@ -353,7 +354,7 @@ export async function signerToEtherspotSmartAccount<
             })
 
             return concatHex([
-                getEcdsaRootIdentifier(ecdsaValidatorAddress),
+                getEcdsaValidatorIdentifier(ecdsaValidatorAddress),
                 signature
             ])
         },
@@ -371,15 +372,18 @@ export async function signerToEtherspotSmartAccount<
                 TPrimaryType,
                 TChain,
                 undefined
-            >(client, {
-                account: viemSigner,
-                ...typedData,
-                accountAddress,
+            >(
+                client,
+                {
+                    account: viemSigner,
+                    ...typedData,
+                    accountAddress
+                },
                 chainId
-            })
+            )
 
             return concatHex([
-                getEcdsaRootIdentifier(ecdsaValidatorAddress),
+                getEcdsaValidatorIdentifier(ecdsaValidatorAddress),
                 signature
             ])
         },
@@ -463,12 +467,14 @@ export async function signerToEtherspotSmartAccount<
 
         // Encode the deploy call data
         async encodeDeployCallData(_) {
-            throw new Error("Simple account doesn't support account deployment")
+            throw new Error(
+                "Etherspot smart account doesn't support account deployment"
+            )
         },
 
         // Encode a call
-        async encodeCallData(_tx) {
-            return encodeCallData(_tx)
+        async encodeCallData(tx) {
+            return encodeCallData(tx)
         },
 
         // Get simple dummy signature

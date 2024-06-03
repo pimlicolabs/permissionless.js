@@ -9,14 +9,10 @@ import {
     type TypedData,
     getTypesForEIP712Domain,
     hashTypedData,
-    publicActions,
     validateTypedData
 } from "viem"
 
-import {
-    signMessage as _signMessage,
-    signTypedData as _signTypedData
-} from "viem/actions"
+import { signMessage, signTypedData as _signTypedData } from "viem/actions"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
 export async function signTypedData<
@@ -27,7 +23,8 @@ export async function signTypedData<
 >(
     client: Client<Transport, chain, account>,
     parameters: SignTypedDataParameters<typedData, primaryType, account> &
-        WrapMessageHashParams
+        WrapMessageHashParams,
+    chainId: number
 ): Promise<SignTypedDataReturnType> {
     const {
         account: account_,
@@ -54,12 +51,10 @@ export async function signTypedData<
 
     const wrappedMessageHash = wrapMessageHash(typedHash, {
         accountAddress,
-        chainId: client.chain
-            ? client.chain.id
-            : await client.extend(publicActions).getChainId()
+        chainId
     })
 
-    const signature = await _signMessage(client, {
+    const signature = await signMessage(client, {
         account: account_ as LocalAccount,
         message: { raw: wrappedMessageHash }
     })
