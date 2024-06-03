@@ -24,7 +24,7 @@ export type PimlicoBundlerClient<entryPoint extends EntryPoint> = Client<
     Chain | undefined,
     Account | undefined,
     PimlicoBundlerRpcSchema,
-    PimlicoBundlerActions & BundlerActions<entryPoint>
+    PimlicoBundlerActions<entryPoint> & BundlerActions<entryPoint>
 >
 
 export type PimlicoPaymasterClient<entryPoint extends EntryPoint> = Client<

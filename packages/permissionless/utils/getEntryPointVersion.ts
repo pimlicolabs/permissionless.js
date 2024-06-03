@@ -15,6 +15,18 @@ export const getEntryPointVersion = (
 ): GetEntryPointVersion<EntryPoint> =>
     entryPoint === ENTRYPOINT_ADDRESS_V06 ? "v0.6" : "v0.7"
 
+export function isEntryPointVersion06(
+    entryPoint: EntryPoint
+): entryPoint is ENTRYPOINT_ADDRESS_V06_TYPE {
+    return entryPoint === ENTRYPOINT_ADDRESS_V06
+}
+
+export function isEntryPointVersion07(
+    entryPoint: EntryPoint
+): entryPoint is ENTRYPOINT_ADDRESS_V07_TYPE {
+    return entryPoint === ENTRYPOINT_ADDRESS_V07
+}
+
 export function isUserOperationVersion06(
     entryPoint: EntryPoint,
     _operation: UserOperation<"v0.6"> | UserOperation<"v0.7">
