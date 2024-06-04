@@ -45,6 +45,11 @@ import {
 } from "./etherspot/signerToEtherspotSmartAccount"
 
 import {
+    type PrivateKeyToEtherspotSmartAccountParameters,
+    privateKeyToEtherspotSmartAccount
+} from "./etherspot/privateKeyToEtherspotSmartAccount"
+
+import {
     type BiconomySmartAccount,
     type SignerToBiconomySmartAccountParameters,
     signerToBiconomySmartAccount
@@ -94,5 +99,7 @@ export {
     type PrivateKeyToBiconomySmartAccountParameters,
     type EtherspotSmartAccount,
     type SignerToEtherspotSmartAccountParameters,
-    signerToEtherspotSmartAccount
+    signerToEtherspotSmartAccount,
+    type PrivateKeyToEtherspotSmartAccountParameters,
+    privateKeyToEtherspotSmartAccount
 }

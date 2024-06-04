@@ -272,7 +272,6 @@ export type SignerToEtherspotSmartAccountParameters<
  * @param deployedAccountAddress
  */
 export async function signerToEtherspotSmartAccount<
-    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = string,
@@ -288,8 +287,14 @@ export async function signerToEtherspotSmartAccount<
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
         ecdsaValidatorAddress: _ecdsaValidatorAddress
-    }: SignerToEtherspotSmartAccountParameters<entryPoint, TSource, TAddress>
-): Promise<EtherspotSmartAccount<entryPoint, TTransport, TChain>> {
+    }: SignerToEtherspotSmartAccountParameters<
+        ENTRYPOINT_ADDRESS_V07_TYPE,
+        TSource,
+        TAddress
+    >
+): Promise<
+    EtherspotSmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE, TTransport, TChain>
+> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
 
     if (entryPointVersion === "v0.6") {
@@ -326,7 +331,11 @@ export async function signerToEtherspotSmartAccount<
     // Fetch account address
     const accountAddress =
         address ??
-        (await getAccountAddress<entryPoint, TTransport, TChain>({
+        (await getAccountAddress<
+            ENTRYPOINT_ADDRESS_V07_TYPE,
+            TTransport,
+            TChain
+        >({
             client,
             entryPoint: entryPointAddress,
             owner: viemSigner.address,

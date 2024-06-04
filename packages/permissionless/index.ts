@@ -46,10 +46,7 @@ import {
     smartAccountActions
 } from "./clients/decorators/smartAccount"
 import { createEtherspotBundlerClient } from "./clients/etherspot"
-import type {
-    EtherspotBundlerClient,
-    EtherspotBundlerClientConfig
-} from "./clients/etherspot"
+import type { EtherspotBundlerClient } from "./clients/etherspot"
 
 export type {
     SendUserOperationParameters,
@@ -68,8 +65,7 @@ export type {
     SmartAccountClientConfig,
     SmartAccountActions,
     EtherspotAccountActions,
-    EtherspotBundlerClient,
-    EtherspotBundlerClientConfig
+    EtherspotBundlerClient
 }
 
 export {

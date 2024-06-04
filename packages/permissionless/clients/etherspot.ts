@@ -1,56 +1,25 @@
 import type {
+    Account,
     Chain,
     Client,
-    ClientConfig,
+    PublicClientConfig,
     Transport,
     WalletClientConfig
 } from "viem"
 import { createClient } from "viem"
-import { type SmartAccount } from "../accounts/types"
-import { type Middleware } from "../actions/etherspot/prepareUserOperationRequest"
-import type { Prettify } from "../types/"
-import { type BundlerRpcSchema } from "../types/bundler"
-import type { EntryPoint } from "../types/entrypoint"
+import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../types/"
+import { type EtherspotBundlerRpcSchema } from "../types/etherspot"
 import {
     type EtherspotAccountActions,
     etherspotAccountActions
 } from "./decorators/etherspot"
 
-export type EtherspotBundlerClient<
-    entryPoint extends EntryPoint,
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
-> = Prettify<
-    Client<
-        transport,
-        chain,
-        account,
-        BundlerRpcSchema<entryPoint>,
-        EtherspotAccountActions<entryPoint, chain, account>
-    >
->
-
-export type EtherspotBundlerClientConfig<
-    entryPoint extends EntryPoint,
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
-> = Prettify<
-    Pick<
-        ClientConfig<transport, chain, account>,
-        "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
-    > &
-        Middleware<entryPoint> & {
-            account: account
-            bundlerTransport: Transport
-        } & {
-            entryPoint?: entryPoint
-        }
+export type EtherspotBundlerClient = Client<
+    Transport,
+    Chain | undefined,
+    Account | undefined,
+    EtherspotBundlerRpcSchema,
+    EtherspotAccountActions
 >
 
 /**
@@ -66,40 +35,26 @@ export type EtherspotBundlerClientConfig<
  * const etherspotAccountClient = createEtherspotBundlerClient({
  *   chain: mainnet,
  *   transport: http(BUNDLER_URL),
+ *   entryPoint: ENTRYPOINT_ADDRESS_V07
  * })
  */
 
 export function createEtherspotBundlerClient<
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = undefined,
-    TEntryPoint extends EntryPoint = TSmartAccount extends SmartAccount<infer U>
-        ? U
-        : never
+    entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = undefined
 >(
-    parameters: EtherspotBundlerClientConfig<
-        TEntryPoint,
-        TTransport,
-        TChain,
-        TSmartAccount
-    >
-): EtherspotBundlerClient<TEntryPoint, TTransport, TChain, TSmartAccount> {
-    const {
-        key = "public",
-        name = "Etherspot Bundler Client",
-        bundlerTransport
-    } = parameters
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint
+    }
+): EtherspotBundlerClient {
+    const { key = "public", name = "Etherspot Bundler Client" } = parameters
     const client = createClient({
         ...parameters,
         key,
         name,
-        transport: bundlerTransport,
         type: "etherspotBundlerClient"
     })
 
-    return client.extend(
-        etherspotAccountActions({
-            middleware: parameters.middleware
-        })
-    ) as EtherspotBundlerClient<TEntryPoint, TTransport, TChain, TSmartAccount>
+    return client.extend(etherspotAccountActions()) as EtherspotBundlerClient
 }
