@@ -11,6 +11,7 @@ export function isVersion07(
     return (
         "factory" in operation ||
         "paymaster" in operation ||
+        "paymasterData" in operation ||
         "factoryData" in operation
     )
 }

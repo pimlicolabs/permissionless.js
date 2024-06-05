@@ -2,6 +2,19 @@ import type { FastifyReply } from "fastify"
 import { type Hex, getAddress } from "viem"
 import { type infer as zodInfer, z } from "zod"
 
+export enum RpcStatus {
+    Unset = "unset",
+    ServerError = "server_error",
+    ClientError = "client_error",
+    Success = "success"
+}
+
+export enum ValidationErrors {
+    InvalidFields = -32602,
+    InsufficientBalance = -32603,
+    UnsupportedEntryPoint = -32604
+}
+
 export const returnInvalidRequestParams = (
     reply: FastifyReply,
     errorMsg: string
@@ -160,3 +173,4 @@ export const pmSponsorUserOperationParamsSchema = z.tuple([
 
 export type UserOperationV7 = zodInfer<typeof userOperationSchemaPaymasterV7>
 export type UserOperationV6 = zodInfer<typeof userOperationSchemaPaymasterV6>
+export type JsonRpcSchema = zodInfer<typeof jsonRpcSchema>
