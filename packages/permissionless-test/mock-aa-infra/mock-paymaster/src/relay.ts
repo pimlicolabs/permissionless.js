@@ -14,6 +14,7 @@ import type {
 import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
 import {
     type Account,
+    BaseError,
     type Chain,
     type GetContractReturnType,
     type Hex,
@@ -23,8 +24,7 @@ import {
     type WalletClient,
     concat,
     encodeAbiParameters,
-    toHex,
-    BaseError
+    toHex
 } from "viem"
 import { fromZodError } from "zod-validation-error"
 import type {
