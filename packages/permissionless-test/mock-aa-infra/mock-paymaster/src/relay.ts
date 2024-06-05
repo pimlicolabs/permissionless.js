@@ -326,8 +326,11 @@ export const createRpcHandler = (
             console.log(`JSON.stringify(err): ${util.inspect(err)}`)
 
             const error = {
+                // biome-ignore lint/suspicious/noExplicitAny:
                 message: (err as any).message,
+                // biome-ignore lint/suspicious/noExplicitAny:
                 data: (err as any).data,
+                // biome-ignore lint/suspicious/noExplicitAny:
                 code: (err as any).code ?? -32603
             }
 
