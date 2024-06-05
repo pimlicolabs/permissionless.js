@@ -1,30 +1,10 @@
-import type { FastifyReply } from "fastify"
 import { type Hex, getAddress } from "viem"
 import { type infer as zodInfer, z } from "zod"
-
-export enum RpcStatus {
-    Unset = "unset",
-    ServerError = "server_error",
-    ClientError = "client_error",
-    Success = "success"
-}
 
 export enum ValidationErrors {
     InvalidFields = -32602,
     InsufficientBalance = -32603,
     UnsupportedEntryPoint = -32604
-}
-
-export const returnInvalidRequestParams = (
-    reply: FastifyReply,
-    errorMsg: string
-) => {
-    reply.status(400).send({
-        jsonrpc: "2.0",
-        error: {
-            message: errorMsg
-        }
-    })
 }
 
 export class InternalBundlerError extends Error {

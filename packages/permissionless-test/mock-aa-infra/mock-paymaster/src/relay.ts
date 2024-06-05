@@ -35,7 +35,6 @@ import {
     InternalBundlerError,
     type JsonRpcSchema,
     RpcError,
-    RpcStatus,
     ValidationErrors,
     jsonRpcSchema,
     pmSponsorUserOperationParamsSchema
