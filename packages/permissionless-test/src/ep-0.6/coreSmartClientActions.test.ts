@@ -73,8 +73,7 @@ describe.each([
             signerToSimpleSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing
                 signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                factoryAddress: SIMPLE_ACCOUNT_FACTORY_V06
+                entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         isEip1271Compliant: false
     },
