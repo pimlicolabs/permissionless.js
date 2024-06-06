@@ -40,6 +40,11 @@
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
+        "./actions/etherspot": {
+            "types": "./_types/actions/etherspot.d.ts",
+            "import": "./_esm/actions/etherspot.js",
+            "default": "./_cjs/actions/etherspot.js"
+        },
         "./actions/stackup": {
             "types": "./_types/actions/stackup.d.ts",
             "import": "./_esm/actions/stackup.js",
@@ -59,6 +64,11 @@
             "types": "./_types/clients/pimlico.d.ts",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
+        },
+        "./clients/etherspot": {
+            "types": "./_types/clients/etherspot.d.ts",
+            "import": "./_esm/clients/etherspot.js",
+            "default": "./_cjs/clients/etherspot.js"
         },
         "./clients/stackup": {
             "types": "./_types/clients/stackup.d.ts",

@@ -8,10 +8,13 @@ import type {
 } from "viem"
 import { createClient } from "viem"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../types/"
-import { type EtherspotBundlerRpcSchema } from "../types/etherspot"
+import type { EntryPoint } from "../types/entrypoint"
+import { type ArkaPaymasterRpcSchema, type EtherspotBundlerRpcSchema } from "../types/etherspot"
 import {
     type EtherspotAccountActions,
-    etherspotAccountActions
+    etherspotAccountActions,
+    type ArkaPaymasterClientActions,
+    arkaPaymasterActions,
 } from "./decorators/etherspot"
 
 export type EtherspotBundlerClient = Client<
@@ -20,6 +23,14 @@ export type EtherspotBundlerClient = Client<
     Account | undefined,
     EtherspotBundlerRpcSchema,
     EtherspotAccountActions
+>
+
+export type ArkaPaymasterClient<entryPoint extends EntryPoint> = Client<
+    Transport,
+    Chain | undefined,
+    Account | undefined,
+    ArkaPaymasterRpcSchema<entryPoint>,
+    ArkaPaymasterClientActions<entryPoint>
 >
 
 /**
@@ -58,3 +69,39 @@ export function createEtherspotBundlerClient<
 
     return client.extend(etherspotAccountActions()) as EtherspotBundlerClient
 }
+
+/**
+ * Creates ARKA specific Paymaster Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
+ *
+ * @param config - {@link PublicClientConfig}
+ * @returns Arka Paymaster Client. {@link ArkaPaymasterClient}
+ *
+ * @example
+ * import { createPublicClient, http } from 'viem'
+ * import { mainnet } from 'viem/chains'
+ *
+ * const arkaPaymasterClient = createArkaPaymasterClient({
+ *   chain: mainnet,
+ *   transport: http("https://arka.etherspot.io?apiKey=YOUR_API_KEY&chainId=${mainnet.id}"),
+ * })
+ */
+export const createArkaPaymasterClient = <
+    entryPoint extends EntryPoint,
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = undefined
+>(
+    parameters: PublicClientConfig<transport, chain> & {
+        entryPoint: entryPoint,
+
+    }
+): ArkaPaymasterClient<entryPoint> => {
+    const { key = "public", name = "Arka Paymaster Client" } = parameters
+    const client = createClient({
+        ...parameters,
+        key,
+        name,
+        type: "arkaPaymasterClient"
+    })
+    return client.extend(arkaPaymasterActions(parameters.entryPoint))
+}
+
