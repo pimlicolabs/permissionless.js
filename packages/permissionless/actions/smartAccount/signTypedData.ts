@@ -6,6 +6,7 @@ import {
     type Transport,
     type TypedData,
     type TypedDataDefinition,
+    type TypedDataDomain,
     getTypesForEIP712Domain,
     validateTypedData
 } from "viem"
@@ -136,10 +137,9 @@ export async function signTypedData<
     const account = parseAccount(account_)
 
     const types = {
-        EIP712Domain: getTypesForEIP712Domain({ domain }),
+        EIP712Domain: getTypesForEIP712Domain(domain as {domain: TypedDataDomain}), // Cast 'domain' to 'TypedDataDomain'
         ...(types_ as TTypedData)
     }
-
     validateTypedData({
         domain,
         message,
