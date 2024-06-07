@@ -138,7 +138,8 @@ export async function sendTransaction<
         waitForUserOperationReceipt,
         "waitForUserOperationReceipt"
     )({
-        hash: userOpHash
+        hash: userOpHash,
+        timeout: client.transport.timeout
     })
 
     return userOperationReceipt?.receipt.transactionHash
