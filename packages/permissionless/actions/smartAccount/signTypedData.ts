@@ -137,7 +137,7 @@ export async function signTypedData<
     const account = parseAccount(account_)
 
     const types = {
-        EIP712Domain: getTypesForEIP712Domain(domain as {domain: TypedDataDomain}), 
+        EIP712Domain: getTypesForEIP712Domain({domain} as {domain: TypedDataDomain}), 
         ...(types_ as TTypedData)
     }
     validateTypedData({
