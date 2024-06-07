@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-fix: domain typing
+Fixed domain not typed as TypedDataDomain
