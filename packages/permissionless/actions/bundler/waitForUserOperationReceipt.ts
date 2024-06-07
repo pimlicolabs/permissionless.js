@@ -66,7 +66,7 @@ export const waitForUserOperationReceipt = <
     {
         hash,
         pollingInterval = bundlerClient.pollingInterval,
-        timeout
+        timeout = bundlerClient.transport.timeout
     }: Prettify<WaitForUserOperationReceiptParameters>
 ): Promise<Prettify<GetUserOperationReceiptReturnType>> => {
     const observerId = stringify([
