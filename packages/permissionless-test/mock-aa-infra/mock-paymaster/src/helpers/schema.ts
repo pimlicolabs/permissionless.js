@@ -1,17 +1,10 @@
-import type { FastifyReply } from "fastify"
 import { type Hex, getAddress } from "viem"
 import { type infer as zodInfer, z } from "zod"
 
-export const returnInvalidRequestParams = (
-    reply: FastifyReply,
-    errorMsg: string
-) => {
-    reply.status(400).send({
-        jsonrpc: "2.0",
-        error: {
-            message: errorMsg
-        }
-    })
+export enum ValidationErrors {
+    InvalidFields = -32602,
+    InsufficientBalance = -32603,
+    UnsupportedEntryPoint = -32604
 }
 
 export class InternalBundlerError extends Error {
@@ -160,3 +153,4 @@ export const pmSponsorUserOperationParamsSchema = z.tuple([
 
 export type UserOperationV7 = zodInfer<typeof userOperationSchemaPaymasterV7>
 export type UserOperationV6 = zodInfer<typeof userOperationSchemaPaymasterV6>
+export type JsonRpcSchema = zodInfer<typeof jsonRpcSchema>
