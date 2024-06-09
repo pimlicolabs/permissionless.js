@@ -1,10 +1,4 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport
-} from "viem"
+import type { Address, Chain, Client, Hex, Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import type { EntryPoint, Prettify } from "../../types"
 import {

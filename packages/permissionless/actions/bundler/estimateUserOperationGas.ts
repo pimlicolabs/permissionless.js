@@ -1,11 +1,4 @@
-import {
-    type Account,
-    BaseError,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport
-} from "viem"
+import type { Account, BaseError, Chain, Client, Hex, Transport } from "viem"
 import type { PartialBy } from "viem/types/utils"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"

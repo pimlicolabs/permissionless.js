@@ -9,7 +9,7 @@ import {
     sponsorUserOperation
 } from "../../actions/stackup/sponsorUserOperation"
 import type { EntryPoint } from "../../types/entrypoint"
-import { type StackupPaymasterClient } from "../stackup"
+import type { StackupPaymasterClient } from "../stackup"
 
 export type StackupPaymasterClientActions<entryPoint extends EntryPoint> = {
     /**
