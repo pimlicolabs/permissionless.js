@@ -8,7 +8,7 @@ import type {
     Transport
 } from "viem"
 import type { Prettify } from "../../types/"
-import { type PimlicoBundlerRpcSchema } from "../../types/pimlico"
+import type { PimlicoBundlerRpcSchema } from "../../types/pimlico"
 
 export type SendCompressedUserOperationParameters = {
     compressedUserOperation: Hex
