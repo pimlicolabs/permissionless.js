@@ -1,5 +1,5 @@
 import { type Hex, getAddress } from "viem"
-import { z, type infer as zodInfer } from "zod"
+import { type infer as zodInfer, z } from "zod"
 
 export enum ValidationErrors {
     InvalidFields = -32602,
