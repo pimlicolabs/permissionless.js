@@ -134,7 +134,7 @@ const adjustVInSignature = (
 ): Hex => {
     const ETHEREUM_V_VALUES = [0, 1, 27, 28]
     const MIN_VALID_V_VALUE_FOR_SAFE_ECDSA = 27
-    let signatureV = parseInt(signature.slice(-2), 16)
+    let signatureV = Number.parseInt(signature.slice(-2), 16)
     if (!ETHEREUM_V_VALUES.includes(signatureV)) {
         throw new Error("Invalid signature")
     }
