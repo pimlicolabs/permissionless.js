@@ -61,8 +61,7 @@ describe.each([
             signerToTrustSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing
                 signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
+                entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         isEip1271Compliant: true
     },

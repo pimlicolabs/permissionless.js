@@ -234,6 +234,7 @@ export const getLightAccountClient = async <T extends EntryPoint>({
     })
 }
 
+// Only supports v0.6 for now
 export const getTrustAccountClient = async <T extends EntryPoint>({
     entryPoint,
     paymasterClient,
@@ -245,8 +246,7 @@ export const getTrustAccountClient = async <T extends EntryPoint>({
         publicClient,
         {
             entryPoint,
-            signer: privateKeyToAccount(privateKey),
-            factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
+            signer: privateKeyToAccount(privateKey)
         }
     )
 
