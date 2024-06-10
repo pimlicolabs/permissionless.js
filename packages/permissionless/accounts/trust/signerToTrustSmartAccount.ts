@@ -21,7 +21,7 @@ import {
     type SmartAccountSigner
 } from "../types"
 
-import type { EntryPoint } from "../../types"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 
 import { encodeCallData } from "./utils/encodeCallData"
@@ -70,13 +70,13 @@ export const TRUST_ADDRESSES: {
 }
 
 export type TrustSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "TrustSmartAccount", transport, chain>
 
 export type SignerToTrustSmartAccountParameters<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TSource extends string = string,
     TAddress extends Address = Address
 > = {
@@ -94,7 +94,7 @@ export type SignerToTrustSmartAccountParameters<
  * @returns A Private Key Trust Smart Account.
  */
 export async function signerToTrustSmartAccount<
-    entryPoint extends EntryPoint,
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = string,
@@ -124,10 +124,9 @@ export async function signerToTrustSmartAccount<
                 secp256k1VerificationFacetAddress,
                 entryPoint: entryPointAddress,
                 bytes: viemSigner.publicKey,
-                owner: viemSigner.address,
                 index
             }),
-        getChainId(client)
+        client.chain?.id ?? getChainId(client)
     ])
 
     if (!accountAddress) throw new Error("Account address not found")
@@ -191,7 +190,6 @@ export async function signerToTrustSmartAccount<
             return concatHex([
                 factoryAddress,
                 await getFactoryData({
-                    account: viemSigner,
                     bytes: viemSigner.publicKey,
                     secp256k1VerificationFacetAddress,
                     index
@@ -215,7 +213,6 @@ export async function signerToTrustSmartAccount<
             if (smartAccountDeployed) return undefined
 
             return getFactoryData({
-                account: viemSigner,
                 bytes: viemSigner.publicKey,
                 secp256k1VerificationFacetAddress,
                 index

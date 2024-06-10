@@ -1,22 +1,18 @@
-import type { Account, Address } from "viem"
+import type { Address } from "viem"
 import { encodeFunctionData } from "viem"
 
 /**
  * Wrapped this function to minimize the call to check if account is deployed
  */
 export const getFactoryData = async ({
-    account,
     bytes,
     index,
     secp256k1VerificationFacetAddress
 }: {
-    account: Account
     bytes: `0x${string}`
     index: bigint
     secp256k1VerificationFacetAddress: Address
 }) => {
-    if (!account.address) throw new Error("Owner account not found")
-
     return encodeFunctionData({
         abi: [
             {
