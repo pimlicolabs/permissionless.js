@@ -2,12 +2,12 @@ import {
     type Address,
     type Chain,
     type Client,
+    type Hex,
     type LocalAccount,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
     concatHex,
-    type Hex,
     hashMessage,
     hashTypedData
 } from "viem"
@@ -140,7 +140,7 @@ export async function signerToTrustSmartAccount<
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
-        source: "TrustSmartAccount",        
+        source: "TrustSmartAccount",
         signMessage: ({ message }) => {
             return _signTypedData<TSource, TAddress>(
                 signer,

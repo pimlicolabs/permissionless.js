@@ -136,11 +136,7 @@ describe.each([
     }
 ])(
     "$name account should support all core functions",
-    ({
-        getSmartAccountClient,
-        getSmartAccountSigner,
-        isEip1271Compliant
-    }) => {
+    ({ getSmartAccountClient, getSmartAccountSigner, isEip1271Compliant }) => {
         let publicClient: PublicClient<Transport, Chain>
         let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
         let paymasterClient: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V06_TYPE>
