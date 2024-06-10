@@ -1,10 +1,10 @@
-import { describe, expect, test, beforeAll, afterAll } from "vitest"
+import getPort from "get-port"
 import { Instance } from "prool"
 import { alto } from "prool/instances"
+import { http } from "viem"
+import { afterAll, beforeAll, describe, expect, test } from "vitest"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
-import getPort from "get-port"
-import { http } from "viem"
 
 const anvilPrivateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
