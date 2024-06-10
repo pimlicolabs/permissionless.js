@@ -6,7 +6,10 @@ import {
     type Transport,
     type TypedData,
     type TypedDataDefinition,
-    concatHex
+    concatHex,
+    type Hex,
+    hashMessage,
+    hashTypedData
 } from "viem"
 import { getChainId } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
@@ -25,10 +28,34 @@ import { encodeCallData } from "./utils/encodeCallData"
 import { getAccountAddress } from "./utils/getAccountAddress"
 import { getDummySignature } from "./utils/getDummySignature"
 import { getFactoryData } from "./utils/getFactoryData"
-import { signMessage } from "./utils/signMessage"
 import { signTransaction } from "./utils/signTransaction"
-import { signTypedData } from "./utils/signTypedData"
 import { signUserOperation } from "./utils/signUserOperation"
+
+async function _signTypedData<
+    TSource extends string = string,
+    TAddress extends Address = Address
+>(
+    signer: SmartAccountSigner<TSource, TAddress>,
+    chainId: number,
+    accountAddress: Address,
+    hashedMessage: Hex
+): Promise<Hex> {
+    return signer.signTypedData({
+        domain: {
+            chainId: Number(chainId),
+            name: "Barz",
+            verifyingContract: accountAddress,
+            version: "v0.2.0"
+        },
+        types: {
+            BarzMessage: [{ name: "message", type: "bytes" }]
+        },
+        message: {
+            message: hashedMessage
+        },
+        primaryType: "BarzMessage"
+    })
+}
 
 /**
  * Default addresses for Trust Smart Account
@@ -37,7 +64,7 @@ export const TRUST_ADDRESSES: {
     Secp256k1VerificationFacetAddress: Address
 } = {
     Secp256k1VerificationFacetAddress:
-        "0x03F82FA254B123282542Efc2b477f30ADD2Ca111"
+        "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5"
 }
 
 export type TrustSmartAccount<
@@ -113,23 +140,29 @@ export async function signerToTrustSmartAccount<
         client: client,
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
-        source: "TrustSmartAccount",
-
-        signMessage: ({ message }) =>
-            signMessage(client, { account: viemSigner, message }),
+        source: "TrustSmartAccount",        
+        signMessage: ({ message }) => {
+            return _signTypedData<TSource, TAddress>(
+                signer,
+                chainId,
+                accountAddress,
+                hashMessage(message)
+            )
+        },
         signTransaction: signTransaction,
-        signTypedData: <
+        signTypedData<
             const TTypedData extends TypedData | Record<string, unknown>,
             TPrimaryType extends
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
-        >(
-            typedData: TypedDataDefinition<TTypedData, TPrimaryType>
-        ) =>
-            signTypedData<TTypedData, TPrimaryType>(client, {
-                account: viemSigner,
-                ...typedData
-            }),
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+            return _signTypedData<TSource, TAddress>(
+                signer,
+                chainId,
+                accountAddress,
+                hashTypedData(typedData)
+            )
+        },
         getNonce: async () => {
             return getAccountNonce(client, {
                 sender: accountAddress,

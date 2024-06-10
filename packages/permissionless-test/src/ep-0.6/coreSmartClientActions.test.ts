@@ -137,7 +137,6 @@ describe.each([
 ])(
     "$name account should support all core functions",
     ({
-        name,
         getSmartAccountClient,
         getSmartAccountSigner,
         isEip1271Compliant
