@@ -1,5 +1,14 @@
 # permissionless
 
+## 0.1.31
+
+### Patch Changes
+
+- 588983dda7afaacfb1316fa0688a246f2219e751: Added Trust account support
+- c1bf8d72f5492e275bc44544c391cd9fc1e53b62: Added default simple account factory address
+- 35c9235e4b53bebeca572007f7822eb96c7dda53: Default timeout for waitForUserOperationReceipt is inherited from bundlerClient.transport
+- 7dde111ad35385c3da1db2b09b1e4ffae19c684d: Fixed domain not typed as TypedDataDomain
+
 ## 0.1.30
 
 ### Patch Changes
