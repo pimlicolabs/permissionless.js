@@ -9,7 +9,8 @@ import {
     signerToEcdsaKernelSmartAccount,
     signerToLightSmartAccount,
     signerToSafeSmartAccount,
-    signerToSimpleSmartAccount
+    signerToSimpleSmartAccount,
+    signerToTrustSmartAccount
 } from "permissionless/accounts"
 import type { PimlicoPaymasterClient } from "permissionless/clients/pimlico"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
@@ -46,10 +47,24 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSafeClient,
-    getSimpleAccountClient
+    getSimpleAccountClient,
+    getTrustAccountClient
 } from "../utils"
 
 describe.each([
+    {
+        name: "Trust",
+        getSmartAccountClient: async (
+            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+        ) => getTrustAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToTrustSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        isEip1271Compliant: true
+    },
     {
         name: "LightAccount v1.1.0",
         getSmartAccountClient: async (
@@ -73,7 +88,8 @@ describe.each([
             signerToSimpleSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing
                 signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                factoryAddress: SIMPLE_ACCOUNT_FACTORY_V06
             }),
         isEip1271Compliant: false
     },
@@ -119,12 +135,7 @@ describe.each([
     }
 ])(
     "$name account should support all core functions",
-    ({
-        name,
-        getSmartAccountClient,
-        getSmartAccountSigner,
-        isEip1271Compliant
-    }) => {
+    ({ getSmartAccountClient, getSmartAccountSigner, isEip1271Compliant }) => {
         let publicClient: PublicClient<Transport, Chain>
         let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
         let paymasterClient: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V06_TYPE>
