@@ -45,7 +45,7 @@
         "changeset:version": "changeset version && bun install --lockfile-only",
         "format": "biome format . --write",
         "lint": "biome check .",
-        "lint:fix": "bun run lint --apply",
+        "lint:fix": "bun run lint --write",
         "test": "vitest dev -c ./packages/permissionless/vitest.config.ts",
         "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
