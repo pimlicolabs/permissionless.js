@@ -1,39 +1,43 @@
-import { isHash, zeroAddress } from "viem"
+import type { Instance } from "prool"
+import { http, isHash, zeroAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
-import { beforeAll, describe, expect, test } from "vitest"
+import { afterAll, beforeAll, describe, expect, test } from "vitest"
 import {
     fund,
+    getPimlicoPaymasterClient,
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
-import type { BundlerClient } from "../../clients/createBundlerClient"
 import {
-    anvilPort,
-    getPortForTestName,
-    startAltoInstance
-} from "../../setupTests"
+    type BundlerClient,
+    createBundlerClient
+} from "../../clients/createBundlerClient"
+import { anvilPort, getPortsForTest } from "../../setupTests"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     ENTRYPOINT_ADDRESS_V07_TYPE
 } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
-describe("sendUserOperation", () => {
-    let port: number
+describe.sequential("sendUserOperation", () => {
     let bundlerClientV06: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
     let bundlerClientV07: BundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
     let anvilRpc: string
     let altoRpc: string
+    let paymasterRpc: string
 
     beforeAll(async () => {
-        port = await getPortForTestName("bundlerActions")
-        anvilRpc = `http://localhost:${anvilPort}/${port}`
-        altoRpc = `http://localhost:${port}`
-        bundlerClientV06 = await startAltoInstance({
-            port,
+        const { altoPort, paymasterPort } = getPortsForTest("bundlerActions")
+        anvilRpc = `http://localhost:${anvilPort}/${altoPort}`
+        altoRpc = `http://localhost:${altoPort}`
+        paymasterRpc = `http://localhost:${paymasterPort}`
+
+        bundlerClientV06 = createBundlerClient({
+            transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
-        bundlerClientV07 = await startAltoInstance({
-            port,
+
+        bundlerClientV07 = createBundlerClient({
+            transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V07
         })
     })
@@ -43,10 +47,12 @@ describe("sendUserOperation", () => {
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             privateKey: generatePrivateKey(),
             altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+            anvilRpc: anvilRpc,
+            paymasterClient: getPimlicoPaymasterClient({
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                paymasterRpc
+            })
         })
-
-        await fund({ to: simpleAccountClient.account.address, anvilRpc })
 
         const userOperation =
             await simpleAccountClient.prepareUserOperationRequest({
@@ -70,7 +76,8 @@ describe("sendUserOperation", () => {
 
         const userOperationReceipt =
             await bundlerClientV06.waitForUserOperationReceipt({
-                hash: opHash
+                hash: opHash,
+                timeout: 100000
             })
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
@@ -90,10 +97,12 @@ describe("sendUserOperation", () => {
             entryPoint: ENTRYPOINT_ADDRESS_V07,
             privateKey: generatePrivateKey(),
             altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+            anvilRpc: anvilRpc,
+            paymasterClient: getPimlicoPaymasterClient({
+                entryPoint: ENTRYPOINT_ADDRESS_V07,
+                paymasterRpc
+            })
         })
-
-        await fund({ to: simpleAccountClient.account.address, anvilRpc })
 
         const userOperation =
             await simpleAccountClient.prepareUserOperationRequest({
@@ -117,7 +126,8 @@ describe("sendUserOperation", () => {
 
         const userOperationReceipt =
             await bundlerClientV07.waitForUserOperationReceipt({
-                hash: opHash
+                hash: opHash,
+                timeout: 100000
             })
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(opHash)

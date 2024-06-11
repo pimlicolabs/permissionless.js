@@ -8,7 +8,6 @@ import {
     setupContracts
 } from "../permissionless-test/mock-aa-infra/alto"
 import { paymaster } from "../permissionless-test/mock-aa-infra/mock-paymaster"
-import { createBundlerClient } from "./clients/createBundlerClient"
 import type { EntryPoint } from "./types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "./utils"
 
@@ -21,35 +20,67 @@ const anvilServer = createServer({
     port: anvilPort
 })
 
-const ports: Record<string, number> = {}
-
-export const getPortForTestName = async (testName: string) => {
-    if (ports[testName]) {
-        return ports[testName]
+export const getPortsForTest = (name: "bundlerActions") => {
+    switch (name) {
+        case "bundlerActions":
+            return {
+                altoPort: 43371,
+                paymasterPort: 43372
+            }
     }
-
-    const port = await getPort()
-    ports[testName] = port
-
-    return port
 }
 
-const instances: Record<string, Instance> = {}
-const paymasterInstances: Record<string, Instance> = {}
+// export const getAltoInstance = async <TEntryPoint extends EntryPoint>({
+//     anvilPort,
+//     altoPort,
+//     paymasterPort
+// }: { anvilPort: number; altoPort: number; paymasterPort: number }) => {
+//     const anvilRpc = `http://localhost:${anvilPort}`
+//     const altoRpc = `http://localhost:${altoPort}`
+
+//     const anvilPrivateKey =
+//         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+//     const anvilInstance = anvil({
+//         chainId: foundry.id,
+//         port: anvilPort
+//     })
+
+//     const instance = alto({
+//         entrypoints: [ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07],
+//         rpcUrl: anvilRpc,
+//         executorPrivateKeys: [anvilPrivateKey],
+//         entrypointSimulationContract: ENTRY_POINT_SIMULATIONS_ADDRESS,
+//         safeMode: false,
+//         port: altoPort
+//     })
+
+//     // instance.on("stderr", (data) => {
+//     //     console.error(data.toString())
+//     // })
+//     // instance.on("stdout", (data) => {
+//     //     console.log(data.toString())
+//     // })
+
+//     const paymasterInstance = paymaster({
+//         anvilRpc,
+//         port: paymasterPort,
+//         altoRpc
+//     })
+//     await anvilInstance.start()
+//     await setupContracts(anvilRpc)
+//     await instance.start()
+//     await paymasterInstance.start()
+
+//     return [anvilInstance, instance, paymasterInstance]
+// }
 
 export const startAltoInstance = async <TEntryPoint extends EntryPoint>({
-    port,
-    entryPoint
-}: { port: number; entryPoint: TEntryPoint }) => {
-    const altoRpc = `http://localhost:${port}`
-    const anvilRpc = `http://localhost:${anvilPort}/${port}`
-
-    if (instances[port]) {
-        return createBundlerClient({
-            transport: http(altoRpc),
-            entryPoint: entryPoint
-        })
-    }
+    altoPort,
+    paymasterPort
+}: { altoPort: number; paymasterPort: number }) => {
+    const anvilRpc = `http://localhost:${anvilPort}/${altoPort}`
+    const altoRpc = `http://localhost:${altoPort}`
 
     const anvilPrivateKey =
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -60,40 +91,38 @@ export const startAltoInstance = async <TEntryPoint extends EntryPoint>({
         executorPrivateKeys: [anvilPrivateKey],
         entrypointSimulationContract: ENTRY_POINT_SIMULATIONS_ADDRESS,
         safeMode: false,
-        port
+        port: altoPort
     })
 
     // instance.on("stderr", (data) => {
-    //     console.log(data.toString())
+    //     console.error(data.toString())
     // })
     // instance.on("stdout", (data) => {
     //     console.log(data.toString())
     // })
 
-    instances[port] = instance
     const paymasterInstance = paymaster({
         anvilRpc,
-        port: await getPort()
+        port: paymasterPort,
+        altoRpc
     })
-    paymasterInstances[port] = paymasterInstance
-
     await setupContracts(anvilRpc)
     await instance.start()
     await paymasterInstance.start()
 
-    return createBundlerClient({
-        transport: http(altoRpc),
-        entryPoint: entryPoint
-    })
+    instances.push(instance)
+    instances.push(paymasterInstance)
 }
 
+const instances: Instance[] = []
 export const setup = async () => {
     await anvilServer.start()
+    await startAltoInstance(getPortsForTest("bundlerActions"))
 }
 
 export const teardown = async () => {
-    await anvilServer.stop()
-    await Promise.all(
-        Object.values(instances).map((instance) => instance.stop())
-    )
+    await Promise.all([
+        ...instances.map((instance) => instance.stop()),
+        anvilServer.stop()
+    ])
 }

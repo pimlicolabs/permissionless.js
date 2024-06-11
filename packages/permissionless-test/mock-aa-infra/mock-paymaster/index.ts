@@ -13,7 +13,11 @@ import {
 import { createRpcHandler } from "./relay"
 
 export const paymaster = defineInstance(
-    ({ anvilRpc, port: _port }: { anvilRpc: string; port: number }) => {
+    ({
+        anvilRpc,
+        port: _port,
+        altoRpc
+    }: { anvilRpc: string; port: number; altoRpc: string }) => {
         const app = Fastify({})
 
         return {
@@ -34,13 +38,13 @@ export const paymaster = defineInstance(
 
                 const altoBundlerV07 = createPimlicoBundlerClient({
                     chain: foundry,
-                    transport: http(process.env.ALTO_RPC),
+                    transport: http(altoRpc),
                     entryPoint: ENTRYPOINT_ADDRESS_V07
                 })
 
                 const altoBundlerV06 = createPimlicoBundlerClient({
                     chain: foundry,
-                    transport: http(process.env.ALTO_RPC),
+                    transport: http(altoRpc),
                     entryPoint: ENTRYPOINT_ADDRESS_V06
                 })
 

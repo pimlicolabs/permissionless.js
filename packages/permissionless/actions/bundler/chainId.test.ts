@@ -1,19 +1,25 @@
+import type { Instance } from "prool"
+import { http } from "viem"
 import { foundry } from "viem/chains"
-import { beforeAll, describe, expect, test } from "vitest"
-import type { BundlerClient } from "../../clients/createBundlerClient"
-import { getPortForTestName, startAltoInstance } from "../../setupTests"
+import { afterAll, beforeAll, describe, expect, test } from "vitest"
+import {
+    type BundlerClient,
+    createBundlerClient
+} from "../../clients/createBundlerClient"
+import { getPortsForTest } from "../../setupTests"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
 
-describe("chainId", () => {
-    let port: number
+describe.sequential("chainId", () => {
     let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
 
     beforeAll(async () => {
-        port = await getPortForTestName("bundlerActions")
-        bundlerClient = await startAltoInstance({
-            port,
-            entryPoint: ENTRYPOINT_ADDRESS_V06
+        const { altoPort } = getPortsForTest("bundlerActions")
+        const altoRpc = `http://localhost:${altoPort}`
+        const entryPoint = ENTRYPOINT_ADDRESS_V06
+        bundlerClient = createBundlerClient({
+            transport: http(altoRpc),
+            entryPoint
         })
     })
 

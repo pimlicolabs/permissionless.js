@@ -295,8 +295,6 @@ export const createRpcHandler = (
     walletClient: WalletClient<Transport, Chain, Account>
 ) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
-        console.log(`received request: ${JSON.stringify(request.body)}`)
-
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
         if (!parsedBody.success) {

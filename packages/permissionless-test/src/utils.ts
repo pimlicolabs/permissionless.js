@@ -102,12 +102,13 @@ export const getAnvilWalletClient = ({
     })
 }
 
-export const getPimlicoPaymasterClient = <T extends EntryPoint>(
-    entryPoint: T
-): PimlicoPaymasterClient<T> => {
+export const getPimlicoPaymasterClient = <T extends EntryPoint>({
+    entryPoint,
+    paymasterRpc
+}: { entryPoint: T; paymasterRpc: string }): PimlicoPaymasterClient<T> => {
     return createPimlicoPaymasterClient({
         chain: foundry,
-        transport: http(PAYMASTER_RPC),
+        transport: http(paymasterRpc),
         entryPoint
     })
 }

@@ -1,38 +1,41 @@
+import { http } from "viem"
 import { generatePrivateKey } from "viem/accounts"
 import { beforeAll, describe, expect, test } from "vitest"
 import {
     getPimlicoPaymasterClient,
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
-import type { BundlerClient } from "../../clients/createBundlerClient"
 import {
-    anvilPort,
-    getPortForTestName,
-    startAltoInstance
-} from "../../setupTests"
+    type BundlerClient,
+    createBundlerClient
+} from "../../clients/createBundlerClient"
+import { anvilPort, getPortsForTest } from "../../setupTests"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     ENTRYPOINT_ADDRESS_V07_TYPE
 } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
-describe("eth_estimateUserOperationGas", () => {
-    let port: number
+describe.sequential("eth_estimateUserOperationGas", () => {
     let bundlerClientV06: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
     let bundlerClientV07: BundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
     let anvilRpc: string
     let altoRpc: string
+    let paymasterRpc: string
 
     beforeAll(async () => {
-        port = await getPortForTestName("bundlerActions")
-        anvilRpc = `http://localhost:${anvilPort}/${port}`
-        altoRpc = `http://localhost:${port}`
-        bundlerClientV06 = await startAltoInstance({
-            port,
+        const { altoPort, paymasterPort } = getPortsForTest("bundlerActions")
+        anvilRpc = `http://localhost:${anvilPort}/${altoPort}`
+        altoRpc = `http://localhost:${altoPort}`
+        paymasterRpc = `http://localhost:${paymasterPort}`
+
+        bundlerClientV06 = createBundlerClient({
+            transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
-        bundlerClientV07 = await startAltoInstance({
-            port,
+
+        bundlerClientV07 = createBundlerClient({
+            transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V07
         })
     })
@@ -42,7 +45,11 @@ describe("eth_estimateUserOperationGas", () => {
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             privateKey: generatePrivateKey(),
             altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+            anvilRpc: anvilRpc,
+            paymasterClient: getPimlicoPaymasterClient({
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                paymasterRpc
+            })
         })
 
         const userOperation =

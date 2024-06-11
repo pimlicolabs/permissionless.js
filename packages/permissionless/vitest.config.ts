@@ -21,7 +21,7 @@ export default defineConfig({
         sequence: {
             concurrent: true
         },
-        fileParallelism: true,
+        fileParallelism: false,
         environment: "node",
         testTimeout: 60_000,
         hookTimeout: 45_000,
