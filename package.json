@@ -1,5 +1,10 @@
 {
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/permissionless",
+        "packages/wagmi",
+        "packages/wagmi-test-demo",
+        "packages/create-permissionless-app"
+    ],
     "private": true,
     "author": "Pimlico",
     "type": "module",
@@ -53,7 +58,9 @@
         "pre-commit": "bun run format && bun run lint:fix"
     },
     "dependencies": {
+        "async-mutex": "^0.5.0",
         "get-port": "^7.0.0",
-        "tsc-alias": "^1.8.8"
+        "tsc-alias": "^1.8.8",
+        "viem": "^2.13.8"
     }
 }

@@ -3,6 +3,9 @@ import { defineConfig } from "vitest/config"
 
 export default defineConfig({
     test: {
+        alias: {
+            permissionless: join(__dirname, "./")
+        },
         globalSetup: [join(__dirname, "./setupTests.ts")],
         coverage: {
             all: false,

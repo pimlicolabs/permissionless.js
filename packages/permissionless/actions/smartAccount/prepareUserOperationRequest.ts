@@ -387,10 +387,6 @@ async function prepareUserOperationRequestEntryPointV07<
             gasParameters.verificationGasLimit
         userOperation.preVerificationGas =
             userOperation.preVerificationGas || gasParameters.preVerificationGas
-
-        userOperation.paymasterPostOpGasLimit =
-            userOperation.paymasterPostOpGasLimit ||
-            gasParameters.paymasterPostOpGasLimit
         userOperation.paymasterPostOpGasLimit =
             userOperation.paymasterPostOpGasLimit ||
             gasParameters.paymasterPostOpGasLimit

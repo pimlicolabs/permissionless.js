@@ -4,6 +4,8 @@ import type { Address, Hex, PublicClient } from "viem"
 
 export type AAParamType<T extends EntryPoint> = {
     entryPoint: T
+    anvilRpc: string
+    altoRpc: string
     paymasterClient?: PimlicoPaymasterClient<T>
     privateKey?: Hex
 }

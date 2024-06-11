@@ -14,7 +14,6 @@ import {
     parseEther,
     slice
 } from "viem"
-import { waitForTransactionReceipt } from "viem/actions"
 import { foundry } from "viem/chains"
 import { VERIFYING_PAYMASTER_V06_ABI, VERIFYING_PAYMASTER_V07_ABI } from "./abi"
 
@@ -36,12 +35,13 @@ const VERIFYING_PAYMASTER_V06_CALL = (owner: Address): Hex =>
     ])
 
 export const setupVerifyingPaymasterV07 = async (
-    walletClient: WalletClient<Transport, Chain, Account>
+    walletClient: WalletClient<Transport, Chain, Account>,
+    anvilRpc: string
 ) => {
     const data = VERIFYING_PAYMASTER_V07_CALL(walletClient.account.address)
 
     const publicClient = createPublicClient({
-        transport: http(process.env.ANVIL_RPC),
+        transport: http(anvilRpc),
         chain: foundry
     })
 
@@ -51,7 +51,6 @@ export const setupVerifyingPaymasterV07 = async (
             data
         })
         .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
-        .then(() => console.log("deployed VerifyingPaymaster v0.7"))
 
     const address = getContractAddress({
         opcode: "CREATE2",
@@ -66,22 +65,21 @@ export const setupVerifyingPaymasterV07 = async (
         client: walletClient
     })
 
-    await verifyingPaymaster.write
-        .deposit({
-            value: parseEther("50")
-        })
-        .then(() => console.log("Funded VerifyingPaymaster V0.7"))
+    await verifyingPaymaster.write.deposit({
+        value: parseEther("50")
+    })
 
     return verifyingPaymaster
 }
 
 export const setupVerifyingPaymasterV06 = async (
-    walletClient: WalletClient<Transport, Chain, Account>
+    walletClient: WalletClient<Transport, Chain, Account>,
+    anvilRpc: string
 ) => {
     const data = VERIFYING_PAYMASTER_V06_CALL(walletClient.account.address)
 
     const publicClient = createPublicClient({
-        transport: http(process.env.ANVIL_RPC),
+        transport: http(anvilRpc),
         chain: foundry
     })
 
@@ -91,7 +89,6 @@ export const setupVerifyingPaymasterV06 = async (
             data
         })
         .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
-        .then(() => console.log("deployed VerifyingPaymaster v0.6"))
 
     const address = getContractAddress({
         opcode: "CREATE2",
@@ -106,11 +103,9 @@ export const setupVerifyingPaymasterV06 = async (
         client: walletClient
     })
 
-    await verifyingPaymaster.write
-        .deposit({
-            value: parseEther("50")
-        })
-        .then(() => console.log("Funded VerifyingPaymaster V0.6"))
+    await verifyingPaymaster.write.deposit({
+        value: parseEther("50")
+    })
 
     return verifyingPaymaster
 }
