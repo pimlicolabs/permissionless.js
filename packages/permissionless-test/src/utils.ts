@@ -13,7 +13,8 @@ import {
     signerToEcdsaKernelSmartAccount,
     signerToLightSmartAccount,
     signerToSafeSmartAccount,
-    signerToSimpleSmartAccount
+    signerToSimpleSmartAccount,
+    signerToTrustSmartAccount
 } from "permissionless/accounts"
 import type { KernelEcdsaSmartAccount } from "permissionless/accounts"
 import {
@@ -251,6 +252,35 @@ export const getLightAccountClient = async <T extends EntryPoint>({
         }
     })
 }
+
+// Only supports v0.6 for now
+export const getTrustAccountClient = async <T extends EntryPoint>({
+    entryPoint,
+    paymasterClient,
+    privateKey = generatePrivateKey()
+}: AAParamType<T>): Promise<
+    SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
+> => {
+    const smartAccount = await signerToTrustSmartAccount<T, Transport, Chain>(
+        publicClient,
+        {
+            entryPoint,
+            signer: privateKeyToAccount(privateKey)
+        }
+    )
+
+    // @ts-ignore
+    return createSmartAccountClient({
+        chain: foundry,
+        account: smartAccount,
+        bundlerTransport: http(ALTO_RPC),
+        middleware: {
+            // @ts-ignore
+            sponsorUserOperation: paymasterClient?.sponsorUserOperation
+        }
+    })
+}
+
 // Only supports v0.6 for now
 export const getBiconomyClient = async ({
     paymasterClient,
