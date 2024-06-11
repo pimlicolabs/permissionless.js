@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "v22.2.0"
+
       - name: Build
         run: bun run build:permissionless
 
