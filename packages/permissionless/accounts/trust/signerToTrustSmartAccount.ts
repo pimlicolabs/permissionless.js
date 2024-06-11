@@ -61,10 +61,10 @@ async function _signTypedData<
  * Default addresses for Trust Smart Account
  */
 export const TRUST_ADDRESSES: {
-    Secp256k1VerificationFacetAddress: Address
+    secp256k1VerificationFacetAddress: Address
     factoryAddress: Address
 } = {
-    Secp256k1VerificationFacetAddress:
+    secp256k1VerificationFacetAddress:
         "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5",
     factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
 }
@@ -106,7 +106,7 @@ export async function signerToTrustSmartAccount<
         factoryAddress = TRUST_ADDRESSES.factoryAddress,
         entryPoint: entryPointAddress,
         index = 0n,
-        secp256k1VerificationFacetAddress = TRUST_ADDRESSES.Secp256k1VerificationFacetAddress,
+        secp256k1VerificationFacetAddress = TRUST_ADDRESSES.secp256k1VerificationFacetAddress,
         address
     }: SignerToTrustSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<TrustSmartAccount<entryPoint, TTransport, TChain>> {
