@@ -254,7 +254,9 @@ export const getLightAccountClient = async <T extends EntryPoint>({
 }
 
 // Only supports v0.6 for now
-export const getTrustAccountClient = async <T extends EntryPoint>({
+export const getTrustAccountClient = async <
+    T extends ENTRYPOINT_ADDRESS_V06_TYPE
+>({
     entryPoint,
     paymasterClient,
     altoRpc,
@@ -391,12 +393,19 @@ export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
     return client
 }
 
-export const getCoreSmartAccountDescriptions = () => [
+export const getCoreSmartAccounts = () => [
     {
         name: "Trust",
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
-        ) => getTrustAccountClient(conf),
+        ) => {
+            if (conf.entryPoint !== ENTRYPOINT_ADDRESS_V06) {
+                throw new Error("Biconomy only works with V06")
+            }
+            return getTrustAccountClient(
+                conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+            )
+        },
         getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
             signerToTrustSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing
@@ -404,7 +413,7 @@ export const getCoreSmartAccountDescriptions = () => [
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
+        supportsEntryPointV07: false,
         isEip1271Compliant: true
     },
     {
@@ -420,7 +429,7 @@ export const getCoreSmartAccountDescriptions = () => [
                 lightAccountVersion: "1.1.0"
             }),
         supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
+        supportsEntryPointV07: false,
         isEip1271Compliant: true
     },
     {

@@ -37,7 +37,14 @@ import {
     SAFE_V07_MODULE_CREATECALL,
     SAFE_V07_MODULE_SETUP_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
-    SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL
+    SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+    TRUST_ACCOUNT_FACET_CREATE_CALL,
+    TRUST_DEFAULT_FALLBACK_HANDLER,
+    TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+    TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+    TRUST_FACTORY_V06_CREATECALL,
+    TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+    TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL
 } from "./constants"
 
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
@@ -266,6 +273,55 @@ export const setupContracts = async (rpc: string) => {
         nonce: nonce++
     })
 
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_FACTORY_V06_CREATECALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_ACCOUNT_FACET_CREATE_CALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
+    walletClient.sendTransaction({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DEFAULT_FALLBACK_HANDLER,
+        gas: 15_000_000n,
+        nonce: nonce++
+    })
+
     // ==== SETUP KERNEL V0.6 CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"
     await anvilClient.setBalance({
@@ -352,6 +408,13 @@ export const setupContracts = async (rpc: string) => {
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f", // Kernel v0.3.0 Factory
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 Meta Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
-        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba" // LightAccount v1.1.0 implementation
+        "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
+        "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5", // Trust Secp256k1VerificationFacet
+        "0x729c310186a57833f622630a16d13f710b83272a", // Trust factory
+        "0xFde53272dcd7938d16E031A6989753c321728332", // Trust AccountFacet
+        "0x0B9504140771C3688Ff041917192277D2f52E1e0", // Trust DiamondCutFacet
+        "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
+        "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
+        "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D" // Trust DefaultFallbackHandler
     ])
 }

@@ -2,12 +2,12 @@ import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
-    getCoreSmartAccountDescriptions,
+    getCoreSmartAccounts,
     getPimlicoPaymasterClient
 } from "../../../permissionless-test/src/utils"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
-describe.each(getCoreSmartAccountDescriptions())(
+describe.each(getCoreSmartAccounts())(
     "deployContract",
     ({
         getSmartAccountClient,
