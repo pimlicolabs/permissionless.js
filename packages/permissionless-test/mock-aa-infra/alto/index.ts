@@ -60,8 +60,6 @@ const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
 }
 
 export const setupContracts = async (rpc: string) => {
-    let nonce = 0
-
     const walletClient = createWalletClient({
         account: mnemonicToAccount(
             "test test test test test test test test test test test junk"
@@ -77,6 +75,10 @@ export const setupContracts = async (rpc: string) => {
 
     const client = createPublicClient({
         transport: http(rpc)
+    })
+
+    let nonce = await client.getTransactionCount({
+        address: walletClient.account.address
     })
 
     walletClient.sendTransaction({
@@ -263,14 +265,6 @@ export const setupContracts = async (rpc: string) => {
         gas: 15_000_000n,
         nonce: nonce++
     })
-
-    let onchainNonce = 0
-    do {
-        onchainNonce = await client.getTransactionCount({
-            address: walletClient.account.address
-        })
-        await new Promise((resolve) => setTimeout(resolve, 500))
-    } while (onchainNonce !== nonce)
 
     // ==== SETUP KERNEL V0.6 CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"

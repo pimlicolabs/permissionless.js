@@ -1,48 +1,23 @@
-import type { Instance } from "prool"
 import { http, isHash, zeroAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
-import { afterAll, beforeAll, describe, expect, test } from "vitest"
+import { describe, expect } from "vitest"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
-    fund,
     getPimlicoPaymasterClient,
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
-import {
-    type BundlerClient,
-    createBundlerClient
-} from "../../clients/createBundlerClient"
-import { anvilPort, getPortsForTest } from "../../setupTests"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE
-} from "../../types/entrypoint"
+import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
-describe.sequential("getUserOperationReceipt", () => {
-    let bundlerClientV06: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
-    let bundlerClientV07: BundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
-    let anvilRpc: string
-    let altoRpc: string
-    let paymasterRpc: string
+describe("getUserOperationReceipt", () => {
+    testWithRpc("getUserOperationReceipt_V06", async ({ rpc }) => {
+        const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
-    beforeAll(async () => {
-        const { altoPort, paymasterPort } = getPortsForTest("bundlerActions")
-        anvilRpc = `http://localhost:${anvilPort}/${altoPort}`
-        altoRpc = `http://localhost:${altoPort}`
-        paymasterRpc = `http://localhost:${paymasterPort}`
-
-        bundlerClientV06 = createBundlerClient({
+        const bundlerClientV06 = createBundlerClient({
             transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
-        bundlerClientV07 = createBundlerClient({
-            transport: http(altoRpc),
-            entryPoint: ENTRYPOINT_ADDRESS_V07
-        })
-    })
-
-    test("getUserOperationReceipt_V06", async () => {
         const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             privateKey: generatePrivateKey(),
@@ -92,7 +67,14 @@ describe.sequential("getUserOperationReceipt", () => {
         )
     })
 
-    test("getUserOperationReceipt_V07", async () => {
+    testWithRpc("getUserOperationReceipt_V07", async ({ rpc }) => {
+        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+
+        const bundlerClientV07 = createBundlerClient({
+            transport: http(altoRpc),
+            entryPoint: ENTRYPOINT_ADDRESS_V07
+        })
+
         const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V07,
             privateKey: generatePrivateKey(),

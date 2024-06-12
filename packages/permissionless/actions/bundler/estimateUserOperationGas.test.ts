@@ -1,46 +1,23 @@
-import { http } from "viem"
+import { http, parseEther } from "viem"
 import { generatePrivateKey } from "viem/accounts"
-import { beforeAll, describe, expect, test } from "vitest"
+import { describe, expect } from "vitest"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getPimlicoPaymasterClient,
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
-import {
-    type BundlerClient,
-    createBundlerClient
-} from "../../clients/createBundlerClient"
-import { anvilPort, getPortsForTest } from "../../setupTests"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE
-} from "../../types/entrypoint"
+import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
-describe.sequential("eth_estimateUserOperationGas", () => {
-    let bundlerClientV06: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
-    let bundlerClientV07: BundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>
-    let anvilRpc: string
-    let altoRpc: string
-    let paymasterRpc: string
+describe("eth_estimateUserOperationGas", () => {
+    testWithRpc("eth_estimateUserOperationGas_v06", async ({ rpc }) => {
+        const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
-    beforeAll(async () => {
-        const { altoPort, paymasterPort } = getPortsForTest("bundlerActions")
-        anvilRpc = `http://localhost:${anvilPort}/${altoPort}`
-        altoRpc = `http://localhost:${altoPort}`
-        paymasterRpc = `http://localhost:${paymasterPort}`
-
-        bundlerClientV06 = createBundlerClient({
+        const bundlerClientV06 = createBundlerClient({
             transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
-        bundlerClientV07 = createBundlerClient({
-            transport: http(altoRpc),
-            entryPoint: ENTRYPOINT_ADDRESS_V07
-        })
-    })
-
-    test("eth_estimateUserOperationGas_v06", async () => {
         const simpleAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V06,
             privateKey: generatePrivateKey(),
@@ -64,16 +41,33 @@ describe.sequential("eth_estimateUserOperationGas", () => {
             })
 
         const { preVerificationGas, verificationGasLimit, callGasLimit } =
-            await bundlerClientV06.estimateUserOperationGas({
-                userOperation
-            })
+            await bundlerClientV06.estimateUserOperationGas(
+                {
+                    userOperation
+                },
+                {
+                    "0xa5cc3c03994DB5b0d9A5eEdD10CabaB0813678AC": {
+                        balance: parseEther("1"),
+                        stateDiff: {
+                            "0x3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0":
+                                "0x00000000000000000000000000000000000000000000000000000000000001a4"
+                        }
+                    }
+                }
+            )
 
         expect(preVerificationGas).toBeTruthy()
         expect(verificationGasLimit).toBeTruthy()
         expect(callGasLimit).toBeTruthy()
     })
 
-    test("eth_estimateUserOperationGas_v07", async () => {
+    testWithRpc("eth_estimateUserOperationGas_v07", async ({ rpc }) => {
+        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const bundlerClientV07 = createBundlerClient({
+            transport: http(altoRpc),
+            entryPoint: ENTRYPOINT_ADDRESS_V07
+        })
+
         const smartAccountClient = await getSimpleAccountClient({
             entryPoint: ENTRYPOINT_ADDRESS_V07,
             privateKey: generatePrivateKey(),
@@ -107,5 +101,98 @@ describe.sequential("eth_estimateUserOperationGas", () => {
         expect(callGasLimit).toBeTruthy()
         expect(paymasterVerificationGasLimit).toBe(0n)
         expect(paymasterPostOpGasLimit).toBe(0n)
-    }, 100000)
+    })
+
+    testWithRpc(
+        "eth_estimateUserOperationGas_V07_with_error",
+        async ({ rpc }) => {
+            const { anvilRpc, altoRpc, paymasterRpc } = rpc
+            const bundlerClientV07 = createBundlerClient({
+                transport: http(altoRpc),
+                entryPoint: ENTRYPOINT_ADDRESS_V07
+            })
+
+            const smartAccountClient = await getSimpleAccountClient({
+                entryPoint: ENTRYPOINT_ADDRESS_V07,
+                privateKey: generatePrivateKey(),
+                altoRpc: altoRpc,
+                anvilRpc: anvilRpc
+            })
+
+            const userOperation =
+                await smartAccountClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData:
+                            await smartAccountClient.account.encodeCallData({
+                                to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
+                                data: "0x",
+                                value: 1000n
+                            })
+                    }
+                })
+
+            await expect(() =>
+                bundlerClientV07.estimateUserOperationGas(
+                    {
+                        userOperation
+                    },
+                    {
+                        [smartAccountClient.account.address]: {
+                            balance: 0n
+                        }
+                    }
+                )
+            ).rejects.toThrowError(/AA21/)
+        }
+    )
+
+    testWithRpc(
+        "eth_estimateUserOperationGas_V07_withPaymaster",
+        async ({ rpc }) => {
+            const { anvilRpc, altoRpc, paymasterRpc } = rpc
+            const bundlerClientV07 = createBundlerClient({
+                transport: http(altoRpc),
+                entryPoint: ENTRYPOINT_ADDRESS_V07
+            })
+
+            const smartAccountClient = await getSimpleAccountClient({
+                entryPoint: ENTRYPOINT_ADDRESS_V07,
+                privateKey: generatePrivateKey(),
+                altoRpc: altoRpc,
+                anvilRpc: anvilRpc,
+                paymasterClient: getPimlicoPaymasterClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    paymasterRpc
+                })
+            })
+
+            const userOperation =
+                await smartAccountClient.prepareUserOperationRequest({
+                    userOperation: {
+                        callData:
+                            await smartAccountClient.account.encodeCallData({
+                                to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
+                                data: "0x",
+                                value: 0n
+                            })
+                    }
+                })
+
+            const {
+                preVerificationGas,
+                verificationGasLimit,
+                callGasLimit,
+                paymasterVerificationGasLimit,
+                paymasterPostOpGasLimit
+            } = await bundlerClientV07.estimateUserOperationGas({
+                userOperation
+            })
+
+            expect(preVerificationGas).toBeTruthy()
+            expect(verificationGasLimit).toBeTruthy()
+            expect(callGasLimit).toBeTruthy()
+            expect(paymasterVerificationGasLimit).toBeTruthy()
+            expect(paymasterPostOpGasLimit).toBeTruthy()
+        }
+    )
 })

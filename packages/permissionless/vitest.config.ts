@@ -6,7 +6,6 @@ export default defineConfig({
         alias: {
             permissionless: join(__dirname, "./")
         },
-        globalSetup: [join(__dirname, "./setupTests.ts")],
         coverage: {
             all: false,
             provider: "v8",
@@ -21,9 +20,9 @@ export default defineConfig({
             ]
         },
         sequence: {
-            concurrent: true
+            concurrent: false
         },
-        fileParallelism: false,
+        fileParallelism: true,
         environment: "node",
         testTimeout: 60_000,
         hookTimeout: 45_000,

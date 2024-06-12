@@ -1,29 +1,24 @@
-import type { Instance } from "prool"
 import { http } from "viem"
 import { foundry } from "viem/chains"
-import { afterAll, beforeAll, describe, expect, test } from "vitest"
+import { describe, expect } from "vitest"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     type BundlerClient,
     createBundlerClient
 } from "../../clients/createBundlerClient"
-import { getPortsForTest } from "../../setupTests"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
 
-describe.sequential("chainId", () => {
-    let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>
-
-    beforeAll(async () => {
-        const { altoPort } = getPortsForTest("bundlerActions")
-        const altoRpc = `http://localhost:${altoPort}`
+describe("chainId", () => {
+    testWithRpc("chainId", async ({ rpc }) => {
+        const { altoRpc } = rpc
         const entryPoint = ENTRYPOINT_ADDRESS_V06
-        bundlerClient = createBundlerClient({
-            transport: http(altoRpc),
-            entryPoint
-        })
-    })
 
-    test("chainId", async () => {
+        const bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE> =
+            createBundlerClient({
+                transport: http(altoRpc),
+                entryPoint
+            })
         const chainId = await bundlerClient.chainId()
         expect(chainId).toBe(foundry.id)
     })
