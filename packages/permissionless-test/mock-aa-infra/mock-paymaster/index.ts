@@ -1,10 +1,13 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "permissionless"
-import { createPimlicoBundlerClient } from "permissionless/clients/pimlico"
 import { defineInstance } from "prool"
 import { http } from "viem"
 import { foundry } from "viem/chains"
+import {
+    ENTRYPOINT_ADDRESS_V06,
+    ENTRYPOINT_ADDRESS_V07
+} from "../../../permissionless"
+import { createPimlicoBundlerClient } from "../../../permissionless/clients/pimlico"
 import { getAnvilWalletClient } from "./helpers/utils"
 import {
     setupVerifyingPaymasterV06,

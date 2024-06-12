@@ -1,10 +1,10 @@
-import { getUserOperationHash } from "permissionless/utils"
 import type { Account, Address, Chain, Client, Transport } from "viem"
 import type {
     EntryPoint,
     GetEntryPointVersion,
     UserOperation
 } from "../../../types"
+import { getUserOperationHash } from "../../../utils"
 import { signMessage } from "./signMessage"
 
 export const signUserOperation = async <

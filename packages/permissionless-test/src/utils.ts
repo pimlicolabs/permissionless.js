@@ -1,34 +1,4 @@
 import {
-    type BundlerClient,
-    ENTRYPOINT_ADDRESS_V06,
-    type SmartAccountClient,
-    createBundlerClient,
-    createSmartAccountClient,
-    getEntryPointVersion
-} from "permissionless"
-import {
-    type SafeSmartAccount,
-    type SmartAccount,
-    signerToBiconomySmartAccount,
-    signerToEcdsaKernelSmartAccount,
-    signerToLightSmartAccount,
-    signerToSafeSmartAccount,
-    signerToSimpleSmartAccount,
-    signerToTrustSmartAccount
-} from "permissionless/accounts"
-import type { KernelEcdsaSmartAccount } from "permissionless/accounts"
-import {
-    type PimlicoBundlerClient,
-    type PimlicoPaymasterClient,
-    createPimlicoBundlerClient,
-    createPimlicoPaymasterClient
-} from "permissionless/clients/pimlico"
-import { paymasterActionsEip7677 } from "permissionless/experimental"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint
-} from "permissionless/types"
-import {
     http,
     type Account,
     type Address,
@@ -48,10 +18,40 @@ import {
 } from "viem/accounts"
 import { foundry } from "viem/chains"
 import {
+    type BundlerClient,
+    ENTRYPOINT_ADDRESS_V06,
+    type SmartAccountClient,
+    createBundlerClient,
+    createSmartAccountClient,
+    getEntryPointVersion
+} from "../../permissionless"
+import {
+    type SafeSmartAccount,
+    type SmartAccount,
+    signerToBiconomySmartAccount,
+    signerToEcdsaKernelSmartAccount,
+    signerToLightSmartAccount,
+    signerToSafeSmartAccount,
+    signerToSimpleSmartAccount,
+    signerToTrustSmartAccount
+} from "../../permissionless/accounts"
+import type { KernelEcdsaSmartAccount } from "../../permissionless/accounts"
+import {
+    type PimlicoBundlerClient,
+    type PimlicoPaymasterClient,
+    createPimlicoBundlerClient,
+    createPimlicoPaymasterClient
+} from "../../permissionless/clients/pimlico"
+import { paymasterActionsEip7677 } from "../../permissionless/experimental"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    EntryPoint
+} from "../../permissionless/types"
+import {
     SIMPLE_ACCOUNT_FACTORY_V06,
     SIMPLE_ACCOUNT_FACTORY_V07
 } from "./constants"
-import type { AAParamType } from "./types"
+import type { AAParamType, ExistingSignerParamType } from "./types"
 
 export const PAYMASTER_RPC = "http://localhost:3000"
 
@@ -257,10 +257,13 @@ export const getLightAccountClient = async <T extends EntryPoint>({
 export const getTrustAccountClient = async <T extends EntryPoint>({
     entryPoint,
     paymasterClient,
+    altoRpc,
+    anvilRpc,
     privateKey = generatePrivateKey()
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
 > => {
+    const publicClient = getPublicClient(anvilRpc)
     const smartAccount = await signerToTrustSmartAccount<T, Transport, Chain>(
         publicClient,
         {
@@ -273,7 +276,7 @@ export const getTrustAccountClient = async <T extends EntryPoint>({
     return createSmartAccountClient({
         chain: foundry,
         account: smartAccount,
-        bundlerTransport: http(ALTO_RPC),
+        bundlerTransport: http(altoRpc),
         middleware: {
             // @ts-ignore
             sponsorUserOperation: paymasterClient?.sponsorUserOperation
@@ -387,3 +390,105 @@ export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
 
     return client
 }
+
+export const getCoreSmartAccountDescriptions = () => [
+    {
+        name: "Trust",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getTrustAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToTrustSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "LightAccount v1.1.0",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getLightAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToLightSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                lightAccountVersion: "1.1.0"
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Simple",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getSimpleAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToSimpleSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: false
+    },
+    {
+        name: "Kernel",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getKernelEcdsaClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToEcdsaKernelSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Biconomy",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => {
+            if (conf.entryPoint !== ENTRYPOINT_ADDRESS_V06) {
+                throw new Error("Biconomy only works with V06")
+            }
+            return getBiconomyClient(
+                conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+            )
+        },
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToBiconomySmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getSafeClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToSafeSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                safeVersion: "1.4.1"
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    }
+]
