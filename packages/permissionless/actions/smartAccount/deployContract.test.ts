@@ -8,7 +8,7 @@ import {
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 
 describe.each(getCoreSmartAccounts())(
-    "deployContract",
+    "deployContract $name",
     ({
         getSmartAccountClient,
         supportsEntryPointV06,

@@ -88,239 +88,219 @@ export const setupContracts = async (rpc: string) => {
         address: walletClient.account.address
     })
 
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: ENTRY_POINT_V07_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: ENTRY_POINT_SIMULATIONS_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: ENTRY_POINT_V06_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SAFE_V06_MODULE_SETUP_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SAFE_V06_MODULE_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SAFE_V07_MODULE_SETUP_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: SAFE_V07_MODULE_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+    await Promise.all([
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ENTRY_POINT_V07_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ENTRY_POINT_SIMULATIONS_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ENTRY_POINT_V06_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_V06_MODULE_SETUP_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_V06_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_V07_MODULE_SETUP_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_V07_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_META_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_FACTORY_V06_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_ACCOUNT_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: TRUST_DEFAULT_FALLBACK_HANDLER,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+    ])
 
     await anvilClient.setCode({
         address: SAFE_SINGLETON_FACTORY,
         bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
     })
 
-    walletClient.sendTransaction({
-        to: SAFE_SINGLETON_FACTORY,
-        data: SAFE_PROXY_FACTORY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: SAFE_SINGLETON_FACTORY,
-        data: SAFE_SINGLETON_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: SAFE_SINGLETON_FACTORY,
-        data: SAFE_MULTI_SEND_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: SAFE_SINGLETON_FACTORY,
-        data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+    await Promise.all([
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_PROXY_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_SINGLETON_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_MULTI_SEND_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+    ])
 
     await anvilClient.setCode({
         address: BICONOMY_SINGLETON_FACTORY,
         bytecode: BICONOMY_SINGLETON_FACTORY_BYTECODE
     })
 
-    walletClient.sendTransaction({
-        to: BICONOMY_SINGLETON_FACTORY,
-        data: BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+    await Promise.all([
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
 
-    walletClient.sendTransaction({
-        to: BICONOMY_SINGLETON_FACTORY,
-        data: BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
 
-    walletClient.sendTransaction({
-        to: BICONOMY_SINGLETON_FACTORY,
-        data: BICONOMY_FACTORY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
 
-    walletClient.sendTransaction({
-        to: BICONOMY_SINGLETON_FACTORY,
-        data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V06_FACTORY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V07_FACTORY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: KERNEL_V07_META_FACTORY_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_FACTORY_V06_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_ACCOUNT_FACET_CREATE_CALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
-
-    walletClient.sendTransaction({
-        to: DETERMINISTIC_DEPLOYER,
-        data: TRUST_DEFAULT_FALLBACK_HANDLER,
-        gas: 15_000_000n,
-        nonce: nonce++
-    })
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+    ])
 
     // ==== SETUP KERNEL V0.6 CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"
