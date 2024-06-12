@@ -10,6 +10,7 @@ export default defineConfig({
             all: true,
             provider: "v8",
             reporter: process.env.CI ? ["lcov"] : ["text", "json", "html"],
+            include: ["**/permissionless/**"],
             exclude: [
                 "**/errors/utils.ts",
                 "**/*.test.ts",
