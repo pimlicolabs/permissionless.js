@@ -1,9 +1,13 @@
-import { zeroAddress } from "viem"
+import { type Chain, type Client, type Transport, zeroAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
+import type { SmartAccount } from "../../accounts"
+import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
+import type { EntryPoint } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { prepareUserOperationRequest } from "./prepareUserOperationRequest"
 
 describe.each(getCoreSmartAccounts())(
     "prepareUserOperationRequest $name",
@@ -24,8 +28,13 @@ describe.each(getCoreSmartAccounts())(
                     anvilRpc: anvilRpc
                 })
 
-                const userOperation =
-                    await smartClient.prepareUserOperationRequest({
+                const userOperation = await prepareUserOperationRequest(
+                    smartClient as Client<
+                        Transport,
+                        Chain,
+                        SmartAccount<EntryPoint>
+                    >,
+                    {
                         userOperation: {
                             callData: await smartClient.account.encodeCallData({
                                 to: zeroAddress,
@@ -33,7 +42,8 @@ describe.each(getCoreSmartAccounts())(
                                 value: 0n
                             })
                         }
-                    })
+                    }
+                )
                 expect(userOperation).toBeTruthy()
                 expect(userOperation.sender).toBe(smartClient.account.address)
                 expect(userOperation.nonce).toBe(
@@ -55,6 +65,8 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOperation.maxPriorityFeePerGas).toBeTruthy()
                 expect(userOperation.paymasterAndData).toBe("0x")
                 expect(userOperation.signature).toBe(
+                    // @ts-ignore: since tests return all smart account client, some of them don't support V06.
+                    // The TS error is because in that case, getDummySignature would not accept the userOperation of type UserOperation<V07>
                     await smartClient.account.getDummySignature(userOperation)
                 )
 
@@ -81,8 +93,13 @@ describe.each(getCoreSmartAccounts())(
                     anvilRpc: anvilRpc
                 })
 
-                const userOperation =
-                    await smartClient.prepareUserOperationRequest({
+                const userOperation = await prepareUserOperationRequest(
+                    smartClient as Client<
+                        Transport,
+                        Chain,
+                        SmartAccount<EntryPoint>
+                    >,
+                    {
                         userOperation: {
                             callData: await smartClient.account.encodeCallData({
                                 to: zeroAddress,
@@ -90,7 +107,8 @@ describe.each(getCoreSmartAccounts())(
                                 value: 0n
                             })
                         }
-                    })
+                    }
+                )
 
                 expect(userOperation).toBeTruthy()
                 expect(userOperation.sender).toBe(smartClient.account.address)

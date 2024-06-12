@@ -15,11 +15,10 @@ describe("chainId", () => {
         const { altoRpc } = rpc
         const entryPoint = ENTRYPOINT_ADDRESS_V06
 
-        const bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE> =
-            createBundlerClient({
-                transport: http(altoRpc),
-                entryPoint
-            })
+        const bundlerClient = createBundlerClient({
+            transport: http(altoRpc),
+            entryPoint
+        })
         const id = await chainId(bundlerClient)
         expect(id).toBe(foundry.id)
     })
