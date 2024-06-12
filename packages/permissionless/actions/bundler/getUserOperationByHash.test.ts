@@ -8,6 +8,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { getUserOperationByHash } from "./getUserOperationByHash"
 
 describe("getUserOperationByHash", () => {
     testWithRpc("getUserOperationByHash_V06", async ({ rpc }) => {
@@ -53,8 +54,10 @@ describe("getUserOperationByHash", () => {
             timeout: 10000
         })
 
-        const userOperationFromUserOpHash =
-            await bundlerClientV06.getUserOperationByHash({ hash: opHash })
+        const userOperationFromUserOpHash = await getUserOperationByHash(
+            bundlerClientV06,
+            { hash: opHash }
+        )
 
         expect(userOperationFromUserOpHash).not.toBeNull()
         expect(userOperationFromUserOpHash?.entryPoint).toBe(
@@ -117,8 +120,10 @@ describe("getUserOperationByHash", () => {
             timeout: 10000
         })
 
-        const userOperationFromUserOpHash =
-            await bundlerClientV07.getUserOperationByHash({ hash: opHash })
+        const userOperationFromUserOpHash = await getUserOperationByHash(
+            bundlerClientV07,
+            { hash: opHash }
+        )
 
         for (const key in userOperationFromUserOpHash?.userOperation) {
             const expected = userOperationFromUserOpHash?.userOperation[key]

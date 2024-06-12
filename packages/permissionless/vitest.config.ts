@@ -7,7 +7,7 @@ export default defineConfig({
             permissionless: join(__dirname, "./")
         },
         coverage: {
-            all: false,
+            all: true,
             provider: "v8",
             reporter: process.env.CI ? ["lcov"] : ["text", "json", "html"],
             exclude: [

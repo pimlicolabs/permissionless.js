@@ -8,6 +8,7 @@ import {
 } from "../../clients/createBundlerClient"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
+import { chainId } from "./chainId"
 
 describe("chainId", () => {
     testWithRpc("chainId", async ({ rpc }) => {
@@ -19,7 +20,7 @@ describe("chainId", () => {
                 transport: http(altoRpc),
                 entryPoint
             })
-        const chainId = await bundlerClient.chainId()
-        expect(chainId).toBe(foundry.id)
+        const id = await chainId(bundlerClient)
+        expect(id).toBe(foundry.id)
     })
 })

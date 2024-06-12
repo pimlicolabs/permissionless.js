@@ -9,6 +9,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { bundlerActions } from "../../clients/decorators/bundler"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { getUserOperationStatus } from "./getUserOperationStatus"
 
 describe("getUserOperationStatus", () => {
     testWithRpc("getUserOperationStatus_V06", async ({ rpc }) => {
@@ -66,10 +67,12 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        const userOperationStatus =
-            await bundlerClientV06.getUserOperationStatus({
+        const userOperationStatus = await getUserOperationStatus(
+            bundlerClientV06,
+            {
                 hash: opHash
-            })
+            }
+        )
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
         expect(userOperationStatus.status).toBe("included")
@@ -133,10 +136,12 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        const userOperationStatus =
-            await bundlerClientV07.getUserOperationStatus({
+        const userOperationStatus = await getUserOperationStatus(
+            bundlerClientV07,
+            {
                 hash: opHash
-            })
+            }
+        )
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
         expect(userOperationStatus.status).toBe("included")

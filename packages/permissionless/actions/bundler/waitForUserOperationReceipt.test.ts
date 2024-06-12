@@ -8,6 +8,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { waitForUserOperationReceipt } from "./waitForUserOperationReceipt"
 
 describe("waitForUserOperationReceipt", () => {
     testWithRpc("waitForUserOperationReceipt_V06", async ({ rpc }) => {
@@ -48,11 +49,13 @@ describe("waitForUserOperationReceipt", () => {
 
         expect(isHash(opHash)).toBe(true)
 
-        const userOperationReceipt =
-            await bundlerClientV06.waitForUserOperationReceipt({
+        const userOperationReceipt = await waitForUserOperationReceipt(
+            bundlerClientV06,
+            {
                 hash: opHash,
                 timeout: 100000
-            })
+            }
+        )
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
@@ -105,11 +108,13 @@ describe("waitForUserOperationReceipt", () => {
 
         expect(isHash(opHash)).toBe(true)
 
-        const userOperationReceipt =
-            await bundlerClientV07.waitForUserOperationReceipt({
+        const userOperationReceipt = await waitForUserOperationReceipt(
+            bundlerClientV07,
+            {
                 hash: opHash,
                 timeout: 100000
-            })
+            }
+        )
         expect(userOperationReceipt).not.toBeNull()
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()

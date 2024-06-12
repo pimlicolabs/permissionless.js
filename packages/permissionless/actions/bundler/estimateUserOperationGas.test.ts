@@ -8,6 +8,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { estimateUserOperationGas } from "./estimateUserOperationGas"
 
 describe("eth_estimateUserOperationGas", () => {
     testWithRpc("eth_estimateUserOperationGas_v06", async ({ rpc }) => {
@@ -41,9 +42,11 @@ describe("eth_estimateUserOperationGas", () => {
             })
 
         const { preVerificationGas, verificationGasLimit, callGasLimit } =
-            await bundlerClientV06.estimateUserOperationGas(
+            await estimateUserOperationGas(
+                bundlerClientV06,
                 {
-                    userOperation
+                    userOperation,
+                    entryPoint: ENTRYPOINT_ADDRESS_V06
                 },
                 {
                     "0xa5cc3c03994DB5b0d9A5eEdD10CabaB0813678AC": {
@@ -62,7 +65,7 @@ describe("eth_estimateUserOperationGas", () => {
     })
 
     testWithRpc("eth_estimateUserOperationGas_v07", async ({ rpc }) => {
-        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const { anvilRpc, altoRpc } = rpc
         const bundlerClientV07 = createBundlerClient({
             transport: http(altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V07
@@ -92,7 +95,8 @@ describe("eth_estimateUserOperationGas", () => {
             callGasLimit,
             paymasterVerificationGasLimit,
             paymasterPostOpGasLimit
-        } = await bundlerClientV07.estimateUserOperationGas({
+        } = await estimateUserOperationGas(bundlerClientV07, {
+            entryPoint: ENTRYPOINT_ADDRESS_V07,
             userOperation
         })
 
@@ -106,7 +110,7 @@ describe("eth_estimateUserOperationGas", () => {
     testWithRpc(
         "eth_estimateUserOperationGas_V07_with_error",
         async ({ rpc }) => {
-            const { anvilRpc, altoRpc, paymasterRpc } = rpc
+            const { anvilRpc, altoRpc } = rpc
             const bundlerClientV07 = createBundlerClient({
                 transport: http(altoRpc),
                 entryPoint: ENTRYPOINT_ADDRESS_V07
@@ -132,9 +136,11 @@ describe("eth_estimateUserOperationGas", () => {
                 })
 
             await expect(() =>
-                bundlerClientV07.estimateUserOperationGas(
+                estimateUserOperationGas(
+                    bundlerClientV07,
                     {
-                        userOperation
+                        userOperation,
+                        entryPoint: ENTRYPOINT_ADDRESS_V07
                     },
                     {
                         [smartAccountClient.account.address]: {
@@ -184,8 +190,9 @@ describe("eth_estimateUserOperationGas", () => {
                 callGasLimit,
                 paymasterVerificationGasLimit,
                 paymasterPostOpGasLimit
-            } = await bundlerClientV07.estimateUserOperationGas({
-                userOperation
+            } = await estimateUserOperationGas(bundlerClientV07, {
+                userOperation,
+                entryPoint: ENTRYPOINT_ADDRESS_V07
             })
 
             expect(preVerificationGas).toBeTruthy()

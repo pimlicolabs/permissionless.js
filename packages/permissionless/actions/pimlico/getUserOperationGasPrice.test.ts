@@ -2,6 +2,7 @@ import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPimlicoBundlerClient } from "../../../permissionless-test/src/utils"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
+import { getUserOperationGasPrice } from "./getUserOperationGasPrice"
 
 describe("getUserOperationGasPrice", () => {
     testWithRpc("getUserOperationGasPrice", async ({ rpc }) => {
@@ -10,7 +11,7 @@ describe("getUserOperationGasPrice", () => {
             altoRpc: rpc.altoRpc
         })
 
-        const gasPrice = await pimlicoBundlerClient.getUserOperationGasPrice()
+        const gasPrice = await getUserOperationGasPrice(pimlicoBundlerClient)
 
         expect(gasPrice).toBeTruthy()
         expect(gasPrice.slow).toBeTruthy()

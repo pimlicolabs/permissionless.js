@@ -3,6 +3,7 @@ import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { supportedEntryPoints } from "./supportedEntryPoints"
 
 describe("supportedEntryPoints", () => {
     testWithRpc("supportedEntryPoints_V06", async ({ rpc }) => {
@@ -11,7 +12,7 @@ describe("supportedEntryPoints", () => {
             entryPoint: ENTRYPOINT_ADDRESS_V06
         })
 
-        const entryPoints = await bundlerClientV06.supportedEntryPoints()
+        const entryPoints = await supportedEntryPoints(bundlerClientV06)
         expect(entryPoints).contain(ENTRYPOINT_ADDRESS_V06)
     })
 
@@ -20,7 +21,7 @@ describe("supportedEntryPoints", () => {
             transport: http(rpc.altoRpc),
             entryPoint: ENTRYPOINT_ADDRESS_V07
         })
-        const entryPoints = await bundlerClientV07.supportedEntryPoints()
+        const entryPoints = await supportedEntryPoints(bundlerClientV07)
         expect(entryPoints).contain(ENTRYPOINT_ADDRESS_V07)
     })
 })

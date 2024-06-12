@@ -59,7 +59,9 @@ export type DeployContractParametersWithPaymaster<
 export async function deployContract<
     entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>

@@ -6,6 +6,7 @@ import {
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
+import { validateSponsorshipPolicies } from "./validateSponsorshipPolicies"
 
 describe("validateSponsorshipPolicies", () => {
     testWithRpc("Validating sponsorship policies", async ({ rpc }) => {
@@ -38,15 +39,18 @@ describe("validateSponsorshipPolicies", () => {
             paymasterRpc
         })
 
-        const validateSponsorshipPolicies =
-            await pimlicoPaymasterClient.validateSponsorshipPolicies({
+        const policies = await validateSponsorshipPolicies(
+            pimlicoPaymasterClient,
+            {
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
                 userOperation: userOperation,
                 sponsorshipPolicyIds: ["sp_crazy_kangaroo"]
-            })
+            }
+        )
 
-        expect(validateSponsorshipPolicies).toBeTruthy()
-        expect(validateSponsorshipPolicies.length).toBeGreaterThan(0)
-        expect(Array.isArray(validateSponsorshipPolicies)).toBe(true)
-        expect(validateSponsorshipPolicies.length).toBe(1)
+        expect(policies).toBeTruthy()
+        expect(policies.length).toBeGreaterThan(0)
+        expect(Array.isArray(policies)).toBe(true)
+        expect(policies.length).toBe(1)
     })
 })

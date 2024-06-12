@@ -8,6 +8,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { getUserOperationReceipt } from "./getUserOperationReceipt"
 
 describe("sendUserOperation", () => {
     testWithRpc("sendUserOperation_V06", async ({ rpc }) => {
@@ -57,7 +58,7 @@ describe("sendUserOperation", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClientV06.getUserOperationReceipt({
+        const receipt = await getUserOperationReceipt(bundlerClientV06, {
             hash: opHash
         })
 
@@ -114,7 +115,7 @@ describe("sendUserOperation", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClientV07.getUserOperationReceipt({
+        const receipt = await getUserOperationReceipt(bundlerClientV07, {
             hash: opHash
         })
 
