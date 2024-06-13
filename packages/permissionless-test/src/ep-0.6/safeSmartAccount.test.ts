@@ -1,6 +1,6 @@
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless"
 import { isHash, zeroAddress } from "viem"
 import { beforeAll, describe, expect, test } from "vitest"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../../permissionless"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,

@@ -36,6 +36,13 @@ export class EstimateUserOperationGasError<
             maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
             paymasterAndData: userOperation.paymasterAndData,
             signature: userOperation.signature,
+            factory: userOperation.factory,
+            factoryData: userOperation.factoryData,
+            paymaster: userOperation.paymaster,
+            paymasterVerificationGasLimit:
+                userOperation.paymasterVerificationGasLimit,
+            paymasterPostOpGasLimit: userOperation.paymasterPostOpGasLimit,
+            paymasterData: userOperation.paymasterData,
             entryPoint
         })
 

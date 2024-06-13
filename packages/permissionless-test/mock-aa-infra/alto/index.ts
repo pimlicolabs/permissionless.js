@@ -1,11 +1,11 @@
 import {
     http,
     type Address,
+    type PublicClient,
     createPublicClient,
     createTestClient,
     createWalletClient,
-    parseEther,
-    zeroAddress
+    parseEther
 } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { sendTransaction } from "viem/actions"
@@ -13,7 +13,7 @@ import { foundry } from "viem/chains"
 import {
     BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
     BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-    BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MOUDULE_CREATECALL,
+    BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
     BICONOMY_FACTORY_CREATECALL,
     BICONOMY_SINGLETON_FACTORY_BYTECODE,
     ENTRY_POINT_SIMULATIONS_CREATECALL,
@@ -50,8 +50,10 @@ import {
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
+export const ENTRY_POINT_SIMULATIONS_ADDRESS =
+    "0x74Cb5e4eE81b86e70f9045036a1C5477de69eE87"
 
-const verifyDeployed = async (addresses: Address[]) => {
+const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
     for (const address of addresses) {
         const bytecode = await client.getBytecode({
             address
@@ -64,347 +66,241 @@ const verifyDeployed = async (addresses: Address[]) => {
     }
 }
 
-const walletClient = createWalletClient({
-    account: mnemonicToAccount(
-        "test test test test test test test test test test test junk"
-    ),
-    chain: foundry,
-    transport: http(process.env.ANVIL_RPC)
-})
+export const setupContracts = async (rpc: string) => {
+    const walletClient = createWalletClient({
+        account: mnemonicToAccount(
+            "test test test test test test test test test test test junk"
+        ),
+        chain: foundry,
+        transport: http(rpc)
+    })
 
-const anvilClient = createTestClient({
-    transport: http(process.env.ANVIL_RPC),
-    mode: "anvil"
-})
+    const anvilClient = createTestClient({
+        transport: http(rpc),
+        mode: "anvil"
+    })
 
-const client = createPublicClient({
-    transport: http(process.env.ANVIL_RPC)
-})
+    const client = createPublicClient({
+        transport: http(rpc)
+    })
 
-const main = async () => {
-    let nonce = 0
+    let nonce = await client.getTransactionCount({
+        address: walletClient.account.address
+    })
 
-    walletClient
-        .sendTransaction({
+    await Promise.all([
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: ENTRY_POINT_V07_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[V0.7 CORE] Deploying EntryPoint"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[V0.7 CORE] Deploying SimpleAccountFactory"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: ENTRY_POINT_SIMULATIONS_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[V0.7 CORE] Deploying EntryPointSimulations"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: ENTRY_POINT_V06_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[V0.6 CORE] Deploying EntryPoint"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[V0.6 CORE] Deploying SimpleAccountFactory"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SAFE_V06_MODULE_SETUP_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[SAFE V0.6] Deploying Safe Module Setup"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SAFE_V06_MODULE_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[SAFE V0.6] Deploying Safe 4337 Module"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SAFE_V07_MODULE_SETUP_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[SAFE V0.7] Deploying Safe Module Setup"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SAFE_V07_MODULE_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[SAFE V0.7] Deploying Safe 4337 Module"))
-
-    await anvilClient
-        .setCode({
-            address: SAFE_SINGLETON_FACTORY,
-            bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
-        })
-        .then(() =>
-            console.log("[SAFE] Etched Safe Singleton Factory Bytecode")
-        )
-
-    walletClient
-        .sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_PROXY_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[SAFE] Deploying Safe Proxy Factory"))
-
-    walletClient
-        .sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_SINGLETON_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[SAFE] Deploying Safe Singleton"))
-
-    walletClient
-        .sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_MULTI_SEND_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[SAFE] Deploying Safe Multi Send"))
-
-    walletClient
-        .sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[SAFE] Deploying Safe Multi Send Call Only"))
-
-    await anvilClient
-        .setCode({
-            address: BICONOMY_SINGLETON_FACTORY,
-            bytecode: BICONOMY_SINGLETON_FACTORY_BYTECODE
-        })
-        .then(() => console.log("[BICONOMY] Etched Singleton Factory Bytecode"))
-
-    walletClient
-        .sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MOUDULE_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() =>
-            console.log("[BICONOMY] Deployed ECDSA Ownership Registry Module")
-        )
-
-    walletClient
-        .sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[BICONOMY] Deploying Account V0.2 Logic"))
-
-    walletClient
-        .sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() => console.log("[BICONOMY] Deploying Factory"))
-
-    walletClient
-        .sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-        .then(() =>
-            console.log("[BICONOMY] Deploying Default Fallback Handler")
-        )
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.6 ECDSA Validator"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.6 Account V2 Logic"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V06_FACTORY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.6 Factory"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V07_FACTORY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.7 Factory"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.7 ECDSA VALIDATOR"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.7 ACCOUNT V3 LOGIC "))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V07_META_FACTORY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[KERNEL] Deploying V0.7 META FACTORY"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() =>
-            console.log("[LIGHT ACCOUNT] Deploying v1.1.0 LightAccount Factory")
-        )
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_FACTORY_V06_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[TRUST] Deploying V0.6 Trust Factory"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() =>
-            console.log("[TRUST] Deploying Trust Secp256k1 Verification Facet")
-        )
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_ACCOUNT_FACET_CREATE_CALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[TRUST] Deploying Trust AccountFacet"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[TRUST] Deploying Trust DiamondCutFacet"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[TRUST] Deploying Trust TokenReceiverFacet"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
             gas: 15_000_000n,
             nonce: nonce++
-        })
-        .then(() => console.log("[TRUST] Deploying Trust DiamondLoupeFacet"))
-
-    walletClient
-        .sendTransaction({
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: TRUST_DEFAULT_FALLBACK_HANDLER,
             gas: 15_000_000n,
             nonce: nonce++
         })
-        .then(() =>
-            console.log("[TRUST] Deploying Trust default fallback handler")
-        )
+    ])
 
-    let onchainNonce = 0
-    do {
-        onchainNonce = await client.getTransactionCount({
-            address: walletClient.account.address
+    await anvilClient.setCode({
+        address: SAFE_SINGLETON_FACTORY,
+        bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
+    })
+
+    await Promise.all([
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_PROXY_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_SINGLETON_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_MULTI_SEND_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
-        await new Promise((resolve) => setTimeout(resolve, 500))
-    } while (onchainNonce !== nonce)
+    ])
+
+    await anvilClient.setCode({
+        address: BICONOMY_SINGLETON_FACTORY,
+        bytecode: BICONOMY_SINGLETON_FACTORY_BYTECODE
+    })
+
+    await Promise.all([
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        })
+    ])
 
     // ==== SETUP KERNEL V0.6 CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"
@@ -463,13 +359,13 @@ const main = async () => {
         address: alchemyLightClientOwner
     })
 
-    await verifyDeployed([
+    await verifyDeployed(client, [
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
         "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint v0.7
         "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory V0.7
-        "0x74Cb5e4eE81b86e70f9045036a1C5477de69eE87", // EntryPoint Simulations (Needed for v0.7)
+        ENTRY_POINT_SIMULATIONS_ADDRESS, // EntryPoint Simulations (Needed for v0.7)
         "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47", // Safe V0.7 Module Setup
         "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226", // Safe V0.7 4337 Module
         "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb", // Safe V0.6 Module Setup
@@ -493,7 +389,6 @@ const main = async () => {
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 Meta Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
-
         "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5", // Trust Secp256k1VerificationFacet
         "0x729c310186a57833f622630a16d13f710b83272a", // Trust factory
         "0xFde53272dcd7938d16E031A6989753c321728332", // Trust AccountFacet
@@ -503,5 +398,3 @@ const main = async () => {
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D" // Trust DefaultFallbackHandler
     ])
 }
-
-main()

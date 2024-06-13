@@ -1,5 +1,10 @@
 {
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/permissionless",
+        "packages/wagmi",
+        "packages/wagmi-test-demo",
+        "packages/create-permissionless-app"
+    ],
     "private": true,
     "author": "Pimlico",
     "type": "module",
@@ -18,13 +23,15 @@
         "simple-git-hooks": "^2.9.0",
         "size-limit": "^9.0.0",
         "tslib": "^2.6.2",
+        "@pimlico/alto": "^0.0.4",
+        "prool": "^0.0.12",
         "typescript": "^5.2.2"
     },
     "description": "",
     "keywords": [],
     "license": "MIT",
     "scripts": {
-        "build": "bun run build:permissionless && bun run build:wagmi",
+        "build": "bun run build:permissionless",
         "build:permissionless": "bun run clean:permissionless && bun run build:cjs && bun run build:esm && bun run build:types",
         "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:cjs && bun run build:wagmi:esm && bun run build:wagmi:types",
         "build:cjs": "tsc --project ./tsconfig/tsconfig.permissionless.cjs.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
@@ -38,9 +45,9 @@
         "changeset:version": "changeset version && bun install --lockfile-only",
         "format": "biome format . --write",
         "lint": "biome check .",
-        "lint:fix": "bun run lint --apply",
-        "test": "bun run --cwd packages/permissionless-test test",
-        "test:ci": "bun run --cwd packages/permissionless-test test:ci",
+        "lint:fix": "bun run lint --write",
+        "test": "vitest dev -c ./packages/permissionless/vitest.config.ts",
+        "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
         "build:wagmi:cjs": "tsc --project ./tsconfig/tsconfig.wagmi.cjs.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/wagmi/_cjs/package.json",
         "build:wagmi:esm": "tsc --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
@@ -51,7 +58,9 @@
         "pre-commit": "bun run format && bun run lint:fix"
     },
     "dependencies": {
+        "async-mutex": "^0.5.0",
         "get-port": "^7.0.0",
-        "tsc-alias": "^1.8.8"
+        "tsc-alias": "^1.8.8",
+        "viem": "^2.13.8"
     }
 }

@@ -1,11 +1,11 @@
-import { ENTRYPOINT_ADDRESS_V07 } from "permissionless"
+import { isAddress, isHash, zeroAddress } from "viem"
+import { beforeAll, describe, expect, test } from "vitest"
+import { ENTRYPOINT_ADDRESS_V07 } from "../../../permissionless"
 import type {
     PimlicoBundlerClient,
     PimlicoPaymasterClient
-} from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "permissionless/types"
-import { isAddress, isHash, zeroAddress } from "viem"
-import { beforeAll, describe, expect, test } from "vitest"
+} from "../../../permissionless/clients/pimlico"
+import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../../permissionless/types"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,

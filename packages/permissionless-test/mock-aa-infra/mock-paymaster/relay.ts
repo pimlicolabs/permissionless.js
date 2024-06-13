@@ -1,18 +1,6 @@
 import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    ENTRYPOINT_ADDRESS_V07,
-    type EstimateUserOperationGasReturnType,
-    getPackedUserOperation
-} from "permissionless"
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    UserOperation
-} from "permissionless/types"
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
-import {
     type Account,
     BaseError,
     type Chain,
@@ -27,6 +15,18 @@ import {
     toHex
 } from "viem"
 import { fromZodError } from "zod-validation-error"
+import {
+    ENTRYPOINT_ADDRESS_V07,
+    type EstimateUserOperationGasReturnType,
+    getPackedUserOperation
+} from "../../../permissionless"
+import type { PimlicoBundlerClient } from "../../../permissionless/clients/pimlico"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
+    UserOperation
+} from "../../../permissionless/types"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../../permissionless/utils"
 import type {
     VERIFYING_PAYMASTER_V06_ABI,
     VERIFYING_PAYMASTER_V07_ABI
@@ -295,8 +295,6 @@ export const createRpcHandler = (
     walletClient: WalletClient<Transport, Chain, Account>
 ) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
-        console.log(`received request: ${JSON.stringify(request.body)}`)
-
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
         if (!parsedBody.success) {
