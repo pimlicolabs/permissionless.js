@@ -1,4 +1,4 @@
-import { type Chain, type Client, type Hex, type Transport } from "viem"
+import type { Chain, Client, Hex, Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
 import {
@@ -16,9 +16,9 @@ export type PrivateKeyToLightSmartAccountParameters<
 >
 
 /**
- * @description Creates an Simple Account from a private key.
+ * @description Creates an Light Account from a private key.
  *
- * @returns A Private Key Simple Account.
+ * @returns A Private Key Light Account.
  */
 export async function privateKeyToLightSmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,

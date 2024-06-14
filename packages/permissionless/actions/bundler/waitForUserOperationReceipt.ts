@@ -19,7 +19,7 @@ export class WaitForUserOperationReceiptTimeoutError extends BaseError {
     override name = "WaitForUserOperationReceiptTimeoutError"
     constructor({ hash }: { hash: Hash }) {
         super(
-            `Timed out while waiting for transaction with hash "${hash}" to be confirmed.`
+            `Timed out while waiting for user operation with hash "${hash}" to be confirmed.`
         )
     }
 }
@@ -66,7 +66,7 @@ export const waitForUserOperationReceipt = <
     {
         hash,
         pollingInterval = bundlerClient.pollingInterval,
-        timeout
+        timeout = bundlerClient.transport.timeout
     }: Prettify<WaitForUserOperationReceiptParameters>
 ): Promise<Prettify<GetUserOperationReceiptReturnType>> => {
     const observerId = stringify([

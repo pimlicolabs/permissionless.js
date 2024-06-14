@@ -25,18 +25,15 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "v22.2.0"
+
       - name: Build
         run: bun run build:permissionless
 
-      - name: Start Docker
-        run: docker compose -f "packages/permissionless-test/mock-aa-infra/docker-compose.yml" up -d
-
       - name: Run tests & coverage
         run: bun run test:ci
-
-      - name: Stop containers
-        if: always()
-        run: docker compose -f "packages/permissionless-test/mock-aa-infra/docker-compose.yml" down
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

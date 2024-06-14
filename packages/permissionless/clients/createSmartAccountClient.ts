@@ -6,10 +6,10 @@ import type {
     WalletClientConfig
 } from "viem"
 import { createClient } from "viem"
-import { type SmartAccount } from "../accounts/types"
-import { type Middleware } from "../actions/smartAccount/prepareUserOperationRequest"
+import type { SmartAccount } from "../accounts/types"
+import type { Middleware } from "../actions/smartAccount/prepareUserOperationRequest"
 import type { Prettify } from "../types/"
-import { type BundlerRpcSchema } from "../types/bundler"
+import type { BundlerRpcSchema } from "../types/bundler"
 import type { EntryPoint } from "../types/entrypoint"
 import {
     type SmartAccountActions,

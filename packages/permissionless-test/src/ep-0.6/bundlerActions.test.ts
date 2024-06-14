@@ -1,18 +1,18 @@
-import {
-    type BundlerClient,
-    WaitForUserOperationReceiptTimeoutError
-} from "permissionless"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    UserOperation
-} from "permissionless/types"
-import {
-    ENTRYPOINT_ADDRESS_V06,
-    getUserOperationHash
-} from "permissionless/utils"
 import { type Chain, isHash, zeroAddress } from "viem"
 import { foundry } from "viem/chains"
 import { beforeAll, describe, expect, test } from "vitest"
+import {
+    type BundlerClient,
+    WaitForUserOperationReceiptTimeoutError
+} from "../../../permissionless"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    UserOperation
+} from "../../../permissionless/types"
+import {
+    ENTRYPOINT_ADDRESS_V06,
+    getUserOperationHash
+} from "../../../permissionless/utils"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,

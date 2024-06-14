@@ -1,10 +1,10 @@
-import { ENTRYPOINT_ADDRESS_V07 } from "permissionless"
 import { isHash, zeroAddress } from "viem"
 import { beforeAll, describe, expect, test } from "vitest"
+import { ENTRYPOINT_ADDRESS_V07 } from "../../../permissionless"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,
-    getPimlicoPaymasterClient,
+    fund,
     getSafeClient
 } from "../utils"
 
@@ -23,9 +23,10 @@ describe("Safe Specific Actions V0.7", () => {
                     data: "0xff",
                     value: 0n
                 }
-            ],
-            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V07)
+            ]
         })
+
+        await fund(smartAccountClient.account.address)
 
         const response = await smartAccountClient.sendTransaction({
             to: zeroAddress,

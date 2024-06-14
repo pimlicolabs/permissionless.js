@@ -1,5 +1,5 @@
 import { type SmartAccountClient, chainId } from "permissionless"
-import { type SmartAccount } from "permissionless/accounts"
+import type { SmartAccount } from "permissionless/accounts"
 import type { Chain, Transport } from "viem"
 import { createConnector } from "wagmi"
 

@@ -1,9 +1,3 @@
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    UserOperation
-} from "permissionless/types"
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
 import {
     type Chain,
     type PublicClient,
@@ -12,6 +6,12 @@ import {
     isHex
 } from "viem"
 import { beforeAll, describe, expect, test } from "vitest"
+import type { PimlicoBundlerClient } from "../../../permissionless/clients/pimlico"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    UserOperation
+} from "../../../permissionless/types"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../../permissionless/utils"
 import {
     ensureBundlerIsReady,
     ensurePaymasterIsReady,

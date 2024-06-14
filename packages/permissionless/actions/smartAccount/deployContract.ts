@@ -14,7 +14,7 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
-import { type Middleware } from "./prepareUserOperationRequest"
+import type { Middleware } from "./prepareUserOperationRequest"
 import { sendUserOperation } from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
@@ -59,7 +59,9 @@ export type DeployContractParametersWithPaymaster<
 export async function deployContract<
     entryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>

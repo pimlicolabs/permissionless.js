@@ -1,23 +1,13 @@
+import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    ENTRYPOINT_ADDRESS_V07,
-    type EstimateUserOperationGasReturnType,
-    getPackedUserOperation
-} from "permissionless"
-import type { PimlicoBundlerClient } from "permissionless/clients/pimlico"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    UserOperation
-} from "permissionless/types"
-import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils"
-import {
     type Account,
+    BaseError,
     type Chain,
     type GetContractReturnType,
     type Hex,
     type PublicClient,
-    RpcRequestError,
+    type RpcRequestError,
     type Transport,
     type WalletClient,
     concat,
@@ -25,18 +15,30 @@ import {
     toHex
 } from "viem"
 import { fromZodError } from "zod-validation-error"
+import {
+    ENTRYPOINT_ADDRESS_V07,
+    type EstimateUserOperationGasReturnType,
+    getPackedUserOperation
+} from "../../../permissionless"
+import type { PimlicoBundlerClient } from "../../../permissionless/clients/pimlico"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
+    UserOperation
+} from "../../../permissionless/types"
+import { ENTRYPOINT_ADDRESS_V06 } from "../../../permissionless/utils"
 import type {
     VERIFYING_PAYMASTER_V06_ABI,
     VERIFYING_PAYMASTER_V07_ABI
 } from "./helpers/abi"
 import {
     InternalBundlerError,
+    type JsonRpcSchema,
     RpcError,
+    ValidationErrors,
     jsonRpcSchema,
-    pmSponsorUserOperationParamsSchema,
-    returnInvalidRequestParams
+    pmSponsorUserOperationParamsSchema
 } from "./helpers/schema"
-import { isVersion06, isVersion07 } from "./helpers/utils"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"v0.6">,
@@ -45,9 +47,7 @@ const handleMethodV06 = async (
         typeof VERIFYING_PAYMASTER_V06_ABI,
         PublicClient<Transport, Chain>
     >,
-    walletClient: WalletClient<Transport, Chain, Account>,
-    reply: FastifyReply,
-    id: number
+    walletClient: WalletClient<Transport, Chain, Account>
 ) => {
     const opToSimulate = {
         ...userOperation,
@@ -65,19 +65,17 @@ const handleMethodV06 = async (
             userOperation: opToSimulate
         })
     } catch (e: unknown) {
-        if (e instanceof RpcRequestError) {
-            reply.status(400).send(new RpcError(e.details, e.code))
-            return
-        }
-        reply.status(500).send(new InternalBundlerError())
-        return
+        if (!(e instanceof BaseError)) throw new InternalBundlerError()
+        const err = e.walk() as RpcRequestError
+        throw err
     }
+
     const op = {
         ...opToSimulate,
         ...gasEstimates
     }
     const validAfter = 0
-    const validUntil = 0
+    const validUntil = Math.floor(Date.now() / 1000) + 6000
     op.paymasterAndData = concat([
         verifyingPaymasterV06.address,
         encodeAbiParameters(
@@ -119,11 +117,7 @@ const handleMethodV06 = async (
         paymasterAndData
     }
 
-    return {
-        jsonrpc: "2.0",
-        id,
-        result
-    }
+    return result
 }
 
 const handleMethodV07 = async (
@@ -133,9 +127,7 @@ const handleMethodV07 = async (
         typeof VERIFYING_PAYMASTER_V07_ABI,
         PublicClient<Transport, Chain>
     >,
-    walletClient: WalletClient<Transport, Chain, Account>,
-    reply: FastifyReply,
-    id: number
+    walletClient: WalletClient<Transport, Chain, Account>
 ) => {
     const opToSimulate = {
         ...userOperation,
@@ -152,13 +144,11 @@ const handleMethodV07 = async (
             userOperation: opToSimulate
         })
     } catch (e: unknown) {
-        if (e instanceof RpcRequestError) {
-            reply.status(400).send(new RpcError(e.details, e.code))
-            return
-        }
-        reply.status(500).send(new InternalBundlerError())
-        return
+        if (!(e instanceof BaseError)) throw new InternalBundlerError()
+        const err = e.walk() as RpcRequestError
+        throw err
     }
+
     const op = {
         ...opToSimulate,
         ...gasEstimates
@@ -216,11 +206,79 @@ const handleMethodV07 = async (
         paymasterData
     }
 
-    return {
-        jsonrpc: "2.0",
-        id,
-        result
+    return result
+}
+
+const handleMethod = async (
+    altoBundlerV07: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V07_TYPE>,
+    altoBundlerV06: PimlicoBundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE>,
+    verifyingPaymasterV07: GetContractReturnType<
+        typeof VERIFYING_PAYMASTER_V07_ABI,
+        PublicClient<Transport, Chain>
+    >,
+    verifyingPaymasterV06: GetContractReturnType<
+        typeof VERIFYING_PAYMASTER_V06_ABI,
+        PublicClient<Transport, Chain>
+    >,
+    walletClient: WalletClient<Transport, Chain, Account>,
+    parsedBody: JsonRpcSchema
+) => {
+    if (parsedBody.method === "pm_sponsorUserOperation") {
+        const params = pmSponsorUserOperationParamsSchema.safeParse(
+            parsedBody.params
+        )
+
+        if (!params.success) {
+            throw new RpcError(
+                fromZodError(params.error).message,
+                ValidationErrors.InvalidFields
+            )
+        }
+
+        const [userOperation, entryPoint] = params.data
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V07) {
+            return await handleMethodV07(
+                userOperation as UserOperation<"v0.7">,
+                altoBundlerV07,
+                verifyingPaymasterV07,
+                walletClient
+            )
+        }
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V06) {
+            return await handleMethodV06(
+                userOperation as UserOperation<"v0.6">,
+                altoBundlerV06,
+                verifyingPaymasterV06,
+                walletClient
+            )
+        }
+
+        throw new RpcError(
+            "EntryPoint not supported",
+            ValidationErrors.InvalidFields
+        )
     }
+
+    if (parsedBody.method === "pm_validateSponsorshipPolicies") {
+        return [
+            {
+                sponsorshipPolicyId: "sp_crazy_kangaroo",
+                data: {
+                    name: "Free ops for devs",
+                    author: "foo",
+                    icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+                    description: "Free userOps :)"
+                }
+            }
+        ]
+    }
+
+    throw new RpcError(
+        "Attempted to call an unknown method",
+        ValidationErrors.InvalidFields
+    )
 }
 
 export const createRpcHandler = (
@@ -236,92 +294,48 @@ export const createRpcHandler = (
     >,
     walletClient: WalletClient<Transport, Chain, Account>
 ) => {
-    return async (request: FastifyRequest, reply: FastifyReply) => {
-        console.log(`received request: ${JSON.stringify(request.body)}`)
-
+    return async (request: FastifyRequest, _reply: FastifyReply) => {
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
         if (!parsedBody.success) {
-            returnInvalidRequestParams(
-                reply,
-                fromZodError(parsedBody.error).message
+            throw new RpcError(
+                fromZodError(parsedBody.error).message,
+                ValidationErrors.InvalidFields
             )
-            return
         }
 
-        if (parsedBody.data.method === "pm_sponsorUserOperation") {
-            const params = pmSponsorUserOperationParamsSchema.safeParse(
-                parsedBody.data.params
+        try {
+            const result = await handleMethod(
+                altoBundlerV07,
+                altoBundlerV06,
+                verifyingPaymasterV07,
+                verifyingPaymasterV06,
+                walletClient,
+                parsedBody.data
             )
 
-            if (!params.success) {
-                returnInvalidRequestParams(
-                    reply,
-                    fromZodError(params.error).message
-                )
-                return
-            }
-
-            const [userOperation, entryPoint] = params.data
-
-            if (
-                entryPoint !== ENTRYPOINT_ADDRESS_V06 &&
-                entryPoint !== ENTRYPOINT_ADDRESS_V07
-            ) {
-                returnInvalidRequestParams(reply, "Unsupported EntryPoint")
-                return
-            }
-
-            if (isVersion07(userOperation)) {
-                return await handleMethodV07(
-                    userOperation,
-                    altoBundlerV07,
-                    verifyingPaymasterV07,
-                    walletClient,
-                    reply,
-                    parsedBody.data.id
-                )
-            }
-
-            if (isVersion06(userOperation)) {
-                return await handleMethodV06(
-                    userOperation,
-                    altoBundlerV06,
-                    verifyingPaymasterV06,
-                    walletClient,
-                    reply,
-                    parsedBody.data.id
-                )
-            }
-
-            reply
-                .status(400)
-                .send(new RpcError("Failed pm_sponsorUserOperation", 404))
-
-            return
-        }
-
-        if (parsedBody.data.method === "pm_validateSponsorshipPolicies") {
             return {
-                jsonrpc: parsedBody.data.jsonrpc,
+                jsonrpc: "2.0",
                 id: parsedBody.data.id,
-                result: [
-                    {
-                        sponsorshipPolicyId: "sp_crazy_kangaroo",
-                        data: {
-                            name: "Linea Christmas Week",
-                            author: "Linea",
-                            icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-                            description:
-                                "Linea is sponsoring the first 10 transactions for existing users between Christmas and New Year's Eve."
-                        }
-                    }
-                ]
+                result
+            }
+        } catch (err: unknown) {
+            console.log(`JSON.stringify(err): ${util.inspect(err)}`)
+
+            const error = {
+                // biome-ignore lint/suspicious/noExplicitAny:
+                message: (err as any).message,
+                // biome-ignore lint/suspicious/noExplicitAny:
+                data: (err as any).data,
+                // biome-ignore lint/suspicious/noExplicitAny:
+                code: (err as any).code ?? -32603
+            }
+
+            return {
+                jsonrpc: "2.0",
+                id: parsedBody.data.id,
+                error
             }
         }
-
-        // Endpoint not supported
-        console.log("Endpoint not supported")
-        reply.status(400).send(new RpcError("Endpoint not supported", 404))
     }
 }

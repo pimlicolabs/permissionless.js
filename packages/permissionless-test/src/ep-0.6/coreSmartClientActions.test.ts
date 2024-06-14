@@ -1,20 +1,4 @@
 import {
-    type BundlerClient,
-    ENTRYPOINT_ADDRESS_V06,
-    createSmartAccountClient
-} from "permissionless"
-import {
-    SignTransactionNotSupportedBySmartAccount,
-    signerToBiconomySmartAccount,
-    signerToEcdsaKernelSmartAccount,
-    signerToLightSmartAccount,
-    signerToSafeSmartAccount,
-    signerToSimpleSmartAccount
-} from "permissionless/accounts"
-import type { PimlicoPaymasterClient } from "permissionless/clients/pimlico"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "permissionless/types"
-import { getUserOperationHash } from "permissionless/utils"
-import {
     http,
     type BaseError,
     type Chain,
@@ -31,11 +15,27 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { beforeAll, describe, expect, test } from "vitest"
+import {
+    type BundlerClient,
+    ENTRYPOINT_ADDRESS_V06,
+    createSmartAccountClient
+} from "../../../permissionless"
+import {
+    SignTransactionNotSupportedBySmartAccount,
+    signerToBiconomySmartAccount,
+    signerToEcdsaKernelSmartAccount,
+    signerToLightSmartAccount,
+    signerToSafeSmartAccount,
+    signerToSimpleSmartAccount,
+    signerToTrustSmartAccount
+} from "../../../permissionless/accounts"
+import type { PimlicoPaymasterClient } from "../../../permissionless/clients/pimlico"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../../permissionless/types"
+import { getUserOperationHash } from "../../../permissionless/utils"
 import { ENTRYPOINT_V06_ABI } from "../../abi/entryPointV06Abi"
 import { SIMPLE_ACCOUNT_FACTORY_V06 } from "../constants"
 import type { AAParamType, ExistingSignerParamType } from "../types"
 import {
-    ALTO_RPC,
     ensureBundlerIsReady,
     ensurePaymasterIsReady,
     fund,
@@ -46,10 +46,24 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient,
     getSafeClient,
-    getSimpleAccountClient
+    getSimpleAccountClient,
+    getTrustAccountClient
 } from "../utils"
 
 describe.each([
+    {
+        name: "Trust",
+        getSmartAccountClient: async (
+            conf: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
+        ) => getTrustAccountClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToTrustSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        isEip1271Compliant: true
+    },
     {
         name: "LightAccount v1.1.0",
         getSmartAccountClient: async (
@@ -120,12 +134,7 @@ describe.each([
     }
 ])(
     "$name account should support all core functions",
-    ({
-        name,
-        getSmartAccountClient,
-        getSmartAccountSigner,
-        isEip1271Compliant
-    }) => {
+    ({ getSmartAccountClient, getSmartAccountSigner, isEip1271Compliant }) => {
         let publicClient: PublicClient<Transport, Chain>
         let bundlerClient: BundlerClient<ENTRYPOINT_ADDRESS_V06_TYPE, Chain>
         let paymasterClient: PimlicoPaymasterClient<ENTRYPOINT_ADDRESS_V06_TYPE>
