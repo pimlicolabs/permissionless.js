@@ -3,9 +3,13 @@ import {
     type GetGasPriceResponseReturnType,
     getUserOperationGasPrice
 } from "../../actions/etherspot/getUserOperationGasPrice"
+import {
+    type ArkaSponsorUserOperationParameters,
+    type SponsorUserOperationReturnType,
+    sponsorUserOperation
+} from "../../actions/etherspot/sponsorUserOperation"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
-import { type ArkaSponsorUserOperationParameters, sponsorUserOperation, type SponsorUserOperationReturnType } from "../../actions/etherspot/sponsorUserOperation"
 import { type ArkaPaymasterClient } from "../etherspot"
 
 export type EtherspotAccountActions = {
@@ -16,9 +20,9 @@ export type EtherspotAccountActions = {
 
 export const etherspotAccountActions =
     () =>
-        (client: Client): EtherspotAccountActions => ({
-            getUserOperationGasPrice: () => getUserOperationGasPrice(client)
-        })
+    (client: Client): EtherspotAccountActions => ({
+        getUserOperationGasPrice: () => getUserOperationGasPrice(client)
+    })
 
 export type ArkaPaymasterClientActions<entryPoint extends EntryPoint> = {
     /**
@@ -44,22 +48,19 @@ export type ArkaPaymasterClientActions<entryPoint extends EntryPoint> = {
      *
      */
     sponsorUserOperation: (
-        args: Omit<
-            ArkaSponsorUserOperationParameters<entryPoint>,
-            "entryPoint"
-        >
+        args: Omit<ArkaSponsorUserOperationParameters<entryPoint>, "entryPoint">
     ) => Promise<Prettify<SponsorUserOperationReturnType<entryPoint>>>
 }
 
 export const arkaPaymasterActions =
     <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
-        (client: Client): ArkaPaymasterClientActions<entryPoint> => ({
-            sponsorUserOperation: async (args) =>
-                sponsorUserOperation<entryPoint>(
-                    client as ArkaPaymasterClient<entryPoint>,
-                    {
-                        ...args,
-                        entryPoint: entryPointAddress
-                    }
-                )
-        })
+    (client: Client): ArkaPaymasterClientActions<entryPoint> => ({
+        sponsorUserOperation: async (args) =>
+            sponsorUserOperation<entryPoint>(
+                client as ArkaPaymasterClient<entryPoint>,
+                {
+                    ...args,
+                    entryPoint: entryPointAddress
+                }
+            )
+    })

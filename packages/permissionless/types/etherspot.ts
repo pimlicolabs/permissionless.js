@@ -1,5 +1,5 @@
-import type { PartialBy } from "viem/types/utils"
 import type { Address, Hex } from "viem"
+import type { PartialBy } from "viem/types/utils"
 import type { EntryPoint, GetEntryPointVersion } from "./entrypoint"
 import type { UserOperationWithBigIntAsHex } from "./userOperation"
 
@@ -23,7 +23,11 @@ interface ArkaPaymasterContextType {
 export type ArkaPaymasterContext =
     | (ArkaPaymasterContextType & { type: "erc20"; token: string })
     | (ArkaPaymasterContextType & { type: "multitoken"; token: string })
-    | (ArkaPaymasterContextType & { type: "sponsor"; validUntil: number, validAfter: number })
+    | (ArkaPaymasterContextType & {
+          type: "sponsor"
+          validUntil: number
+          validAfter: number
+      })
     | (ArkaPaymasterContextType & { type: "sponsor" })
 
 export type ArkaPaymasterRpcSchema<entryPoint extends EntryPoint> = [

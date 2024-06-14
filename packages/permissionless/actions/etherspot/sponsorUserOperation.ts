@@ -3,34 +3,34 @@ import type { PartialBy } from "viem/types/utils"
 import type { Prettify } from "../../types/"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint,
+    EntryPoint
 } from "../../types/entrypoint"
-import { type ArkaPaymasterContext, type ArkaPaymasterRpcSchema } from "../../types/etherspot"
-import type {
-    UserOperation,
-} from "../../types/userOperation"
+import {
+    type ArkaPaymasterContext,
+    type ArkaPaymasterRpcSchema
+} from "../../types/etherspot"
+import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
 import { ENTRYPOINT_ADDRESS_V06 } from "../../utils/getEntryPointVersion"
 
-export type ArkaSponsorUserOperationParameters<
-    entryPoint extends EntryPoint
-> = {
-    userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
-        ? PartialBy<
-              UserOperation<"v0.6">,
-              "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
-          >
-        : PartialBy<
-              UserOperation<"v0.7">,
-              | "callGasLimit"
-              | "preVerificationGas"
-              | "verificationGasLimit"
-              | "paymasterVerificationGasLimit"
-              | "paymasterPostOpGasLimit"
-          >
-    entryPoint: entryPoint
-    context: ArkaPaymasterContext
-}
+export type ArkaSponsorUserOperationParameters<entryPoint extends EntryPoint> =
+    {
+        userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+            ? PartialBy<
+                  UserOperation<"v0.6">,
+                  "callGasLimit" | "preVerificationGas" | "verificationGasLimit"
+              >
+            : PartialBy<
+                  UserOperation<"v0.7">,
+                  | "callGasLimit"
+                  | "preVerificationGas"
+                  | "verificationGasLimit"
+                  | "paymasterVerificationGasLimit"
+                  | "paymasterPostOpGasLimit"
+              >
+        entryPoint: entryPoint
+        context: ArkaPaymasterContext
+    }
 
 export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
@@ -52,7 +52,7 @@ export type SponsorUserOperationReturnType<entryPoint extends EntryPoint> =
 
 /**
  * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
- * 
+ *
  * @param args {@link ArkaSponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
  * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}
  *

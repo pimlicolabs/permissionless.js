@@ -9,12 +9,15 @@ import type {
 import { createClient } from "viem"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../types/"
 import type { EntryPoint } from "../types/entrypoint"
-import { type ArkaPaymasterRpcSchema, type EtherspotBundlerRpcSchema } from "../types/etherspot"
 import {
-    type EtherspotAccountActions,
-    etherspotAccountActions,
+    type ArkaPaymasterRpcSchema,
+    type EtherspotBundlerRpcSchema
+} from "../types/etherspot"
+import {
     type ArkaPaymasterClientActions,
+    type EtherspotAccountActions,
     arkaPaymasterActions,
+    etherspotAccountActions
 } from "./decorators/etherspot"
 
 export type EtherspotBundlerClient = Client<
@@ -91,8 +94,7 @@ export const createArkaPaymasterClient = <
     chain extends Chain | undefined = undefined
 >(
     parameters: PublicClientConfig<transport, chain> & {
-        entryPoint: entryPoint,
-
+        entryPoint: entryPoint
     }
 ): ArkaPaymasterClient<entryPoint> => {
     const { key = "public", name = "Arka Paymaster Client" } = parameters
@@ -104,4 +106,3 @@ export const createArkaPaymasterClient = <
     })
     return client.extend(arkaPaymasterActions(parameters.entryPoint))
 }
-

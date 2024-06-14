@@ -31,10 +31,10 @@ import {
 } from "../types"
 import { EtherspotWalletFactoryAbi } from "./abi/EtherspotWalletFactoryAbi"
 import {
+    DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
     Networks,
-    VALIDATOR_TYPE,
-    supportedNetworks
+    VALIDATOR_TYPE
 } from "./constants"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getInitMSAData } from "./utils/getInitMSAData"
@@ -98,23 +98,19 @@ const getDefaultAddresses = (
     chainId: number,
     {
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        accountLogicAddress: _accountLogicAddress,
-        factoryAddress: _factoryAddress,
-        metaFactoryAddress: _metaFactoryAddress
+        metaFactoryAddress: _metaFactoryAddress,
+        bootstrapAddress: _bootstrapAddress
     }: Partial<CONTRACT_ADDRESSES>
 ): CONTRACT_ADDRESSES => {
-    if (!supportedNetworks.includes(chainId)) {
-        throw new Error(`Unsupported network with chainId: ${chainId}`)
-    }
-
-    const addresses = Networks[chainId]
+    const addresses = Networks[chainId] ?? DEFAULT_CONTRACT_ADDRESS
     const ecdsaValidatorAddress =
         _ecdsaValidatorAddress ?? addresses.multipleOwnerECDSAValidator
     const metaFactoryAddress =
         _metaFactoryAddress ??
         addresses?.modularEtherspotWalletFactory ??
         zeroAddress
-    const bootstrapAddress = addresses.bootstrap ?? zeroAddress
+    const bootstrapAddress =
+        _bootstrapAddress ?? addresses.bootstrap ?? zeroAddress
 
     return {
         ecdsaValidatorAddress,
@@ -165,9 +161,8 @@ const getInitialisationData = <entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE>({
  * @param entryPoint
  * @param owner
  * @param index
- * @param factoryAddress
- * @param accountLogicAddress
  * @param ecdsaValidatorAddress
+ * @param bootstrapAddress
  */
 const getAccountInitCode = async ({
     entryPoint: entryPointAddress,
@@ -259,6 +254,7 @@ export type SignerToEtherspotSmartAccountParameters<
     accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
     deployedAccountAddress?: Address
+    bootstrapAddress?: Address
 }>
 /**
  * Build a etherspot smart account from a private key, that use the ECDSA signer behind the scene
@@ -270,6 +266,7 @@ export type SignerToEtherspotSmartAccountParameters<
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
  * @param deployedAccountAddress
+ * @param bootstrapAddress
  */
 export async function signerToEtherspotSmartAccount<
     TTransport extends Transport = Transport,
@@ -286,7 +283,8 @@ export async function signerToEtherspotSmartAccount<
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
-        ecdsaValidatorAddress: _ecdsaValidatorAddress
+        ecdsaValidatorAddress: _ecdsaValidatorAddress,
+        bootstrapAddress: _bootstrapAddress
     }: SignerToEtherspotSmartAccountParameters<
         ENTRYPOINT_ADDRESS_V07_TYPE,
         TSource,
@@ -305,9 +303,8 @@ export async function signerToEtherspotSmartAccount<
     const { ecdsaValidatorAddress, metaFactoryAddress, bootstrapAddress } =
         getDefaultAddresses(chainId, {
             ecdsaValidatorAddress: _ecdsaValidatorAddress,
-            accountLogicAddress: _accountLogicAddress,
-            factoryAddress: _factoryAddress,
-            metaFactoryAddress: _metaFactoryAddress
+            metaFactoryAddress: _metaFactoryAddress,
+            bootstrapAddress: _bootstrapAddress
         })
 
     // Get the private key related account
