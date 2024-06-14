@@ -145,14 +145,6 @@ export const Networks: {
         multipleOwnerECDSAValidator:
             "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143"
     },
-    [20197]: {
-        modularEtherspotWalletFactory:
-            "0xf80D543Ca10B48AF07c65Ff508605c1737EFAF3F",
-        modularEtherspotWallet: "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9",
-        bootstrap: "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066",
-        multipleOwnerECDSAValidator:
-            "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143"
-    },
     [5000]: {
         modularEtherspotWalletFactory:
             "0xf80D543Ca10B48AF07c65Ff508605c1737EFAF3F",
@@ -288,13 +280,5 @@ export const Networks: {
         bootstrap: "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066",
         multipleOwnerECDSAValidator:
             "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143"
-    },
-    [51]: {
-        modularEtherspotWalletFactory:
-            "0x3aa509fd07B09d5a8b944c96ae6eE767fe75C465",
-        modularEtherspotWallet: "0x15A58094F4DE350ff7F3Ea94B5051a8a4c938Ad5",
-        bootstrap: "0xCF9bf036D63641003566FD8B10817Dd7168ac5Cb",
-        multipleOwnerECDSAValidator:
-            "0x61a5eb96F597c72cd24a32D4e241fCA5b22f3dDb"
     }
 }
