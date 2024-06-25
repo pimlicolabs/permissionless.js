@@ -1,9 +1,10 @@
 import { type Address, concatHex, maxUint16, pad, toHex } from "viem"
 import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants"
 import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
+import type { EntryPoint } from "../../../types"
 
 export const getNonceKeyWithEncoding = (
-    accountVerion: KernelVersion,
+    accountVerion: KernelVersion<EntryPoint>,
     validatorAddress: Address,
     nonceKey = 0n
 ) => {

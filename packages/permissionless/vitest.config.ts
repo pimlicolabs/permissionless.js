@@ -3,9 +3,6 @@ import { defineConfig } from "vitest/config"
 
 export default defineConfig({
     test: {
-        alias: {
-            permissionless: join(__dirname, "./")
-        },
         coverage: {
             all: true,
             provider: "v8",

@@ -10,7 +10,9 @@ import {
     type Transport,
     type TypedDataDefinition,
     concat,
-    encodeAbiParameters
+    encodeAbiParameters,
+    type PublicRpcSchema,
+    type PublicActions
 } from "viem"
 import { toAccount } from "viem/accounts"
 import type { UserOperation } from "../types"
@@ -48,7 +50,7 @@ export function toSmartAccount<
     signTypedData
 }: TAccountSource & {
     source: TSource
-    client: Client<transport, chain>
+    client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
     entryPoint: TEntryPoint
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
@@ -163,5 +165,5 @@ export function toSmartAccount<
         getDummySignature,
         encodeDeployCallData,
         signUserOperation
-    } as SmartAccount<TEntryPoint, TSource, transport, chain, TAbi>
+    }
 }

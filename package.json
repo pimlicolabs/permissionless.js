@@ -10,7 +10,6 @@
     "type": "module",
     "sideEffects": false,
     "devDependencies": {
-        "vitest": "^1.2.0",
         "@vitest/coverage-v8": "^1.2.0",
         "@biomejs/biome": "^1.0.0",
         "@changesets/changelog-git": "^0.1.14",
@@ -61,6 +60,7 @@
         "async-mutex": "^0.5.0",
         "get-port": "^7.0.0",
         "tsc-alias": "^1.8.8",
-        "viem": "^2.13.8"
+        "vitest": "^1.2.0",
+        "viem": "^2.14.1"
     }
 }

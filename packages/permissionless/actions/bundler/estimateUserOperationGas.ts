@@ -1,5 +1,5 @@
 import type { Account, BaseError, Chain, Client, Hex, Transport } from "viem"
-import type { PartialBy } from "viem/types/utils"
+import type { PartialBy } from "viem/chains"
 import type { BundlerClient } from "../../clients/createBundlerClient"
 import type { Prettify } from "../../types/"
 import type { BundlerRpcSchema, StateOverrides } from "../../types/bundler"

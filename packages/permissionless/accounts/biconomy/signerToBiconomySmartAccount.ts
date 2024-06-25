@@ -1,4 +1,4 @@
-import type { TypedData } from "viem"
+import type { PublicActions, PublicRpcSchema, TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -214,7 +214,13 @@ export async function signerToBiconomySmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         address,

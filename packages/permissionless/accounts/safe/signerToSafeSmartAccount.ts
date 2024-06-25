@@ -20,7 +20,9 @@ import {
     pad,
     toBytes,
     toHex,
-    zeroAddress
+    zeroAddress,
+    type PublicRpcSchema,
+    type PublicActions
 } from "viem"
 import {
     getChainId,
@@ -47,6 +49,7 @@ import {
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
+import { encode7579CallData } from "../../utils/encodeCallData"
 
 export type SafeVersion = "1.4.1"
 
@@ -595,6 +598,7 @@ export type SignerToSafeSmartAccountParameters<
     saltNonce?: bigint
     validUntil?: number
     validAfter?: number
+    erc7579?: boolean
     setupTransactions?: {
         to: Address
         data: Address
@@ -615,7 +619,13 @@ export async function signerToSafeSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         address,
@@ -631,6 +641,7 @@ export async function signerToSafeSmartAccount<
         validUntil = 0,
         validAfter = 0,
         safeModules = [],
+        erc7579,
         setupTransactions = []
     }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
@@ -804,12 +815,6 @@ export async function signerToSafeSmartAccount<
                     }
                 ]
 
-                signatures.sort((left, right) =>
-                    left.signer
-                        .toLowerCase()
-                        .localeCompare(right.signer.toLowerCase())
-                )
-
                 const signatureBytes = concat(signatures.map((sig) => sig.data))
 
                 return encodePacked(
@@ -862,12 +867,26 @@ export async function signerToSafeSmartAccount<
                 )
             },
             async encodeCallData(args) {
+                const isArray = Array.isArray(args)
+
+                if (erc7579) {
+                    return encode7579CallData({
+                        mode: {
+                            callType: isArray ? "batchcall" : "call",
+                            revertOnError: false,
+                            modeSelector: "0x",
+                            modeData: "0x"
+                        },
+                        callData: args as any
+                    })
+                }
+
                 let to: Address
                 let value: bigint
                 let data: Hex
                 let operationType = 0
 
-                if (Array.isArray(args)) {
+                if (isArray) {
                     const argsArray = args as {
                         to: Address
                         value: bigint

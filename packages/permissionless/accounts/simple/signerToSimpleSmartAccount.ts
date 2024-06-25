@@ -6,7 +6,9 @@ import {
     type LocalAccount,
     type Transport,
     concatHex,
-    encodeFunctionData
+    encodeFunctionData,
+    type PublicRpcSchema,
+    type PublicActions
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
@@ -142,7 +144,13 @@ export async function signerToSimpleSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         factoryAddress: _factoryAddress,

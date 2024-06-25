@@ -11,6 +11,7 @@ import { KernelV3ExecuteAbi } from "../abi/KernelV3AccountAbi"
 import { CALL_TYPE, EXEC_TYPE } from "../constants"
 import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 import { getExecMode } from "./getExecMode"
+import type { EntryPoint } from "../../../types"
 
 export const encodeCallData = (
     _tx:
@@ -24,7 +25,7 @@ export const encodeCallData = (
               value: bigint
               data: Hex
           }[],
-    accountVersion: KernelVersion
+    accountVersion: KernelVersion<EntryPoint>
 ) => {
     if (accountVersion === "0.2.2") {
         if (Array.isArray(_tx)) {

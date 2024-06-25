@@ -9,7 +9,9 @@ import {
     type TypedDataDefinition,
     concatHex,
     hashMessage,
-    hashTypedData
+    hashTypedData,
+    type PublicRpcSchema,
+    type PublicActions
 } from "viem"
 import { getChainId } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
@@ -100,7 +102,13 @@ export async function signerToTrustSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         factoryAddress = TRUST_ADDRESSES.factoryAddress,

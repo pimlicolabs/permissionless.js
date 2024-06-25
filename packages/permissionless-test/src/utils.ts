@@ -9,7 +9,8 @@ import {
     createClient,
     createPublicClient,
     createWalletClient,
-    parseEther
+    parseEther,
+    getAddress
 } from "viem"
 import {
     generatePrivateKey,
@@ -23,7 +24,8 @@ import {
     type SmartAccountClient,
     createBundlerClient,
     createSmartAccountClient,
-    getEntryPointVersion
+    getEntryPointVersion,
+    ENTRYPOINT_ADDRESS_V07
 } from "../../permissionless"
 import {
     type SafeSmartAccount,
@@ -45,6 +47,7 @@ import {
 import { paymasterActionsEip7677 } from "../../permissionless/experimental"
 import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
+    ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint
 } from "../../permissionless/types"
 import {
@@ -317,23 +320,32 @@ export const getKernelEcdsaClient = async <T extends EntryPoint>({
     paymasterClient,
     anvilRpc,
     altoRpc,
-    privateKey = generatePrivateKey()
-}: AAParamType<T>): Promise<
+    privateKey = generatePrivateKey(),
+    erc7579
+}: AAParamType<T> & { erc7579?: boolean }): Promise<
     SmartAccountClient<T, Transport, Chain, KernelEcdsaSmartAccount<T>>
 > => {
     const publicClient = getPublicClient(anvilRpc)
-    const kernelEcdsaAccount = await signerToEcdsaKernelSmartAccount(
-        publicClient,
-        {
-            entryPoint,
-            signer: privateKeyToAccount(privateKey)
-        }
-    )
 
+    if (erc7579 && entryPoint === ENTRYPOINT_ADDRESS_V06) {
+        throw new Error("ERC7579 is not supported for V06")
+    }
+
+    const kernelEcdsaAccount =
+        erc7579 && entryPoint === ENTRYPOINT_ADDRESS_V07
+            ? await signerToEcdsaKernelSmartAccount(publicClient, {
+                  entryPoint: entryPoint as ENTRYPOINT_ADDRESS_V07_TYPE,
+                  signer: privateKeyToAccount(privateKey),
+                  version: "0.3.0"
+              })
+            : await signerToEcdsaKernelSmartAccount(publicClient, {
+                  entryPoint,
+                  signer: privateKeyToAccount(privateKey)
+              })
     // @ts-ignore
     return createSmartAccountClient({
         chain: foundry,
-        account: kernelEcdsaAccount,
+        account: kernelEcdsaAccount as KernelEcdsaSmartAccount<T>,
         bundlerTransport: http(altoRpc),
         middleware: {
             // @ts-ignore
@@ -348,7 +360,8 @@ export const getSafeClient = async <T extends EntryPoint>({
     paymasterClient,
     anvilRpc,
     altoRpc,
-    privateKey = generatePrivateKey()
+    privateKey = generatePrivateKey(),
+    erc7579
 }: {
     setupTransactions?: {
         to: Address
@@ -360,13 +373,22 @@ export const getSafeClient = async <T extends EntryPoint>({
     entryPoint: T
     paymasterClient?: PimlicoPaymasterClient<T>
     privateKey?: Hex
+    erc7579?: boolean
 }): Promise<SmartAccountClient<T, Transport, Chain, SafeSmartAccount<T>>> => {
     const publicClient = getPublicClient(anvilRpc)
+
+    // const safeModules: Address[] = erc7579
+    //     ? [getAddress("0xbaCA6f74a5549368568f387FD989C279f940f1A5")]
+    //     : []
+
     const safeSmartAccount = await signerToSafeSmartAccount(publicClient, {
         entryPoint,
         signer: privateKeyToAccount(privateKey),
         safeVersion: "1.4.1",
         saltNonce: 420n,
+        safe4337ModuleAddress: getAddress(
+            "0xbaCA6f74a5549368568f387FD989C279f940f1A5"
+        ),
         setupTransactions
     })
 
@@ -414,7 +436,8 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
-        isEip1271Compliant: true
+        isEip1271Compliant: true,
+        supportsErc7579: false
     },
     {
         name: "LightAccount v1.1.0",
@@ -430,6 +453,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsErc7579: false,
         isEip1271Compliant: true
     },
     {
@@ -445,6 +469,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsErc7579: false,
         isEip1271Compliant: false
     },
     {
@@ -458,8 +483,12 @@ export const getCoreSmartAccounts = () => [
                 signer: privateKeyToAccount(conf.privateKey),
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsErc7579: false,
         isEip1271Compliant: true
     },
     {
@@ -481,6 +510,7 @@ export const getCoreSmartAccounts = () => [
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         supportsEntryPointV06: true,
+        supportsErc7579: false,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
     },
@@ -496,7 +526,11 @@ export const getCoreSmartAccounts = () => [
                 entryPoint: ENTRYPOINT_ADDRESS_V06,
                 safeVersion: "1.4.1"
             }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getSafeClient({ ...conf, erc7579: true }),
         supportsEntryPointV06: true,
+        supportsErc7579: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     }

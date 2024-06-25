@@ -1,5 +1,4 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { IsUndefined } from "viem/types/utils"
 import type { SmartAccount } from "../accounts/types"
 import type { EntryPoint } from "./entrypoint"
 import type { UserOperation } from "./userOperation"
@@ -13,6 +12,8 @@ export type {
 } from "./entrypoint"
 
 export type { PackedUserOperation } from "./userOperation"
+
+export type IsUndefined<T> = [undefined] extends [T] ? true : false
 
 export type GetAccountParameterWithClient<
     TTransport extends Transport = Transport,
