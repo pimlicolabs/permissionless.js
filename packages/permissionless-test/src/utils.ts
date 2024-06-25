@@ -9,8 +9,8 @@ import {
     createClient,
     createPublicClient,
     createWalletClient,
-    parseEther,
-    getAddress
+    getAddress,
+    parseEther
 } from "viem"
 import {
     generatePrivateKey,
@@ -21,11 +21,11 @@ import { foundry } from "viem/chains"
 import {
     type BundlerClient,
     ENTRYPOINT_ADDRESS_V06,
+    ENTRYPOINT_ADDRESS_V07,
     type SmartAccountClient,
     createBundlerClient,
     createSmartAccountClient,
-    getEntryPointVersion,
-    ENTRYPOINT_ADDRESS_V07
+    getEntryPointVersion
 } from "../../permissionless"
 import {
     type SafeSmartAccount,

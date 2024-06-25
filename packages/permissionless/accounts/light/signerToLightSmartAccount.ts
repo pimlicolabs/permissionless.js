@@ -4,15 +4,15 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    type PublicActions,
+    type PublicRpcSchema,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
     concatHex,
     encodeFunctionData,
     hashMessage,
-    hashTypedData,
-    type PublicRpcSchema,
-    type PublicActions
+    hashTypedData
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"

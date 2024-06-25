@@ -1,4 +1,6 @@
+import { http, getAddress, zeroAddress } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -6,13 +8,11 @@ import {
     getPimlicoPaymasterClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
-import { accountId } from "./accountId"
-import { getAddress, http, zeroAddress } from "viem"
-import { erc7579Actions } from "../../clients/decorators/erc7579"
 import { signerToSafeSmartAccount } from "../../accounts"
 import { createSmartAccountClient } from "../../clients/createSmartAccountClient"
-import { foundry } from "viem/chains"
+import { erc7579Actions } from "../../clients/decorators/erc7579"
+import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { accountId } from "./accountId"
 
 describe.each(getCoreSmartAccounts())(
     "accountId $name",

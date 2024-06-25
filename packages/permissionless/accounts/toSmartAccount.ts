@@ -6,13 +6,13 @@ import {
     type CustomSource,
     type EncodeDeployDataParameters,
     type Hex,
+    type PublicActions,
+    type PublicRpcSchema,
     type SignableMessage,
     type Transport,
     type TypedDataDefinition,
     concat,
-    encodeAbiParameters,
-    type PublicRpcSchema,
-    type PublicActions
+    encodeAbiParameters
 } from "viem"
 import { toAccount } from "viem/accounts"
 import type { UserOperation } from "../types"

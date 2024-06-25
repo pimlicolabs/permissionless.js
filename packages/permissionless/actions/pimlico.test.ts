@@ -1,13 +1,3 @@
-import { describe, expectTypeOf, test } from "vitest"
-import {
-    type PimlicoBundlerActions,
-    getUserOperationGasPrice,
-    getUserOperationStatus,
-    pimlicoBundlerActions,
-    sendCompressedUserOperation,
-    sponsorUserOperation,
-    validateSponsorshipPolicies
-} from "./pimlico"
 import type {
     Account,
     Address,
@@ -17,9 +7,19 @@ import type {
     Hex,
     Transport
 } from "viem"
+import { describe, expectTypeOf, test } from "vitest"
+import type { EntryPoint } from "../types/entrypoint"
 import type { PimlicoBundlerRpcSchema } from "../types/pimlico"
 import type { UserOperation } from "../types/userOperation"
-import type { EntryPoint } from "../types/entrypoint"
+import {
+    type PimlicoBundlerActions,
+    getUserOperationGasPrice,
+    getUserOperationStatus,
+    pimlicoBundlerActions,
+    sendCompressedUserOperation,
+    sponsorUserOperation,
+    validateSponsorshipPolicies
+} from "./pimlico"
 
 describe("pimlico", () => {
     test("getUserOperationGasPrice", () => {

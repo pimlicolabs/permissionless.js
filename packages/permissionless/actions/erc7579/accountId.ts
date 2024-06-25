@@ -1,16 +1,16 @@
 import {
-    ContractFunctionExecutionError,
-    decodeFunctionResult,
-    encodeFunctionData,
     type Chain,
     type Client,
-    type Transport
+    ContractFunctionExecutionError,
+    type Transport,
+    decodeFunctionResult,
+    encodeFunctionData
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
+import type { GetAccountParameter } from "../../types"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
-import type { GetAccountParameter } from "../../types"
 
 // export async function accountId<
 //     TEntryPoint extends EntryPoint,

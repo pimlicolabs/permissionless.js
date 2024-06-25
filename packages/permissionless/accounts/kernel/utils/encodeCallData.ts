@@ -6,12 +6,12 @@ import {
     encodeFunctionData,
     toHex
 } from "viem"
+import type { EntryPoint } from "../../../types"
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi"
 import { KernelV3ExecuteAbi } from "../abi/KernelV3AccountAbi"
 import { CALL_TYPE, EXEC_TYPE } from "../constants"
 import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 import { getExecMode } from "./getExecMode"
-import type { EntryPoint } from "../../../types"
 
 export const encodeCallData = (
     _tx:

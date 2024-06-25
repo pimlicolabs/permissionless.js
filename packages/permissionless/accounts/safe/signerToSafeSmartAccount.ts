@@ -4,6 +4,8 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    type PublicActions,
+    type PublicRpcSchema,
     type SignableMessage,
     type Transport,
     type TypedData,
@@ -20,9 +22,7 @@ import {
     pad,
     toBytes,
     toHex,
-    zeroAddress,
-    type PublicRpcSchema,
-    type PublicActions
+    zeroAddress
 } from "viem"
 import {
     getChainId,
@@ -37,6 +37,7 @@ import type {
     Prettify
 } from "../../types"
 import type { EntryPoint, UserOperation } from "../../types"
+import { encode7579CallData } from "../../utils/encodeCallData"
 import {
     getEntryPointVersion,
     isUserOperationVersion06,
@@ -49,7 +50,6 @@ import {
     type SmartAccount,
     type SmartAccountSigner
 } from "../types"
-import { encode7579CallData } from "../../utils/encodeCallData"
 
 export type SafeVersion = "1.4.1"
 

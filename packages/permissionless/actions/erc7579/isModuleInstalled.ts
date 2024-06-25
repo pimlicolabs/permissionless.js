@@ -1,11 +1,11 @@
-import type { Chain, Client, Transport, Hex, Address } from "viem"
+import type { Address, Chain, Client, Hex, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import { parseModuleTypeId, type moduleType } from "./supportsModule"
+import { type moduleType, parseModuleTypeId } from "./supportsModule"
 
 export type IsModuleInstalledParameters<
     entryPoint extends EntryPoint,

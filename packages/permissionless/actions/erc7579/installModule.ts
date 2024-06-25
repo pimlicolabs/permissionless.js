@@ -1,20 +1,20 @@
 import {
-    encodeFunctionData,
+    type Address,
     type Chain,
     type Client,
-    type Transport,
     type Hex,
-    type Address
+    type Transport,
+    encodeFunctionData
 } from "viem"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
-import { getAction } from "viem/utils"
-import { sendUserOperation } from "../smartAccount/sendUserOperation"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import { parseModuleTypeId, type moduleType } from "./supportsModule"
+import { sendUserOperation } from "../smartAccount/sendUserOperation"
+import { type moduleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
     entryPoint extends EntryPoint,

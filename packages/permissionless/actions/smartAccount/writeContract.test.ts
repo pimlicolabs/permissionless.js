@@ -1,4 +1,4 @@
-import { getAddress, type Chain, type Client, type Transport } from "viem"
+import { type Chain, type Client, type Transport, getAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
