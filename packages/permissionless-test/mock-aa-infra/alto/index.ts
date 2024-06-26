@@ -19,6 +19,7 @@ import {
     ENTRY_POINT_SIMULATIONS_CREATECALL,
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
+    ERC_7579_TEST_MODULE_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
     KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
     KERNEL_V06_FACTORY_CREATECALL,
@@ -239,6 +240,12 @@ export const setupContracts = async (rpc: string) => {
             data: TRUST_DEFAULT_FALLBACK_HANDLER,
             gas: 15_000_000n,
             nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ERC_7579_TEST_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
     ])
 
@@ -403,6 +410,7 @@ export const setupContracts = async (rpc: string) => {
         "0x0B9504140771C3688Ff041917192277D2f52E1e0", // Trust DiamondCutFacet
         "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
         "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
-        "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D" // Trust DefaultFallbackHandler
+        "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
+        "0xc98B026383885F41d9a995f85FC480E9bb8bB891" // ERC7579 Test Module
     ])
 }

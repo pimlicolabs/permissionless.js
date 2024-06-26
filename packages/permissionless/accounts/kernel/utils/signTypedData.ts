@@ -17,6 +17,7 @@ import {
     signMessage as _signMessage,
     signTypedData as _signTypedData
 } from "viem/actions"
+import { isKernelV2 } from "./isKernelV2"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
 export async function signTypedData<
@@ -35,7 +36,7 @@ export async function signTypedData<
         accountVersion,
         ...typedData
     } = parameters as unknown as SignTypedDataParameters & WrapMessageHashParams
-    if (accountVersion === "0.2.2") {
+    if (isKernelV2(accountVersion)) {
         return _signTypedData(client, { account: account_, ...typedData })
     }
     const { message, primaryType, types: _types, domain } = typedData

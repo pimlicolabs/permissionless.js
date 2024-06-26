@@ -1,32 +1,30 @@
 import type { Address, Chain, Client, Hex, Transport } from "viem"
 import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter, Prettify } from "../../types/"
+import type { GetAccountParameter } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
-import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
 import { type moduleType, parseModuleTypeId } from "./supportsModule"
 
 export type IsModuleInstalledParameters<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<entryPoint, TAccount> & {
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: moduleType
     address: Address
     callData: Hex
-} & Middleware<entryPoint>
+}
 
 export async function isModuleInstalled<
-    entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    parameters: Prettify<IsModuleInstalledParameters<entryPoint>>
+    client: Client<TTransport, TChain, TSmartAccount>,
+    parameters: IsModuleInstalledParameters<TEntryPoint, TSmartAccount>
 ): Promise<boolean> {
     const { account: account_ = client.account, address, callData } = parameters
 
@@ -36,7 +34,7 @@ export async function isModuleInstalled<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const publicClient = account.client
 

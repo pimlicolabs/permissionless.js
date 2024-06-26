@@ -377,18 +377,15 @@ export const getSafeClient = async <T extends EntryPoint>({
 }): Promise<SmartAccountClient<T, Transport, Chain, SafeSmartAccount<T>>> => {
     const publicClient = getPublicClient(anvilRpc)
 
-    // const safeModules: Address[] = erc7579
-    //     ? [getAddress("0xbaCA6f74a5549368568f387FD989C279f940f1A5")]
-    //     : []
-
     const safeSmartAccount = await signerToSafeSmartAccount(publicClient, {
         entryPoint,
         signer: privateKeyToAccount(privateKey),
         safeVersion: "1.4.1",
         saltNonce: 420n,
-        safe4337ModuleAddress: getAddress(
-            "0xbaCA6f74a5549368568f387FD989C279f940f1A5"
-        ),
+        safe4337ModuleAddress: erc7579
+            ? getAddress("0x50Da3861d482116c5F2Ea6d673a58CedB786Dc1C")
+            : undefined,
+        erc7579,
         setupTransactions
     })
 
@@ -436,8 +433,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
-        isEip1271Compliant: true,
-        supportsErc7579: false
+        isEip1271Compliant: true
     },
     {
         name: "LightAccount v1.1.0",
@@ -453,7 +449,6 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
-        supportsErc7579: false,
         isEip1271Compliant: true
     },
     {
@@ -469,7 +464,6 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
-        supportsErc7579: false,
         isEip1271Compliant: false
     },
     {
@@ -483,12 +477,11 @@ export const getCoreSmartAccounts = () => [
                 signer: privateKeyToAccount(conf.privateKey),
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
-        getErc7579SmartAccountClient: async <T extends EntryPoint>(
-            conf: AAParamType<T>
-        ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
+        // getErc7579SmartAccountClient: async <T extends EntryPoint>(
+        //     conf: AAParamType<T>
+        // ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
-        supportsErc7579: false,
         isEip1271Compliant: true
     },
     {
@@ -510,7 +503,6 @@ export const getCoreSmartAccounts = () => [
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         supportsEntryPointV06: true,
-        supportsErc7579: false,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
     },
@@ -530,7 +522,6 @@ export const getCoreSmartAccounts = () => [
             conf: AAParamType<T>
         ) => getSafeClient({ ...conf, erc7579: true }),
         supportsEntryPointV06: true,
-        supportsErc7579: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     }

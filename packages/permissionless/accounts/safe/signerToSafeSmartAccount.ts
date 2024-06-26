@@ -752,6 +752,7 @@ export async function signerToSafeSmartAccount<
             entryPoint: entryPointAddress,
             source: "SafeSmartAccount",
             async getNonce() {
+                // TODO: Allow dapp developers to specify custom nonce key (eg: Validator address)
                 return getAccountNonce(client, {
                     sender: accountAddress,
                     entryPoint: entryPointAddress

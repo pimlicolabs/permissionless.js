@@ -12,6 +12,7 @@ import { KernelV3ExecuteAbi } from "../abi/KernelV3AccountAbi"
 import { CALL_TYPE, EXEC_TYPE } from "../constants"
 import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 import { getExecMode } from "./getExecMode"
+import { isKernelV2 } from "./isKernelV2"
 
 export const encodeCallData = (
     _tx:
@@ -27,7 +28,7 @@ export const encodeCallData = (
           }[],
     accountVersion: KernelVersion<EntryPoint>
 ) => {
-    if (accountVersion === "0.2.2") {
+    if (isKernelV2(accountVersion)) {
         if (Array.isArray(_tx)) {
             // Encode a batched call
             return encodeFunctionData({

@@ -8,11 +8,11 @@ import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashW
 export type moduleType = "validation" | "execution" | "fallback" | "hooks"
 
 export type SupportsModuleParameters<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<entryPoint, TAccount> & {
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: moduleType
 }
 
@@ -32,14 +32,13 @@ export function parseModuleTypeId(type: moduleType): bigint {
 }
 
 export async function supportsModule<
-    entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    args: Prettify<SupportsModuleParameters<entryPoint>>
+    client: Client<TTransport, TChain, TSmartAccount>,
+    args: Prettify<SupportsModuleParameters<TEntryPoint, TSmartAccount>>
 ): Promise<boolean> {
     const { account: account_ = client.account } = args
 
@@ -49,7 +48,7 @@ export async function supportsModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const publicClient = account.client
 

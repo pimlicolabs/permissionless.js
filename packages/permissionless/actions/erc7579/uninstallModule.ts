@@ -17,28 +17,29 @@ import { sendUserOperation } from "../smartAccount/sendUserOperation"
 import { type moduleType, parseModuleTypeId } from "./supportsModule"
 
 export type UninstallModuleParameters<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<entryPoint, TAccount> & {
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: moduleType
     address: Address
     callData: Hex
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-} & Middleware<entryPoint>
+} & Middleware<TEntryPoint>
 
 export async function uninstallModule<
-    entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
+        | undefined,
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    parameters: Prettify<UninstallModuleParameters<entryPoint>>
+    client: Client<TTransport, TChain, TSmartAccount>,
+    parameters: Prettify<UninstallModuleParameters<TEntryPoint, TSmartAccount>>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -56,7 +57,7 @@ export async function uninstallModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const uninstallModuleCallData = encodeFunctionData({
         abi: [
@@ -87,7 +88,7 @@ export async function uninstallModule<
 
     return getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<TEntryPoint>,
         "sendUserOperation"
     )({
         userOperation: {

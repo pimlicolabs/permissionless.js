@@ -22,12 +22,12 @@ export type ExecutionMode = {
     modeData: Hex
 }
 
-export type supportsExecutionModeParameters<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+export type SupportsExecutionModeParameters<
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<entryPoint, TAccount> & ExecutionMode
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode
 
 function parseCallType(executionMode: CallType) {
     switch (executionMode) {
@@ -59,14 +59,13 @@ export function encodeExecutionMode({
 }
 
 export async function supportsExecutionMode<
-    entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    args: Prettify<supportsExecutionModeParameters<entryPoint>>
+    client: Client<TTransport, TChain, TSmartAccount>,
+    args: Prettify<SupportsExecutionModeParameters<TEntryPoint, TSmartAccount>>
 ): Promise<boolean> {
     const {
         account: account_ = client.account,
@@ -82,7 +81,7 @@ export async function supportsExecutionMode<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const publicClient = account.client
 

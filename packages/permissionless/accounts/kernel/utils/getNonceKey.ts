@@ -2,13 +2,14 @@ import { type Address, concatHex, maxUint16, pad, toHex } from "viem"
 import type { EntryPoint } from "../../../types"
 import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants"
 import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
+import { isKernelV2 } from "./isKernelV2"
 
 export const getNonceKeyWithEncoding = (
     accountVerion: KernelVersion<EntryPoint>,
     validatorAddress: Address,
     nonceKey = 0n
 ) => {
-    if (accountVerion === "0.2.2") {
+    if (isKernelV2(accountVerion)) {
         return nonceKey
     }
 

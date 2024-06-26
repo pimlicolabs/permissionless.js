@@ -45,6 +45,7 @@ import {
 } from "./constants"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
+import { isKernelV2 } from "./utils/isKernelV2"
 import { signMessage } from "./utils/signMessage"
 import { signTypedData } from "./utils/signTypedData"
 
@@ -143,7 +144,7 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
  * Get supported Kernel Smart Account version based on entryPoint
  * @param entryPoint
  */
-const getKernelVersion = <TEntryPoint extends EntryPoint>(
+const getDefaultKernelVersion = <TEntryPoint extends EntryPoint>(
     entryPoint: TEntryPoint,
     version?: KernelVersion<TEntryPoint>
 ): KernelVersion<TEntryPoint> => {
@@ -431,7 +432,7 @@ export async function signerToEcdsaKernelSmartAccount<
     }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
-    const kernelVersion = getKernelVersion(entryPointAddress, version)
+    const kernelVersion = getDefaultKernelVersion(entryPointAddress, version)
 
     const {
         accountLogicAddress,
@@ -501,7 +502,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId
             })
 
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return signature
             }
 
@@ -532,7 +533,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId
             })
 
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return signature
             }
 
@@ -576,7 +577,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 message: { raw: hash }
             })
             // Always use the sudo mode, since we will use external paymaster
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return concatHex(["0x00000000", signature])
             }
             return signature
@@ -640,7 +641,7 @@ export async function signerToEcdsaKernelSmartAccount<
 
         // Get simple dummy signature
         async getDummySignature(_userOperation) {
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return concatHex([ROOT_MODE_KERNEL_V2, DUMMY_ECDSA_SIGNATURE])
             }
             return DUMMY_ECDSA_SIGNATURE

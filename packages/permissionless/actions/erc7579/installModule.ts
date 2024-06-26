@@ -17,28 +17,25 @@ import { sendUserOperation } from "../smartAccount/sendUserOperation"
 import { type moduleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
-> = GetAccountParameter<entryPoint, TAccount> & {
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: moduleType
     address: Address
     callData: Hex
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-} & Middleware<entryPoint>
+} & Middleware<TEntryPoint>
 
 export async function installModule<
-    entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
-        | undefined
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    parameters: Prettify<InstallModuleParameters<entryPoint>>
+    client: Client<TTransport, TChain, TSmartAccount>,
+    parameters: Prettify<InstallModuleParameters<TEntryPoint, TSmartAccount>>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -56,7 +53,7 @@ export async function installModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const installModuleCallData = encodeFunctionData({
         abi: [
@@ -87,7 +84,7 @@ export async function installModule<
 
     return getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<TEntryPoint>,
         "sendUserOperation"
     )({
         userOperation: {
