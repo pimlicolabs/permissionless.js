@@ -6,7 +6,8 @@ import {
     type Hex,
     type Transport,
     decodeFunctionResult,
-    encodeFunctionData
+    encodeFunctionData,
+    getAddress
 } from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter } from "../../types/"
@@ -23,7 +24,7 @@ export type IsModuleInstalledParameters<
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: ModuleType
     address: Address
-    callData: Hex
+    context: Hex
 }
 
 export async function isModuleInstalled<
@@ -35,7 +36,7 @@ export async function isModuleInstalled<
     client: Client<TTransport, TChain, TSmartAccount>,
     parameters: IsModuleInstalledParameters<TEntryPoint, TSmartAccount>
 ): Promise<boolean> {
-    const { account: account_ = client.account, address, callData } = parameters
+    const { account: account_ = client.account, address, context } = parameters
 
     if (!account_) {
         throw new AccountOrClientNotFoundError({
@@ -78,7 +79,11 @@ export async function isModuleInstalled<
         return await publicClient.readContract({
             abi,
             functionName: "isModuleInstalled",
-            args: [parseModuleTypeId(parameters.type), address, callData],
+            args: [
+                parseModuleTypeId(parameters.type),
+                getAddress(address),
+                context
+            ],
             address: account.address
         })
     } catch (error) {
@@ -95,8 +100,8 @@ export async function isModuleInstalled<
                     functionName: "isModuleInstalled",
                     args: [
                         parseModuleTypeId(parameters.type),
-                        address,
-                        callData
+                        getAddress(address),
+                        context
                     ]
                 })
             })

@@ -35,7 +35,7 @@ describe.each(getCoreSmartAccounts())(
                     smartClient as any,
                     {
                         account: smartClient.account as any,
-                        type: "validation"
+                        type: "validator"
                     }
                 )
 

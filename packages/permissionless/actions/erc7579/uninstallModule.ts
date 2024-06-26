@@ -4,7 +4,8 @@ import {
     type Client,
     type Hex,
     type Transport,
-    encodeFunctionData
+    encodeFunctionData,
+    getAddress
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
@@ -24,7 +25,7 @@ export type UninstallModuleParameters<
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: ModuleType
     address: Address
-    callData: Hex
+    context: Hex
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
@@ -48,7 +49,7 @@ export async function uninstallModule<
         nonce,
         middleware,
         address,
-        callData
+        context
     } = parameters
 
     if (!account_) {
@@ -83,7 +84,7 @@ export async function uninstallModule<
             }
         ],
         functionName: "uninstallModule",
-        args: [parseModuleTypeId(parameters.type), address, callData]
+        args: [parseModuleTypeId(parameters.type), getAddress(address), context]
     })
 
     return getAction(

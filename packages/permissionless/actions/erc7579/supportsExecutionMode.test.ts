@@ -35,7 +35,7 @@ describe.each(getCoreSmartAccounts())(
                 const supportsExecutionModeBatchCallBeforeDeploy =
                     await supportsExecutionMode(smartClient as any, {
                         account: smartClient.account as any,
-                        callType: "batchcall",
+                        type: "batchcall",
                         revertOnError: false,
                         modeSelector: "0x0",
                         modeData: "0x"
@@ -53,7 +53,7 @@ describe.each(getCoreSmartAccounts())(
                 const supportsExecutionModeBatchCallBeforeDeployPostDeploy =
                     await supportsExecutionMode(smartClient as any, {
                         account: smartClient.account as any,
-                        callType: "batchcall",
+                        type: "batchcall",
                         revertOnError: false,
                         modeSelector: "0x0",
                         modeData: "0x"

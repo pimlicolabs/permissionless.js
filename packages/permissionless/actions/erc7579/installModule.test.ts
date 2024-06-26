@@ -67,20 +67,24 @@ describe.each(getCoreSmartAccounts())(
 
                 const opHash = await installModule(smartClient as any, {
                     account: smartClient.account as any,
-                    type: "execution",
+                    type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    callData: encodePacked(
-                        ["address", "bytes"],
-                        [
-                            name === "Kernel"
-                                ? zeroAddress
-                                : eoaAccount.address,
-                            encodeAbiParameters(
-                                [{ type: "bytes" }, { type: "bytes" }],
-                                [moduleData, "0x"]
-                            )
-                        ]
-                    )
+                    context:
+                        name === "Kernel"
+                            ? encodePacked(
+                                  ["address", "bytes"],
+                                  [
+                                      zeroAddress,
+                                      encodeAbiParameters(
+                                          [
+                                              { type: "bytes" },
+                                              { type: "bytes" }
+                                          ],
+                                          [moduleData, "0x"]
+                                      )
+                                  ]
+                              )
+                            : moduleData
                 })
 
                 const bundlerClientV07 = createBundlerClient({
@@ -110,9 +114,9 @@ describe.each(getCoreSmartAccounts())(
                 )
 
                 const isModuleInstalled = await smartClient.isModuleInstalled({
-                    type: "execution",
+                    type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    callData: "0x"
+                    context: "0x"
                 })
 
                 expect(isModuleInstalled).toBe(true)
