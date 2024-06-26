@@ -19,7 +19,7 @@ import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashW
 export type CallType = "call" | "delegatecall" | "batchcall"
 
 export type ExecutionMode = {
-    callType: CallType
+    type: CallType
     revertOnError: boolean
     modeSelector: Hex
     modeData: Hex
@@ -44,7 +44,7 @@ function parseCallType(executionMode: CallType) {
 }
 
 export function encodeExecutionMode({
-    callType,
+    type,
     revertOnError,
     modeSelector,
     modeData
@@ -52,7 +52,7 @@ export function encodeExecutionMode({
     return encodePacked(
         ["bytes1", "bytes1", "bytes4", "bytes4", "bytes22"],
         [
-            toHex(toBytes(parseCallType(callType), { size: 1 })),
+            toHex(toBytes(parseCallType(type), { size: 1 })),
             toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
             toHex(toBytes("0x0", { size: 4 })),
             toHex(toBytes(modeSelector, { size: 4 })),
@@ -72,7 +72,7 @@ export async function supportsExecutionMode<
 ): Promise<boolean> {
     const {
         account: account_ = client.account,
-        callType,
+        type,
         revertOnError,
         modeSelector,
         modeData
@@ -89,7 +89,7 @@ export async function supportsExecutionMode<
     const publicClient = account.client
 
     const encodedMode = encodeExecutionMode({
-        callType,
+        type,
         revertOnError,
         modeSelector,
         modeData

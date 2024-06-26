@@ -13,7 +13,7 @@ import {
 
 export type EncodeCallDataParams<executionMode extends ExecutionMode> = {
     mode: executionMode
-    callData: executionMode["callType"] extends "batchcall"
+    callData: executionMode["type"] extends "batchcall"
         ? {
               to: Address
               value: bigint
@@ -30,7 +30,7 @@ export function encode7579CallData({
     mode,
     callData
 }: EncodeCallDataParams<ExecutionMode>): Hex {
-    if (Array.isArray(callData) && mode?.callType !== "batchcall") {
+    if (Array.isArray(callData) && mode?.type !== "batchcall") {
         throw new Error(
             `mode ${mode} does not supported for batchcall calldata`
         )

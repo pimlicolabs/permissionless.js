@@ -882,7 +882,7 @@ export async function signerToSafeSmartAccount<
                 if (erc7579) {
                     return encode7579CallData({
                         mode: {
-                            callType: isArray ? "batchcall" : "call",
+                            type: isArray ? "batchcall" : "call",
                             revertOnError: false,
                             modeSelector: "0x",
                             modeData: "0x"
