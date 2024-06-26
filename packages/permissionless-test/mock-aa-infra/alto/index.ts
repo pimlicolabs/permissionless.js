@@ -388,7 +388,7 @@ export const setupContracts = async (rpc: string) => {
         "0x41675C099F32341bf84BFc5382aF534df5C7461a", // Safe Singleton
         "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526", // Safe Multi Send
         "0x9641d764fc13c8B624c04430C7356C1C7C8102e2", // Safe Multi Send Call Only
-        "0xbaCA6f74a5549368568f387FD989C279f940f1A5", // Safe 7579 module
+        "0x50Da3861d482116c5F2Ea6d673a58CedB786Dc1C", // Safe 7579 module
         "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint V0.6
         "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory V0.6
         "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e", // Biconomy ECDSA Ownership Registry Module

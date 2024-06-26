@@ -41,7 +41,7 @@ export type SmartAccount<
 > = LocalAccount<TSource> & {
     client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
     entryPoint: entryPoint
-    getNonce: () => Promise<bigint>
+    getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>
     getFactory: () => Promise<Address | undefined>
     getFactoryData: () => Promise<Hex | undefined>

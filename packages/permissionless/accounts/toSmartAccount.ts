@@ -52,7 +52,7 @@ export function toSmartAccount<
     source: TSource
     client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
     entryPoint: TEntryPoint
-    getNonce: () => Promise<bigint>
+    getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>
     getFactory: () => Promise<Address | undefined>
     getFactoryData: () => Promise<Hex | undefined>

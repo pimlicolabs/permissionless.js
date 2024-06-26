@@ -187,6 +187,7 @@ export type SignerToBiconomySmartAccountParameters<
     TSource extends string = string,
     TAddress extends Address = Address
 > = Prettify<{
+    nonceKey?: bigint
     signer: SmartAccountSigner<TSource, TAddress>
     entryPoint: entryPoint
     address?: Address
@@ -229,7 +230,8 @@ export async function signerToBiconomySmartAccount<
         factoryAddress = BICONOMY_ADDRESSES.FACTORY_ADDRESS,
         accountLogicAddress = BICONOMY_ADDRESSES.ACCOUNT_V2_0_LOGIC,
         fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
-        ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
+        ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE,
+        nonceKey
     }: SignerToBiconomySmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<BiconomySmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
@@ -334,10 +336,11 @@ export async function signerToBiconomySmartAccount<
         source: "biconomySmartAccount",
 
         // Get the nonce of the smart account
-        async getNonce() {
+        async getNonce(key?: bigint) {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPointAddress
+                entryPoint: entryPointAddress,
+                key: key ?? nonceKey
             })
         },
 

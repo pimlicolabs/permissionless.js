@@ -1,10 +1,19 @@
-import type { Address, Chain, Client, Hex, Transport } from "viem"
+import {
+    type Address,
+    type Chain,
+    type Client,
+    ContractFunctionExecutionError,
+    type Hex,
+    type Transport,
+    decodeFunctionResult,
+    encodeFunctionData
+} from "viem"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
-import { type moduleType, parseModuleTypeId } from "./supportsModule"
+import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type IsModuleInstalledParameters<
     TEntryPoint extends EntryPoint,
@@ -12,7 +21,7 @@ export type IsModuleInstalledParameters<
         | SmartAccount<TEntryPoint>
         | undefined
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & {
-    type: moduleType
+    type: ModuleType
     address: Address
     callData: Hex
 }
@@ -38,38 +47,71 @@ export async function isModuleInstalled<
 
     const publicClient = account.client
 
-    /**
-     * TODO: counterfactual
-     */
-    return publicClient.readContract({
-        abi: [
-            {
-                name: "isModuleInstalled",
-                type: "function",
-                stateMutability: "view",
-                inputs: [
-                    {
-                        type: "uint256",
-                        name: "moduleTypeId"
-                    },
-                    {
-                        type: "address",
-                        name: "module"
-                    },
-                    {
-                        type: "bytes",
-                        name: "additionalContext"
-                    }
-                ],
-                outputs: [
-                    {
-                        type: "bool"
-                    }
-                ]
+    const abi = [
+        {
+            name: "isModuleInstalled",
+            type: "function",
+            stateMutability: "view",
+            inputs: [
+                {
+                    type: "uint256",
+                    name: "moduleTypeId"
+                },
+                {
+                    type: "address",
+                    name: "module"
+                },
+                {
+                    type: "bytes",
+                    name: "additionalContext"
+                }
+            ],
+            outputs: [
+                {
+                    type: "bool"
+                }
+            ]
+        }
+    ] as const
+
+    try {
+        return await publicClient.readContract({
+            abi,
+            functionName: "isModuleInstalled",
+            args: [parseModuleTypeId(parameters.type), address, callData],
+            address: account.address
+        })
+    } catch (error) {
+        if (error instanceof ContractFunctionExecutionError) {
+            const factory = await account.getFactory()
+            const factoryData = await account.getFactoryData()
+
+            const result = await publicClient.call({
+                factory: factory,
+                factoryData: factoryData,
+                to: account.address,
+                data: encodeFunctionData({
+                    abi,
+                    functionName: "isModuleInstalled",
+                    args: [
+                        parseModuleTypeId(parameters.type),
+                        address,
+                        callData
+                    ]
+                })
+            })
+
+            if (!result || !result.data) {
+                throw new Error("accountId result is empty")
             }
-        ],
-        functionName: "isModuleInstalled",
-        args: [parseModuleTypeId(parameters.type), address, callData],
-        address: account.address
-    })
+
+            return decodeFunctionResult({
+                abi,
+                functionName: "isModuleInstalled",
+                data: result.data
+            })
+        }
+
+        throw error
+    }
 }

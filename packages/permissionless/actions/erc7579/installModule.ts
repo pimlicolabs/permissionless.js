@@ -14,13 +14,13 @@ import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
 import { sendUserOperation } from "../smartAccount/sendUserOperation"
-import { type moduleType, parseModuleTypeId } from "./supportsModule"
+import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
     TEntryPoint extends EntryPoint,
     TSmartAccount extends SmartAccount<TEntryPoint> | undefined
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & {
-    type: moduleType
+    type: ModuleType
     address: Address
     callData: Hex
     maxFeePerGas?: bigint

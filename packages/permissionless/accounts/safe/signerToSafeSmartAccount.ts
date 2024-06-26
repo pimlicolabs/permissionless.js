@@ -37,7 +37,7 @@ import type {
     Prettify
 } from "../../types"
 import type { EntryPoint, UserOperation } from "../../types"
-import { encode7579CallData } from "../../utils/encodeCallData"
+import { encode7579CallData } from "../../utils/encode7579CallData"
 import {
     getEntryPointVersion,
     isUserOperationVersion06,
@@ -599,6 +599,7 @@ export type SignerToSafeSmartAccountParameters<
     validUntil?: number
     validAfter?: number
     erc7579?: boolean
+    nonceKey?: bigint
     setupTransactions?: {
         to: Address
         data: Address
@@ -642,7 +643,8 @@ export async function signerToSafeSmartAccount<
         validAfter = 0,
         safeModules = [],
         erc7579,
-        setupTransactions = []
+        setupTransactions = [],
+        nonceKey
     }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
     const chainId = client.chain?.id ?? (await getChainId(client))
@@ -751,11 +753,12 @@ export async function signerToSafeSmartAccount<
             publicKey: accountAddress,
             entryPoint: entryPointAddress,
             source: "SafeSmartAccount",
-            async getNonce() {
+            async getNonce(key?: bigint) {
                 // TODO: Allow dapp developers to specify custom nonce key (eg: Validator address)
                 return getAccountNonce(client, {
                     sender: accountAddress,
-                    entryPoint: entryPointAddress
+                    entryPoint: entryPointAddress,
+                    key: key ?? nonceKey
                 })
             },
             async signUserOperation(
@@ -815,6 +818,12 @@ export async function signerToSafeSmartAccount<
                         })
                     }
                 ]
+
+                signatures.sort((left, right) =>
+                    left.signer
+                        .toLowerCase()
+                        .localeCompare(right.signer.toLowerCase())
+                )
 
                 const signatureBytes = concat(signatures.map((sig) => sig.data))
 

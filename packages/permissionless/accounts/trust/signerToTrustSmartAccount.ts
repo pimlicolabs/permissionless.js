@@ -88,6 +88,7 @@ export type SignerToTrustSmartAccountParameters<
     index?: bigint
     address?: Address
     secp256k1VerificationFacetAddress?: Address
+    nonceKey?: bigint
 }
 
 /**
@@ -115,7 +116,8 @@ export async function signerToTrustSmartAccount<
         entryPoint: entryPointAddress,
         index = 0n,
         secp256k1VerificationFacetAddress = TRUST_ADDRESSES.secp256k1VerificationFacetAddress,
-        address
+        address,
+        nonceKey
     }: SignerToTrustSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<TrustSmartAccount<entryPoint, TTransport, TChain>> {
     const viemSigner: LocalAccount<string> = {
@@ -172,10 +174,11 @@ export async function signerToTrustSmartAccount<
                 hashTypedData(typedData)
             )
         },
-        getNonce: async () => {
+        getNonce: async (key?: bigint) => {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPointAddress
+                entryPoint: entryPointAddress,
+                key: key ?? nonceKey
             })
         },
         signUserOperation: async (userOperation) => {

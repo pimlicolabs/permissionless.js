@@ -119,6 +119,7 @@ export type SignerToSimpleSmartAccountParameters<
     entryPoint: entryPoint
     index?: bigint
     address?: Address
+    nonceKey?: bigint
 }>
 
 const getFactoryAddress = (
@@ -156,7 +157,8 @@ export async function signerToSimpleSmartAccount<
         factoryAddress: _factoryAddress,
         entryPoint: entryPointAddress,
         index = BigInt(0),
-        address
+        address,
+        nonceKey
     }: SignerToSimpleSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<SimpleSmartAccount<entryPoint, TTransport, TChain>> {
     const viemSigner: LocalAccount = {
@@ -202,10 +204,11 @@ export async function signerToSimpleSmartAccount<
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
         source: "SimpleSmartAccount",
-        async getNonce() {
+        async getNonce(key?: bigint) {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPointAddress
+                entryPoint: entryPointAddress,
+                key: key ?? nonceKey
             })
         },
         async signUserOperation(userOperation) {

@@ -477,9 +477,9 @@ export const getCoreSmartAccounts = () => [
                 signer: privateKeyToAccount(conf.privateKey),
                 entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
-        // getErc7579SmartAccountClient: async <T extends EntryPoint>(
-        //     conf: AAParamType<T>
-        // ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true

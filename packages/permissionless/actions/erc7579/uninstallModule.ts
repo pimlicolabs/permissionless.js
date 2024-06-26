@@ -14,7 +14,7 @@ import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
 import { sendUserOperation } from "../smartAccount/sendUserOperation"
-import { type moduleType, parseModuleTypeId } from "./supportsModule"
+import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type UninstallModuleParameters<
     TEntryPoint extends EntryPoint,
@@ -22,7 +22,7 @@ export type UninstallModuleParameters<
         | SmartAccount<TEntryPoint>
         | undefined
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & {
-    type: moduleType
+    type: ModuleType
     address: Address
     callData: Hex
     maxFeePerGas?: bigint

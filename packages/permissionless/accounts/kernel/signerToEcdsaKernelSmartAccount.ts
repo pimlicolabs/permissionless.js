@@ -392,6 +392,7 @@ export type SignerToEcdsaKernelSmartAccountParameters<
     accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
     deployedAccountAddress?: Address
+    nonceKey?: bigint
 }>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
@@ -428,7 +429,8 @@ export async function signerToEcdsaKernelSmartAccount<
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        deployedAccountAddress
+        deployedAccountAddress,
+        nonceKey
     }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
@@ -548,17 +550,19 @@ export async function signerToEcdsaKernelSmartAccount<
         source: "kernelEcdsaSmartAccount",
 
         // Get the nonce of the smart account
-        async getNonce() {
-            const key = getNonceKeyWithEncoding(
-                kernelVersion,
-                ecdsaValidatorAddress
-                // @dev specify the custom nonceKey here when integrating the said feature
-                /*, nonceKey */
-            )
+        async getNonce(key?: bigint) {
             return getAccountNonce(client, {
                 sender: accountAddress,
                 entryPoint: entryPointAddress,
-                key
+                key:
+                    key ??
+                    nonceKey ??
+                    getNonceKeyWithEncoding(
+                        kernelVersion,
+                        ecdsaValidatorAddress
+                        // @dev specify the custom nonceKey here when integrating the said feature
+                        /*, nonceKey */
+                    )
             })
         },
 

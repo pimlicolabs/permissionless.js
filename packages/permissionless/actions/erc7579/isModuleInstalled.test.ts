@@ -4,7 +4,6 @@ import {
     type Transport,
     encodeAbiParameters,
     encodePacked,
-    isHash,
     zeroAddress
 } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
@@ -23,10 +22,10 @@ import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { installModule } from "./installModule"
 
 describe.each(getCoreSmartAccounts())(
-    "installmodule $name",
+    "isModuleInstalled $name",
     ({ getErc7579SmartAccountClient, name }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "installModule",
+            "isModuleInstalled",
             async ({ rpc }) => {
                 const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
@@ -88,26 +87,10 @@ describe.each(getCoreSmartAccounts())(
                     entryPoint: ENTRYPOINT_ADDRESS_V07
                 })
 
-                expect(isHash(opHash)).toBe(true)
-
-                const userOperationReceipt =
-                    await bundlerClientV07.waitForUserOperationReceipt({
-                        hash: opHash,
-                        timeout: 100000
-                    })
-                expect(userOperationReceipt).not.toBeNull()
-                expect(userOperationReceipt?.userOpHash).toBe(opHash)
-                expect(
-                    userOperationReceipt?.receipt.transactionHash
-                ).toBeTruthy()
-
-                const receipt = await bundlerClientV07.getUserOperationReceipt({
-                    hash: opHash
+                await bundlerClientV07.waitForUserOperationReceipt({
+                    hash: opHash,
+                    timeout: 100000
                 })
-
-                expect(receipt?.receipt.transactionHash).toBe(
-                    userOperationReceipt?.receipt.transactionHash
-                )
 
                 const isModuleInstalled = await smartClient.isModuleInstalled({
                     type: "execution",
