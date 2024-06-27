@@ -1,5 +1,6 @@
 import { zeroAddress } from "viem"
 import { generatePrivateKey } from "viem/accounts"
+import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc"
 import {
@@ -7,10 +8,9 @@ import {
     getPimlicoPaymasterClient,
     getSimpleAccountClient
 } from "../../../../permissionless-test/src/utils"
+import type { UserOperation } from "../../../types/userOperation"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../../utils"
 import { paymasterActionsEip7677 } from "../clients/decorators/paymasterActionsEip7677"
-import { foundry } from "viem/chains"
-import { UserOperation } from "../../../types/userOperation"
 
 describe("EIP-7677 getPaymasterData", () => {
     testWithRpc("getPaymasterData_V06", async ({ rpc }) => {
@@ -95,12 +95,16 @@ describe("EIP-7677 getPaymasterData", () => {
                 }
             })
 
-        userOperation.paymasterPostOpGasLimit = 150_000n
-        userOperation.paymasterVerificationGasLimit = 650_000n
+        const paymasterGasValues = {
+            paymasterPostOpGasLimit: 150_000n,
+            paymasterVerificationGasLimit: 650_000n
+        }
 
         const paymasterData = await pimlicoPaymasterClient.getPaymasterData({
-            // @ts-ignore
-            userOperation,
+            userOperation: {
+                ...userOperation,
+                ...paymasterGasValues
+            },
             chain: foundry
         })
         expect(paymasterData).not.toBeNull()
@@ -115,6 +119,7 @@ describe("EIP-7677 getPaymasterData", () => {
 
         userOperation = {
             ...userOperation,
+            ...paymasterGasValues,
             ...paymasterData
         } as UserOperation<"v0.7">
         userOperation.signature =
