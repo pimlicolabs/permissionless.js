@@ -151,6 +151,114 @@ export const pmSponsorUserOperationParamsSchema = z.tuple([
     addressSchema
 ])
 
+const eip7677UserOperationSchemaV6 = z
+    .object({
+        sender: addressSchema,
+        nonce: hexNumberSchema,
+        initCode: hexDataSchema,
+        callData: hexDataSchema,
+        callGasLimit: hexNumberSchema,
+        verificationGasLimit: hexNumberSchema,
+        preVerificationGas: hexNumberSchema,
+        maxPriorityFeePerGas: hexNumberSchema,
+        maxFeePerGas: hexNumberSchema,
+        paymasterAndData: hexDataSchema
+            .nullable()
+            .optional()
+            .transform((_) => {
+                return "0x" as Hex
+            }),
+        signature: hexDataSchema
+            .nullable()
+            .optional()
+            .transform((_) => {
+                return "0x" as Hex
+            })
+    })
+    .strict()
+    .transform((val) => {
+        return val
+    })
+
+const eip7677UserOperationSchemaV7 = z
+    .object({
+        sender: addressSchema,
+        nonce: hexNumberSchema,
+        factory: addressSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        factoryData: hexDataSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        callData: hexDataSchema,
+        callGasLimit: hexNumberSchema,
+        verificationGasLimit: hexNumberSchema,
+        preVerificationGas: hexNumberSchema,
+        maxFeePerGas: hexNumberSchema,
+        maxPriorityFeePerGas: hexNumberSchema,
+        paymaster: addressSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        paymasterVerificationGasLimit: hexNumberSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        paymasterPostOpGasLimit: hexNumberSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        paymasterData: hexDataSchema
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
+        signature: hexDataSchema.optional().transform((val) => {
+            if (val === undefined) {
+                return "0x"
+            }
+            return val
+        })
+    })
+    .strict()
+    .transform((val) => {
+        return val
+    })
+
+const eip7677UserOperationSchema = z.union([
+    eip7677UserOperationSchemaV6,
+    eip7677UserOperationSchemaV7
+])
+
+export const pmGetPaymasterData = z
+    .union([
+        z.tuple([
+            eip7677UserOperationSchema,
+            addressSchema,
+            hexNumberSchema,
+            z.union([z.object({}), z.null()])
+        ]),
+        z.tuple([eip7677UserOperationSchema, addressSchema, hexNumberSchema])
+    ])
+    .transform((val) => {
+        return [val[0], val[1], val[2], val[3] ?? null] as const
+    })
+
+export const pmGetPaymasterStubDataParamsSchema = z
+    .union([
+        z.tuple([
+            eip7677UserOperationSchema,
+            addressSchema,
+            hexNumberSchema,
+            z.union([z.object({}), z.null()])
+        ]),
+        z.tuple([eip7677UserOperationSchema, addressSchema, hexNumberSchema])
+    ])
+    .transform((val) => {
+        return [val[0], val[1], val[2], val[3] ?? null] as const
+    })
+
 export type UserOperationV7 = zodInfer<typeof userOperationSchemaPaymasterV7>
 export type UserOperationV6 = zodInfer<typeof userOperationSchemaPaymasterV6>
 export type JsonRpcSchema = zodInfer<typeof jsonRpcSchema>

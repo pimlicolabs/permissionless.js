@@ -37,8 +37,12 @@ import {
     RpcError,
     ValidationErrors,
     jsonRpcSchema,
-    pmSponsorUserOperationParamsSchema
+    pmSponsorUserOperationParamsSchema,
+    pmGetPaymasterStubDataParamsSchema,
+    pmGetPaymasterData,
+    UserOperationV7
 } from "./helpers/schema"
+import { maxBigInt } from "./helpers/utils"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"v0.6">,
@@ -47,9 +51,10 @@ const handleMethodV06 = async (
         typeof VERIFYING_PAYMASTER_V06_ABI,
         PublicClient<Transport, Chain>
     >,
-    walletClient: WalletClient<Transport, Chain, Account>
+    walletClient: WalletClient<Transport, Chain, Account>,
+    estimateGas: boolean
 ) => {
-    const opToSimulate = {
+    let op = {
         ...userOperation,
         paymasterAndData: concat([
             verifyingPaymasterV06.address,
@@ -57,23 +62,49 @@ const handleMethodV06 = async (
         ])
     }
 
-    let gasEstimates:
-        | EstimateUserOperationGasReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
-        | undefined = undefined
-    try {
-        gasEstimates = await altoBundlerV06.estimateUserOperationGas({
-            userOperation: opToSimulate
-        })
-    } catch (e: unknown) {
-        if (!(e instanceof BaseError)) throw new InternalBundlerError()
-        const err = e.walk() as RpcRequestError
-        throw err
+    const callGasLimit = userOperation.callGasLimit
+    const verificationGasLimit = userOperation.verificationGasLimit
+    const preVerificationGas = userOperation.preVerificationGas
+
+    if (estimateGas) {
+        let gasEstimates:
+            | EstimateUserOperationGasReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
+            | undefined = undefined
+        try {
+            gasEstimates = await altoBundlerV06.estimateUserOperationGas({
+                userOperation: op
+            })
+        } catch (e: unknown) {
+            if (!(e instanceof BaseError)) throw new InternalBundlerError()
+            const err = e.walk() as RpcRequestError
+            throw err
+        }
+
+        op = {
+            ...op,
+            ...gasEstimates
+        }
+
+        op.callGasLimit = maxBigInt(op.callGasLimit, callGasLimit)
+        op.preVerificationGas = maxBigInt(
+            op.preVerificationGas,
+            preVerificationGas
+        )
+        op.verificationGasLimit = maxBigInt(
+            op.verificationGasLimit,
+            verificationGasLimit
+        )
+    } else if (
+        userOperation.preVerificationGas === 1n ||
+        userOperation.verificationGasLimit === 1n ||
+        userOperation.callGasLimit === 1n
+    ) {
+        throw new RpcError(
+            "Gas Limit values (preVerificationGas, verificationGasLimit, callGasLimit) must be set",
+            ValidationErrors.InvalidFields
+        )
     }
 
-    const op = {
-        ...opToSimulate,
-        ...gasEstimates
-    }
     const validAfter = 0
     const validUntil = Math.floor(Date.now() / 1000) + 6000
     op.paymasterAndData = concat([
@@ -107,13 +138,10 @@ const handleMethodV06 = async (
         sig
     ])
 
-    const { verificationGasLimit, preVerificationGas, callGasLimit } =
-        gasEstimates
-
     const result = {
-        preVerificationGas: toHex(preVerificationGas),
-        callGasLimit: toHex(callGasLimit),
-        verificationGasLimit: toHex(verificationGasLimit || 0),
+        preVerificationGas: toHex(op.preVerificationGas),
+        callGasLimit: toHex(op.callGasLimit),
+        verificationGasLimit: toHex(op.verificationGasLimit || 0),
         paymasterAndData
     }
 
@@ -127,32 +155,59 @@ const handleMethodV07 = async (
         typeof VERIFYING_PAYMASTER_V07_ABI,
         PublicClient<Transport, Chain>
     >,
-    walletClient: WalletClient<Transport, Chain, Account>
+    walletClient: WalletClient<Transport, Chain, Account>,
+    estimateGas: boolean
 ) => {
-    const opToSimulate = {
+    let op = {
         ...userOperation,
         paymaster: verifyingPaymasterV07.address,
         paymasterData:
             "0x000000000000000000000000000000000000000000000000000000006602f66a0000000000000000000000000000000000000000000000000000000000000000dba7a71bd49ae0174b1e4577b28f8b7c262d4085cfa192f1c19b516c85d2d1ef17eadeb549d71caf5d5f24fb6519088c1c13427343843131dd6ec19a3c6a350e1b" as Hex
     }
 
-    let gasEstimates:
-        | EstimateUserOperationGasReturnType<ENTRYPOINT_ADDRESS_V07_TYPE>
-        | undefined = undefined
-    try {
-        gasEstimates = await altoBundlerV07.estimateUserOperationGas({
-            userOperation: opToSimulate
-        })
-    } catch (e: unknown) {
-        if (!(e instanceof BaseError)) throw new InternalBundlerError()
-        const err = e.walk() as RpcRequestError
-        throw err
+    const callGasLimit = userOperation.callGasLimit
+    const verificationGasLimit = userOperation.verificationGasLimit
+    const preVerificationGas = userOperation.preVerificationGas
+
+    if (estimateGas) {
+        let gasEstimates:
+            | EstimateUserOperationGasReturnType<ENTRYPOINT_ADDRESS_V07_TYPE>
+            | undefined = undefined
+        try {
+            gasEstimates = await altoBundlerV07.estimateUserOperationGas({
+                userOperation: op
+            })
+        } catch (e: unknown) {
+            if (!(e instanceof BaseError)) throw new InternalBundlerError()
+            const err = e.walk() as RpcRequestError
+            throw err
+        }
+
+        op = {
+            ...op,
+            ...gasEstimates
+        }
+
+        op.callGasLimit = maxBigInt(op.callGasLimit, callGasLimit)
+        op.preVerificationGas = maxBigInt(
+            op.preVerificationGas,
+            preVerificationGas
+        )
+        op.verificationGasLimit = maxBigInt(
+            op.verificationGasLimit,
+            verificationGasLimit
+        )
+    } else if (
+        userOperation.preVerificationGas === 1n ||
+        userOperation.verificationGasLimit === 1n ||
+        userOperation.callGasLimit === 1n
+    ) {
+        throw new RpcError(
+            "Gas Limit values (preVerificationGas, verificationGasLimit, callGasLimit) must be set",
+            ValidationErrors.InvalidFields
+        )
     }
 
-    const op = {
-        ...opToSimulate,
-        ...gasEstimates
-    }
     const validAfter = 0
     const validUntil = Math.floor(Date.now() / 1000) + 6000
     op.paymasterData = concat([
@@ -186,22 +241,14 @@ const handleMethodV07 = async (
         sig
     ])
 
-    const {
-        paymasterVerificationGasLimit,
-        verificationGasLimit,
-        preVerificationGas,
-        callGasLimit,
-        paymasterPostOpGasLimit
-    } = gasEstimates
-
     const result = {
-        preVerificationGas: toHex(preVerificationGas),
-        callGasLimit: toHex(callGasLimit),
+        preVerificationGas: toHex(op.preVerificationGas),
+        callGasLimit: toHex(op.callGasLimit),
         paymasterVerificationGasLimit: toHex(
-            paymasterVerificationGasLimit || 0
+            op.paymasterVerificationGasLimit || 0
         ),
-        paymasterPostOpGasLimit: toHex(paymasterPostOpGasLimit || 0),
-        verificationGasLimit: toHex(verificationGasLimit || 0),
+        paymasterPostOpGasLimit: toHex(op.paymasterPostOpGasLimit || 0),
+        verificationGasLimit: toHex(op.verificationGasLimit || 0),
         paymaster,
         paymasterData
     }
@@ -242,7 +289,8 @@ const handleMethod = async (
                 userOperation as UserOperation<"v0.7">,
                 altoBundlerV07,
                 verifyingPaymasterV07,
-                walletClient
+                walletClient,
+                true
             )
         }
 
@@ -251,7 +299,82 @@ const handleMethod = async (
                 userOperation as UserOperation<"v0.6">,
                 altoBundlerV06,
                 verifyingPaymasterV06,
-                walletClient
+                walletClient,
+                true
+            )
+        }
+
+        throw new RpcError(
+            "EntryPoint not supported",
+            ValidationErrors.InvalidFields
+        )
+    }
+
+    if (parsedBody.method === "pm_getPaymasterStubData") {
+        const params = pmGetPaymasterStubDataParamsSchema.safeParse(
+            parsedBody.params
+        )
+
+        if (!params.success) {
+            throw new RpcError(
+                fromZodError(params.error).message,
+                ValidationErrors.InvalidFields
+            )
+        }
+
+        const [, entryPoint] = params.data
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V07) {
+            return {
+                paymaster: verifyingPaymasterV07.address,
+                paymasterData:
+                    "0x00000000000000000000000000000000000000000000000000000101010101010000000000000000000000000000000000000000000000000000000000000000cd91f19f0f19ce862d7bec7b7d9b95457145afc6f639c28fd0360f488937bfa41e6eedcd3a46054fd95fcd0e3ef6b0bc0a615c4d975eef55c8a3517257904d5b1c",
+                paymasterVerificationGasLimit: toHex(50_000n),
+                paymasterPostOpGasLimit: toHex(20_000n)
+            }
+        }
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V06) {
+            return {
+                paymasterAndData: `${verifyingPaymasterV06.address}00000000000000000000000000000000000000000000000000000101010101010000000000000000000000000000000000000000000000000000000000000000cd91f19f0f19ce862d7bec7b7d9b95457145afc6f639c28fd0360f488937bfa41e6eedcd3a46054fd95fcd0e3ef6b0bc0a615c4d975eef55c8a3517257904d5b1c`
+            }
+        }
+
+        throw new RpcError(
+            "EntryPoint not supported",
+            ValidationErrors.InvalidFields
+        )
+    }
+
+    if (parsedBody.method === "pm_getPaymasterData") {
+        const params = pmGetPaymasterData.safeParse(parsedBody.params)
+
+        if (!params.success) {
+            throw new RpcError(
+                fromZodError(params.error).message,
+                ValidationErrors.InvalidFields
+            )
+        }
+
+        const [userOperation, entryPoint] = params.data
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V07) {
+            return await handleMethodV07(
+                userOperation as UserOperation<"v0.7">,
+                altoBundlerV07,
+                verifyingPaymasterV07,
+                walletClient,
+                false
+            )
+        }
+
+        if (entryPoint === ENTRYPOINT_ADDRESS_V06) {
+            return await handleMethodV06(
+                userOperation as UserOperation<"v0.6">,
+                altoBundlerV06,
+                verifyingPaymasterV06,
+                walletClient,
+                false
             )
         }
 
