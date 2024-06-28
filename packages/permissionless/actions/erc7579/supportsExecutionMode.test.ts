@@ -37,8 +37,8 @@ describe.each(getCoreSmartAccounts())(
                         account: smartClient.account as any,
                         type: "batchcall",
                         revertOnError: false,
-                        modeSelector: "0x0",
-                        modeData: "0x"
+                        selector: "0x0",
+                        context: "0x"
                     })
 
                 expect(supportsExecutionModeBatchCallBeforeDeploy).toBe(true)
@@ -55,8 +55,8 @@ describe.each(getCoreSmartAccounts())(
                         account: smartClient.account as any,
                         type: "batchcall",
                         revertOnError: false,
-                        modeSelector: "0x0",
-                        modeData: "0x"
+                        selector: "0x0",
+                        context: "0x"
                     })
 
                 expect(

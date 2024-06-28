@@ -18,19 +18,20 @@ import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashW
 
 export type CallType = "call" | "delegatecall" | "batchcall"
 
-export type ExecutionMode = {
-    type: CallType
+export type ExecutionMode<callType extends CallType> = {
+    type: callType
     revertOnError: boolean
-    modeSelector: Hex
-    modeData: Hex
+    selector: Hex
+    context: Hex
 }
 
 export type SupportsExecutionModeParameters<
     TEntryPoint extends EntryPoint,
     TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
         | SmartAccount<TEntryPoint>
-        | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode
+        | undefined,
+    callType extends CallType = CallType
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode<callType>
 
 function parseCallType(executionMode: CallType) {
     switch (executionMode) {
@@ -43,20 +44,20 @@ function parseCallType(executionMode: CallType) {
     }
 }
 
-export function encodeExecutionMode({
+export function encodeExecutionMode<callType extends CallType>({
     type,
     revertOnError,
-    modeSelector,
-    modeData
-}: ExecutionMode): Hex {
+    selector,
+    context
+}: ExecutionMode<callType>): Hex {
     return encodePacked(
         ["bytes1", "bytes1", "bytes4", "bytes4", "bytes22"],
         [
             toHex(toBytes(parseCallType(type), { size: 1 })),
             toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
             toHex(toBytes("0x0", { size: 4 })),
-            toHex(toBytes(modeSelector, { size: 4 })),
-            toHex(toBytes(modeData, { size: 22 }))
+            toHex(toBytes(selector, { size: 4 })),
+            toHex(toBytes(context, { size: 22 }))
         ]
     )
 }
@@ -74,8 +75,8 @@ export async function supportsExecutionMode<
         account: account_ = client.account,
         type,
         revertOnError,
-        modeSelector,
-        modeData
+        selector,
+        context
     } = args
 
     if (!account_) {
@@ -91,8 +92,8 @@ export async function supportsExecutionMode<
     const encodedMode = encodeExecutionMode({
         type,
         revertOnError,
-        modeSelector,
-        modeData
+        selector,
+        context
     })
 
     const abi = [

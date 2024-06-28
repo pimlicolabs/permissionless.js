@@ -19,7 +19,7 @@ import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
 import { erc7579Actions } from "../../clients/decorators/erc7579"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
-import { installModule } from "./installModule"
+import { isModuleInstalled } from "./isModuleInstalled"
 
 describe.each(getCoreSmartAccounts())(
     "isModuleInstalled $name",
@@ -34,8 +34,6 @@ describe.each(getCoreSmartAccounts())(
                 }
 
                 const privateKey = generatePrivateKey()
-
-                const eoaAccount = privateKeyToAccount(privateKey)
 
                 const smartClientWithoutExtend: SmartAccountClient<
                     ENTRYPOINT_ADDRESS_V07_TYPE,
@@ -64,7 +62,7 @@ describe.each(getCoreSmartAccounts())(
                     [smartClient.account.address]
                 )
 
-                const opHash = await installModule(smartClient as any, {
+                const opHash = await smartClient.installModule({
                     account: smartClient.account as any,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
@@ -91,18 +89,30 @@ describe.each(getCoreSmartAccounts())(
                     entryPoint: ENTRYPOINT_ADDRESS_V07
                 })
 
-                await bundlerClientV07.waitForUserOperationReceipt({
-                    hash: opHash,
-                    timeout: 100000
+                const receipt =
+                    await bundlerClientV07.waitForUserOperationReceipt({
+                        hash: opHash,
+                        timeout: 100000
+                    })
+
+                const isModuleInstalledResult = await isModuleInstalled(
+                    smartClient as any,
+                    {
+                        account: smartClient.account as any,
+                        type: "executor",
+                        address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                        context: "0x"
+                    }
+                )
+
+                expect(isModuleInstalledResult).toBe(true)
+
+                const nextTransaction = await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n
                 })
 
-                const isModuleInstalled = await smartClient.isModuleInstalled({
-                    type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context: "0x"
-                })
-
-                expect(isModuleInstalled).toBe(true)
+                expect(nextTransaction).toBeTruthy()
             }
         )
     }

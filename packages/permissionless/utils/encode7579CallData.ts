@@ -7,13 +7,14 @@ import {
     toHex
 } from "viem"
 import {
+    type CallType,
     type ExecutionMode,
     encodeExecutionMode
 } from "../actions/erc7579/supportsExecutionMode"
 
-export type EncodeCallDataParams<executionMode extends ExecutionMode> = {
-    mode: executionMode
-    callData: executionMode["type"] extends "batchcall"
+export type EncodeCallDataParams<callType extends CallType> = {
+    mode: ExecutionMode<callType>
+    callData: callType extends "batchcall"
         ? {
               to: Address
               value: bigint
@@ -26,10 +27,10 @@ export type EncodeCallDataParams<executionMode extends ExecutionMode> = {
           }
 }
 
-export function encode7579CallData({
+export function encode7579CallData<callType extends CallType>({
     mode,
     callData
-}: EncodeCallDataParams<ExecutionMode>): Hex {
+}: EncodeCallDataParams<callType>): Hex {
     if (Array.isArray(callData) && mode?.type !== "batchcall") {
         throw new Error(
             `mode ${mode} does not supported for batchcall calldata`

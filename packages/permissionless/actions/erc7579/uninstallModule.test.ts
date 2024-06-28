@@ -12,7 +12,8 @@ import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
-    getPimlicoPaymasterClient
+    getPimlicoPaymasterClient,
+    getPublicClient
 } from "../../../permissionless-test/src/utils"
 import type { SmartAccount } from "../../accounts"
 import { createBundlerClient } from "../../clients/createBundlerClient"
@@ -65,6 +66,13 @@ describe.each(getCoreSmartAccounts())(
                     [smartClient.account.address]
                 )
 
+                const bundlerClientV07 = createBundlerClient({
+                    transport: http(altoRpc),
+                    entryPoint: ENTRYPOINT_ADDRESS_V07
+                })
+
+                const publicClient = getPublicClient(anvilRpc)
+
                 const opHash = await smartClient.installModule({
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
@@ -86,14 +94,14 @@ describe.each(getCoreSmartAccounts())(
                             : moduleData
                 })
 
-                const bundlerClientV07 = createBundlerClient({
-                    transport: http(altoRpc),
-                    entryPoint: ENTRYPOINT_ADDRESS_V07
-                })
+                const userOperationReceipt =
+                    await bundlerClientV07.waitForUserOperationReceipt({
+                        hash: opHash,
+                        timeout: 100000
+                    })
 
-                await bundlerClientV07.waitForUserOperationReceipt({
-                    hash: opHash,
-                    timeout: 100000
+                await publicClient.waitForTransactionReceipt({
+                    hash: userOperationReceipt.receipt.transactionHash
                 })
 
                 const uninstallModuleUserOpHash = await uninstallModule(
@@ -102,7 +110,22 @@ describe.each(getCoreSmartAccounts())(
                         account: smartClient.account as any,
                         type: "executor",
                         address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                        context: "0x"
+                        context:
+                            name === "Kernel"
+                                ? "0x"
+                                : encodeAbiParameters(
+                                      [
+                                          { name: "prev", type: "address" },
+                                          {
+                                              name: "moduleInitData",
+                                              type: "bytes"
+                                          }
+                                      ],
+                                      [
+                                          "0x0000000000000000000000000000000000000001",
+                                          "0x"
+                                      ]
+                                  )
                     }
                 )
 

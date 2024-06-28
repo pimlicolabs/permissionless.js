@@ -12,23 +12,6 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 
-// export async function accountId<
-//     TEntryPoint extends EntryPoint,
-//     TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-//     TTransport extends Transport = Transport,
-//     TChain extends Chain | undefined = Chain | undefined
-// >(client: Client<TTransport, TChain, TSmartAccount>): Promise<string>
-
-// export async function accountId<
-//     TEntryPoint extends EntryPoint,
-//     TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-//     TTransport extends Transport = Transport,
-//     TChain extends Chain | undefined = Chain | undefined
-// >(
-//     client: Client<TTransport, TChain, TSmartAccount>,
-//     args: GetAccountParameter<TEntryPoint, TSmartAccount>
-// ): Promise<string>
-
 export async function accountId<
     TEntryPoint extends EntryPoint,
     TSmartAccount extends SmartAccount<TEntryPoint> | undefined,

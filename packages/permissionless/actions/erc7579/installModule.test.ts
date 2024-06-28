@@ -36,8 +36,6 @@ describe.each(getCoreSmartAccounts())(
 
                 const privateKey = generatePrivateKey()
 
-                const eoaAccount = privateKeyToAccount(privateKey)
-
                 const smartClientWithoutExtend: SmartAccountClient<
                     ENTRYPOINT_ADDRESS_V07_TYPE,
                     Transport,

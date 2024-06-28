@@ -12,6 +12,7 @@ import {
     type TypedDataDefinition,
     concat,
     concatHex,
+    encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
     getContractAddress,
@@ -31,11 +32,7 @@ import {
     signTypedData
 } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import type {
-    EntryPointVersion,
-    GetEntryPointVersion,
-    Prettify
-} from "../../types"
+import type { EntryPointVersion, GetEntryPointVersion } from "../../types"
 import type { EntryPoint, UserOperation } from "../../types"
 import { encode7579CallData } from "../../utils/encode7579CallData"
 import {
@@ -52,6 +49,341 @@ import {
 } from "../types"
 
 export type SafeVersion = "1.4.1"
+
+const multiSendAbi = [
+    {
+        inputs: [
+            {
+                internalType: "bytes",
+                name: "transactions",
+                type: "bytes"
+            }
+        ],
+        name: "multiSend",
+        outputs: [],
+        stateMutability: "payable",
+        type: "function"
+    }
+] as const
+
+const initSafe7579Abi = [
+    {
+        type: "function",
+        name: "initSafe7579",
+        inputs: [
+            {
+                name: "safe7579",
+                type: "address",
+                internalType: "address"
+            },
+            {
+                name: "executors",
+                type: "tuple[]",
+                internalType: "struct ModuleInit[]",
+                components: [
+                    {
+                        name: "module",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "initData",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            },
+            {
+                name: "fallbacks",
+                type: "tuple[]",
+                internalType: "struct ModuleInit[]",
+                components: [
+                    {
+                        name: "module",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "initData",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            },
+            {
+                name: "hooks",
+                type: "tuple[]",
+                internalType: "struct ModuleInit[]",
+                components: [
+                    {
+                        name: "module",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "initData",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            },
+            {
+                name: "attesters",
+                type: "address[]",
+                internalType: "address[]"
+            },
+            {
+                name: "threshold",
+                type: "uint8",
+                internalType: "uint8"
+            }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const
+
+const preValidationSetupAbi = [
+    {
+        type: "function",
+        name: "preValidationSetup",
+        inputs: [
+            {
+                name: "initHash",
+                type: "bytes32",
+                internalType: "bytes32"
+            },
+            {
+                name: "to",
+                type: "address",
+                internalType: "address"
+            },
+            {
+                name: "preInit",
+                type: "bytes",
+                internalType: "bytes"
+            }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const
+
+const enableModulesAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "modules",
+                type: "address[]"
+            }
+        ],
+        name: "enableModules",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const setupAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "_owners",
+                type: "address[]"
+            },
+            {
+                internalType: "uint256",
+                name: "_threshold",
+                type: "uint256"
+            },
+            {
+                internalType: "address",
+                name: "to",
+                type: "address"
+            },
+            {
+                internalType: "bytes",
+                name: "data",
+                type: "bytes"
+            },
+            {
+                internalType: "address",
+                name: "fallbackHandler",
+                type: "address"
+            },
+            {
+                internalType: "address",
+                name: "paymentToken",
+                type: "address"
+            },
+            {
+                internalType: "uint256",
+                name: "payment",
+                type: "uint256"
+            },
+            {
+                internalType: "address payable",
+                name: "paymentReceiver",
+                type: "address"
+            }
+        ],
+        name: "setup",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const createProxyWithNonceAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "_singleton",
+                type: "address"
+            },
+            {
+                internalType: "bytes",
+                name: "initializer",
+                type: "bytes"
+            },
+            {
+                internalType: "uint256",
+                name: "saltNonce",
+                type: "uint256"
+            }
+        ],
+        name: "createProxyWithNonce",
+        outputs: [
+            {
+                internalType: "contract SafeProxy",
+                name: "proxy",
+                type: "address"
+            }
+        ],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const proxyCreationCodeAbi = [
+    {
+        inputs: [],
+        name: "proxyCreationCode",
+        outputs: [
+            {
+                internalType: "bytes",
+                name: "",
+                type: "bytes"
+            }
+        ],
+        stateMutability: "pure",
+        type: "function"
+    }
+] as const
+
+const setupSafeAbi = [
+    {
+        type: "function",
+        name: "setupSafe",
+        inputs: [
+            {
+                name: "initData",
+                type: "tuple",
+                internalType: "struct Safe7579Launchpad.InitData",
+                components: [
+                    {
+                        name: "singleton",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "owners",
+                        type: "address[]",
+                        internalType: "address[]"
+                    },
+                    {
+                        name: "threshold",
+                        type: "uint256",
+                        internalType: "uint256"
+                    },
+                    {
+                        name: "setupTo",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "setupData",
+                        type: "bytes",
+                        internalType: "bytes"
+                    },
+                    {
+                        name: "safe7579",
+                        type: "address",
+                        internalType: "contract ISafe7579"
+                    },
+                    {
+                        name: "validators",
+                        type: "tuple[]",
+                        internalType: "struct ModuleInit[]",
+                        components: [
+                            {
+                                name: "module",
+                                type: "address",
+                                internalType: "address"
+                            },
+                            {
+                                name: "initData",
+                                type: "bytes",
+                                internalType: "bytes"
+                            }
+                        ]
+                    },
+                    {
+                        name: "callData",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const
+
+const executeUserOpWithErrorStringAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "to",
+                type: "address"
+            },
+            {
+                internalType: "uint256",
+                name: "value",
+                type: "uint256"
+            },
+            {
+                internalType: "bytes",
+                name: "data",
+                type: "bytes"
+            },
+            {
+                internalType: "uint8",
+                name: "operation",
+                type: "uint8"
+            }
+        ],
+        name: "executeUserOpWithErrorString",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
 
 const EIP712_SAFE_OPERATION_TYPE_V06 = {
     SafeOp: [
@@ -204,21 +536,7 @@ const encodeMultiSend = (
         .join("")}`
 
     return encodeFunctionData({
-        abi: [
-            {
-                inputs: [
-                    {
-                        internalType: "bytes",
-                        name: "transactions",
-                        type: "bytes"
-                    }
-                ],
-                name: "multiSend",
-                outputs: [],
-                stateMutability: "payable",
-                type: "function"
-            }
-        ],
+        abi: multiSendAbi,
         functionName: "multiSend",
         args: [data]
     })
@@ -230,44 +548,195 @@ export type SafeSmartAccount<
     chain extends Chain | undefined = Chain | undefined
 > = SmartAccount<entryPoint, "SafeSmartAccount", transport, chain>
 
+const get7579LaunchPadInitData = ({
+    safe4337ModuleAddress,
+    safeSingletonAddress,
+    erc7569LaunchpadAddress,
+    owner,
+    validators,
+    executors,
+    fallbacks,
+    hooks,
+    attesters,
+    attestersThreshold
+}: {
+    safe4337ModuleAddress: Address
+    safeSingletonAddress: Address
+    erc7569LaunchpadAddress: Address
+    owner: Address
+    executors: {
+        address: Address
+        context: Address
+    }[]
+    validators: { address: Address; context: Address }[]
+    fallbacks: { address: Address; context: Address }[]
+    hooks: { address: Address; context: Address }[]
+    attesters: Address[]
+    attestersThreshold: number
+}) => {
+    const initData = {
+        singleton: safeSingletonAddress,
+        owners: [owner],
+        threshold: BigInt(1),
+        setupTo: erc7569LaunchpadAddress,
+        setupData: encodeFunctionData({
+            abi: initSafe7579Abi,
+            functionName: "initSafe7579",
+            args: [
+                safe4337ModuleAddress, // SAFE_7579_ADDRESS,
+                executors.map((executor) => ({
+                    module: executor.address,
+                    initData: executor.context
+                })),
+                fallbacks.map((fallback) => ({
+                    module: fallback.address,
+                    initData: fallback.context
+                })),
+                hooks.map((hook) => ({
+                    module: hook.address,
+                    initData: hook.context
+                })),
+                attesters,
+                attestersThreshold
+            ]
+        }),
+        safe7579: safe4337ModuleAddress,
+        validators: validators
+    }
+
+    return initData
+}
+
 const getInitializerCode = async ({
     owner,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     multiSendAddress,
+    safeSingletonAddress,
+    erc7569LaunchpadAddress,
     setupTransactions = [],
-    safeModules = []
+    safeModules = [],
+    validators = [],
+    executors = [],
+    fallbacks = [],
+    hooks = [],
+    attesters = [],
+    attestersThreshold = 0
 }: {
     owner: Address
+    safeSingletonAddress: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     multiSendAddress: Address
+    erc7569LaunchpadAddress?: Address
     setupTransactions?: {
         to: Address
         data: Address
         value: bigint
     }[]
     safeModules?: Address[]
+    validators?: { address: Address; context: Address }[]
+    executors?: {
+        address: Address
+        context: Address
+    }[]
+    fallbacks?: { address: Address; context: Address }[]
+    hooks?: { address: Address; context: Address }[]
+    attesters?: Address[]
+    attestersThreshold?: number
 }) => {
+    if (erc7569LaunchpadAddress) {
+        const initData = get7579LaunchPadInitData({
+            safe4337ModuleAddress,
+            safeSingletonAddress,
+            erc7569LaunchpadAddress,
+            owner,
+            validators,
+            executors,
+            fallbacks,
+            hooks,
+            attesters,
+            attestersThreshold
+        })
+
+        const initHash = keccak256(
+            encodeAbiParameters(
+                [
+                    {
+                        internalType: "address",
+                        name: "singleton",
+                        type: "address"
+                    },
+                    {
+                        internalType: "address[]",
+                        name: "owners",
+                        type: "address[]"
+                    },
+                    {
+                        internalType: "uint256",
+                        name: "threshold",
+                        type: "uint256"
+                    },
+                    {
+                        internalType: "address",
+                        name: "setupTo",
+                        type: "address"
+                    },
+                    {
+                        internalType: "bytes",
+                        name: "setupData",
+                        type: "bytes"
+                    },
+                    {
+                        internalType: "contract ISafe7579",
+                        name: "safe7579",
+                        type: "address"
+                    },
+                    {
+                        internalType: "struct ModuleInit[]",
+                        name: "validators",
+                        type: "tuple[]",
+                        components: [
+                            {
+                                internalType: "address",
+                                name: "module",
+                                type: "address"
+                            },
+                            {
+                                internalType: "bytes",
+                                name: "initData",
+                                type: "bytes"
+                            }
+                        ]
+                    }
+                ],
+                [
+                    initData.singleton,
+                    initData.owners,
+                    initData.threshold,
+                    initData.setupTo,
+                    initData.setupData,
+                    initData.safe7579,
+                    initData.validators.map((validator) => ({
+                        module: validator.address,
+                        initData: validator.context
+                    }))
+                ]
+            )
+        )
+
+        return encodeFunctionData({
+            abi: preValidationSetupAbi,
+            functionName: "preValidationSetup",
+            args: [initHash, zeroAddress, "0x"]
+        })
+    }
+
     const multiSendCallData = encodeMultiSend([
         {
             to: safeModuleSetupAddress,
             data: encodeFunctionData({
-                abi: [
-                    {
-                        inputs: [
-                            {
-                                internalType: "address[]",
-                                name: "modules",
-                                type: "address[]"
-                            }
-                        ],
-                        name: "enableModules",
-                        outputs: [],
-                        stateMutability: "nonpayable",
-                        type: "function"
-                    }
-                ],
+                abi: enableModulesAbi,
                 functionName: "enableModules",
                 args: [[safe4337ModuleAddress, ...safeModules]]
             }),
@@ -278,56 +747,7 @@ const getInitializerCode = async ({
     ])
 
     return encodeFunctionData({
-        abi: [
-            {
-                inputs: [
-                    {
-                        internalType: "address[]",
-                        name: "_owners",
-                        type: "address[]"
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "_threshold",
-                        type: "uint256"
-                    },
-                    {
-                        internalType: "address",
-                        name: "to",
-                        type: "address"
-                    },
-                    {
-                        internalType: "bytes",
-                        name: "data",
-                        type: "bytes"
-                    },
-                    {
-                        internalType: "address",
-                        name: "fallbackHandler",
-                        type: "address"
-                    },
-                    {
-                        internalType: "address",
-                        name: "paymentToken",
-                        type: "address"
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "payment",
-                        type: "uint256"
-                    },
-                    {
-                        internalType: "address payable",
-                        name: "paymentReceiver",
-                        type: "address"
-                    }
-                ],
-                name: "setup",
-                outputs: [],
-                stateMutability: "nonpayable",
-                type: "function"
-            }
-        ],
+        abi: setupAbi,
         functionName: "setup",
         args: [
             [owner],
@@ -373,16 +793,24 @@ const getAccountInitCode = async ({
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
+    erc7569LaunchpadAddress,
     multiSendAddress,
     saltNonce = BigInt(0),
     setupTransactions = [],
-    safeModules = []
+    safeModules = [],
+    validators = [],
+    executors = [],
+    fallbacks = [],
+    hooks = [],
+    attesters = [],
+    attestersThreshold = 0
 }: {
     owner: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
+    erc7569LaunchpadAddress?: Address
     saltNonce?: bigint
     setupTransactions?: {
         to: Address
@@ -390,51 +818,45 @@ const getAccountInitCode = async ({
         value: bigint
     }[]
     safeModules?: Address[]
+    validators?: { address: Address; context: Address }[]
+    executors?: {
+        address: Address
+        context: Address
+    }[]
+    fallbacks?: { address: Address; context: Address }[]
+    hooks?: { address: Address; context: Address }[]
+    attesters?: Address[]
+    attestersThreshold?: number
 }): Promise<Hex> => {
-    if (!owner) throw new Error("Owner account not found")
+    if (!owner) {
+        throw new Error("Owner account not found")
+    }
+
     const initializer = await getInitializerCode({
         owner,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
         setupTransactions,
-        safeModules
+        safeSingletonAddress,
+        safeModules,
+        erc7569LaunchpadAddress,
+        validators,
+        executors,
+        fallbacks,
+        hooks,
+        attesters,
+        attestersThreshold
     })
 
     const initCodeCallData = encodeFunctionData({
-        abi: [
-            {
-                inputs: [
-                    {
-                        internalType: "address",
-                        name: "_singleton",
-                        type: "address"
-                    },
-                    {
-                        internalType: "bytes",
-                        name: "initializer",
-                        type: "bytes"
-                    },
-                    {
-                        internalType: "uint256",
-                        name: "saltNonce",
-                        type: "uint256"
-                    }
-                ],
-                name: "createProxyWithNonce",
-                outputs: [
-                    {
-                        internalType: "contract SafeProxy",
-                        name: "proxy",
-                        type: "address"
-                    }
-                ],
-                stateMutability: "nonpayable",
-                type: "function"
-            }
-        ],
+        abi: createProxyWithNonceAbi,
         functionName: "createProxyWithNonce",
-        args: [safeSingletonAddress, initializer, saltNonce]
+        args: [
+            erc7569LaunchpadAddress ?? safeSingletonAddress,
+            initializer,
+            saltNonce
+        ]
     })
 
     return initCodeCallData
@@ -451,9 +873,16 @@ const getAccountAddress = async <
     safeProxyFactoryAddress,
     safeSingletonAddress,
     multiSendAddress,
+    erc7569LaunchpadAddress,
     setupTransactions = [],
     safeModules = [],
-    saltNonce = BigInt(0)
+    saltNonce = BigInt(0),
+    validators = [],
+    executors = [],
+    fallbacks = [],
+    hooks = [],
+    attesters = [],
+    attestersThreshold = 0
 }: {
     client: Client<TTransport, TChain>
     owner: Address
@@ -469,31 +898,22 @@ const getAccountAddress = async <
     }[]
     safeModules?: Address[]
     saltNonce?: bigint
+    erc7569LaunchpadAddress?: Address
+    validators?: { address: Address; context: Address }[]
+    executors?: {
+        address: Address
+        context: Address
+    }[]
+    fallbacks?: { address: Address; context: Address }[]
+    hooks?: { address: Address; context: Address }[]
+    attesters?: Address[]
+    attestersThreshold?: number
 }): Promise<Address> => {
     const proxyCreationCode = await readContract(client, {
-        abi: [
-            {
-                inputs: [],
-                name: "proxyCreationCode",
-                outputs: [
-                    {
-                        internalType: "bytes",
-                        name: "",
-                        type: "bytes"
-                    }
-                ],
-                stateMutability: "pure",
-                type: "function"
-            }
-        ],
+        abi: proxyCreationCodeAbi,
         address: safeProxyFactoryAddress,
         functionName: "proxyCreationCode"
     })
-
-    const deploymentCode = encodePacked(
-        ["bytes", "uint256"],
-        [proxyCreationCode, hexToBigInt(safeSingletonAddress)]
-    )
 
     const initializer = await getInitializerCode({
         owner,
@@ -501,8 +921,24 @@ const getAccountAddress = async <
         safe4337ModuleAddress,
         multiSendAddress,
         setupTransactions,
-        safeModules
+        safeSingletonAddress,
+        safeModules,
+        erc7569LaunchpadAddress,
+        validators,
+        executors,
+        fallbacks,
+        hooks,
+        attesters,
+        attestersThreshold
     })
+
+    const deploymentCode = encodePacked(
+        ["bytes", "uint256"],
+        [
+            proxyCreationCode,
+            hexToBigInt(erc7569LaunchpadAddress ?? safeSingletonAddress)
+        ]
+    )
 
     const salt = keccak256(
         encodePacked(
@@ -580,33 +1016,66 @@ const getDefaultAddresses = (
     }
 }
 
+type GetErc7579Params<TErc7579 extends Address | undefined> =
+    TErc7579 extends undefined
+        ? {
+              safeModuleSetupAddress?: Address
+              multiSendAddress?: Address
+              multiSendCallOnlyAddress?: Address
+              setupTransactions?: {
+                  to: Address
+                  data: Address
+                  value: bigint
+              }[]
+              safeModules?: Address[]
+          }
+        : {
+              validators?: { address: Address; context: Address }[]
+              executors?: {
+                  address: Address
+                  context: Address
+              }[]
+              fallbacks?: { address: Address; context: Address }[]
+              hooks?: { address: Address; context: Address }[]
+              attesters?: Address[]
+              attestersThreshold?: number
+          }
+
 export type SignerToSafeSmartAccountParameters<
     entryPoint extends EntryPoint,
     TSource extends string = string,
-    TAddress extends Address = Address
-> = Prettify<{
+    TAddress extends Address = Address,
+    TErc7579 extends Address | undefined = Address | undefined
+> = {
     signer: SmartAccountSigner<TSource, TAddress>
     safeVersion: SafeVersion
     entryPoint: entryPoint
-    address?: Address
-    safeModuleSetupAddress?: Address
     safe4337ModuleAddress?: Address
+    erc7569LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
-    multiSendAddress?: Address
-    multiSendCallOnlyAddress?: Address
+    address?: Address
     saltNonce?: bigint
     validUntil?: number
     validAfter?: number
-    erc7579?: boolean
     nonceKey?: bigint
-    setupTransactions?: {
-        to: Address
-        data: Address
-        value: bigint
-    }[]
-    safeModules?: Address[]
-}>
+} & GetErc7579Params<TErc7579>
+
+function isErc7579Args(
+    args: SignerToSafeSmartAccountParameters<
+        EntryPoint,
+        string,
+        Address,
+        Address | undefined
+    >
+): args is SignerToSafeSmartAccountParameters<
+    EntryPoint,
+    string,
+    Address,
+    Address
+> {
+    return args.erc7569LaunchpadAddress !== undefined
+}
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -618,7 +1087,8 @@ export async function signerToSafeSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
     TSource extends string = string,
-    TAddress extends Address = Address
+    TAddress extends Address = Address,
+    TErc7579 extends Address | undefined = undefined
 >(
     client: Client<
         TTransport,
@@ -627,27 +1097,62 @@ export async function signerToSafeSmartAccount<
         PublicRpcSchema,
         PublicActions
     >,
-    {
+    args: SignerToSafeSmartAccountParameters<
+        entryPoint,
+        TSource,
+        TAddress,
+        TErc7579
+    >
+): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
+    const chainId = client.chain?.id ?? (await getChainId(client))
+
+    const {
         signer,
         address,
         safeVersion,
         entryPoint: entryPointAddress,
-        safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        multiSendAddress: _multiSendAddress,
-        multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
+        erc7569LaunchpadAddress,
         saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
-        safeModules = [],
-        erc7579,
-        setupTransactions = [],
         nonceKey
-    }: SignerToSafeSmartAccountParameters<entryPoint, TSource, TAddress>
-): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
-    const chainId = client.chain?.id ?? (await getChainId(client))
+    } = args
+
+    let _safeModuleSetupAddress: Address | undefined = undefined
+    let _multiSendAddress: Address | undefined = undefined
+    let _multiSendCallOnlyAddress: Address | undefined = undefined
+    let safeModules: Address[] | undefined = undefined
+    let setupTransactions: {
+        to: `0x${string}`
+        data: `0x${string}`
+        value: bigint
+    }[] = []
+    let validators: { address: Address; context: Address }[] = []
+    let executors: { address: Address; context: Address }[] = []
+    let fallbacks: { address: Address; context: Address }[] = []
+    let hooks: { address: Address; context: Address }[] = []
+    let attesters: Address[] = []
+    let attestersThreshold = 0
+
+    if (!isErc7579Args(args)) {
+        _safeModuleSetupAddress = args.safeModuleSetupAddress
+        _multiSendAddress = args.multiSendAddress
+        _multiSendCallOnlyAddress = args.multiSendCallOnlyAddress
+        safeModules = args.safeModules
+        setupTransactions = args.setupTransactions ?? []
+    }
+
+    if (isErc7579Args(args)) {
+        validators = args.validators ?? []
+        executors = args.executors ?? []
+        fallbacks = args.fallbacks ?? []
+        hooks = args.hooks ?? []
+        attesters = args.attesters ?? []
+        attestersThreshold = args.attestersThreshold ?? 0
+    }
 
     const viemSigner: LocalAccount = {
         ...signer,
@@ -682,9 +1187,16 @@ export async function signerToSafeSmartAccount<
             safeProxyFactoryAddress,
             safeSingletonAddress,
             multiSendAddress,
+            erc7569LaunchpadAddress,
             saltNonce,
             setupTransactions,
-            safeModules
+            safeModules,
+            validators,
+            executors,
+            fallbacks,
+            hooks,
+            attesters,
+            attestersThreshold
         }))
 
     if (!accountAddress) throw new Error("Account address not found")
@@ -694,6 +1206,10 @@ export async function signerToSafeSmartAccount<
     const safeSmartAccount: SafeSmartAccount<entryPoint, TTransport, TChain> =
         toSmartAccount({
             address: accountAddress,
+            client: client,
+            publicKey: accountAddress,
+            entryPoint: entryPointAddress,
+            source: "SafeSmartAccount",
             async signMessage({ message }) {
                 const messageHash = hashTypedData({
                     domain: {
@@ -749,12 +1265,7 @@ export async function signerToSafeSmartAccount<
                     })
                 )
             },
-            client: client,
-            publicKey: accountAddress,
-            entryPoint: entryPointAddress,
-            source: "SafeSmartAccount",
             async getNonce(key?: bigint) {
-                // TODO: Allow dapp developers to specify custom nonce key (eg: Validator address)
                 return getAccountNonce(client, {
                     sender: accountAddress,
                     entryPoint: entryPointAddress,
@@ -780,10 +1291,13 @@ export async function signerToSafeSmartAccount<
                     entryPoint: entryPointAddress
                 }
 
+                let isDeployed = false
+
                 if (
                     isUserOperationVersion06(entryPointAddress, userOperation)
                 ) {
                     message.paymasterAndData = userOperation.paymasterAndData
+                    isDeployed = userOperation.initCode === "0x"
                 }
 
                 if (
@@ -797,6 +1311,13 @@ export async function signerToSafeSmartAccount<
                     }
                     message.paymasterAndData =
                         getPaymasterAndData(userOperation)
+                    isDeployed = !userOperation.factory
+                }
+
+                let verifyingContract = safe4337ModuleAddress
+
+                if (erc7569LaunchpadAddress && !isDeployed) {
+                    verifyingContract = userOperation.sender
                 }
 
                 const signatures = [
@@ -805,8 +1326,8 @@ export async function signerToSafeSmartAccount<
                         data: await signTypedData(client, {
                             account: viemSigner,
                             domain: {
-                                chainId: chainId,
-                                verifyingContract: safe4337ModuleAddress
+                                chainId,
+                                verifyingContract
                             },
                             types:
                                 getEntryPointVersion(entryPointAddress) ===
@@ -866,9 +1387,16 @@ export async function signerToSafeSmartAccount<
                     safe4337ModuleAddress,
                     safeSingletonAddress,
                     multiSendAddress,
+                    erc7569LaunchpadAddress,
                     saltNonce,
                     setupTransactions,
-                    safeModules
+                    safeModules,
+                    validators,
+                    executors,
+                    fallbacks,
+                    hooks,
+                    attesters,
+                    attestersThreshold
                 })
             },
             async encodeDeployCallData(_) {
@@ -879,15 +1407,63 @@ export async function signerToSafeSmartAccount<
             async encodeCallData(args) {
                 const isArray = Array.isArray(args)
 
-                if (erc7579) {
+                if (erc7569LaunchpadAddress) {
+                    // First transaction will be slower because we need to enable 7579 modules
+
+                    safeDeployed =
+                        safeDeployed ||
+                        (await isSmartAccountDeployed(client, accountAddress))
+
+                    if (!safeDeployed) {
+                        const initData = get7579LaunchPadInitData({
+                            safe4337ModuleAddress,
+                            safeSingletonAddress,
+                            erc7569LaunchpadAddress,
+                            owner: viemSigner.address,
+                            validators,
+                            executors,
+                            fallbacks,
+                            hooks,
+                            attesters,
+                            attestersThreshold
+                        })
+
+                        return encodeFunctionData({
+                            abi: setupSafeAbi,
+                            functionName: "setupSafe",
+                            args: [
+                                {
+                                    ...initData,
+                                    validators: initData.validators.map(
+                                        (validator) => ({
+                                            module: validator.address,
+                                            initData: validator.context
+                                        })
+                                    ),
+                                    callData: encode7579CallData({
+                                        mode: {
+                                            type: isArray
+                                                ? "batchcall"
+                                                : "call",
+                                            revertOnError: false,
+                                            selector: "0x",
+                                            context: "0x"
+                                        },
+                                        callData: args
+                                    })
+                                }
+                            ]
+                        })
+                    }
+
                     return encode7579CallData({
                         mode: {
                             type: isArray ? "batchcall" : "call",
                             revertOnError: false,
-                            modeSelector: "0x",
-                            modeData: "0x"
+                            selector: "0x",
+                            context: "0x"
                         },
-                        callData: args as any
+                        callData: args
                     })
                 }
 
@@ -922,36 +1498,7 @@ export async function signerToSafeSmartAccount<
                 }
 
                 return encodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address",
-                                    name: "to",
-                                    type: "address"
-                                },
-                                {
-                                    internalType: "uint256",
-                                    name: "value",
-                                    type: "uint256"
-                                },
-                                {
-                                    internalType: "bytes",
-                                    name: "data",
-                                    type: "bytes"
-                                },
-                                {
-                                    internalType: "uint8",
-                                    name: "operation",
-                                    type: "uint8"
-                                }
-                            ],
-                            name: "executeUserOpWithErrorString",
-                            outputs: [],
-                            stateMutability: "nonpayable",
-                            type: "function"
-                        }
-                    ],
+                    abi: executeUserOpWithErrorStringAbi,
                     functionName: "executeUserOpWithErrorString",
                     args: [to, value, data, operationType]
                 })

@@ -60,31 +60,39 @@ export async function uninstallModule<
 
     const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
-    const uninstallModuleCallData = encodeFunctionData({
-        abi: [
-            {
-                name: "uninstallModule",
-                type: "function",
-                stateMutability: "nonpayable",
-                inputs: [
-                    {
-                        type: "uint256",
-                        name: "moduleTypeId"
-                    },
-                    {
-                        type: "address",
-                        name: "module"
-                    },
-                    {
-                        type: "bytes",
-                        name: "deInitData"
-                    }
-                ],
-                outputs: []
-            }
-        ],
-        functionName: "uninstallModule",
-        args: [parseModuleTypeId(parameters.type), getAddress(address), context]
+    const uninstallModuleCallData = await account.encodeCallData({
+        to: account.address,
+        value: BigInt(0),
+        data: encodeFunctionData({
+            abi: [
+                {
+                    name: "uninstallModule",
+                    type: "function",
+                    stateMutability: "nonpayable",
+                    inputs: [
+                        {
+                            type: "uint256",
+                            name: "moduleTypeId"
+                        },
+                        {
+                            type: "address",
+                            name: "module"
+                        },
+                        {
+                            type: "bytes",
+                            name: "deInitData"
+                        }
+                    ],
+                    outputs: []
+                }
+            ],
+            functionName: "uninstallModule",
+            args: [
+                parseModuleTypeId(parameters.type),
+                getAddress(address),
+                context
+            ]
+        })
     })
 
     return getAction(

@@ -17,7 +17,7 @@ import {
     mnemonicToAccount,
     privateKeyToAccount
 } from "viem/accounts"
-import { foundry } from "viem/chains"
+import { foundry, sepolia } from "viem/chains"
 import {
     type BundlerClient,
     ENTRYPOINT_ADDRESS_V06,
@@ -138,9 +138,15 @@ export const getPimlicoBundlerClient = <T extends EntryPoint>({
     })
 
 export const getPublicClient = (anvilRpc: string) => {
+    const transport = http(anvilRpc, {
+        onFetchRequest: async (request) => {
+            // console.log("fetching", await request.json())
+        }
+    })
+
     return createPublicClient({
         chain: foundry,
-        transport: http(anvilRpc),
+        transport: transport,
         pollingInterval: 100
     })
 }
@@ -383,10 +389,16 @@ export const getSafeClient = async <T extends EntryPoint>({
         safeVersion: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
-            ? getAddress("0x50Da3861d482116c5F2Ea6d673a58CedB786Dc1C")
+            ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
             : undefined,
-        erc7579,
-        setupTransactions
+        erc7569LaunchpadAddress: erc7579
+            ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
+            : undefined
+    })
+
+    const pimlicoBundlerClient = getPimlicoBundlerClient({
+        entryPoint,
+        altoRpc
     })
 
     // @ts-ignore
@@ -395,6 +407,8 @@ export const getSafeClient = async <T extends EntryPoint>({
         account: safeSmartAccount,
         bundlerTransport: http(altoRpc),
         middleware: {
+            gasPrice: async () =>
+                (await pimlicoBundlerClient.getUserOperationGasPrice()).fast,
             // @ts-ignore
             sponsorUserOperation: paymasterClient?.sponsorUserOperation
         }

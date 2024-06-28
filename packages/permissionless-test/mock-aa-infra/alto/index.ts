@@ -28,7 +28,9 @@ import {
     KERNEL_V07_FACTORY_CREATECALL,
     KERNEL_V07_META_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+    SAFE_7579_LAUNCHPAD_CREATECALL,
     SAFE_7579_MODULE_CREATECALL,
+    SAFE_7579_REGISTRY_CREATECALL,
     SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
     SAFE_MULTI_SEND_CREATECALL,
     SAFE_PROXY_FACTORY_CREATECALL,
@@ -142,6 +144,18 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SAFE_7579_MODULE_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_7579_REGISTRY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SAFE_7579_LAUNCHPAD_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -388,7 +402,9 @@ export const setupContracts = async (rpc: string) => {
         "0x41675C099F32341bf84BFc5382aF534df5C7461a", // Safe Singleton
         "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526", // Safe Multi Send
         "0x9641d764fc13c8B624c04430C7356C1C7C8102e2", // Safe Multi Send Call Only
-        "0x50Da3861d482116c5F2Ea6d673a58CedB786Dc1C", // Safe 7579 module
+        "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2", // Safe 7579 module
+        "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE", // Safe 7579 launchpad
+        "0x25A4b2F363678E13A0A5DB79b712dE00347a593E", // Safe 7579 Registry
         "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint V0.6
         "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory V0.6
         "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e", // Biconomy ECDSA Ownership Registry Module
