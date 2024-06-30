@@ -24,8 +24,7 @@ import {
     ENTRYPOINT_ADDRESS_V07,
     type SmartAccountClient,
     createBundlerClient,
-    createSmartAccountClient,
-    getEntryPointVersion
+    createSmartAccountClient
 } from "../../permissionless"
 import {
     type SafeSmartAccount,
@@ -55,10 +54,6 @@ import type {
     ENTRYPOINT_ADDRESS_V07_TYPE,
     EntryPoint
 } from "../../permissionless/types"
-import {
-    SIMPLE_ACCOUNT_FACTORY_V06,
-    SIMPLE_ACCOUNT_FACTORY_V07
-} from "./constants"
 import type { AAParamType, ExistingSignerParamType } from "./types"
 
 export const PAYMASTER_RPC = "http://localhost:3000"
@@ -189,22 +184,6 @@ export const fund = async ({
     await publicClient.waitForTransactionReceipt({ hash })
 }
 
-export const getFactoryAddress = (
-    entryPoint: EntryPoint,
-    accountType: "simple" | "safe"
-) => {
-    switch (accountType) {
-        case "simple":
-            return getEntryPointVersion(entryPoint) === "v0.6"
-                ? SIMPLE_ACCOUNT_FACTORY_V06
-                : SIMPLE_ACCOUNT_FACTORY_V07
-        case "safe":
-            break
-    }
-
-    throw new Error("Parameters not recongized")
-}
-
 export const getSimpleAccountClient = async <T extends EntryPoint>({
     entryPoint,
     paymasterClient,
@@ -224,8 +203,7 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
           })
         : await signerToSimpleSmartAccount<T, Transport, Chain>(publicClient, {
               entryPoint,
-              signer: privateKeyToAccount(generatePrivateKey()),
-              factoryAddress: getFactoryAddress(entryPoint, "simple")
+              signer: privateKeyToAccount(generatePrivateKey())
           })
 
     return createSmartAccountClient({
