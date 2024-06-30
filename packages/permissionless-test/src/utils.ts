@@ -198,8 +198,7 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
     const smartAccount = privateKey
         ? await privateKeyToSimpleSmartAccount(publicClient, {
               entryPoint,
-              privateKey,
-              factoryAddress: getFactoryAddress(entryPoint, "simple")
+              privateKey
           })
         : await signerToSimpleSmartAccount<T, Transport, Chain>(publicClient, {
               entryPoint,
