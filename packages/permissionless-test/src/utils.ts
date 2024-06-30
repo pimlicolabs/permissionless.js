@@ -30,6 +30,11 @@ import {
 import {
     type SafeSmartAccount,
     type SmartAccount,
+    privateKeyToBiconomySmartAccount,
+    privateKeyToLightSmartAccount,
+    privateKeyToSafeSmartAccount,
+    privateKeyToSimpleSmartAccount,
+    privateKeyToTrustSmartAccount,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
     signerToLightSmartAccount,
@@ -205,20 +210,23 @@ export const getSimpleAccountClient = async <T extends EntryPoint>({
     paymasterClient,
     anvilRpc,
     altoRpc,
-    privateKey = generatePrivateKey()
+    privateKey
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
 > => {
     const publicClient = getPublicClient(anvilRpc)
 
-    const smartAccount = await signerToSimpleSmartAccount<T, Transport, Chain>(
-        publicClient,
-        {
-            entryPoint,
-            signer: privateKeyToAccount(privateKey),
-            factoryAddress: getFactoryAddress(entryPoint, "simple")
-        }
-    )
+    const smartAccount = privateKey
+        ? await privateKeyToSimpleSmartAccount(publicClient, {
+              entryPoint,
+              privateKey,
+              factoryAddress: getFactoryAddress(entryPoint, "simple")
+          })
+        : await signerToSimpleSmartAccount<T, Transport, Chain>(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey()),
+              factoryAddress: getFactoryAddress(entryPoint, "simple")
+          })
 
     return createSmartAccountClient({
         chain: foundry,
@@ -238,16 +246,22 @@ export const getLightAccountClient = async <T extends EntryPoint>({
     paymasterClient,
     anvilRpc,
     altoRpc,
-    privateKey = generatePrivateKey()
+    privateKey
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
 > => {
     const publicClient = getPublicClient(anvilRpc)
-    const smartAccount = await signerToLightSmartAccount(publicClient, {
-        entryPoint,
-        signer: privateKeyToAccount(privateKey),
-        lightAccountVersion: "1.1.0"
-    })
+    const smartAccount = privateKey
+        ? await privateKeyToLightSmartAccount(publicClient, {
+              entryPoint,
+              lightAccountVersion: "1.1.0",
+              privateKey
+          })
+        : await signerToLightSmartAccount(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey()),
+              lightAccountVersion: "1.1.0"
+          })
 
     return createSmartAccountClient({
         chain: foundry,
@@ -270,18 +284,20 @@ export const getTrustAccountClient = async <
     paymasterClient,
     altoRpc,
     anvilRpc,
-    privateKey = generatePrivateKey()
+    privateKey
 }: AAParamType<T>): Promise<
     SmartAccountClient<T, Transport, Chain, SmartAccount<T>>
 > => {
     const publicClient = getPublicClient(anvilRpc)
-    const smartAccount = await signerToTrustSmartAccount<T, Transport, Chain>(
-        publicClient,
-        {
-            entryPoint,
-            signer: privateKeyToAccount(privateKey)
-        }
-    )
+    const smartAccount = privateKey
+        ? await privateKeyToTrustSmartAccount(publicClient, {
+              entryPoint,
+              privateKey
+          })
+        : await signerToTrustSmartAccount<T, Transport, Chain>(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey())
+          })
 
     // @ts-ignore
     return createSmartAccountClient({
@@ -298,16 +314,21 @@ export const getTrustAccountClient = async <
 // Only supports v0.6 for now
 export const getBiconomyClient = async ({
     paymasterClient,
-    privateKey = generatePrivateKey(),
+    privateKey,
     anvilRpc,
     altoRpc,
     entryPoint = ENTRYPOINT_ADDRESS_V06
 }: AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>) => {
     const publicClient = getPublicClient(anvilRpc)
-    const ecdsaSmartAccount = await signerToBiconomySmartAccount(publicClient, {
-        entryPoint,
-        signer: privateKeyToAccount(privateKey)
-    })
+    const ecdsaSmartAccount = privateKey
+        ? await privateKeyToBiconomySmartAccount(publicClient, {
+              entryPoint,
+              privateKey
+          })
+        : await signerToBiconomySmartAccount(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey())
+          })
 
     // @ts-ignore
     return createSmartAccountClient({
@@ -366,7 +387,7 @@ export const getSafeClient = async <T extends EntryPoint>({
     paymasterClient,
     anvilRpc,
     altoRpc,
-    privateKey = generatePrivateKey(),
+    privateKey,
     erc7579
 }: {
     setupTransactions?: {
@@ -383,18 +404,31 @@ export const getSafeClient = async <T extends EntryPoint>({
 }): Promise<SmartAccountClient<T, Transport, Chain, SafeSmartAccount<T>>> => {
     const publicClient = getPublicClient(anvilRpc)
 
-    const safeSmartAccount = await signerToSafeSmartAccount(publicClient, {
-        entryPoint,
-        signer: privateKeyToAccount(privateKey),
-        safeVersion: "1.4.1",
-        saltNonce: 420n,
-        safe4337ModuleAddress: erc7579
-            ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
-            : undefined,
-        erc7569LaunchpadAddress: erc7579
-            ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
-            : undefined
-    })
+    const safeSmartAccount = privateKey
+        ? await privateKeyToSafeSmartAccount(publicClient, {
+              entryPoint,
+              privateKey,
+              safeVersion: "1.4.1",
+              saltNonce: 420n,
+              safe4337ModuleAddress: erc7579
+                  ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
+                  : undefined,
+              erc7569LaunchpadAddress: erc7579
+                  ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
+                  : undefined
+          })
+        : await signerToSafeSmartAccount(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey()),
+              safeVersion: "1.4.1",
+              saltNonce: 420n,
+              safe4337ModuleAddress: erc7579
+                  ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
+                  : undefined,
+              erc7569LaunchpadAddress: erc7579
+                  ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
+                  : undefined
+          })
 
     const pimlicoBundlerClient = getPimlicoBundlerClient({
         entryPoint,
@@ -525,6 +559,113 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSafeClient(conf),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToSafeSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                safeVersion: "1.4.1"
+            }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getSafeClient({ ...conf, erc7579: true }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+
+    // ---------------------------- Account from private key -------------------------------------------------
+
+    {
+        name: "Trust",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => {
+            if (conf.entryPoint !== ENTRYPOINT_ADDRESS_V06) {
+                throw new Error("Biconomy only works with V06")
+            }
+            return getTrustAccountClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>),
+                privateKey: generatePrivateKey()
+            })
+        },
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToTrustSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "LightAccount v1.1.0",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getLightAccountClient({
+                ...conf,
+                privateKey: generatePrivateKey()
+            }),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToLightSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06,
+                lightAccountVersion: "1.1.0"
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Simple",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getSimpleAccountClient({
+                ...conf,
+                privateKey: generatePrivateKey()
+            }),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToSimpleSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: false
+    },
+    {
+        name: "Biconomy",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => {
+            if (conf.entryPoint !== ENTRYPOINT_ADDRESS_V06) {
+                throw new Error("Biconomy only works with V06")
+            }
+            return getBiconomyClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>),
+                privateKey: generatePrivateKey()
+            })
+        },
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToBiconomySmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V06
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) => getSafeClient({ ...conf, privateKey: generatePrivateKey() }),
         getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
             signerToSafeSmartAccount(conf.publicClient, {
                 address: conf.existingAddress, // this is the field we are testing

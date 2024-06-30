@@ -7,7 +7,11 @@ import type {
     Transport
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
+import type {
+    ENTRYPOINT_ADDRESS_V06_TYPE,
+    EntryPoint,
+    Prettify
+} from "../../types"
 import {
     type SafeSmartAccount,
     type SignerToSafeSmartAccountParameters,
@@ -28,7 +32,7 @@ export type PrivateKeyToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function privateKeyToSafeSmartAccount<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(

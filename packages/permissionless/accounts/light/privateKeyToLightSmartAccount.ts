@@ -28,7 +28,7 @@ export type PrivateKeyToLightSmartAccountParameters<
  * @returns A Private Key Light Account.
  */
 export async function privateKeyToLightSmartAccount<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
