@@ -7,11 +7,7 @@ import type {
     Transport
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint,
-    Prettify
-} from "../../types"
+import type { EntryPoint, Prettify } from "../../types"
 import {
     type SafeSmartAccount,
     type SignerToSafeSmartAccountParameters,
@@ -19,7 +15,7 @@ import {
 } from "./signerToSafeSmartAccount"
 
 export type PrivateKeyToSafeSmartAccountParameters<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+    entryPoint extends EntryPoint
 > = Prettify<
     {
         privateKey: Hex

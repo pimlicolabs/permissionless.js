@@ -7,7 +7,8 @@ import type {
     Transport
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
+import type { Prettify } from "../../types"
+import type { EntryPoint } from "../../types"
 import {
     type LightSmartAccount,
     type SignerToLightSmartAccountParameters,
@@ -15,7 +16,7 @@ import {
 } from "./signerToLightSmartAccount"
 
 export type PrivateKeyToLightSmartAccountParameters<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+    entryPoint extends EntryPoint
 > = Prettify<
     {
         privateKey: Hex
