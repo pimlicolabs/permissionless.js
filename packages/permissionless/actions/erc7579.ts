@@ -1,28 +1,28 @@
 import type { Chain, Client, Hash, Transport } from "viem"
-import type { SmartAccount } from "../../accounts/types"
-import { accountId } from "../../actions/erc7579/accountId"
+import type { SmartAccount } from "../accounts"
+import type { GetAccountParameter } from "../types"
+import type { EntryPoint } from "../types/entrypoint"
+import { accountId } from "./erc7579/accountId"
 import {
     type InstallModuleParameters,
     installModule
-} from "../../actions/erc7579/installModule"
+} from "./erc7579/installModule"
 import {
     type IsModuleInstalledParameters,
     isModuleInstalled
-} from "../../actions/erc7579/isModuleInstalled"
+} from "./erc7579/isModuleInstalled"
 import {
     type SupportsExecutionModeParameters,
     supportsExecutionMode
-} from "../../actions/erc7579/supportsExecutionMode"
+} from "./erc7579/supportsExecutionMode"
 import {
     type SupportsModuleParameters,
     supportsModule
-} from "../../actions/erc7579/supportsModule"
+} from "./erc7579/supportsModule"
 import {
     type UninstallModuleParameters,
     uninstallModule
-} from "../../actions/erc7579/uninstallModule"
-import type { GetAccountParameter } from "../../types"
-import type { EntryPoint } from "../../types/entrypoint"
+} from "./erc7579/uninstallModule"
 
 export type Erc7579Actions<
     TEntryPoint extends EntryPoint,

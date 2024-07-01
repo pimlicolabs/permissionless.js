@@ -7,7 +7,7 @@ import {
     isHash,
     zeroAddress
 } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -17,9 +17,9 @@ import {
 import type { SmartAccount } from "../../accounts"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
-import { erc7579Actions } from "../../clients/decorators/erc7579"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { erc7579Actions } from "../erc7579"
 import { installModule } from "./installModule"
 
 describe.each(getCoreSmartAccounts())(

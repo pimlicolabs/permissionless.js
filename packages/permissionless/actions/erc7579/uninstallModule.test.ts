@@ -18,9 +18,9 @@ import {
 import type { SmartAccount } from "../../accounts"
 import { createBundlerClient } from "../../clients/createBundlerClient"
 import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
-import { erc7579Actions } from "../../clients/decorators/erc7579"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { erc7579Actions } from "../erc7579"
 import { uninstallModule } from "./uninstallModule"
 
 describe.each(getCoreSmartAccounts())(

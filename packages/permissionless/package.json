@@ -29,6 +29,11 @@
             "import": "./_esm/actions/index.js",
             "default": "./_cjs/actions/index.js"
         },
+        "./actions/erc7579": {
+            "types": "./_types/actions/index.d.ts",
+            "import": "./_esm/actions/index.js",
+            "default": "./_cjs/actions/index.js"
+        },
         "./actions/pimlico": {
             "types": "./_types/actions/pimlico.d.ts",
             "import": "./_esm/actions/pimlico.js",
