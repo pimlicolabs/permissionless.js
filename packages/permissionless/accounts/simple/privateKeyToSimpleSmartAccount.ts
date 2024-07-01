@@ -1,4 +1,12 @@
-import type { Address, Chain, Client, Hex, Transport } from "viem"
+import type {
+    Address,
+    Chain,
+    Client,
+    Hex,
+    PublicActions,
+    PublicRpcSchema,
+    Transport
+} from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import type { EntryPoint, Prettify } from "../../types"
 import {
@@ -25,7 +33,13 @@ export async function privateKeyToSimpleSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         privateKey,
         ...rest

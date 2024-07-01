@@ -6,6 +6,8 @@ import {
     type CustomSource,
     type EncodeDeployDataParameters,
     type Hex,
+    type PublicActions,
+    type PublicRpcSchema,
     type SignableMessage,
     type Transport,
     type TypedDataDefinition,
@@ -48,9 +50,9 @@ export function toSmartAccount<
     signTypedData
 }: TAccountSource & {
     source: TSource
-    client: Client<transport, chain>
+    client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
     entryPoint: TEntryPoint
-    getNonce: () => Promise<bigint>
+    getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>
     getFactory: () => Promise<Address | undefined>
     getFactoryData: () => Promise<Hex | undefined>
@@ -163,5 +165,5 @@ export function toSmartAccount<
         getDummySignature,
         encodeDeployCallData,
         signUserOperation
-    } as SmartAccount<TEntryPoint, TSource, transport, chain, TAbi>
+    }
 }
