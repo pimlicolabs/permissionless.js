@@ -15,10 +15,12 @@ import {
     type SupportsExecutionModeParameters,
     supportsExecutionMode
 } from "./erc7579/supportsExecutionMode"
+import type { CallType, ExecutionMode } from "./erc7579/supportsExecutionMode"
 import {
     type SupportsModuleParameters,
     supportsModule
 } from "./erc7579/supportsModule"
+import type { ModuleType } from "./erc7579/supportsModule"
 import {
     type UninstallModuleParameters,
     uninstallModule
@@ -28,42 +30,6 @@ export type Erc7579Actions<
     TEntryPoint extends EntryPoint,
     TSmartAccount extends SmartAccount<TEntryPoint> | undefined
 > = {
-    /**
-     * Get's the accountId of the smart account
-     *
-     * @param args - {@link SendTransactionParameters}
-     * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link SendTransactionReturnType}
-     *
-     * @example
-     * import { createSmartAccountClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createSmartAccountClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const hash = await client.sendTransaction({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createSmartAccountClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createSmartAccountClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const hash = await client.sendTransaction({
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
-     * })
-     */
     accountId: (
         args?: TSmartAccount extends undefined
             ? GetAccountParameter<TEntryPoint, TSmartAccount>
@@ -84,6 +50,26 @@ export type Erc7579Actions<
     uninstallModule: (
         args: UninstallModuleParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
+}
+
+export type {
+    InstallModuleParameters,
+    IsModuleInstalledParameters,
+    CallType,
+    ExecutionMode,
+    SupportsExecutionModeParameters,
+    ModuleType,
+    SupportsModuleParameters,
+    UninstallModuleParameters
+}
+
+export {
+    accountId,
+    installModule,
+    isModuleInstalled,
+    supportsExecutionMode,
+    supportsModule,
+    uninstallModule
 }
 
 export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {

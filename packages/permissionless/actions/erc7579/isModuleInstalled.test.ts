@@ -8,7 +8,6 @@ import {
 } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
-import { erc7579Actions } from "."
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
@@ -19,6 +18,7 @@ import { createBundlerClient } from "../../clients/createBundlerClient"
 import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { erc7579Actions } from "../erc7579"
 import { isModuleInstalled } from "./isModuleInstalled"
 
 describe.each(getCoreSmartAccounts())(
