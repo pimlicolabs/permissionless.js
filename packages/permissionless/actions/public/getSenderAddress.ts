@@ -152,8 +152,11 @@ export const getSenderAddress = async <
                 const revertError =
                     callExecutionError.cause as RpcRequestErrorType
 
-                const hexStringRegex = /0x[a-fA-F0-9]+/;
-                const match = (revertError as unknown as any).cause.data.match(hexStringRegex);
+                const hexStringRegex = /0x[a-fA-F0-9]+/
+                // biome-ignore lint/suspicious/noExplicitAny:
+                const match = (revertError as unknown as any).cause.data.match(
+                    hexStringRegex
+                )
 
                 if (!match) {
                     throw new Error(
@@ -188,8 +191,11 @@ export const getSenderAddress = async <
                 const revertError =
                     callExecutionError.cause as RpcRequestErrorType
 
-                const hexStringRegex = /0x[a-fA-F0-9]+/;
-                const match = (revertError as unknown as any).cause.data.match(hexStringRegex);
+                const hexStringRegex = /0x[a-fA-F0-9]+/
+                // biome-ignore lint/suspicious/noExplicitAny:
+                const match = (revertError as unknown as any).cause.data.match(
+                    hexStringRegex
+                )
 
                 if (!match) {
                     throw new Error(
