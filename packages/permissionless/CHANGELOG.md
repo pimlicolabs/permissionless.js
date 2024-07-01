@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.32
+
+### Patch Changes
+
+- d7f7f0de2dfc683352a6ec91a96fc2621d37e835: Added 7579 actions support
+
 ## 0.1.31
 
 ### Patch Changes
