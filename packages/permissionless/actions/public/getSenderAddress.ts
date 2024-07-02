@@ -151,10 +151,20 @@ export const getSenderAddress = async <
             if (callExecutionError.cause.name === "RpcRequestError") {
                 const revertError =
                     callExecutionError.cause as RpcRequestErrorType
-                // biome-ignore lint/suspicious/noExplicitAny: fuse issues
-                const data = (revertError as unknown as any).cause.data.split(
-                    " "
-                )[1]
+
+                const hexStringRegex = /0x[a-fA-F0-9]+/
+                // biome-ignore lint/suspicious/noExplicitAny:
+                const match = (revertError as unknown as any).cause.data.match(
+                    hexStringRegex
+                )
+
+                if (!match) {
+                    throw new Error(
+                        "Failed to parse revert bytes from RPC response"
+                    )
+                }
+
+                const data: Hex = match[0]
 
                 const error = decodeErrorResult({
                     abi: [
@@ -180,8 +190,20 @@ export const getSenderAddress = async <
                 //Ganache local testing returns "InvalidInputRpcError" with data in regular format
                 const revertError =
                     callExecutionError.cause as RpcRequestErrorType
-                // biome-ignore lint/suspicious/noExplicitAny: fuse issues
-                const data = (revertError as unknown as any).cause.data
+
+                const hexStringRegex = /0x[a-fA-F0-9]+/
+                // biome-ignore lint/suspicious/noExplicitAny:
+                const match = (revertError as unknown as any).cause.data.match(
+                    hexStringRegex
+                )
+
+                if (!match) {
+                    throw new Error(
+                        "Failed to parse revert bytes from RPC response"
+                    )
+                }
+
+                const data: Hex = match[0]
 
                 const error = decodeErrorResult({
                     abi: [
