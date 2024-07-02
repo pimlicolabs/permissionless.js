@@ -30,9 +30,9 @@
             "default": "./_cjs/actions/index.js"
         },
         "./actions/erc7579": {
-            "types": "./_types/actions/index.d.ts",
-            "import": "./_esm/actions/index.js",
-            "default": "./_cjs/actions/index.js"
+            "types": "./_types/actions/erc7579.d.ts",
+            "import": "./_esm/actions/erc7579.js",
+            "default": "./_cjs/actions/erc7579.js"
         },
         "./actions/pimlico": {
             "types": "./_types/actions/pimlico.d.ts",
