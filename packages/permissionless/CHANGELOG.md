@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.34
+
+### Patch Changes
+
+- 133de34e2a8140879caba4d108e6910ffb38d807: Fixed erc7579Actions export
+
 ## 0.1.33
 
 ### Patch Changes
