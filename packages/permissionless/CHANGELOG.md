@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.33
+
+### Patch Changes
+
+- 3e1ff32f3b99e22b957a05abe34ecf22d30112b8: Added support for parsing revert data from kakarot, rootstock-testnet & fuse to "getSenderAddress"
+
 ## 0.1.32
 
 ### Patch Changes
