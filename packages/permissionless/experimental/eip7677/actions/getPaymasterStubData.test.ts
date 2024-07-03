@@ -43,6 +43,9 @@ describe("EIP-7677 getPaymasterStubData", () => {
         })
         expect(stubData).not.toBeNull()
         expect(stubData?.paymasterAndData).not.toBeNull()
+        expect(stubData?.isFinal).toBe(false)
+        expect(stubData?.sponsor?.icon).toBeTruthy()
+        expect(stubData?.sponsor?.name).toBe("Pimlico")
     })
 
     testWithRpc("getPaymasterStubData_V07", async ({ rpc }) => {
@@ -80,5 +83,8 @@ describe("EIP-7677 getPaymasterStubData", () => {
         expect(stubData?.paymasterData).not.toBeNull()
         expect(stubData?.paymasterPostOpGasLimit).not.toBeNull()
         expect(stubData?.paymasterVerificationGasLimit).not.toBeNull()
+        expect(stubData?.isFinal).toBe(false)
+        expect(stubData?.sponsor?.icon).toBeTruthy()
+        expect(stubData?.sponsor?.name).toBe("Pimlico")
     })
 })
