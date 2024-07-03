@@ -72,12 +72,16 @@ export type GetPaymasterStubDataReturnType<TEntryPoint extends EntryPoint> =
     GetEntryPointVersion<TEntryPoint> extends "v0.6"
         ? {
               paymasterAndData: Hex
+              sponsor?: { name: string; icon?: string }
+              isFinal?: boolean
           }
         : {
               paymaster: Hex
               paymasterData: Hex
               paymasterVerificationGasLimit?: bigint
               paymasterPostOpGasLimit?: bigint
+              sponsor?: { name: string; icon?: string }
+              isFinal?: boolean
           }
 
 export async function getPaymasterStubData<
@@ -145,7 +149,9 @@ export async function getPaymasterStubData<
             response as GetRpcPaymasterStubDataReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
         return {
-            paymasterAndData: responseV06.paymasterAndData
+            paymasterAndData: responseV06.paymasterAndData,
+            sponsor: responseV06.sponsor,
+            isFinal: responseV06.isFinal
         } as GetPaymasterStubDataReturnType<TEntryPoint>
     }
 
@@ -160,6 +166,8 @@ export async function getPaymasterStubData<
             : undefined,
         paymasterPostOpGasLimit: responseV07.paymasterPostOpGasLimit
             ? BigInt(responseV07.paymasterPostOpGasLimit)
-            : undefined
+            : undefined,
+        sponsor: responseV07.sponsor,
+        isFinal: responseV07.isFinal
     } as GetPaymasterStubDataReturnType<TEntryPoint>
 }
