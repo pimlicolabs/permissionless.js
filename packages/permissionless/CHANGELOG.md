@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.35
+
+### Patch Changes
+
+- d986d6987d94d0a3cdf46126eac170fdb8994dd1: Added Erc7677 upgrade to include sponsor & isFinal in paymaster stub data.
+
 ## 0.1.34
 
 ### Patch Changes
