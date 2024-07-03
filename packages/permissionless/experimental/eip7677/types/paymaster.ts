@@ -43,12 +43,10 @@ export type GetRpcPaymasterDataReturnType<entryPoint extends EntryPoint> =
     GetEntryPointVersion<entryPoint> extends "v0.6"
         ? {
               paymasterAndData: Hex
-              sponsor?: { name: string; icon?: string }
           }
         : {
               paymaster: Hex
               paymasterData: Hex
-              sponsor?: { name: string; icon?: string }
           }
 
 export type Eip7677RpcSchema<entryPoint extends EntryPoint> = [

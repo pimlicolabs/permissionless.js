@@ -45,8 +45,6 @@ describe("EIP-7677 getPaymasterData", () => {
         })
         expect(paymasterData).not.toBeNull()
         expect(paymasterData?.paymasterAndData).not.toBeNull()
-        expect(paymasterData?.sponsor?.icon).toBeTruthy()
-        expect(paymasterData?.sponsor?.name).toBe("Pimlico")
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
@@ -112,8 +110,6 @@ describe("EIP-7677 getPaymasterData", () => {
         expect(paymasterData).not.toBeNull()
         expect(paymasterData?.paymaster).not.toBeNull()
         expect(paymasterData?.paymasterData).not.toBeNull()
-        expect(paymasterData?.sponsor?.icon).toBeTruthy()
-        expect(paymasterData?.sponsor?.name).toBe("Pimlico")
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
