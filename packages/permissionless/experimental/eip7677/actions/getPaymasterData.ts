@@ -72,10 +72,12 @@ export type GetPaymasterDataReturnType<TEntryPoint extends EntryPoint> =
     GetEntryPointVersion<TEntryPoint> extends "v0.6"
         ? {
               paymasterAndData: Hex
+              sponsor?: { name: string; icon?: string }
           }
         : {
               paymaster: Hex
               paymasterData: Hex
+              sponsor?: { name: string; icon?: string }
           }
 
 export async function getPaymasterData<
@@ -143,7 +145,8 @@ export async function getPaymasterData<
             response as GetRpcPaymasterDataReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
 
         return {
-            paymasterAndData: responseV06.paymasterAndData
+            paymasterAndData: responseV06.paymasterAndData,
+            sponsor: responseV06.sponsor
         } as GetPaymasterDataReturnType<TEntryPoint>
     }
 
@@ -152,6 +155,7 @@ export async function getPaymasterData<
 
     return {
         paymaster: responseV07.paymaster,
-        paymasterData: responseV07.paymasterData
+        paymasterData: responseV07.paymasterData,
+        sponsor: responseV07.sponsor
     } as GetPaymasterDataReturnType<TEntryPoint>
 }
