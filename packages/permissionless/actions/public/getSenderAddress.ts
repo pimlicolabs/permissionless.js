@@ -1,7 +1,6 @@
 import {
     type Address,
     BaseError,
-    type CallExecutionErrorType,
     type Chain,
     type Client,
     type ContractFunctionExecutionErrorType,
@@ -9,7 +8,6 @@ import {
     type Hex,
     InvalidInputRpcError,
     RpcRequestError,
-    type RpcRequestErrorType,
     type Transport,
     concat,
     decodeErrorResult
@@ -149,8 +147,6 @@ export const getSenderAddress = async <
         }
 
         if (err.cause.name === "CallExecutionError") {
-            const callExecutionError = err.cause as CallExecutionErrorType
-
             const revertError = err.walk(
                 (err) =>
                     err instanceof RpcRequestError ||
