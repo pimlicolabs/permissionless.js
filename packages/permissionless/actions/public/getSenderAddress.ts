@@ -7,6 +7,8 @@ import {
     type ContractFunctionExecutionErrorType,
     type ContractFunctionRevertedErrorType,
     type Hex,
+    InvalidInputRpcError,
+    RpcRequestError,
     type RpcRequestErrorType,
     type Transport,
     concat,
@@ -148,10 +150,14 @@ export const getSenderAddress = async <
 
         if (err.cause.name === "CallExecutionError") {
             const callExecutionError = err.cause as CallExecutionErrorType
-            if (callExecutionError.cause.name === "RpcRequestError") {
-                const revertError =
-                    callExecutionError.cause as RpcRequestErrorType
 
+            const revertError = err.walk(
+                (err) =>
+                    err instanceof RpcRequestError ||
+                    err instanceof InvalidInputRpcError
+            )
+
+            if (revertError instanceof RpcRequestError) {
                 const hexStringRegex = /0x[a-fA-F0-9]+/
                 // biome-ignore lint/suspicious/noExplicitAny:
                 const match = (revertError as unknown as any).cause.data.match(
@@ -186,11 +192,7 @@ export const getSenderAddress = async <
                 return error.args[0] as Address
             }
 
-            if (callExecutionError.cause.name === "InvalidInputRpcError") {
-                //Ganache local testing returns "InvalidInputRpcError" with data in regular format
-                const revertError =
-                    callExecutionError.cause as RpcRequestErrorType
-
+            if (revertError instanceof InvalidInputRpcError) {
                 const hexStringRegex = /0x[a-fA-F0-9]+/
                 // biome-ignore lint/suspicious/noExplicitAny:
                 const match = (revertError as unknown as any).cause.data.match(
