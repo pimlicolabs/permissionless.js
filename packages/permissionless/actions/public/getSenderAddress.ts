@@ -10,7 +10,8 @@ import {
     RpcRequestError,
     type Transport,
     concat,
-    decodeErrorResult
+    decodeErrorResult,
+    UnknownRpcError
 } from "viem"
 
 import { simulateContract } from "viem/actions"
@@ -136,7 +137,8 @@ export const getSenderAddress = async <
             (err) =>
                 err instanceof ContractFunctionRevertedError ||
                 err instanceof RpcRequestError ||
-                err instanceof InvalidInputRpcError
+                err instanceof InvalidInputRpcError ||
+                err instanceof UnknownRpcError
         )
 
         if (revertError instanceof ContractFunctionRevertedError) {
@@ -191,6 +193,44 @@ export const getSenderAddress = async <
             const match = (revertError as unknown as any).cause.data.match(
                 hexStringRegex
             )
+
+            if (!match) {
+                throw new Error(
+                    "Failed to parse revert bytes from RPC response"
+                )
+            }
+
+            const data: Hex = match[0]
+
+            const error = decodeErrorResult({
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "sender",
+                                type: "address"
+                            }
+                        ],
+                        name: "SenderAddressResult",
+                        type: "error"
+                    }
+                ],
+                data
+            })
+
+            return error.args[0] as Address
+        }
+
+        if (revertError instanceof UnknownRpcError) {
+            const parsedBody: any = JSON.parse(
+                (revertError as unknown as any).cause.body
+            )
+            const revertData = parsedBody.error.data
+
+            const hexStringRegex = /0x[a-fA-F0-9]+/
+            // biome-ignore lint/suspicious/noExplicitAny:
+            const match = revertData.match(hexStringRegex)
 
             if (!match) {
                 throw new Error(
