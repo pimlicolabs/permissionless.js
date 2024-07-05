@@ -67,7 +67,7 @@ export const TRUST_ADDRESSES: {
     factoryAddress: Address
 } = {
     secp256k1VerificationFacetAddress:
-        "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5",
+        "0x62b59e4a137E137BE2Db0b2DDa4eacE26A918F98",
     factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
 }
 
