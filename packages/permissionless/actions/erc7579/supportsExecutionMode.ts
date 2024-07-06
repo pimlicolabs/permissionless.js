@@ -20,9 +20,9 @@ export type CallType = "call" | "delegatecall" | "batchcall"
 
 export type ExecutionMode<callType extends CallType> = {
     type: callType
-    revertOnError: boolean
-    selector: Hex
-    context: Hex
+    revertOnError?: boolean
+    selector?: Hex
+    context?: Hex
 }
 
 export type SupportsExecutionModeParameters<
@@ -33,8 +33,8 @@ export type SupportsExecutionModeParameters<
     callType extends CallType = CallType
 > = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode<callType>
 
-function parseCallType(executionMode: CallType) {
-    switch (executionMode) {
+function parseCallType(callType: CallType) {
+    switch (callType) {
         case "call":
             return "0x00"
         case "delegatecall":
@@ -56,8 +56,8 @@ export function encodeExecutionMode<callType extends CallType>({
             toHex(toBytes(parseCallType(type), { size: 1 })),
             toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
             toHex(toBytes("0x0", { size: 4 })),
-            toHex(toBytes(selector, { size: 4 })),
-            toHex(toBytes(context, { size: 22 }))
+            toHex(toBytes(selector ?? "0x", { size: 4 })),
+            toHex(toBytes(context ?? "0x", { size: 22 }))
         ]
     )
 }
