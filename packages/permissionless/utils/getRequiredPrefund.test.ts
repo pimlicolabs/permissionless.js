@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { getRequiredPrefund } from "./getRequiredPrefund"
+import type { UserOperation } from "../types/userOperation"
 import {
     ENTRYPOINT_ADDRESS_V06,
     ENTRYPOINT_ADDRESS_V07
 } from "./getEntryPointVersion"
-import type { UserOperation } from "../types/userOperation"
+import { getRequiredPrefund } from "./getRequiredPrefund"
 
 describe("getRequiredPrefund", () => {
     describe("v0.6 UserOperation", () => {
