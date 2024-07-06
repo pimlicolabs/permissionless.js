@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.36
+
+### Patch Changes
+
+- f3b5d5e65c34479c8b7a3e59d96fd3fb8bc4933c: Made ExecutionMode fields optional
+
 ## 0.1.35
 
 ### Patch Changes
