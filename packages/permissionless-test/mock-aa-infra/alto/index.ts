@@ -420,7 +420,7 @@ export const setupContracts = async (rpc: string) => {
         "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 Meta Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
-        "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5", // Trust Secp256k1VerificationFacet
+        "0x62b59e4a137E137BE2Db0b2DDa4eacE26A918F98", // Trust Secp256k1VerificationFacet
         "0x729c310186a57833f622630a16d13f710b83272a", // Trust factory
         "0xFde53272dcd7938d16E031A6989753c321728332", // Trust AccountFacet
         "0x0B9504140771C3688Ff041917192277D2f52E1e0", // Trust DiamondCutFacet
