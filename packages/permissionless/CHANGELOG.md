@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.37
+
+### Patch Changes
+
+- 75f48b038f2c0943c1df3e0aa693a641fb4be941: Fixed typo erc7569 > erc7579.
+
 ## 0.1.36
 
 ### Patch Changes
