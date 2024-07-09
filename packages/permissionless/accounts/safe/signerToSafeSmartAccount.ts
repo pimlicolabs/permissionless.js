@@ -551,7 +551,7 @@ export type SafeSmartAccount<
 const get7579LaunchPadInitData = ({
     safe4337ModuleAddress,
     safeSingletonAddress,
-    erc7569LaunchpadAddress,
+    erc7579LaunchpadAddress,
     owner,
     validators,
     executors,
@@ -562,7 +562,7 @@ const get7579LaunchPadInitData = ({
 }: {
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
-    erc7569LaunchpadAddress: Address
+    erc7579LaunchpadAddress: Address
     owner: Address
     executors: {
         address: Address
@@ -578,7 +578,7 @@ const get7579LaunchPadInitData = ({
         singleton: safeSingletonAddress,
         owners: [owner],
         threshold: BigInt(1),
-        setupTo: erc7569LaunchpadAddress,
+        setupTo: erc7579LaunchpadAddress,
         setupData: encodeFunctionData({
             abi: initSafe7579Abi,
             functionName: "initSafe7579",
@@ -613,7 +613,7 @@ const getInitializerCode = async ({
     safe4337ModuleAddress,
     multiSendAddress,
     safeSingletonAddress,
-    erc7569LaunchpadAddress,
+    erc7579LaunchpadAddress,
     setupTransactions = [],
     safeModules = [],
     validators = [],
@@ -628,7 +628,7 @@ const getInitializerCode = async ({
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     multiSendAddress: Address
-    erc7569LaunchpadAddress?: Address
+    erc7579LaunchpadAddress?: Address
     setupTransactions?: {
         to: Address
         data: Address
@@ -645,11 +645,11 @@ const getInitializerCode = async ({
     attesters?: Address[]
     attestersThreshold?: number
 }) => {
-    if (erc7569LaunchpadAddress) {
+    if (erc7579LaunchpadAddress) {
         const initData = get7579LaunchPadInitData({
             safe4337ModuleAddress,
             safeSingletonAddress,
-            erc7569LaunchpadAddress,
+            erc7579LaunchpadAddress,
             owner,
             validators,
             executors,
@@ -793,7 +793,7 @@ const getAccountInitCode = async ({
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
-    erc7569LaunchpadAddress,
+    erc7579LaunchpadAddress,
     multiSendAddress,
     saltNonce = BigInt(0),
     setupTransactions = [],
@@ -810,7 +810,7 @@ const getAccountInitCode = async ({
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
-    erc7569LaunchpadAddress?: Address
+    erc7579LaunchpadAddress?: Address
     saltNonce?: bigint
     setupTransactions?: {
         to: Address
@@ -840,7 +840,7 @@ const getAccountInitCode = async ({
         setupTransactions,
         safeSingletonAddress,
         safeModules,
-        erc7569LaunchpadAddress,
+        erc7579LaunchpadAddress,
         validators,
         executors,
         fallbacks,
@@ -853,7 +853,7 @@ const getAccountInitCode = async ({
         abi: createProxyWithNonceAbi,
         functionName: "createProxyWithNonce",
         args: [
-            erc7569LaunchpadAddress ?? safeSingletonAddress,
+            erc7579LaunchpadAddress ?? safeSingletonAddress,
             initializer,
             saltNonce
         ]
@@ -873,7 +873,7 @@ const getAccountAddress = async <
     safeProxyFactoryAddress,
     safeSingletonAddress,
     multiSendAddress,
-    erc7569LaunchpadAddress,
+    erc7579LaunchpadAddress,
     setupTransactions = [],
     safeModules = [],
     saltNonce = BigInt(0),
@@ -898,7 +898,7 @@ const getAccountAddress = async <
     }[]
     safeModules?: Address[]
     saltNonce?: bigint
-    erc7569LaunchpadAddress?: Address
+    erc7579LaunchpadAddress?: Address
     validators?: { address: Address; context: Address }[]
     executors?: {
         address: Address
@@ -923,7 +923,7 @@ const getAccountAddress = async <
         setupTransactions,
         safeSingletonAddress,
         safeModules,
-        erc7569LaunchpadAddress,
+        erc7579LaunchpadAddress,
         validators,
         executors,
         fallbacks,
@@ -936,7 +936,7 @@ const getAccountAddress = async <
         ["bytes", "uint256"],
         [
             proxyCreationCode,
-            hexToBigInt(erc7569LaunchpadAddress ?? safeSingletonAddress)
+            hexToBigInt(erc7579LaunchpadAddress ?? safeSingletonAddress)
         ]
     )
 
@@ -1051,7 +1051,8 @@ export type SignerToSafeSmartAccountParameters<
     safeVersion: SafeVersion
     entryPoint: entryPoint
     safe4337ModuleAddress?: Address
-    erc7569LaunchpadAddress?: TErc7579
+    erc7569LaunchpadAddress?: Address
+    erc7579LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
     address?: Address
@@ -1074,7 +1075,7 @@ function isErc7579Args(
     Address,
     Address
 > {
-    return args.erc7569LaunchpadAddress !== undefined
+    return args.erc7579LaunchpadAddress !== undefined
 }
 
 /**
@@ -1114,7 +1115,7 @@ export async function signerToSafeSmartAccount<
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        erc7569LaunchpadAddress,
+        erc7579LaunchpadAddress = args.erc7579LaunchpadAddress,
         saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
@@ -1187,7 +1188,7 @@ export async function signerToSafeSmartAccount<
             safeProxyFactoryAddress,
             safeSingletonAddress,
             multiSendAddress,
-            erc7569LaunchpadAddress,
+            erc7579LaunchpadAddress,
             saltNonce,
             setupTransactions,
             safeModules,
@@ -1316,7 +1317,7 @@ export async function signerToSafeSmartAccount<
 
                 let verifyingContract = safe4337ModuleAddress
 
-                if (erc7569LaunchpadAddress && !isDeployed) {
+                if (erc7579LaunchpadAddress && !isDeployed) {
                     verifyingContract = userOperation.sender
                 }
 
@@ -1387,7 +1388,7 @@ export async function signerToSafeSmartAccount<
                     safe4337ModuleAddress,
                     safeSingletonAddress,
                     multiSendAddress,
-                    erc7569LaunchpadAddress,
+                    erc7579LaunchpadAddress,
                     saltNonce,
                     setupTransactions,
                     safeModules,
@@ -1407,7 +1408,7 @@ export async function signerToSafeSmartAccount<
             async encodeCallData(args) {
                 const isArray = Array.isArray(args)
 
-                if (erc7569LaunchpadAddress) {
+                if (erc7579LaunchpadAddress) {
                     // First transaction will be slower because we need to enable 7579 modules
 
                     safeDeployed =
@@ -1418,7 +1419,7 @@ export async function signerToSafeSmartAccount<
                         const initData = get7579LaunchPadInitData({
                             safe4337ModuleAddress,
                             safeSingletonAddress,
-                            erc7569LaunchpadAddress,
+                            erc7579LaunchpadAddress,
                             owner: viemSigner.address,
                             validators,
                             executors,

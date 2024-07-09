@@ -390,7 +390,7 @@ export const getSafeClient = async <T extends EntryPoint>({
               safe4337ModuleAddress: erc7579
                   ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
                   : undefined,
-              erc7569LaunchpadAddress: erc7579
+              erc7579LaunchpadAddress: erc7579
                   ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
                   : undefined
           })
@@ -402,7 +402,7 @@ export const getSafeClient = async <T extends EntryPoint>({
               safe4337ModuleAddress: erc7579
                   ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
                   : undefined,
-              erc7569LaunchpadAddress: erc7579
+              erc7579LaunchpadAddress: erc7579
                   ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
                   : undefined
           })
