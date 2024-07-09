@@ -1051,6 +1051,7 @@ export type SignerToSafeSmartAccountParameters<
     safeVersion: SafeVersion
     entryPoint: entryPoint
     safe4337ModuleAddress?: Address
+    erc7569LaunchpadAddress?: Address
     erc7579LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
@@ -1114,7 +1115,7 @@ export async function signerToSafeSmartAccount<
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
-        erc7579LaunchpadAddress,
+        erc7579LaunchpadAddress = args.erc7579LaunchpadAddress,
         saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
