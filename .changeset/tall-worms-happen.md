@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Fixed type erc7569 > erc7579.
+Fixed typo erc7569 > erc7579.
