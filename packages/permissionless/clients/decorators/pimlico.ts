@@ -1,4 +1,4 @@
-import type { Client, Hash } from "viem"
+import type { Client, Hash, Hex } from "viem"
 import {
     type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
@@ -6,6 +6,10 @@ import {
     sendCompressedUserOperation,
     validateSponsorshipPolicies
 } from "../../actions/pimlico"
+import {
+    type BuildSimulateUserOperationCallParams,
+    buildSimulateUserOperationCall
+} from "../../actions/pimlico/buildSimulateUserOperationCall"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
@@ -24,7 +28,7 @@ import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
 
-export type PimlicoBundlerActions = {
+export type PimlicoBundlerActions<entryPoint extends EntryPoint> = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
      *
@@ -98,11 +102,23 @@ export type PimlicoBundlerActions = {
             Omit<SendCompressedUserOperationParameters, "entryPoint">
         >
     ) => Promise<Hash>
+
+    buildSimulateUserOperationCall: <TEntryPointCode extends Hex | undefined>(
+        args: Prettify<
+            Omit<
+                BuildSimulateUserOperationCallParams<
+                    entryPoint,
+                    TEntryPointCode
+                >,
+                "entryPoint"
+            >
+        >
+    ) => ReturnType<typeof buildSimulateUserOperationCall>
 }
 
 export const pimlicoBundlerActions =
     <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
-    (client: Client): PimlicoBundlerActions => ({
+    (client: Client): PimlicoBundlerActions<entryPoint> => ({
         getUserOperationGasPrice: async () =>
             getUserOperationGasPrice(
                 client as PimlicoBundlerClient<entryPoint>
@@ -123,7 +139,27 @@ export const pimlicoBundlerActions =
                     ...args,
                     entryPoint: entryPointAddress
                 }
-            )
+            ),
+        buildSimulateUserOperationCall: <
+            TEntryPointCode extends Hex | undefined
+        >(
+            args: Prettify<
+                Omit<
+                    BuildSimulateUserOperationCallParams<
+                        entryPoint,
+                        TEntryPointCode
+                    >,
+                    "entryPoint"
+                >
+            >
+        ) =>
+            buildSimulateUserOperationCall(client, {
+                ...args,
+                entryPoint: entryPointAddress
+            } as BuildSimulateUserOperationCallParams<
+                entryPoint,
+                TEntryPointCode
+            >)
     })
 
 export type PimlicoPaymasterClientActions<entryPoint extends EntryPoint> = {

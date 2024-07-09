@@ -206,4 +206,29 @@ describe("Pimlico Actions tests", () => {
         expect(Array.isArray(validateSponsorshipPolicies)).toBe(true)
         expect(validateSponsorshipPolicies.length).toBe(1)
     }, 100000)
+
+    test("create simulateHandleOp callData", async () => {
+        const simpleAccountClient = await getSimpleAccountClient({
+            entryPoint: ENTRYPOINT_ADDRESS_V06,
+            paymasterClient: getPimlicoPaymasterClient(ENTRYPOINT_ADDRESS_V06)
+        })
+
+        const userOperation =
+            await simpleAccountClient.prepareUserOperationRequest({
+                userOperation: {
+                    callData: await simpleAccountClient.account.encodeCallData({
+                        to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
+                        data: "0x",
+                        value: 0n
+                    })
+                }
+            })
+
+        const result = pimlicoBundlerClient.buildSimulateUserOperationCall({
+            userOperation
+        })
+
+        expect(result.to).toBe(ENTRYPOINT_ADDRESS_V06)
+        expect(result.data).toBeTruthy()
+    })
 })

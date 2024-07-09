@@ -17,6 +17,11 @@ import {
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation"
 
+import {
+    type BuildSimulateUserOperationCallParams,
+    buildSimulateUserOperationCall
+} from "./pimlico/buildSimulateUserOperationCall"
+
 import type {
     PimlicoBundlerActions,
     PimlicoPaymasterClientActions
@@ -42,6 +47,7 @@ export type {
     SendCompressedUserOperationParameters,
     SponsorUserOperationReturnType,
     ValidateSponsorshipPolicies,
+    BuildSimulateUserOperationCallParams,
     ValidateSponsorshipPoliciesParameters
 }
 
@@ -52,5 +58,6 @@ export {
     pimlicoPaymasterActions,
     sendCompressedUserOperation,
     sponsorUserOperation,
+    buildSimulateUserOperationCall,
     validateSponsorshipPolicies
 }
