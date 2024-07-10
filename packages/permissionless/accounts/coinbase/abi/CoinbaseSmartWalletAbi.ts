@@ -1,4 +1,4 @@
-export const CoinbaseSmartAccountAbi = [
+export const CoinbaseSmartWalletAbi = [
     { type: "constructor", inputs: [], stateMutability: "nonpayable" },
     {
         type: "error",
