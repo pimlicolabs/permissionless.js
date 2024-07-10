@@ -9,7 +9,8 @@ import {
     type TypedDataDefinition,
     concatHex,
     encodeFunctionData,
-    hashMessage
+    hashMessage,
+    hashTypedData
 } from "viem"
 import { sign } from "viem/accounts"
 import { getChainId } from "viem/actions"
@@ -32,6 +33,7 @@ import { buildSignatureWrapperForEOA } from "./utils/buildSignatureWrapperForEOA
 import { getAccountAddress } from "./utils/getAccountAddress"
 import { getAccountInitCode } from "./utils/getAccountInitCode"
 import { replaySafeHash } from "./utils/replaySafeHash"
+import { signAndWrapHash } from "./utils/signAndWrapHash"
 
 export type CoinbaseSmartAccount<
     entryPoint extends EntryPoint,
@@ -93,32 +95,18 @@ export async function privateKeyToCoinbaseSmartAccount<
     return toSmartAccount({
         address: accountAddress,
         signMessage: async ({ message }) => {
-            //
-            let factoryCalldata: Hex = "0x"
-            if (!smartAccountDeployed) {
-                factoryCalldata = await getAccountInitCode(initialOwners, index)
-            }
+            const hash = hashMessage(message)
 
-            // https://github.com/coinbase/smart-wallet/blob/main/src/ERC1271.sol#L69
-            const hash = await replaySafeHash(client, {
-                hash: hashMessage(message),
+            return signAndWrapHash({
+                client,
+                hash,
+                smartAccountDeployed,
+                privateKey,
                 account: accountAddress,
                 factory: factoryAddress,
-                factoryCalldata
+                initialOwners,
+                index
             })
-
-            const signature = await sign({
-                hash,
-                privateKey
-            })
-
-            // https://github.com/coinbase/smart-wallet/blob/main/src/CoinbaseSmartWallet.sol#L297
-            const signatureWrapper = buildSignatureWrapperForEOA({
-                signature,
-                ownerIndex: 0n
-            })
-
-            return signatureWrapper
         },
         signTransaction: (_, __) => {
             throw new SignTransactionNotSupportedBySmartAccount()
@@ -128,10 +116,19 @@ export async function privateKeyToCoinbaseSmartAccount<
             TPrimaryType extends
                 | keyof TTypedData
                 | "EIP712Domain" = keyof TTypedData
-        >(_typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            throw new Error(
-                "[signerToCoinbaseSmartAccount] Not yet implemented"
-            )
+        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
+            const hash = hashTypedData(typedData)
+
+            return signAndWrapHash({
+                client,
+                hash,
+                smartAccountDeployed,
+                privateKey,
+                account: accountAddress,
+                factory: factoryAddress,
+                initialOwners,
+                index
+            })
         },
         client: client,
         publicKey: accountAddress,
