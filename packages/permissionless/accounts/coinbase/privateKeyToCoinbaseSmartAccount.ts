@@ -103,7 +103,7 @@ export async function privateKeyToCoinbaseSmartAccount<
             const hash = await replaySafeHash(client, {
                 hash: hashMessage(message),
                 account: accountAddress,
-                factory: COINBASE_SMART_WALLET_FACTORY_ADDRESS,
+                factory: factoryAddress,
                 factoryCalldata
             })
 
