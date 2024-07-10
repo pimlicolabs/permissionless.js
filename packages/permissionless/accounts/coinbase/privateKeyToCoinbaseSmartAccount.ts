@@ -237,7 +237,14 @@ export async function privateKeyToCoinbaseSmartAccount<
         },
 
         async getDummySignature(_userOperation) {
-            return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+            return buildSignatureWrapperForEOA({
+                signature: {
+                    r: "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    s: "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    v: 0n
+                },
+                ownerIndex
+            })
         }
     })
 }
