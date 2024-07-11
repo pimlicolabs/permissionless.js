@@ -33,7 +33,7 @@ export function encode7579CallData<callType extends CallType>({
 }: EncodeCallDataParams<callType>): Hex {
     if (Array.isArray(callData) && mode?.type !== "batchcall") {
         throw new Error(
-            `mode ${mode} does not supported for batchcall calldata`
+            `mode ${JSON.stringify(mode)} does not supported for batchcall calldata`
         )
     }
 

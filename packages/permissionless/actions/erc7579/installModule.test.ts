@@ -68,7 +68,117 @@ describe.each(getCoreSmartAccounts())(
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
                     context:
-                        name === "Kernel"
+                        name === "Kernel 7579"
+                            ? encodePacked(
+                                  ["address", "bytes"],
+                                  [
+                                      zeroAddress,
+                                      encodeAbiParameters(
+                                          [
+                                              { type: "bytes" },
+                                              { type: "bytes" }
+                                          ],
+                                          [moduleData, "0x"]
+                                      )
+                                  ]
+                              )
+                            : moduleData
+                })
+
+                const bundlerClientV07 = createBundlerClient({
+                    transport: http(altoRpc),
+                    entryPoint: ENTRYPOINT_ADDRESS_V07
+                })
+
+                expect(isHash(opHash)).toBe(true)
+
+                const userOperationReceipt =
+                    await bundlerClientV07.waitForUserOperationReceipt({
+                        hash: opHash,
+                        timeout: 100000
+                    })
+                expect(userOperationReceipt).not.toBeNull()
+                expect(userOperationReceipt?.userOpHash).toBe(opHash)
+                expect(
+                    userOperationReceipt?.receipt.transactionHash
+                ).toBeTruthy()
+
+                const receipt = await bundlerClientV07.getUserOperationReceipt({
+                    hash: opHash
+                })
+
+                expect(receipt?.receipt.transactionHash).toBe(
+                    userOperationReceipt?.receipt.transactionHash
+                )
+
+                const isModuleInstalled = await smartClient.isModuleInstalled({
+                    type: "executor",
+                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    context: "0x"
+                })
+
+                expect(isModuleInstalled).toBe(true)
+            }
+        )
+        testWithRpc.skipIf(!getErc7579SmartAccountClient)(
+            "installModule",
+            async ({ rpc }) => {
+                const { anvilRpc, altoRpc, paymasterRpc } = rpc
+
+                if (!getErc7579SmartAccountClient) {
+                    throw new Error("getErc7579SmartAccountClient not defined")
+                }
+
+                const privateKey = generatePrivateKey()
+
+                const smartClientWithoutExtend: SmartAccountClient<
+                    ENTRYPOINT_ADDRESS_V07_TYPE,
+                    Transport,
+                    Chain,
+                    SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
+                > = await getErc7579SmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    privateKey: privateKey,
+                    altoRpc: altoRpc,
+                    anvilRpc: anvilRpc,
+                    paymasterClient: getPimlicoPaymasterClient({
+                        entryPoint: ENTRYPOINT_ADDRESS_V07,
+                        paymasterRpc
+                    })
+                })
+
+                const smartClient = smartClientWithoutExtend.extend(
+                    erc7579Actions({
+                        entryPoint: ENTRYPOINT_ADDRESS_V07
+                    })
+                )
+
+                await smartClient.sendTransactions({
+                    transactions: [
+                        {
+                            to: smartClient.account.address,
+                            value: 0n,
+                            data: "0x"
+                        },
+                        {
+                            to: smartClient.account.address,
+                            value: 0n,
+                            data: "0x"
+                        }
+                    ]
+                })
+
+                const moduleData = encodePacked(
+                    ["address"],
+                    [smartClient.account.address]
+                )
+
+                const opHash = await installModule(smartClient as any, {
+                    account: smartClient.account as any,
+                    type: "executor",
+                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    context:
+                        name === "Kernel 7579"
                             ? encodePacked(
                                   ["address", "bytes"],
                                   [

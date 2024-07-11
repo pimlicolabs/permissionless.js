@@ -93,7 +93,7 @@ const createAccountAbi = [
 export type KernelVersion<entryPoint extends EntryPoint> =
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
         ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
-        : "0.3.0" | "0.3.1"
+        : "0.3.0-beta" | "0.3.1"
 
 /**
  * Default addresses map for different kernel smart account versions
@@ -126,7 +126,7 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
         ACCOUNT_LOGIC: "0xd3082872F8B06073A021b4602e022d5A070d7cfC",
         FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
     },
-    "0.3.0": {
+    "0.3.0-beta": {
         ECDSA_VALIDATOR: "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43",
         ACCOUNT_LOGIC: "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27",
         FACTORY_ADDRESS: "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
@@ -152,7 +152,7 @@ const getDefaultKernelVersion = <TEntryPoint extends EntryPoint>(
         return version
     }
     return (
-        entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0"
+        entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
     ) as KernelVersion<TEntryPoint>
 }
 
