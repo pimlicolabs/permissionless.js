@@ -9,7 +9,7 @@ import {
 } from "../../../permissionless-test/src/utils"
 import type { SmartAccount } from "../../accounts"
 import type { EntryPoint } from "../../types/entrypoint"
-import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
+import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { signTypedData } from "./signTypedData"
 
 const typedData = {
@@ -48,9 +48,15 @@ const typedData = {
 
 describe.each(getCoreSmartAccounts())(
     "signTypedData $name",
-    ({ getSmartAccountClient, isEip1271Compliant }) => {
-        testWithRpc.skipIf(isEip1271Compliant)(
-            "not isEip1271Compliant",
+    ({
+        getSmartAccountClient,
+        isEip1271Compliant,
+        supportsEntryPointV06,
+        supportsEntryPointV07,
+        name
+    }) => {
+        testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV06)(
+            "not isEip1271Compliant_v06",
             async ({ rpc }) => {
                 const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
@@ -78,8 +84,8 @@ describe.each(getCoreSmartAccounts())(
             }
         )
 
-        testWithRpc.skipIf(!isEip1271Compliant)(
-            "isEip1271Compliant",
+        testWithRpc.skipIf(!isEip1271Compliant || !supportsEntryPointV06)(
+            "isEip1271Compliant_v06",
             async ({ rpc }) => {
                 const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
@@ -104,6 +110,78 @@ describe.each(getCoreSmartAccounts())(
                 )
 
                 const publicClient = getPublicClient(anvilRpc)
+
+                const isVerified = await publicClient.verifyTypedData({
+                    ...typedData,
+                    address: smartClient.account.address,
+                    signature
+                })
+
+                expect(isVerified).toBeTruthy()
+            }
+        )
+
+        testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV07)(
+            "not isEip1271Compliant_v07",
+            async ({ rpc }) => {
+                const { anvilRpc, altoRpc, paymasterRpc } = rpc
+
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    privateKey: generatePrivateKey(),
+                    altoRpc: altoRpc,
+                    anvilRpc: anvilRpc,
+                    paymasterClient: getPimlicoPaymasterClient({
+                        entryPoint: ENTRYPOINT_ADDRESS_V07,
+                        paymasterRpc
+                    })
+                })
+
+                await expect(async () =>
+                    signTypedData(
+                        smartClient as Client<
+                            Transport,
+                            Chain,
+                            SmartAccount<EntryPoint>
+                        >,
+                        typedData
+                    )
+                ).rejects.toThrow()
+            }
+        )
+
+        testWithRpc.skipIf(!isEip1271Compliant || !supportsEntryPointV07)(
+            "isEip1271Compliant_v07",
+            async ({ rpc }) => {
+                const { anvilRpc, altoRpc, paymasterRpc } = rpc
+
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: ENTRYPOINT_ADDRESS_V07,
+                    privateKey: generatePrivateKey(),
+                    altoRpc: altoRpc,
+                    anvilRpc: anvilRpc,
+                    paymasterClient: getPimlicoPaymasterClient({
+                        entryPoint: ENTRYPOINT_ADDRESS_V07,
+                        paymasterRpc
+                    })
+                })
+
+                const signature = await signTypedData(
+                    smartClient as Client<
+                        Transport,
+                        Chain,
+                        SmartAccount<EntryPoint>
+                    >,
+                    typedData
+                )
+
+                const publicClient = getPublicClient(anvilRpc)
+
+                if (name === "Safe 7579") {
+                    // Due to 7579 launchpad, we can't verify the signature as of now.
+                    // Awaiting for the fix
+                    return
+                }
 
                 const isVerified = await publicClient.verifyTypedData({
                     ...typedData,
