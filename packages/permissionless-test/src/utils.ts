@@ -340,7 +340,7 @@ export const getKernelEcdsaClient = async <T extends EntryPoint>({
             ? await signerToEcdsaKernelSmartAccount(publicClient, {
                   entryPoint: entryPoint as ENTRYPOINT_ADDRESS_V07_TYPE,
                   signer: privateKeyToAccount(privateKey),
-                  version: "0.3.0"
+                  version: "0.3.0-beta"
               })
             : await signerToEcdsaKernelSmartAccount(publicClient, {
                   entryPoint,
@@ -520,7 +520,7 @@ export const getCoreSmartAccounts = () => [
         getErc7579SmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
-        supportsEntryPointV06: true,
+        supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
