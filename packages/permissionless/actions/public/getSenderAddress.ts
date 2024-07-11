@@ -223,7 +223,7 @@ export const getSenderAddress = async <
         }
 
         if (revertError instanceof UnknownRpcError) {
-            const parsedBody: any = JSON.parse(
+            const parsedBody = JSON.parse(
                 (revertError as unknown as any).cause.body
             )
             const revertData = parsedBody.error.data
