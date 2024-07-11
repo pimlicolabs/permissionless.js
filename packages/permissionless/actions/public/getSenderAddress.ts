@@ -1,14 +1,15 @@
 import {
     type Address,
     BaseError,
-    type CallExecutionErrorType,
     type Chain,
     type Client,
     type ContractFunctionExecutionErrorType,
-    type ContractFunctionRevertedErrorType,
+    ContractFunctionRevertedError,
     type Hex,
-    type RpcRequestErrorType,
+    InvalidInputRpcError,
+    RpcRequestError,
     type Transport,
+    UnknownRpcError,
     concat,
     decodeErrorResult
 } from "viem"
@@ -132,10 +133,15 @@ export const getSenderAddress = async <
             args: [initCode || concat([factory as Hex, factoryData as Hex])]
         })
     } catch (e) {
-        const err = e as ContractFunctionExecutionErrorType
+        const revertError = (e as ContractFunctionExecutionErrorType).walk(
+            (err) =>
+                err instanceof ContractFunctionRevertedError ||
+                err instanceof RpcRequestError ||
+                err instanceof InvalidInputRpcError ||
+                err instanceof UnknownRpcError
+        )
 
-        if (err.cause.name === "ContractFunctionRevertedError") {
-            const revertError = err.cause as ContractFunctionRevertedErrorType
+        if (revertError instanceof ContractFunctionRevertedError) {
             const errorName = revertError.data?.errorName ?? ""
             if (
                 errorName === "SenderAddressResult" &&
@@ -146,84 +152,112 @@ export const getSenderAddress = async <
             }
         }
 
-        if (err.cause.name === "CallExecutionError") {
-            const callExecutionError = err.cause as CallExecutionErrorType
-            if (callExecutionError.cause.name === "RpcRequestError") {
-                const revertError =
-                    callExecutionError.cause as RpcRequestErrorType
+        if (revertError instanceof RpcRequestError) {
+            const hexStringRegex = /0x[a-fA-F0-9]+/
+            // biome-ignore lint/suspicious/noExplicitAny:
+            const match = (revertError as unknown as any).cause.data.match(
+                hexStringRegex
+            )
 
-                const hexStringRegex = /0x[a-fA-F0-9]+/
-                // biome-ignore lint/suspicious/noExplicitAny:
-                const match = (revertError as unknown as any).cause.data.match(
-                    hexStringRegex
+            if (!match) {
+                throw new Error(
+                    "Failed to parse revert bytes from RPC response"
                 )
-
-                if (!match) {
-                    throw new Error(
-                        "Failed to parse revert bytes from RPC response"
-                    )
-                }
-
-                const data: Hex = match[0]
-
-                const error = decodeErrorResult({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address",
-                                    name: "sender",
-                                    type: "address"
-                                }
-                            ],
-                            name: "SenderAddressResult",
-                            type: "error"
-                        }
-                    ],
-                    data
-                })
-
-                return error.args[0] as Address
             }
 
-            if (callExecutionError.cause.name === "InvalidInputRpcError") {
-                //Ganache local testing returns "InvalidInputRpcError" with data in regular format
-                const revertError =
-                    callExecutionError.cause as RpcRequestErrorType
+            const data: Hex = match[0]
 
-                const hexStringRegex = /0x[a-fA-F0-9]+/
-                // biome-ignore lint/suspicious/noExplicitAny:
-                const match = (revertError as unknown as any).cause.data.match(
-                    hexStringRegex
+            const error = decodeErrorResult({
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "sender",
+                                type: "address"
+                            }
+                        ],
+                        name: "SenderAddressResult",
+                        type: "error"
+                    }
+                ],
+                data
+            })
+
+            return error.args[0] as Address
+        }
+
+        if (revertError instanceof InvalidInputRpcError) {
+            const hexStringRegex = /0x[a-fA-F0-9]+/
+            // biome-ignore lint/suspicious/noExplicitAny:
+            const match = (revertError as unknown as any).cause.data.match(
+                hexStringRegex
+            )
+
+            if (!match) {
+                throw new Error(
+                    "Failed to parse revert bytes from RPC response"
                 )
-
-                if (!match) {
-                    throw new Error(
-                        "Failed to parse revert bytes from RPC response"
-                    )
-                }
-
-                const data: Hex = match[0]
-
-                const error = decodeErrorResult({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address",
-                                    name: "sender",
-                                    type: "address"
-                                }
-                            ],
-                            name: "SenderAddressResult",
-                            type: "error"
-                        }
-                    ],
-                    data
-                })
-
-                return error.args[0] as Address
             }
+
+            const data: Hex = match[0]
+
+            const error = decodeErrorResult({
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "sender",
+                                type: "address"
+                            }
+                        ],
+                        name: "SenderAddressResult",
+                        type: "error"
+                    }
+                ],
+                data
+            })
+
+            return error.args[0] as Address
+        }
+
+        if (revertError instanceof UnknownRpcError) {
+            const parsedBody = JSON.parse(
+                (revertError as unknown as any).cause.body
+            )
+            const revertData = parsedBody.error.data
+
+            const hexStringRegex = /0x[a-fA-F0-9]+/
+            // biome-ignore lint/suspicious/noExplicitAny:
+            const match = revertData.match(hexStringRegex)
+
+            if (!match) {
+                throw new Error(
+                    "Failed to parse revert bytes from RPC response"
+                )
+            }
+
+            const data: Hex = match[0]
+
+            const error = decodeErrorResult({
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "sender",
+                                type: "address"
+                            }
+                        ],
+                        name: "SenderAddressResult",
+                        type: "error"
+                    }
+                ],
+                data
+            })
+
+            return error.args[0] as Address
         }
 
         throw e
