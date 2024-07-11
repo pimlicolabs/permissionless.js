@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.38
+
+### Patch Changes
+
+- 71740c2d9a3fbb289df277831bde10b33995d9df: Fixed batchcall for 7579 accounts
+
 ## 0.1.37
 
 ### Patch Changes
