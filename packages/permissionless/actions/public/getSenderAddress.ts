@@ -9,9 +9,9 @@ import {
     InvalidInputRpcError,
     RpcRequestError,
     type Transport,
+    UnknownRpcError,
     concat,
-    decodeErrorResult,
-    UnknownRpcError
+    decodeErrorResult
 } from "viem"
 
 import { simulateContract } from "viem/actions"
