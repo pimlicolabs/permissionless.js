@@ -3,7 +3,7 @@ import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getSimpleAccountClient } from "../../../permissionless-test/src/utils"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../_types/types"
+import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types"
 import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { getSenderAddress } from "./getSenderAddress"
 

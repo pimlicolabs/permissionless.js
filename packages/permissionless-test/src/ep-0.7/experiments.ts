@@ -6,8 +6,7 @@ import {
     ENTRYPOINT_ADDRESS_V07,
     createSmartAccountClient
 } from "../../../permissionless"
-import { privateKeyToSimpleSmartAccount } from "../../../permissionless/_types/accounts"
-import { privateKeyToSafeSmartAccount } from "../../../permissionless/accounts"
+import { privateKeyToSimpleSmartAccount } from "../../../permissionless/accounts"
 import { paymasterActionsEip7677 } from "../../../permissionless/experimental"
 import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../../permissionless/types"
 import { SIMPLE_ACCOUNT_FACTORY_V07 } from "../constants"
