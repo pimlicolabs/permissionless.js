@@ -37,9 +37,9 @@ function parseCallType(callType: CallType) {
     switch (callType) {
         case "call":
             return "0x00"
-        case "delegatecall":
-            return "0x01"
         case "batchcall":
+            return "0x01"
+        case "delegatecall":
             return "0xff"
     }
 }

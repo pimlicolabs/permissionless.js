@@ -1410,7 +1410,6 @@ export async function signerToSafeSmartAccount<
 
                 if (erc7579LaunchpadAddress) {
                     // First transaction will be slower because we need to enable 7579 modules
-
                     safeDeployed =
                         safeDeployed ||
                         (await isSmartAccountDeployed(client, accountAddress))
