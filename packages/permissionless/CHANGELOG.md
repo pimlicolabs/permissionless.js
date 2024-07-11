@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.39
+
+### Patch Changes
+
+- 3527daa505b73b343cbee257124d5416b7dff730: Fixed getSenderAddress, when rpc returns an UnknownRpcError
+
 ## 0.1.38
 
 ### Patch Changes
