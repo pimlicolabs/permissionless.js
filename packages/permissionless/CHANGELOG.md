@@ -1,5 +1,53 @@
 # permissionless
 
+## 0.1.39
+
+### Patch Changes
+
+- 3527daa505b73b343cbee257124d5416b7dff730: Fixed getSenderAddress, when rpc returns an UnknownRpcError
+
+## 0.1.38
+
+### Patch Changes
+
+- 71740c2d9a3fbb289df277831bde10b33995d9df: Fixed batchcall for 7579 accounts
+
+## 0.1.37
+
+### Patch Changes
+
+- 75f48b038f2c0943c1df3e0aa693a641fb4be941: Fixed typo erc7569 > erc7579.
+
+## 0.1.36
+
+### Patch Changes
+
+- f3b5d5e65c34479c8b7a3e59d96fd3fb8bc4933c: Made ExecutionMode fields optional
+
+## 0.1.35
+
+### Patch Changes
+
+- d986d6987d94d0a3cdf46126eac170fdb8994dd1: Added Erc7677 upgrade to include sponsor & isFinal in paymaster stub data.
+
+## 0.1.34
+
+### Patch Changes
+
+- 133de34e2a8140879caba4d108e6910ffb38d807: Fixed erc7579Actions export
+
+## 0.1.33
+
+### Patch Changes
+
+- 3e1ff32f3b99e22b957a05abe34ecf22d30112b8: Added support for parsing revert data from kakarot, rootstock-testnet & fuse to "getSenderAddress"
+
+## 0.1.32
+
+### Patch Changes
+
+- d7f7f0de2dfc683352a6ec91a96fc2621d37e835: Added 7579 actions support
+
 ## 0.1.31
 
 ### Patch Changes

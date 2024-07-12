@@ -6,7 +6,13 @@ import {
     type Hex,
     type LocalAccount
 } from "viem"
-import type { Chain, EncodeDeployDataParameters, Transport } from "viem"
+import type {
+    Chain,
+    EncodeDeployDataParameters,
+    PublicActions,
+    PublicRpcSchema,
+    Transport
+} from "viem"
 import type { UserOperation } from "../types"
 import type { EntryPoint, GetEntryPointVersion } from "../types/entrypoint"
 
@@ -33,9 +39,9 @@ export type SmartAccount<
     chain extends Chain | undefined = Chain | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<TSource> & {
-    client: Client<transport, chain>
+    client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
     entryPoint: entryPoint
-    getNonce: () => Promise<bigint>
+    getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>
     getFactory: () => Promise<Address | undefined>
     getFactoryData: () => Promise<Hex | undefined>

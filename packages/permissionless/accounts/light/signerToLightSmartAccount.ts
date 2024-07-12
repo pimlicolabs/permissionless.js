@@ -4,6 +4,8 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    type PublicActions,
+    type PublicRpcSchema,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
@@ -124,6 +126,7 @@ export type SignerToLightSmartAccountParameters<
     factoryAddress?: Address
     index?: bigint
     address?: Address
+    nonceKey?: bigint
 }>
 
 async function signWith1271WrapperV1<
@@ -191,14 +194,21 @@ export async function signerToLightSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         address,
         lightAccountVersion,
         entryPoint: entryPointAddress,
         index = BigInt(0),
-        factoryAddress: _factoryAddress
+        factoryAddress: _factoryAddress,
+        nonceKey
     }: SignerToLightSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<LightSmartAccount<entryPoint, TTransport, TChain>> {
     const viemSigner: LocalAccount = {
@@ -267,10 +277,11 @@ export async function signerToLightSmartAccount<
         publicKey: accountAddress,
         entryPoint: entryPointAddress,
         source: "LightSmartAccount",
-        async getNonce() {
+        async getNonce(key?: bigint) {
             return getAccountNonce(client, {
                 sender: accountAddress,
-                entryPoint: entryPointAddress
+                entryPoint: entryPointAddress,
+                key: key ?? nonceKey
             })
         },
         async signUserOperation(userOperation) {

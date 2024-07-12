@@ -1,4 +1,4 @@
-import type { TypedData } from "viem"
+import type { PublicActions, PublicRpcSchema, TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -45,6 +45,7 @@ import {
 } from "./constants"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
+import { isKernelV2 } from "./utils/isKernelV2"
 import { signMessage } from "./utils/signMessage"
 import { signTypedData } from "./utils/signTypedData"
 
@@ -89,28 +90,52 @@ const createAccountAbi = [
     }
 ] as const
 
-export type KernelVersion = "0.2.2" | "0.3.0-beta"
+export type KernelVersion<entryPoint extends EntryPoint> =
+    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+        ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
+        : "0.3.0-beta" | "0.3.1"
 
 /**
  * Default addresses map for different kernel smart account versions
  */
 export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
-    [key in KernelVersion]: {
+    [key in KernelVersion<EntryPoint>]: {
         ECDSA_VALIDATOR: Address
         ACCOUNT_LOGIC: Address
         FACTORY_ADDRESS: Address
         META_FACTORY_ADDRESS?: Address
     }
 } = {
+    "0.2.1": {
+        ECDSA_VALIDATOR: "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390",
+        ACCOUNT_LOGIC: "0xf048AD83CB2dfd6037A43902a2A5Be04e53cd2Eb",
+        FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
+    },
     "0.2.2": {
         ECDSA_VALIDATOR: "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390",
         ACCOUNT_LOGIC: "0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5",
+        FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
+    },
+    "0.2.3": {
+        ECDSA_VALIDATOR: "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390",
+        ACCOUNT_LOGIC: "0xD3F582F6B4814E989Ee8E96bc3175320B5A540ab",
+        FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
+    },
+    "0.2.4": {
+        ECDSA_VALIDATOR: "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390",
+        ACCOUNT_LOGIC: "0xd3082872F8B06073A021b4602e022d5A070d7cfC",
         FACTORY_ADDRESS: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3"
     },
     "0.3.0-beta": {
         ECDSA_VALIDATOR: "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43",
         ACCOUNT_LOGIC: "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27",
         FACTORY_ADDRESS: "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
+        META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
+    },
+    "0.3.1": {
+        ECDSA_VALIDATOR: "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57",
+        ACCOUNT_LOGIC: "0xBAC849bB641841b44E965fB01A4Bf5F074f84b4D",
+        FACTORY_ADDRESS: "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
         META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
     }
 }
@@ -119,8 +144,16 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
  * Get supported Kernel Smart Account version based on entryPoint
  * @param entryPoint
  */
-const getKernelVersion = (entryPoint: EntryPoint): KernelVersion => {
-    return entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
+const getDefaultKernelVersion = <TEntryPoint extends EntryPoint>(
+    entryPoint: TEntryPoint,
+    version?: KernelVersion<TEntryPoint>
+): KernelVersion<TEntryPoint> => {
+    if (version) {
+        return version
+    }
+    return (
+        entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
+    ) as KernelVersion<TEntryPoint>
 }
 
 type KERNEL_ADDRESSES = {
@@ -138,16 +171,15 @@ type KERNEL_ADDRESSES = {
  * @param factoryAddress
  * @param metaFactoryAddress
  */
-const getDefaultAddresses = <entryPoint extends EntryPoint>(
-    entryPointAddress: entryPoint,
-    {
-        ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        accountLogicAddress: _accountLogicAddress,
-        factoryAddress: _factoryAddress,
-        metaFactoryAddress: _metaFactoryAddress
-    }: Partial<KERNEL_ADDRESSES>
-): KERNEL_ADDRESSES => {
-    const kernelVersion = getKernelVersion(entryPointAddress)
+const getDefaultAddresses = ({
+    ecdsaValidatorAddress: _ecdsaValidatorAddress,
+    accountLogicAddress: _accountLogicAddress,
+    factoryAddress: _factoryAddress,
+    metaFactoryAddress: _metaFactoryAddress,
+    kernelVersion
+}: Partial<KERNEL_ADDRESSES> & {
+    kernelVersion: KernelVersion<EntryPoint>
+}): KERNEL_ADDRESSES => {
     const addresses = KERNEL_VERSION_TO_ADDRESSES_MAP[kernelVersion]
     const ecdsaValidatorAddress =
         _ecdsaValidatorAddress ?? addresses.ECDSA_VALIDATOR
@@ -351,6 +383,7 @@ export type SignerToEcdsaKernelSmartAccountParameters<
     TAddress extends Address = Address
 > = Prettify<{
     signer: SmartAccountSigner<TSource, TAddress>
+    version?: KernelVersion<entryPoint>
     entryPoint: entryPoint
     address?: Address
     index?: bigint
@@ -359,6 +392,7 @@ export type SignerToEcdsaKernelSmartAccountParameters<
     accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
     deployedAccountAddress?: Address
+    nonceKey?: bigint
 }>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
@@ -378,32 +412,41 @@ export async function signerToEcdsaKernelSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         address,
+        version,
         entryPoint: entryPointAddress,
         index = BigInt(0),
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        deployedAccountAddress
+        deployedAccountAddress,
+        nonceKey
     }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
-    const kernelVersion = getKernelVersion(entryPointAddress)
+    const kernelVersion = getDefaultKernelVersion(entryPointAddress, version)
 
     const {
         accountLogicAddress,
         ecdsaValidatorAddress,
         factoryAddress,
         metaFactoryAddress
-    } = getDefaultAddresses(entryPointAddress, {
+    } = getDefaultAddresses({
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
         accountLogicAddress: _accountLogicAddress,
         factoryAddress: _factoryAddress,
-        metaFactoryAddress: _metaFactoryAddress
+        metaFactoryAddress: _metaFactoryAddress,
+        kernelVersion
     })
 
     // Get the private key related account
@@ -461,7 +504,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId
             })
 
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return signature
             }
 
@@ -492,7 +535,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 chainId
             })
 
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return signature
             }
 
@@ -507,17 +550,19 @@ export async function signerToEcdsaKernelSmartAccount<
         source: "kernelEcdsaSmartAccount",
 
         // Get the nonce of the smart account
-        async getNonce() {
-            const key = getNonceKeyWithEncoding(
-                kernelVersion,
-                ecdsaValidatorAddress
-                // @dev specify the custom nonceKey here when integrating the said feature
-                /*, nonceKey */
-            )
+        async getNonce(key?: bigint) {
             return getAccountNonce(client, {
                 sender: accountAddress,
                 entryPoint: entryPointAddress,
-                key
+                key:
+                    key ??
+                    nonceKey ??
+                    getNonceKeyWithEncoding(
+                        kernelVersion,
+                        ecdsaValidatorAddress
+                        // @dev specify the custom nonceKey here when integrating the said feature
+                        /*, nonceKey */
+                    )
             })
         },
 
@@ -536,7 +581,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 message: { raw: hash }
             })
             // Always use the sudo mode, since we will use external paymaster
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return concatHex(["0x00000000", signature])
             }
             return signature
@@ -600,7 +645,7 @@ export async function signerToEcdsaKernelSmartAccount<
 
         // Get simple dummy signature
         async getDummySignature(_userOperation) {
-            if (kernelVersion === "0.2.2") {
+            if (isKernelV2(kernelVersion)) {
                 return concatHex([ROOT_MODE_KERNEL_V2, DUMMY_ECDSA_SIGNATURE])
             }
             return DUMMY_ECDSA_SIGNATURE

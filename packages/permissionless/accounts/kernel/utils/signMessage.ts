@@ -10,6 +10,7 @@ import {
     publicActions
 } from "viem"
 import { signMessage as _signMessage } from "viem/actions"
+import { isKernelV2 } from "./isKernelV2"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
 export async function signMessage<
@@ -24,7 +25,7 @@ export async function signMessage<
         accountVersion
     }: SignMessageParameters<TAccount> & WrapMessageHashParams
 ): Promise<SignMessageReturnType> {
-    if (accountVersion === "0.2.2") {
+    if (isKernelV2(accountVersion)) {
         return _signMessage(client, {
             account: account_ as LocalAccount,
             message

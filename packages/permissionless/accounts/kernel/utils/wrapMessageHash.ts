@@ -6,9 +6,11 @@ import {
     stringToHex
 } from "viem"
 import { type Address, domainSeparator } from "viem"
+import type { EntryPoint } from "../../../types"
+import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
 
 export type WrapMessageHashParams = {
-    accountVersion: string
+    accountVersion: KernelVersion<EntryPoint>
     accountAddress: Address
     chainId?: number
 }

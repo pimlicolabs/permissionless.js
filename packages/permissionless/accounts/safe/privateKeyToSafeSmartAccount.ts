@@ -1,6 +1,13 @@
-import type { Chain, Client, Hex, Transport } from "viem"
+import type {
+    Chain,
+    Client,
+    Hex,
+    PublicActions,
+    PublicRpcSchema,
+    Transport
+} from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE, Prettify } from "../../types"
+import type { EntryPoint, Prettify } from "../../types"
 import {
     type SafeSmartAccount,
     type SignerToSafeSmartAccountParameters,
@@ -8,7 +15,7 @@ import {
 } from "./signerToSafeSmartAccount"
 
 export type PrivateKeyToSafeSmartAccountParameters<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+    entryPoint extends EntryPoint
 > = Prettify<
     {
         privateKey: Hex
@@ -21,11 +28,17 @@ export type PrivateKeyToSafeSmartAccountParameters<
  * @returns A Private Key Simple Account.
  */
 export async function privateKeyToSafeSmartAccount<
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
+    entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     { privateKey, ...rest }: PrivateKeyToSafeSmartAccountParameters<entryPoint>
 ): Promise<SafeSmartAccount<entryPoint, TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)

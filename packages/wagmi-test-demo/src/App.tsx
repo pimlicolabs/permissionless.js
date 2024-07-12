@@ -111,8 +111,6 @@ function App() {
         })
     }
 
-    console.log("error: ", sendTransactionError)
-
     return (
         <>
             <div>

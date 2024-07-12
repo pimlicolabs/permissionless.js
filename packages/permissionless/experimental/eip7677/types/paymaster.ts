@@ -18,12 +18,16 @@ export type GetRpcPaymasterStubDataReturnType<entryPoint extends EntryPoint> =
     GetEntryPointVersion<entryPoint> extends "v0.6"
         ? {
               paymasterAndData: Hex
+              sponsor?: { name: string; icon?: string }
+              isFinal?: boolean
           }
         : {
               paymaster: Hex
               paymasterData: Hex
               paymasterVerificationGasLimit?: Hex | null
               paymasterPostOpGasLimit?: Hex | null
+              sponsor?: { name: string; icon?: string }
+              isFinal?: boolean
           }
 
 export type GetRpcPaymasterDataParameters<entryPoint extends EntryPoint> = [
