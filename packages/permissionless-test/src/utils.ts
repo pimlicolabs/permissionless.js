@@ -30,12 +30,14 @@ import {
     type SafeSmartAccount,
     type SmartAccount,
     privateKeyToBiconomySmartAccount,
+    privateKeyToEtherspotSmartAccount,
     privateKeyToLightSmartAccount,
     privateKeyToSafeSmartAccount,
     privateKeyToSimpleSmartAccount,
     privateKeyToTrustSmartAccount,
     signerToBiconomySmartAccount,
     signerToEcdsaKernelSmartAccount,
+    signerToEtherspotSmartAccount,
     signerToLightSmartAccount,
     signerToSafeSmartAccount,
     signerToSimpleSmartAccount,
@@ -426,6 +428,44 @@ export const getSafeClient = async <T extends EntryPoint>({
     })
 }
 
+export const getEtherspotClient = async ({
+    entryPoint,
+    paymasterClient,
+    anvilRpc,
+    altoRpc,
+    privateKey
+}: AAParamType<ENTRYPOINT_ADDRESS_V07_TYPE>) => {
+    const publicClient = getPublicClient(anvilRpc)
+
+    const safeSmartAccount = privateKey
+        ? await privateKeyToEtherspotSmartAccount(publicClient, {
+              entryPoint,
+              privateKey
+          })
+        : await signerToEtherspotSmartAccount(publicClient, {
+              entryPoint,
+              signer: privateKeyToAccount(generatePrivateKey())
+          })
+
+    const pimlicoBundlerClient = getPimlicoBundlerClient({
+        entryPoint,
+        altoRpc
+    })
+
+    // @ts-ignore
+    return createSmartAccountClient({
+        chain: foundry,
+        account: safeSmartAccount,
+        bundlerTransport: http(altoRpc),
+        middleware: {
+            gasPrice: async () =>
+                (await pimlicoBundlerClient.getUserOperationGasPrice()).fast,
+            // @ts-ignore
+            sponsorUserOperation: paymasterClient?.sponsorUserOperation
+        }
+    })
+}
+
 export const getEip7677Client = async <TEntryPoint extends EntryPoint>({
     entryPoint
 }: { entryPoint: TEntryPoint }) => {
@@ -581,6 +621,48 @@ export const getCoreSmartAccounts = () => [
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
+    {
+        name: "Etherspot",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getEtherspotClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V07_TYPE>)
+            }),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToEtherspotSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V07
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Etherspot 7579",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getEtherspotClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V07_TYPE>)
+            }),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToEtherspotSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V07
+            }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getEtherspotClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V07_TYPE>)
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
 
     // ---------------------------- Account from private key -------------------------------------------------
 
@@ -682,6 +764,25 @@ export const getCoreSmartAccounts = () => [
                 safeVersion: "1.4.1"
             }),
         supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Etherspot private key private key",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getEtherspotClient({
+                ...(conf as AAParamType<ENTRYPOINT_ADDRESS_V07_TYPE>),
+                privateKey: generatePrivateKey()
+            }),
+        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
+            signerToEtherspotSmartAccount(conf.publicClient, {
+                address: conf.existingAddress, // this is the field we are testing
+                signer: privateKeyToAccount(conf.privateKey),
+                entryPoint: ENTRYPOINT_ADDRESS_V07
+            }),
+        supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     }
