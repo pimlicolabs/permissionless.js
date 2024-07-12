@@ -23,6 +23,7 @@ import {
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE, Prettify } from "../../types"
 import { getEntryPointVersion } from "../../utils"
+import { encode7579CallData } from "../../utils/encode7579CallData"
 import { getUserOperationHash } from "../../utils/getUserOperationHash"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import { toSmartAccount } from "../toSmartAccount"
@@ -38,7 +39,6 @@ import {
     Networks,
     VALIDATOR_TYPE
 } from "./constants"
-import { encodeCallData } from "./utils/encodeCallData"
 import { getInitMSAData } from "./utils/getInitMSAData"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
 import { signMessage } from "./utils/signMessage"
@@ -487,8 +487,17 @@ export async function signerToEtherspotSmartAccount<
         },
 
         // Encode a call
-        async encodeCallData(tx) {
-            return encodeCallData(tx)
+        async encodeCallData(args) {
+            const isArray = Array.isArray(args)
+            return encode7579CallData({
+                mode: {
+                    type: isArray ? "batchcall" : "call",
+                    revertOnError: false,
+                    selector: "0x",
+                    context: "0x"
+                },
+                callData: args
+            })
         },
 
         // Get simple dummy signature
