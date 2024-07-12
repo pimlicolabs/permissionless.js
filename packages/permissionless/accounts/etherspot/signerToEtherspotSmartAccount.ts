@@ -4,6 +4,8 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    type PublicActions,
+    type PublicRpcSchema,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
@@ -274,7 +276,13 @@ export async function signerToEtherspotSmartAccount<
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<
+        TTransport,
+        TChain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions
+    >,
     {
         signer,
         address,
