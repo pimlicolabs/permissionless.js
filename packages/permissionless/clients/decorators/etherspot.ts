@@ -10,7 +10,7 @@ import {
 } from "../../actions/etherspot/sponsorUserOperation"
 import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
-import { type ArkaPaymasterClient } from "../etherspot"
+import type { ArkaPaymasterClient } from "../etherspot"
 
 export type EtherspotAccountActions = {
     getUserOperationGasPrice: () => Promise<

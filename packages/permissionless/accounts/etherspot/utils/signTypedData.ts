@@ -12,7 +12,7 @@ import {
     validateTypedData
 } from "viem"
 
-import { signMessage, signTypedData as _signTypedData } from "viem/actions"
+import { signTypedData as _signTypedData, signMessage } from "viem/actions"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
 export async function signTypedData<

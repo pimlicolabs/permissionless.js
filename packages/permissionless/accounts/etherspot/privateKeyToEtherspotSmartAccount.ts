@@ -1,4 +1,4 @@
-import { type Chain, type Client, type Hex, type Transport } from "viem"
+import type { Chain, Client, Hex, Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE, Prettify } from "../../types"
 

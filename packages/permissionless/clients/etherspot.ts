@@ -9,9 +9,9 @@ import type {
 import { createClient } from "viem"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../types/"
 import type { EntryPoint } from "../types/entrypoint"
-import {
-    type ArkaPaymasterRpcSchema,
-    type EtherspotBundlerRpcSchema
+import type {
+    ArkaPaymasterRpcSchema,
+    EtherspotBundlerRpcSchema
 } from "../types/etherspot"
 import {
     type ArkaPaymasterClientActions,

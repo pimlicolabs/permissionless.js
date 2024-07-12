@@ -5,9 +5,9 @@ import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint
 } from "../../types/entrypoint"
-import {
-    type ArkaPaymasterContext,
-    type ArkaPaymasterRpcSchema
+import type {
+    ArkaPaymasterContext,
+    ArkaPaymasterRpcSchema
 } from "../../types/etherspot"
 import type { UserOperation } from "../../types/userOperation"
 import { deepHexlify } from "../../utils/deepHexlify"
