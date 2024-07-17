@@ -23,6 +23,7 @@ export function parseAccount(account: Address | Account): Account {
         return { address: account, type: "json-rpc" }
     return account
 }
+import { encodeNonce } from "./encodeNonce"
 import {
     ENTRYPOINT_ADDRESS_V06,
     ENTRYPOINT_ADDRESS_V07,
@@ -47,6 +48,7 @@ export {
     getAddressFromInitCodeOrPaymasterAndData,
     getPackedUserOperation,
     getEntryPointVersion,
+    encodeNonce,
     ENTRYPOINT_ADDRESS_V06,
     ENTRYPOINT_ADDRESS_V07
 }
