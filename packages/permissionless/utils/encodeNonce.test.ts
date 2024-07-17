@@ -1,6 +1,6 @@
+import { encodeNonce } from "permissionless/utils"
 import { toHex } from "viem"
 import { describe, expect, test } from "vitest"
-import { encodeNonce } from "../utils"
 
 describe("encodeNonce", () => {
     test("should encode key and sequence correctly", async () => {
