@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.40
+
+### Patch Changes
+
+- be1c3dede45bdfbffe168735cbd48fd967684818: Added encodeNonce util function
+
 ## 0.1.39
 
 ### Patch Changes
