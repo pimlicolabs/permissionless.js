@@ -1,5 +1,5 @@
-import { decodeNonce, encodeNonce } from "./index"
 import { describe, expect, test } from "vitest"
+import { decodeNonce, encodeNonce } from "./index"
 
 describe("decodeNonce", () => {
     test("should encode key and sequence correctly", async () => {

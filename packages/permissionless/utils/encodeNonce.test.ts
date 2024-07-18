@@ -1,6 +1,6 @@
-import { encodeNonce } from "./index"
 import { toHex } from "viem"
 import { describe, expect, test } from "vitest"
+import { encodeNonce } from "./index"
 
 describe("encodeNonce", () => {
     test("should encode key and sequence correctly", async () => {
