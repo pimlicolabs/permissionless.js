@@ -36,6 +36,7 @@ import { EtherspotWalletFactoryAbi } from "./abi/EtherspotWalletFactoryAbi"
 import {
     DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
+    type NetworkAddresses,
     VALIDATOR_TYPE
 } from "./constants"
 import { getInitMSAData } from "./utils/getInitMSAData"
@@ -79,39 +80,28 @@ const createAccountAbi = [
     }
 ] as const
 
-type CONTRACT_ADDRESSES = {
-    ecdsaValidatorAddress: Address
-    metaFactoryAddress: Address
-    bootstrapAddress: Address
-    accountLogicAddress?: Address
-    factoryAddress?: Address
-}
-
 /**
  * Get default addresses for Etherspot Smart Account based on chainId
  * @param chainId
- * @param ecdsaValidatorAddress
+ * @param validatorAddress
  * @param accountLogicAddress
  * @param factoryAddress
  * @param metaFactoryAddress
  */
 const getDefaultAddresses = ({
-    ecdsaValidatorAddress: _ecdsaValidatorAddress,
+    validatorAddress: _validatorAddress,
     metaFactoryAddress: _metaFactoryAddress,
     bootstrapAddress: _bootstrapAddress
-}: Partial<CONTRACT_ADDRESSES>): CONTRACT_ADDRESSES => {
+}: Partial<NetworkAddresses>): NetworkAddresses => {
     const addresses = DEFAULT_CONTRACT_ADDRESS
-    const ecdsaValidatorAddress =
-        _ecdsaValidatorAddress ?? addresses.multipleOwnerECDSAValidator
+    const validatorAddress = _validatorAddress ?? addresses.validatorAddress
     const metaFactoryAddress =
-        _metaFactoryAddress ??
-        addresses?.modularEtherspotWalletFactory ??
-        zeroAddress
+        _metaFactoryAddress ?? addresses?.metaFactoryAddress ?? zeroAddress
     const bootstrapAddress =
         _bootstrapAddress ?? addresses.bootstrapAddress ?? zeroAddress
 
     return {
-        ecdsaValidatorAddress,
+        validatorAddress,
         metaFactoryAddress,
         bootstrapAddress
     }
@@ -125,17 +115,17 @@ export const getEcdsaValidatorIdentifier = (validatorAddress: Address) => {
  * Get the initialization data for a etherspot smart account
  * @param entryPoint
  * @param owner
- * @param ecdsaValidatorAddress
+ * @param validatorAddress
  */
 const getInitialisationData = <entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE>({
     entryPoint: entryPointAddress,
     owner,
-    ecdsaValidatorAddress,
+    validatorAddress,
     bootstrapAddress
 }: {
     entryPoint: entryPoint
     owner: Address
-    ecdsaValidatorAddress: Address
+    validatorAddress: Address
     bootstrapAddress: Address
 }) => {
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
@@ -144,7 +134,7 @@ const getInitialisationData = <entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE>({
         throw new Error("Only EntryPoint 0.7 is supported")
     }
 
-    const initMSAData = getInitMSAData(ecdsaValidatorAddress)
+    const initMSAData = getInitMSAData(validatorAddress)
 
     const initCode = encodeAbiParameters(
         [{ type: "address" }, { type: "address" }, { type: "bytes" }],
@@ -159,20 +149,20 @@ const getInitialisationData = <entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE>({
  * @param entryPoint
  * @param owner
  * @param index
- * @param ecdsaValidatorAddress
+ * @param validatorAddress
  * @param bootstrapAddress
  */
 const getAccountInitCode = async ({
     entryPoint: entryPointAddress,
     owner,
     index,
-    ecdsaValidatorAddress,
+    validatorAddress,
     bootstrapAddress
 }: {
     entryPoint: ENTRYPOINT_ADDRESS_V07_TYPE
     owner: Address
     index: bigint
-    ecdsaValidatorAddress: Address
+    validatorAddress: Address
     bootstrapAddress: Address
 }): Promise<Hex> => {
     if (!owner) throw new Error("Owner account not found")
@@ -180,7 +170,7 @@ const getAccountInitCode = async ({
     // Build the account initialization data
     const initialisationData = getInitialisationData({
         entryPoint: entryPointAddress,
-        ecdsaValidatorAddress,
+        validatorAddress,
         owner,
         bootstrapAddress
     })
@@ -197,7 +187,7 @@ const getAccountInitCode = async ({
  * @param client
  * @param owner
  * @param entryPoint
- * @param ecdsaValidatorAddress
+ * @param validatorAddress
  * @param bootstrapAddress
  * @param factoryAddress
  * @param index
@@ -210,7 +200,7 @@ const getAccountAddress = async <
     client,
     owner,
     entryPoint: entryPointAddress,
-    ecdsaValidatorAddress,
+    validatorAddress,
     bootstrapAddress,
     factoryAddress,
     index
@@ -219,13 +209,13 @@ const getAccountAddress = async <
     owner: Address
     factoryAddress: Address
     entryPoint: entryPoint
-    ecdsaValidatorAddress: Address
+    validatorAddress: Address
     bootstrapAddress: Address
     index: bigint
 }): Promise<Address> => {
     const factoryData = getInitialisationData({
         entryPoint: entryPointAddress,
-        ecdsaValidatorAddress,
+        validatorAddress,
         owner,
         bootstrapAddress
     })
@@ -248,7 +238,7 @@ export type SignerToEtherspotSmartAccountParameters<
     address?: Address
     index?: bigint
     metaFactoryAddress?: Address
-    ecdsaValidatorAddress?: Address
+    validatorAddress?: Address
     bootstrapAddress?: Address
 }>
 
@@ -271,7 +261,7 @@ export async function signerToEtherspotSmartAccount<
         entryPoint: entryPointAddress,
         index = BigInt(0),
         metaFactoryAddress: _metaFactoryAddress,
-        ecdsaValidatorAddress: _ecdsaValidatorAddress,
+        validatorAddress: _validatorAddress,
         bootstrapAddress: _bootstrapAddress
     }: SignerToEtherspotSmartAccountParameters<
         ENTRYPOINT_ADDRESS_V07_TYPE,
@@ -288,9 +278,9 @@ export async function signerToEtherspotSmartAccount<
     }
 
     const chainId = client.chain?.id ?? (await getChainId(client))
-    const { ecdsaValidatorAddress, metaFactoryAddress, bootstrapAddress } =
+    const { validatorAddress, metaFactoryAddress, bootstrapAddress } =
         getDefaultAddresses({
-            ecdsaValidatorAddress: _ecdsaValidatorAddress,
+            validatorAddress: _validatorAddress,
             metaFactoryAddress: _metaFactoryAddress,
             bootstrapAddress: _bootstrapAddress
         })
@@ -309,7 +299,7 @@ export async function signerToEtherspotSmartAccount<
             entryPoint: entryPointAddress,
             owner: viemSigner.address,
             index,
-            ecdsaValidatorAddress,
+            validatorAddress,
             bootstrapAddress
         })
 
@@ -324,7 +314,7 @@ export async function signerToEtherspotSmartAccount<
             client,
             entryPoint: entryPointAddress,
             owner: viemSigner.address,
-            ecdsaValidatorAddress,
+            validatorAddress,
             factoryAddress: metaFactoryAddress,
             bootstrapAddress,
             index
@@ -348,7 +338,7 @@ export async function signerToEtherspotSmartAccount<
             })
 
             return concatHex([
-                getEcdsaValidatorIdentifier(ecdsaValidatorAddress),
+                getEcdsaValidatorIdentifier(validatorAddress),
                 signature
             ])
         },
@@ -377,7 +367,7 @@ export async function signerToEtherspotSmartAccount<
             )
 
             return concatHex([
-                getEcdsaValidatorIdentifier(ecdsaValidatorAddress),
+                getEcdsaValidatorIdentifier(validatorAddress),
                 signature
             ])
         },
@@ -389,7 +379,7 @@ export async function signerToEtherspotSmartAccount<
         // Get the nonce of the smart account
         async getNonce() {
             const key = getNonceKeyWithEncoding(
-                ecdsaValidatorAddress
+                validatorAddress
                 // @dev specify the custom nonceKey here when integrating the said feature
                 /*, nonceKey */
             )

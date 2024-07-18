@@ -26,14 +26,14 @@ export enum VALIDATOR_MODE {
     ENABLE = "0x01"
 }
 
-type NetworkAddresses = {
-    modularEtherspotWalletFactory: Address
+export type NetworkAddresses = {
+    metaFactoryAddress: Address
     bootstrapAddress: Address
-    multipleOwnerECDSAValidator: Address
+    validatorAddress: Address
 }
 
 export const DEFAULT_CONTRACT_ADDRESS: NetworkAddresses = {
-    modularEtherspotWalletFactory: "0xf80D543Ca10B48AF07c65Ff508605c1737EFAF3F",
+    metaFactoryAddress: "0xf80D543Ca10B48AF07c65Ff508605c1737EFAF3F", // modularEtherspotWalletFactory
     bootstrapAddress: "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066",
-    multipleOwnerECDSAValidator: "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143"
+    validatorAddress: "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143" // multipleOwnerECDSAValidator
 }
