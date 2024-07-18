@@ -36,7 +36,6 @@ import { EtherspotWalletFactoryAbi } from "./abi/EtherspotWalletFactoryAbi"
 import {
     DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
-    Networks,
     VALIDATOR_TYPE
 } from "./constants"
 import { getInitMSAData } from "./utils/getInitMSAData"
@@ -104,7 +103,7 @@ const getDefaultAddresses = (
         bootstrapAddress: _bootstrapAddress
     }: Partial<CONTRACT_ADDRESSES>
 ): CONTRACT_ADDRESSES => {
-    const addresses = Networks[chainId] ?? DEFAULT_CONTRACT_ADDRESS
+    const addresses = DEFAULT_CONTRACT_ADDRESS
     const ecdsaValidatorAddress =
         _ecdsaValidatorAddress ?? addresses.multipleOwnerECDSAValidator
     const metaFactoryAddress =
@@ -112,7 +111,7 @@ const getDefaultAddresses = (
         addresses?.modularEtherspotWalletFactory ??
         zeroAddress
     const bootstrapAddress =
-        _bootstrapAddress ?? addresses.bootstrap ?? zeroAddress
+        _bootstrapAddress ?? addresses.bootstrapAddress ?? zeroAddress
 
     return {
         ecdsaValidatorAddress,
@@ -202,9 +201,9 @@ const getAccountInitCode = async ({
  * @param owner
  * @param entryPoint
  * @param ecdsaValidatorAddress
- * @param initCodeProvider
- * @param deployedAccountAddress
+ * @param bootstrapAddress
  * @param factoryAddress
+ * @param index
  */
 const getAccountAddress = async <
     entryPoint extends ENTRYPOINT_ADDRESS_V07_TYPE,
@@ -251,25 +250,11 @@ export type SignerToEtherspotSmartAccountParameters<
     entryPoint: entryPoint
     address?: Address
     index?: bigint
-    factoryAddress?: Address
     metaFactoryAddress?: Address
-    accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
-    deployedAccountAddress?: Address
     bootstrapAddress?: Address
 }>
-/**
- * Build a etherspot smart account from a private key, that use the ECDSA signer behind the scene
- * @param client
- * @param privateKey
- * @param entryPoint
- * @param index
- * @param factoryAddress
- * @param accountLogicAddress
- * @param ecdsaValidatorAddress
- * @param deployedAccountAddress
- * @param bootstrapAddress
- */
+
 export async function signerToEtherspotSmartAccount<
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
@@ -288,9 +273,7 @@ export async function signerToEtherspotSmartAccount<
         address,
         entryPoint: entryPointAddress,
         index = BigInt(0),
-        factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
-        accountLogicAddress: _accountLogicAddress,
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
         bootstrapAddress: _bootstrapAddress
     }: SignerToEtherspotSmartAccountParameters<
