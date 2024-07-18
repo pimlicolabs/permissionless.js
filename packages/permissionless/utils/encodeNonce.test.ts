@@ -1,4 +1,4 @@
-import { encodeNonce } from "permissionless/utils"
+import { encodeNonce } from "./index"
 import { toHex } from "viem"
 import { describe, expect, test } from "vitest"
 
