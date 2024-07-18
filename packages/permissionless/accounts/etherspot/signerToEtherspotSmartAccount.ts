@@ -95,14 +95,11 @@ type CONTRACT_ADDRESSES = {
  * @param factoryAddress
  * @param metaFactoryAddress
  */
-const getDefaultAddresses = (
-    chainId: number,
-    {
-        ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        metaFactoryAddress: _metaFactoryAddress,
-        bootstrapAddress: _bootstrapAddress
-    }: Partial<CONTRACT_ADDRESSES>
-): CONTRACT_ADDRESSES => {
+const getDefaultAddresses = ({
+    ecdsaValidatorAddress: _ecdsaValidatorAddress,
+    metaFactoryAddress: _metaFactoryAddress,
+    bootstrapAddress: _bootstrapAddress
+}: Partial<CONTRACT_ADDRESSES>): CONTRACT_ADDRESSES => {
     const addresses = DEFAULT_CONTRACT_ADDRESS
     const ecdsaValidatorAddress =
         _ecdsaValidatorAddress ?? addresses.multipleOwnerECDSAValidator
@@ -292,7 +289,7 @@ export async function signerToEtherspotSmartAccount<
 
     const chainId = client.chain?.id ?? (await getChainId(client))
     const { ecdsaValidatorAddress, metaFactoryAddress, bootstrapAddress } =
-        getDefaultAddresses(chainId, {
+        getDefaultAddresses({
             ecdsaValidatorAddress: _ecdsaValidatorAddress,
             metaFactoryAddress: _metaFactoryAddress,
             bootstrapAddress: _bootstrapAddress
