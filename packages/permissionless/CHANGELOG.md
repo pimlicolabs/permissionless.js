@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.41
+
+### Patch Changes
+
+- 299513dfee5054a3d59591f4bf11cb145783988d: Added decodeNonce util function
+
 ## 0.1.40
 
 ### Patch Changes
