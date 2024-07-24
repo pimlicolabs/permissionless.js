@@ -124,8 +124,8 @@ export async function sendTransaction<
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: maxFeePerGas || BigInt(0),
-            maxPriorityFeePerGas: maxPriorityFeePerGas || BigInt(0),
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
             callData: callData,
             nonce: nonce ? BigInt(nonce) : undefined
         },

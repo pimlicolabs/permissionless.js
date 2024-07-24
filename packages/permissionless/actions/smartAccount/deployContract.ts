@@ -91,8 +91,8 @@ export async function deployContract<
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: request.maxFeePerGas || BigInt(0),
-            maxPriorityFeePerGas: request.maxPriorityFeePerGas || BigInt(0),
+            maxFeePerGas: request.maxFeePerGas,
+            maxPriorityFeePerGas: request.maxPriorityFeePerGas,
             callData: await account.encodeDeployCallData({
                 abi,
                 bytecode,

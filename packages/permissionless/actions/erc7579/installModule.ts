@@ -98,10 +98,10 @@ export async function installModule<
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: maxFeePerGas || BigInt(0),
-            maxPriorityFeePerGas: maxPriorityFeePerGas || BigInt(0),
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
             callData: installModuleCallData,
-            nonce: nonce ? BigInt(nonce) : undefined
+            nonce: nonce
         },
         account: account,
         middleware

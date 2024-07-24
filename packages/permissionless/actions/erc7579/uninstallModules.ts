@@ -109,10 +109,10 @@ export async function uninstallModules<
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: maxFeePerGas || BigInt(0),
-            maxPriorityFeePerGas: maxPriorityFeePerGas || BigInt(0),
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
             callData: uninstallModulesCallData,
-            nonce: nonce ? BigInt(nonce) : undefined
+            nonce: nonce
         },
         account: account,
         middleware
