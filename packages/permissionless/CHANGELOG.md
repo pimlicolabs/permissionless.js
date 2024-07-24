@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.42
+
+### Patch Changes
+
+- a41a84c4232ceec6e5c0544200a2d1cba241cd08: Added uninstall modules and install modules functions
+
 ## 0.1.41
 
 ### Patch Changes
