@@ -17,6 +17,26 @@ export const KernelV3InitAbi = [
     }
 ] as const
 
+export const KernelV3_1AccountAbi = [
+    {
+        type: "function",
+        name: "initialize",
+        inputs: [
+            {
+                name: "_rootValidator",
+                type: "bytes21",
+                internalType: "ValidationId"
+            },
+            { name: "hook", type: "address", internalType: "contract IHook" },
+            { name: "validatorData", type: "bytes", internalType: "bytes" },
+            { name: "hookData", type: "bytes", internalType: "bytes" },
+            { name: "initConfig", type: "bytes[]", internalType: "bytes[]" }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const
+
 export const KernelV3ExecuteAbi = [
     {
         type: "function",

@@ -8,6 +8,10 @@ import {
     installModule
 } from "./erc7579/installModule"
 import {
+    type InstallModulesParameters,
+    installModules
+} from "./erc7579/installModules"
+import {
     type IsModuleInstalledParameters,
     isModuleInstalled
 } from "./erc7579/isModuleInstalled"
@@ -25,6 +29,10 @@ import {
     type UninstallModuleParameters,
     uninstallModule
 } from "./erc7579/uninstallModule"
+import {
+    type UninstallModulesParameters,
+    uninstallModules
+} from "./erc7579/uninstallModules"
 
 export type Erc7579Actions<
     TEntryPoint extends EntryPoint,
@@ -38,6 +46,9 @@ export type Erc7579Actions<
     installModule: (
         args: InstallModuleParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
+    installModules: (
+        args: InstallModulesParameters<TEntryPoint, TSmartAccount>
+    ) => Promise<Hash>
     isModuleInstalled: (
         args: IsModuleInstalledParameters<TEntryPoint, TSmartAccount>
     ) => Promise<boolean>
@@ -49,6 +60,9 @@ export type Erc7579Actions<
     ) => Promise<boolean>
     uninstallModule: (
         args: UninstallModuleParameters<TEntryPoint, TSmartAccount>
+    ) => Promise<Hash>
+    uninstallModules: (
+        args: UninstallModulesParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
 }
 
@@ -66,10 +80,12 @@ export type {
 export {
     accountId,
     installModule,
+    installModules,
     isModuleInstalled,
     supportsExecutionMode,
     supportsModule,
-    uninstallModule
+    uninstallModule,
+    uninstallModules
 }
 
 export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {
@@ -85,6 +101,11 @@ export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {
         accountId: (args) => accountId(client, args),
         installModule: (args) =>
             installModule<TEntryPoint, TSmartAccount, TTransport, TChain>(
+                client,
+                args
+            ),
+        installModules: (args) =>
+            installModules<TEntryPoint, TSmartAccount, TTransport, TChain>(
                 client,
                 args
             ),
@@ -107,6 +128,11 @@ export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {
             ),
         uninstallModule: (args) =>
             uninstallModule<TEntryPoint, TSmartAccount, TTransport, TChain>(
+                client,
+                args
+            ),
+        uninstallModules: (args) =>
+            uninstallModules<TEntryPoint, TSmartAccount, TTransport, TChain>(
                 client,
                 args
             )
