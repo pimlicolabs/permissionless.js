@@ -67,22 +67,18 @@ describe.each(getCoreSmartAccounts())(
                     account: smartClient.account as any,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context:
-                        name === "Kernel 7579"
-                            ? encodePacked(
-                                  ["address", "bytes"],
-                                  [
-                                      zeroAddress,
-                                      encodeAbiParameters(
-                                          [
-                                              { type: "bytes" },
-                                              { type: "bytes" }
-                                          ],
-                                          [moduleData, "0x"]
-                                      )
-                                  ]
-                              )
-                            : moduleData
+                    context: name.startsWith("Kernel 7579")
+                        ? encodePacked(
+                              ["address", "bytes"],
+                              [
+                                  zeroAddress,
+                                  encodeAbiParameters(
+                                      [{ type: "bytes" }, { type: "bytes" }],
+                                      [moduleData, "0x"]
+                                  )
+                              ]
+                          )
+                        : moduleData
                 })
 
                 const bundlerClientV07 = createBundlerClient({
@@ -177,22 +173,18 @@ describe.each(getCoreSmartAccounts())(
                     account: smartClient.account as any,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context:
-                        name === "Kernel 7579"
-                            ? encodePacked(
-                                  ["address", "bytes"],
-                                  [
-                                      zeroAddress,
-                                      encodeAbiParameters(
-                                          [
-                                              { type: "bytes" },
-                                              { type: "bytes" }
-                                          ],
-                                          [moduleData, "0x"]
-                                      )
-                                  ]
-                              )
-                            : moduleData
+                    context: name.startsWith("Kernel 7579")
+                        ? encodePacked(
+                              ["address", "bytes"],
+                              [
+                                  zeroAddress,
+                                  encodeAbiParameters(
+                                      [{ type: "bytes" }, { type: "bytes" }],
+                                      [moduleData, "0x"]
+                                  )
+                              ]
+                          )
+                        : moduleData
                 })
 
                 const bundlerClientV07 = createBundlerClient({

@@ -70,22 +70,21 @@ describe.each(getCoreSmartAccounts())(
                             type: "executor",
                             address:
                                 "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                            context:
-                                name === "Kernel 7579"
-                                    ? encodePacked(
-                                          ["address", "bytes"],
-                                          [
-                                              zeroAddress,
-                                              encodeAbiParameters(
-                                                  [
-                                                      { type: "bytes" },
-                                                      { type: "bytes" }
-                                                  ],
-                                                  [moduleData, "0x"]
-                                              )
-                                          ]
-                                      )
-                                    : moduleData
+                            context: name.startsWith("Kernel 7579")
+                                ? encodePacked(
+                                      ["address", "bytes"],
+                                      [
+                                          zeroAddress,
+                                          encodeAbiParameters(
+                                              [
+                                                  { type: "bytes" },
+                                                  { type: "bytes" }
+                                              ],
+                                              [moduleData, "0x"]
+                                          )
+                                      ]
+                                  )
+                                : moduleData
                         }
                     ]
                 })
@@ -185,22 +184,21 @@ describe.each(getCoreSmartAccounts())(
                             type: "executor",
                             address:
                                 "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                            context:
-                                name === "Kernel 7579"
-                                    ? encodePacked(
-                                          ["address", "bytes"],
-                                          [
-                                              zeroAddress,
-                                              encodeAbiParameters(
-                                                  [
-                                                      { type: "bytes" },
-                                                      { type: "bytes" }
-                                                  ],
-                                                  [moduleData, "0x"]
-                                              )
-                                          ]
-                                      )
-                                    : moduleData
+                            context: name.startsWith("Kernel 7579")
+                                ? encodePacked(
+                                      ["address", "bytes"],
+                                      [
+                                          zeroAddress,
+                                          encodeAbiParameters(
+                                              [
+                                                  { type: "bytes" },
+                                                  { type: "bytes" }
+                                              ],
+                                              [moduleData, "0x"]
+                                          )
+                                      ]
+                                  )
+                                : moduleData
                         }
                     ]
                 })
