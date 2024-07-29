@@ -27,6 +27,9 @@ import {
     KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
     KERNEL_V07_FACTORY_CREATECALL,
     KERNEL_V07_META_FACTORY_CREATECALL,
+    KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
+    KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
+    KERNEL_V07_V3_1_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     SAFE_7579_LAUNCHPAD_CREATECALL,
     SAFE_7579_MODULE_CREATECALL,
@@ -209,6 +212,24 @@ export const setupContracts = async (rpc: string) => {
         }),
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_V3_1_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
             data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
@@ -355,6 +376,13 @@ export const setupContracts = async (rpc: string) => {
         data: "0x6e7dbabb0000000000000000000000006723b44abeec4e71ebe3232bd5b455805badd22f0000000000000000000000000000000000000000000000000000000000000001"
     })
 
+    // register 0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
+        data: "0x6e7dbabb000000000000000000000000aac5D4240AF87249B3f71BC8E4A2cae074A3E4190000000000000000000000000000000000000000000000000000000000000001"
+    })
+
     await sendTransaction(walletClient, {
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
@@ -417,7 +445,10 @@ export const setupContracts = async (rpc: string) => {
         "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43", // Kernel v0.3.0 ECDSA Valdiator
         "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27", // Kernel v0.3.0 Account Logic
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f", // Kernel v0.3.0 Factory
-        "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 Meta Factory
+        "0xd703aaE79538628d27099B8c4f621bE4CCd142d5", // Kernel v0.3.0 & v0.3.1 Meta Factory
+        "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57", // Kernel v0.3.1 ECDSA Valdiator
+        "0xBAC849bB641841b44E965fB01A4Bf5F074f84b4D", // Kernel v0.3.1 Account Logic
+        "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419", // Kernel v0.3.1 Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
         "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5", // Trust Secp256k1VerificationFacet

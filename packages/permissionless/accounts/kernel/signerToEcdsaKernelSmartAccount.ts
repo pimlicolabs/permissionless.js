@@ -9,15 +9,10 @@ import {
     type TypedDataDefinition,
     concatHex,
     encodeFunctionData,
-    isAddressEqual,
     toHex,
     zeroAddress
 } from "viem"
-import {
-    signMessage as _signMessage,
-    getChainId,
-    readContract
-} from "viem/actions"
+import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import type {
@@ -36,7 +31,7 @@ import {
     type SmartAccountSigner
 } from "../types"
 import { KernelInitAbi } from "./abi/KernelAccountAbi"
-import { KernelV3InitAbi } from "./abi/KernelV3AccountAbi"
+import { KernelV3InitAbi, KernelV3_1AccountAbi } from "./abi/KernelV3AccountAbi"
 import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi"
 import {
     DUMMY_ECDSA_SIGNATURE,
@@ -209,10 +204,12 @@ export const getEcdsaRootIdentifierForKernelV3 = (
  * @param ecdsaValidatorAddress
  */
 const getInitialisationData = <entryPoint extends EntryPoint>({
+    kernelVersion,
     entryPoint: entryPointAddress,
     owner,
     ecdsaValidatorAddress
 }: {
+    kernelVersion: KernelVersion<entryPoint>
     entryPoint: entryPoint
     owner: Address
     ecdsaValidatorAddress: Address
@@ -227,14 +224,28 @@ const getInitialisationData = <entryPoint extends EntryPoint>({
         })
     }
 
+    if (kernelVersion === "0.3.0-beta") {
+        return encodeFunctionData({
+            abi: KernelV3InitAbi,
+            functionName: "initialize",
+            args: [
+                getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
+                zeroAddress,
+                owner,
+                "0x"
+            ]
+        })
+    }
+
     return encodeFunctionData({
-        abi: KernelV3InitAbi,
+        abi: KernelV3_1AccountAbi,
         functionName: "initialize",
         args: [
             getEcdsaRootIdentifierForKernelV3(ecdsaValidatorAddress),
-            zeroAddress /* hookAddress */,
+            zeroAddress,
             owner,
-            "0x" /* hookData */
+            "0x",
+            []
         ]
     })
 }
@@ -250,12 +261,14 @@ const getInitialisationData = <entryPoint extends EntryPoint>({
  */
 const getAccountInitCode = async <entryPoint extends EntryPoint>({
     entryPoint: entryPointAddress,
+    kernelVersion,
     owner,
     index,
     factoryAddress,
     accountLogicAddress,
     ecdsaValidatorAddress
 }: {
+    kernelVersion: KernelVersion<entryPoint>
     entryPoint: entryPoint
     owner: Address
     index: bigint
@@ -268,6 +281,7 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
 
     // Build the account initialization data
     const initialisationData = getInitialisationData({
+        kernelVersion,
         entryPoint: entryPointAddress,
         ecdsaValidatorAddress,
         owner
@@ -297,7 +311,6 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
  * @param entryPoint
  * @param ecdsaValidatorAddress
  * @param initCodeProvider
- * @param deployedAccountAddress
  * @param factoryAddress
  */
 const getAccountAddress = async <
@@ -306,72 +319,25 @@ const getAccountAddress = async <
     TChain extends Chain | undefined = Chain | undefined
 >({
     client,
-    owner,
     entryPoint: entryPointAddress,
-    initCodeProvider,
-    ecdsaValidatorAddress,
-    deployedAccountAddress,
-    factoryAddress
+    factory,
+    factoryData
 }: {
     client: Client<TTransport, TChain>
-    owner: Address
-    initCodeProvider: () => Promise<Hex>
-    factoryAddress: Address
     entryPoint: entryPoint
-    ecdsaValidatorAddress: Address
-    deployedAccountAddress?: Address
+    factory: Address
+    factoryData: Hex
 }): Promise<Address> => {
-    // If we got an already deployed account, ensure it's well deployed, and the validator & signer are correct
-    if (deployedAccountAddress !== undefined) {
-        // Get the owner of the deployed account, ensure it's the same as the owner given in params
-        const deployedAccountOwner = await readContract(client, {
-            address: ecdsaValidatorAddress,
-            abi: [
-                {
-                    inputs: [
-                        {
-                            internalType: "address",
-                            name: "",
-                            type: "address"
-                        }
-                    ],
-                    name: "ecdsaValidatorStorage",
-                    outputs: [
-                        {
-                            internalType: "address",
-                            name: "owner",
-                            type: "address"
-                        }
-                    ],
-                    stateMutability: "view",
-                    type: "function"
-                }
-            ],
-            functionName: "ecdsaValidatorStorage",
-            args: [deployedAccountAddress]
-        })
-
-        // Ensure the address match
-        if (!isAddressEqual(deployedAccountOwner, owner)) {
-            throw new Error("Invalid owner for the already deployed account")
-        }
-
-        // If ok, return the address
-        return deployedAccountAddress
-    }
-
     // Find the init code for this account
-    const factoryData = await initCodeProvider()
-
     const entryPointVersion = getEntryPointVersion(entryPointAddress)
     if (entryPointVersion === "v0.6") {
         return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
-            initCode: concatHex([factoryAddress, factoryData]),
+            initCode: concatHex([factory, factoryData]),
             entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
         })
     }
     return getSenderAddress<ENTRYPOINT_ADDRESS_V07_TYPE>(client, {
-        factory: factoryAddress,
+        factory: factory,
         factoryData: factoryData,
         entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V07_TYPE
     })
@@ -391,7 +357,6 @@ export type SignerToEcdsaKernelSmartAccountParameters<
     metaFactoryAddress?: Address
     accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
-    deployedAccountAddress?: Address
     nonceKey?: bigint
 }>
 /**
@@ -403,7 +368,6 @@ export type SignerToEcdsaKernelSmartAccountParameters<
  * @param factoryAddress
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
- * @param deployedAccountAddress
  */
 export async function signerToEcdsaKernelSmartAccount<
     entryPoint extends EntryPoint,
@@ -429,7 +393,6 @@ export async function signerToEcdsaKernelSmartAccount<
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        deployedAccountAddress,
         nonceKey
     }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
 ): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
@@ -460,6 +423,7 @@ export async function signerToEcdsaKernelSmartAccount<
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>
         getAccountInitCode({
+            kernelVersion,
             entryPoint: entryPointAddress,
             owner: viemSigner.address,
             index,
@@ -473,15 +437,12 @@ export async function signerToEcdsaKernelSmartAccount<
         address ??
             getAccountAddress<entryPoint, TTransport, TChain>({
                 client,
-                entryPoint: entryPointAddress,
-                owner: viemSigner.address,
-                ecdsaValidatorAddress,
-                initCodeProvider: generateInitCode,
-                deployedAccountAddress,
-                factoryAddress:
+                factory:
                     entryPointVersion === "v0.6"
                         ? factoryAddress
-                        : metaFactoryAddress
+                        : metaFactoryAddress,
+                factoryData: await generateInitCode(),
+                entryPoint: entryPointAddress
             }),
         client.chain?.id ?? getChainId(client)
     ])

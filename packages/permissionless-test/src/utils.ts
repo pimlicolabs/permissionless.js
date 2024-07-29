@@ -42,6 +42,7 @@ import {
     signerToTrustSmartAccount
 } from "../../permissionless/accounts"
 import type { KernelEcdsaSmartAccount } from "../../permissionless/accounts"
+import type { KernelVersion } from "../../permissionless/accounts/kernel/signerToEcdsaKernelSmartAccount"
 import {
     type PimlicoBundlerClient,
     type PimlicoPaymasterClient,
@@ -325,22 +326,25 @@ export const getKernelEcdsaClient = async <T extends EntryPoint>({
     anvilRpc,
     altoRpc,
     privateKey = generatePrivateKey(),
-    erc7579
-}: AAParamType<T> & { erc7579?: boolean }): Promise<
+    version
+}: AAParamType<T> & { version?: KernelVersion<T> }): Promise<
     SmartAccountClient<T, Transport, Chain, KernelEcdsaSmartAccount<T>>
 > => {
     const publicClient = getPublicClient(anvilRpc)
 
-    if (erc7579 && entryPoint === ENTRYPOINT_ADDRESS_V06) {
+    if (
+        (version === "0.3.0-beta" || version === "0.3.1") &&
+        entryPoint === ENTRYPOINT_ADDRESS_V06
+    ) {
         throw new Error("ERC7579 is not supported for V06")
     }
 
     const kernelEcdsaAccount =
-        erc7579 && entryPoint === ENTRYPOINT_ADDRESS_V07
+        entryPoint === ENTRYPOINT_ADDRESS_V07
             ? await signerToEcdsaKernelSmartAccount(publicClient, {
-                  entryPoint: entryPoint as ENTRYPOINT_ADDRESS_V07_TYPE,
+                  entryPoint: entryPoint,
                   signer: privateKeyToAccount(privateKey),
-                  version: "0.3.0-beta"
+                  version
               })
             : await signerToEcdsaKernelSmartAccount(publicClient, {
                   entryPoint,
@@ -450,12 +454,6 @@ export const getCoreSmartAccounts = () => [
                 conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
             )
         },
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToTrustSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -465,13 +463,6 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getLightAccountClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToLightSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                lightAccountVersion: "1.1.0"
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -481,12 +472,6 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSimpleAccountClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSimpleSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: false
@@ -496,30 +481,46 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getKernelEcdsaClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToEcdsaKernelSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
     {
-        name: "Kernel 7579",
+        name: "Kernel 7579 0.3.0-beta",
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
-        ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToEcdsaKernelSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
+        ) =>
+            getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.0-beta" as KernelVersion<T>
             }),
         getErc7579SmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
-        ) => getKernelEcdsaClient({ ...conf, erc7579: true }),
+        ) =>
+            getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.0-beta" as KernelVersion<T>
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.1",
+        getSmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.1" as KernelVersion<T>
+            }),
+        getErc7579SmartAccountClient: async <T extends EntryPoint>(
+            conf: AAParamType<T>
+        ) =>
+            getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.1" as KernelVersion<T>
+            }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
@@ -536,12 +537,6 @@ export const getCoreSmartAccounts = () => [
                 conf as AAParamType<ENTRYPOINT_ADDRESS_V06_TYPE>
             )
         },
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToBiconomySmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -551,13 +546,6 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSafeClient(conf),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSafeSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                safeVersion: "1.4.1"
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
@@ -567,13 +555,6 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSafeClient({ ...conf, erc7579: true }),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSafeSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                safeVersion: "1.4.1"
-            }),
         getErc7579SmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSafeClient({ ...conf, erc7579: true }),
@@ -597,12 +578,6 @@ export const getCoreSmartAccounts = () => [
                 privateKey: generatePrivateKey()
             })
         },
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToTrustSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -616,13 +591,6 @@ export const getCoreSmartAccounts = () => [
                 ...conf,
                 privateKey: generatePrivateKey()
             }),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToLightSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                lightAccountVersion: "1.1.0"
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -635,12 +603,6 @@ export const getCoreSmartAccounts = () => [
             getSimpleAccountClient({
                 ...conf,
                 privateKey: generatePrivateKey()
-            }),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSimpleSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
@@ -659,12 +621,6 @@ export const getCoreSmartAccounts = () => [
                 privateKey: generatePrivateKey()
             })
         },
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToBiconomySmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
         isEip1271Compliant: true
@@ -674,13 +630,6 @@ export const getCoreSmartAccounts = () => [
         getSmartAccountClient: async <T extends EntryPoint>(
             conf: AAParamType<T>
         ) => getSafeClient({ ...conf, privateKey: generatePrivateKey() }),
-        getSmartAccountSigner: async (conf: ExistingSignerParamType) =>
-            signerToSafeSmartAccount(conf.publicClient, {
-                address: conf.existingAddress, // this is the field we are testing
-                signer: privateKeyToAccount(conf.privateKey),
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                safeVersion: "1.4.1"
-            }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
