@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.1.43
+
+### Patch Changes
+
+- 89a42e1d8b61c49c8795c71c12487f91f64abbc3: Fixed Kernel 0.3.1 address calculation
+- 89a42e1d8b61c49c8795c71c12487f91f64abbc3: Added installModules & uninstallModules export
+
 ## 0.1.42
 
 ### Patch Changes
