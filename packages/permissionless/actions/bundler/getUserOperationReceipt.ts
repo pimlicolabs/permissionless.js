@@ -41,7 +41,8 @@ export type GetUserOperationReceiptReturnType = {
         gasUsed: bigint
         contractAddress: Address | null
         logsBloom: Hex
-        effectiveGasPrice: bigint
+        effectiveGasPrice: bigint | null
+        gasPrice: bigint | null
     }
     logs: Log[]
 }
@@ -108,7 +109,12 @@ export const getUserOperationReceipt = async <
             gasUsed: BigInt(response.receipt.gasUsed),
             contractAddress: response.receipt.contractAddress,
             logsBloom: response.receipt.logsBloom,
-            effectiveGasPrice: BigInt(response.receipt.effectiveGasPrice)
+            effectiveGasPrice: response.receipt.effectiveGasPrice
+                ? BigInt(response.receipt.effectiveGasPrice)
+                : null,
+            gasPrice: response.receipt.gasPrice
+                ? BigInt(response.receipt.gasPrice)
+                : null
         },
         logs: response.logs.map((log) => ({
             data: log.data,

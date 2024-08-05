@@ -225,7 +225,8 @@ describe("index", () => {
                     gasUsed: bigint
                     contractAddress: Address | null
                     logsBloom: Hex
-                    effectiveGasPrice: bigint
+                    effectiveGasPrice: bigint | null
+                    gasPrice: bigint | null
                 }
                 logs: Log[]
             } | null>
@@ -320,7 +321,8 @@ describe("index", () => {
                     gasUsed: bigint
                     contractAddress: Address | null
                     logsBloom: Hex
-                    effectiveGasPrice: bigint
+                    effectiveGasPrice: bigint | null
+                    gasPrice: bigint | null
                 }
                 logs: Log[]
             }>
