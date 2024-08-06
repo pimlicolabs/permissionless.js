@@ -52,8 +52,8 @@ export type SmartAccountClientConfig<
         | undefined
 > = Prettify<
     Pick<
-        ClientConfig<transport>,
-        "cacheTime" | "key" | "name" | "pollingInterval"
+        ClientConfig<transport, chain>,
+        "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
     > &
         Middleware<entryPoint> & {
             account: account
