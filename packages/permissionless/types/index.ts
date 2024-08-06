@@ -31,8 +31,8 @@ export type GetAccountParameter<
         | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined
 > = IsUndefined<TAccount> extends true
-    ? { account: SmartAccount<entryPoint> }
-    : { account?: SmartAccount<entryPoint> }
+    ? { account: SmartAccount<entryPoint, string, TTransport, TChain> }
+    : { account?: SmartAccount<entryPoint, string, TTransport, TChain> }
 
 export type Prettify<T> = {
     [K in keyof T]: T[K]

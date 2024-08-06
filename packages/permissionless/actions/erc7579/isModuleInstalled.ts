@@ -1,5 +1,6 @@
 import {
     type Address,
+    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -57,7 +58,12 @@ export async function isModuleInstalled<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const publicClient = account.client
 
@@ -117,7 +123,7 @@ export async function isModuleInstalled<
                         context
                     ]
                 })
-            })
+            } as unknown as CallParameters<TChain>)
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

@@ -114,7 +114,12 @@ export async function sendTransactions<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     if (account.type !== "local") {
         throw new Error("RPC account type not supported")
@@ -133,7 +138,12 @@ export async function sendTransactions<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<
+            entryPoint,
+            TTransport,
+            TChain,
+            SmartAccount<entryPoint, string, TTransport, TChain>
+        >,
         "sendUserOperation"
     )({
         userOperation: {

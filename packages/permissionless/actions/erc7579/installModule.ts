@@ -14,7 +14,10 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import { sendUserOperation } from "../smartAccount/sendUserOperation"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "../smartAccount/sendUserOperation"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
@@ -64,7 +67,12 @@ export async function installModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const installModuleCallData = await account.encodeCallData({
         to: account.address,
@@ -103,7 +111,7 @@ export async function installModule<
 
     return getAction(
         client,
-        sendUserOperation<TEntryPoint>,
+        sendUserOperation<TEntryPoint, TTransport, TChain, TSmartAccount>,
         "sendUserOperation"
     )({
         userOperation: {
@@ -115,5 +123,10 @@ export async function installModule<
         },
         account: account,
         middleware
-    })
+    } as SendUserOperationParameters<
+        TEntryPoint,
+        TTransport,
+        TChain,
+        TSmartAccount
+    >)
 }

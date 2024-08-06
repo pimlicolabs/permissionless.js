@@ -146,9 +146,12 @@ async function prepareUserOperationRequestForEntryPointV06<
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
-    const account = parseAccount(
-        account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_V06_TYPE>
+    const account = parseAccount(account_) as SmartAccount<
+        ENTRYPOINT_ADDRESS_V06_TYPE,
+        string,
+        Transport,
+        TChain
+    >
 
     const [sender, nonce, initCode, callData] = await Promise.all([
         partialUserOperation.sender || account.address,
@@ -292,9 +295,12 @@ async function prepareUserOperationRequestEntryPointV07<
     } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
-    const account = parseAccount(
-        account_
-    ) as SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
+    const account = parseAccount(account_) as SmartAccount<
+        ENTRYPOINT_ADDRESS_V07_TYPE,
+        string,
+        Transport,
+        TChain
+    >
 
     const [sender, nonce, factory, factoryData, callData] = await Promise.all([
         partialUserOperation.sender || account.address,
@@ -441,7 +447,12 @@ export async function prepareUserOperationRequest<
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const entryPointVersion = getEntryPointVersion(account.entryPoint)
 

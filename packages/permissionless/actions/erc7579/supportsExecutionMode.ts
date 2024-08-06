@@ -1,4 +1,5 @@
 import {
+    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -101,7 +102,12 @@ export async function supportsExecutionMode<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const publicClient = account.client
 
@@ -152,7 +158,7 @@ export async function supportsExecutionMode<
                     functionName: "supportsExecutionMode",
                     args: [encodedMode]
                 })
-            })
+            } as unknown as CallParameters<TChain>)
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

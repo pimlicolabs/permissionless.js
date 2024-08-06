@@ -2,20 +2,21 @@ import type { Chain, Client, Hash, Transport } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type {
-    GetAccountParameter,
-    PartialBy,
-    Prettify,
-    UserOperation
-} from "../../types/"
-import type {
     ENTRYPOINT_ADDRESS_V06_TYPE,
     EntryPoint,
     GetEntryPointVersion
 } from "../../types/entrypoint"
+import type {
+    GetAccountParameter,
+    PartialBy,
+    Prettify,
+    UserOperation
+} from "../../types/index"
 import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
 import { sendUserOperation as sendUserOperationBundler } from "../bundler/sendUserOperation"
 import {
     type Middleware,
+    type PrepareUserOperationRequestParameters,
     prepareUserOperationRequest
 } from "./prepareUserOperationRequest"
 
@@ -81,13 +82,23 @@ export async function sendUserOperation<
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const userOperation = await getAction(
         client,
         prepareUserOperationRequest<entryPoint, TTransport, TChain, TAccount>,
         "prepareUserOperationRequest"
-    )(args)
+    )({ ...args, account } as PrepareUserOperationRequestParameters<
+        entryPoint,
+        TTransport,
+        TChain,
+        TAccount
+    >)
 
     userOperation.signature = await account.signUserOperation(
         userOperation as UserOperation<GetEntryPointVersion<entryPoint>>

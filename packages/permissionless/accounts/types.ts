@@ -34,9 +34,9 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 
 export type SmartAccount<
     entryPoint extends EntryPoint,
-    TSource extends string = string,
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined,
+    TSource extends string,
+    transport extends Transport,
+    chain extends Chain | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<TSource> & {
     client: Client<

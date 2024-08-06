@@ -110,7 +110,12 @@ export async function sendTransaction<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     if (!to) throw new Error("Missing to address")
 
@@ -126,7 +131,12 @@ export async function sendTransaction<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<
+            entryPoint,
+            TTransport,
+            TChain,
+            SmartAccount<entryPoint, string, TTransport, TChain>
+        >,
         "sendUserOperation"
     )({
         userOperation: {
@@ -136,7 +146,7 @@ export async function sendTransaction<
             callData: callData,
             nonce: nonce ? BigInt(nonce) : undefined
         },
-        account: account,
+        account,
         middleware
     })
 

@@ -15,14 +15,20 @@ import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import type { Middleware } from "./prepareUserOperationRequest"
-import { sendUserOperation } from "./sendUserOperation"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
     entryPoint extends EntryPoint,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
@@ -85,11 +91,16 @@ export async function deployContract<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<entryPoint, TTransport, TChain, TAccount>,
         "sendUserOperation"
     )({
         userOperation: {
@@ -104,7 +115,7 @@ export async function deployContract<
         },
         account: account,
         middleware
-    })
+    } as SendUserOperationParameters<entryPoint, TTransport, TChain, TAccount>)
 
     const userOperationReceipt = await getAction(
         client,
