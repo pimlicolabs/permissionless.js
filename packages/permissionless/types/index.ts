@@ -25,7 +25,11 @@ export type GetAccountParameterWithClient<
 
 export type GetAccountParameter<
     entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined
 > = IsUndefined<TAccount> extends true
     ? { account: SmartAccount<entryPoint> }
     : { account?: SmartAccount<entryPoint> }

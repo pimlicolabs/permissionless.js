@@ -18,10 +18,14 @@ import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type IsModuleInstalledParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
     type: ModuleType
     address: Address
     context: Hex
@@ -29,12 +33,21 @@ export type IsModuleInstalledParameters<
 
 export async function isModuleInstalled<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: IsModuleInstalledParameters<TEntryPoint, TSmartAccount>
+    parameters: IsModuleInstalledParameters<
+        TEntryPoint,
+        TTransport,
+        TChain,
+        TSmartAccount
+    >
 ): Promise<boolean> {
     const { account: account_ = client.account, address, context } = parameters
 

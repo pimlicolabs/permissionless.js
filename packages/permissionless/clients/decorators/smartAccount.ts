@@ -45,9 +45,12 @@ import type { EntryPoint } from "../../types/entrypoint"
 
 export type SmartAccountActions<
     entryPoint extends EntryPoint,
+    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TSmartAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined
 > = {
     /**
@@ -141,9 +144,11 @@ export type SmartAccountActions<
      */
     signMessage: (
         args: Parameters<
-            typeof signMessage<entryPoint, TChain, TSmartAccount>
+            typeof signMessage<entryPoint, TTransport, TChain, TSmartAccount>
         >[1]
-    ) => ReturnType<typeof signMessage<entryPoint, TChain, TSmartAccount>>
+    ) => ReturnType<
+        typeof signMessage<entryPoint, TTransport, TChain, TSmartAccount>
+    >
     /**
      * Signs typed data and calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
      *
@@ -249,6 +254,7 @@ export type SmartAccountActions<
                 entryPoint,
                 TTypedData,
                 TPrimaryType,
+                TTransport,
                 TChain,
                 TSmartAccount
             >
@@ -258,6 +264,7 @@ export type SmartAccountActions<
             entryPoint,
             TTypedData,
             TPrimaryType,
+            TTransport,
             TChain,
             TSmartAccount
         >
@@ -373,6 +380,7 @@ export type SmartAccountActions<
     ) => ReturnType<
         typeof writeContract<
             entryPoint,
+            TTransport,
             TChain,
             TSmartAccount,
             TAbi,
@@ -457,9 +465,16 @@ export type SmartAccountActions<
      */
     sendTransactions: (
         args: Prettify<
-            SendTransactionsWithPaymasterParameters<entryPoint, TSmartAccount>
+            SendTransactionsWithPaymasterParameters<
+                entryPoint,
+                TTransport,
+                TChain,
+                TSmartAccount
+            >
         >
-    ) => ReturnType<typeof sendTransactions<TChain, TSmartAccount, entryPoint>>
+    ) => ReturnType<
+        typeof sendTransactions<TTransport, TChain, TSmartAccount, entryPoint>
+    >
 }
 
 export function smartAccountActions<entryPoint extends EntryPoint>({
@@ -468,12 +483,14 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
     return <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
-        TSmartAccount extends SmartAccount<entryPoint> | undefined =
-            | SmartAccount<entryPoint>
+        TSmartAccount extends
+            | SmartAccount<entryPoint, string, TTransport, TChain>
+            | undefined =
+            | SmartAccount<entryPoint, string, TTransport, TChain>
             | undefined
     >(
         client: Client<TTransport, TChain, TSmartAccount>
-    ): SmartAccountActions<entryPoint, TChain, TSmartAccount> => ({
+    ): SmartAccountActions<entryPoint, TTransport, TChain, TSmartAccount> => ({
         prepareUserOperationRequest: (args, stateOverrides) =>
             prepareUserOperationRequest(
                 client,
@@ -489,29 +506,44 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 middleware
             } as DeployContractParametersWithPaymaster<entryPoint>),
         sendTransaction: (args) =>
-            sendTransaction<TChain, TSmartAccount, entryPoint>(client, {
-                ...args,
-                middleware
-            } as SendTransactionWithPaymasterParameters<
-                entryPoint,
-                TChain,
-                TSmartAccount
-            >),
+            sendTransaction<TTransport, TChain, TSmartAccount, entryPoint>(
+                client,
+                {
+                    ...args,
+                    middleware
+                } as SendTransactionWithPaymasterParameters<
+                    entryPoint,
+                    TTransport,
+                    TChain,
+                    TSmartAccount
+                >
+            ),
         sendTransactions: (args) =>
-            sendTransactions<TChain, TSmartAccount, entryPoint>(client, {
-                ...args,
-                middleware
-            }),
+            sendTransactions<TTransport, TChain, TSmartAccount, entryPoint>(
+                client,
+                {
+                    ...args,
+                    middleware
+                }
+            ),
         sendUserOperation: (args) =>
             sendUserOperation<entryPoint, TTransport, TChain, TSmartAccount>(
                 client,
                 {
                     ...args,
                     middleware
-                } as SendUserOperationParameters<entryPoint, TSmartAccount>
+                } as SendUserOperationParameters<
+                    entryPoint,
+                    TTransport,
+                    TChain,
+                    TSmartAccount
+                >
             ),
         signMessage: (args) =>
-            signMessage<entryPoint, TChain, TSmartAccount>(client, args),
+            signMessage<entryPoint, TTransport, TChain, TSmartAccount>(
+                client,
+                args
+            ),
         signTypedData: <
             const TTypedData extends TypedData | { [key: string]: unknown },
             TPrimaryType extends string
@@ -521,6 +553,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                     entryPoint,
                     TTypedData,
                     TPrimaryType,
+                    TTransport,
                     TChain,
                     TSmartAccount
                 >
@@ -530,6 +563,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 entryPoint,
                 TTypedData,
                 TPrimaryType,
+                TTransport,
                 TChain,
                 TSmartAccount
             >(client, args),
@@ -564,6 +598,7 @@ export function smartAccountActions<entryPoint extends EntryPoint>({
                 middleware
             } as WriteContractWithPaymasterParameters<
                 entryPoint,
+                TTransport,
                 TChain,
                 TSmartAccount,
                 TAbi

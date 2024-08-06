@@ -16,10 +16,14 @@ export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 
 export type SupportsModuleParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
     type: ModuleType
 }
 
@@ -40,12 +44,18 @@ export function parseModuleTypeId(type: ModuleType): bigint {
 
 export async function supportsModule<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    args: Prettify<SupportsModuleParameters<TEntryPoint, TSmartAccount>>
+    args: Prettify<
+        SupportsModuleParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
+    >
 ): Promise<boolean> {
     const { account: account_ = client.account } = args
 

@@ -72,9 +72,12 @@ import {
  */
 export type WriteContractWithPaymasterParameters<
     entryPoint extends EntryPoint,
+    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<
@@ -99,8 +102,11 @@ export type WriteContractWithPaymasterParameters<
 
 export async function writeContract<
     entryPoint extends EntryPoint,
+    TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined,
     const TAbi extends Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<
         TAbi,
@@ -123,6 +129,7 @@ export async function writeContract<
         ...request
     }: WriteContractWithPaymasterParameters<
         entryPoint,
+        TTransport,
         TChain,
         TAccount,
         TAbi,
@@ -138,7 +145,13 @@ export async function writeContract<
     } as EncodeFunctionDataParameters<TAbi, TFunctionName>)
     const hash = await getAction(
         client,
-        sendTransaction<TChain, TAccount, entryPoint, TChainOverride>,
+        sendTransaction<
+            TTransport,
+            TChain,
+            TAccount,
+            entryPoint,
+            TChainOverride
+        >,
         "sendTransaction"
     )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
@@ -146,6 +159,7 @@ export async function writeContract<
         ...request
     } as unknown as SendTransactionWithPaymasterParameters<
         entryPoint,
+        TTransport,
         TChain,
         TAccount,
         TChainOverride

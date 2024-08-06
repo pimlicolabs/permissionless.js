@@ -21,8 +21,12 @@ import {
 
 export type SendUserOperationParameters<
     entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
@@ -56,19 +60,23 @@ export type SendUserOperationParameters<
               | "paymasterData"
               | "signature"
           >
-} & GetAccountParameter<entryPoint, TAccount> &
+} & GetAccountParameter<entryPoint, TTransport, TChain, TAccount> &
     Middleware<entryPoint>
 
 export async function sendUserOperation<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<SendUserOperationParameters<entryPoint, TAccount>>
+    args: Prettify<
+        SendUserOperationParameters<entryPoint, TTransport, TChain, TAccount>
+    >
 ): Promise<Hash> {
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()

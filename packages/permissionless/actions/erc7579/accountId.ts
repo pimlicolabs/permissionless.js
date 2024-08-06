@@ -14,13 +14,15 @@ import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashW
 
 export async function accountId<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
     args?: TSmartAccount extends undefined
-        ? GetAccountParameter<TEntryPoint, TSmartAccount>
+        ? GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount>
         : undefined
 ): Promise<string> {
     let account_ = client.account

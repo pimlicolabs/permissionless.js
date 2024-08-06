@@ -19,8 +19,12 @@ import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
     type: ModuleType
     address: Address
     context: Hex
@@ -31,12 +35,18 @@ export type InstallModuleParameters<
 
 export async function installModule<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<InstallModuleParameters<TEntryPoint, TSmartAccount>>
+    parameters: Prettify<
+        InstallModuleParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
+    >
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
