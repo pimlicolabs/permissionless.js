@@ -220,7 +220,7 @@ export async function signerToBiconomySmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,

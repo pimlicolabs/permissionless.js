@@ -37,7 +37,7 @@ export async function privateKeyToBiconomySmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         privateKey,

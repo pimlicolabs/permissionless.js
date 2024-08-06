@@ -50,7 +50,13 @@ export function toSmartAccount<
     signTypedData
 }: TAccountSource & {
     source: TSource
-    client: Client<transport, chain, undefined, PublicRpcSchema, PublicActions>
+    client: Client<
+        transport,
+        chain,
+        undefined,
+        PublicRpcSchema,
+        PublicActions<transport, chain>
+    >
     entryPoint: TEntryPoint
     getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>

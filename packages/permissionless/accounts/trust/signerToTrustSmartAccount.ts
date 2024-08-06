@@ -108,7 +108,7 @@ export async function signerToTrustSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,

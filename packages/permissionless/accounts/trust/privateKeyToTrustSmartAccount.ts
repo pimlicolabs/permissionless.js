@@ -37,7 +37,7 @@ export async function privateKeyToTrustSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     { privateKey, ...rest }: PrivateKeyToTrustSmartAccountParameters<entryPoint>
 ): Promise<TrustSmartAccount<entryPoint, TTransport, TChain>> {
