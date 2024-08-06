@@ -116,8 +116,13 @@ export async function signTypedData<
     entryPoint extends EntryPoint,
     const TTypedData extends TypedData | { [key: string]: unknown },
     TPrimaryType extends string,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     {

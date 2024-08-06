@@ -38,7 +38,7 @@ export async function privateKeyToSimpleSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         privateKey,

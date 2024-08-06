@@ -1096,7 +1096,7 @@ export async function signerToSafeSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     args: SignerToSafeSmartAccountParameters<
         entryPoint,

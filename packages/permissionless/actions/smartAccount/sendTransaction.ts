@@ -16,9 +16,12 @@ import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionWithPaymasterParameters<
     entryPoint extends EntryPoint,
+    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = SendTransactionParameters<TChain, TAccount, TChainOverride> &
@@ -71,8 +74,11 @@ export type SendTransactionWithPaymasterParameters<
  * })
  */
 export async function sendTransaction<
+    TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined,
     entryPoint extends EntryPoint,
     TChainOverride extends Chain | undefined = Chain | undefined
 >(
@@ -80,6 +86,7 @@ export async function sendTransaction<
     args: Prettify<
         SendTransactionWithPaymasterParameters<
             entryPoint,
+            TTransport,
             TChain,
             TAccount,
             TChainOverride
@@ -103,7 +110,12 @@ export async function sendTransaction<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     if (!to) throw new Error("Missing to address")
 
@@ -119,7 +131,12 @@ export async function sendTransaction<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<
+            entryPoint,
+            TTransport,
+            TChain,
+            SmartAccount<entryPoint, string, TTransport, TChain>
+        >,
         "sendUserOperation"
     )({
         userOperation: {
@@ -129,7 +146,7 @@ export async function sendTransaction<
             callData: callData,
             nonce: nonce ? BigInt(nonce) : undefined
         },
-        account: account,
+        account,
         middleware
     })
 

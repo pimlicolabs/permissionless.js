@@ -199,7 +199,7 @@ export async function signerToLightSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,

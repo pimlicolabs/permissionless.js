@@ -1,4 +1,5 @@
 import {
+    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -27,11 +28,16 @@ export type ExecutionMode<callType extends CallType> = {
 
 export type SupportsExecutionModeParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined,
     callType extends CallType = CallType
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode<callType>
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> &
+    ExecutionMode<callType>
 
 function parseCallType(callType: CallType) {
     switch (callType) {
@@ -64,12 +70,23 @@ export function encodeExecutionMode<callType extends CallType>({
 
 export async function supportsExecutionMode<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    args: Prettify<SupportsExecutionModeParameters<TEntryPoint, TSmartAccount>>
+    args: Prettify<
+        SupportsExecutionModeParameters<
+            TEntryPoint,
+            TTransport,
+            TChain,
+            TSmartAccount
+        >
+    >
 ): Promise<boolean> {
     const {
         account: account_ = client.account,
@@ -85,7 +102,12 @@ export async function supportsExecutionMode<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const publicClient = account.client
 
@@ -136,7 +158,7 @@ export async function supportsExecutionMode<
                     functionName: "supportsExecutionMode",
                     args: [encodedMode]
                 })
-            })
+            } as unknown as CallParameters<TChain>)
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

@@ -1,4 +1,5 @@
 import {
+    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -14,13 +15,15 @@ import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashW
 
 export async function accountId<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
     args?: TSmartAccount extends undefined
-        ? GetAccountParameter<TEntryPoint, TSmartAccount>
+        ? GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount>
         : undefined
 ): Promise<string> {
     let account_ = client.account
@@ -35,7 +38,12 @@ export async function accountId<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const publicClient = account.client
 
@@ -73,7 +81,7 @@ export async function accountId<
                     abi,
                     functionName: "accountId"
                 })
-            })
+            } as unknown as CallParameters<TChain>)
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

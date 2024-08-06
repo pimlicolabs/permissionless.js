@@ -25,8 +25,10 @@ export type SmartAccountClient<
     entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    account extends
+        | SmartAccount<entryPoint, string, transport, chain>
+        | undefined =
+        | SmartAccount<entryPoint, string, transport, chain>
         | undefined
 > = Prettify<
     Client<
@@ -34,7 +36,7 @@ export type SmartAccountClient<
         chain,
         account,
         BundlerRpcSchema<entryPoint>,
-        SmartAccountActions<entryPoint, chain, account>
+        SmartAccountActions<entryPoint, transport, chain, account>
     >
 >
 
@@ -42,12 +44,15 @@ export type SmartAccountClientConfig<
     entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    account extends
+        | SmartAccount<entryPoint, string, transport, chain>
+        | undefined =
+        | SmartAccount<entryPoint, string, transport, chain>
+        | undefined
         | undefined
 > = Prettify<
     Pick<
-        ClientConfig<transport, chain, account>,
+        ClientConfig<transport, chain>,
         "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
     > &
         Middleware<entryPoint> & {
@@ -79,12 +84,14 @@ export type SmartAccountClientConfig<
  */
 
 export function createSmartAccountClient<
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = undefined,
-    TEntryPoint extends EntryPoint = TSmartAccount extends SmartAccount<infer U>
-        ? U
-        : never
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TEntryPoint extends EntryPoint,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     parameters: SmartAccountClientConfig<
         TEntryPoint,

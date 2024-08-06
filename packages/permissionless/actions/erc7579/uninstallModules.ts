@@ -14,15 +14,22 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import { sendUserOperation } from "../smartAccount/sendUserOperation"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "../smartAccount/sendUserOperation"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type UninstallModulesParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
     modules: [
         {
             type: ModuleType
@@ -37,14 +44,23 @@ export type UninstallModulesParameters<
 
 export async function uninstallModules<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
-        | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<UninstallModulesParameters<TEntryPoint, TSmartAccount>>
+    parameters: Prettify<
+        UninstallModulesParameters<
+            TEntryPoint,
+            TTransport,
+            TChain,
+            TSmartAccount
+        >
+    >
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -61,7 +77,12 @@ export async function uninstallModules<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const uninstallModulesCallData = await account.encodeCallData(
         await Promise.all(
@@ -104,7 +125,7 @@ export async function uninstallModules<
 
     return getAction(
         client,
-        sendUserOperation<TEntryPoint>,
+        sendUserOperation<TEntryPoint, TTransport, TChain, TSmartAccount>,
         "sendUserOperation"
     )({
         userOperation: {
@@ -116,5 +137,10 @@ export async function uninstallModules<
         },
         account: account,
         middleware
-    })
+    } as SendUserOperationParameters<
+        TEntryPoint,
+        TTransport,
+        TChain,
+        TSmartAccount
+    >)
 }

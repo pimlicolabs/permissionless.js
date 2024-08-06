@@ -14,13 +14,20 @@ import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import { sendUserOperation } from "../smartAccount/sendUserOperation"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "../smartAccount/sendUserOperation"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModulesParameters<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> &
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> &
     Middleware<TEntryPoint> & {
         modules: {
             type: ModuleType
@@ -34,12 +41,19 @@ export type InstallModulesParameters<
 
 export async function installModules<
     TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TSmartAccount extends
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        | undefined
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<InstallModulesParameters<TEntryPoint, TSmartAccount>>
+    parameters: Prettify<
+        InstallModulesParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
+    >
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -56,7 +70,12 @@ export async function installModules<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        TEntryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const installModulesCallData = await account.encodeCallData(
         await Promise.all(
@@ -99,7 +118,7 @@ export async function installModules<
 
     return getAction(
         client,
-        sendUserOperation<TEntryPoint>,
+        sendUserOperation<TEntryPoint, TTransport, TChain, TSmartAccount>,
         "sendUserOperation"
     )({
         userOperation: {
@@ -111,5 +130,10 @@ export async function installModules<
         },
         account: account,
         middleware
-    })
+    } as SendUserOperationParameters<
+        TEntryPoint,
+        TTransport,
+        TChain,
+        TSmartAccount
+    >)
 }

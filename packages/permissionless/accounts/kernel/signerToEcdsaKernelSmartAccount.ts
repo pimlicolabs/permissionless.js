@@ -381,7 +381,7 @@ export async function signerToEcdsaKernelSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,

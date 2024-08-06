@@ -18,12 +18,17 @@ import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionsWithPaymasterParameters<
     entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined
         | undefined
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
-} & GetAccountParameter<entryPoint, TAccount> &
+} & GetAccountParameter<entryPoint, TTransport, TChain, TAccount> &
     Middleware<entryPoint> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
@@ -77,13 +82,21 @@ export type SendTransactionsWithPaymasterParameters<
  * }])
  */
 export async function sendTransactions<
+    TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined,
     entryPoint extends EntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
-        SendTransactionsWithPaymasterParameters<entryPoint, TAccount>
+        SendTransactionsWithPaymasterParameters<
+            entryPoint,
+            TTransport,
+            TChain,
+            TAccount
+        >
     >
 ): Promise<Hash> {
     const {
@@ -101,7 +114,12 @@ export async function sendTransactions<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     if (account.type !== "local") {
         throw new Error("RPC account type not supported")
@@ -120,7 +138,12 @@ export async function sendTransactions<
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<
+            entryPoint,
+            TTransport,
+            TChain,
+            SmartAccount<entryPoint, string, TTransport, TChain>
+        >,
         "sendUserOperation"
     )({
         userOperation: {
