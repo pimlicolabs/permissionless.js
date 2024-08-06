@@ -84,9 +84,9 @@ export type SmartAccountClientConfig<
  */
 
 export function createSmartAccountClient<
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = undefined,
-    TEntryPoint extends EntryPoint = EntryPoint,
+    TTransport extends Transport,
+    TChain extends Chain | undefined,
+    TEntryPoint extends EntryPoint,
     TSmartAccount extends
         | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined =
