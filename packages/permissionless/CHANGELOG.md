@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.44
+
+### Patch Changes
+
+- fa011a17578dc2a4d35cb97116571e098a8dca09: Added support for extending the type of chain passed
+
 ## 0.1.43
 
 ### Patch Changes
