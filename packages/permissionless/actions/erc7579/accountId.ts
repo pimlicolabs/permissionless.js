@@ -22,9 +22,7 @@ export async function accountId<
         | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    args?: TSmartAccount extends undefined
-        ? GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount>
-        : undefined
+    args?: GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount>
 ): Promise<string> {
     let account_ = client.account
 
