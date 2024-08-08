@@ -8,7 +8,7 @@ permissionless.js is a TypeScript library built on top of [viem](https://viem.sh
 
 ## Features
 
-- **High-Level Smart Account Support**: We support a high-level API for deploying and managing smart accounts, including some of the most popular implementations ([Safe](https://safe.global), [Kernel](https://zerodev.app), [Biconomy](https://biconomy.io), etc.)
+- **High-Level Smart Account Support**: We support a high-level API for deploying and managing smart accounts, including some of the most popular implementations ([Safe](https://safe.global), [Kernel](https://zerodev.app), [Biconomy](https://biconomy.io), [Etherspot](https://etherspot.io) etc.)
 - **Bundler Support**: We support all bundler actions following [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
 - **Gas Sponsorship**: We support paymaster actions to allow you to easily sponsor gas fees.
 - **User Operation Utility Functions**: We provide many low-level utility functions useful for dealing with User Operations.

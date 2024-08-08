@@ -1078,11 +1078,6 @@ function isErc7579Args(
     return args.erc7579LaunchpadAddress !== undefined
 }
 
-/**
- * @description Creates an Simple Account from a private key.
- *
- * @returns A Private Key Simple Account.
- */
 export async function signerToSafeSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,

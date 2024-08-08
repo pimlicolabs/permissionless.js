@@ -50,6 +50,17 @@ import {
 } from "./kernel/signerToEcdsaKernelSmartAccount"
 
 import {
+    type EtherspotSmartAccount,
+    type SignerToEtherspotSmartAccountParameters,
+    signerToEtherspotSmartAccount
+} from "./etherspot/signerToEtherspotSmartAccount"
+
+import {
+    type PrivateKeyToEtherspotSmartAccountParameters,
+    privateKeyToEtherspotSmartAccount
+} from "./etherspot/privateKeyToEtherspotSmartAccount"
+
+import {
     type BiconomySmartAccount,
     type SignerToBiconomySmartAccountParameters,
     signerToBiconomySmartAccount
@@ -100,6 +111,11 @@ export {
     type SignerToEcdsaKernelSmartAccountParameters,
     type SignerToBiconomySmartAccountParameters,
     type PrivateKeyToBiconomySmartAccountParameters,
+    type EtherspotSmartAccount,
+    type SignerToEtherspotSmartAccountParameters,
+    signerToEtherspotSmartAccount,
+    type PrivateKeyToEtherspotSmartAccountParameters,
+    privateKeyToEtherspotSmartAccount,
     type SignerToTrustSmartAccountParameters,
     type PrivateKeyToTrustSmartAccountParameters
 }
