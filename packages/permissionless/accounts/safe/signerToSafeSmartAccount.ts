@@ -1175,7 +1175,7 @@ export async function signerToSafeSmartAccount<
 
     const accountAddress =
         address ??
-        (await getAccountAddress<TTransport, TChain>({
+        (await getAccountAddress({
             client,
             owner: viemSigner.address,
             safeModuleSetupAddress,

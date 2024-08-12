@@ -431,7 +431,7 @@ export async function signerToEcdsaKernelSmartAccount<
     // Fetch account address and chain id
     const [accountAddress, chainId] = await Promise.all([
         address ??
-            getAccountAddress<entryPoint, TTransport, TChain>({
+            getAccountAddress({
                 client,
                 factory:
                     entryPointVersion === "v0.6"

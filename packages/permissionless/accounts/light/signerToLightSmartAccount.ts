@@ -225,7 +225,7 @@ export async function signerToLightSmartAccount<
 
     const [accountAddress, chainId] = await Promise.all([
         address ??
-            getAccountAddress<entryPoint, TTransport, TChain>({
+            getAccountAddress({
                 client,
                 factoryAddress,
                 entryPoint: entryPointAddress,
