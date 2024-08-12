@@ -11,7 +11,7 @@ export const signUserOperation = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 >(
     client: Client<TTransport, TChain, TClientAccount>,
     {

@@ -39,7 +39,7 @@ const paymasterActionsEip7677 =
     <
         TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
-        TClientAccount extends Account | undefined = Account | undefined
+        TClientAccount extends Account | undefined = undefined
     >(
         client: Client<TTransport, TChain>
     ): PaymasterActionsEip7677<TEntryPoint, TChain> => ({

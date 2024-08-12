@@ -89,7 +89,7 @@ export async function getPaymasterStubData<
     TEntryPoint extends EntryPoint,
     TChain extends Chain | undefined,
     TTransport extends Transport = Transport,
-    TClientAccount extends Account | undefined = Account | undefined,
+    TClientAccount extends Account | undefined = undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 >(
     client: Client<

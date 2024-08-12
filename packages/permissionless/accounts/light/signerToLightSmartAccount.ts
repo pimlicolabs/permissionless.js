@@ -80,7 +80,7 @@ const getAccountAddress = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 >({
     client,
     factoryAddress,
@@ -191,7 +191,7 @@ export async function signerToLightSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined,
+    TClientAccount extends Account | undefined = undefined,
     TSource extends string = string,
     TAddress extends Address = Address
 >(

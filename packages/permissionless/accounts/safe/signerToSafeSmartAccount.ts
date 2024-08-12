@@ -864,7 +864,7 @@ const getAccountInitCode = async ({
 const getAccountAddress = async <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 >({
     client,
     owner,
@@ -1087,7 +1087,7 @@ export async function signerToSafeSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined,
+    TClientAccount extends Account | undefined = undefined,
     TSource extends string = string,
     TAddress extends Address = Address,
     TErc7579 extends Address | undefined = undefined

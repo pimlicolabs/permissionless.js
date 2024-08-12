@@ -5,7 +5,7 @@ import { signMessage as viem_signMessage } from "viem/actions"
 export const signMessage = <
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 >(
     client: Client<TTransport, TChain, TClientAccount>,
     { account, message }: SignMessageParameters<undefined>

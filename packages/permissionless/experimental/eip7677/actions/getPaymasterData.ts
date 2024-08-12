@@ -82,7 +82,7 @@ export type GetPaymasterDataReturnType<TEntryPoint extends EntryPoint> =
 export async function getPaymasterData<
     TEntryPoint extends EntryPoint,
     TChain extends Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined,
+    TClientAccount extends Account | undefined = undefined,
     TTransport extends Transport = Transport,
     TChainOverride extends Chain | undefined = Chain | undefined
 >(

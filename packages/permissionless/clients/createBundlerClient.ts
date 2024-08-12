@@ -13,7 +13,7 @@ import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 export type BundlerClient<
     entryPoint extends EntryPoint,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 > = Client<
     Transport,
     TChain,

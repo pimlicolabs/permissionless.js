@@ -24,7 +24,7 @@ export async function privateKeyToBiconomySmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = Account | undefined
+    TClientAccount extends Account | undefined = undefined
 >(
     client: Client<TTransport, TChain, TClientAccount>,
     {
