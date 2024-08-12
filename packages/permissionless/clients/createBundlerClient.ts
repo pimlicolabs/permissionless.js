@@ -12,11 +12,12 @@ import { type BundlerActions, bundlerActions } from "./decorators/bundler"
 
 export type BundlerClient<
     entryPoint extends EntryPoint,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 > = Client<
     Transport,
     TChain,
-    Account | undefined,
+    TClientAccount,
     BundlerRpcSchema<entryPoint>,
     BundlerActions<entryPoint>
 >

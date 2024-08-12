@@ -22,12 +22,8 @@ import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModulesParameters<
     TEntryPoint extends EntryPoint,
-    TTransport extends Transport,
-    TChain extends Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> &
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
+> = GetAccountParameter<TEntryPoint, TSmartAccount> &
     Middleware<TEntryPoint> & {
         modules: {
             type: ModuleType
@@ -43,17 +39,13 @@ export async function installModules<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
         | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<
-        InstallModulesParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
-    >
+    parameters: Prettify<InstallModulesParameters<TEntryPoint, TSmartAccount>>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -70,12 +62,7 @@ export async function installModules<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const installModulesCallData = await account.encodeCallData(
         await Promise.all(
@@ -130,10 +117,5 @@ export async function installModules<
         },
         account: account,
         middleware
-    } as SendUserOperationParameters<
-        TEntryPoint,
-        TTransport,
-        TChain,
-        TSmartAccount
-    >)
+    } as SendUserOperationParameters<TEntryPoint, TSmartAccount>)
 }

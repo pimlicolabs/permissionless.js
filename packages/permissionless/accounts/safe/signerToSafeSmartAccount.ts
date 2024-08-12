@@ -1,11 +1,10 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
     type LocalAccount,
-    type PublicActions,
-    type PublicRpcSchema,
     type SignableMessage,
     type Transport,
     type TypedData,
@@ -864,7 +863,8 @@ const getAccountInitCode = async ({
 
 const getAccountAddress = async <
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >({
     client,
     owner,
@@ -884,7 +884,7 @@ const getAccountAddress = async <
     attesters = [],
     attestersThreshold = 0
 }: {
-    client: Client<TTransport, TChain>
+    client: Client<TTransport, TChain, TClientAccount>
     owner: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
@@ -1087,17 +1087,12 @@ export async function signerToSafeSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined,
     TSource extends string = string,
     TAddress extends Address = Address,
     TErc7579 extends Address | undefined = undefined
 >(
-    client: Client<
-        TTransport,
-        TChain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<TTransport, TChain>
-    >,
+    client: Client<TTransport, TChain, TClientAccount>,
     args: SignerToSafeSmartAccountParameters<
         entryPoint,
         TSource,

@@ -1,4 +1,5 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
@@ -12,9 +13,10 @@ import { getFactoryData } from "./getFactoryData"
 export const getAccountAddress = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<TTransport, TChain, TClientAccount>,
     {
         factoryAddress,
         entryPoint: entryPointAddress,

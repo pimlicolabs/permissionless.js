@@ -1,11 +1,4 @@
-import type {
-    Chain,
-    Client,
-    Hex,
-    PublicActions,
-    PublicRpcSchema,
-    Transport
-} from "viem"
+import type { Account, Chain, Client, Hex, Transport } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import type { Prettify } from "../../types"
 import type { EntryPoint } from "../../types"
@@ -31,15 +24,10 @@ export type PrivateKeyToLightSmartAccountParameters<
 export async function privateKeyToLightSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<
-        TTransport,
-        TChain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<TTransport, TChain>
-    >,
+    client: Client<TTransport, TChain, TClientAccount>,
     { privateKey, ...rest }: PrivateKeyToLightSmartAccountParameters<entryPoint>
 ): Promise<LightSmartAccount<entryPoint, TTransport, TChain>> {
     const privateKeyAccount = privateKeyToAccount(privateKey)

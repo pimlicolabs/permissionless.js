@@ -7,10 +7,9 @@ import {
     type LocalAccount
 } from "viem"
 import type {
+    Account,
     Chain,
     EncodeDeployDataParameters,
-    PublicActions,
-    PublicRpcSchema,
     Transport
 } from "viem"
 import type { UserOperation } from "../types"
@@ -34,18 +33,13 @@ export class SignTransactionNotSupportedBySmartAccount extends BaseError {
 
 export type SmartAccount<
     entryPoint extends EntryPoint,
-    TSource extends string,
-    transport extends Transport,
-    chain extends Chain | undefined,
+    TSource extends string = string,
+    transport extends Transport = Transport,
+    chain extends Chain | undefined = Chain | undefined,
+    clientAccount extends Account | undefined = Account | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 > = LocalAccount<TSource> & {
-    client: Client<
-        transport,
-        chain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<transport, chain>
-    >
+    client: Client<transport, chain, clientAccount>
     entryPoint: entryPoint
     getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>

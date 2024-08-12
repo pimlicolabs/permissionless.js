@@ -10,9 +10,10 @@ import { signMessage } from "./signMessage"
 export const signUserOperation = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >(
-    client: Client<TTransport, TChain, undefined>,
+    client: Client<TTransport, TChain, TClientAccount>,
     {
         account,
         userOperation,

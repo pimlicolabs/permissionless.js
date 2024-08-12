@@ -22,14 +22,10 @@ import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type UninstallModuleParameters<
     TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: ModuleType
     address: Address
     context: Hex
@@ -42,21 +38,12 @@ export async function uninstallModule<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<
-        UninstallModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
-    >
+    parameters: Prettify<UninstallModuleParameters<TEntryPoint, TSmartAccount>>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -74,12 +61,7 @@ export async function uninstallModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const uninstallModuleCallData = await account.encodeCallData({
         to: account.address,
@@ -130,10 +112,5 @@ export async function uninstallModule<
         },
         account: account,
         middleware
-    } as SendUserOperationParameters<
-        TEntryPoint,
-        TTransport,
-        TChain,
-        TSmartAccount
-    >)
+    } as SendUserOperationParameters<TEntryPoint, TSmartAccount>)
 }

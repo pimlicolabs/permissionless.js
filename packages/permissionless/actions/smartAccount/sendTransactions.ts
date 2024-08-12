@@ -18,17 +18,13 @@ import { sendUserOperation } from "./sendUserOperation"
 
 export type SendTransactionsWithPaymasterParameters<
     entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
         | undefined
         | undefined
 > = {
     transactions: { to: Address; value: bigint; data: Hex }[]
-} & GetAccountParameter<entryPoint, TTransport, TChain, TAccount> &
+} & GetAccountParameter<entryPoint, TAccount> &
     Middleware<entryPoint> & {
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
@@ -84,19 +80,12 @@ export type SendTransactionsWithPaymasterParameters<
 export async function sendTransactions<
     TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined,
+    TAccount extends SmartAccount<entryPoint> | undefined,
     entryPoint extends EntryPoint
 >(
     client: Client<Transport, TChain, TAccount>,
     args: Prettify<
-        SendTransactionsWithPaymasterParameters<
-            entryPoint,
-            TTransport,
-            TChain,
-            TAccount
-        >
+        SendTransactionsWithPaymasterParameters<entryPoint, TAccount>
     >
 ): Promise<Hash> {
     const {
@@ -114,12 +103,7 @@ export async function sendTransactions<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        entryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     if (account.type !== "local") {
         throw new Error("RPC account type not supported")
@@ -142,7 +126,7 @@ export async function sendTransactions<
             entryPoint,
             TTransport,
             TChain,
-            SmartAccount<entryPoint, string, TTransport, TChain>
+            SmartAccount<entryPoint>
         >,
         "sendUserOperation"
     )({

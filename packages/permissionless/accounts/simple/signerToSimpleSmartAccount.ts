@@ -1,11 +1,10 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
     type LocalAccount,
-    type PublicActions,
-    type PublicRpcSchema,
     type Transport,
     concatHex,
     encodeFunctionData
@@ -76,7 +75,8 @@ const getAccountInitCode = async (
 const getAccountAddress = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >({
     client,
     factoryAddress,
@@ -84,7 +84,7 @@ const getAccountAddress = async <
     owner,
     index = BigInt(0)
 }: {
-    client: Client<TTransport, TChain>
+    client: Client<TTransport, TChain, TClientAccount>
     factoryAddress: Address
     owner: Address
     entryPoint: entryPoint
@@ -142,16 +142,11 @@ export async function signerToSimpleSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined,
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<
-        TTransport,
-        TChain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<TTransport, TChain>
-    >,
+    client: Client<TTransport, TChain, TClientAccount>,
     {
         signer,
         factoryAddress: _factoryAddress,

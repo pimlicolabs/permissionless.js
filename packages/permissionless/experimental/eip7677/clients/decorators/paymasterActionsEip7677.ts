@@ -1,4 +1,4 @@
-import type { Chain, Client, Transport } from "viem"
+import type { Account, Chain, Client, Transport } from "viem"
 import type { EntryPoint } from "../../../../types/entrypoint"
 import {
     type GetPaymasterDataParameters,
@@ -38,7 +38,8 @@ const paymasterActionsEip7677 =
     <TEntryPoint extends EntryPoint>(entryPoint: TEntryPoint) =>
     <
         TTransport extends Transport,
-        TChain extends Chain | undefined = Chain | undefined
+        TChain extends Chain | undefined = Chain | undefined,
+        TClientAccount extends Account | undefined = Account | undefined
     >(
         client: Client<TTransport, TChain>
     ): PaymasterActionsEip7677<TEntryPoint, TChain> => ({
@@ -47,7 +48,7 @@ const paymasterActionsEip7677 =
                 client as Client<
                     TTransport,
                     TChain,
-                    undefined,
+                    TClientAccount,
                     Eip7677RpcSchema<TEntryPoint>
                 >,
                 {
@@ -62,7 +63,7 @@ const paymasterActionsEip7677 =
                 client as Client<
                     TTransport,
                     TChain,
-                    undefined,
+                    TClientAccount,
                     Eip7677RpcSchema<TEntryPoint>
                 >,
                 {

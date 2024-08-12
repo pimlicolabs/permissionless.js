@@ -1,4 +1,4 @@
-import type { PublicActions, PublicRpcSchema, TypedData } from "viem"
+import type { Account, TypedData } from "viem"
 import {
     type Address,
     type Chain,
@@ -316,14 +316,15 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
 const getAccountAddress = async <
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined
 >({
     client,
     entryPoint: entryPointAddress,
     factory,
     factoryData
 }: {
-    client: Client<TTransport, TChain>
+    client: Client<TTransport, TChain, TClientAccount>
     entryPoint: entryPoint
     factory: Address
     factoryData: Hex
@@ -373,16 +374,11 @@ export async function signerToEcdsaKernelSmartAccount<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined,
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<
-        TTransport,
-        TChain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<TTransport, TChain>
-    >,
+    client: Client<TTransport, TChain, TClientAccount>,
     {
         signer,
         address,
@@ -487,7 +483,7 @@ export async function signerToEcdsaKernelSmartAccount<
                 TTypedData,
                 TPrimaryType,
                 TChain,
-                undefined
+                TClientAccount
             >(client, {
                 account: viemSigner,
                 ...typedData,

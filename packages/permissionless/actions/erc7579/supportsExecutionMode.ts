@@ -11,6 +11,8 @@ import {
     toBytes,
     toHex
 } from "viem"
+import { call, readContract } from "viem/actions"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
@@ -28,16 +30,11 @@ export type ExecutionMode<callType extends CallType> = {
 
 export type SupportsExecutionModeParameters<
     TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined,
     callType extends CallType = CallType
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> &
-    ExecutionMode<callType>
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & ExecutionMode<callType>
 
 function parseCallType(callType: CallType) {
     switch (callType) {
@@ -72,21 +69,12 @@ export async function supportsExecutionMode<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    args: Prettify<
-        SupportsExecutionModeParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
-    >
+    args: Prettify<SupportsExecutionModeParameters<TEntryPoint, TSmartAccount>>
 ): Promise<boolean> {
     const {
         account: account_ = client.account,
@@ -102,12 +90,7 @@ export async function supportsExecutionMode<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const publicClient = account.client
 
@@ -138,7 +121,11 @@ export async function supportsExecutionMode<
     ] as const
 
     try {
-        return await publicClient.readContract({
+        return await getAction(
+            publicClient,
+            readContract,
+            "readContract"
+        )({
             abi,
             functionName: "supportsExecutionMode",
             args: [encodedMode],
@@ -149,7 +136,11 @@ export async function supportsExecutionMode<
             const factory = await account.getFactory()
             const factoryData = await account.getFactoryData()
 
-            const result = await publicClient.call({
+            const result = await getAction(
+                publicClient,
+                call,
+                "call"
+            )({
                 factory: factory,
                 factoryData: factoryData,
                 to: account.address,

@@ -1,11 +1,10 @@
 import {
+    type Account,
     type Address,
     type Chain,
     type Client,
     type Hex,
     type LocalAccount,
-    type PublicActions,
-    type PublicRpcSchema,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
@@ -100,16 +99,11 @@ export async function signerToTrustSmartAccount<
     entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined,
     TSource extends string = string,
     TAddress extends Address = Address
 >(
-    client: Client<
-        TTransport,
-        TChain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<TTransport, TChain>
-    >,
+    client: Client<TTransport, TChain, TClientAccount>,
     {
         signer,
         factoryAddress = TRUST_ADDRESSES.factoryAddress,

@@ -118,13 +118,11 @@ export async function signTypedData<
     TPrimaryType extends string,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
         | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
+    client: Client<TTransport, TChain, TAccount>,
     {
         account: account_ = client.account,
         domain,

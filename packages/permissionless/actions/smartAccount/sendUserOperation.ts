@@ -22,12 +22,8 @@ import {
 
 export type SendUserOperationParameters<
     entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
         | undefined
 > = {
     userOperation: entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
@@ -61,33 +57,24 @@ export type SendUserOperationParameters<
               | "paymasterData"
               | "signature"
           >
-} & GetAccountParameter<entryPoint, TTransport, TChain, TAccount> &
+} & GetAccountParameter<entryPoint, TAccount> &
     Middleware<entryPoint>
 
 export async function sendUserOperation<
     entryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
+    TAccount extends SmartAccount<entryPoint> | undefined =
+        | SmartAccount<entryPoint>
         | undefined
 >(
     client: Client<TTransport, TChain, TAccount>,
-    args: Prettify<
-        SendUserOperationParameters<entryPoint, TTransport, TChain, TAccount>
-    >
+    args: Prettify<SendUserOperationParameters<entryPoint, TAccount>>
 ): Promise<Hash> {
     const { account: account_ = client.account } = args
     if (!account_) throw new AccountOrClientNotFoundError()
 
-    const account = parseAccount(account_) as SmartAccount<
-        entryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     const userOperation = await getAction(
         client,
@@ -95,8 +82,6 @@ export async function sendUserOperation<
         "prepareUserOperationRequest"
     )({ ...args, account } as PrepareUserOperationRequestParameters<
         entryPoint,
-        TTransport,
-        TChain,
         TAccount
     >)
 

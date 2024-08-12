@@ -1,5 +1,6 @@
 import type {
     Abi,
+    Account,
     Chain,
     Client,
     DeployContractParameters,
@@ -9,7 +10,6 @@ import type {
 } from "viem"
 import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
-import type { Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
@@ -23,13 +23,8 @@ import {
 export type DeployContractParametersWithPaymaster<
     entryPoint extends EntryPoint,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
-    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined,
+    TAccount extends Account | undefined = Account | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
     Middleware<entryPoint>
@@ -66,14 +61,18 @@ export async function deployContract<
     entryPoint extends EntryPoint,
     TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined
+    TAbi extends Abi | readonly unknown[],
+    TAccount extends SmartAccount<entryPoint> | undefined,
+    TChainOverride extends Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>
+    client: Client<TTransport, TChain, TAccount>,
+    args: DeployContractParametersWithPaymaster<
+        entryPoint,
+        TAbi,
+        TChain,
+        TAccount,
+        TChainOverride
+    >
 ): Promise<Hash> {
     const {
         abi,
@@ -91,12 +90,7 @@ export async function deployContract<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        entryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<entryPoint>
 
     const userOpHash = await getAction(
         client,
@@ -115,7 +109,7 @@ export async function deployContract<
         },
         account: account,
         middleware
-    } as SendUserOperationParameters<entryPoint, TTransport, TChain, TAccount>)
+    } as SendUserOperationParameters<entryPoint, TAccount>)
 
     const userOperationReceipt = await getAction(
         client,

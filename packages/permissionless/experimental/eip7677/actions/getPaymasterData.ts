@@ -1,4 +1,5 @@
 import {
+    type Account,
     type Address,
     type Chain,
     ChainNotFoundError,
@@ -81,13 +82,14 @@ export type GetPaymasterDataReturnType<TEntryPoint extends EntryPoint> =
 export async function getPaymasterData<
     TEntryPoint extends EntryPoint,
     TChain extends Chain | undefined,
+    TClientAccount extends Account | undefined = Account | undefined,
     TTransport extends Transport = Transport,
     TChainOverride extends Chain | undefined = Chain | undefined
 >(
     client: Client<
         TTransport,
         TChain,
-        undefined,
+        TClientAccount,
         Eip7677RpcSchema<TEntryPoint>
     >,
     {

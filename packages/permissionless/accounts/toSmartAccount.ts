@@ -1,13 +1,12 @@
 import {
     type Abi,
+    type Account,
     type Address,
     type Chain,
     type Client,
     type CustomSource,
     type EncodeDeployDataParameters,
     type Hex,
-    type PublicActions,
-    type PublicRpcSchema,
     type SignableMessage,
     type Transport,
     type TypedDataDefinition,
@@ -32,6 +31,7 @@ export function toSmartAccount<
     TSource extends string = string,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
+    clientAccount extends Account | undefined = Account | undefined,
     TAbi extends Abi | readonly unknown[] = Abi
 >({
     address,
@@ -50,13 +50,7 @@ export function toSmartAccount<
     signTypedData
 }: TAccountSource & {
     source: TSource
-    client: Client<
-        transport,
-        chain,
-        undefined,
-        PublicRpcSchema,
-        PublicActions<transport, chain>
-    >
+    client: Client<transport, chain, clientAccount>
     entryPoint: TEntryPoint
     getNonce: (key?: bigint) => Promise<bigint>
     getInitCode: () => Promise<Hex>
@@ -86,7 +80,7 @@ export function toSmartAccount<
     signUserOperation: (
         userOperation: UserOperation<GetEntryPointVersion<TEntryPoint>>
     ) => Promise<Hex>
-}): SmartAccount<TEntryPoint, TSource, transport, chain, TAbi> {
+}): SmartAccount<TEntryPoint, TSource, transport, chain, clientAccount, TAbi> {
     const account = toAccount({
         address: address,
         signMessage: async ({ message }: { message: SignableMessage }) => {
@@ -171,5 +165,12 @@ export function toSmartAccount<
         getDummySignature,
         encodeDeployCallData,
         signUserOperation
-    }
+    } as SmartAccount<
+        TEntryPoint,
+        TSource,
+        transport,
+        chain,
+        clientAccount,
+        TAbi
+    >
 }

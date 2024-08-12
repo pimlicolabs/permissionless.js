@@ -1,4 +1,5 @@
 import {
+    type Account,
     type Address,
     type Chain,
     ChainNotFoundError,
@@ -88,12 +89,13 @@ export async function getPaymasterStubData<
     TEntryPoint extends EntryPoint,
     TChain extends Chain | undefined,
     TTransport extends Transport = Transport,
+    TClientAccount extends Account | undefined = Account | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 >(
     client: Client<
         TTransport,
         TChain,
-        undefined,
+        TClientAccount,
         Eip7677RpcSchema<TEntryPoint>
     >,
     {

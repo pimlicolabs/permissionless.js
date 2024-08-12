@@ -36,77 +36,33 @@ import {
 
 export type Erc7579Actions<
     TEntryPoint extends EntryPoint,
-    TTransport extends Transport,
-    TChain extends Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
 > = {
     accountId: (
         args?: TSmartAccount extends undefined
-            ? GetAccountParameter<
-                  TEntryPoint,
-                  TTransport,
-                  TChain,
-                  TSmartAccount
-              >
+            ? GetAccountParameter<TEntryPoint, TSmartAccount>
             : undefined
     ) => Promise<string>
     installModule: (
-        args: InstallModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: InstallModuleParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
     installModules: (
-        args: InstallModulesParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: InstallModulesParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
     isModuleInstalled: (
-        args: IsModuleInstalledParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: IsModuleInstalledParameters<TEntryPoint, TSmartAccount>
     ) => Promise<boolean>
     supportsExecutionMode: (
-        args: SupportsExecutionModeParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: SupportsExecutionModeParameters<TEntryPoint, TSmartAccount>
     ) => Promise<boolean>
     supportsModule: (
-        args: SupportsModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: SupportsModuleParameters<TEntryPoint, TSmartAccount>
     ) => Promise<boolean>
     uninstallModule: (
-        args: UninstallModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: UninstallModuleParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
     uninstallModules: (
-        args: UninstallModulesParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: UninstallModulesParameters<TEntryPoint, TSmartAccount>
     ) => Promise<Hash>
 }
 
@@ -136,14 +92,14 @@ export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {
     entryPoint: TEntryPoint
 }) {
     return <
-        TTransport extends Transport,
-        TChain extends Chain | undefined,
-        TSmartAccount extends
-            | SmartAccount<TEntryPoint, string, TTransport, TChain>
+        TTransport extends Transport = Transport,
+        TChain extends Chain | undefined = Chain | undefined,
+        TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+            | SmartAccount<TEntryPoint>
             | undefined
     >(
         client: Client<TTransport, TChain, TSmartAccount>
-    ): Erc7579Actions<TEntryPoint, TTransport, TChain, TSmartAccount> => ({
+    ): Erc7579Actions<TEntryPoint, TSmartAccount> => ({
         accountId: (args) => accountId(client, args),
         installModule: (args) =>
             installModule<TEntryPoint, TTransport, TChain, TSmartAccount>(

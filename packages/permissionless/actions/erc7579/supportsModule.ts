@@ -7,6 +7,8 @@ import {
     decodeFunctionResult,
     encodeFunctionData
 } from "viem"
+import { call, readContract } from "viem/actions"
+import { getAction } from "viem/utils"
 import type { SmartAccount } from "../../accounts/types"
 import type { GetAccountParameter, Prettify } from "../../types/"
 import type { EntryPoint } from "../../types/entrypoint"
@@ -17,14 +19,10 @@ export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 
 export type SupportsModuleParameters<
     TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
+> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
     type: ModuleType
 }
 
@@ -47,16 +45,12 @@ export async function supportsModule<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
+    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
+        | SmartAccount<TEntryPoint>
         | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
-    args: Prettify<
-        SupportsModuleParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
-    >
+    args: Prettify<SupportsModuleParameters<TEntryPoint, TSmartAccount>>
 ): Promise<boolean> {
     const { account: account_ = client.account } = args
 
@@ -66,12 +60,7 @@ export async function supportsModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
 
     const publicClient = account.client
 
@@ -95,7 +84,11 @@ export async function supportsModule<
     ] as const
 
     try {
-        return await publicClient.readContract({
+        return await getAction(
+            publicClient,
+            readContract,
+            "readContract"
+        )({
             abi,
             functionName: "supportsModule",
             args: [parseModuleTypeId(args.type)],
@@ -106,7 +99,11 @@ export async function supportsModule<
             const factory = await account.getFactory()
             const factoryData = await account.getFactoryData()
 
-            const result = await publicClient.call({
+            const result = await getAction(
+                publicClient,
+                call,
+                "call"
+            )({
                 factory: factory,
                 factoryData: factoryData,
                 to: account.address,
