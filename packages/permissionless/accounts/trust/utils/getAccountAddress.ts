@@ -1,22 +1,13 @@
-import {
-    type Account,
-    type Address,
-    type Chain,
-    type Client,
-    type Transport,
-    concatHex
-} from "viem"
+import { type Address, type Client, concatHex } from "viem"
+import type { entryPoint06Address } from "viem/account-abstraction"
 import { getSenderAddress } from "../../../actions/public/getSenderAddress"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE, EntryPoint } from "../../../types"
 import { getFactoryData } from "./getFactoryData"
 
 export const getAccountAddress = async <
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = undefined
+    entryPointAddress extends
+        typeof entryPoint06Address = typeof entryPoint06Address
 >(
-    client: Client<TTransport, TChain, TClientAccount>,
+    client: Client,
     {
         factoryAddress,
         entryPoint: entryPointAddress,
@@ -26,7 +17,7 @@ export const getAccountAddress = async <
     }: {
         factoryAddress: Address
         bytes: `0x${string}`
-        entryPoint: entryPoint
+        entryPoint: entryPointAddress
         secp256k1VerificationFacetAddress: Address
         index?: bigint
     }
@@ -39,6 +30,6 @@ export const getAccountAddress = async <
 
     return getSenderAddress(client, {
         initCode: concatHex([factoryAddress, factoryData]),
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
+        entryPointAddress: entryPointAddress
     })
 }

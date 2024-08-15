@@ -14,29 +14,17 @@ import {
 
 export type EncodeCallDataParams<callType extends CallType> = {
     mode: ExecutionMode<callType>
-    callData: callType extends "batchcall"
-        ? {
-              to: Address
-              value: bigint
-              data: Hex
-          }[]
-        : {
-              to: Address
-              value: bigint
-              data: Hex
-          }
+    callData: readonly {
+        to: Address
+        value?: bigint | undefined
+        data?: Hex | undefined
+    }[]
 }
 
-export function encode7579CallData<callType extends CallType>({
+export function encode7579Calls<callType extends CallType>({
     mode,
     callData
 }: EncodeCallDataParams<callType>): Hex {
-    if (Array.isArray(callData) && mode?.type !== "batchcall") {
-        throw new Error(
-            `mode ${JSON.stringify(mode)} does not supported for batchcall calldata`
-        )
-    }
-
     const executeAbi = [
         {
             type: "function",
@@ -58,7 +46,7 @@ export function encode7579CallData<callType extends CallType>({
         }
     ] as const
 
-    if (Array.isArray(callData)) {
+    if (callData.length > 1) {
         return encodeFunctionData({
             abi: executeAbi,
             functionName: "execute",
@@ -89,8 +77,8 @@ export function encode7579CallData<callType extends CallType>({
                         callData.map((arg) => {
                             return {
                                 target: arg.to,
-                                value: arg.value,
-                                callData: arg.data
+                                value: arg.value ?? 0n,
+                                callData: arg.data ?? "0x"
                             }
                         })
                     ]
@@ -105,9 +93,9 @@ export function encode7579CallData<callType extends CallType>({
         args: [
             encodeExecutionMode(mode),
             concatHex([
-                callData.to,
-                toHex(callData.value, { size: 32 }),
-                callData.data
+                callData[0].to,
+                toHex(callData[0].value ?? 0n, { size: 32 }),
+                callData[0].data ?? "0x"
             ])
         ]
     })

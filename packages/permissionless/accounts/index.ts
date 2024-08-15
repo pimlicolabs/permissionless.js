@@ -1,105 +1,77 @@
 import {
-    type PrivateKeyToSimpleSmartAccountParameters,
-    privateKeyToSimpleSmartAccount
-} from "./simple/privateKeyToSimpleSmartAccount"
+    type SimpleSmartAccountImplementation,
+    type ToSimpleSmartAccountParameters,
+    type ToSimpleSmartAccountReturnType,
+    toSimpleSmartAccount
+} from "./simple/toSimpleSmartAccount"
 
 import {
-    type SignerToSimpleSmartAccountParameters,
-    type SimpleSmartAccount,
-    signerToSimpleSmartAccount
-} from "./simple/signerToSimpleSmartAccount"
+    type LightAccountVersion,
+    type LightSmartAccountImplementation,
+    type ToLightSmartAccountParameters,
+    type ToLightSmartAccountReturnType,
+    toLightSmartAccount
+} from "./light/toLightSmartAccount"
 
 import {
-    type PrivateKeyToLightSmartAccountParameters,
-    privateKeyToLightSmartAccount
-} from "./light/privateKeyToLightSmartAccount"
+    type ToTrustSmartAccountParameters,
+    type ToTrustSmartAccountReturnType,
+    type TrustSmartAccountImplementation,
+    toTrustSmartAccount
+} from "./trust/toTrustSmartAccount"
 
 import {
-    type LightSmartAccount,
-    type SignerToLightSmartAccountParameters,
-    signerToLightSmartAccount
-} from "./light/signerToLightSmartAccount"
-
-import {
-    type SignerToTrustSmartAccountParameters,
-    type TrustSmartAccount,
-    signerToTrustSmartAccount
-} from "./trust/signerToTrustSmartAccount"
-
-import {
-    type PrivateKeyToTrustSmartAccountParameters,
-    privateKeyToTrustSmartAccount
-} from "./trust/privateKeyToTrustSmartAccount"
-
-import {
-    type PrivateKeyToSafeSmartAccountParameters,
-    privateKeyToSafeSmartAccount
-} from "./safe/privateKeyToSafeSmartAccount"
-
-import {
-    type SafeSmartAccount,
+    type SafeSmartAccountImplementation,
     type SafeVersion,
-    type SignerToSafeSmartAccountParameters,
-    signerToSafeSmartAccount
-} from "./safe/signerToSafeSmartAccount"
+    type ToSafeSmartAccountParameters,
+    type ToSafeSmartAccountReturnType,
+    toSafeSmartAccount
+} from "./safe/toSafeSmartAccount"
 
 import {
-    type KernelEcdsaSmartAccount,
-    type SignerToEcdsaKernelSmartAccountParameters,
-    signerToEcdsaKernelSmartAccount
-} from "./kernel/signerToEcdsaKernelSmartAccount"
+    type EcdsaKernelSmartAccountImplementation,
+    type KernelVersion,
+    type ToEcdsaKernelSmartAccountParameters,
+    type ToEcdsaKernelSmartAccountReturnType,
+    toEcdsaKernelSmartAccount
+} from "./kernel/toEcdsaKernelSmartAccount"
 
 import {
-    type BiconomySmartAccount,
-    type SignerToBiconomySmartAccountParameters,
-    signerToBiconomySmartAccount
-} from "./biconomy/signerToBiconomySmartAccount"
+    type BiconomySmartAccountImplementation,
+    type ToBiconomySmartAccountParameters,
+    type ToBiconomySmartAccountReturnType,
+    toBiconomySmartAccount
+} from "./biconomy/toBiconomySmartAccount"
 
-import {
-    type PrivateKeyToBiconomySmartAccountParameters,
-    privateKeyToBiconomySmartAccount
-} from "./biconomy/privateKeyToBiconomySmartAccount"
-
-import {
-    SignTransactionNotSupportedBySmartAccount,
-    type SmartAccount,
-    type SmartAccountSigner
-} from "./types"
-
-import { toSmartAccount } from "./toSmartAccount"
+import { SignTransactionNotSupportedBySmartAccount } from "./types"
 
 export {
+    type ToSimpleSmartAccountParameters,
+    type SimpleSmartAccountImplementation,
+    type ToSimpleSmartAccountReturnType,
+    toSimpleSmartAccount,
+    type LightAccountVersion,
+    type ToLightSmartAccountParameters,
+    type LightSmartAccountImplementation,
+    type ToLightSmartAccountReturnType,
+    toLightSmartAccount,
+    type ToTrustSmartAccountParameters,
+    type TrustSmartAccountImplementation,
+    type ToTrustSmartAccountReturnType,
+    toTrustSmartAccount,
+    type ToSafeSmartAccountParameters,
+    type SafeSmartAccountImplementation,
+    type ToSafeSmartAccountReturnType,
+    toSafeSmartAccount,
+    type ToEcdsaKernelSmartAccountParameters,
+    type EcdsaKernelSmartAccountImplementation,
+    type ToEcdsaKernelSmartAccountReturnType,
     type SafeVersion,
-    type SmartAccountSigner,
-    type SafeSmartAccount,
-    signerToSafeSmartAccount,
-    type SimpleSmartAccount,
-    signerToSimpleSmartAccount,
-    type LightSmartAccount,
-    signerToLightSmartAccount,
-    type TrustSmartAccount,
-    signerToTrustSmartAccount,
-    privateKeyToTrustSmartAccount,
-    SignTransactionNotSupportedBySmartAccount,
-    privateKeyToBiconomySmartAccount,
-    privateKeyToSimpleSmartAccount,
-    privateKeyToLightSmartAccount,
-    type SmartAccount,
-    privateKeyToSafeSmartAccount,
-    type KernelEcdsaSmartAccount,
-    signerToEcdsaKernelSmartAccount,
-    type BiconomySmartAccount,
-    signerToBiconomySmartAccount,
-    toSmartAccount,
-    type SignerToSimpleSmartAccountParameters,
-    type SignerToLightSmartAccountParameters,
-    type SignerToSafeSmartAccountParameters,
-    type PrivateKeyToSimpleSmartAccountParameters,
-    type PrivateKeyToLightSmartAccountParameters,
-    type PrivateKeyToSafeSmartAccountParameters,
-    type SignerToEcdsaKernelSmartAccountParameters,
-    type SignerToBiconomySmartAccountParameters,
-    type PrivateKeyToBiconomySmartAccountParameters,
-    type SignerToTrustSmartAccountParameters,
-    type PrivateKeyToTrustSmartAccountParameters
+    type KernelVersion,
+    toEcdsaKernelSmartAccount,
+    type ToBiconomySmartAccountReturnType,
+    type ToBiconomySmartAccountParameters,
+    type BiconomySmartAccountImplementation,
+    toBiconomySmartAccount,
+    SignTransactionNotSupportedBySmartAccount
 }

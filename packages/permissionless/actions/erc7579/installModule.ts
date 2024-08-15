@@ -1,16 +1,15 @@
 import {
     type Address,
-    type Chain,
     type Client,
     type Hex,
-    type Transport,
     encodeFunctionData,
     getAddress
 } from "viem"
+import type {
+    GetSmartAccountParameter,
+    SmartAccount
+} from "viem/account-abstraction"
 import { getAction } from "viem/utils"
-import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter, Prettify } from "../../types/"
-import type { EntryPoint } from "../../types/entrypoint"
 import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
@@ -21,9 +20,8 @@ import {
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
-    TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+> = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
     context: Hex
@@ -33,15 +31,10 @@ export type InstallModuleParameters<
 } & Middleware<TEntryPoint>
 
 export async function installModule<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
-        | undefined
+    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: Prettify<InstallModuleParameters<TEntryPoint, TSmartAccount>>
+    client: Client,
+    parameters: Prettify<InstallModuleParameters<TSmartAccount>>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,

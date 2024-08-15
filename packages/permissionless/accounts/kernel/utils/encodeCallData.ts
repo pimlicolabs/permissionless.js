@@ -1,44 +1,31 @@
-import {
-    type Address,
-    type Hex,
-    concatHex,
-    encodeAbiParameters,
-    encodeFunctionData,
-    toHex
-} from "viem"
-import type { EntryPoint } from "../../../types"
+import { type Address, type Hex, encodeFunctionData } from "viem"
+import { encode7579Calls } from "../../../utils/encode7579Calls"
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi"
-import { KernelV3ExecuteAbi } from "../abi/KernelV3AccountAbi"
-import { CALL_TYPE, EXEC_TYPE } from "../constants"
-import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
-import { getExecMode } from "./getExecMode"
+import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
 import { isKernelV2 } from "./isKernelV2"
 
-export const encodeCallData = (
-    _tx:
-        | {
-              to: Address
-              value: bigint
-              data: Hex
-          }
-        | {
-              to: Address
-              value: bigint
-              data: Hex
-          }[],
-    accountVersion: KernelVersion<EntryPoint>
-) => {
-    if (isKernelV2(accountVersion)) {
-        if (Array.isArray(_tx)) {
+export const encodeCallData = ({
+    kernelVersion,
+    calls
+}: {
+    calls: readonly {
+        to: Address
+        value?: bigint | undefined
+        data?: Hex | undefined
+    }[]
+    kernelVersion: KernelVersion<"0.6" | "0.7">
+}) => {
+    if (isKernelV2(kernelVersion)) {
+        if (calls.length > 1) {
             // Encode a batched call
             return encodeFunctionData({
                 abi: KernelExecuteAbi,
                 functionName: "executeBatch",
                 args: [
-                    _tx.map((tx) => ({
+                    calls.map((tx) => ({
                         to: tx.to,
-                        value: tx.value,
-                        data: tx.data
+                        value: tx.value ?? 0n,
+                        data: tx.data ?? "0x"
                     }))
                 ]
             })
@@ -47,70 +34,17 @@ export const encodeCallData = (
         return encodeFunctionData({
             abi: KernelExecuteAbi,
             functionName: "execute",
-            args: [_tx.to, _tx.value, _tx.data, 0]
-        })
-    }
-    if (Array.isArray(_tx)) {
-        // Encode a batched call
-        const calldata = encodeAbiParameters(
-            [
-                {
-                    name: "executionBatch",
-                    type: "tuple[]",
-                    components: [
-                        {
-                            name: "target",
-                            type: "address"
-                        },
-                        {
-                            name: "value",
-                            type: "uint256"
-                        },
-                        {
-                            name: "callData",
-                            type: "bytes"
-                        }
-                    ]
-                }
-            ],
-            [
-                _tx.map((arg) => {
-                    return {
-                        target: arg.to,
-                        value: arg.value,
-                        callData: arg.data
-                    }
-                })
-            ]
-        )
-        return encodeFunctionData({
-            abi: KernelV3ExecuteAbi,
-            functionName: "execute",
-            args: [
-                getExecMode({
-                    callType: CALL_TYPE.BATCH,
-                    execType: EXEC_TYPE.DEFAULT
-                }),
-                calldata
-            ]
+            args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? "0x", 0]
         })
     }
 
-    const calldata = concatHex([
-        _tx.to,
-        toHex(_tx.value, { size: 32 }),
-        _tx.data
-    ])
-
-    return encodeFunctionData({
-        abi: KernelV3ExecuteAbi,
-        functionName: "execute",
-        args: [
-            getExecMode({
-                callType: CALL_TYPE.SINGLE,
-                execType: EXEC_TYPE.DEFAULT
-            }),
-            calldata
-        ]
+    return encode7579Calls({
+        mode: {
+            type: Array.isArray(calls) ? "batchcall" : "call",
+            revertOnError: false,
+            selector: "0x",
+            context: "0x"
+        },
+        callData: calls
     })
 }

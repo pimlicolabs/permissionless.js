@@ -1,59 +1,36 @@
-/**
- * The exeuctor abi, used to execute transactions on the Biconomy Modular Smart Account
- */
-export const BiconomyExecuteAbi = [
+export const FactoryAbi = [
     {
         inputs: [
             {
                 internalType: "address",
-                name: "dest",
+                name: "moduleSetupContract",
                 type: "address"
             },
             {
-                internalType: "uint256",
-                name: "value",
-                type: "uint256"
-            },
-            {
                 internalType: "bytes",
-                name: "func",
+                name: "moduleSetupData",
                 type: "bytes"
-            }
-        ],
-        name: "execute_ncC",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function"
-    },
-    {
-        inputs: [
-            {
-                internalType: "address[]",
-                name: "dest",
-                type: "address[]"
             },
             {
-                internalType: "uint256[]",
-                name: "value",
-                type: "uint256[]"
-            },
-            {
-                internalType: "bytes[]",
-                name: "func",
-                type: "bytes[]"
+                internalType: "uint256",
+                name: "index",
+                type: "uint256"
             }
         ],
-        name: "executeBatch_y6U",
-        outputs: [],
+        name: "deployCounterFactualAccount",
+        outputs: [
+            {
+                internalType: "address",
+                name: "proxy",
+                type: "address"
+            }
+        ],
         stateMutability: "nonpayable",
         type: "function"
     }
 ] as const
 
-/**
- * The init abi, used to initialise Biconomy Modular Smart Account / setup default ECDSA module
- */
-export const BiconomyInitAbi = [
+export const BiconomyAbi = [
     {
         inputs: [
             {
@@ -101,5 +78,51 @@ export const BiconomyInitAbi = [
         ],
         stateMutability: "nonpayable",
         type: "function"
+    },
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "dest",
+                type: "address"
+            },
+            {
+                internalType: "uint256",
+                name: "value",
+                type: "uint256"
+            },
+            {
+                internalType: "bytes",
+                name: "func",
+                type: "bytes"
+            }
+        ],
+        name: "execute_ncC",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    },
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "dest",
+                type: "address[]"
+            },
+            {
+                internalType: "uint256[]",
+                name: "value",
+                type: "uint256[]"
+            },
+            {
+                internalType: "bytes[]",
+                name: "func",
+                type: "bytes[]"
+            }
+        ],
+        name: "executeBatch_y6U",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
     }
-]
+] as const

@@ -1,15 +1,8 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { SmartAccount } from "../accounts/types"
-import type { EntryPoint } from "./entrypoint"
-import type { UserOperation } from "./userOperation"
-export type { UserOperation }
-export type {
-    EntryPointVersion,
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    GetEntryPointVersion,
-    EntryPoint
-} from "./entrypoint"
+import type {
+    SmartAccount,
+    SmartAccountImplementation
+} from "viem/account-abstraction"
 
 export type { PackedUserOperation } from "./userOperation"
 
@@ -23,24 +16,17 @@ export type GetAccountParameterWithClient<
     ? { account: Account; client?: Client<TTransport, TChain, TAccount> }
     : { client: Client<TTransport, TChain, TAccount>; account?: Account }
 
-export type GetAccountParameter<
-    entryPoint extends EntryPoint,
-    TAccount extends SmartAccount<entryPoint> | undefined
-> = IsUndefined<TAccount> extends true
-    ? {
-          account: SmartAccount<entryPoint>
-      }
-    : {
-          account?: SmartAccount<entryPoint>
-      }
-
-export type Prettify<T> = {
-    [K in keyof T]: T[K]
-} & {}
-
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 export type PartialPick<T, K extends keyof T> = Partial<Pick<T, K>>
+
+export type GetAccountParameter<
+    implementation extends
+        | SmartAccountImplementation
+        | undefined = SmartAccountImplementation
+> = IsUndefined<implementation> extends true
+    ? { account: SmartAccount<SmartAccountImplementation> }
+    : { account?: SmartAccount<SmartAccountImplementation> }
 
 // biome-ignore lint/suspicious/noExplicitAny: generic type
 export type UnionOmit<T, K extends keyof any> = T extends any

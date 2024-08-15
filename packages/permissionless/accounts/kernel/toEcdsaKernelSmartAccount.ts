@@ -1,35 +1,30 @@
-import type { Account, TypedData } from "viem"
+import type { Assign } from "viem"
 import {
     type Address,
-    type Chain,
     type Client,
     type Hex,
     type LocalAccount,
-    type Transport,
     type TypedDataDefinition,
     concatHex,
     encodeFunctionData,
     toHex,
     zeroAddress
 } from "viem"
+import {
+    type SmartAccount,
+    type SmartAccountImplementation,
+    type UserOperation,
+    entryPoint06Abi,
+    type entryPoint06Address,
+    entryPoint07Abi,
+    entryPoint07Address,
+    getUserOperationHash,
+    toSmartAccount
+} from "viem/account-abstraction"
 import { signMessage as _signMessage, getChainId } from "viem/actions"
+import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import type {
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    EntryPoint,
-    Prettify
-} from "../../types"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types/entrypoint"
-import { ENTRYPOINT_ADDRESS_V06, getEntryPointVersion } from "../../utils"
-import { getUserOperationHash } from "../../utils/getUserOperationHash"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
-import { toSmartAccount } from "../toSmartAccount"
-import type { SmartAccount } from "../types"
-import {
-    SignTransactionNotSupportedBySmartAccount,
-    type SmartAccountSigner
-} from "../types"
 import { KernelInitAbi } from "./abi/KernelAccountAbi"
 import { KernelV3InitAbi, KernelV3_1AccountAbi } from "./abi/KernelV3AccountAbi"
 import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi"
@@ -43,12 +38,6 @@ import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
 import { isKernelV2 } from "./utils/isKernelV2"
 import { signMessage } from "./utils/signMessage"
 import { signTypedData } from "./utils/signTypedData"
-
-export type KernelEcdsaSmartAccount<
-    entryPoint extends EntryPoint,
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined
-> = SmartAccount<entryPoint, "kernelEcdsaSmartAccount", transport, chain>
 
 /**
  * The account creation ABI for a kernel smart account (from the KernelFactory)
@@ -85,8 +74,8 @@ const createAccountAbi = [
     }
 ] as const
 
-export type KernelVersion<entryPoint extends EntryPoint> =
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
+export type KernelVersion<entryPointVersion extends "0.6" | "0.7"> =
+    entryPointVersion extends "0.6"
         ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
         : "0.3.0-beta" | "0.3.1"
 
@@ -94,7 +83,7 @@ export type KernelVersion<entryPoint extends EntryPoint> =
  * Default addresses map for different kernel smart account versions
  */
 export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
-    [key in KernelVersion<EntryPoint>]: {
+    [key in KernelVersion<"0.6" | "0.7">]: {
         ECDSA_VALIDATOR: Address
         ACCOUNT_LOGIC: Address
         FACTORY_ADDRESS: Address
@@ -139,16 +128,16 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
  * Get supported Kernel Smart Account version based on entryPoint
  * @param entryPoint
  */
-const getDefaultKernelVersion = <TEntryPoint extends EntryPoint>(
-    entryPoint: TEntryPoint,
-    version?: KernelVersion<TEntryPoint>
-): KernelVersion<TEntryPoint> => {
+const getDefaultKernelVersion = <TEntryPointVersion extends "0.6" | "0.7">(
+    entryPointVersion: TEntryPointVersion,
+    version?: KernelVersion<TEntryPointVersion>
+): KernelVersion<TEntryPointVersion> => {
     if (version) {
         return version
     }
     return (
-        entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
-    ) as KernelVersion<TEntryPoint>
+        entryPointVersion === "0.6" ? "0.2.2" : "0.3.0-beta"
+    ) as KernelVersion<TEntryPointVersion>
 }
 
 type KERNEL_ADDRESSES = {
@@ -173,7 +162,7 @@ const getDefaultAddresses = ({
     metaFactoryAddress: _metaFactoryAddress,
     kernelVersion
 }: Partial<KERNEL_ADDRESSES> & {
-    kernelVersion: KernelVersion<EntryPoint>
+    kernelVersion: KernelVersion<"0.6" | "0.7">
 }): KERNEL_ADDRESSES => {
     const addresses = KERNEL_VERSION_TO_ADDRESSES_MAP[kernelVersion]
     const ecdsaValidatorAddress =
@@ -203,20 +192,21 @@ export const getEcdsaRootIdentifierForKernelV3 = (
  * @param owner
  * @param ecdsaValidatorAddress
  */
-const getInitialisationData = <entryPoint extends EntryPoint>({
+const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
+    entryPoint: { version: entryPointVersion, address: entryPointAddress },
     kernelVersion,
-    entryPoint: entryPointAddress,
     owner,
     ecdsaValidatorAddress
 }: {
-    kernelVersion: KernelVersion<entryPoint>
-    entryPoint: entryPoint
+    kernelVersion: KernelVersion<entryPointVersion>
+    entryPoint: {
+        version: entryPointVersion
+        address: typeof entryPoint06Address | typeof entryPoint07Address
+    }
     owner: Address
     ecdsaValidatorAddress: Address
 }) => {
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-
-    if (entryPointVersion === "v0.6") {
+    if (entryPointVersion === "0.6") {
         return encodeFunctionData({
             abi: KernelInitAbi,
             functionName: "initialize",
@@ -259,8 +249,8 @@ const getInitialisationData = <entryPoint extends EntryPoint>({
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
  */
-const getAccountInitCode = async <entryPoint extends EntryPoint>({
-    entryPoint: entryPointAddress,
+const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
+    entryPoint: { version: entryPointVersion, address: entryPointAddress },
     kernelVersion,
     owner,
     index,
@@ -268,39 +258,39 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
     accountLogicAddress,
     ecdsaValidatorAddress
 }: {
-    kernelVersion: KernelVersion<entryPoint>
-    entryPoint: entryPoint
+    kernelVersion: KernelVersion<entryPointVersion>
+    entryPoint: {
+        version: entryPointVersion
+        address: typeof entryPoint06Address | typeof entryPoint07Address
+    }
     owner: Address
     index: bigint
     factoryAddress: Address
     accountLogicAddress: Address
     ecdsaValidatorAddress: Address
 }): Promise<Hex> => {
-    if (!owner) throw new Error("Owner account not found")
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-
     // Build the account initialization data
-    const initialisationData = getInitialisationData({
+    const initializationData = getInitializationData({
+        entryPoint: { version: entryPointVersion, address: entryPointAddress },
         kernelVersion,
-        entryPoint: entryPointAddress,
         ecdsaValidatorAddress,
         owner
     })
 
     // Build the account init code
 
-    if (entryPointVersion === "v0.6") {
+    if (entryPointVersion === "0.6") {
         return encodeFunctionData({
             abi: createAccountAbi,
             functionName: "createAccount",
-            args: [accountLogicAddress, initialisationData, index]
+            args: [accountLogicAddress, initializationData, index]
         })
     }
 
     return encodeFunctionData({
         abi: KernelV3MetaFactoryDeployWithFactoryAbi,
         functionName: "deployWithFactory",
-        args: [factoryAddress, initialisationData, toHex(index, { size: 32 })]
+        args: [factoryAddress, initializationData, toHex(index, { size: 32 })]
     })
 }
 
@@ -313,53 +303,95 @@ const getAccountInitCode = async <entryPoint extends EntryPoint>({
  * @param initCodeProvider
  * @param factoryAddress
  */
-const getAccountAddress = async <
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = undefined
->({
+const getAccountAddress = async ({
     client,
-    entryPoint: entryPointAddress,
+    entryPointVersion,
+    entryPointAddress,
     factory,
     factoryData
 }: {
-    client: Client<TTransport, TChain, TClientAccount>
-    entryPoint: entryPoint
+    client: Client
+    entryPointVersion: "0.6" | "0.7"
+    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
     factory: Address
     factoryData: Hex
 }): Promise<Address> => {
     // Find the init code for this account
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-    if (entryPointVersion === "v0.6") {
-        return getSenderAddress<ENTRYPOINT_ADDRESS_V06_TYPE>(client, {
+    if (entryPointVersion === "0.6") {
+        return getSenderAddress<typeof entryPoint06Address>(client, {
             initCode: concatHex([factory, factoryData]),
-            entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V06_TYPE
+            entryPointAddress: entryPointAddress as typeof entryPoint06Address
         })
     }
-    return getSenderAddress<ENTRYPOINT_ADDRESS_V07_TYPE>(client, {
+    return getSenderAddress<typeof entryPoint07Address>(client, {
         factory: factory,
         factoryData: factoryData,
-        entryPoint: entryPointAddress as ENTRYPOINT_ADDRESS_V07_TYPE
+        entryPointAddress: entryPointAddress as typeof entryPoint07Address
     })
 }
 
-export type SignerToEcdsaKernelSmartAccountParameters<
-    entryPoint extends EntryPoint,
-    TSource extends string = string,
-    TAddress extends Address = Address
-> = Prettify<{
-    signer: SmartAccountSigner<TSource, TAddress>
-    version?: KernelVersion<entryPoint>
-    entryPoint: entryPoint
+export type ToEcdsaKernelSmartAccountParameters<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
+        ? typeof entryPoint06Abi
+        : typeof entryPoint07Abi,
+    kernelVersion extends
+        KernelVersion<entryPointVersion> = entryPointVersion extends "0.6"
+        ? KernelVersion<"0.6">
+        : KernelVersion<"0.7">
+> = {
+    client: Client
+    owner: LocalAccount
+    entryPoint?: {
+        address: entryPointAddress
+        abi: entryPointAbi
+        version: entryPointVersion
+    }
     address?: Address
+    version?: kernelVersion
     index?: bigint
     factoryAddress?: Address
     metaFactoryAddress?: Address
     accountLogicAddress?: Address
     ecdsaValidatorAddress?: Address
     nonceKey?: bigint
-}>
+}
+
+export type EcdsaKernelSmartAccountImplementation<
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
+        ? typeof entryPoint06Abi
+        : typeof entryPoint07Abi
+> = Assign<
+    SmartAccountImplementation<
+        entryPointAbi,
+        entryPointVersion
+        // {
+        //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
+        //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
+        //     factory: { abi: typeof FactoryAbi; address: Address }
+        // }
+    >,
+    { sign: NonNullable<SmartAccountImplementation["sign"]> }
+>
+
+export type ToEcdsaKernelSmartAccountReturnType<
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
+        ? typeof entryPoint06Abi
+        : typeof entryPoint07Abi
+> = SmartAccount<
+    EcdsaKernelSmartAccountImplementation<entryPointVersion, entryPointAbi>
+>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
  * @param client
@@ -370,30 +402,48 @@ export type SignerToEcdsaKernelSmartAccountParameters<
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
  */
-export async function signerToEcdsaKernelSmartAccount<
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TClientAccount extends Account | undefined = undefined,
-    TSource extends string = string,
-    TAddress extends Address = Address
+export async function toEcdsaKernelSmartAccount<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address = typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
+        ? typeof entryPoint06Abi
+        : typeof entryPoint07Abi
 >(
-    client: Client<TTransport, TChain, TClientAccount>,
-    {
-        signer,
+    parameters: ToEcdsaKernelSmartAccountParameters<
+        entryPointAddress,
+        entryPointVersion,
+        entryPointAbi
+    >
+): Promise<
+    ToEcdsaKernelSmartAccountReturnType<entryPointVersion, entryPointAbi>
+> {
+    const {
+        client,
         address,
+        index = 0n,
+        owner,
         version,
-        entryPoint: entryPointAddress,
-        index = BigInt(0),
+        ecdsaValidatorAddress: _ecdsaValidatorAddress,
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
-        accountLogicAddress: _accountLogicAddress,
-        ecdsaValidatorAddress: _ecdsaValidatorAddress,
-        nonceKey
-    }: SignerToEcdsaKernelSmartAccountParameters<entryPoint, TSource, TAddress>
-): Promise<KernelEcdsaSmartAccount<entryPoint, TTransport, TChain>> {
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-    const kernelVersion = getDefaultKernelVersion(entryPointAddress, version)
+        accountLogicAddress: _accountLogicAddress
+    } = parameters
+
+    const entryPoint = {
+        address: parameters.entryPoint?.address ?? entryPoint07Address,
+        abi:
+            parameters.entryPoint?.abi ??
+            (parameters.entryPoint?.version ?? "0.7") === "0.6"
+                ? entryPoint06Abi
+                : entryPoint07Abi,
+        version: parameters.entryPoint?.version ?? "0.7"
+    } as const
+
+    const kernelVersion = getDefaultKernelVersion(entryPoint.version, version)
 
     const {
         accountLogicAddress,
@@ -408,57 +458,95 @@ export async function signerToEcdsaKernelSmartAccount<
         kernelVersion
     })
 
-    // Get the private key related account
-    const viemSigner: LocalAccount = {
-        ...signer,
-        signTransaction: (_, __) => {
-            throw new SignTransactionNotSupportedBySmartAccount()
-        }
-    } as LocalAccount
-
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>
         getAccountInitCode({
+            entryPoint: {
+                version: entryPoint.version,
+                address: entryPoint.address
+            },
             kernelVersion,
-            entryPoint: entryPointAddress,
-            owner: viemSigner.address,
+            owner: owner.address,
             index,
             factoryAddress,
             accountLogicAddress,
             ecdsaValidatorAddress
         })
 
-    // Fetch account address and chain id
-    const [accountAddress, chainId] = await Promise.all([
-        address ??
-            getAccountAddress({
+    let accountAddress: Address
+
+    const getAddress = async () => {
+        if (accountAddress) return accountAddress
+        accountAddress =
+            address ??
+            (await getAccountAddress({
                 client,
                 factory:
-                    entryPointVersion === "v0.6"
+                    entryPoint.version === "0.6"
                         ? factoryAddress
                         : metaFactoryAddress,
                 factoryData: await generateInitCode(),
-                entryPoint: entryPointAddress
-            }),
-        client.chain?.id ?? getChainId(client)
-    ])
+                entryPointAddress: entryPoint.address,
+                entryPointVersion: entryPoint.version
+            }))
+        return accountAddress
+    }
 
-    if (!accountAddress) throw new Error("Account address not found")
+    let chainId: number
 
-    let smartAccountDeployed = await isSmartAccountDeployed(
-        client,
-        accountAddress
-    )
+    const getMemoizedChainId = async () => {
+        if (chainId) return chainId
+        chainId = client.chain
+            ? client.chain.id
+            : await getAction(client, getChainId, "getChainId")({})
+        return chainId
+    }
 
     return toSmartAccount({
-        address: accountAddress,
+        client,
+        entryPoint,
+        getAddress,
+        async encodeCalls(calls) {
+            return encodeCallData({ calls, kernelVersion })
+        },
+        async getFactoryArgs() {
+            return {
+                factory:
+                    entryPoint.version === "0.6"
+                        ? factoryAddress
+                        : metaFactoryAddress,
+                factoryData: await generateInitCode()
+            }
+        },
+        async getNonce(args) {
+            return getAccountNonce(client, {
+                address: await getAddress(),
+                entryPointAddress: entryPoint.address,
+                key: getNonceKeyWithEncoding(
+                    kernelVersion,
+                    ecdsaValidatorAddress,
+                    args?.key ?? parameters?.nonceKey ?? 0n
+                    // @dev specify the custom nonceKey here when integrating the said feature
+                    /*, nonceKey */
+                )
+            })
+        },
+        async getStubSignature() {
+            if (isKernelV2(kernelVersion)) {
+                return concatHex([ROOT_MODE_KERNEL_V2, DUMMY_ECDSA_SIGNATURE])
+            }
+            return DUMMY_ECDSA_SIGNATURE
+        },
+        async sign({ hash }) {
+            return this.signMessage({ message: hash })
+        },
         async signMessage({ message }) {
-            const signature = await signMessage(client, {
-                account: viemSigner,
+            const signature = await signMessage({
+                owner: owner,
                 message,
                 accountAddress,
-                accountVersion: kernelVersion,
-                chainId
+                kernelVersion,
+                chainId: await getMemoizedChainId()
             })
 
             if (isKernelV2(kernelVersion)) {
@@ -470,26 +558,13 @@ export async function signerToEcdsaKernelSmartAccount<
                 signature
             ])
         },
-        async signTransaction(_, __) {
-            throw new SignTransactionNotSupportedBySmartAccount()
-        },
-        async signTypedData<
-            const TTypedData extends TypedData | Record<string, unknown>,
-            TPrimaryType extends
-                | keyof TTypedData
-                | "EIP712Domain" = keyof TTypedData
-        >(typedData: TypedDataDefinition<TTypedData, TPrimaryType>) {
-            const signature = await signTypedData<
-                TTypedData,
-                TPrimaryType,
-                TChain,
-                TClientAccount
-            >(client, {
-                account: viemSigner,
-                ...typedData,
+        async signTypedData(typedData) {
+            const signature = await signTypedData({
+                owner,
+                chainId: await getMemoizedChainId(),
+                ...(typedData as TypedDataDefinition),
                 accountAddress,
-                accountVersion: kernelVersion,
-                chainId
+                kernelVersion
             })
 
             if (isKernelV2(kernelVersion)) {
@@ -501,111 +576,32 @@ export async function signerToEcdsaKernelSmartAccount<
                 signature
             ])
         },
-        client: client,
-        publicKey: accountAddress,
-        entryPoint: entryPointAddress,
-        source: "kernelEcdsaSmartAccount",
-
-        // Get the nonce of the smart account
-        async getNonce(key?: bigint) {
-            return getAccountNonce(client, {
-                sender: accountAddress,
-                entryPoint: entryPointAddress,
-                key:
-                    key ??
-                    nonceKey ??
-                    getNonceKeyWithEncoding(
-                        kernelVersion,
-                        ecdsaValidatorAddress
-                        // @dev specify the custom nonceKey here when integrating the said feature
-                        /*, nonceKey */
-                    )
-            })
-        },
-
         // Sign a user operation
-        async signUserOperation(userOperation) {
+        async signUserOperation(parameters) {
+            const { chainId = await getMemoizedChainId(), ...userOperation } =
+                parameters
+
             const hash = getUserOperationHash({
                 userOperation: {
                     ...userOperation,
+                    sender: userOperation.sender ?? (await getAddress()),
                     signature: "0x"
-                },
-                entryPoint: entryPointAddress,
+                } as UserOperation<entryPointVersion>,
+                entryPointAddress: entryPoint.address,
+                entryPointVersion: entryPoint.version,
                 chainId: chainId
             })
-            const signature = await _signMessage(client, {
-                account: viemSigner,
+            const signature = await owner.signMessage({
                 message: { raw: hash }
             })
+
             // Always use the sudo mode, since we will use external paymaster
             if (isKernelV2(kernelVersion)) {
                 return concatHex(["0x00000000", signature])
             }
             return signature
-        },
-
-        // Encode the init code
-        async getInitCode() {
-            if (smartAccountDeployed) return "0x"
-
-            smartAccountDeployed = await isSmartAccountDeployed(
-                client,
-                accountAddress
-            )
-
-            if (smartAccountDeployed) return "0x"
-
-            const _factoryAddress =
-                entryPointVersion === "v0.6"
-                    ? factoryAddress
-                    : metaFactoryAddress
-            return concatHex([_factoryAddress, await generateInitCode()])
-        },
-
-        async getFactory() {
-            if (smartAccountDeployed) return undefined
-
-            smartAccountDeployed = await isSmartAccountDeployed(
-                client,
-                accountAddress
-            )
-
-            if (smartAccountDeployed) return undefined
-
-            return entryPointVersion === "v0.6"
-                ? factoryAddress
-                : metaFactoryAddress
-        },
-
-        async getFactoryData() {
-            if (smartAccountDeployed) return undefined
-
-            smartAccountDeployed = await isSmartAccountDeployed(
-                client,
-                accountAddress
-            )
-
-            if (smartAccountDeployed) return undefined
-
-            return generateInitCode()
-        },
-
-        // Encode the deploy call data
-        async encodeDeployCallData(_) {
-            throw new Error("Simple account doesn't support account deployment")
-        },
-
-        // Encode a call
-        async encodeCallData(_tx) {
-            return encodeCallData(_tx, kernelVersion)
-        },
-
-        // Get simple dummy signature
-        async getDummySignature(_userOperation) {
-            if (isKernelV2(kernelVersion)) {
-                return concatHex([ROOT_MODE_KERNEL_V2, DUMMY_ECDSA_SIGNATURE])
-            }
-            return DUMMY_ECDSA_SIGNATURE
         }
-    })
+    }) as Promise<
+        ToEcdsaKernelSmartAccountReturnType<entryPointVersion, entryPointAbi>
+    >
 }

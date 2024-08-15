@@ -1,49 +1,40 @@
 import {
-    type Account,
-    type Chain,
-    type Client,
     type LocalAccount,
-    type SignMessageParameters,
     type SignMessageReturnType,
-    type Transport,
-    hashMessage,
-    publicActions
+    type SignableMessage,
+    hashMessage
 } from "viem"
 import { signMessage as _signMessage } from "viem/actions"
 import { isKernelV2 } from "./isKernelV2"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
-export async function signMessage<
-    TChain extends Chain | undefined,
-    TAccount extends Account | undefined
->(
-    client: Client<Transport, TChain, TAccount>,
-    {
-        account: account_ = client.account,
-        message,
-        accountAddress,
-        accountVersion
-    }: SignMessageParameters<TAccount> & WrapMessageHashParams
-): Promise<SignMessageReturnType> {
+export async function signMessage({
+    message,
+    owner,
+    accountAddress,
+    kernelVersion: accountVersion,
+    chainId
+}: {
+    chainId: number
+    message: SignableMessage
+    owner: LocalAccount
+} & WrapMessageHashParams): Promise<SignMessageReturnType> {
     if (isKernelV2(accountVersion)) {
-        return _signMessage(client, {
-            account: account_ as LocalAccount,
+        return owner.signMessage({
             message
         })
     }
 
     const wrappedMessageHash = wrapMessageHash(hashMessage(message), {
-        accountVersion,
+        kernelVersion: accountVersion,
         accountAddress,
-        chainId: client.chain
-            ? client.chain.id
-            : await client.extend(publicActions).getChainId()
+        chainId
+        // chainId: client.chain
+        //     ? client.chain.id
+        //     : await client.extend(publicActions).getChainId()
     })
 
-    const signature = await _signMessage(client, {
-        account: account_ as LocalAccount,
+    return owner.signMessage({
         message: { raw: wrappedMessageHash }
     })
-
-    return signature
 }

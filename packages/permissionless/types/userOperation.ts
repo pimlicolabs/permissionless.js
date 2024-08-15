@@ -46,47 +46,6 @@ export type UserOperationWithBigIntAsHex<
           paymasterAndData?: never
       }
 
-export type UserOperation<entryPointVersion extends EntryPointVersion> =
-    entryPointVersion extends "v0.6"
-        ? {
-              sender: Address
-              nonce: bigint
-              initCode: Hex
-              callData: Hex
-              callGasLimit: bigint
-              verificationGasLimit: bigint
-              preVerificationGas: bigint
-              maxFeePerGas: bigint
-              maxPriorityFeePerGas: bigint
-              paymasterAndData: Hex
-              signature: Hex
-              factory?: never
-              factoryData?: never
-              paymaster?: never
-              paymasterVerificationGasLimit?: never
-              paymasterPostOpGasLimit?: never
-              paymasterData?: never
-          }
-        : {
-              sender: Address
-              nonce: bigint
-              factory?: Address
-              factoryData?: Hex
-              callData: Hex
-              callGasLimit: bigint
-              verificationGasLimit: bigint
-              preVerificationGas: bigint
-              maxFeePerGas: bigint
-              maxPriorityFeePerGas: bigint
-              paymaster?: Address
-              paymasterVerificationGasLimit?: bigint
-              paymasterPostOpGasLimit?: bigint
-              paymasterData?: Hex
-              signature: Hex
-              initCode?: never
-              paymasterAndData?: never
-          }
-
 export type Hex32 = `0x${string & { length: 64 }}`
 
 export type PackedUserOperation = {

@@ -1,52 +1,51 @@
 import {
     type Address,
     BaseError,
-    type Chain,
     type Client,
     type ContractFunctionExecutionErrorType,
     ContractFunctionRevertedError,
     type Hex,
     InvalidInputRpcError,
+    type Prettify,
     RpcRequestError,
-    type Transport,
     UnknownRpcError,
     concat,
     decodeErrorResult
 } from "viem"
 
+import type {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 import { simulateContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import type { Prettify } from "../../types/"
-import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    EntryPoint
-} from "../../types/entrypoint"
 
-export type GetSenderAddressParams<entryPoint extends EntryPoint> =
-    entryPoint extends ENTRYPOINT_ADDRESS_V06_TYPE
-        ? {
-              initCode: Hex
-              entryPoint: entryPoint
-              factory?: never
-              factoryData?: never
-          }
-        : {
-              entryPoint: entryPoint
-              factory: Address
-              factoryData: Hex
-              initCode?: never
-          }
+export type GetSenderAddressParams<
+    entryPoint extends typeof entryPoint06Address | typeof entryPoint07Address
+> = entryPoint extends typeof entryPoint06Address
+    ? {
+          initCode: Hex
+          entryPointAddress: entryPoint
+          factory?: never
+          factoryData?: never
+      }
+    : {
+          entryPointAddress: entryPoint
+          factory: Address
+          factoryData: Hex
+          initCode?: never
+      }
 
 export class InvalidEntryPointError extends BaseError {
     override name = "InvalidEntryPointError"
 
     constructor({
         cause,
-        entryPoint
-    }: { cause?: BaseError; entryPoint?: Address } = {}) {
+        entryPointAddress
+    }: { cause?: BaseError; entryPointAddress?: Address } = {}) {
         super(
             `The entry point address (\`entryPoint\`${
-                entryPoint ? ` = ${entryPoint}` : ""
+                entryPointAddress ? ` = ${entryPointAddress}` : ""
             }) is not a valid entry point. getSenderAddress did not revert with a SenderAddressResult error.`,
             {
                 cause
@@ -81,14 +80,12 @@ export class InvalidEntryPointError extends BaseError {
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
 export const getSenderAddress = async <
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
+    entryPoint extends typeof entryPoint06Address | typeof entryPoint07Address
 >(
-    client: Client<TTransport, TChain>,
+    client: Client,
     args: Prettify<GetSenderAddressParams<entryPoint>>
 ): Promise<Address> => {
-    const { initCode, entryPoint, factory, factoryData } = args
+    const { initCode, entryPointAddress, factory, factoryData } = args
 
     if (!initCode && !factory && !factoryData) {
         throw new Error(
@@ -102,7 +99,7 @@ export const getSenderAddress = async <
             simulateContract,
             "simulateContract"
         )({
-            address: entryPoint,
+            address: entryPointAddress,
             abi: [
                 {
                     inputs: [
@@ -224,12 +221,12 @@ export const getSenderAddress = async <
 
         if (revertError instanceof UnknownRpcError) {
             const parsedBody = JSON.parse(
+                // biome-ignore lint/suspicious/noExplicitAny:
                 (revertError as unknown as any).cause.body
             )
             const revertData = parsedBody.error.data
 
             const hexStringRegex = /0x[a-fA-F0-9]+/
-            // biome-ignore lint/suspicious/noExplicitAny:
             const match = revertData.match(hexStringRegex)
 
             if (!match) {
@@ -263,5 +260,5 @@ export const getSenderAddress = async <
         throw e
     }
 
-    throw new InvalidEntryPointError({ entryPoint })
+    throw new InvalidEntryPointError({ entryPointAddress })
 }

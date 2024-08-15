@@ -1,17 +1,19 @@
 import { describe, expect, test } from "vitest"
-import { encode7579CallData } from "./encode7579CallData"
+import { encode7579Calls } from "./encode7579Calls"
 
-describe("encode7579CallData", () => {
+describe("encode7579Calls", () => {
     test("single call", async () => {
-        const callData = encode7579CallData({
+        const callData = encode7579Calls({
             mode: {
                 type: "call"
             },
-            callData: {
-                to: "0x1234567890123456789012345678901234567890",
-                value: BigInt(12345),
-                data: "0x1234567890123456789012345678901234567890"
-            }
+            callData: [
+                {
+                    to: "0x1234567890123456789012345678901234567890",
+                    value: BigInt(12345),
+                    data: "0x1234567890123456789012345678901234567890"
+                }
+            ]
         })
 
         expect(callData).toBe(
@@ -20,7 +22,7 @@ describe("encode7579CallData", () => {
     })
 
     test("batch call", async () => {
-        const callData = encode7579CallData({
+        const callData = encode7579Calls({
             mode: {
                 type: "batchcall"
             },
@@ -45,11 +47,10 @@ describe("encode7579CallData", () => {
 
     test("should throw error for batch call with different mode", async () => {
         expect(() => {
-            encode7579CallData({
+            encode7579Calls({
                 mode: {
                     type: "call"
                 },
-                // @ts-expect-error
                 callData: [
                     {
                         to: "0x1234567890123456789012345678901234567890",
