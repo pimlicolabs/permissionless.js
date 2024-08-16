@@ -10,7 +10,7 @@ export type EstimateUserOperationGasErrorType<entryPoint extends EntryPoint> =
 export class EstimateUserOperationGasError<
     entryPoint extends EntryPoint
 > extends BaseError {
-    override cause: BaseError
+    cause: BaseError
 
     override name = "EstimateUserOperationGasError"
 

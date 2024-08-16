@@ -10,7 +10,7 @@ export type SendUserOperationErrorType<entryPoint extends EntryPoint> =
 export class SendUserOperationError<
     entryPoint extends EntryPoint
 > extends BaseError {
-    override cause: BaseError
+    cause: BaseError
 
     override name = "SendUserOperationError"
 
