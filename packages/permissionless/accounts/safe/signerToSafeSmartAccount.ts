@@ -614,6 +614,9 @@ const getInitializerCode = async ({
     multiSendAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
     setupTransactions = [],
     safeModules = [],
     validators = [],
@@ -628,6 +631,9 @@ const getInitializerCode = async ({
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     multiSendAddress: Address
+    paymentToken: Address
+    payment: bigint
+    paymentReceiver: Address
     erc7579LaunchpadAddress?: Address
     setupTransactions?: {
         to: Address
@@ -755,9 +761,9 @@ const getInitializerCode = async ({
             multiSendAddress,
             multiSendCallData,
             safe4337ModuleAddress,
-            zeroAddress,
-            BigInt(0),
-            zeroAddress
+            paymentToken,
+            payment,
+            paymentReceiver
         ]
     })
 }
@@ -795,6 +801,9 @@ const getAccountInitCode = async ({
     safeSingletonAddress,
     erc7579LaunchpadAddress,
     multiSendAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
     saltNonce = BigInt(0),
     setupTransactions = [],
     safeModules = [],
@@ -810,6 +819,9 @@ const getAccountInitCode = async ({
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
+    paymentToken: Address
+    payment: bigint
+    paymentReceiver: Address
     erc7579LaunchpadAddress?: Address
     saltNonce?: bigint
     setupTransactions?: {
@@ -846,7 +858,10 @@ const getAccountInitCode = async ({
         fallbacks,
         hooks,
         attesters,
-        attestersThreshold
+        attestersThreshold,
+        paymentToken,
+        payment,
+        paymentReceiver
     })
 
     const initCodeCallData = encodeFunctionData({
@@ -874,6 +889,9 @@ const getAccountAddress = async <
     safeSingletonAddress,
     multiSendAddress,
     erc7579LaunchpadAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
     setupTransactions = [],
     safeModules = [],
     saltNonce = BigInt(0),
@@ -896,6 +914,9 @@ const getAccountAddress = async <
         data: Address
         value: bigint
     }[]
+    paymentToken: Address
+    payment: bigint
+    paymentReceiver: Address
     safeModules?: Address[]
     saltNonce?: bigint
     erc7579LaunchpadAddress?: Address
@@ -929,7 +950,10 @@ const getAccountAddress = async <
         fallbacks,
         hooks,
         attesters,
-        attestersThreshold
+        attestersThreshold,
+        paymentToken,
+        payment,
+        paymentReceiver
     })
 
     const deploymentCode = encodePacked(
@@ -1060,6 +1084,9 @@ export type SignerToSafeSmartAccountParameters<
     validUntil?: number
     validAfter?: number
     nonceKey?: bigint
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
 } & GetErc7579Params<TErc7579>
 
 function isErc7579Args(
@@ -1119,7 +1146,10 @@ export async function signerToSafeSmartAccount<
         saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
-        nonceKey
+        nonceKey,
+        paymentToken = zeroAddress,
+        payment = BigInt(0),
+        paymentReceiver = zeroAddress
     } = args
 
     let _safeModuleSetupAddress: Address | undefined = undefined
@@ -1197,7 +1227,10 @@ export async function signerToSafeSmartAccount<
             fallbacks,
             hooks,
             attesters,
-            attestersThreshold
+            attestersThreshold,
+            paymentToken,
+            payment,
+            paymentReceiver
         }))
 
     if (!accountAddress) throw new Error("Account address not found")
@@ -1397,7 +1430,10 @@ export async function signerToSafeSmartAccount<
                     fallbacks,
                     hooks,
                     attesters,
-                    attestersThreshold
+                    attestersThreshold,
+                    paymentToken,
+                    payment,
+                    paymentReceiver
                 })
             },
             async encodeDeployCallData(_) {
