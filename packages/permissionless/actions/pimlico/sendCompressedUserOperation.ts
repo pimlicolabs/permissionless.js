@@ -7,13 +7,16 @@ import type {
     Hex,
     Transport
 } from "viem"
-import type { Prettify } from "../../types/"
-import type { PimlicoBundlerRpcSchema } from "../../types/pimlico"
+import type {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
+import type { PimlicoRpcSchema } from "../../types/pimlico"
 
 export type SendCompressedUserOperationParameters = {
     compressedUserOperation: Hex
     inflatorAddress: Address
-    entryPoint: Address
+    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
 }
 
 /**
@@ -41,22 +44,19 @@ export type SendCompressedUserOperationParameters = {
  * })
  * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
  */
-export const sendCompressedUserOperation = async <
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
->(
-    client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>,
-    args: Prettify<SendCompressedUserOperationParameters>
+export const sendCompressedUserOperation = async (
+    client: Client<
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PimlicoRpcSchema
+    >,
+    args: SendCompressedUserOperationParameters
 ): Promise<Hash> => {
-    const { compressedUserOperation, inflatorAddress, entryPoint } = args
+    const { compressedUserOperation, inflatorAddress, entryPointAddress } = args
 
     return client.request({
         method: "pimlico_sendCompressedUserOperation",
-        params: [
-            compressedUserOperation as Hex,
-            inflatorAddress as Address,
-            entryPoint as Address
-        ]
+        params: [compressedUserOperation, inflatorAddress, entryPointAddress]
     })
 }

@@ -193,7 +193,7 @@ export const getEcdsaRootIdentifierForKernelV3 = (
  * @param ecdsaValidatorAddress
  */
 const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
-    entryPoint: { version: entryPointVersion, address: entryPointAddress },
+    entryPoint: { version: entryPointVersion },
     kernelVersion,
     owner,
     ecdsaValidatorAddress
@@ -201,7 +201,6 @@ const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
     kernelVersion: KernelVersion<entryPointVersion>
     entryPoint: {
         version: entryPointVersion
-        address: typeof entryPoint06Address | typeof entryPoint07Address
     }
     owner: Address
     ecdsaValidatorAddress: Address
@@ -250,7 +249,7 @@ const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
  * @param ecdsaValidatorAddress
  */
 const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
-    entryPoint: { version: entryPointVersion, address: entryPointAddress },
+    entryPointVersion,
     kernelVersion,
     owner,
     index,
@@ -259,10 +258,7 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
     ecdsaValidatorAddress
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
-    entryPoint: {
-        version: entryPointVersion
-        address: typeof entryPoint06Address | typeof entryPoint07Address
-    }
+    entryPointVersion: entryPointVersion
     owner: Address
     index: bigint
     factoryAddress: Address
@@ -271,7 +267,7 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
 }): Promise<Hex> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
-        entryPoint: { version: entryPointVersion, address: entryPointAddress },
+        entryPoint: { version: entryPointVersion },
         kernelVersion,
         ecdsaValidatorAddress,
         owner
@@ -461,10 +457,7 @@ export async function toEcdsaKernelSmartAccount<
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>
         getAccountInitCode({
-            entryPoint: {
-                version: entryPoint.version,
-                address: entryPoint.address
-            },
+            entryPointVersion: entryPoint.version,
             kernelVersion,
             owner: owner.address,
             index,

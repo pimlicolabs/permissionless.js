@@ -1,7 +1,9 @@
-import type { Address, Hash, Hex } from "viem"
-import type { PartialBy } from "viem/types/utils"
-import type { EntryPoint, GetEntryPointVersion } from "./entrypoint"
-import type { UserOperationWithBigIntAsHex } from "./userOperation"
+import type { Address, Hash, Hex, OneOf, PartialBy } from "viem"
+import type {
+    UserOperation,
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {
@@ -30,7 +32,12 @@ export type PimlicoUserOperationStatus = {
     transactionHash: Hash | null
 }
 
-export type PimlicoBundlerRpcSchema = [
+export type PimlicoRpcSchema<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address = typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = [
     {
         Method: "pimlico_getUserOperationGasPrice"
         Parameters: []
@@ -49,34 +56,36 @@ export type PimlicoBundlerRpcSchema = [
             entryPoint: Address
         ]
         ReturnType: Hash
-    }
-]
-
-export type PimlicoPaymasterRpcSchema<entryPoint extends EntryPoint> = [
+    },
     {
         Method: "pm_sponsorUserOperation"
         Parameters: [
-            userOperation: GetEntryPointVersion<entryPoint> extends "v0.6"
-                ? PartialBy<
-                      UserOperationWithBigIntAsHex<"v0.6">,
-                      | "callGasLimit"
-                      | "preVerificationGas"
-                      | "verificationGasLimit"
-                  >
-                : PartialBy<
-                      UserOperationWithBigIntAsHex<"v0.7">,
-                      | "callGasLimit"
-                      | "preVerificationGas"
-                      | "verificationGasLimit"
-                      | "paymasterVerificationGasLimit"
-                      | "paymasterPostOpGasLimit"
-                  >,
-            entryPoint: entryPoint,
+            userOperation: OneOf<
+                | (entryPointVersion extends "0.6"
+                      ? PartialBy<
+                            UserOperation<"0.6", Hex>,
+                            | "callGasLimit"
+                            | "preVerificationGas"
+                            | "verificationGasLimit"
+                        >
+                      : never)
+                | (entryPointVersion extends "0.7"
+                      ? PartialBy<
+                            UserOperation<"0.7", Hex>,
+                            | "callGasLimit"
+                            | "preVerificationGas"
+                            | "verificationGasLimit"
+                            | "paymasterVerificationGasLimit"
+                            | "paymasterPostOpGasLimit"
+                        >
+                      : never)
+            >,
+            entryPoint: entryPointAddress,
             metadata?: {
                 sponsorshipPolicyId?: string
             }
         ]
-        ReturnType: GetEntryPointVersion<entryPoint> extends "v0.6"
+        ReturnType: entryPointAddress extends "0.6"
             ? {
                   paymasterAndData: Hex
                   preVerificationGas: Hex
@@ -101,10 +110,8 @@ export type PimlicoPaymasterRpcSchema<entryPoint extends EntryPoint> = [
     {
         Method: "pm_validateSponsorshipPolicies"
         Parameters: [
-            userOperation: UserOperationWithBigIntAsHex<
-                GetEntryPointVersion<entryPoint>
-            >,
-            entryPoint: entryPoint,
+            userOperation: UserOperation<entryPointVersion, Hex>,
+            entryPoint: entryPointAddress,
             sponsorshipPolicyIds: string[]
         ]
         ReturnType: {

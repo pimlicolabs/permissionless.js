@@ -18,11 +18,11 @@ import {
 } from "./pimlico/sponsorUserOperation"
 
 import type {
-    PimlicoBundlerActions,
+    PimlicoActions,
     PimlicoPaymasterClientActions
 } from "../clients/decorators/pimlico"
 import {
-    pimlicoBundlerActions,
+    pimlicoActions,
     pimlicoPaymasterActions
 } from "../clients/decorators/pimlico"
 
@@ -36,7 +36,7 @@ export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    PimlicoBundlerActions,
+    PimlicoActions as PimlicoBundlerActions,
     PimlicoPaymasterClientActions,
     PimlicoSponsorUserOperationParameters,
     SendCompressedUserOperationParameters,
@@ -48,7 +48,7 @@ export type {
 export {
     getUserOperationGasPrice,
     getUserOperationStatus,
-    pimlicoBundlerActions,
+    pimlicoActions as pimlicoBundlerActions,
     pimlicoPaymasterActions,
     sendCompressedUserOperation,
     sponsorUserOperation,

@@ -1,9 +1,10 @@
-import type { EntryPoint, GetEntryPointVersion, UserOperation } from "../types"
-import { ENTRYPOINT_ADDRESS_V06 } from "./getEntryPointVersion"
+import type { UserOperation } from "viem/account-abstraction"
 
-export type GetRequiredPrefundReturnType<entryPoint extends EntryPoint> = {
-    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-    entryPoint: entryPoint
+export type GetRequiredPrefundReturnType<
+    entryPointVersion extends "0.6" | "0.7"
+> = {
+    userOperation: UserOperation<entryPointVersion>
+    entryPointVersion: entryPointVersion
 }
 
 /**
@@ -20,14 +21,14 @@ export type GetRequiredPrefundReturnType<entryPoint extends EntryPoint> = {
  *     userOperation
  * })
  */
-export const getRequiredPrefund = <entryPoint extends EntryPoint>({
+export const getRequiredPrefund = <entryPointVersion extends "0.6" | "0.7">({
     userOperation,
-    entryPoint: entryPointAddress
-}: GetRequiredPrefundReturnType<entryPoint>): bigint => {
-    if (entryPointAddress === ENTRYPOINT_ADDRESS_V06) {
-        const userOperationVersion0_6 = userOperation as UserOperation<"v0.6">
+    entryPointVersion
+}: GetRequiredPrefundReturnType<entryPointVersion>): bigint => {
+    if (entryPointVersion === "0.6") {
+        const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
         const multiplier =
-            userOperationVersion0_6.paymasterAndData.length > 2
+            (userOperationVersion0_6.paymasterAndData?.length ?? 0) > 2
                 ? BigInt(3)
                 : BigInt(1)
         const requiredGas =
@@ -40,7 +41,7 @@ export const getRequiredPrefund = <entryPoint extends EntryPoint>({
         )
     }
 
-    const userOperationV07 = userOperation as UserOperation<"v0.7">
+    const userOperationV07 = userOperation as UserOperation<"0.7">
     const multiplier = userOperationV07.paymaster ? BigInt(3) : BigInt(1)
 
     const verificationGasLimit =

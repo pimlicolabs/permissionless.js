@@ -1,5 +1,4 @@
 import { type Address, concatHex, maxUint16, pad, toHex } from "viem"
-import type { EntryPoint } from "../../../types"
 import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants"
 import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
 import { isKernelV2 } from "./isKernelV2"

@@ -1,8 +1,8 @@
 import type {
     Account,
-    Address,
     Chain,
     Hex,
+    LocalAccount,
     SignableMessage,
     Transport,
     TypedData,
@@ -11,13 +11,10 @@ import type {
 } from "viem"
 
 import { signTypedData } from "viem/actions"
-import type { SmartAccountSigner } from "../accounts/types"
 
 export function walletClientToSmartAccountSigner<
     TChain extends Chain | undefined = Chain | undefined
->(
-    walletClient: WalletClient<Transport, TChain, Account>
-): SmartAccountSigner<"custom", Address> {
+>(walletClient: WalletClient<Transport, TChain, Account>): LocalAccount {
     return {
         address: walletClient.account.address,
         type: "local",
@@ -27,6 +24,11 @@ export function walletClientToSmartAccountSigner<
             message
         }: { message: SignableMessage }): Promise<Hex> => {
             return walletClient.signMessage({ message })
+        },
+        signTransaction: async (_): Promise<Hex> => {
+            throw new Error(
+                "Smart account signer doesn't need to sign transactions"
+            )
         },
         async signTypedData<
             const TTypedData extends TypedData | Record<string, unknown>,

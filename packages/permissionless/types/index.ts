@@ -4,17 +4,7 @@ import type {
     SmartAccountImplementation
 } from "viem/account-abstraction"
 
-export type { PackedUserOperation } from "./userOperation"
-
 export type IsUndefined<T> = [undefined] extends [T] ? true : false
-
-export type GetAccountParameterWithClient<
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
-> = IsUndefined<TAccount> extends true
-    ? { account: Account; client?: Client<TTransport, TChain, TAccount> }
-    : { client: Client<TTransport, TChain, TAccount>; account?: Account }
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 

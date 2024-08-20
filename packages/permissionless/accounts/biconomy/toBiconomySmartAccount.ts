@@ -22,7 +22,6 @@ import {
 } from "viem/account-abstraction"
 import { signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed"
 import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi"
 
 /**
@@ -146,7 +145,7 @@ export type ToBiconomySmartAccountParameters<
     entryPoint?: {
         address: entryPointAddress
         version: "0.6"
-        abi?: entryPointAbi
+        abi: entryPointAbi
     }
     nonceKey?: bigint
     index?: bigint
@@ -159,14 +158,7 @@ export type ToBiconomySmartAccountParameters<
 export type BiconomySmartAccountImplementation<
     entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 > = Assign<
-    SmartAccountImplementation<
-        entryPointAbi,
-        "0.6",
-        {
-            abi: typeof BiconomyAbi
-            factory: { abi: typeof FactoryAbi; address: Address }
-        }
-    >,
+    SmartAccountImplementation<entryPointAbi, "0.6">,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
@@ -199,11 +191,17 @@ export async function toBiconomySmartAccount<
 
     const { owner, client, index = 0n, address } = parameters
 
-    const entryPoint = {
-        address: parameters.entryPoint?.address ?? entryPoint06Address,
-        abi: parameters.entryPoint?.abi ?? entryPoint06Abi,
-        version: "0.6"
-    } as const
+    const entryPoint =
+        parameters.entryPoint ??
+        ({
+            address: entryPoint06Address,
+            abi: entryPoint06Abi,
+            version: "0.6"
+        } as {
+            address: entryPointAddress
+            version: "0.6"
+            abi: entryPointAbi
+        })
 
     const factoryAddress =
         parameters.factoryAddress ?? BICONOMY_ADDRESSES.FACTORY_ADDRESS
@@ -241,13 +239,6 @@ export async function toBiconomySmartAccount<
     return toSmartAccount({
         client,
         entryPoint,
-        extend: {
-            abi: BiconomyAbi,
-            factory: {
-                abi: FactoryAbi,
-                address: factoryAddress
-            }
-        },
         getAddress,
         async getNonce(args) {
             const address = await getAddress()
@@ -359,5 +350,5 @@ export async function toBiconomySmartAccount<
             )
             return signatureWithModuleAddress
         }
-    }) as Promise<ToBiconomySmartAccountReturnType<entryPointAbi>>
+    })
 }

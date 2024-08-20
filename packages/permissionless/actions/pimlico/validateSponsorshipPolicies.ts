@@ -1,18 +1,22 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { Prettify } from "../../types/"
-import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
-import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
 import type {
     UserOperation,
-    UserOperationWithBigIntAsHex
-} from "../../types/userOperation"
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
+import type { PimlicoRpcSchema } from "../../types/pimlico"
 import { deepHexlify } from "../../utils/deepHexlify"
 
 export type ValidateSponsorshipPoliciesParameters<
-    entryPoint extends EntryPoint
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address =
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = {
-    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-    entryPoint: entryPoint
+    userOperation: UserOperation<entryPointVersion>
+    entryPointAddress: entryPointAddress
     sponsorshipPolicyIds: string[]
 }
 
@@ -62,26 +66,29 @@ export type ValidateSponsorshipPolicies = {
  * ]
  */
 export const validateSponsorshipPolicies = async <
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address =
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 >(
     client: Client<
-        TTransport,
-        TChain,
-        TAccount,
-        PimlicoPaymasterRpcSchema<entryPoint>
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PimlicoRpcSchema<entryPointAddress, entryPointVersion>
     >,
-    args: Prettify<ValidateSponsorshipPoliciesParameters<entryPoint>>
-): Promise<Prettify<ValidateSponsorshipPolicies>[]> => {
+    args: ValidateSponsorshipPoliciesParameters<
+        entryPointAddress,
+        entryPointVersion
+    >
+): Promise<ValidateSponsorshipPolicies[]> => {
     return await client.request({
         method: "pm_validateSponsorshipPolicies",
         params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex<
-                GetEntryPointVersion<entryPoint>
-            >,
-            args.entryPoint,
+            deepHexlify(args.userOperation),
+            args.entryPointAddress,
             args.sponsorshipPolicyIds
         ]
     })
