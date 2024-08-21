@@ -613,7 +613,10 @@ const getInitializerCode = async ({
     fallbacks = [],
     hooks = [],
     attesters = [],
-    attestersThreshold = 0
+    attestersThreshold = 0,
+    paymentToken = zeroAddress,
+    payment = BigInt(0),
+    paymentReceiver = zeroAddress
 }: {
     owner: Address
     safeSingletonAddress: Address
@@ -636,6 +639,9 @@ const getInitializerCode = async ({
     hooks?: { address: Address; context: Address }[]
     attesters?: Address[]
     attestersThreshold?: number
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
 }) => {
     if (erc7579LaunchpadAddress) {
         const initData = get7579LaunchPadInitData({
@@ -747,9 +753,9 @@ const getInitializerCode = async ({
             multiSendAddress,
             multiSendCallData,
             safe4337ModuleAddress,
-            zeroAddress,
-            BigInt(0),
-            zeroAddress
+            paymentToken,
+            payment,
+            paymentReceiver
         ]
     })
 }
@@ -787,6 +793,9 @@ const getAccountInitCode = async ({
     safeSingletonAddress,
     erc7579LaunchpadAddress,
     multiSendAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
     saltNonce = BigInt(0),
     setupTransactions = [],
     safeModules = [],
@@ -819,6 +828,9 @@ const getAccountInitCode = async ({
     hooks?: { address: Address; context: Address }[]
     attesters?: Address[]
     attestersThreshold?: number
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
 }): Promise<Hex> => {
     if (!owner) {
         throw new Error("Owner account not found")
@@ -838,7 +850,10 @@ const getAccountInitCode = async ({
         fallbacks,
         hooks,
         attesters,
-        attestersThreshold
+        attestersThreshold,
+        paymentToken,
+        payment,
+        paymentReceiver
     })
 
     const initCodeCallData = encodeFunctionData({
@@ -867,6 +882,9 @@ const getAccountAddress = async <
     safeSingletonAddress,
     multiSendAddress,
     erc7579LaunchpadAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
     setupTransactions = [],
     safeModules = [],
     saltNonce = BigInt(0),
@@ -901,6 +919,9 @@ const getAccountAddress = async <
     hooks?: { address: Address; context: Address }[]
     attesters?: Address[]
     attestersThreshold?: number
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
 }): Promise<Address> => {
     const proxyCreationCode = await readContract(client, {
         abi: proxyCreationCodeAbi,
@@ -922,7 +943,10 @@ const getAccountAddress = async <
         fallbacks,
         hooks,
         attesters,
-        attestersThreshold
+        attestersThreshold,
+        paymentToken,
+        payment,
+        paymentReceiver
     })
 
     const deploymentCode = encodePacked(
@@ -1054,6 +1078,9 @@ export type ToSafeSmartAccountParameters<
     validUntil?: number
     validAfter?: number
     nonceKey?: bigint
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
 } & GetErc7579Params<TErc7579>
 
 function isErc7579Args<
@@ -1130,7 +1157,10 @@ export async function toSafeSmartAccount<
         saltNonce = BigInt(0),
         validUntil = 0,
         validAfter = 0,
-        nonceKey
+        nonceKey,
+        paymentToken,
+        payment,
+        paymentReceiver
     } = parameters
 
     const entryPoint = {
@@ -1215,7 +1245,10 @@ export async function toSafeSmartAccount<
                 fallbacks,
                 hooks,
                 attesters,
-                attestersThreshold
+                attestersThreshold,
+                paymentToken,
+                payment,
+                paymentReceiver
             }))
         return accountAddress
     }
@@ -1344,7 +1377,10 @@ export async function toSafeSmartAccount<
                     fallbacks,
                     hooks,
                     attesters,
-                    attestersThreshold
+                    attestersThreshold,
+                    paymentToken,
+                    payment,
+                    paymentReceiver
                 })
             }
         },
