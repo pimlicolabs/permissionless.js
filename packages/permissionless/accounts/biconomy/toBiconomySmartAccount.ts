@@ -135,15 +135,13 @@ const getAccountAddress = async ({
 }
 
 export type ToBiconomySmartAccountParameters<
-    entryPointAddress extends
-        typeof entryPoint06Address = typeof entryPoint06Address,
     entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 > = Prettify<{
     client: Client
     owner: LocalAccount
     address?: Address | undefined
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address
         version: "0.6"
         abi: entryPointAbi
     }
@@ -178,14 +176,9 @@ export type ToBiconomySmartAccountReturnType<
  */
 
 export async function toBiconomySmartAccount<
-    entryPointAddress extends
-        typeof entryPoint06Address = typeof entryPoint06Address,
     entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 >(
-    parameters: ToBiconomySmartAccountParameters<
-        entryPointAddress,
-        entryPointAbi
-    >
+    parameters: ToBiconomySmartAccountParameters<entryPointAbi>
 ): Promise<ToBiconomySmartAccountReturnType<entryPointAbi>> {
     // ): Promise<BiconomySmartAccount<entryPoint, TTransport, TChain>> {
 
@@ -198,7 +191,7 @@ export async function toBiconomySmartAccount<
             abi: entryPoint06Abi,
             version: "0.6"
         } as {
-            address: entryPointAddress
+            address: typeof entryPoint06Address
             version: "0.6"
             abi: entryPointAbi
         })

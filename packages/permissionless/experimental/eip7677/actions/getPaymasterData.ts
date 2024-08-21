@@ -1,6 +1,5 @@
 import {
     type Account,
-    type Address,
     type Chain,
     ChainNotFoundError,
     type Client,
@@ -10,150 +9,99 @@ import {
     toHex
 } from "viem"
 import type {
-    ENTRYPOINT_ADDRESS_V06_TYPE,
-    ENTRYPOINT_ADDRESS_V07_TYPE,
-    EntryPoint,
-    GetEntryPointVersion
-} from "../../../types/entrypoint"
-import type { UserOperationWithBigIntAsHex } from "../../../types/userOperation"
-import { deepHexlify, getEntryPointVersion } from "../../../utils"
+    UserOperation,
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
+import { deepHexlify } from "../../../utils"
 import type {
     Eip7677RpcSchema,
     GetRpcPaymasterDataReturnType
 } from "../types/paymaster"
 
 export type GetPaymasterDataParameters<
-    TEntryPoint extends EntryPoint,
-    TChain extends Chain | undefined = Chain | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7",
+    TChain extends Chain | undefined,
+    TChainOverride extends Chain | undefined
 > = {
-    userOperation: GetEntryPointVersion<TEntryPoint> extends "v0.6"
-        ? {
-              sender: Address
-              nonce: bigint
-              initCode: Hex
-              callData: Hex
-              callGasLimit: bigint
-              verificationGasLimit: bigint
-              preVerificationGas: bigint
-              maxFeePerGas: bigint
-              maxPriorityFeePerGas: bigint
-              paymasterAndData?: Hex
-              signature?: Hex
-              factory?: never
-              factoryData?: never
-              paymaster?: never
-              paymasterVerificationGasLimit?: never
-              paymasterPostOpGasLimit?: never
-              paymasterData?: never
-          }
-        : {
-              sender: Address
-              nonce: bigint
-              factory?: Address
-              factoryData?: Hex
-              callData: Hex
-              callGasLimit: bigint
-              verificationGasLimit: bigint
-              preVerificationGas: bigint
-              maxFeePerGas: bigint
-              maxPriorityFeePerGas: bigint
-              paymaster?: Address
-              paymasterData?: Hex
-              signature?: Hex
-              paymasterAndData?: never
-              paymasterVerificationGasLimit: bigint
-              paymasterPostOpGasLimit: bigint
-          }
-    entryPoint: TEntryPoint
+    userOperation: UserOperation<entryPointVersion>
+    entryPoint: {
+        address: entryPointAddress
+        version: entryPointVersion
+    }
     context?: Record<string, unknown>
 } & GetChainParameter<TChain, TChainOverride>
 
-export type GetPaymasterDataReturnType<TEntryPoint extends EntryPoint> =
-    GetEntryPointVersion<TEntryPoint> extends "v0.6"
-        ? {
-              paymasterAndData: Hex
-          }
-        : {
-              paymaster: Hex
-              paymasterData: Hex
-          }
+export type GetPaymasterDataReturnType<
+    entryPointVersion extends "0.6" | "0.7"
+> = entryPointVersion extends "0.6"
+    ? {
+          paymasterAndData: Hex
+      }
+    : {
+          paymaster: Hex
+          paymasterData: Hex
+      }
 
 export async function getPaymasterData<
-    TEntryPoint extends EntryPoint,
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7",
     TChain extends Chain | undefined,
-    TClientAccount extends Account | undefined = undefined,
-    TTransport extends Transport = Transport,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    TChainOverride extends Chain | undefined
 >(
     client: Client<
-        TTransport,
+        Transport,
         TChain,
-        TClientAccount,
-        Eip7677RpcSchema<TEntryPoint>
+        Account | undefined,
+        Eip7677RpcSchema<entryPointVersion>
     >,
     {
         userOperation,
         entryPoint,
         context,
         chain
-    }: GetPaymasterDataParameters<TEntryPoint, TChain, TChainOverride>
-): Promise<GetPaymasterDataReturnType<TEntryPoint>> {
+    }: GetPaymasterDataParameters<
+        entryPointAddress,
+        entryPointVersion,
+        TChain,
+        TChainOverride
+    >
+): Promise<GetPaymasterDataReturnType<entryPointVersion>> {
     const chainId = chain?.id ?? client.chain?.id
 
     if (!chainId) {
         throw new ChainNotFoundError()
     }
 
-    const params:
-        | [
-              UserOperationWithBigIntAsHex<GetEntryPointVersion<TEntryPoint>>,
-              TEntryPoint,
-              Hex,
-              Record<string, unknown>
-          ]
-        | [
-              UserOperationWithBigIntAsHex<GetEntryPointVersion<TEntryPoint>>,
-              TEntryPoint,
-              Hex
-          ] = context
-        ? [
-              deepHexlify(userOperation) as UserOperationWithBigIntAsHex<
-                  GetEntryPointVersion<TEntryPoint>
-              >,
-              entryPoint,
-              toHex(chainId),
-              context
-          ]
-        : [
-              deepHexlify(userOperation) as UserOperationWithBigIntAsHex<
-                  GetEntryPointVersion<TEntryPoint>
-              >,
-              entryPoint,
-              toHex(chainId)
-          ]
-
     const response = await client.request({
         method: "pm_getPaymasterData",
-        params
+        params: context
+            ? [
+                  deepHexlify(userOperation),
+                  entryPoint.address,
+                  toHex(chainId),
+                  context
+              ]
+            : [deepHexlify(userOperation), entryPoint.address, toHex(chainId)]
     })
 
-    const entryPointVersion = getEntryPointVersion(entryPoint)
-
-    if (entryPointVersion === "v0.6") {
-        const responseV06 =
-            response as GetRpcPaymasterDataReturnType<ENTRYPOINT_ADDRESS_V06_TYPE>
+    if (entryPoint.version === "0.6") {
+        const responseV06 = response as GetRpcPaymasterDataReturnType<"0.6">
 
         return {
             paymasterAndData: responseV06.paymasterAndData
-        } as GetPaymasterDataReturnType<TEntryPoint>
+        } as GetPaymasterDataReturnType<entryPointVersion>
     }
 
-    const responseV07 =
-        response as GetRpcPaymasterDataReturnType<ENTRYPOINT_ADDRESS_V07_TYPE>
+    const responseV07 = response as GetRpcPaymasterDataReturnType<"0.7">
 
     return {
         paymaster: responseV07.paymaster,
         paymasterData: responseV07.paymasterData
-    } as GetPaymasterDataReturnType<TEntryPoint>
+    } as GetPaymasterDataReturnType<entryPointVersion>
 }

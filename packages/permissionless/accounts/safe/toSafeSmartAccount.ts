@@ -43,6 +43,7 @@ import {
 } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { isSmartAccountDeployed } from "../../utils"
 import { encode7579Calls } from "../../utils/encode7579Calls"
 
 export type SafeVersion = "1.4.1"
@@ -1031,22 +1032,15 @@ type GetErc7579Params<TErc7579 extends Address | undefined> =
           }
 
 export type ToSafeSmartAccountParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi,
-    TErc7579 extends Address | undefined = Address | undefined
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
+    TErc7579 extends Address | undefined
 > = {
     client: Client
     owner: LocalAccount
-    safeVersion: SafeVersion
+    version: SafeVersion
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address | typeof entryPoint07Address
         abi: entryPointAbi
         version: entryPointVersion
     }
@@ -1063,24 +1057,17 @@ export type ToSafeSmartAccountParameters<
 } & GetErc7579Params<TErc7579>
 
 function isErc7579Args<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 >(
     args: ToSafeSmartAccountParameters<
-        entryPointAddress,
         entryPointVersion,
         entryPointAbi,
         Address | undefined
     >
 ): args is ToSafeSmartAccountParameters<
-    entryPointAddress,
     entryPointVersion,
     entryPointAbi,
     Address
@@ -1089,12 +1076,10 @@ function isErc7579Args<
 }
 
 export type SafeSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = Assign<
     SmartAccountImplementation<
         entryPointAbi,
@@ -1109,12 +1094,10 @@ export type SafeSmartAccountImplementation<
 >
 
 export type ToSafeSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = SmartAccount<
     SafeSmartAccountImplementation<entryPointVersion, entryPointAbi>
 >
@@ -1125,19 +1108,11 @@ export type ToSafeSmartAccountReturnType<
  * @returns A Private Key Simple Account.
  */
 export async function toSafeSmartAccount<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi,
-    TErc7579 extends Address | undefined = undefined
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
+    TErc7579 extends Address | undefined
 >(
     parameters: ToSafeSmartAccountParameters<
-        entryPointAddress,
         entryPointVersion,
         entryPointAbi,
         TErc7579
@@ -1147,7 +1122,7 @@ export async function toSafeSmartAccount<
         client,
         owner,
         address,
-        safeVersion,
+        version,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
@@ -1208,7 +1183,7 @@ export async function toSafeSmartAccount<
         safeSingletonAddress,
         multiSendAddress,
         multiSendCallOnlyAddress
-    } = getDefaultAddresses(safeVersion, entryPoint.version, {
+    } = getDefaultAddresses(version, entryPoint.version, {
         safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
@@ -1263,7 +1238,10 @@ export async function toSafeSmartAccount<
             const hasMultipleCalls = calls.length > 1
 
             if (erc7579LaunchpadAddress) {
-                const safeDeployed = await this.isDeployed()
+                const safeDeployed = await isSmartAccountDeployed(
+                    client,
+                    await getAddress()
+                )
 
                 if (!safeDeployed) {
                     const initData = get7579LaunchPadInitData({

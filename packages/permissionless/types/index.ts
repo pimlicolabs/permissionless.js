@@ -1,4 +1,3 @@
-import type { Account, Chain, Client, Transport } from "viem"
 import type {
     SmartAccount,
     SmartAccountImplementation

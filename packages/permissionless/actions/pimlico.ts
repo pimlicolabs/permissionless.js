@@ -17,14 +17,8 @@ import {
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation"
 
-import type {
-    PimlicoActions,
-    PimlicoPaymasterClientActions
-} from "../clients/decorators/pimlico"
-import {
-    pimlicoActions,
-    pimlicoPaymasterActions
-} from "../clients/decorators/pimlico"
+import type { PimlicoActions } from "../clients/decorators/pimlico"
+import { pimlicoActions } from "../clients/decorators/pimlico"
 
 import {
     type ValidateSponsorshipPolicies,
@@ -36,8 +30,7 @@ export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    PimlicoActions as PimlicoBundlerActions,
-    PimlicoPaymasterClientActions,
+    PimlicoActions,
     PimlicoSponsorUserOperationParameters,
     SendCompressedUserOperationParameters,
     SponsorUserOperationReturnType,
@@ -48,8 +41,7 @@ export type {
 export {
     getUserOperationGasPrice,
     getUserOperationStatus,
-    pimlicoActions as pimlicoBundlerActions,
-    pimlicoPaymasterActions,
+    pimlicoActions,
     sendCompressedUserOperation,
     sponsorUserOperation,
     validateSponsorshipPolicies

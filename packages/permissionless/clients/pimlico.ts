@@ -86,7 +86,7 @@ export type PimlicoClientConfig<
  *   transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE"),
  * })
  */
-export function createPimlicoBundlerClient<
+export function createPimlicoClient<
     transport extends Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = undefined,
@@ -105,7 +105,7 @@ export function createPimlicoBundlerClient<
     >
 ): PimlicoClient<transport, chain, account, client, rpcSchema>
 
-export function createPimlicoBundlerClient(
+export function createPimlicoClient(
     parameters: PimlicoClientConfig
 ): PimlicoClient {
     const {

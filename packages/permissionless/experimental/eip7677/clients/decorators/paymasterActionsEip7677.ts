@@ -1,5 +1,8 @@
-import type { Account, Chain, Client, Transport } from "viem"
-import type { EntryPoint } from "../../../../types/entrypoint"
+import type { Chain, Client, Transport } from "viem"
+import type {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 import {
     type GetPaymasterDataParameters,
     type GetPaymasterDataReturnType,
@@ -10,69 +13,73 @@ import {
     type GetPaymasterStubDataReturnType,
     getPaymasterStubData
 } from "../../actions/getPaymasterStubData"
-import type { Eip7677RpcSchema } from "../../types/paymaster"
 
 export type PaymasterActionsEip7677<
-    TEntryPoint extends EntryPoint,
-    TChain extends Chain | undefined = Chain | undefined
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7",
+    TChain extends Chain | undefined
 > = {
     getPaymasterData: <
         TChainOverride extends Chain | undefined = Chain | undefined
     >(
         args: Omit<
-            GetPaymasterDataParameters<TEntryPoint, TChain, TChainOverride>,
+            GetPaymasterDataParameters<
+                entryPointAddress,
+                entryPointVersion,
+                TChain,
+                TChainOverride
+            >,
             "entryPoint"
         >
-    ) => Promise<GetPaymasterDataReturnType<TEntryPoint>>
+    ) => Promise<GetPaymasterDataReturnType<entryPointVersion>>
     getPaymasterStubData: <
         TChainOverride extends Chain | undefined = Chain | undefined
     >(
         args: Omit<
-            GetPaymasterStubDataParameters<TEntryPoint, TChain, TChainOverride>,
+            GetPaymasterStubDataParameters<
+                entryPointAddress,
+                entryPointVersion,
+                TChain,
+                TChainOverride
+            >,
             "entryPoint"
         >
-    ) => Promise<GetPaymasterStubDataReturnType<TEntryPoint>>
+    ) => Promise<GetPaymasterStubDataReturnType<entryPointVersion>>
 }
 
 const paymasterActionsEip7677 =
-    <TEntryPoint extends EntryPoint>(entryPoint: TEntryPoint) =>
     <
-        TTransport extends Transport,
-        TChain extends Chain | undefined = Chain | undefined,
-        TClientAccount extends Account | undefined = undefined
-    >(
-        client: Client<TTransport, TChain>
-    ): PaymasterActionsEip7677<TEntryPoint, TChain> => ({
+        entryPointAddress extends
+            | typeof entryPoint06Address
+            | typeof entryPoint07Address,
+        entryPointVersion extends "0.6" | "0.7"
+    >(entryPoint: {
+        address: entryPointAddress
+        version: entryPointVersion
+    }) =>
+    <TChain extends Chain | undefined>(
+        client: Client<Transport, TChain>
+    ): PaymasterActionsEip7677<
+        entryPointAddress,
+        entryPointVersion,
+        TChain
+    > => ({
         getPaymasterData: (args) =>
-            getPaymasterData(
-                client as Client<
-                    TTransport,
-                    TChain,
-                    TClientAccount,
-                    Eip7677RpcSchema<TEntryPoint>
-                >,
-                {
-                    userOperation: args.userOperation,
-                    context: args.context,
-                    chain: args.chain,
-                    entryPoint
-                }
-            ),
+            getPaymasterData(client, {
+                userOperation: args.userOperation,
+                context: args.context,
+                chain: args.chain,
+                entryPoint
+            }),
         getPaymasterStubData: async (args) =>
-            getPaymasterStubData(
-                client as Client<
-                    TTransport,
-                    TChain,
-                    TClientAccount,
-                    Eip7677RpcSchema<TEntryPoint>
-                >,
-                {
-                    userOperation: args.userOperation,
-                    context: args.context,
-                    chain: args.chain,
-                    entryPoint
-                }
-            )
+            getPaymasterStubData(client, {
+                userOperation: args.userOperation,
+                context: args.context,
+                chain: args.chain,
+                entryPoint
+            })
     })
 
 export { paymasterActionsEip7677 }

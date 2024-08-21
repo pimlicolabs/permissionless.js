@@ -1,6 +1,8 @@
 import {
+    type Chain,
     type Client,
     ContractFunctionExecutionError,
+    type Transport,
     decodeFunctionResult,
     encodeFunctionData
 } from "viem"
@@ -10,12 +12,10 @@ import type {
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
+import { AccountNotFoundError } from "../../errors"
 
-export async function accountId<
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
->(
-    client: Client,
+export async function accountId<TSmartAccount extends SmartAccount | undefined>(
+    client: Client<Transport, Chain | undefined, TSmartAccount>,
     args?: GetSmartAccountParameter<TSmartAccount>
 ): Promise<string> {
     let account_ = client.account
@@ -25,7 +25,7 @@ export async function accountId<
     }
 
     if (!account_) {
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
     }

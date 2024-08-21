@@ -5,22 +5,18 @@ import {
     encodeFunctionData,
     getAddress
 } from "viem"
-import type {
-    GetSmartAccountParameter,
-    SmartAccount
+import {
+    type GetSmartAccountParameter,
+    type SmartAccount,
+    sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
+import { AccountNotFoundError } from "../../errors"
 import { parseAccount } from "../../utils/"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
-import type { Middleware } from "../smartAccount/prepareUserOperationRequest"
-import {
-    type SendUserOperationParameters,
-    sendUserOperation
-} from "../smartAccount/sendUserOperation"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type InstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
@@ -28,80 +24,75 @@ export type InstallModuleParameters<
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-} & Middleware<TEntryPoint>
+}
 
 export async function installModule<
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined
 >(
     client: Client,
-    parameters: Prettify<InstallModuleParameters<TSmartAccount>>
+    parameters: InstallModuleParameters<TSmartAccount>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
-        middleware,
         address,
         context
     } = parameters
 
     if (!account_) {
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
-
-    const installModuleCallData = await account.encodeCallData({
-        to: account.address,
-        value: BigInt(0),
-        data: encodeFunctionData({
-            abi: [
-                {
-                    name: "installModule",
-                    type: "function",
-                    stateMutability: "nonpayable",
-                    inputs: [
-                        {
-                            type: "uint256",
-                            name: "moduleTypeId"
-                        },
-                        {
-                            type: "address",
-                            name: "module"
-                        },
-                        {
-                            type: "bytes",
-                            name: "initData"
-                        }
-                    ],
-                    outputs: []
-                }
-            ],
-            functionName: "installModule",
-            args: [
-                parseModuleTypeId(parameters.type),
-                getAddress(address),
-                context
-            ]
-        })
-    })
+    const account = parseAccount(account_) as SmartAccount
 
     return getAction(
         client,
-        sendUserOperation<TEntryPoint, TTransport, TChain, TSmartAccount>,
+        sendUserOperation,
         "sendUserOperation"
     )({
-        userOperation: {
-            sender: account.address,
-            maxFeePerGas: maxFeePerGas,
-            maxPriorityFeePerGas: maxPriorityFeePerGas,
-            callData: installModuleCallData,
-            nonce: nonce
-        },
-        account: account,
-        middleware
-    } as SendUserOperationParameters<TEntryPoint, TSmartAccount>)
+        calls: [
+            {
+                to: account.address,
+                value: BigInt(0),
+                data: encodeFunctionData({
+                    abi: [
+                        {
+                            name: "installModule",
+                            type: "function",
+                            stateMutability: "nonpayable",
+                            inputs: [
+                                {
+                                    type: "uint256",
+                                    name: "moduleTypeId"
+                                },
+                                {
+                                    type: "address",
+                                    name: "module"
+                                },
+                                {
+                                    type: "bytes",
+                                    name: "initData"
+                                }
+                            ],
+                            outputs: []
+                        }
+                    ],
+                    functionName: "installModule",
+                    args: [
+                        parseModuleTypeId(parameters.type),
+                        getAddress(address),
+                        context
+                    ]
+                })
+            }
+        ],
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        nonce,
+        account
+    })
 }

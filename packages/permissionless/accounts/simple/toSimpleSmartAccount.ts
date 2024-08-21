@@ -22,7 +22,6 @@ import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { getEntryPointVersion } from "../../utils"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -62,28 +61,24 @@ const getAccountInitCode = async (
     })
 }
 
-const getAccountAddress = async <
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address
->({
+const getAccountAddress = async ({
     client,
     factoryAddress,
     entryPointAddress,
     owner,
+    entryPointVersion,
     index = BigInt(0)
 }: {
     client: Client
     factoryAddress: Address
     owner: Address
-    entryPointAddress: entryPointAddress
+    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
+    entryPointVersion: "0.6" | "0.7"
     index?: bigint
 }): Promise<Address> => {
-    const entryPointVersion = getEntryPointVersion(entryPointAddress)
-
     const factoryData = await getAccountInitCode(owner, index)
 
-    if (entryPointVersion === "v0.6") {
+    if (entryPointVersion === "0.6") {
         return getSenderAddress<typeof entryPoint06Address>(client, {
             initCode: concatHex([factoryAddress, factoryData]),
             entryPointAddress: entryPointAddress as typeof entryPoint06Address
@@ -99,21 +94,14 @@ const getAccountAddress = async <
 }
 
 export type ToSimpleSmartAccountParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
 > = {
     client: Client
     owner: LocalAccount
     factoryAddress?: Address
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address | typeof entryPoint07Address
         abi: entryPointAbi
         version: entryPointVersion
     }
@@ -135,12 +123,10 @@ const getFactoryAddress = (
 }
 
 export type SimpleSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = Assign<
     SmartAccountImplementation<
         entryPointAbi,
@@ -155,12 +141,10 @@ export type SimpleSmartAccountImplementation<
 >
 
 export type ToSimpleSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = SmartAccount<
     SimpleSmartAccountImplementation<entryPointVersion, entryPointAbi>
 >
@@ -171,27 +155,15 @@ export type ToSimpleSmartAccountReturnType<
  * @returns A Private Key Simple Account.
  */
 export async function toSimpleSmartAccount<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
 >(
-    parameters: ToSimpleSmartAccountParameters<
-        entryPointAddress,
-        entryPointVersion,
-        entryPointAbi
-    >
+    parameters: ToSimpleSmartAccountParameters<entryPointVersion, entryPointAbi>
 ): Promise<ToSimpleSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
     const {
         client,
         owner,
         factoryAddress: _factoryAddress,
-        entryPoint: entryPointAddress,
         index = BigInt(0),
         address,
         nonceKey
@@ -222,6 +194,7 @@ export async function toSimpleSmartAccount<
                 client,
                 factoryAddress,
                 entryPointAddress: entryPoint.address,
+                entryPointVersion: entryPoint.version,
                 owner: owner.address,
                 index
             }))
@@ -244,7 +217,7 @@ export async function toSimpleSmartAccount<
         getAddress,
         async encodeCalls(calls) {
             if (calls.length > 1) {
-                if (getEntryPointVersion(entryPointAddress) === "v0.6") {
+                if (entryPoint.version === "0.6") {
                     return encodeFunctionData({
                         abi: [
                             {

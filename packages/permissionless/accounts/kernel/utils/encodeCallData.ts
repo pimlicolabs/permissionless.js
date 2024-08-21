@@ -40,7 +40,7 @@ export const encodeCallData = ({
 
     return encode7579Calls({
         mode: {
-            type: Array.isArray(calls) ? "batchcall" : "call",
+            type: calls.length > 1 ? "batchcall" : "call",
             revertOnError: false,
             selector: "0x",
             context: "0x"

@@ -16,7 +16,6 @@ import {
     type UserOperation,
     entryPoint06Abi,
     entryPoint06Address,
-    type entryPoint07Abi,
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
@@ -61,8 +60,6 @@ export const TRUST_ADDRESSES: {
 }
 
 export type ToTrustSmartAccountParameters<
-    entryPointAddress extends
-        typeof entryPoint06Address = typeof entryPoint06Address,
     entryPointVersion extends "0.6" = "0.6",
     entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 > = {
@@ -70,7 +67,7 @@ export type ToTrustSmartAccountParameters<
     owner: LocalAccount
     factoryAddress?: Address
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address
         abi: entryPointAbi
         version: entryPointVersion
     }
@@ -81,12 +78,8 @@ export type ToTrustSmartAccountParameters<
 }
 
 export type TrustSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointVersion extends "0.6" = "0.6",
+    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 > = Assign<
     SmartAccountImplementation<
         entryPointAbi,
@@ -113,16 +106,10 @@ export type ToTrustSmartAccountReturnType<
  * @returns A Private Key Trust Smart Account.
  */
 export async function toTrustSmartAccount<
-    entryPointAddress extends
-        typeof entryPoint06Address = typeof entryPoint06Address,
     entryPointVersion extends "0.6" = "0.6",
     entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
 >(
-    parameters: ToTrustSmartAccountParameters<
-        entryPointAddress,
-        entryPointVersion,
-        entryPointAbi
-    >
+    parameters: ToTrustSmartAccountParameters<entryPointVersion, entryPointAbi>
 ): Promise<ToTrustSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
     const {
         owner,

@@ -1,9 +1,5 @@
+import type { UserOperation } from "viem/account-abstraction"
 import { describe, expect, test } from "vitest"
-import type { UserOperation } from "../types/userOperation"
-import {
-    ENTRYPOINT_ADDRESS_V06,
-    ENTRYPOINT_ADDRESS_V07
-} from "./getEntryPointVersion"
 import { getRequiredPrefund } from "./getRequiredPrefund"
 
 describe("getRequiredPrefund", () => {
@@ -17,8 +13,8 @@ describe("getRequiredPrefund", () => {
                 paymasterAndData: "0x"
             }
             const result = getRequiredPrefund({
-                userOperation: userOperation as UserOperation<"v0.6">,
-                entryPoint: ENTRYPOINT_ADDRESS_V06
+                userOperation: userOperation as UserOperation<"0.6">,
+                entryPointVersion: "0.6"
             })
             const expectedGas =
                 BigInt(1000) + BigInt(2000) * BigInt(1) + BigInt(500)
@@ -35,8 +31,8 @@ describe("getRequiredPrefund", () => {
                 paymasterAndData: "0x1234"
             }
             const result = getRequiredPrefund({
-                userOperation: userOperation as UserOperation<"v0.6">,
-                entryPoint: ENTRYPOINT_ADDRESS_V06
+                userOperation: userOperation as UserOperation<"0.6">,
+                entryPointVersion: "0.6"
             })
             const multiplier = BigInt(3)
             const expectedGas =
@@ -56,8 +52,8 @@ describe("getRequiredPrefund", () => {
                 paymasterVerificationGasLimit: BigInt(200)
             }
             const result = getRequiredPrefund({
-                userOperation: userOperation as UserOperation<"v0.7">,
-                entryPoint: ENTRYPOINT_ADDRESS_V07
+                userOperation: userOperation as UserOperation<"0.7">,
+                entryPointVersion: "0.7"
             })
             const multiplier = BigInt(3)
             const verificationGasLimit =

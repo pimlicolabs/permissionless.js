@@ -1,5 +1,4 @@
 import {
-    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -7,22 +6,20 @@ import {
     decodeFunctionResult,
     encodeFunctionData
 } from "viem"
+import type {
+    GetSmartAccountParameter,
+    SmartAccount
+} from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter, Prettify } from "../../types/"
-import type { EntryPoint } from "../../types/entrypoint"
+import { AccountNotFoundError } from "../../errors"
 import { parseAccount } from "../../utils/"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 
 export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 
 export type SupportsModuleParameters<
-    TEntryPoint extends EntryPoint,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
-        | undefined
-> = GetAccountParameter<TEntryPoint, TSmartAccount> & {
+    TSmartAccount extends SmartAccount | undefined
+> = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
 }
 
@@ -42,25 +39,20 @@ export function parseModuleTypeId(type: ModuleType): bigint {
 }
 
 export async function supportsModule<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount<TEntryPoint> | undefined =
-        | SmartAccount<TEntryPoint>
-        | undefined
+    TSmartAccount extends SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TSmartAccount>,
-    args: Prettify<SupportsModuleParameters<TEntryPoint, TSmartAccount>>
+    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    args: SupportsModuleParameters<TSmartAccount>
 ): Promise<boolean> {
     const { account: account_ = client.account } = args
 
     if (!account_) {
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<TEntryPoint>
+    const account = parseAccount(account_) as SmartAccount
 
     const publicClient = account.client
 
@@ -96,8 +88,7 @@ export async function supportsModule<
         })
     } catch (error) {
         if (error instanceof ContractFunctionExecutionError) {
-            const factory = await account.getFactory()
-            const factoryData = await account.getFactoryData()
+            const { factory, factoryData } = await account.getFactoryArgs()
 
             const result = await getAction(
                 publicClient,
@@ -112,7 +103,7 @@ export async function supportsModule<
                     functionName: "supportsModule",
                     args: [parseModuleTypeId(args.type)]
                 })
-            } as unknown as CallParameters<TChain>)
+            })
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

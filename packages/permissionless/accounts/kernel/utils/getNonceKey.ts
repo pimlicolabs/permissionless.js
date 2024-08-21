@@ -28,5 +28,6 @@ export const getNonceKeyWithEncoding = (
         ]),
         { size: 24 }
     ) // 24 bytes
+
     return BigInt(encoding)
 }

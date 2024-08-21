@@ -1,61 +1,30 @@
-import {
-    http,
-    type Chain,
-    type Transport,
-    encodeAbiParameters,
-    encodePacked,
-    isHash,
-    zeroAddress
-} from "viem"
-import { generatePrivateKey } from "viem/accounts"
+import { encodeAbiParameters, encodePacked, isHash, zeroAddress } from "viem"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import {
-    getCoreSmartAccounts,
-    getPimlicoPaymasterClient
-} from "../../../permissionless-test/src/utils"
-import type { SmartAccount } from "../../accounts"
-import { createBundlerClient } from "../../clients/createBundlerClient"
-import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
-import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types/entrypoint"
-import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
 import { erc7579Actions } from "../erc7579"
 import { installModule } from "./installModule"
 
 describe.each(getCoreSmartAccounts())(
-    "installmodule $name",
+    "installModule $name",
     ({ getErc7579SmartAccountClient, name }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
             "installModule",
             async ({ rpc }) => {
-                const { anvilRpc, altoRpc, paymasterRpc } = rpc
-
                 if (!getErc7579SmartAccountClient) {
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey = generatePrivateKey()
-
-                const smartClientWithoutExtend: SmartAccountClient<
-                    ENTRYPOINT_ADDRESS_V07_TYPE,
-                    Transport,
-                    Chain,
-                    SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
-                > = await getErc7579SmartAccountClient({
-                    entryPoint: ENTRYPOINT_ADDRESS_V07,
-                    privateKey: privateKey,
-                    altoRpc: altoRpc,
-                    anvilRpc: anvilRpc,
-                    paymasterClient: getPimlicoPaymasterClient({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07,
-                        paymasterRpc
+                const smartClientWithoutExtend =
+                    await getErc7579SmartAccountClient({
+                        entryPoint: {
+                            version: "0.7"
+                        },
+                        ...rpc
                     })
-                })
 
                 const smartClient = smartClientWithoutExtend.extend(
-                    erc7579Actions({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07
-                    })
+                    erc7579Actions()
                 )
 
                 const moduleData = encodePacked(
@@ -63,8 +32,8 @@ describe.each(getCoreSmartAccounts())(
                     [smartClient.account.address]
                 )
 
-                const opHash = await installModule(smartClient as any, {
-                    account: smartClient.account as any,
+                const opHash = await installModule(smartClient, {
+                    account: smartClient.account,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
                     context: name.startsWith("Kernel 7579")
@@ -81,25 +50,21 @@ describe.each(getCoreSmartAccounts())(
                         : moduleData
                 })
 
-                const bundlerClientV07 = createBundlerClient({
-                    transport: http(altoRpc),
-                    entryPoint: ENTRYPOINT_ADDRESS_V07
-                })
-
                 expect(isHash(opHash)).toBe(true)
 
                 const userOperationReceipt =
-                    await bundlerClientV07.waitForUserOperationReceipt({
+                    await smartClient.waitForUserOperationReceipt({
                         hash: opHash,
                         timeout: 100000
                     })
+
                 expect(userOperationReceipt).not.toBeNull()
                 expect(userOperationReceipt?.userOpHash).toBe(opHash)
                 expect(
                     userOperationReceipt?.receipt.transactionHash
                 ).toBeTruthy()
 
-                const receipt = await bundlerClientV07.getUserOperationReceipt({
+                const receipt = await smartClient.getUserOperationReceipt({
                     hash: opHash
                 })
 
@@ -119,38 +84,24 @@ describe.each(getCoreSmartAccounts())(
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
             "installModule",
             async ({ rpc }) => {
-                const { anvilRpc, altoRpc, paymasterRpc } = rpc
-
                 if (!getErc7579SmartAccountClient) {
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey = generatePrivateKey()
-
-                const smartClientWithoutExtend: SmartAccountClient<
-                    ENTRYPOINT_ADDRESS_V07_TYPE,
-                    Transport,
-                    Chain,
-                    SmartAccount<ENTRYPOINT_ADDRESS_V07_TYPE>
-                > = await getErc7579SmartAccountClient({
-                    entryPoint: ENTRYPOINT_ADDRESS_V07,
-                    privateKey: privateKey,
-                    altoRpc: altoRpc,
-                    anvilRpc: anvilRpc,
-                    paymasterClient: getPimlicoPaymasterClient({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07,
-                        paymasterRpc
+                const smartClientWithoutExtend =
+                    await getErc7579SmartAccountClient({
+                        entryPoint: {
+                            version: "0.7"
+                        },
+                        ...rpc
                     })
-                })
 
                 const smartClient = smartClientWithoutExtend.extend(
-                    erc7579Actions({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07
-                    })
+                    erc7579Actions()
                 )
 
-                await smartClient.sendTransactions({
-                    transactions: [
+                const userOpHash = await smartClient.sendUserOperation({
+                    calls: [
                         {
                             to: smartClient.account.address,
                             value: 0n,
@@ -164,13 +115,17 @@ describe.each(getCoreSmartAccounts())(
                     ]
                 })
 
+                await smartClient.waitForUserOperationReceipt({
+                    hash: userOpHash
+                })
+
                 const moduleData = encodePacked(
                     ["address"],
                     [smartClient.account.address]
                 )
 
-                const opHash = await installModule(smartClient as any, {
-                    account: smartClient.account as any,
+                const opHash = await installModule(smartClient, {
+                    account: smartClient.account,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
                     context: name.startsWith("Kernel 7579")
@@ -187,15 +142,10 @@ describe.each(getCoreSmartAccounts())(
                         : moduleData
                 })
 
-                const bundlerClientV07 = createBundlerClient({
-                    transport: http(altoRpc),
-                    entryPoint: ENTRYPOINT_ADDRESS_V07
-                })
-
                 expect(isHash(opHash)).toBe(true)
 
                 const userOperationReceipt =
-                    await bundlerClientV07.waitForUserOperationReceipt({
+                    await smartClient.waitForUserOperationReceipt({
                         hash: opHash,
                         timeout: 100000
                     })
@@ -205,7 +155,7 @@ describe.each(getCoreSmartAccounts())(
                     userOperationReceipt?.receipt.transactionHash
                 ).toBeTruthy()
 
-                const receipt = await bundlerClientV07.getUserOperationReceipt({
+                const receipt = await smartClient.getUserOperationReceipt({
                     hash: opHash
                 })
 

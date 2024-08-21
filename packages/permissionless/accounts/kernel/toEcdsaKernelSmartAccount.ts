@@ -327,24 +327,14 @@ const getAccountAddress = async ({
 }
 
 export type ToEcdsaKernelSmartAccountParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi,
-    kernelVersion extends
-        KernelVersion<entryPointVersion> = entryPointVersion extends "0.6"
-        ? KernelVersion<"0.6">
-        : KernelVersion<"0.7">
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
+    kernelVersion extends KernelVersion<entryPointVersion>
 > = {
     client: Client
     owner: LocalAccount
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address | typeof entryPoint07Address
         abi: entryPointAbi
         version: entryPointVersion
     }
@@ -359,12 +349,10 @@ export type ToEcdsaKernelSmartAccountParameters<
 }
 
 export type EcdsaKernelSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = Assign<
     SmartAccountImplementation<
         entryPointAbi,
@@ -379,12 +367,10 @@ export type EcdsaKernelSmartAccountImplementation<
 >
 
 export type ToEcdsaKernelSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = SmartAccount<
     EcdsaKernelSmartAccountImplementation<entryPointVersion, entryPointAbi>
 >
@@ -399,20 +385,14 @@ export type ToEcdsaKernelSmartAccountReturnType<
  * @param ecdsaValidatorAddress
  */
 export async function toEcdsaKernelSmartAccount<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7",
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
+    kernelVersion extends KernelVersion<entryPointVersion>
 >(
     parameters: ToEcdsaKernelSmartAccountParameters<
-        entryPointAddress,
         entryPointVersion,
-        entryPointAbi
+        entryPointAbi,
+        kernelVersion
     >
 ): Promise<
     ToEcdsaKernelSmartAccountReturnType<entryPointVersion, entryPointAbi>
@@ -511,16 +491,14 @@ export async function toEcdsaKernelSmartAccount<
                 factoryData: await generateInitCode()
             }
         },
-        async getNonce(args) {
+        async getNonce(_args) {
             return getAccountNonce(client, {
                 address: await getAddress(),
                 entryPointAddress: entryPoint.address,
                 key: getNonceKeyWithEncoding(
                     kernelVersion,
                     ecdsaValidatorAddress,
-                    args?.key ?? parameters?.nonceKey ?? 0n
-                    // @dev specify the custom nonceKey here when integrating the said feature
-                    /*, nonceKey */
+                    /*args?.key ?? */ parameters.nonceKey ?? 0n
                 )
             })
         },

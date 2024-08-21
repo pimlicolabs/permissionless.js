@@ -1,43 +1,51 @@
 import { zeroAddress } from "viem"
-import { generatePrivateKey } from "viem/accounts"
+import {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
-    getPimlicoPaymasterClient,
+    getPimlicoClient,
     getSimpleAccountClient
 } from "../../../../permissionless-test/src/utils"
-import type { UserOperation } from "../../../types/userOperation"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../../utils"
 import { paymasterActionsEip7677 } from "../clients/decorators/paymasterActionsEip7677"
 
 describe("EIP-7677 getPaymasterData", () => {
     testWithRpc("getPaymasterData_V06", async ({ rpc }) => {
-        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const { paymasterRpc } = rpc
 
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.6"
+                }
+            }),
+            ...rpc
         })
 
-        const pimlicoPaymasterClient = getPimlicoPaymasterClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            paymasterRpc
-        }).extend(paymasterActionsEip7677(ENTRYPOINT_ADDRESS_V06))
-
-        let userOperation =
-            await simpleAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await simpleAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    })
-                }
+        const pimlicoPaymasterClient = getPimlicoClient({
+            entryPoint: entryPoint06Address,
+            altoRpc: paymasterRpc
+        }).extend(
+            paymasterActionsEip7677({
+                address: entryPoint06Address,
+                version: "0.6"
             })
+        )
+
+        let userOperation = await simpleAccountClient.prepareUserOperation({
+            calls: [
+                {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
+        })
 
         const paymasterData = await pimlicoPaymasterClient.getPaymasterData({
             userOperation,
@@ -48,8 +56,7 @@ describe("EIP-7677 getPaymasterData", () => {
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            altoRpc
+            ...rpc
         })
 
         userOperation = {
@@ -60,7 +67,8 @@ describe("EIP-7677 getPaymasterData", () => {
             await simpleAccountClient.account.signUserOperation(userOperation)
 
         const hash = await bundlerClient.sendUserOperation({
-            userOperation
+            account: simpleAccountClient.account,
+            ...userOperation
         })
 
         const receipt = await bundlerClient.waitForUserOperationReceipt({
@@ -70,30 +78,37 @@ describe("EIP-7677 getPaymasterData", () => {
     })
 
     testWithRpc("getPaymasterData_V07", async ({ rpc }) => {
-        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const { altoRpc, paymasterRpc } = rpc
 
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.7"
+                }
+            }),
+            ...rpc
         })
 
-        const pimlicoPaymasterClient = getPimlicoPaymasterClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
-            paymasterRpc
-        }).extend(paymasterActionsEip7677(ENTRYPOINT_ADDRESS_V07))
-
-        let userOperation =
-            await simpleAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await simpleAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    })
-                }
+        const pimlicoPaymasterClient = getPimlicoClient({
+            entryPoint: entryPoint07Address,
+            altoRpc: paymasterRpc
+        }).extend(
+            paymasterActionsEip7677({
+                address: entryPoint07Address,
+                version: "0.7"
             })
+        )
+
+        let userOperation = await simpleAccountClient.prepareUserOperation({
+            calls: [
+                {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
+        })
 
         const paymasterGasValues = {
             paymasterPostOpGasLimit: 150_000n,
@@ -113,20 +128,21 @@ describe("EIP-7677 getPaymasterData", () => {
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
-            altoRpc
+            ...rpc
         })
 
         userOperation = {
             ...userOperation,
             ...paymasterGasValues,
             ...paymasterData
-        } as UserOperation<"v0.7">
+        }
+
         userOperation.signature =
             await simpleAccountClient.account.signUserOperation(userOperation)
 
         const hash = await bundlerClient.sendUserOperation({
-            userOperation
+            account: simpleAccountClient.account,
+            ...userOperation
         })
 
         const receipt = await bundlerClient.waitForUserOperationReceipt({

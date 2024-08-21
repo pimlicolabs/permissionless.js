@@ -1,11 +1,6 @@
-import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import {
-    getCoreSmartAccounts,
-    getPimlicoPaymasterClient
-} from "../../../permissionless-test/src/utils"
-import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
 import { supportsModule } from "./supportsModule"
 
 describe.each(getCoreSmartAccounts())(
@@ -14,27 +9,21 @@ describe.each(getCoreSmartAccounts())(
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
             "supportsModule",
             async ({ rpc }) => {
-                const { anvilRpc, altoRpc, paymasterRpc } = rpc
-
                 if (!getErc7579SmartAccountClient) {
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
                 const smartClient = await getErc7579SmartAccountClient({
-                    entryPoint: ENTRYPOINT_ADDRESS_V07,
-                    privateKey: generatePrivateKey(),
-                    altoRpc: altoRpc,
-                    anvilRpc: anvilRpc,
-                    paymasterClient: getPimlicoPaymasterClient({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07,
-                        paymasterRpc
-                    })
+                    entryPoint: {
+                        version: "0.7"
+                    },
+                    ...rpc
                 })
 
                 const supportsValidationModule = await supportsModule(
-                    smartClient as any,
+                    smartClient,
                     {
-                        account: smartClient.account as any,
+                        account: smartClient.account,
                         type: "validator"
                     }
                 )

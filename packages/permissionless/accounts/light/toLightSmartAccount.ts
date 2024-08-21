@@ -103,24 +103,17 @@ const getAccountAddress = async <
 export type LightAccountVersion = "1.1.0"
 
 export type ToLightSmartAccountParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
 > = {
     client: Client
     entryPoint?: {
-        address: entryPointAddress
+        address: typeof entryPoint06Address | typeof entryPoint07Address
         abi: entryPointAbi
         version: entryPointVersion
     }
     owner: LocalAccount
-    lightAccountVersion: LightAccountVersion
+    version: LightAccountVersion
     factoryAddress?: Address
     index?: bigint
     address?: Address
@@ -198,12 +191,10 @@ export type LightSmartAccountImplementation<
 >
 
 export type ToLightSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
     entryPointAbi extends
         | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = SmartAccount<
     LightSmartAccountImplementation<entryPointVersion, entryPointAbi>
 >
@@ -214,24 +205,13 @@ export type ToLightSmartAccountReturnType<
  * @returns A Private Key Light Account.
  */
 export async function toLightSmartAccount<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
 >(
-    parameters: ToLightSmartAccountParameters<
-        entryPointAddress,
-        entryPointVersion,
-        entryPointAbi
-    >
+    parameters: ToLightSmartAccountParameters<entryPointVersion, entryPointAbi>
 ): Promise<ToLightSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
     const {
-        lightAccountVersion,
+        version,
         factoryAddress: _factoryAddress,
         address,
         owner,
@@ -250,13 +230,13 @@ export async function toLightSmartAccount<
         version: parameters.entryPoint?.version ?? "0.7"
     } as const
 
-    if (lightAccountVersion !== "1.1.0") {
+    if (version !== "1.1.0") {
         throw new Error(
             "Only Light Account version 1.1.0 is supported at the moment"
         )
     }
 
-    const { factoryAddress } = getDefaultAddresses(lightAccountVersion, {
+    const { factoryAddress } = getDefaultAddresses(version, {
         factoryAddress: _factoryAddress
     })
 
