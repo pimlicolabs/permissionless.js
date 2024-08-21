@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.1.45
+
+### Patch Changes
+
+- b045fb4b20610c72138b85208977be7de9984ec7: Added support for paymentToken, payment and paymentReceiver in Safe smart account
+
 ## 0.1.44
 
 ### Patch Changes
