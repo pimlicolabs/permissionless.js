@@ -1395,7 +1395,7 @@ export async function toSafeSmartAccount<
         async signMessage({ message }) {
             const messageHash = hashTypedData({
                 domain: {
-                    chainId: chainId,
+                    chainId: await getMemoizedChainId(),
                     verifyingContract: await getAddress()
                 },
                 types: {
@@ -1421,7 +1421,7 @@ export async function toSafeSmartAccount<
                 "eth_signTypedData",
                 await owner.signTypedData({
                     domain: {
-                        chainId: chainId,
+                        chainId: await getMemoizedChainId(),
                         verifyingContract: await getAddress()
                     },
                     types: {
