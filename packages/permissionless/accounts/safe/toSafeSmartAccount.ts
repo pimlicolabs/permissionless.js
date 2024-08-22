@@ -1401,7 +1401,7 @@ export async function toSafeSmartAccount<
             const messageHash = hashTypedData({
                 domain: {
                     chainId: chainId,
-                    verifyingContract: accountAddress
+                    verifyingContract: await getAddress()
                 },
                 types: {
                     SafeMessage: [{ name: "message", type: "bytes" }]
@@ -1429,7 +1429,7 @@ export async function toSafeSmartAccount<
                     account: owner,
                     domain: {
                         chainId: chainId,
-                        verifyingContract: accountAddress
+                        verifyingContract: await getAddress()
                     },
                     types: {
                         SafeMessage: [{ name: "message", type: "bytes" }]
@@ -1446,7 +1446,7 @@ export async function toSafeSmartAccount<
                 parameters
 
             const message = {
-                safe: accountAddress,
+                safe: await getAddress(),
                 callData: userOperation.callData,
                 nonce: userOperation.nonce,
                 initCode: userOperation.initCode ?? "0x",

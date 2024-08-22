@@ -100,7 +100,7 @@ describe.each(getCoreSmartAccounts())(
                 if (name === "Safe 7579") {
                     // Due to 7579 launchpad, we can't verify the signature as of now.
                     // Awaiting for the fix
-                    // return
+                    return
                 }
 
                 const isVerified = await publicClient.verifyMessage({
