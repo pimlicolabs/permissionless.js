@@ -13,8 +13,8 @@ import {
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
+import { parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors"
-import { parseAccount } from "../../utils/"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type UninstallModulesParameters<

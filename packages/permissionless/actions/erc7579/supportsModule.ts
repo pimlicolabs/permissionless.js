@@ -12,8 +12,8 @@ import type {
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
+import { parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors"
-import { parseAccount } from "../../utils/"
 
 export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 
