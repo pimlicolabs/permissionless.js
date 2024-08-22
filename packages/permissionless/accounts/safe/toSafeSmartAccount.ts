@@ -35,12 +35,7 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import {
-    getChainId,
-    readContract,
-    signMessage,
-    signTypedData
-} from "viem/actions"
+import { getChainId, readContract, signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { isSmartAccountDeployed } from "../../utils"
@@ -1414,8 +1409,7 @@ export async function toSafeSmartAccount<
 
             return adjustVInSignature(
                 "eth_sign",
-                await signMessage(client, {
-                    account: owner,
+                await owner.signMessage({
                     message: {
                         raw: toBytes(messageHash)
                     }
@@ -1425,8 +1419,7 @@ export async function toSafeSmartAccount<
         async signTypedData(typedData) {
             return adjustVInSignature(
                 "eth_signTypedData",
-                await signTypedData(client, {
-                    account: owner,
+                await owner.signTypedData({
                     domain: {
                         chainId: chainId,
                         verifyingContract: await getAddress()

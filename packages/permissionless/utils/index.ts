@@ -1,4 +1,3 @@
-import type { Account, Address } from "viem"
 import { deepHexlify, transactionReceiptStatus } from "./deepHexlify"
 import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData"
 import {
