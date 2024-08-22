@@ -78,7 +78,7 @@ describe("EIP-7677 getPaymasterData", () => {
     })
 
     testWithRpc("getPaymasterData_V07", async ({ rpc }) => {
-        const { altoRpc, paymasterRpc } = rpc
+        const { paymasterRpc } = rpc
 
         const simpleAccountClient = getBundlerClient({
             account: await getSimpleAccountClient({
