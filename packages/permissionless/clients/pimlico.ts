@@ -11,15 +11,23 @@ import type {
 import { createClient } from "viem"
 import {
     type BundlerActions,
+    type PaymasterActions,
     type SmartAccount,
     bundlerActions,
     type entryPoint06Address,
-    entryPoint07Address
+    type entryPoint07Address,
+    paymasterActions
 } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../types/pimlico"
-import { pimlicoActions } from "./decorators/pimlico"
+import { type PimlicoActions, pimlicoActions } from "./decorators/pimlico"
 
 export type PimlicoClient<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address =
+        | typeof entryPoint07Address
+        | typeof entryPoint06Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
@@ -38,19 +46,23 @@ export type PimlicoClient<
         rpcSchema extends RpcSchema
             ? [...BundlerRpcSchema, ...PimlicoRpcSchema, ...rpcSchema]
             : [...BundlerRpcSchema, ...PimlicoRpcSchema],
-        BundlerActions<account>
+        BundlerActions<account> &
+            PaymasterActions &
+            PimlicoActions<entryPointAddress, entryPointVersion>
     >
 >
 
 export type PimlicoClientConfig<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address =
+        | typeof entryPoint07Address
+        | typeof entryPoint06Address,
+    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
-    rpcSchema extends RpcSchema | undefined = undefined,
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address
-        | undefined = undefined
+    rpcSchema extends RpcSchema | undefined = undefined
 > = Prettify<
     Pick<
         ClientConfig<transport, chain, account, rpcSchema>,
@@ -64,7 +76,10 @@ export type PimlicoClientConfig<
         | "transport"
     >
 > & {
-    entryPointAddress?: entryPointAddress
+    entryPoint: {
+        address: entryPointAddress
+        version: entryPointVersion
+    }
 }
 
 /**
@@ -87,23 +102,33 @@ export type PimlicoClientConfig<
  * })
  */
 export function createPimlicoClient<
+    entryPointAddress extends
+        | typeof entryPoint06Address
+        | typeof entryPoint07Address,
+    entryPointVersion extends "0.6" | "0.7",
     transport extends Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = undefined,
     client extends Client | undefined = undefined,
-    rpcSchema extends RpcSchema | undefined = undefined,
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address
+    rpcSchema extends RpcSchema | undefined = undefined
 >(
     parameters: PimlicoClientConfig<
+        entryPointAddress,
+        entryPointVersion,
         transport,
         chain,
         account,
-        rpcSchema,
-        entryPointAddress
+        rpcSchema
     >
-): PimlicoClient<transport, chain, account, client, rpcSchema>
+): PimlicoClient<
+    entryPointAddress,
+    entryPointVersion,
+    transport,
+    chain,
+    account,
+    client,
+    rpcSchema
+>
 
 export function createPimlicoClient(
     parameters: PimlicoClientConfig
@@ -111,7 +136,7 @@ export function createPimlicoClient(
     const {
         key = "public",
         name = "Pimlico Bundler Client",
-        entryPointAddress
+        entryPoint
     } = parameters
     const client = createClient({
         ...parameters,
@@ -119,7 +144,9 @@ export function createPimlicoClient(
         name,
         type: "pimlicoBundlerClient"
     })
-    return client
-        .extend(bundlerActions)
-        .extend(pimlicoActions(entryPointAddress ?? entryPoint07Address))
+    return client.extend(bundlerActions).extend(paymasterActions).extend(
+        pimlicoActions({
+            entryPoint
+        })
+    )
 }

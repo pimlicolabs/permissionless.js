@@ -24,11 +24,14 @@ describe("EIP-7677 getPaymasterStubData", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
         const pimlicoPaymasterClient = getPimlicoClient({
-            entryPoint: entryPoint06Address,
+            entryPointVersion: "0.6",
             altoRpc: paymasterRpc
         }).extend(
             paymasterActionsEip7677({
@@ -68,11 +71,14 @@ describe("EIP-7677 getPaymasterStubData", () => {
                     version: "0.7"
                 }
             }),
+            entryPoint: {
+                version: "0.7"
+            },
             ...rpc
         })
 
         const pimlicoPaymasterClient = getPimlicoClient({
-            entryPoint: entryPoint07Address,
+            entryPointVersion: "0.7",
             altoRpc: paymasterRpc
         }).extend(
             paymasterActionsEip7677({

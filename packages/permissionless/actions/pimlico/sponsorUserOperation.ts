@@ -8,10 +8,10 @@ import type {
     PartialBy,
     Transport
 } from "viem"
-import {
-    type UserOperation,
+import type {
+    UserOperation,
     entryPoint06Address,
-    type entryPoint07Address
+    entryPoint07Address
 } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 import { deepHexlify } from "../../utils/deepHexlify"
@@ -19,10 +19,8 @@ import { deepHexlify } from "../../utils/deepHexlify"
 export type PimlicoSponsorUserOperationParameters<
     entryPointAddress extends
         | typeof entryPoint06Address
-        | typeof entryPoint07Address =
-        | typeof entryPoint06Address
         | typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends "0.6" | "0.7"
 > = {
     userOperation: OneOf<
         | (entryPointVersion extends "0.6"
@@ -44,7 +42,10 @@ export type PimlicoSponsorUserOperationParameters<
                 >
               : never)
     >
-    entryPointAddress: entryPointAddress
+    entryPoint: {
+        address: entryPointAddress
+        version: entryPointVersion
+    }
     sponsorshipPolicyId?: string
 }
 
@@ -121,15 +122,15 @@ export const sponsorUserOperation = async <
         params: args.sponsorshipPolicyId
             ? [
                   deepHexlify(args.userOperation),
-                  args.entryPointAddress,
+                  args.entryPoint.address,
                   {
                       sponsorshipPolicyId: args.sponsorshipPolicyId
                   }
               ]
-            : [deepHexlify(args.userOperation), args.entryPointAddress]
+            : [deepHexlify(args.userOperation), args.entryPoint.address]
     })
 
-    if (args.entryPointAddress === entryPoint06Address) {
+    if (args.entryPoint.version === "0.6") {
         const responseV06 = response as {
             paymasterAndData: Hex
             preVerificationGas: Hex

@@ -24,11 +24,14 @@ describe("EIP-7677 getPaymasterData", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
         const pimlicoPaymasterClient = getPimlicoClient({
-            entryPoint: entryPoint06Address,
+            entryPointVersion: "0.6",
             altoRpc: paymasterRpc
         }).extend(
             paymasterActionsEip7677({
@@ -56,6 +59,9 @@ describe("EIP-7677 getPaymasterData", () => {
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
@@ -87,11 +93,14 @@ describe("EIP-7677 getPaymasterData", () => {
                     version: "0.7"
                 }
             }),
+            entryPoint: {
+                version: "0.7"
+            },
             ...rpc
         })
 
         const pimlicoPaymasterClient = getPimlicoClient({
-            entryPoint: entryPoint07Address,
+            entryPointVersion: "0.7",
             altoRpc: paymasterRpc
         }).extend(
             paymasterActionsEip7677({
@@ -128,6 +137,9 @@ describe("EIP-7677 getPaymasterData", () => {
 
         // test that smart account can send op with the returned values
         const bundlerClient = getBundlerClient({
+            entryPoint: {
+                version: "0.7"
+            },
             ...rpc
         })
 

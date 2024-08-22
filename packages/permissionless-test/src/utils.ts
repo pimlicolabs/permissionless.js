@@ -50,7 +50,10 @@ export const ensureBundlerIsReady = async ({
 }: { altoRpc: string; anvilRpc: string }) => {
     const bundlerClient = getBundlerClient({
         altoRpc: altoRpc,
-        anvilRpc
+        anvilRpc,
+        entryPoint: {
+            version: "0.6"
+        }
     })
 
     while (true) {
@@ -99,24 +102,51 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
     altoRpc,
     anvilRpc,
     account,
-    paymasterRpc
+    paymasterRpc,
+    entryPoint
 }: {
     altoRpc: string
     paymasterRpc?: string
     anvilRpc: string
     account?: account
+    entryPoint: {
+        version: "0.6" | "0.7"
+    }
 }) => {
     const paymaster = paymasterRpc
-        ? createPaymasterClient({
-              transport: http(paymasterRpc)
+        ? createPimlicoClient({
+              transport: http(paymasterRpc),
+              entryPoint: {
+                  address:
+                      entryPoint.version === "0.6"
+                          ? entryPoint06Address
+                          : entryPoint07Address,
+                  version: entryPoint.version
+              }
           })
         : undefined
+
+    const pimlicoBundler = createPimlicoClient({
+        transport: http(altoRpc),
+        entryPoint: {
+            address:
+                entryPoint.version === "0.6"
+                    ? entryPoint06Address
+                    : entryPoint07Address,
+            version: entryPoint.version
+        }
+    })
 
     return createBundlerClient<Transport, undefined, account>({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
-        transport: http(altoRpc)
+        transport: http(altoRpc),
+        userOperation: {
+            estimateFeesPerGas: async ({ userOperation }) => {
+                return (await pimlicoBundler.getUserOperationGasPrice()).fast
+            }
+        }
     })
 }
 
@@ -149,15 +179,21 @@ export const getSmartAccountClient = <
 }
 
 export const getPimlicoClient = ({
-    entryPoint,
+    entryPointVersion,
     altoRpc
 }: {
-    entryPoint: typeof entryPoint07Address | typeof entryPoint06Address
+    entryPointVersion: "0.6" | "0.7"
     altoRpc: string
 }) =>
     createPimlicoClient({
         chain: foundry,
-        entryPointAddress: entryPoint,
+        entryPoint: {
+            address:
+                entryPointVersion === "0.6"
+                    ? entryPoint06Address
+                    : entryPoint07Address,
+            version: entryPointVersion
+        },
         transport: http(altoRpc)
     })
 

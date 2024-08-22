@@ -132,11 +132,14 @@ export const pimlicoActions =
     <
         entryPointAddress extends
             | typeof entryPoint06Address
-            | typeof entryPoint07Address
-    >(
-        entryPointAddress: entryPointAddress
-    ) =>
-    (client: Client): PimlicoActions => ({
+            | typeof entryPoint07Address,
+        entryPointVersion extends "0.6" | "0.7"
+    >({
+        entryPoint
+    }: {
+        entryPoint: { address: entryPointAddress; version: entryPointVersion }
+    }) =>
+    (client: Client): PimlicoActions<entryPointAddress, entryPointVersion> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
@@ -146,16 +149,16 @@ export const pimlicoActions =
         ) =>
             sendCompressedUserOperation(client, {
                 ...args,
-                entryPointAddress
+                entryPointAddress: entryPoint.address
             }),
         sponsorUserOperation: async (args) =>
             sponsorUserOperation(client, {
                 ...args,
-                entryPointAddress
+                entryPoint
             }),
         validateSponsorshipPolicies: async (args) =>
             validateSponsorshipPolicies(client, {
                 ...args,
-                entryPointAddress
+                entryPointAddress: entryPoint.address
             })
     })

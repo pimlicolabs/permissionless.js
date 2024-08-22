@@ -423,7 +423,7 @@ const handleMethod = async (
     }
 
     throw new RpcError(
-        "Attempted to call an unknown method",
+        `Attempted to call an unknown method ${parsedBody.method}`,
         ValidationErrors.InvalidFields
     )
 }

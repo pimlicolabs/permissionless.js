@@ -39,11 +39,6 @@
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
-        "./actions/stackup": {
-            "types": "./_types/actions/stackup.d.ts",
-            "import": "./_esm/actions/stackup.js",
-            "default": "./_cjs/actions/stackup.js"
-        },
         "./actions/smartAccount": {
             "types": "./_types/actions/smartAccount.d.ts",
             "import": "./_esm/actions/smartAccount.js",
@@ -59,11 +54,6 @@
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
         },
-        "./clients/stackup": {
-            "types": "./_types/clients/stackup.d.ts",
-            "import": "./_esm/clients/stackup.js",
-            "default": "./_cjs/clients/stackup.js"
-        },
         "./utils": {
             "types": "./_types/utils/index.d.ts",
             "import": "./_esm/utils/index.js",
@@ -73,11 +63,6 @@
             "types": "./_types/errors/index.d.ts",
             "import": "./_esm/errors/index.js",
             "default": "./_cjs/errors/index.js"
-        },
-        "./types": {
-            "types": "./_types/types/index.d.ts",
-            "import": "./_esm/types/index.js",
-            "default": "./_cjs/types/index.js"
         },
         "./experimental": {
             "types": "./_types/experimental/index.d.ts",

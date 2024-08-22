@@ -13,7 +13,7 @@ describe("sponsorUserOperation", () => {
         const { altoRpc } = rpc
 
         const bundlerClient = getPimlicoClient({
-            entryPoint: entryPoint06Address,
+            entryPointVersion: "0.6",
             altoRpc: altoRpc
         })
 
@@ -24,6 +24,9 @@ describe("sponsorUserOperation", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
@@ -61,7 +64,7 @@ describe("sponsorUserOperation", () => {
         const { altoRpc } = rpc
 
         const bundlerClient = getPimlicoClient({
-            entryPoint: entryPoint06Address,
+            entryPointVersion: "0.7",
             altoRpc: altoRpc
         })
 
@@ -72,6 +75,9 @@ describe("sponsorUserOperation", () => {
                     version: "0.7"
                 }
             }),
+            entryPoint: {
+                version: "0.7"
+            },
             ...rpc
         })
 

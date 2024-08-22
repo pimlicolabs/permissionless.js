@@ -19,6 +19,9 @@ describe("validateSponsorshipPolicies", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
@@ -33,7 +36,7 @@ describe("validateSponsorshipPolicies", () => {
         })
 
         const pimlicoPaymasterClient = getPimlicoClient({
-            entryPoint: entryPoint06Address,
+            entryPointVersion: "0.6",
             altoRpc: paymasterRpc
         })
 

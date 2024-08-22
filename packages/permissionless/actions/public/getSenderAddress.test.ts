@@ -26,6 +26,9 @@ describe("getSenderAddress", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
@@ -57,6 +60,9 @@ describe("getSenderAddress", () => {
                     version: "0.6"
                 }
             }),
+            entryPoint: {
+                version: "0.6"
+            },
             ...rpc
         })
 
@@ -89,6 +95,9 @@ describe("getSenderAddress", () => {
                     version: "0.7"
                 }
             }),
+            entryPoint: {
+                version: "0.7"
+            },
             ...rpc
         })
 
