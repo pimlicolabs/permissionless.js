@@ -24,18 +24,10 @@ describe.each(getCoreSmartAccounts())(
                 const accountIdBeforeDeploy = await accountId(smartClient)
 
                 // deploy account
-                const userOpHash = await smartClient.sendUserOperation({
-                    calls: [
-                        {
-                            to: zeroAddress,
-                            value: 0n,
-                            data: "0x"
-                        }
-                    ]
-                })
-
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash
+                await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
                 })
 
                 const postDeployAccountId = await accountId(smartClient)

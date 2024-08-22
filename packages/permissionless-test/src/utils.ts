@@ -37,6 +37,7 @@ import {
     toSimpleSmartAccount
 } from "../../permissionless/accounts/simple/toSimpleSmartAccount"
 import { toTrustSmartAccount } from "../../permissionless/accounts/trust/toTrustSmartAccount"
+import { createSmartAccountClient } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
 import { paymasterActionsEip7677 } from "../../permissionless/experimental"
 import type { AAParamType } from "./types"
@@ -113,6 +114,34 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
 
     return createBundlerClient<Transport, undefined, account>({
         client: getPublicClient(anvilRpc),
+        account,
+        paymaster,
+        transport: http(altoRpc)
+    })
+}
+
+export const getSmartAccountClient = <
+    account extends SmartAccount | undefined
+>({
+    altoRpc,
+    anvilRpc,
+    account,
+    paymasterRpc
+}: {
+    altoRpc: string
+    paymasterRpc?: string
+    anvilRpc: string
+    account?: account
+}) => {
+    const paymaster = paymasterRpc
+        ? createPaymasterClient({
+              transport: http(paymasterRpc)
+          })
+        : undefined
+
+    return createSmartAccountClient<Transport, Chain, account>({
+        client: getPublicClient(anvilRpc),
+        chain: foundry,
         account,
         paymaster,
         transport: http(altoRpc)
@@ -416,7 +445,7 @@ export const getCoreSmartAccounts = () => [
         >(
             conf: AAParamType<entryPointVersion>
         ) =>
-            getBundlerClient({
+            getSmartAccountClient({
                 account: await getKernelEcdsaClient({
                     ...conf,
                     version: "0.3.0-beta" as KernelVersion<entryPointVersion>
@@ -444,7 +473,7 @@ export const getCoreSmartAccounts = () => [
         >(
             conf: AAParamType<entryPointVersion>
         ) =>
-            getBundlerClient({
+            getSmartAccountClient({
                 account: await getKernelEcdsaClient({
                     ...conf,
                     version: "0.3.1" as KernelVersion<entryPointVersion>
@@ -495,7 +524,7 @@ export const getCoreSmartAccounts = () => [
         >(
             conf: AAParamType<entryPointVersion>
         ) =>
-            getBundlerClient({
+            getSmartAccountClient({
                 account: await getSafeClient({ ...conf, erc7579: true }),
                 ...conf
             }),

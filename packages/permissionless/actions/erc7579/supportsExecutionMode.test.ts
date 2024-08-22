@@ -33,12 +33,10 @@ describe.each(getCoreSmartAccounts())(
                 expect(supportsExecutionModeBatchCallBeforeDeploy).toBe(true)
 
                 // deploy account
-                const userOpHash = await smartClient.sendUserOperation({
-                    calls: [{ to: zeroAddress, value: 0n, data: "0x" }]
-                })
-
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash
+                await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
                 })
 
                 const supportsExecutionModeBatchCallBeforeDeployPostDeploy =
@@ -82,12 +80,10 @@ describe.each(getCoreSmartAccounts())(
                 expect(supportsExecutionModeBatchCallBeforeDeploy).toBe(true)
 
                 // deploy account
-                const userOpHash = await smartClient.sendUserOperation({
-                    calls: [{ to: zeroAddress, value: 0n, data: "0x" }]
-                })
-
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash
+                await smartClient.sendTransaction({
+                    to: zeroAddress,
+                    value: 0n,
+                    data: "0x"
                 })
 
                 const supportsExecutionModeBatchCallBeforeDeployPostDeploy =
