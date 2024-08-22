@@ -329,6 +329,10 @@ const handleMethod = async (
         )
 
         if (!params.success) {
+            console.log({
+                params: parsedBody.params
+            })
+
             throw new RpcError(
                 fromZodError(params.error).message,
                 ValidationErrors.InvalidFields

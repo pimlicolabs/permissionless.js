@@ -106,7 +106,7 @@ export function createPimlicoClient<
         | typeof entryPoint06Address
         | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7",
-    transport extends Transport,
+    transport extends Transport = Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = undefined,
     client extends Client | undefined = undefined,

@@ -5,7 +5,6 @@ import {
     type Chain,
     type Transport,
     type WalletClient,
-    createClient,
     createPublicClient,
     createWalletClient,
     parseEther
@@ -39,7 +38,6 @@ import {
 import { toTrustSmartAccount } from "../../permissionless/accounts/trust/toTrustSmartAccount"
 import { createSmartAccountClient } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
-import { paymasterActionsEip7677 } from "../../permissionless/experimental"
 import type { AAParamType } from "./types"
 
 export const PAYMASTER_RPC = "http://localhost:3000"
@@ -115,6 +113,7 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
 }) => {
     const paymaster = paymasterRpc
         ? createPimlicoClient({
+              chain: foundry,
               transport: http(paymasterRpc),
               entryPoint: {
                   address:
@@ -143,7 +142,7 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
         paymaster,
         transport: http(altoRpc),
         userOperation: {
-            estimateFeesPerGas: async ({ userOperation }) => {
+            estimateFeesPerGas: async () => {
                 return (await pimlicoBundler.getUserOperationGasPrice()).fast
             }
         }
@@ -178,20 +177,26 @@ export const getSmartAccountClient = <
     })
 }
 
-export const getPimlicoClient = ({
+export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
     entryPointVersion,
     altoRpc
 }: {
-    entryPointVersion: "0.6" | "0.7"
+    entryPointVersion: entryPointVersion
     altoRpc: string
 }) =>
-    createPimlicoClient({
+    createPimlicoClient<
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Address
+            : typeof entryPoint07Address,
+        entryPointVersion
+    >({
         chain: foundry,
         entryPoint: {
-            address:
-                entryPointVersion === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
+            address: (entryPointVersion === "0.6"
+                ? entryPoint06Address
+                : entryPoint07Address) as entryPointVersion extends "0.6"
+                ? typeof entryPoint06Address
+                : typeof entryPoint07Address,
             version: entryPointVersion
         },
         transport: http(altoRpc)
@@ -392,22 +397,6 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
             ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
             : undefined
     })
-}
-
-export const getEip7677Client = async ({
-    entryPoint
-}: {
-    entryPoint: {
-        address: typeof entryPoint06Address | typeof entryPoint07Address
-        version: "0.6" | "0.7"
-    }
-}) => {
-    const client = createClient({
-        chain: foundry,
-        transport: http(PAYMASTER_RPC)
-    }).extend(paymasterActionsEip7677(entryPoint))
-
-    return client
 }
 
 export const getCoreSmartAccounts = () => [
