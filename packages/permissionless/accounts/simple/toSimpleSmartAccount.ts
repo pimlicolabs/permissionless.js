@@ -4,7 +4,6 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
-    concatHex,
     encodeFunctionData
 } from "viem"
 import {
@@ -58,38 +57,6 @@ const getAccountInitCode = async (
         ],
         functionName: "createAccount",
         args: [owner, index]
-    })
-}
-
-const getAccountAddress = async ({
-    client,
-    factoryAddress,
-    entryPointAddress,
-    owner,
-    entryPointVersion,
-    index = BigInt(0)
-}: {
-    client: Client
-    factoryAddress: Address
-    owner: Address
-    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
-    entryPointVersion: "0.6" | "0.7"
-    index?: bigint
-}): Promise<Address> => {
-    const factoryData = await getAccountInitCode(owner, index)
-
-    if (entryPointVersion === "0.6") {
-        return getSenderAddress<typeof entryPoint06Address>(client, {
-            initCode: concatHex([factoryAddress, factoryData]),
-            entryPointAddress: entryPointAddress as typeof entryPoint06Address
-        })
-    }
-
-    // Get the sender address based on the init code
-    return getSenderAddress<typeof entryPoint07Address>(client, {
-        factory: factoryAddress,
-        factoryData,
-        entryPointAddress: entryPointAddress as typeof entryPoint07Address
     })
 }
 
@@ -184,22 +151,7 @@ export async function toSimpleSmartAccount<
         _factoryAddress
     )
 
-    let accountAddress: Address
-
-    const getAddress = async () => {
-        if (accountAddress) return accountAddress
-        accountAddress =
-            address ??
-            (await getAccountAddress({
-                client,
-                factoryAddress,
-                entryPointAddress: entryPoint.address,
-                entryPointVersion: entryPoint.version,
-                owner: owner.address,
-                index
-            }))
-        return accountAddress
-    }
+    let accountAddress: Address | undefined = address
 
     let chainId: number
 
@@ -211,10 +163,31 @@ export async function toSimpleSmartAccount<
         return chainId
     }
 
+    const getFactoryArgs = async () => {
+        return {
+            factory: factoryAddress,
+            factoryData: await getAccountInitCode(owner.address, index)
+        }
+    }
+
     return toSmartAccount({
         client,
         entryPoint,
-        getAddress,
+        getFactoryArgs,
+        async getAddress() {
+            if (accountAddress) return accountAddress
+
+            const { factory, factoryData } = await getFactoryArgs()
+
+            // Get the sender address based on the init code
+            accountAddress = await getSenderAddress(client, {
+                factory,
+                factoryData,
+                entryPointAddress: entryPoint.address
+            })
+
+            return accountAddress
+        },
         async encodeCalls(calls) {
             if (calls.length > 1) {
                 if (entryPoint.version === "0.6") {
@@ -311,15 +284,9 @@ export async function toSimpleSmartAccount<
                 args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? "0x"]
             })
         },
-        async getFactoryArgs() {
-            return {
-                factory: factoryAddress,
-                factoryData: await getAccountInitCode(owner.address, index)
-            }
-        },
         async getNonce(args) {
             return getAccountNonce(client, {
-                address: accountAddress,
+                address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
                 key: args?.key ?? nonceKey
             })
@@ -346,7 +313,8 @@ export async function toSimpleSmartAccount<
                         userOperation: {
                             ...userOperation,
                             sender:
-                                userOperation.sender ?? (await getAddress()),
+                                userOperation.sender ??
+                                (await this.getAddress()),
                             signature: "0x"
                         } as UserOperation<entryPointVersion>,
                         entryPointAddress: entryPoint.address,

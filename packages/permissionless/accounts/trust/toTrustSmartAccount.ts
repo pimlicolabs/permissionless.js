@@ -20,8 +20,8 @@ import {
     toSmartAccount
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { encodeCallData } from "./utils/encodeCallData"
-import { getAccountAddress } from "./utils/getAccountAddress"
 import { getFactoryData } from "./utils/getFactoryData"
 
 async function _signTypedData(
@@ -120,27 +120,13 @@ export async function toTrustSmartAccount<
         secp256k1VerificationFacetAddress = TRUST_ADDRESSES.secp256k1VerificationFacetAddress
     } = parameters
 
-    let accountAddress: Address
+    let accountAddress: Address | undefined = address
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint06Address,
         abi: parameters.entryPoint?.abi ?? entryPoint06Abi,
         version: parameters.entryPoint?.version ?? "0.6"
     } as const
-
-    const getAddress = async () => {
-        if (accountAddress) return accountAddress
-        accountAddress =
-            address ??
-            (await getAccountAddress(client, {
-                factoryAddress,
-                secp256k1VerificationFacetAddress,
-                entryPoint: entryPoint.address,
-                bytes: owner.address,
-                index
-            }))
-        return accountAddress
-    }
 
     let chainId: number
 
@@ -152,26 +138,41 @@ export async function toTrustSmartAccount<
         return chainId
     }
 
+    const getFactoryArgs = async () => {
+        return {
+            factory: factoryAddress,
+            factoryData: await getFactoryData({
+                bytes: owner.address,
+                secp256k1VerificationFacetAddress,
+                index
+            })
+        }
+    }
+
     return toSmartAccount({
         client,
         entryPoint,
-        getAddress,
+        getFactoryArgs,
+        async getAddress() {
+            if (accountAddress) return accountAddress
+
+            const { factory, factoryData } = await getFactoryArgs()
+
+            // Get the sender address based on the init code
+            accountAddress = await getSenderAddress(client, {
+                factory,
+                factoryData,
+                entryPointAddress: entryPoint.address
+            })
+
+            return accountAddress
+        },
         async encodeCalls(calls) {
             return encodeCallData(calls)
         },
-        async getFactoryArgs() {
-            return {
-                factory: factoryAddress,
-                factoryData: await getFactoryData({
-                    bytes: owner.address,
-                    secp256k1VerificationFacetAddress,
-                    index
-                })
-            }
-        },
         async getNonce(args) {
             return getAccountNonce(client, {
-                address: await getAddress(),
+                address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
                 key: args?.key ?? parameters?.nonceKey
             })
@@ -186,7 +187,7 @@ export async function toTrustSmartAccount<
             return _signTypedData(
                 owner,
                 await getMemoizedChainId(),
-                await getAddress(),
+                await this.getAddress(),
                 hashMessage(message)
             )
         },
@@ -194,7 +195,7 @@ export async function toTrustSmartAccount<
             return _signTypedData(
                 owner,
                 await getMemoizedChainId(),
-                await getAddress(),
+                await this.getAddress(),
                 hashTypedData(typedData)
             )
         },
@@ -209,7 +210,8 @@ export async function toTrustSmartAccount<
                         userOperation: {
                             ...userOperation,
                             sender:
-                                userOperation.sender ?? (await getAddress()),
+                                userOperation.sender ??
+                                (await this.getAddress()),
                             signature: "0x"
                         } as UserOperation<entryPointVersion>,
                         entryPointAddress: entryPoint.address,

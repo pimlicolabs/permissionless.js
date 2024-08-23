@@ -6,6 +6,7 @@ import {
     ContractFunctionRevertedError,
     type Hex,
     InvalidInputRpcError,
+    type OneOf,
     type Prettify,
     RpcRequestError,
     UnknownRpcError,
@@ -20,21 +21,24 @@ import type {
 import { simulateContract } from "viem/actions"
 import { getAction } from "viem/utils"
 
-export type GetSenderAddressParams<
-    entryPoint extends typeof entryPoint06Address | typeof entryPoint07Address
-> = entryPoint extends typeof entryPoint06Address
-    ? {
+export type GetSenderAddressParams = OneOf<
+    | {
           initCode: Hex
-          entryPointAddress: entryPoint
+          entryPointAddress:
+              | typeof entryPoint06Address
+              | typeof entryPoint07Address
           factory?: never
           factoryData?: never
       }
-    : {
-          entryPointAddress: entryPoint
+    | {
+          entryPointAddress:
+              | typeof entryPoint06Address
+              | typeof entryPoint07Address
           factory: Address
           factoryData: Hex
           initCode?: never
       }
+>
 
 export class InvalidEntryPointError extends BaseError {
     override name = "InvalidEntryPointError"
@@ -79,11 +83,9 @@ export class InvalidEntryPointError extends BaseError {
  *
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
-export const getSenderAddress = async <
-    entryPoint extends typeof entryPoint06Address | typeof entryPoint07Address
->(
+export const getSenderAddress = async (
     client: Client,
-    args: Prettify<GetSenderAddressParams<entryPoint>>
+    args: Prettify<GetSenderAddressParams>
 ): Promise<Address> => {
     const { initCode, entryPointAddress, factory, factoryData } = args
 

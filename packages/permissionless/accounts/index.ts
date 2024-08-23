@@ -43,8 +43,6 @@ import {
     toBiconomySmartAccount
 } from "./biconomy/toBiconomySmartAccount"
 
-import { SignTransactionNotSupportedBySmartAccount } from "./types"
-
 export {
     type ToSimpleSmartAccountParameters,
     type SimpleSmartAccountImplementation,
@@ -72,6 +70,5 @@ export {
     type ToBiconomySmartAccountReturnType,
     type ToBiconomySmartAccountParameters,
     type BiconomySmartAccountImplementation,
-    toBiconomySmartAccount,
-    SignTransactionNotSupportedBySmartAccount
+    toBiconomySmartAccount
 }

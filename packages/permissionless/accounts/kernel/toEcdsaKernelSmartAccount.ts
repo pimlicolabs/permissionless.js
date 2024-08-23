@@ -290,42 +290,6 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
     })
 }
 
-/**
- * Check the validity of an existing account address, or fetch the pre-deterministic account address for a kernel smart wallet
- * @param client
- * @param owner
- * @param entryPoint
- * @param ecdsaValidatorAddress
- * @param initCodeProvider
- * @param factoryAddress
- */
-const getAccountAddress = async ({
-    client,
-    entryPointVersion,
-    entryPointAddress,
-    factory,
-    factoryData
-}: {
-    client: Client
-    entryPointVersion: "0.6" | "0.7"
-    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
-    factory: Address
-    factoryData: Hex
-}): Promise<Address> => {
-    // Find the init code for this account
-    if (entryPointVersion === "0.6") {
-        return getSenderAddress<typeof entryPoint06Address>(client, {
-            initCode: concatHex([factory, factoryData]),
-            entryPointAddress: entryPointAddress as typeof entryPoint06Address
-        })
-    }
-    return getSenderAddress<typeof entryPoint07Address>(client, {
-        factory: factory,
-        factoryData: factoryData,
-        entryPointAddress: entryPointAddress as typeof entryPoint07Address
-    })
-}
-
 export type ToEcdsaKernelSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
     entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
@@ -446,24 +410,7 @@ export async function toEcdsaKernelSmartAccount<
             ecdsaValidatorAddress
         })
 
-    let accountAddress: Address
-
-    const getAddress = async () => {
-        if (accountAddress) return accountAddress
-        accountAddress =
-            address ??
-            (await getAccountAddress({
-                client,
-                factory:
-                    entryPoint.version === "0.6"
-                        ? factoryAddress
-                        : metaFactoryAddress,
-                factoryData: await generateInitCode(),
-                entryPointAddress: entryPoint.address,
-                entryPointVersion: entryPoint.version
-            }))
-        return accountAddress
-    }
+    let accountAddress: Address | undefined = address
 
     let chainId: number
 
@@ -475,25 +422,40 @@ export async function toEcdsaKernelSmartAccount<
         return chainId
     }
 
+    const getFactoryArgs = async () => {
+        return {
+            factory:
+                entryPoint.version === "0.6"
+                    ? factoryAddress
+                    : metaFactoryAddress,
+            factoryData: await generateInitCode()
+        }
+    }
+
     return toSmartAccount({
         client,
         entryPoint,
-        getAddress,
+        getFactoryArgs,
+        async getAddress() {
+            if (accountAddress) return accountAddress
+
+            const { factory, factoryData } = await getFactoryArgs()
+
+            // Get the sender address based on the init code
+            accountAddress = await getSenderAddress(client, {
+                factory,
+                factoryData,
+                entryPointAddress: entryPoint.address
+            })
+
+            return accountAddress
+        },
         async encodeCalls(calls) {
             return encodeCallData({ calls, kernelVersion })
         },
-        async getFactoryArgs() {
-            return {
-                factory:
-                    entryPoint.version === "0.6"
-                        ? factoryAddress
-                        : metaFactoryAddress,
-                factoryData: await generateInitCode()
-            }
-        },
         async getNonce(_args) {
             return getAccountNonce(client, {
-                address: await getAddress(),
+                address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
                 key: getNonceKeyWithEncoding(
                     kernelVersion,
@@ -515,7 +477,7 @@ export async function toEcdsaKernelSmartAccount<
             const signature = await signMessage({
                 owner: owner,
                 message,
-                accountAddress,
+                accountAddress: await this.getAddress(),
                 kernelVersion,
                 chainId: await getMemoizedChainId()
             })
@@ -534,7 +496,7 @@ export async function toEcdsaKernelSmartAccount<
                 owner,
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
-                accountAddress,
+                accountAddress: await this.getAddress(),
                 kernelVersion
             })
 
@@ -555,7 +517,7 @@ export async function toEcdsaKernelSmartAccount<
             const hash = getUserOperationHash({
                 userOperation: {
                     ...userOperation,
-                    sender: userOperation.sender ?? (await getAddress()),
+                    sender: userOperation.sender ?? (await this.getAddress()),
                     signature: "0x"
                 } as UserOperation<entryPointVersion>,
                 entryPointAddress: entryPoint.address,
