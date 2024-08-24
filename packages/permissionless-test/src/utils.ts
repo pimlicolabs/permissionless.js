@@ -23,13 +23,16 @@ import {
     mnemonicToAccount,
     privateKeyToAccount
 } from "viem/accounts"
-import { foundry } from "viem/chains"
+import { foundry, sepolia } from "viem/chains"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type KernelVersion,
     toEcdsaKernelSmartAccount
 } from "../../permissionless/accounts/kernel/toEcdsaKernelSmartAccount"
-import { toLightSmartAccount } from "../../permissionless/accounts/light/toLightSmartAccount"
+import {
+    type LightAccountVersion,
+    toLightSmartAccount
+} from "../../permissionless/accounts/light/toLightSmartAccount"
 import { toSafeSmartAccount } from "../../permissionless/accounts/safe/toSafeSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
@@ -113,7 +116,6 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
 }) => {
     const paymaster = paymasterRpc
         ? createPimlicoClient({
-              chain: foundry,
               transport: http(paymasterRpc),
               entryPoint: {
                   address:
@@ -205,12 +207,12 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
 export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {
         onFetchRequest: async (request) => {
-            // console.log("fetching", await request.json())
+            console.log("fetching", await request.json())
         }
     })
 
     return createPublicClient({
-        chain: foundry,
+        chain: sepolia,
         transport: transport,
         pollingInterval: 100
     })
@@ -291,8 +293,11 @@ export const getLightAccountClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
     entryPoint,
-    anvilRpc
-}: AAParamType<entryPointVersion>) => {
+    anvilRpc,
+    version
+}: AAParamType<entryPointVersion> & {
+    version?: LightAccountVersion<entryPointVersion>
+}) => {
     return toLightSmartAccount({
         entryPoint: {
             address:
@@ -304,7 +309,7 @@ export const getLightAccountClient = async <
                 entryPoint.version === "0.6" ? entryPoint06Abi : entryPoint07Abi
         },
         client: getPublicClient(anvilRpc),
-        version: "1.1.0",
+        version: version ?? "1.1.0",
         owner: privateKeyToAccount(generatePrivateKey())
     })
 }
@@ -415,16 +420,35 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: true
     },
     {
-        name: "LightAccount v1.1.0",
+        name: "LightAccount 1.1.0",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
             getBundlerClient({
-                account: await getLightAccountClient(conf),
+                account: await getLightAccountClient({
+                    ...conf,
+                    version: "1.1.0" as LightAccountVersion<entryPointVersion>
+                }),
                 ...conf
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "LightAccount 2.0.0",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getLightAccountClient({
+                    ...conf,
+                    version: "2.0.0" as LightAccountVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
     {

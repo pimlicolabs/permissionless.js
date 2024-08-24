@@ -1,3 +1,4 @@
+import { zeroAddress } from "viem"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {

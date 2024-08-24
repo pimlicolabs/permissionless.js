@@ -4,6 +4,7 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    concat,
     encodeFunctionData,
     hashMessage,
     hashTypedData
@@ -62,11 +63,14 @@ const getAccountInitCode = async (
     })
 }
 
-export type LightAccountVersion = "1.1.0"
+export type LightAccountVersion<entryPointVersion extends "0.6" | "0.7"> =
+    entryPointVersion extends "0.6" ? "1.1.0" : "2.0.0"
 
 export type ToLightSmartAccountParameters<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 > = {
     client: Client
     entryPoint?: {
@@ -75,7 +79,7 @@ export type ToLightSmartAccountParameters<
         version: entryPointVersion
     }
     owner: LocalAccount
-    version: LightAccountVersion
+    version: LightAccountVersion<entryPointVersion>
     factoryAddress?: Address
     index?: bigint
     address?: Address
@@ -106,17 +110,20 @@ async function signWith1271WrapperV1(
 }
 
 const LIGHT_VERSION_TO_ADDRESSES_MAP: {
-    [key in LightAccountVersion]: {
+    [key in LightAccountVersion<"0.6" | "0.7">]: {
         factoryAddress: Address
     }
 } = {
     "1.1.0": {
         factoryAddress: "0x00004EC70002a32400f8ae005A26081065620D20"
+    },
+    "2.0.0": {
+        factoryAddress: "0x0000000000400CdFef5E2714E63d8040b700BC24"
     }
 }
 
 const getDefaultAddresses = (
-    lightAccountVersion: LightAccountVersion,
+    lightAccountVersion: LightAccountVersion<"0.6" | "0.7">,
     {
         factoryAddress: _factoryAddress
     }: {
@@ -140,15 +147,7 @@ export type LightSmartAccountImplementation<
         ? typeof entryPoint06Abi
         : typeof entryPoint07Abi
 > = Assign<
-    SmartAccountImplementation<
-        entryPointAbi,
-        entryPointVersion
-        // {
-        //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
-        //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
-        //     factory: { abi: typeof FactoryAbi; address: Address }
-        // }
-    >,
+    SmartAccountImplementation<entryPointAbi, entryPointVersion>,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
@@ -161,14 +160,22 @@ export type ToLightSmartAccountReturnType<
     LightSmartAccountImplementation<entryPointVersion, entryPointAbi>
 >
 
+enum SignatureType {
+    EOA = "0x00"
+    // CONTRACT = "0x01",
+    // CONTRACT_WITH_ADDR = "0x02"
+}
+
 /**
  * @description Creates an Light Account from a private key.
  *
  * @returns A Private Key Light Account.
  */
 export async function toLightSmartAccount<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7",
+    entryPointAbi extends
+        | typeof entryPoint06Abi
+        | typeof entryPoint07Abi = typeof entryPoint07Abi
 >(
     parameters: ToLightSmartAccountParameters<entryPointVersion, entryPointAbi>
 ): Promise<ToLightSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
@@ -191,12 +198,6 @@ export async function toLightSmartAccount<
                 : entryPoint07Abi,
         version: parameters.entryPoint?.version ?? "0.7"
     } as const
-
-    if (version !== "1.1.0") {
-        throw new Error(
-            "Only Light Account version 1.1.0 is supported at the moment"
-        )
-    }
 
     const { factoryAddress } = getDefaultAddresses(version, {
         factoryAddress: _factoryAddress
@@ -230,7 +231,6 @@ export async function toLightSmartAccount<
 
             const { factory, factoryData } = await getFactoryArgs()
 
-            // Get the sender address based on the init code
             accountAddress = await getSenderAddress(client, {
                 factory,
                 factoryData,
@@ -314,26 +314,54 @@ export async function toLightSmartAccount<
             })
         },
         async getStubSignature() {
-            return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+            const signature =
+                "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+
+            switch (version) {
+                case "1.1.0":
+                    return signature
+                case "2.0.0":
+                    return concat([SignatureType.EOA, signature])
+                default:
+                    throw new Error("Unknown Light Account version")
+            }
         },
         async sign({ hash }) {
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            return signWith1271WrapperV1(
+            const signature = await signWith1271WrapperV1(
                 owner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashMessage(message)
             )
+
+            switch (version) {
+                case "1.1.0":
+                    return signature
+                case "2.0.0":
+                    return concat([SignatureType.EOA, signature])
+                default:
+                    throw new Error("Unknown Light Account version")
+            }
         },
         async signTypedData(typedData) {
-            return signWith1271WrapperV1(
+            const signature = await signWith1271WrapperV1(
                 owner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashTypedData(typedData)
             )
+
+            switch (version) {
+                case "1.1.0":
+                    return signature
+                case "2.0.0":
+                    return concat([SignatureType.EOA, signature])
+                default:
+                    throw new Error("Unknown Light Account version")
+            }
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
@@ -349,12 +377,21 @@ export async function toLightSmartAccount<
                 chainId: chainId
             })
 
-            return signMessage(client, {
+            const signature = await signMessage(client, {
                 account: owner,
                 message: {
                     raw: hash
                 }
             })
+
+            switch (version) {
+                case "1.1.0":
+                    return signature
+                case "2.0.0":
+                    return concat([SignatureType.EOA, signature])
+                default:
+                    throw new Error("Unknown Light Account version")
+            }
         }
     }) as Promise<
         ToLightSmartAccountReturnType<entryPointVersion, entryPointAbi>

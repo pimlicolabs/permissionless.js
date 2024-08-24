@@ -31,6 +31,7 @@ import {
     KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
     KERNEL_V07_V3_1_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+    LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
     SAFE_7579_LAUNCHPAD_CREATECALL,
     SAFE_7579_MODULE_CREATECALL,
     SAFE_7579_REGISTRY_CREATECALL,
@@ -231,6 +232,12 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -451,6 +458,8 @@ export const setupContracts = async (rpc: string) => {
         "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419", // Kernel v0.3.1 Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
+        "0x0000000000400CdFef5E2714E63d8040b700BC24", // LightAccountFactory v2.0.0
+        "0x8E8e658E22B12ada97B402fF0b044D6A325013C7", // LightAccount v2.0.0 implementation
         "0x81b9E3689390C7e74cF526594A105Dea21a8cdD5", // Trust Secp256k1VerificationFacet
         "0x729c310186a57833f622630a16d13f710b83272a", // Trust factory
         "0xFde53272dcd7938d16E031A6989753c321728332", // Trust AccountFacet
