@@ -60,15 +60,13 @@ export const TRUST_ADDRESSES: {
 }
 
 export type ToTrustSmartAccountParameters<
-    entryPointVersion extends "0.6" = "0.6",
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
+    entryPointVersion extends "0.6" = "0.6"
 > = {
     client: Client
     owner: LocalAccount
     factoryAddress?: Address
     entryPoint?: {
         address: typeof entryPoint06Address
-        abi: entryPointAbi
         version: entryPointVersion
     }
     index?: bigint
@@ -78,11 +76,10 @@ export type ToTrustSmartAccountParameters<
 }
 
 export type TrustSmartAccountImplementation<
-    entryPointVersion extends "0.6" = "0.6",
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
+    entryPointVersion extends "0.6" = "0.6"
 > = Assign<
     SmartAccountImplementation<
-        entryPointAbi,
+        typeof entryPoint06Abi,
         entryPointVersion
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
@@ -94,11 +91,8 @@ export type TrustSmartAccountImplementation<
 >
 
 export type ToTrustSmartAccountReturnType<
-    entryPointVersion extends "0.6" = "0.6",
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
-> = SmartAccount<
-    TrustSmartAccountImplementation<entryPointVersion, entryPointAbi>
->
+    entryPointVersion extends "0.6" = "0.6"
+> = SmartAccount<TrustSmartAccountImplementation<entryPointVersion>>
 
 /**
  * @description Creates an Trust Smart Account from a private key.
@@ -106,11 +100,10 @@ export type ToTrustSmartAccountReturnType<
  * @returns A Private Key Trust Smart Account.
  */
 export async function toTrustSmartAccount<
-    entryPointVersion extends "0.6" = "0.6",
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
+    entryPointVersion extends "0.6" = "0.6"
 >(
-    parameters: ToTrustSmartAccountParameters<entryPointVersion, entryPointAbi>
-): Promise<ToTrustSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
+    parameters: ToTrustSmartAccountParameters<entryPointVersion>
+): Promise<ToTrustSmartAccountReturnType<entryPointVersion>> {
     const {
         owner,
         client,
@@ -124,7 +117,7 @@ export async function toTrustSmartAccount<
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint06Address,
-        abi: parameters.entryPoint?.abi ?? entryPoint06Abi,
+        abi: entryPoint06Abi,
         version: parameters.entryPoint?.version ?? "0.6"
     } as const
 
@@ -221,7 +214,5 @@ export async function toTrustSmartAccount<
                 }
             })
         }
-    }) as Promise<
-        ToTrustSmartAccountReturnType<entryPointVersion, entryPointAbi>
-    >
+    }) as Promise<ToTrustSmartAccountReturnType<entryPointVersion>>
 }

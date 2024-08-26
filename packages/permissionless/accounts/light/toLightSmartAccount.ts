@@ -67,15 +67,11 @@ export type LightAccountVersion<entryPointVersion extends "0.6" | "0.7"> =
     entryPointVersion extends "0.6" ? "1.1.0" : "2.0.0"
 
 export type ToLightSmartAccountParameters<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = {
     client: Client
     entryPoint?: {
         address: typeof entryPoint06Address | typeof entryPoint07Address
-        abi: entryPointAbi
         version: entryPointVersion
     }
     owner: LocalAccount
@@ -140,25 +136,20 @@ const getDefaultAddresses = (
 }
 
 export type LightSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = entryPointVersion extends "0.6"
-        ? typeof entryPoint06Abi
-        : typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7"
 > = Assign<
-    SmartAccountImplementation<entryPointAbi, entryPointVersion>,
+    SmartAccountImplementation<
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : typeof entryPoint07Abi,
+        entryPointVersion
+    >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
 export type ToLightSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
-> = SmartAccount<
-    LightSmartAccountImplementation<entryPointVersion, entryPointAbi>
->
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = SmartAccount<LightSmartAccountImplementation<entryPointVersion>>
 
 enum SignatureType {
     EOA = "0x00"
@@ -172,13 +163,10 @@ enum SignatureType {
  * @returns A Private Key Light Account.
  */
 export async function toLightSmartAccount<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
 >(
-    parameters: ToLightSmartAccountParameters<entryPointVersion, entryPointAbi>
-): Promise<ToLightSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
+    parameters: ToLightSmartAccountParameters<entryPointVersion>
+): Promise<ToLightSmartAccountReturnType<entryPointVersion>> {
     const {
         version,
         factoryAddress: _factoryAddress,
@@ -192,7 +180,6 @@ export async function toLightSmartAccount<
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
-            parameters.entryPoint?.abi ??
             (parameters.entryPoint?.version ?? "0.7") === "0.6"
                 ? entryPoint06Abi
                 : entryPoint07Abi,
@@ -393,7 +380,5 @@ export async function toLightSmartAccount<
                     throw new Error("Unknown Light Account version")
             }
         }
-    }) as Promise<
-        ToLightSmartAccountReturnType<entryPointVersion, entryPointAbi>
-    >
+    }) as Promise<ToLightSmartAccountReturnType<entryPointVersion>>
 }

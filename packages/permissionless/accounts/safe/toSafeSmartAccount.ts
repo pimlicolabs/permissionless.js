@@ -929,7 +929,6 @@ type GetErc7579Params<TErc7579 extends Address | undefined> =
 
 export type ToSafeSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
     TErc7579 extends Address | undefined
 > = {
     client: Client
@@ -937,7 +936,6 @@ export type ToSafeSmartAccountParameters<
     version: SafeVersion
     entryPoint?: {
         address: typeof entryPoint06Address | typeof entryPoint07Address
-        abi: entryPointAbi
         version: entryPointVersion
     }
     safe4337ModuleAddress?: Address
@@ -955,33 +953,19 @@ export type ToSafeSmartAccountParameters<
     paymentReceiver?: Address
 } & GetErc7579Params<TErc7579>
 
-function isErc7579Args<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
->(
-    args: ToSafeSmartAccountParameters<
-        entryPointVersion,
-        entryPointAbi,
-        Address | undefined
-    >
-): args is ToSafeSmartAccountParameters<
-    entryPointVersion,
-    entryPointAbi,
-    Address
-> {
+function isErc7579Args<entryPointVersion extends "0.6" | "0.7" = "0.7">(
+    args: ToSafeSmartAccountParameters<entryPointVersion, Address | undefined>
+): args is ToSafeSmartAccountParameters<entryPointVersion, Address> {
     return args.erc7579LaunchpadAddress !== undefined
 }
 
 export type SafeSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        entryPointAbi,
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : typeof entryPoint07Abi,
         entryPointVersion
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
@@ -993,13 +977,8 @@ export type SafeSmartAccountImplementation<
 >
 
 export type ToSafeSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
-> = SmartAccount<
-    SafeSmartAccountImplementation<entryPointVersion, entryPointAbi>
->
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = SmartAccount<SafeSmartAccountImplementation<entryPointVersion>>
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -1008,15 +987,10 @@ export type ToSafeSmartAccountReturnType<
  */
 export async function toSafeSmartAccount<
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
     TErc7579 extends Address | undefined
 >(
-    parameters: ToSafeSmartAccountParameters<
-        entryPointVersion,
-        entryPointAbi,
-        TErc7579
-    >
-): Promise<ToSafeSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
+    parameters: ToSafeSmartAccountParameters<entryPointVersion, TErc7579>
+): Promise<ToSafeSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
         owner,
@@ -1038,7 +1012,6 @@ export async function toSafeSmartAccount<
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
-            parameters.entryPoint?.abi ??
             (parameters.entryPoint?.version ?? "0.7") === "0.6"
                 ? entryPoint06Abi
                 : entryPoint07Abi,
@@ -1378,7 +1351,5 @@ export async function toSafeSmartAccount<
                 [validAfter, validUntil, signatureBytes]
             )
         }
-    }) as Promise<
-        ToSafeSmartAccountReturnType<entryPointVersion, entryPointAbi>
-    >
+    }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }

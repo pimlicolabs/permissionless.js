@@ -292,14 +292,12 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
 
 export type ToEcdsaKernelSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
     kernelVersion extends KernelVersion<entryPointVersion>
 > = {
     client: Client
     owner: LocalAccount
     entryPoint?: {
         address: typeof entryPoint06Address | typeof entryPoint07Address
-        abi: entryPointAbi
         version: entryPointVersion
     }
     address?: Address
@@ -313,13 +311,12 @@ export type ToEcdsaKernelSmartAccountParameters<
 }
 
 export type EcdsaKernelSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        entryPointAbi,
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : typeof entryPoint07Abi,
         entryPointVersion
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
@@ -331,13 +328,8 @@ export type EcdsaKernelSmartAccountImplementation<
 >
 
 export type ToEcdsaKernelSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
-> = SmartAccount<
-    EcdsaKernelSmartAccountImplementation<entryPointVersion, entryPointAbi>
->
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = SmartAccount<EcdsaKernelSmartAccountImplementation<entryPointVersion>>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
  * @param client
@@ -350,17 +342,13 @@ export type ToEcdsaKernelSmartAccountReturnType<
  */
 export async function toEcdsaKernelSmartAccount<
     entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi,
     kernelVersion extends KernelVersion<entryPointVersion>
 >(
     parameters: ToEcdsaKernelSmartAccountParameters<
         entryPointVersion,
-        entryPointAbi,
         kernelVersion
     >
-): Promise<
-    ToEcdsaKernelSmartAccountReturnType<entryPointVersion, entryPointAbi>
-> {
+): Promise<ToEcdsaKernelSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
         address,
@@ -376,7 +364,6 @@ export async function toEcdsaKernelSmartAccount<
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
-            parameters.entryPoint?.abi ??
             (parameters.entryPoint?.version ?? "0.7") === "0.6"
                 ? entryPoint06Abi
                 : entryPoint07Abi,
@@ -534,7 +521,5 @@ export async function toEcdsaKernelSmartAccount<
             }
             return signature
         }
-    }) as Promise<
-        ToEcdsaKernelSmartAccountReturnType<entryPointVersion, entryPointAbi>
-    >
+    }) as Promise<ToEcdsaKernelSmartAccountReturnType<entryPointVersion>>
 }

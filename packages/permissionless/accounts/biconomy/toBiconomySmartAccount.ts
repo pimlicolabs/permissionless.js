@@ -70,16 +70,13 @@ const getAccountInitCode = async ({
     })
 }
 
-export type ToBiconomySmartAccountParameters<
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
-> = Prettify<{
+export type ToBiconomySmartAccountParameters = Prettify<{
     client: Client
     owner: LocalAccount
     address?: Address | undefined
     entryPoint?: {
         address: typeof entryPoint06Address
         version: "0.6"
-        abi: entryPointAbi
     }
     nonceKey?: bigint
     index?: bigint
@@ -87,16 +84,14 @@ export type ToBiconomySmartAccountParameters<
     ecdsaModuleAddress?: Address
 }>
 
-export type BiconomySmartAccountImplementation<
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
-> = Assign<
-    SmartAccountImplementation<entryPointAbi, "0.6">,
+export type BiconomySmartAccountImplementation = Assign<
+    SmartAccountImplementation<typeof entryPoint06Abi, "0.6">,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
-export type ToBiconomySmartAccountReturnType<
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
-> = Prettify<SmartAccount<BiconomySmartAccountImplementation<entryPointAbi>>>
+export type ToBiconomySmartAccountReturnType = Prettify<
+    SmartAccount<BiconomySmartAccountImplementation>
+>
 
 /**
  * Build a Biconomy modular smart account from a private key, that use the ECDSA signer behind the scene
@@ -108,26 +103,16 @@ export type ToBiconomySmartAccountReturnType<
  * @param ecdsaModuleAddress
  */
 
-export async function toBiconomySmartAccount<
-    entryPointAbi extends typeof entryPoint06Abi = typeof entryPoint06Abi
->(
-    parameters: ToBiconomySmartAccountParameters<entryPointAbi>
-): Promise<ToBiconomySmartAccountReturnType<entryPointAbi>> {
-    // ): Promise<BiconomySmartAccount<entryPoint, TTransport, TChain>> {
-
+export async function toBiconomySmartAccount(
+    parameters: ToBiconomySmartAccountParameters
+): Promise<ToBiconomySmartAccountReturnType> {
     const { owner, client, index = 0n, address } = parameters
 
-    const entryPoint =
-        parameters.entryPoint ??
-        ({
-            address: entryPoint06Address,
-            abi: entryPoint06Abi,
-            version: "0.6"
-        } as {
-            address: typeof entryPoint06Address
-            version: "0.6"
-            abi: entryPointAbi
-        })
+    const entryPoint = {
+        address: parameters.entryPoint?.address ?? entryPoint06Address,
+        abi: entryPoint06Abi,
+        version: parameters.entryPoint?.version ?? "0.6"
+    }
 
     const factoryAddress =
         parameters.factoryAddress ?? BICONOMY_ADDRESSES.FACTORY_ADDRESS

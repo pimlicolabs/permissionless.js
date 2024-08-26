@@ -61,15 +61,13 @@ const getAccountInitCode = async (
 }
 
 export type ToSimpleSmartAccountParameters<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7"
 > = {
     client: Client
     owner: LocalAccount
     factoryAddress?: Address
     entryPoint?: {
         address: typeof entryPoint06Address | typeof entryPoint07Address
-        abi: entryPointAbi
         version: entryPointVersion
     }
     index?: bigint
@@ -90,13 +88,12 @@ const getFactoryAddress = (
 }
 
 export type SimpleSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        entryPointAbi,
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : typeof entryPoint07Abi,
         entryPointVersion
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
@@ -108,13 +105,8 @@ export type SimpleSmartAccountImplementation<
 >
 
 export type ToSimpleSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
-    entryPointAbi extends
-        | typeof entryPoint06Abi
-        | typeof entryPoint07Abi = typeof entryPoint07Abi
-> = SmartAccount<
-    SimpleSmartAccountImplementation<entryPointVersion, entryPointAbi>
->
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = SmartAccount<SimpleSmartAccountImplementation<entryPointVersion>>
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -122,11 +114,10 @@ export type ToSimpleSmartAccountReturnType<
  * @returns A Private Key Simple Account.
  */
 export async function toSimpleSmartAccount<
-    entryPointVersion extends "0.6" | "0.7",
-    entryPointAbi extends typeof entryPoint06Abi | typeof entryPoint07Abi
+    entryPointVersion extends "0.6" | "0.7"
 >(
-    parameters: ToSimpleSmartAccountParameters<entryPointVersion, entryPointAbi>
-): Promise<ToSimpleSmartAccountReturnType<entryPointVersion, entryPointAbi>> {
+    parameters: ToSimpleSmartAccountParameters<entryPointVersion>
+): Promise<ToSimpleSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
         owner,
@@ -139,7 +130,6 @@ export async function toSimpleSmartAccount<
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
-            parameters.entryPoint?.abi ??
             (parameters.entryPoint?.version ?? "0.7") === "0.6"
                 ? entryPoint06Abi
                 : entryPoint07Abi,
@@ -324,7 +314,5 @@ export async function toSimpleSmartAccount<
                 }
             })
         }
-    }) as Promise<
-        ToSimpleSmartAccountReturnType<entryPointVersion, entryPointAbi>
-    >
+    }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion>>
 }
