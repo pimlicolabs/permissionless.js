@@ -207,7 +207,7 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
 export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {
         onFetchRequest: async (request) => {
-            console.log("fetching", await request.json())
+            // console.log("fetching", await request.json())
         }
     })
 
@@ -257,19 +257,9 @@ export const getSimpleAccountClient = async <
     entryPoint,
     anvilRpc
 }: AAParamType<entryPointVersion>): Promise<
-    ToSimpleSmartAccountReturnType<
-        entryPointVersion,
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Abi
-            : typeof entryPoint07Abi
-    >
+    ToSimpleSmartAccountReturnType<entryPointVersion>
 > => {
-    return toSimpleSmartAccount<
-        entryPointVersion,
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Abi
-            : typeof entryPoint07Abi
-    >({
+    return toSimpleSmartAccount<entryPointVersion>({
         client: getPublicClient(anvilRpc),
         entryPoint: {
             address:
@@ -278,12 +268,7 @@ export const getSimpleAccountClient = async <
                     : entryPoint07Address,
             version: (entryPoint.version === "0.6"
                 ? "0.6"
-                : "0.7") as entryPointVersion,
-            abi: (entryPoint.version === "0.6"
-                ? entryPoint06Abi
-                : entryPoint07Abi) as entryPointVersion extends "0.6"
-                ? typeof entryPoint06Abi
-                : typeof entryPoint07Abi
+                : "0.7") as entryPointVersion
         },
         owner: privateKeyToAccount(generatePrivateKey())
     })
@@ -304,9 +289,7 @@ export const getLightAccountClient = async <
                 entryPoint.version === "0.6"
                     ? entryPoint06Address
                     : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7",
-            abi:
-                entryPoint.version === "0.6" ? entryPoint06Abi : entryPoint07Abi
+            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
         client: getPublicClient(anvilRpc),
         version: version ?? "1.1.0",
@@ -363,9 +346,7 @@ export const getKernelEcdsaClient = async <
                 entryPoint.version === "0.6"
                     ? entryPoint06Address
                     : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7",
-            abi:
-                entryPoint.version === "0.6" ? entryPoint06Abi : entryPoint07Abi
+            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
         owner: privateKeyToAccount(generatePrivateKey()),
         version
@@ -388,9 +369,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                 entryPoint.version === "0.6"
                     ? entryPoint06Address
                     : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7",
-            abi:
-                entryPoint.version === "0.6" ? entryPoint06Abi : entryPoint07Abi
+            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
         owner: privateKeyToAccount(generatePrivateKey()),
         version: "1.4.1",
