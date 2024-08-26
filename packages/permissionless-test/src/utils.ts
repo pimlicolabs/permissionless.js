@@ -23,7 +23,7 @@ import {
     mnemonicToAccount,
     privateKeyToAccount
 } from "viem/accounts"
-import { foundry, sepolia } from "viem/chains"
+import { foundry } from "viem/chains"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type KernelVersion,
@@ -212,7 +212,7 @@ export const getPublicClient = (anvilRpc: string) => {
     })
 
     return createPublicClient({
-        chain: sepolia,
+        chain: foundry,
         transport: transport,
         pollingInterval: 100
     })
