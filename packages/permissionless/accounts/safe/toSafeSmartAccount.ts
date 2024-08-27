@@ -12,8 +12,10 @@ import {
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
+    getContractAddress,
     hashMessage,
     hashTypedData,
+    hexToBigInt,
     keccak256,
     pad,
     toBytes,
@@ -29,10 +31,9 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, signTypedData } from "viem/actions"
+import { getChainId, readContract, signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { isSmartAccountDeployed } from "../../utils"
 import { encode7579Calls } from "../../utils/encode7579Calls"
 
@@ -958,6 +959,121 @@ function isErc7579Args<entryPointVersion extends "0.6" | "0.7" = "0.7">(
     return args.erc7579LaunchpadAddress !== undefined
 }
 
+const proxyCreationCodeAbi = [
+    {
+        inputs: [],
+        name: "proxyCreationCode",
+        outputs: [
+            {
+                internalType: "bytes",
+                name: "",
+                type: "bytes"
+            }
+        ],
+        stateMutability: "pure",
+        type: "function"
+    }
+] as const
+
+const getAccountAddress = async ({
+    client,
+    owner,
+    safeModuleSetupAddress,
+    safe4337ModuleAddress,
+    safeProxyFactoryAddress,
+    safeSingletonAddress,
+    multiSendAddress,
+    erc7579LaunchpadAddress,
+    paymentToken,
+    payment,
+    paymentReceiver,
+    setupTransactions = [],
+    safeModules = [],
+    saltNonce = BigInt(0),
+    validators = [],
+    executors = [],
+    fallbacks = [],
+    hooks = [],
+    attesters = [],
+    attestersThreshold = 0
+}: {
+    client: Client
+    owner: Address
+    safeModuleSetupAddress: Address
+    safe4337ModuleAddress: Address
+    safeProxyFactoryAddress: Address
+    safeSingletonAddress: Address
+    multiSendAddress: Address
+    setupTransactions: {
+        to: Address
+        data: Address
+        value: bigint
+    }[]
+    paymentToken?: Address
+    payment?: bigint
+    paymentReceiver?: Address
+    safeModules?: Address[]
+    saltNonce?: bigint
+    erc7579LaunchpadAddress?: Address
+    validators?: { address: Address; context: Address }[]
+    executors?: {
+        address: Address
+        context: Address
+    }[]
+    fallbacks?: { address: Address; context: Address }[]
+    hooks?: { address: Address; context: Address }[]
+    attesters?: Address[]
+    attestersThreshold?: number
+}): Promise<Address> => {
+    const proxyCreationCode = await readContract(client, {
+        abi: proxyCreationCodeAbi,
+        address: safeProxyFactoryAddress,
+        functionName: "proxyCreationCode"
+    })
+
+    const initializer = await getInitializerCode({
+        owner,
+        safeModuleSetupAddress,
+        safe4337ModuleAddress,
+        multiSendAddress,
+        setupTransactions,
+        safeSingletonAddress,
+        safeModules,
+        erc7579LaunchpadAddress,
+        validators,
+        executors,
+        fallbacks,
+        hooks,
+        attesters,
+        attestersThreshold,
+        paymentToken,
+        payment,
+        paymentReceiver
+    })
+
+    const deploymentCode = encodePacked(
+        ["bytes", "uint256"],
+        [
+            proxyCreationCode,
+            hexToBigInt(erc7579LaunchpadAddress ?? safeSingletonAddress)
+        ]
+    )
+
+    const salt = keccak256(
+        encodePacked(
+            ["bytes32", "uint256"],
+            [keccak256(encodePacked(["bytes"], [initializer])), saltNonce]
+        )
+    )
+
+    return getContractAddress({
+        from: safeProxyFactoryAddress,
+        salt,
+        bytecode: deploymentCode,
+        opcode: "CREATE2"
+    })
+}
+
 export type SafeSmartAccountImplementation<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = Assign<
@@ -1111,13 +1227,28 @@ export async function toSafeSmartAccount<
         async getAddress() {
             if (accountAddress) return accountAddress
 
-            const { factory, factoryData } = await getFactoryArgs()
-
             // Get the sender address based on the init code
-            accountAddress = await getSenderAddress(client, {
-                factory,
-                factoryData,
-                entryPointAddress: entryPoint.address
+            accountAddress = await getAccountAddress({
+                client,
+                owner: owner.address,
+                safeModuleSetupAddress,
+                safe4337ModuleAddress,
+                safeProxyFactoryAddress,
+                safeSingletonAddress,
+                multiSendAddress,
+                erc7579LaunchpadAddress,
+                saltNonce,
+                setupTransactions,
+                safeModules,
+                validators,
+                executors,
+                fallbacks,
+                hooks,
+                attesters,
+                attestersThreshold,
+                paymentToken,
+                payment,
+                paymentReceiver
             })
 
             return accountAddress
