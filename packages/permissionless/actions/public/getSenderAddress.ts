@@ -14,26 +14,18 @@ import {
     decodeErrorResult
 } from "viem"
 
-import type {
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
 import { simulateContract } from "viem/actions"
 import { getAction } from "viem/utils"
 
 export type GetSenderAddressParams = OneOf<
     | {
           initCode: Hex
-          entryPointAddress:
-              | typeof entryPoint06Address
-              | typeof entryPoint07Address
+          entryPointAddress: Address
           factory?: never
           factoryData?: never
       }
     | {
-          entryPointAddress:
-              | typeof entryPoint06Address
-              | typeof entryPoint07Address
+          entryPointAddress: Address
           factory: Address
           factoryData: Hex
           initCode?: never

@@ -15,7 +15,6 @@ import {
     type SmartAccountImplementation,
     type UserOperation,
     entryPoint06Abi,
-    type entryPoint06Address,
     entryPoint07Abi,
     entryPoint07Address,
     getUserOperationHash,
@@ -297,7 +296,7 @@ export type ToEcdsaKernelSmartAccountParameters<
     client: Client
     owner: LocalAccount
     entryPoint?: {
-        address: typeof entryPoint06Address | typeof entryPoint07Address
+        address: Address
         version: entryPointVersion
     }
     address?: Address

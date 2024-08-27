@@ -14,7 +14,6 @@ import {
     type SmartAccountImplementation,
     type UserOperation,
     entryPoint06Abi,
-    type entryPoint06Address,
     entryPoint07Abi,
     entryPoint07Address,
     getUserOperationHash,
@@ -71,7 +70,7 @@ export type ToLightSmartAccountParameters<
 > = {
     client: Client
     entryPoint?: {
-        address: typeof entryPoint06Address | typeof entryPoint07Address
+        address: Address
         version: entryPointVersion
     }
     owner: LocalAccount

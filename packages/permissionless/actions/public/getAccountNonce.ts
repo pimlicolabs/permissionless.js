@@ -1,14 +1,10 @@
 import type { Address, Client } from "viem"
-import type {
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
 import { readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 
 export type GetAccountNonceParams = {
     address: Address
-    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
+    entryPointAddress: Address
     key?: bigint
 }
 

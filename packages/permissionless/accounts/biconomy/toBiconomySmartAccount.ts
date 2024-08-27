@@ -75,7 +75,7 @@ export type ToBiconomySmartAccountParameters = Prettify<{
     owner: LocalAccount
     address?: Address | undefined
     entryPoint?: {
-        address: typeof entryPoint06Address
+        address: Address
         version: "0.6"
     }
     nonceKey?: bigint

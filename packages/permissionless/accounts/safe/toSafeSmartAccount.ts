@@ -25,7 +25,6 @@ import {
     type SmartAccountImplementation,
     type UserOperation,
     entryPoint06Abi,
-    type entryPoint06Address,
     entryPoint07Abi,
     entryPoint07Address,
     toSmartAccount
@@ -935,7 +934,7 @@ export type ToSafeSmartAccountParameters<
     owner: LocalAccount
     version: SafeVersion
     entryPoint?: {
-        address: typeof entryPoint06Address | typeof entryPoint07Address
+        address: Address
         version: entryPointVersion
     }
     safe4337ModuleAddress?: Address

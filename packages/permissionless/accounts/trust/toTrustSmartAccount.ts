@@ -66,7 +66,7 @@ export type ToTrustSmartAccountParameters<
     owner: LocalAccount
     factoryAddress?: Address
     entryPoint?: {
-        address: typeof entryPoint06Address
+        address: Address
         version: entryPointVersion
     }
     index?: bigint
