@@ -38,7 +38,7 @@ export async function privateKeyToEtherspotSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     { privateKey, ...rest }: PrivateKeyToEtherspotSmartAccountParameters
 ): Promise<

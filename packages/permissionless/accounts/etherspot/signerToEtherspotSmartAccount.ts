@@ -253,7 +253,7 @@ export async function signerToEtherspotSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,
