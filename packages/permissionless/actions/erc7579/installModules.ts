@@ -20,23 +20,26 @@ import {
 } from "../smartAccount/sendUserOperation"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
-export type InstallModuleParameters<
+export type InstallModulesParameters<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport,
     TChain extends Chain | undefined,
     TSmartAccount extends
         | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
-    type: ModuleType
-    address: Address
-    context: Hex
-    maxFeePerGas?: bigint
-    maxPriorityFeePerGas?: bigint
-    nonce?: bigint
-} & Middleware<TEntryPoint>
+> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> &
+    Middleware<TEntryPoint> & {
+        modules: {
+            type: ModuleType
+            address: Address
+            context: Hex
+        }[]
+        maxFeePerGas?: bigint
+        maxPriorityFeePerGas?: bigint
+        nonce?: bigint
+    }
 
-export async function installModule<
+export async function installModules<
     TEntryPoint extends EntryPoint,
     TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
@@ -45,10 +48,11 @@ export async function installModule<
         | undefined =
         | SmartAccount<TEntryPoint, string, TTransport, TChain>
         | undefined
+        | undefined
 >(
     client: Client<TTransport, TChain, TSmartAccount>,
     parameters: Prettify<
-        InstallModuleParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
+        InstallModulesParameters<TEntryPoint, TTransport, TChain, TSmartAccount>
     >
 ): Promise<Hex> {
     const {
@@ -57,8 +61,7 @@ export async function installModule<
         maxPriorityFeePerGas,
         nonce,
         middleware,
-        address,
-        context
+        modules
     } = parameters
 
     if (!account_) {
@@ -74,40 +77,44 @@ export async function installModule<
         TChain
     >
 
-    const installModuleCallData = await account.encodeCallData({
-        to: account.address,
-        value: BigInt(0),
-        data: encodeFunctionData({
-            abi: [
-                {
-                    name: "installModule",
-                    type: "function",
-                    stateMutability: "nonpayable",
-                    inputs: [
+    const installModulesCallData = await account.encodeCallData(
+        await Promise.all(
+            modules.map(({ type, address, context }) => ({
+                to: account.address,
+                value: BigInt(0),
+                data: encodeFunctionData({
+                    abi: [
                         {
-                            type: "uint256",
-                            name: "moduleTypeId"
-                        },
-                        {
-                            type: "address",
-                            name: "module"
-                        },
-                        {
-                            type: "bytes",
-                            name: "initData"
+                            name: "installModule",
+                            type: "function",
+                            stateMutability: "nonpayable",
+                            inputs: [
+                                {
+                                    type: "uint256",
+                                    name: "moduleTypeId"
+                                },
+                                {
+                                    type: "address",
+                                    name: "module"
+                                },
+                                {
+                                    type: "bytes",
+                                    name: "initData"
+                                }
+                            ],
+                            outputs: []
                         }
                     ],
-                    outputs: []
-                }
-            ],
-            functionName: "installModule",
-            args: [
-                parseModuleTypeId(parameters.type),
-                getAddress(address),
-                context
-            ]
-        })
-    })
+                    functionName: "installModule",
+                    args: [
+                        parseModuleTypeId(type),
+                        getAddress(address),
+                        context
+                    ]
+                })
+            }))
+        )
+    )
 
     return getAction(
         client,
@@ -118,7 +125,7 @@ export async function installModule<
             sender: account.address,
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
-            callData: installModuleCallData,
+            callData: installModulesCallData,
             nonce: nonce
         },
         account: account,

@@ -20,13 +20,13 @@ import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types/entrypoint"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { erc7579Actions } from "../erc7579"
-import { installModule } from "./installModule"
+import { installModules } from "./installModules"
 
 describe.each(getCoreSmartAccounts())(
-    "installmodule $name",
+    "installmodules $name",
     ({ getErc7579SmartAccountClient, name }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "installModule",
+            "installModules",
             async ({ rpc }) => {
                 const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
@@ -63,22 +63,30 @@ describe.each(getCoreSmartAccounts())(
                     [smartClient.account.address]
                 )
 
-                const opHash = await installModule(smartClient as any, {
+                const opHash = await installModules(smartClient as any, {
                     account: smartClient.account as any,
-                    type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context: name.startsWith("Kernel 7579")
-                        ? encodePacked(
-                              ["address", "bytes"],
-                              [
-                                  zeroAddress,
-                                  encodeAbiParameters(
-                                      [{ type: "bytes" }, { type: "bytes" }],
-                                      [moduleData, "0x"]
+                    modules: [
+                        {
+                            type: "executor",
+                            address:
+                                "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                            context: name.startsWith("Kernel 7579")
+                                ? encodePacked(
+                                      ["address", "bytes"],
+                                      [
+                                          zeroAddress,
+                                          encodeAbiParameters(
+                                              [
+                                                  { type: "bytes" },
+                                                  { type: "bytes" }
+                                              ],
+                                              [moduleData, "0x"]
+                                          )
+                                      ]
                                   )
-                              ]
-                          )
-                        : moduleData
+                                : moduleData
+                        }
+                    ]
                 })
 
                 const bundlerClientV07 = createBundlerClient({
@@ -169,22 +177,30 @@ describe.each(getCoreSmartAccounts())(
                     [smartClient.account.address]
                 )
 
-                const opHash = await installModule(smartClient as any, {
+                const opHash = await installModules(smartClient as any, {
                     account: smartClient.account as any,
-                    type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context: name.startsWith("Kernel 7579")
-                        ? encodePacked(
-                              ["address", "bytes"],
-                              [
-                                  zeroAddress,
-                                  encodeAbiParameters(
-                                      [{ type: "bytes" }, { type: "bytes" }],
-                                      [moduleData, "0x"]
+                    modules: [
+                        {
+                            type: "executor",
+                            address:
+                                "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                            context: name.startsWith("Kernel 7579")
+                                ? encodePacked(
+                                      ["address", "bytes"],
+                                      [
+                                          zeroAddress,
+                                          encodeAbiParameters(
+                                              [
+                                                  { type: "bytes" },
+                                                  { type: "bytes" }
+                                              ],
+                                              [moduleData, "0x"]
+                                          )
+                                      ]
                                   )
-                              ]
-                          )
-                        : moduleData
+                                : moduleData
+                        }
+                    ]
                 })
 
                 const bundlerClientV07 = createBundlerClient({

@@ -21,13 +21,13 @@ import type { SmartAccountClient } from "../../clients/createSmartAccountClient"
 import type { ENTRYPOINT_ADDRESS_V07_TYPE } from "../../types"
 import { ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { erc7579Actions } from "../erc7579"
-import { uninstallModule } from "./uninstallModule"
+import { uninstallModules } from "./uninstallModules"
 
 describe.each(getCoreSmartAccounts())(
-    "uninstallModule $name",
+    "uninstallModules $name",
     ({ getErc7579SmartAccountClient, name }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "uninstallModule",
+            "uninstallModules",
             async ({ rpc }) => {
                 const { anvilRpc, altoRpc, paymasterRpc } = rpc
 
@@ -100,52 +100,62 @@ describe.each(getCoreSmartAccounts())(
                     hash: userOperationReceipt.receipt.transactionHash
                 })
 
-                const uninstallModuleUserOpHash = await uninstallModule(
+                const uninstallModulesUserOpHash = await uninstallModules(
                     smartClient as any,
                     {
                         account: smartClient.account as any,
-                        type: "executor",
-                        address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                        context: name.startsWith("Kernel 7579")
-                            ? "0x"
-                            : encodeAbiParameters(
-                                  [
-                                      { name: "prev", type: "address" },
-                                      {
-                                          name: "moduleInitData",
-                                          type: "bytes"
-                                      }
-                                  ],
-                                  [
-                                      "0x0000000000000000000000000000000000000001",
-                                      "0x"
-                                  ]
-                              )
+                        modules: [
+                            {
+                                type: "executor",
+                                address:
+                                    "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                                context: name.startsWith("Kernel 7579")
+                                    ? "0x"
+                                    : encodeAbiParameters(
+                                          [
+                                              {
+                                                  name: "prev",
+                                                  type: "address"
+                                              },
+                                              {
+                                                  name: "moduleInitData",
+                                                  type: "bytes"
+                                              }
+                                          ],
+                                          [
+                                              "0x0000000000000000000000000000000000000001",
+                                              "0x"
+                                          ]
+                                      )
+                            }
+                        ]
                     }
                 )
 
-                expect(isHash(uninstallModuleUserOpHash)).toBe(true)
+                expect(isHash(uninstallModulesUserOpHash)).toBe(true)
 
-                const userOperationReceiptUninstallModule =
+                const userOperationReceiptUninstallModules =
                     await bundlerClientV07.waitForUserOperationReceipt({
-                        hash: uninstallModuleUserOpHash,
+                        hash: uninstallModulesUserOpHash,
                         timeout: 100000
                     })
-                expect(userOperationReceiptUninstallModule).not.toBeNull()
-                expect(userOperationReceiptUninstallModule?.userOpHash).toBe(
-                    uninstallModuleUserOpHash
+                expect(userOperationReceiptUninstallModules).not.toBeNull()
+                expect(userOperationReceiptUninstallModules?.userOpHash).toBe(
+                    uninstallModulesUserOpHash
                 )
                 expect(
-                    userOperationReceiptUninstallModule?.receipt.transactionHash
+                    userOperationReceiptUninstallModules?.receipt
+                        .transactionHash
                 ).toBeTruthy()
 
-                const receiptUninstallModule =
+                const receiptUninstallModules =
                     await bundlerClientV07.getUserOperationReceipt({
-                        hash: uninstallModuleUserOpHash
+                        hash: uninstallModulesUserOpHash
                     })
 
-                expect(receiptUninstallModule?.receipt.transactionHash).toBe(
-                    userOperationReceiptUninstallModule?.receipt.transactionHash
+                expect(receiptUninstallModules?.receipt.transactionHash).toBe(
+                    userOperationReceiptUninstallModules?.receipt
+                        .transactionHash
                 )
             }
         )

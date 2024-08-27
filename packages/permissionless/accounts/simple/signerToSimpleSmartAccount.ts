@@ -150,7 +150,7 @@ export async function signerToSimpleSmartAccount<
         TChain,
         undefined,
         PublicRpcSchema,
-        PublicActions
+        PublicActions<TTransport, TChain>
     >,
     {
         signer,

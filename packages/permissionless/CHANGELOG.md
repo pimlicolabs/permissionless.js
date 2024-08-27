@@ -1,5 +1,42 @@
 # permissionless
 
+## 0.1.45
+
+### Patch Changes
+
+- b045fb4b20610c72138b85208977be7de9984ec7: Added support for paymentToken, payment and paymentReceiver in Safe smart account
+
+## 0.1.44
+
+### Patch Changes
+
+- fa011a17578dc2a4d35cb97116571e098a8dca09: Added support for extending the type of chain passed
+
+## 0.1.43
+
+### Patch Changes
+
+- 89a42e1d8b61c49c8795c71c12487f91f64abbc3: Fixed Kernel 0.3.1 address calculation
+- 89a42e1d8b61c49c8795c71c12487f91f64abbc3: Added installModules & uninstallModules export
+
+## 0.1.42
+
+### Patch Changes
+
+- a41a84c4232ceec6e5c0544200a2d1cba241cd08: Added uninstall modules and install modules functions
+
+## 0.1.41
+
+### Patch Changes
+
+- 299513dfee5054a3d59591f4bf11cb145783988d: Added decodeNonce util function
+
+## 0.1.40
+
+### Patch Changes
+
+- be1c3dede45bdfbffe168735cbd48fd967684818: Added encodeNonce util function
+
 ## 0.1.39
 
 ### Patch Changes

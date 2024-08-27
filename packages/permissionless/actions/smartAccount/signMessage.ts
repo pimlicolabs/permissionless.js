@@ -57,8 +57,13 @@ import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
  */
 export async function signMessage<
     entryPoint extends EntryPoint,
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined
+    TTransport extends Transport = Transport,
+    TChain extends Chain | undefined = Chain | undefined,
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
     {

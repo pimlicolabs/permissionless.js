@@ -15,14 +15,20 @@ import { parseAccount } from "../../utils/"
 import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
 import { waitForUserOperationReceipt } from "../bundler/waitForUserOperationReceipt"
 import type { Middleware } from "./prepareUserOperationRequest"
-import { sendUserOperation } from "./sendUserOperation"
+import {
+    type SendUserOperationParameters,
+    sendUserOperation
+} from "./sendUserOperation"
 
 export type DeployContractParametersWithPaymaster<
     entryPoint extends EntryPoint,
     TAbi extends Abi | readonly unknown[] = Abi | readonly unknown[],
+    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined,
     TChainOverride extends Chain | undefined = Chain | undefined
 > = DeployContractParameters<TAbi, TChain, TAccount, TChainOverride> &
@@ -58,9 +64,12 @@ export type DeployContractParametersWithPaymaster<
  */
 export async function deployContract<
     entryPoint extends EntryPoint,
+    TTransport extends Transport,
     TChain extends Chain | undefined,
-    TAccount extends SmartAccount<entryPoint> | undefined =
-        | SmartAccount<entryPoint>
+    TAccount extends
+        | SmartAccount<entryPoint, string, TTransport, TChain>
+        | undefined =
+        | SmartAccount<entryPoint, string, TTransport, TChain>
         | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
@@ -82,17 +91,22 @@ export async function deployContract<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<entryPoint>
+    const account = parseAccount(account_) as SmartAccount<
+        entryPoint,
+        string,
+        TTransport,
+        TChain
+    >
 
     const userOpHash = await getAction(
         client,
-        sendUserOperation<entryPoint>,
+        sendUserOperation<entryPoint, TTransport, TChain, TAccount>,
         "sendUserOperation"
     )({
         userOperation: {
             sender: account.address,
-            maxFeePerGas: request.maxFeePerGas || BigInt(0),
-            maxPriorityFeePerGas: request.maxPriorityFeePerGas || BigInt(0),
+            maxFeePerGas: request.maxFeePerGas,
+            maxPriorityFeePerGas: request.maxPriorityFeePerGas,
             callData: await account.encodeDeployCallData({
                 abi,
                 bytecode,
@@ -101,7 +115,7 @@ export async function deployContract<
         },
         account: account,
         middleware
-    })
+    } as SendUserOperationParameters<entryPoint, TTransport, TChain, TAccount>)
 
     const userOperationReceipt = await getAction(
         client,
