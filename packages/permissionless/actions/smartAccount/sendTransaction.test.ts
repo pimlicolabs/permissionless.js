@@ -45,6 +45,25 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt).toBeTruthy()
                 expect(receipt.transactionHash).toBe(transactionHash)
                 expect(receipt.status).toBe("success")
+
+                // -- second transaction after deployment
+
+                const transactionHash2 = await sendTransaction(smartClient, {
+                    chain: foundry,
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
+
+                expect(transactionHash2).toBeTruthy()
+
+                const receipt2 = await publicClient.getTransactionReceipt({
+                    hash: transactionHash2
+                })
+
+                expect(receipt2).toBeTruthy()
+                expect(receipt2.transactionHash).toBe(transactionHash2)
+                expect(receipt2.status).toBe("success")
             }
         )
 
@@ -78,6 +97,25 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt).toBeTruthy()
                 expect(receipt.transactionHash).toBe(transactionHash)
                 expect(receipt.status).toBe("success")
+
+                const transactionHash2 = await sendTransaction(smartClient, {
+                    chain: foundry,
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
+
+                // -- second transaction after deployment
+
+                expect(transactionHash2).toBeTruthy()
+
+                const receipt2 = await publicClient.getTransactionReceipt({
+                    hash: transactionHash2
+                })
+
+                expect(receipt2).toBeTruthy()
+                expect(receipt2.transactionHash).toBe(transactionHash2)
+                expect(receipt2.status).toBe("success")
             }
         )
     }
