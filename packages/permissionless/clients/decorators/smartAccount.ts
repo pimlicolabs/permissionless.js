@@ -63,8 +63,17 @@ export type SmartAccountActions<
      *   value: 1000000000000000000n,
      * })
      */
-    sendTransaction: <TChainOverride extends Chain | undefined>(
-        args: SendTransactionParameters<TChain, TSmartAccount, TChainOverride>
+    sendTransaction: <
+        TChainOverride extends Chain | undefined = undefined,
+        accountOverride extends SmartAccount | undefined = undefined
+    >(
+        args: Parameters<
+            typeof sendTransaction<
+                TSmartAccount,
+                accountOverride,
+                TChainOverride
+            >
+        >[1]
     ) => Promise<Hash>
     /**
      * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.

@@ -6,6 +6,7 @@ import type {
     Transport
 } from "viem"
 import {
+    type SendUserOperationParameters,
     type SmartAccount,
     sendUserOperation,
     waitForUserOperationReceipt
@@ -60,50 +61,62 @@ import { AccountNotFoundError } from "../../errors"
  * })
  */
 export async function sendTransaction<
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    account extends SmartAccount | undefined,
+    accountOverride extends SmartAccount | undefined = undefined,
+    chainOverride extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
-    args: SendTransactionParameters<TChain, TAccount, TChainOverride>
+    client: Client<Transport, Chain | undefined, account>,
+    args:
+        | SendTransactionParameters<Chain | undefined, account, chainOverride>
+        | SendUserOperationParameters<account, accountOverride>
 ): Promise<Hash> {
-    const {
-        account: account_ = client.account,
-        data,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        to,
-        value,
-        nonce
-    } = args
+    let userOpHash: Hash
 
-    if (!account_) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/sendTransaction"
+    if ("to" in args) {
+        const {
+            account: account_ = client.account,
+            data,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            to,
+            value,
+            nonce
+        } = args
+
+        if (!account_) {
+            throw new AccountNotFoundError({
+                docsPath: "/docs/actions/wallet/sendTransaction"
+            })
+        }
+
+        const account = parseAccount(account_) as SmartAccount
+
+        if (!to) throw new Error("Missing to address")
+
+        userOpHash = await getAction(
+            client,
+            sendUserOperation,
+            "sendUserOperation"
+        )({
+            calls: [
+                {
+                    to,
+                    value: value || BigInt(0),
+                    data: data || "0x"
+                }
+            ],
+            account,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            nonce: nonce ? BigInt(nonce) : undefined
         })
+    } else {
+        userOpHash = await getAction(
+            client,
+            sendUserOperation,
+            "sendUserOperation"
+        )({ ...args } as SendUserOperationParameters<account, accountOverride>)
     }
-
-    const account = parseAccount(account_) as SmartAccount
-
-    if (!to) throw new Error("Missing to address")
-
-    const userOpHash = await getAction(
-        client,
-        sendUserOperation,
-        "sendUserOperation"
-    )({
-        calls: [
-            {
-                to,
-                value: value || BigInt(0),
-                data: data || "0x"
-            }
-        ],
-        account,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        nonce: nonce ? BigInt(nonce) : undefined
-    })
 
     const userOperationReceipt = await getAction(
         client,

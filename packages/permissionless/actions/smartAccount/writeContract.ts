@@ -55,12 +55,16 @@ export async function writeContract<
 
     const hash = await getAction(
         client,
-        sendTransaction<TChain, TAccount, TChainOverride>,
+        sendTransaction<TAccount, undefined, undefined>,
         "sendTransaction"
     )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request
-    } as unknown as SendTransactionParameters<TChain, TAccount, TChainOverride>)
+    } as unknown as SendTransactionParameters<
+        Chain | undefined,
+        TAccount,
+        undefined
+    >)
     return hash
 }
