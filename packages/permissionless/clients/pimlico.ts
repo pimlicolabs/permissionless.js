@@ -10,10 +10,8 @@ import type {
 } from "viem"
 import { createClient } from "viem"
 import {
-    type BundlerActions,
     type PaymasterActions,
     type SmartAccount,
-    bundlerActions,
     type entryPoint06Address,
     type entryPoint07Address,
     paymasterActions
@@ -46,9 +44,7 @@ export type PimlicoClient<
         rpcSchema extends RpcSchema
             ? [...BundlerRpcSchema, ...PimlicoRpcSchema, ...rpcSchema]
             : [...BundlerRpcSchema, ...PimlicoRpcSchema],
-        BundlerActions<account> &
-            PaymasterActions &
-            PimlicoActions<entryPointAddress, entryPointVersion>
+        PaymasterActions & PimlicoActions<entryPointAddress, entryPointVersion>
     >
 >
 
@@ -144,7 +140,7 @@ export function createPimlicoClient(
         name,
         type: "pimlicoBundlerClient"
     })
-    return client.extend(bundlerActions).extend(paymasterActions).extend(
+    return client.extend(paymasterActions).extend(
         pimlicoActions({
             entryPoint
         })

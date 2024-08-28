@@ -106,6 +106,9 @@ export type PimlicoActions<
             Omit<SendCompressedUserOperationParameters, "entryPoint">
         >
     ) => Promise<Hash>
+    /**
+     * @deprecated Use `getPaymasterData` instead
+     */
     sponsorUserOperation: (
         args: Omit<
             PimlicoSponsorUserOperationParameters<
