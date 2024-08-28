@@ -64,12 +64,13 @@ export async function sendTransaction<
     account extends SmartAccount | undefined,
     chain extends Chain | undefined,
     accountOverride extends SmartAccount | undefined = undefined,
-    chainOverride extends Chain | undefined = Chain | undefined
+    chainOverride extends Chain | undefined = Chain | undefined,
+    calls extends readonly unknown[] = readonly unknown[]
 >(
     client: Client<Transport, chain, account>,
     args:
         | SendTransactionParameters<chain, account, chainOverride>
-        | SendUserOperationParameters<account, accountOverride>
+        | SendUserOperationParameters<account, accountOverride, calls>
 ): Promise<Hash> {
     let userOpHash: Hash
 

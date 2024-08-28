@@ -65,14 +65,16 @@ export type SmartAccountActions<
      */
     sendTransaction: <
         TChainOverride extends Chain | undefined = undefined,
-        accountOverride extends SmartAccount | undefined = undefined
+        accountOverride extends SmartAccount | undefined = undefined,
+        calls extends readonly unknown[] = readonly unknown[]
     >(
         args: Parameters<
             typeof sendTransaction<
                 TSmartAccount,
                 TChain,
                 accountOverride,
-                TChainOverride
+                TChainOverride,
+                calls
             >
         >[1]
     ) => Promise<Hash>
@@ -318,7 +320,7 @@ export function smartAccountActions() {
     >(
         client: Client<Transport, TChain, TSmartAccount>
     ): SmartAccountActions<TChain, TSmartAccount> => ({
-        sendTransaction: (args) => sendTransaction(client, args),
+        sendTransaction: (args) => sendTransaction(client, args as any),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
         writeContract: (args) => writeContract(client, args)
