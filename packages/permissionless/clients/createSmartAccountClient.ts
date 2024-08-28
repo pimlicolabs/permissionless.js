@@ -69,9 +69,9 @@ export type SmartAccountClientConfig<
         | "name"
         | "pollingInterval"
         | "rpcSchema"
-        | "transport"
     >
 > & {
+    bundlerTransport: transport
     /** Client that points to an Execution RPC URL. */
     client?: client | Client | undefined
     /** Paymaster configuration. */
@@ -130,7 +130,7 @@ export function createSmartAccountClient(
         name = "Bundler Client",
         paymaster,
         paymasterContext,
-        transport,
+        bundlerTransport,
         userOperation
     } = parameters
 
@@ -139,7 +139,7 @@ export function createSmartAccountClient(
         chain: parameters.chain ?? client_?.chain,
         key,
         name,
-        transport,
+        transport: bundlerTransport,
         paymaster,
         paymasterContext,
         userOperation

@@ -138,7 +138,7 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
         }
     })
 
-    return createBundlerClient<Transport, undefined, account>({
+    return createBundlerClient({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
@@ -170,12 +170,12 @@ export const getSmartAccountClient = <
           })
         : undefined
 
-    return createSmartAccountClient<Transport, Chain, account>({
+    return createSmartAccountClient({
         client: getPublicClient(anvilRpc),
         chain: foundry,
         account,
         paymaster,
-        transport: http(altoRpc)
+        bundlerTransport: http(altoRpc)
     })
 }
 

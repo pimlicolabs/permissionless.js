@@ -40,7 +40,6 @@ import {
     pmSponsorUserOperationParamsSchema
 } from "./helpers/schema"
 import { maxBigInt } from "./helpers/utils"
-import { getMockAccount } from "./mockAccount"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"0.6">,
@@ -67,14 +66,6 @@ const handleMethodV06 = async (
     if (estimateGas) {
         try {
             const gasEstimates = await bundler.estimateUserOperationGas({
-                account: await getMockAccount({
-                    publicClient,
-                    entryPoint: {
-                        address: entryPoint06Address,
-                        abi: entryPoint06Abi,
-                        version: "0.6"
-                    }
-                }),
                 ...op
             })
             op = {
@@ -177,14 +168,6 @@ const handleMethodV07 = async (
     if (estimateGas) {
         try {
             const gasEstimates = await bundler.estimateUserOperationGas({
-                account: await getMockAccount({
-                    publicClient,
-                    entryPoint: {
-                        address: entryPoint06Address,
-                        abi: entryPoint06Abi,
-                        version: "0.6"
-                    }
-                }),
                 ...op
             })
 

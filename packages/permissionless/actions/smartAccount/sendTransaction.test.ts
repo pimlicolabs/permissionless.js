@@ -28,7 +28,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const transactionHash = await sendTransaction(smartClient, {
-                    chain: foundry,
                     to: zeroAddress,
                     data: "0x",
                     value: 0n
@@ -49,7 +48,6 @@ describe.each(getCoreSmartAccounts())(
                 // -- second transaction after deployment
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    chain: foundry,
                     to: zeroAddress,
                     data: "0x",
                     value: 0n
@@ -80,7 +78,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const transactionHash = await sendTransaction(smartClient, {
-                    chain: foundry,
                     to: zeroAddress,
                     data: "0x",
                     value: 0n
@@ -99,7 +96,6 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt.status).toBe("success")
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    chain: foundry,
                     to: zeroAddress,
                     data: "0x",
                     value: 0n

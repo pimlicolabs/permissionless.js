@@ -71,6 +71,6 @@
         }
     },
     "peerDependencies": {
-        "viem": "^2.18.0"
+        "viem": "^2.20.0"
     }
 }
