@@ -70,6 +70,7 @@ export type SmartAccountActions<
         args: Parameters<
             typeof sendTransaction<
                 TSmartAccount,
+                TChain,
                 accountOverride,
                 TChainOverride
             >

@@ -62,12 +62,13 @@ import { AccountNotFoundError } from "../../errors"
  */
 export async function sendTransaction<
     account extends SmartAccount | undefined,
+    chain extends Chain | undefined,
     accountOverride extends SmartAccount | undefined = undefined,
     chainOverride extends Chain | undefined = Chain | undefined
 >(
-    client: Client<Transport, Chain | undefined, account>,
+    client: Client<Transport, chain, account>,
     args:
-        | SendTransactionParameters<Chain | undefined, account, chainOverride>
+        | SendTransactionParameters<chain, account, chainOverride>
         | SendUserOperationParameters<account, accountOverride>
 ): Promise<Hash> {
     let userOpHash: Hash
