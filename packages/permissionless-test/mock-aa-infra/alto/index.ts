@@ -490,6 +490,6 @@ export const setupContracts = async (rpc: string) => {
         "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // Etherspot Factory
         "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066", // Etherspot Bootstrap
         "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143", // Etherspot Multiple Owner ECDSA Validator
-        "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933" // Etherspot implementation
+        "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9" // Etherspot implementation
     ])
 }
