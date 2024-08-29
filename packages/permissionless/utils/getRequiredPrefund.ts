@@ -42,17 +42,13 @@ export const getRequiredPrefund = <entryPointVersion extends "0.6" | "0.7">({
     }
 
     const userOperationV07 = userOperation as UserOperation<"0.7">
-    const multiplier = userOperationV07.paymaster ? BigInt(3) : BigInt(1)
-
-    const verificationGasLimit =
-        userOperationV07.verificationGasLimit +
-        (userOperationV07.paymasterPostOpGasLimit || BigInt(0)) +
-        (userOperationV07.paymasterVerificationGasLimit || BigInt(0))
 
     const requiredGas =
+        userOperationV07.verificationGasLimit +
         userOperationV07.callGasLimit +
-        verificationGasLimit * multiplier +
+        (userOperationV07.paymasterVerificationGasLimit || 0n) +
+        (userOperationV07.paymasterPostOpGasLimit || 0n) +
         userOperationV07.preVerificationGas
 
-    return BigInt(requiredGas) * BigInt(userOperationV07.maxFeePerGas)
+    return requiredGas * userOperationV07.maxFeePerGas
 }
