@@ -64,4 +64,51 @@ describe("getRequiredPrefund", () => {
             expect(result).toBe(expectedResult)
         })
     })
+    describe("v0.7 UserOperation", () => {
+        test("should calculate the required prefund without paymater gasLimits", () => {
+            const userOperation = {
+                callGasLimit: BigInt(1000),
+                verificationGasLimit: BigInt(2000),
+                preVerificationGas: BigInt(500),
+                paymasterVerificationGasLimit: undefined,
+                paymasterPostOpGasLimit: undefined,
+                paymaster: undefined,
+                paymasterData: undefined,
+                maxFeePerGas: BigInt(10)
+            }
+            const result = getRequiredPrefund({
+                userOperation: userOperation as UserOperation<"0.7">,
+                entryPointVersion: "0.7"
+            })
+            const expectedGas =
+                BigInt(1000) + BigInt(2000) * BigInt(1) + BigInt(500)
+            const expectedResult = expectedGas * BigInt(10)
+            expect(result).toBe(expectedResult)
+        })
+
+        test("should calculate the required prefund with paymaster gasLimits", () => {
+            const userOperation = {
+                callGasLimit: BigInt(1000),
+                verificationGasLimit: BigInt(2000),
+                preVerificationGas: BigInt(500),
+                paymasterVerificationGasLimit: BigInt(20),
+                paymasterPostOpGasLimit: BigInt(30),
+                paymaster: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                paymasterData: "0x1234",
+                maxFeePerGas: BigInt(10)
+            }
+            const result = getRequiredPrefund({
+                userOperation: userOperation as UserOperation<"0.7">,
+                entryPointVersion: "0.7"
+            })
+            const expectedGas =
+                BigInt(1000) +
+                BigInt(2000) +
+                BigInt(500) +
+                BigInt(20) +
+                BigInt(30)
+            const expectedResult = expectedGas * BigInt(10)
+            expect(result).toBe(expectedResult)
+        })
+    })
 })
