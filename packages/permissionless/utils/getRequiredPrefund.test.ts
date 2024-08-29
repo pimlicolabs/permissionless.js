@@ -40,29 +40,6 @@ describe("getRequiredPrefund", () => {
             const expectedResult = expectedGas * BigInt(10)
             expect(result).toBe(expectedResult)
         })
-
-        test("should calculate the required prefund with paymaster", () => {
-            const userOperation = {
-                callGasLimit: BigInt(1000),
-                verificationGasLimit: BigInt(2000),
-                preVerificationGas: BigInt(500),
-                maxFeePerGas: BigInt(10),
-                paymaster: "0xPaymasterAddress",
-                paymasterPostOpGasLimit: BigInt(100),
-                paymasterVerificationGasLimit: BigInt(200)
-            }
-            const result = getRequiredPrefund({
-                userOperation: userOperation as UserOperation<"0.7">,
-                entryPointVersion: "0.7"
-            })
-            const multiplier = BigInt(3)
-            const verificationGasLimit =
-                BigInt(2000) + BigInt(100) + BigInt(200)
-            const expectedGas =
-                BigInt(1000) + verificationGasLimit * multiplier + BigInt(500)
-            const expectedResult = expectedGas * BigInt(10)
-            expect(result).toBe(expectedResult)
-        })
     })
     describe("v0.7 UserOperation", () => {
         test("should calculate the required prefund without paymater gasLimits", () => {
@@ -94,7 +71,6 @@ describe("getRequiredPrefund", () => {
                 paymasterVerificationGasLimit: BigInt(20),
                 paymasterPostOpGasLimit: BigInt(30),
                 paymaster: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                paymasterData: "0x1234",
                 maxFeePerGas: BigInt(10)
             }
             const result = getRequiredPrefund({
