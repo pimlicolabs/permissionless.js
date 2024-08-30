@@ -12,7 +12,7 @@ import type { PimlicoRpcSchema } from "../../types/pimlico"
 export type GetTokenQuotesParameters = {
     tokens: Address[]
     entryPointAddress: Address
-    chainId: bigint
+    chainId: number
 }
 
 export type GetTokenQuotesReturnType = {

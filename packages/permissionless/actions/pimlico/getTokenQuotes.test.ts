@@ -18,7 +18,7 @@ describe("getTokenQuotes", () => {
         const quotes = await getTokenQuotes(pimlicoBundlerClient, {
             tokens: [token],
             entryPointAddress: entryPoint07Address,
-            chainId: BigInt(foundry.id)
+            chainId: foundry.id
         })
 
         expect(quotes).toBeTruthy()
