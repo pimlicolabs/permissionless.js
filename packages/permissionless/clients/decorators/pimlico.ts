@@ -7,8 +7,11 @@ import {
     type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
     sendCompressedUserOperation,
-    validateSponsorshipPolicies
+    validateSponsorshipPolicies,
+    getTokenQuotes
 } from "../../actions/pimlico"
 import {
     type GetUserOperationGasPriceReturnType,
@@ -129,6 +132,9 @@ export type PimlicoActions<
             >
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
+    getTokenQuotes: (
+        args: Prettify<Omit<GetTokenQuotesParameters, "entryPoint">>
+    ) => Promise<Prettify<GetTokenQuotesReturnType>>
 }
 
 export const pimlicoActions =
@@ -161,6 +167,11 @@ export const pimlicoActions =
             }),
         validateSponsorshipPolicies: async (args) =>
             validateSponsorshipPolicies(client, {
+                ...args,
+                entryPointAddress: entryPoint.address
+            }),
+        getTokenQuotes: async (args) =>
+            getTokenQuotes(client, {
                 ...args,
                 entryPointAddress: entryPoint.address
             })

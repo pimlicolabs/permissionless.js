@@ -16,6 +16,11 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation"
+import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
+    getTokenQuotes
+} from "./pimlico/getTokenQuotes"
 
 import type { PimlicoActions } from "../clients/decorators/pimlico"
 import { pimlicoActions } from "../clients/decorators/pimlico"
@@ -35,7 +40,9 @@ export type {
     SendCompressedUserOperationParameters,
     SponsorUserOperationReturnType,
     ValidateSponsorshipPolicies,
-    ValidateSponsorshipPoliciesParameters
+    ValidateSponsorshipPoliciesParameters,
+    GetTokenQuotesParameters,
+    GetTokenQuotesReturnType
 }
 
 export {
@@ -44,5 +51,6 @@ export {
     pimlicoActions,
     sendCompressedUserOperation,
     sponsorUserOperation,
-    validateSponsorshipPolicies
+    validateSponsorshipPolicies,
+    getTokenQuotes
 }

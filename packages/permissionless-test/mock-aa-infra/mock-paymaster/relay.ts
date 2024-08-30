@@ -1,8 +1,8 @@
 import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    type Account,
     BaseError,
+    type Account,
     type Chain,
     type Client,
     type GetContractReturnType,
@@ -11,14 +11,15 @@ import {
     type RpcRequestError,
     type Transport,
     type WalletClient,
+    type Address,
     concat,
     encodeAbiParameters,
-    toHex
+    toHex,
+    getAddress
 } from "viem"
 import {
     type BundlerClient,
     type UserOperation,
-    entryPoint06Abi,
     entryPoint06Address,
     entryPoint07Address
 } from "viem/account-abstraction"
@@ -37,7 +38,8 @@ import {
     jsonRpcSchema,
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
-    pmSponsorUserOperationParamsSchema
+    pmSponsorUserOperationParamsSchema,
+    pimlicoGetTokenQuotesSchema
 } from "./helpers/schema"
 import { maxBigInt } from "./helpers/utils"
 
@@ -260,7 +262,7 @@ const handleMethod = async (
     verifyingPaymasterV06: GetContractReturnType<
         typeof VERIFYING_PAYMASTER_V06_ABI
     >,
-    publicClient: PublicClient,
+    publicClient: PublicClient<Transport, Chain>,
     walletClient: WalletClient<Transport, Chain, Account>,
     parsedBody: JsonRpcSchema
 ) => {
@@ -405,6 +407,42 @@ const handleMethod = async (
         ]
     }
 
+    if (parsedBody.method === "pimlico_getTokenQuotes") {
+        const params = pimlicoGetTokenQuotesSchema.safeParse(parsedBody.params)
+
+        if (!params.success) {
+            throw new RpcError(
+                fromZodError(params.error).message,
+                ValidationErrors.InvalidFields
+            )
+        }
+
+        const [context, entryPoint] = params.data
+        const { tokens } = context
+
+        const quotes = {
+            [getAddress("0xffffffffffffffffffffffffffffffffffffffff")]: {
+                exchangeRate: "0x5cc717fbb3450c0000",
+                postOpGas: "0xc350"
+            }
+        }
+
+        let paymaster: Address
+        if (entryPoint === entryPoint07Address) {
+            paymaster = verifyingPaymasterV07.address
+        } else {
+            paymaster = verifyingPaymasterV06.address
+        }
+
+        return tokens
+            .filter((t) => quotes[t]) // Filter out unrecongized tokens
+            .map((token) => ({
+                ...quotes[token],
+                paymaster,
+                token
+            }))
+    }
+
     throw new RpcError(
         `Attempted to call an unknown method ${parsedBody.method}`,
         ValidationErrors.InvalidFields
@@ -419,7 +457,7 @@ export const createRpcHandler = (
     verifyingPaymasterV06: GetContractReturnType<
         typeof VERIFYING_PAYMASTER_V06_ABI
     >,
-    publicClient: PublicClient,
+    publicClient: PublicClient<Transport, Chain>,
     walletClient: WalletClient<Transport, Chain, Account>
 ) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
