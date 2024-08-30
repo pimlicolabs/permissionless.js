@@ -73,7 +73,10 @@ export async function deployContract<
         | undefined
 >(
     client: Client<Transport, TChain, TAccount>,
-    args: Prettify<DeployContractParametersWithPaymaster<entryPoint>>
+    args: Prettify<DeployContractParametersWithPaymaster<entryPoint>> &
+    {
+        callGasLimit?: bigint
+    }
 ): Promise<Hash> {
     const {
         abi,
@@ -104,6 +107,7 @@ export async function deployContract<
         "sendUserOperation"
     )({
         userOperation: {
+            callGasLimit: request.callGasLimit,
             sender: account.address,
             maxFeePerGas: request.maxFeePerGas,
             maxPriorityFeePerGas: request.maxPriorityFeePerGas,

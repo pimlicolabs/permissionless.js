@@ -33,6 +33,7 @@ export type SendTransactionsWithPaymasterParameters<
         maxFeePerGas?: bigint
         maxPriorityFeePerGas?: bigint
         nonce?: bigint
+        callGasLimit?: bigint
     }
 
 /**
@@ -105,7 +106,8 @@ export async function sendTransactions<
         middleware,
         maxFeePerGas,
         maxPriorityFeePerGas,
-        nonce
+        nonce,
+        callGasLimit
     } = args
 
     if (!account_) {
@@ -147,6 +149,7 @@ export async function sendTransactions<
         "sendUserOperation"
     )({
         userOperation: {
+            callGasLimit: callGasLimit,
             sender: account.address,
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
