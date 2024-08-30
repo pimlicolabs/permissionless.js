@@ -434,13 +434,15 @@ const handleMethod = async (
             paymaster = verifyingPaymasterV06.address
         }
 
-        return tokens
-            .filter((t) => quotes[t]) // Filter out unrecongized tokens
-            .map((token) => ({
-                ...quotes[token],
-                paymaster,
-                token
-            }))
+        return {
+            quotes: tokens
+                .filter((t) => quotes[t]) // Filter out unrecongized tokens
+                .map((token) => ({
+                    ...quotes[token],
+                    paymaster,
+                    token
+                }))
+        }
     }
 
     throw new RpcError(

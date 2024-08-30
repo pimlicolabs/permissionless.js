@@ -1,5 +1,5 @@
 import { getAddress, isAddress } from "viem"
-import { entryPoint07Address } from "viem/_types/account-abstraction"
+import { entryPoint07Address } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
@@ -10,7 +10,7 @@ describe("getTokenQuotes", () => {
     testWithRpc("getTokenQuotes", async ({ rpc }) => {
         const pimlicoBundlerClient = getPimlicoClient({
             entryPointVersion: "0.7",
-            altoRpc: rpc.altoRpc
+            altoRpc: rpc.paymasterRpc
         })
 
         const token = getAddress("0xffffffffffffffffffffffffffffffffffffffff")

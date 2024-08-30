@@ -50,11 +50,9 @@ export const getTokenQuotes = async (
         ]
     })
 
-    return {
-        ...res.quotes.map((quote) => ({
-            ...quote,
-            postOpGas: hexToBigInt(quote.postOpGas),
-            exchangeRate: hexToBigInt(quote.exchangeRate)
-        }))
-    }
+    return res.quotes.map((quote) => ({
+        ...quote,
+        postOpGas: hexToBigInt(quote.postOpGas),
+        exchangeRate: hexToBigInt(quote.exchangeRate)
+    }))
 }
