@@ -1,8 +1,9 @@
 import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    BaseError,
     type Account,
+    type Address,
+    BaseError,
     type Chain,
     type Client,
     type GetContractReturnType,
@@ -11,11 +12,10 @@ import {
     type RpcRequestError,
     type Transport,
     type WalletClient,
-    type Address,
     concat,
     encodeAbiParameters,
-    toHex,
-    getAddress
+    getAddress,
+    toHex
 } from "viem"
 import {
     type BundlerClient,
@@ -36,10 +36,10 @@ import {
     RpcError,
     ValidationErrors,
     jsonRpcSchema,
+    pimlicoGetTokenQuotesSchema,
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
-    pmSponsorUserOperationParamsSchema,
-    pimlicoGetTokenQuotesSchema
+    pmSponsorUserOperationParamsSchema
 } from "./helpers/schema"
 import { maxBigInt } from "./helpers/utils"
 

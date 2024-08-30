@@ -1,4 +1,9 @@
 import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
+    getTokenQuotes
+} from "./pimlico/getTokenQuotes"
+import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
 } from "./pimlico/getUserOperationGasPrice"
@@ -16,11 +21,6 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation"
-import {
-    type GetTokenQuotesParameters,
-    type GetTokenQuotesReturnType,
-    getTokenQuotes
-} from "./pimlico/getTokenQuotes"
 
 import type { PimlicoActions } from "../clients/decorators/pimlico"
 import { pimlicoActions } from "../clients/decorators/pimlico"

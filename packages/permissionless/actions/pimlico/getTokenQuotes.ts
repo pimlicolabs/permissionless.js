@@ -1,11 +1,11 @@
 import {
-    hexToBigInt,
-    numberToHex,
     type Account,
     type Address,
     type Chain,
     type Client,
-    type Transport
+    type Transport,
+    hexToBigInt,
+    numberToHex
 } from "viem"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 
