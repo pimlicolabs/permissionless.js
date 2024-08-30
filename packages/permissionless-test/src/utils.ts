@@ -317,7 +317,7 @@ export const getBiconomyClient = async <
 }: AAParamType<entryPointVersion>) => {
     return toBiconomySmartAccount({
         client: getPublicClient(anvilRpc),
-        owner: privateKeyToAccount(generatePrivateKey())
+        owners: [privateKeyToAccount(generatePrivateKey())]
     })
 }
 
