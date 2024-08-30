@@ -22,10 +22,20 @@ export async function toOwner({
     address
 }: {
     owner: OneOf<
-        EIP1193Provider | WalletClient<Transport, Chain | undefined, Account>
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
     >
     address?: Address
 }): Promise<LocalAccount> {
+    if ("type" in owner && owner.type === "local") {
+        return owner as LocalAccount
+    }
+
+    let walletClient:
+        | WalletClient<Transport, Chain | undefined, Account>
+        | undefined = undefined
+
     if ("request" in owner) {
         if (!address) {
             try {
@@ -46,20 +56,28 @@ export async function toOwner({
             // For TS to be happy
             throw new Error("address is required")
         }
-        owner = createWalletClient({
+        walletClient = createWalletClient({
             account: address,
-            transport: custom(owner)
+            transport: custom(owner as EIP1193Provider)
         })
     }
 
+    if (!walletClient) {
+        walletClient = owner as WalletClient<
+            Transport,
+            Chain | undefined,
+            Account
+        >
+    }
+
     return toAccount({
-        address: owner.account.address,
+        address: walletClient.account.address,
         async signMessage({ message }) {
-            return owner.signMessage({ message })
+            return walletClient.signMessage({ message })
         },
         async signTypedData(typedData) {
             return getAction(
-                owner,
+                walletClient,
                 signTypedData,
                 "signTypedData"
             )(typedData as any)

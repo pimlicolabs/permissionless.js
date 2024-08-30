@@ -348,7 +348,7 @@ export const getKernelEcdsaClient = async <
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owner: privateKeyToAccount(generatePrivateKey()),
+        owners: [privateKeyToAccount(generatePrivateKey())],
         version
     })
 }
@@ -371,7 +371,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owner: privateKeyToAccount(generatePrivateKey()),
+        owners: [privateKeyToAccount(generatePrivateKey())],
         version: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579

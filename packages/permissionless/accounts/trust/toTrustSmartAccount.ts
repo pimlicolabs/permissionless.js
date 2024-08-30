@@ -1,9 +1,15 @@
 import {
+    type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
+    type EIP1193Provider,
     type Hex,
     type LocalAccount,
+    type OneOf,
+    type Transport,
+    type WalletClient,
     hashMessage,
     hashTypedData
 } from "viem"
@@ -21,6 +27,7 @@ import {
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getFactoryData } from "./utils/getFactoryData"
 
@@ -63,7 +70,11 @@ export type ToTrustSmartAccountParameters<
     entryPointVersion extends "0.6" = "0.6"
 > = {
     client: Client
-    owner: LocalAccount
+    owner: OneOf<
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
     factoryAddress?: Address
     entryPoint?: {
         address: Address
@@ -113,6 +124,8 @@ export async function toTrustSmartAccount<
         secp256k1VerificationFacetAddress = TRUST_ADDRESSES.secp256k1VerificationFacetAddress
     } = parameters
 
+    const localOwner = await toOwner({ owner })
+
     let accountAddress: Address | undefined = address
 
     const entryPoint = {
@@ -135,7 +148,7 @@ export async function toTrustSmartAccount<
         return {
             factory: factoryAddress,
             factoryData: await getFactoryData({
-                bytes: owner.address,
+                bytes: localOwner.address,
                 secp256k1VerificationFacetAddress,
                 index
             })
@@ -178,7 +191,7 @@ export async function toTrustSmartAccount<
         },
         async signMessage({ message }) {
             return _signTypedData(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashMessage(message)
@@ -186,7 +199,7 @@ export async function toTrustSmartAccount<
         },
         async signTypedData(typedData) {
             return _signTypedData(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashTypedData(typedData)
@@ -197,7 +210,7 @@ export async function toTrustSmartAccount<
                 parameters
 
             return signMessage(client, {
-                account: owner,
+                account: localOwner,
                 message: {
                     raw: getUserOperationHash({
                         userOperation: {

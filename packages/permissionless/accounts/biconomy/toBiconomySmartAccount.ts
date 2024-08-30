@@ -1,4 +1,13 @@
-import type { Assign, Prettify } from "viem"
+import type {
+    Account,
+    Assign,
+    Chain,
+    EIP1193Provider,
+    OneOf,
+    Prettify,
+    Transport,
+    WalletClient
+} from "viem"
 import {
     type Address,
     type Client,
@@ -19,6 +28,7 @@ import {
 import { signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi"
 
 /**
@@ -72,7 +82,11 @@ const getAccountInitCode = async ({
 
 export type ToBiconomySmartAccountParameters = Prettify<{
     client: Client
-    owner: LocalAccount
+    owner: OneOf<
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
     address?: Address | undefined
     entryPoint?: {
         address: Address
@@ -108,6 +122,8 @@ export async function toBiconomySmartAccount(
 ): Promise<ToBiconomySmartAccountReturnType> {
     const { owner, client, index = 0n, address } = parameters
 
+    const localOwner = await toOwner({ owner })
+
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint06Address,
         abi: entryPoint06Abi,
@@ -127,7 +143,7 @@ export async function toBiconomySmartAccount(
         return {
             factory: factoryAddress,
             factoryData: await getAccountInitCode({
-                owner: owner.address,
+                owner: localOwner.address,
                 index,
                 ecdsaModuleAddress
             })
@@ -190,7 +206,7 @@ export async function toBiconomySmartAccount(
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            let signature = await owner.signMessage({
+            let signature = await localOwner.signMessage({
                 message
             })
 
@@ -209,7 +225,7 @@ export async function toBiconomySmartAccount(
             )
         },
         async signTypedData(typedData) {
-            let signature = await owner.signTypedData(typedData)
+            let signature = await localOwner.signTypedData(typedData)
 
             const potentiallyIncorrectV = Number.parseInt(
                 signature.slice(-2),
@@ -242,7 +258,7 @@ export async function toBiconomySmartAccount(
                 chainId: chainId
             })
             const signature = await signMessage(client, {
-                account: owner,
+                account: localOwner,
                 message: { raw: hash }
             })
             // userOp signature is encoded module signature + module address
