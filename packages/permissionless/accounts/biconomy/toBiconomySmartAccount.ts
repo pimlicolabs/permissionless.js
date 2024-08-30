@@ -82,11 +82,13 @@ const getAccountInitCode = async ({
 
 export type ToBiconomySmartAccountParameters = Prettify<{
     client: Client
-    owner: OneOf<
-        | EIP1193Provider
-        | WalletClient<Transport, Chain | undefined, Account>
-        | LocalAccount
-    >
+    owners: [
+        OneOf<
+            | EIP1193Provider
+            | WalletClient<Transport, Chain | undefined, Account>
+            | LocalAccount
+        >
+    ]
     address?: Address | undefined
     entryPoint?: {
         address: Address
@@ -120,9 +122,9 @@ export type ToBiconomySmartAccountReturnType = Prettify<
 export async function toBiconomySmartAccount(
     parameters: ToBiconomySmartAccountParameters
 ): Promise<ToBiconomySmartAccountReturnType> {
-    const { owner, client, index = 0n, address } = parameters
+    const { owners, client, index = 0n, address } = parameters
 
-    const localOwner = await toOwner({ owner })
+    const localOwner = await toOwner({ owner: owners[0] })
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint06Address,
