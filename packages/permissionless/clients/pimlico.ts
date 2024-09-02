@@ -138,15 +138,17 @@ export function createPimlicoClient(
         name = "Pimlico Bundler Client",
         entryPoint
     } = parameters
-    const client = createClient({
+    return createClient({
         ...parameters,
         key,
         name,
         type: "pimlicoBundlerClient"
     })
-    return client.extend(bundlerActions).extend(paymasterActions).extend(
-        pimlicoActions({
-            entryPoint
-        })
-    )
+        .extend(bundlerActions)
+        .extend(paymasterActions)
+        .extend(
+            pimlicoActions({
+                entryPoint
+            })
+        )
 }
