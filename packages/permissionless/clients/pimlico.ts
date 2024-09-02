@@ -42,7 +42,7 @@ export type PimlicoClient<
             : [...BundlerRpcSchema, ...PimlicoRpcSchema],
         BundlerActions<account> &
             PaymasterActions &
-            PimlicoActions<entryPointVersion>
+            PimlicoActions<chain, entryPointVersion>
     >
 >
 
