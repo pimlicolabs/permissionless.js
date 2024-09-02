@@ -1,10 +1,14 @@
-import { http, createPublicClient } from "viem"
-import { generatePrivateKey } from "viem/accounts"
+import { http, concatHex, createPublicClient } from "viem"
+import {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import { getSimpleAccountClient } from "../../../permissionless-test/src/utils"
-import type { ENTRYPOINT_ADDRESS_V06_TYPE } from "../../types"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
+import {
+    getBundlerClient,
+    getSimpleAccountClient
+} from "../../../permissionless-test/src/utils"
 import { getSenderAddress } from "./getSenderAddress"
 
 describe("getSenderAddress", () => {
@@ -15,16 +19,29 @@ describe("getSenderAddress", () => {
             transport: http(anvilRpc)
         })
 
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.6"
+                }
+            }),
+            entryPoint: {
+                version: "0.6"
+            },
+            ...rpc
         })
 
+        const { factory, factoryData } =
+            await simpleAccountClient.account.getFactoryArgs()
+
+        if (!factory || !factoryData) {
+            throw Error("Init code not found")
+        }
+
         const address = await getSenderAddress(client, {
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            initCode: await simpleAccountClient.account.getInitCode()
+            entryPointAddress: entryPoint06Address,
+            initCode: concatHex([factory, factoryData])
         })
 
         expect(address).toBe(simpleAccountClient.account.address)
@@ -36,18 +53,30 @@ describe("getSenderAddress", () => {
             transport: http(anvilRpc)
         })
 
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.6"
+                }
+            }),
+            entryPoint: {
+                version: "0.6"
+            },
+            ...rpc
         })
+
+        const { factory, factoryData } =
+            await simpleAccountClient.account.getFactoryArgs()
+
+        if (!factory || !factoryData) {
+            throw Error("Init code not found")
+        }
 
         await expect(async () =>
             getSenderAddress(client, {
-                entryPoint:
-                    "0x0000000000000000000000000000000000000000" as ENTRYPOINT_ADDRESS_V06_TYPE,
-                initCode: await simpleAccountClient.account.getInitCode()
+                entryPointAddress: "0x0000000000000000000000000000000000000000",
+                initCode: concatHex([factory, factoryData])
             })
         ).rejects.toThrowError(/not a valid entry point/)
     })
@@ -58,22 +87,28 @@ describe("getSenderAddress", () => {
             transport: http(anvilRpc)
         })
 
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.7"
+                }
+            }),
+            entryPoint: {
+                version: "0.7"
+            },
+            ...rpc
         })
 
-        const factory = await simpleAccountClient.account.getFactory()
-        const factoryData = await simpleAccountClient.account.getFactoryData()
+        const { factory, factoryData } =
+            await simpleAccountClient.account.getFactoryArgs()
 
         if (!factory || !factoryData) {
             throw new Error("Factory or factoryData not found")
         }
 
         const address = await getSenderAddress(client, {
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
+            entryPointAddress: entryPoint07Address,
             factory,
             factoryData
         })

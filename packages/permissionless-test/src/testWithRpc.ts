@@ -1,12 +1,11 @@
 import getPort from "get-port"
 import { alto, anvil } from "prool/instances"
+import {
+    entryPoint06Address,
+    entryPoint07Address
+} from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { test } from "vitest"
-import type { EntryPoint } from "../../permissionless/types/entrypoint"
-import {
-    ENTRYPOINT_ADDRESS_V06,
-    ENTRYPOINT_ADDRESS_V07
-} from "../../permissionless/utils"
 import {
     ENTRY_POINT_SIMULATIONS_ADDRESS,
     setupContracts
@@ -30,7 +29,7 @@ export const getAltoInstance = async ({
     })
 
     const instance = alto({
-        entrypoints: [ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07],
+        entrypoints: [entryPoint06Address, entryPoint07Address],
         rpcUrl: anvilRpc,
         executorPrivateKeys: [anvilPrivateKey],
         entrypointSimulationContract: ENTRY_POINT_SIMULATIONS_ADDRESS,

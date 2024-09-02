@@ -1,15 +1,11 @@
-import { type Chain, type Client, type Transport, zeroAddress } from "viem"
-import { generatePrivateKey } from "viem/accounts"
+import { zeroAddress } from "viem"
+import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
-    getPimlicoPaymasterClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import type { SmartAccount } from "../../accounts"
-import type { EntryPoint } from "../../types/entrypoint"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { sendTransaction } from "./sendTransaction"
 
 describe.each(getCoreSmartAccounts())(
@@ -22,31 +18,20 @@ describe.each(getCoreSmartAccounts())(
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "sendTransaction_v06",
             async ({ rpc }) => {
-                const { anvilRpc, altoRpc, paymasterRpc } = rpc
+                const { anvilRpc } = rpc
 
                 const smartClient = await getSmartAccountClient({
-                    entryPoint: ENTRYPOINT_ADDRESS_V06,
-                    privateKey: generatePrivateKey(),
-                    altoRpc: altoRpc,
-                    anvilRpc: anvilRpc,
-                    paymasterClient: getPimlicoPaymasterClient({
-                        entryPoint: ENTRYPOINT_ADDRESS_V06,
-                        paymasterRpc
-                    })
+                    entryPoint: {
+                        version: "0.6"
+                    },
+                    ...rpc
                 })
 
-                const transactionHash = await sendTransaction(
-                    smartClient as Client<
-                        Transport,
-                        Chain,
-                        SmartAccount<EntryPoint>
-                    >,
-                    {
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    }
-                )
+                const transactionHash = await sendTransaction(smartClient, {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
 
                 expect(transactionHash).toBeTruthy()
 
@@ -59,37 +44,44 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt).toBeTruthy()
                 expect(receipt.transactionHash).toBe(transactionHash)
                 expect(receipt.status).toBe("success")
+
+                // -- second transaction after deployment
+
+                const transactionHash2 = await sendTransaction(smartClient, {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
+
+                expect(transactionHash2).toBeTruthy()
+
+                const receipt2 = await publicClient.getTransactionReceipt({
+                    hash: transactionHash2
+                })
+
+                expect(receipt2).toBeTruthy()
+                expect(receipt2.transactionHash).toBe(transactionHash2)
+                expect(receipt2.status).toBe("success")
             }
         )
 
         testWithRpc.skipIf(!supportsEntryPointV07)(
             "sendTransaction_v07",
             async ({ rpc }) => {
-                const { anvilRpc, altoRpc, paymasterRpc } = rpc
+                const { anvilRpc } = rpc
 
                 const smartClient = await getSmartAccountClient({
-                    entryPoint: ENTRYPOINT_ADDRESS_V07,
-                    privateKey: generatePrivateKey(),
-                    altoRpc: altoRpc,
-                    anvilRpc: anvilRpc,
-                    paymasterClient: getPimlicoPaymasterClient({
-                        entryPoint: ENTRYPOINT_ADDRESS_V07,
-                        paymasterRpc
-                    })
+                    entryPoint: {
+                        version: "0.7"
+                    },
+                    ...rpc
                 })
 
-                const transactionHash = await sendTransaction(
-                    smartClient as Client<
-                        Transport,
-                        Chain,
-                        SmartAccount<EntryPoint>
-                    >,
-                    {
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    }
-                )
+                const transactionHash = await sendTransaction(smartClient, {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
 
                 expect(transactionHash).toBeTruthy()
 
@@ -102,6 +94,24 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt).toBeTruthy()
                 expect(receipt.transactionHash).toBe(transactionHash)
                 expect(receipt.status).toBe("success")
+
+                const transactionHash2 = await sendTransaction(smartClient, {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                })
+
+                // -- second transaction after deployment
+
+                expect(transactionHash2).toBeTruthy()
+
+                const receipt2 = await publicClient.getTransactionReceipt({
+                    hash: transactionHash2
+                })
+
+                expect(receipt2).toBeTruthy()
+                expect(receipt2.transactionHash).toBe(transactionHash2)
+                expect(receipt2.status).toBe("success")
             }
         )
     }

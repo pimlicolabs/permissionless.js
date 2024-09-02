@@ -1,12 +1,10 @@
-import type { Address, Chain, Client, Transport } from "viem"
+import type { Address, Client } from "viem"
 import { readContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import type { Prettify } from "../../types/"
-import type { EntryPoint } from "../../types/entrypoint"
 
 export type GetAccountNonceParams = {
-    sender: Address
-    entryPoint: EntryPoint
+    address: Address
+    entryPointAddress: Address
     key?: bigint
 }
 
@@ -36,21 +34,18 @@ export type GetAccountNonceParams = {
  *
  * // Return 0n
  */
-export const getAccountNonce = async <
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined
->(
-    client: Client<TTransport, TChain>,
-    args: Prettify<GetAccountNonceParams>
+export const getAccountNonce = async (
+    client: Client,
+    args: GetAccountNonceParams
 ): Promise<bigint> => {
-    const { sender, entryPoint, key = BigInt(0) } = args
+    const { address, entryPointAddress, key = BigInt(0) } = args
 
     return await getAction(
         client,
         readContract,
         "readContract"
     )({
-        address: entryPoint,
+        address: entryPointAddress,
         abi: [
             {
                 inputs: [
@@ -75,6 +70,6 @@ export const getAccountNonce = async <
             }
         ],
         functionName: "getNonce",
-        args: [sender, key]
+        args: [address, key]
     })
 }

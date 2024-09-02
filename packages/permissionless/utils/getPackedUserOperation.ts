@@ -1,8 +1,10 @@
 import { type Hex, concat, getAddress, pad, slice, toHex } from "viem"
-import type { UserOperation } from "../types/userOperation"
-import type { Hex32, PackedUserOperation } from "../types/userOperation"
+import type {
+    PackedUserOperation,
+    UserOperation
+} from "viem/account-abstraction"
 
-export function getInitCode(unpackedUserOperation: UserOperation<"v0.7">) {
+export function getInitCode(unpackedUserOperation: UserOperation<"0.7">) {
     return unpackedUserOperation.factory
         ? concat([
               unpackedUserOperation.factory,
@@ -25,14 +27,14 @@ export function unPackInitCode(initCode: Hex) {
 }
 
 export function getAccountGasLimits(
-    unpackedUserOperation: UserOperation<"v0.7">
+    unpackedUserOperation: UserOperation<"0.7">
 ) {
     return concat([
         pad(toHex(unpackedUserOperation.verificationGasLimit), {
             size: 16
         }),
         pad(toHex(unpackedUserOperation.callGasLimit), { size: 16 })
-    ]) as Hex32
+    ])
 }
 
 export function unpackAccountGasLimits(accountGasLimits: Hex) {
@@ -42,13 +44,13 @@ export function unpackAccountGasLimits(accountGasLimits: Hex) {
     }
 }
 
-export function getGasLimits(unpackedUserOperation: UserOperation<"v0.7">) {
+export function getGasLimits(unpackedUserOperation: UserOperation<"0.7">) {
     return concat([
         pad(toHex(unpackedUserOperation.maxPriorityFeePerGas), {
             size: 16
         }),
         pad(toHex(unpackedUserOperation.maxFeePerGas), { size: 16 })
-    ]) as Hex32
+    ])
 }
 
 export function unpackGasLimits(gasLimits: Hex) {
@@ -59,7 +61,7 @@ export function unpackGasLimits(gasLimits: Hex) {
 }
 
 export function getPaymasterAndData(
-    unpackedUserOperation: UserOperation<"v0.7">
+    unpackedUserOperation: UserOperation<"0.7">
 ) {
     return unpackedUserOperation.paymaster
         ? concat([
@@ -104,7 +106,7 @@ export function unpackPaymasterAndData(paymasterAndData: Hex) {
 }
 
 export const getPackedUserOperation = (
-    userOperation: UserOperation<"v0.7">
+    userOperation: UserOperation<"0.7">
 ): PackedUserOperation => {
     return {
         sender: userOperation.sender,

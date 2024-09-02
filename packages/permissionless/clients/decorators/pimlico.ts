@@ -1,8 +1,11 @@
-import type { Client, Hash } from "viem"
+import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
 import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
     type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
+    getTokenQuotes,
     sendCompressedUserOperation,
     validateSponsorshipPolicies
 } from "../../actions/pimlico"
@@ -20,11 +23,11 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation"
-import type { Prettify } from "../../types/"
-import type { EntryPoint } from "../../types/entrypoint"
-import type { PimlicoBundlerClient, PimlicoPaymasterClient } from "../pimlico"
 
-export type PimlicoBundlerActions = {
+export type PimlicoActions<
+    TChain extends Chain | undefined,
+    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+> = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
      *
@@ -95,147 +98,70 @@ export type PimlicoBundlerActions = {
      */
     sendCompressedUserOperation: (
         args: Prettify<
-            Omit<SendCompressedUserOperationParameters, "entryPoint">
+            Omit<SendCompressedUserOperationParameters, "entryPointAddress">
         >
     ) => Promise<Hash>
-}
-
-export const pimlicoBundlerActions =
-    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
-    (client: Client): PimlicoBundlerActions => ({
-        getUserOperationGasPrice: async () =>
-            getUserOperationGasPrice(
-                client as PimlicoBundlerClient<entryPoint>
-            ),
-        getUserOperationStatus: async (
-            args: GetUserOperationStatusParameters
-        ) =>
-            getUserOperationStatus(
-                client as PimlicoBundlerClient<entryPoint>,
-                args
-            ),
-        sendCompressedUserOperation: async (
-            args: Omit<SendCompressedUserOperationParameters, "entryPoint">
-        ) =>
-            sendCompressedUserOperation(
-                client as PimlicoBundlerClient<entryPoint>,
-                {
-                    ...args,
-                    entryPoint: entryPointAddress
-                }
-            )
-    })
-
-export type PimlicoPaymasterClientActions<entryPoint extends EntryPoint> = {
     /**
-     * Returns paymasterAndData & updated gas parameters required to sponsor a userOperation.
-     *
-     * https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/sponsorUserOperation
-     *
-     * @param args {@link PimlicoSponsorUserOperationParameters} UserOperation you want to sponsor & entryPoint.
-     * @returns paymasterAndData & updated gas parameters, see {@link SponsorUserOperationReturnType}
-     *
-     * @example
-     * import { createClient } from "viem"
-     * import { sponsorUserOperation } from "permissionless/actions/pimlico"
-     *
-     * const bundlerClient = createClient({
-     *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
-     * }).extend(pimlicoPaymasterActions)
-     *
-     * await bundlerClient.sponsorUserOperation(bundlerClient, {
-     *      userOperation: userOperationWithDummySignature,
-     *      entryPoint: entryPoint
-     * }})
-     *
+     * @deprecated Use `getPaymasterData` instead
      */
     sponsorUserOperation: (
         args: Omit<
-            PimlicoSponsorUserOperationParameters<entryPoint>,
+            PimlicoSponsorUserOperationParameters<entryPointVersion>,
             "entryPoint"
         >
-    ) => Promise<Prettify<SponsorUserOperationReturnType<entryPoint>>>
-
+    ) => Promise<Prettify<SponsorUserOperationReturnType<entryPointVersion>>>
     validateSponsorshipPolicies: (
         args: Prettify<
-            Omit<
-                ValidateSponsorshipPoliciesParameters<entryPoint>,
-                "entryPoint"
-            >
+            Omit<ValidateSponsorshipPoliciesParameters, "entryPointAddress">
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
+    getTokenQuotes: <
+        TChainOverride extends Chain | undefined = Chain | undefined
+    >(
+        args: Prettify<
+            Omit<
+                GetTokenQuotesParameters<TChain, TChainOverride>,
+                "entryPointAddress"
+            >
+        >
+    ) => Promise<Prettify<GetTokenQuotesReturnType>>
 }
 
-/**
- * Returns valid sponsorship policies for a userOperation from the list of ids passed
- * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-paymaster-actions/ValidateSponsorshipPolicies
- *
- * @param args {@link ValidateSponsorshipPoliciesParameters} UserOperation you want to sponsor & entryPoint.
- * @returns valid sponsorship policies, see {@link ValidateSponsorshipPolicies}
- *
- * @example
- * import { createClient } from "viem"
- * import { validateSponsorshipPolicies } from "permissionless/actions/pimlico"
- *
- * const bundlerClient = createClient({
- *   chain: goerli,
- *   transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
- * }).extend(pimlicoPaymasterActions)
-
- *
- * await bundlerClient.validateSponsorshipPolicies({
- *   userOperation: userOperationWithDummySignature,
- *   entryPoint: entryPoint,
- *   sponsorshipPolicyIds: ["sp_shiny_puma"]
- * })
- * Returns
- * [
- *   {
- *     sponsorshipPolicyId: "sp_shiny_puma",
- *     data: {
- *       name: "Shiny Puma",
- *       author: "Pimlico",
- *       icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4...",
- *       description: "This policy is for testing purposes only"
- *    }
- *   }
- * ]
- */
-export const pimlicoPaymasterActions =
-    <entryPoint extends EntryPoint>(entryPointAddress: entryPoint) =>
-    (client: Client): PimlicoPaymasterClientActions<entryPoint> => ({
-        sponsorUserOperation: async (
-            args: Omit<
-                PimlicoSponsorUserOperationParameters<entryPoint>,
-                "entryPoint"
-            >
-        ) =>
-            sponsorUserOperation<entryPoint>(
-                client as PimlicoPaymasterClient<entryPoint>,
-                {
-                    ...args,
-                    entryPoint: entryPointAddress
-                }
-            ),
-        validateSponsorshipPolicies: async (
-            args: Omit<
-                ValidateSponsorshipPoliciesParameters<entryPoint>,
-                "entryPoint"
-            >
-        ) =>
-            validateSponsorshipPolicies(
-                client as PimlicoPaymasterClient<entryPoint>,
-                { ...args, entryPoint: entryPointAddress }
-            )
+export const pimlicoActions =
+    <entryPointVersion extends "0.6" | "0.7">({
+        entryPoint
+    }: {
+        entryPoint: { address: Address; version: entryPointVersion }
+    }) =>
+    <
+        TTransport extends Transport,
+        TChain extends Chain | undefined = Chain | undefined
+    >(
+        client: Client<TTransport, TChain>
+    ): PimlicoActions<TChain, entryPointVersion> => ({
+        getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
+        getUserOperationStatus: async (
+            args: GetUserOperationStatusParameters
+        ) => getUserOperationStatus(client, args),
+        sendCompressedUserOperation: async (args) =>
+            sendCompressedUserOperation(client, {
+                ...args,
+                entryPointAddress: entryPoint.address
+            }),
+        sponsorUserOperation: async (args) =>
+            sponsorUserOperation(client, {
+                ...args,
+                entryPoint
+            }),
+        validateSponsorshipPolicies: async (args) =>
+            validateSponsorshipPolicies(client, {
+                ...args,
+                entryPointAddress: entryPoint.address
+            }),
+        getTokenQuotes: async (args) =>
+            getTokenQuotes(client, {
+                ...args,
+                chain: args.chain,
+                entryPointAddress: entryPoint.address
+            })
     })
-
-/**
- * TODO: Add support for pimlicoActions after we support all the actions of v2 of the Pimlico API.
- */
-// export const pimlicoActions = (client: Client) => {
-//     return {
-//         ...pimlicoBundlerActions(client),
-//         ...pimlicoPaymasterActions(client)
-//     }
-// }

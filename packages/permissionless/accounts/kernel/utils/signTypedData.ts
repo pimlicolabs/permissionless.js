@@ -1,43 +1,32 @@
 import {
-    type Account,
-    type Chain,
-    type Client,
     type LocalAccount,
-    type SignTypedDataParameters,
     type SignTypedDataReturnType,
-    type Transport,
-    type TypedData,
+    type TypedDataDefinition,
     getTypesForEIP712Domain,
     hashTypedData,
-    publicActions,
     validateTypedData
 } from "viem"
-
-import {
-    signMessage as _signMessage,
-    signTypedData as _signTypedData
-} from "viem/actions"
 import { isKernelV2 } from "./isKernelV2"
 import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
 
-export async function signTypedData<
-    const typedData extends TypedData | Record<string, unknown>,
-    primaryType extends keyof typedData | "EIP712Domain",
-    chain extends Chain | undefined,
-    account extends Account | undefined
->(
-    client: Client<Transport, chain, account>,
-    parameters: SignTypedDataParameters<typedData, primaryType, account> &
-        WrapMessageHashParams
+export async function signTypedData(
+    parameters: TypedDataDefinition &
+        WrapMessageHashParams & {
+            owner: LocalAccount
+        }
 ): Promise<SignTypedDataReturnType> {
     const {
-        account: account_,
+        owner,
         accountAddress,
-        accountVersion,
+        kernelVersion: accountVersion,
+        chainId,
         ...typedData
-    } = parameters as unknown as SignTypedDataParameters & WrapMessageHashParams
+    } = parameters
+
     if (isKernelV2(accountVersion)) {
-        return _signTypedData(client, { account: account_, ...typedData })
+        return owner.signTypedData({
+            ...typedData
+        })
     }
     const { message, primaryType, types: _types, domain } = typedData
     const types = {
@@ -59,17 +48,12 @@ export async function signTypedData<
     const typedHash = hashTypedData({ message, primaryType, types, domain })
 
     const wrappedMessageHash = wrapMessageHash(typedHash, {
-        accountVersion,
+        kernelVersion: accountVersion,
         accountAddress,
-        chainId: client.chain
-            ? client.chain.id
-            : await client.extend(publicActions).getChainId()
+        chainId: chainId
     })
 
-    const signature = await _signMessage(client, {
-        account: account_ as LocalAccount,
+    return owner.signMessage({
         message: { raw: wrappedMessageHash }
     })
-
-    return signature
 }

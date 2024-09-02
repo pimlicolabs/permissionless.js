@@ -1,13 +1,9 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
-import { http } from "viem"
+import { http, createPublicClient } from "viem"
+import { createBundlerClient } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
-import {
-    ENTRYPOINT_ADDRESS_V06,
-    ENTRYPOINT_ADDRESS_V07
-} from "../../../permissionless"
-import { createPimlicoBundlerClient } from "../../../permissionless/clients/pimlico"
 import { getAnvilWalletClient } from "./helpers/utils"
 import {
     setupVerifyingPaymasterV06,
@@ -39,16 +35,14 @@ export const paymaster = defineInstance(
                     anvilRpc
                 )
 
-                const altoBundlerV07 = createPimlicoBundlerClient({
-                    chain: foundry,
-                    transport: http(altoRpc),
-                    entryPoint: ENTRYPOINT_ADDRESS_V07
+                const publicClient = createPublicClient({
+                    transport: http(anvilRpc),
+                    chain: foundry
                 })
 
-                const altoBundlerV06 = createPimlicoBundlerClient({
+                const bundler = createBundlerClient({
                     chain: foundry,
-                    transport: http(altoRpc),
-                    entryPoint: ENTRYPOINT_ADDRESS_V06
+                    transport: http(altoRpc)
                 })
 
                 app.register(cors, {
@@ -57,10 +51,10 @@ export const paymaster = defineInstance(
                 })
 
                 const rpcHandler = createRpcHandler(
-                    altoBundlerV07,
-                    altoBundlerV06,
+                    bundler,
                     verifyingPaymasterV07,
                     verifyingPaymasterV06,
+                    publicClient,
                     walletClient
                 )
                 app.post("/", {}, rpcHandler)

@@ -1,16 +1,21 @@
 import type {
+    BundlerRpcSchema,
     Chain,
     Client,
     ClientConfig,
-    Transport,
-    WalletClientConfig
+    EstimateFeesPerGasReturnType,
+    Prettify,
+    RpcSchema,
+    Transport
 } from "viem"
-import { createClient } from "viem"
-import type { SmartAccount } from "../accounts/types"
-import type { Middleware } from "../actions/smartAccount/prepareUserOperationRequest"
-import type { Prettify } from "../types/"
-import type { BundlerRpcSchema } from "../types/bundler"
-import type { EntryPoint } from "../types/entrypoint"
+import {
+    type BundlerActions,
+    type BundlerClientConfig,
+    type PaymasterActions,
+    type SmartAccount,
+    type UserOperationRequest,
+    createBundlerClient
+} from "viem/account-abstraction"
 import {
     type SmartAccountActions,
     smartAccountActions
@@ -22,100 +27,123 @@ import {
  *  - Fix typing, 'accounts' is required to signMessage, signTypedData, signTransaction, but not needed here, since account is embedded in the client
  */
 export type SmartAccountClient<
-    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends
-        | SmartAccount<entryPoint, string, transport, chain>
-        | undefined =
-        | SmartAccount<entryPoint, string, transport, chain>
-        | undefined
+    account extends SmartAccount | undefined = SmartAccount | undefined,
+    client extends Client | undefined = Client | undefined,
+    rpcSchema extends RpcSchema | undefined = undefined
 > = Prettify<
     Client<
         transport,
-        chain,
+        chain extends Chain
+            ? chain
+            : client extends Client<any, infer chain>
+              ? chain
+              : undefined,
         account,
-        BundlerRpcSchema<entryPoint>,
-        SmartAccountActions<entryPoint, transport, chain, account>
+        rpcSchema extends RpcSchema
+            ? [...BundlerRpcSchema, ...rpcSchema]
+            : BundlerRpcSchema,
+        BundlerActions<account> & SmartAccountActions<chain, account>
     >
->
+> & {
+    client: client
+    paymaster: BundlerClientConfig["paymaster"] | undefined
+    paymasterContext: BundlerClientConfig["paymasterContext"] | undefined
+    userOperation: BundlerClientConfig["userOperation"] | undefined
+}
 
 export type SmartAccountClientConfig<
-    entryPoint extends EntryPoint,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
-    account extends
-        | SmartAccount<entryPoint, string, transport, chain>
-        | undefined =
-        | SmartAccount<entryPoint, string, transport, chain>
-        | undefined
-        | undefined
+    account extends SmartAccount | undefined = SmartAccount | undefined,
+    client extends Client | undefined = Client | undefined,
+    rpcSchema extends RpcSchema | undefined = undefined
 > = Prettify<
     Pick<
-        ClientConfig<transport, chain>,
-        "cacheTime" | "chain" | "key" | "name" | "pollingInterval"
-    > &
-        Middleware<entryPoint> & {
-            account: account
-            bundlerTransport: Transport
-        } & {
-            entryPoint?: entryPoint
-        }
->
-
-/**
- * Creates a EIP-4337 compliant Bundler Client with a given [Transport](https://viem.sh/docs/clients/intro.html) configured for a [Chain](https://viem.sh/docs/clients/chains.html).
- *
- * - Docs: https://docs.pimlico.io/permissionless/reference/clients/smartAccountClient
- *
- * A Bundler Client is an interface to "erc 4337" [JSON-RPC API](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace) methods such as sending user operation, estimating gas for a user operation, get user operation receipt, etc through Bundler Actions.
- *
- * @param parameters - {@link WalletClientConfig}
- * @returns A Bundler Client. {@link SmartAccountClient}
- *
- * @example
- * import { createPublicClient, http } from 'viem'
- * import { mainnet } from 'viem/chains'
- *
- * const smartAccountClient = createSmartAccountClient({
- *   chain: mainnet,
- *   transport: http(BUNDLER_URL),
- * })
- */
+        ClientConfig<transport, chain, account, rpcSchema>,
+        | "account"
+        | "cacheTime"
+        | "chain"
+        | "key"
+        | "name"
+        | "pollingInterval"
+        | "rpcSchema"
+    >
+> & {
+    bundlerTransport: transport
+    /** Client that points to an Execution RPC URL. */
+    client?: client | Client | undefined
+    /** Paymaster configuration. */
+    paymaster?:
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown
+    /** User Operation configuration. */
+    userOperation?:
+        | {
+              /** Prepares fee properties for the User Operation request. */
+              estimateFeesPerGas?:
+                  | ((parameters: {
+                        account: account | SmartAccount
+                        bundlerClient: Client
+                        userOperation: UserOperationRequest
+                    }) => Promise<EstimateFeesPerGasReturnType<"eip1559">>)
+                  | undefined
+          }
+        | undefined
+}
 
 export function createSmartAccountClient<
-    TTransport extends Transport,
-    TChain extends Chain | undefined,
-    TEntryPoint extends EntryPoint,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
+    transport extends Transport,
+    chain extends Chain | undefined = undefined,
+    account extends SmartAccount | undefined = undefined,
+    client extends Client | undefined = undefined,
+    rpcSchema extends RpcSchema | undefined = undefined
 >(
     parameters: SmartAccountClientConfig<
-        TEntryPoint,
-        TTransport,
-        TChain,
-        TSmartAccount
+        transport,
+        chain,
+        account,
+        client,
+        rpcSchema
     >
-): SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount> {
+): SmartAccountClient<transport, chain, account, client, rpcSchema>
+
+export function createSmartAccountClient(
+    parameters: SmartAccountClientConfig
+): SmartAccountClient {
     const {
-        key = "Account",
-        name = "Smart Account Client",
-        bundlerTransport
+        client: client_,
+        key = "bundler",
+        name = "Bundler Client",
+        paymaster,
+        paymasterContext,
+        bundlerTransport,
+        userOperation
     } = parameters
-    const client = createClient({
+
+    const client = createBundlerClient({
         ...parameters,
+        chain: parameters.chain ?? client_?.chain,
         key,
         name,
         transport: bundlerTransport,
-        type: "smartAccountClient"
+        paymaster,
+        paymasterContext,
+        userOperation
     })
 
-    return client.extend(
-        smartAccountActions({
-            middleware: parameters.middleware
-        })
-    ) as SmartAccountClient<TEntryPoint, TTransport, TChain, TSmartAccount>
+    return client.extend(smartAccountActions()) as unknown as SmartAccountClient
 }

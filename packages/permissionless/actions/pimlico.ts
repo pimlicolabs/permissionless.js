@@ -1,4 +1,9 @@
 import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
+    getTokenQuotes
+} from "./pimlico/getTokenQuotes"
+import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
 } from "./pimlico/getUserOperationGasPrice"
@@ -17,14 +22,8 @@ import {
     sponsorUserOperation
 } from "./pimlico/sponsorUserOperation"
 
-import type {
-    PimlicoBundlerActions,
-    PimlicoPaymasterClientActions
-} from "../clients/decorators/pimlico"
-import {
-    pimlicoBundlerActions,
-    pimlicoPaymasterActions
-} from "../clients/decorators/pimlico"
+import type { PimlicoActions } from "../clients/decorators/pimlico"
+import { pimlicoActions } from "../clients/decorators/pimlico"
 
 import {
     type ValidateSponsorshipPolicies,
@@ -36,21 +35,22 @@ export type {
     GetUserOperationGasPriceReturnType,
     GetUserOperationStatusParameters,
     GetUserOperationStatusReturnType,
-    PimlicoBundlerActions,
-    PimlicoPaymasterClientActions,
+    PimlicoActions,
     PimlicoSponsorUserOperationParameters,
     SendCompressedUserOperationParameters,
     SponsorUserOperationReturnType,
     ValidateSponsorshipPolicies,
-    ValidateSponsorshipPoliciesParameters
+    ValidateSponsorshipPoliciesParameters,
+    GetTokenQuotesParameters,
+    GetTokenQuotesReturnType
 }
 
 export {
     getUserOperationGasPrice,
     getUserOperationStatus,
-    pimlicoBundlerActions,
-    pimlicoPaymasterActions,
+    pimlicoActions,
     sendCompressedUserOperation,
     sponsorUserOperation,
-    validateSponsorshipPolicies
+    validateSponsorshipPolicies,
+    getTokenQuotes
 }

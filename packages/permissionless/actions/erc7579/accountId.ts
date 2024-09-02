@@ -1,5 +1,4 @@
 import {
-    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -7,22 +6,17 @@ import {
     decodeFunctionResult,
     encodeFunctionData
 } from "viem"
-import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter } from "../../types"
-import type { EntryPoint } from "../../types/entrypoint"
-import { parseAccount } from "../../utils/"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
+import type {
+    GetSmartAccountParameter,
+    SmartAccount
+} from "viem/account-abstraction"
+import { call, readContract } from "viem/actions"
+import { getAction } from "viem/utils"
+import { AccountNotFoundError } from "../../errors"
 
-export async function accountId<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport,
-    TChain extends Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
->(
-    client: Client<TTransport, TChain, TSmartAccount>,
-    args?: GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount>
+export async function accountId<TSmartAccount extends SmartAccount | undefined>(
+    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    args?: GetSmartAccountParameter<TSmartAccount>
 ): Promise<string> {
     let account_ = client.account
 
@@ -31,17 +25,12 @@ export async function accountId<
     }
 
     if (!account_) {
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = account_ as SmartAccount
 
     const publicClient = account.client
 
@@ -61,17 +50,24 @@ export async function accountId<
     ] as const
 
     try {
-        return await publicClient.readContract({
+        return await getAction(
+            publicClient,
+            readContract,
+            "readContract"
+        )({
             abi,
             functionName: "accountId",
-            address: account.address
+            address: await account.getAddress()
         })
     } catch (error) {
         if (error instanceof ContractFunctionExecutionError) {
-            const factory = await account.getFactory()
-            const factoryData = await account.getFactoryData()
+            const { factory, factoryData } = await account.getFactoryArgs()
 
-            const result = await publicClient.call({
+            const result = await getAction(
+                publicClient,
+                call,
+                "call"
+            )({
                 factory: factory,
                 factoryData: factoryData,
                 to: account.address,
@@ -79,7 +75,7 @@ export async function accountId<
                     abi,
                     functionName: "accountId"
                 })
-            } as unknown as CallParameters<TChain>)
+            })
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

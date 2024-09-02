@@ -5,9 +5,9 @@ import type {
     SignMessageReturnType,
     Transport
 } from "viem"
-import type { SmartAccount } from "../../accounts/types"
-import type { EntryPoint } from "../../types/entrypoint"
-import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
+import type { SmartAccount } from "viem/account-abstraction"
+import { parseAccount } from "viem/utils"
+import { AccountNotFoundError } from "../../errors"
 
 /**
  * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
@@ -55,29 +55,19 @@ import { AccountOrClientNotFoundError, parseAccount } from "../../utils/"
  *   message: 'hello world',
  * })
  */
-export async function signMessage<
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined
->(
-    client: Client<Transport, TChain, TAccount>,
+export async function signMessage<TAccount extends SmartAccount | undefined>(
+    client: Client<Transport, Chain | undefined, TAccount>,
     {
         account: account_ = client.account,
         message
     }: SignMessageParameters<TAccount>
 ): Promise<SignMessageReturnType> {
     if (!account_)
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/signMessage"
         })
 
-    const account = parseAccount(account_)
-    if (account.type === "local") return account.signMessage({ message })
+    const account = parseAccount(account_) as SmartAccount
 
-    throw new Error("Sign message is not supported by this account")
+    return account.signMessage({ message })
 }

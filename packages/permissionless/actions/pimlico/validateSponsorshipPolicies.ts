@@ -1,18 +1,11 @@
-import type { Account, Chain, Client, Transport } from "viem"
-import type { Prettify } from "../../types/"
-import type { EntryPoint, GetEntryPointVersion } from "../../types/entrypoint"
-import type { PimlicoPaymasterRpcSchema } from "../../types/pimlico"
-import type {
-    UserOperation,
-    UserOperationWithBigIntAsHex
-} from "../../types/userOperation"
+import type { Account, Address, Chain, Client, Transport } from "viem"
+import type { UserOperation } from "viem/account-abstraction"
+import type { PimlicoRpcSchema } from "../../types/pimlico"
 import { deepHexlify } from "../../utils/deepHexlify"
 
-export type ValidateSponsorshipPoliciesParameters<
-    entryPoint extends EntryPoint
-> = {
-    userOperation: UserOperation<GetEntryPointVersion<entryPoint>>
-    entryPoint: entryPoint
+export type ValidateSponsorshipPoliciesParameters = {
+    userOperation: UserOperation
+    entryPointAddress: Address
     sponsorshipPolicyIds: string[]
 }
 
@@ -61,27 +54,20 @@ export type ValidateSponsorshipPolicies = {
  *   }
  * ]
  */
-export const validateSponsorshipPolicies = async <
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
->(
+export const validateSponsorshipPolicies = async (
     client: Client<
-        TTransport,
-        TChain,
-        TAccount,
-        PimlicoPaymasterRpcSchema<entryPoint>
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PimlicoRpcSchema
     >,
-    args: Prettify<ValidateSponsorshipPoliciesParameters<entryPoint>>
-): Promise<Prettify<ValidateSponsorshipPolicies>[]> => {
+    args: ValidateSponsorshipPoliciesParameters
+): Promise<ValidateSponsorshipPolicies[]> => {
     return await client.request({
         method: "pm_validateSponsorshipPolicies",
         params: [
-            deepHexlify(args.userOperation) as UserOperationWithBigIntAsHex<
-                GetEntryPointVersion<entryPoint>
-            >,
-            args.entryPoint,
+            deepHexlify(args.userOperation),
+            args.entryPointAddress,
             args.sponsorshipPolicyIds
         ]
     })

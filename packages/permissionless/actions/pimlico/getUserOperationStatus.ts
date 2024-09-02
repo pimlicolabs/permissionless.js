@@ -1,8 +1,6 @@
 import type { Account, Chain, Client, Hash, Transport } from "viem"
-import type { PimlicoBundlerClient } from "../../clients/pimlico"
-import type { Prettify } from "../../types/"
 import type {
-    PimlicoBundlerRpcSchema,
+    PimlicoRpcSchema,
     PimlicoUserOperationStatus
 } from "../../types/pimlico"
 
@@ -17,7 +15,7 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
  *
- * @param client {@link PimlicoBundlerClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client {@link PimlicoClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
  * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
  *
@@ -35,14 +33,15 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
  *
  */
-export const getUserOperationStatus = async <
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TAccount extends Account | undefined = Account | undefined
->(
-    client: Client<TTransport, TChain, TAccount, PimlicoBundlerRpcSchema>,
-    { hash }: Prettify<GetUserOperationStatusParameters>
-): Promise<Prettify<GetUserOperationStatusReturnType>> => {
+export const getUserOperationStatus = async (
+    client: Client<
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PimlicoRpcSchema
+    >,
+    { hash }: GetUserOperationStatusParameters
+): Promise<GetUserOperationStatusReturnType> => {
     return client.request({
         method: "pimlico_getUserOperationStatus",
         params: [hash]

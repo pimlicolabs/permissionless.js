@@ -4,54 +4,21 @@ import type {
     Client,
     ContractFunctionArgs,
     ContractFunctionName,
-    DeployContractParameters,
     Hash,
     SendTransactionParameters,
     Transport,
     TypedData,
     WriteContractParameters
 } from "viem"
-import type { SmartAccount } from "../../accounts/types"
-import {
-    type SendTransactionsWithPaymasterParameters,
-    sendTransactions
-} from "../../actions/smartAccount"
-import {
-    type DeployContractParametersWithPaymaster,
-    deployContract
-} from "../../actions/smartAccount/deployContract"
-import {
-    type Middleware,
-    type PrepareUserOperationRequestReturnType,
-    prepareUserOperationRequest
-} from "../../actions/smartAccount/prepareUserOperationRequest"
-import {
-    type SendTransactionWithPaymasterParameters,
-    sendTransaction
-} from "../../actions/smartAccount/sendTransaction"
-import {
-    type SendUserOperationParameters,
-    sendUserOperation
-} from "../../actions/smartAccount/sendUserOperation"
+import type { SmartAccount } from "viem/account-abstraction"
+import { sendTransaction } from "../../actions/smartAccount/sendTransaction"
 import { signMessage } from "../../actions/smartAccount/signMessage"
 import { signTypedData } from "../../actions/smartAccount/signTypedData"
-import {
-    type WriteContractWithPaymasterParameters,
-    writeContract
-} from "../../actions/smartAccount/writeContract"
-import type { Prettify } from "../../types/"
-import type { StateOverrides } from "../../types/bundler"
-import type { EntryPoint } from "../../types/entrypoint"
+import { writeContract } from "../../actions/smartAccount/writeContract"
 
 export type SmartAccountActions<
-    entryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
     TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<entryPoint, string, TTransport, TChain>
-        | undefined
+    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
 > = {
     /**
      * Creates, signs, and sends a new transaction to the network.
@@ -96,8 +63,20 @@ export type SmartAccountActions<
      *   value: 1000000000000000000n,
      * })
      */
-    sendTransaction: <TChainOverride extends Chain | undefined>(
-        args: SendTransactionParameters<TChain, TSmartAccount, TChainOverride>
+    sendTransaction: <
+        TChainOverride extends Chain | undefined = undefined,
+        accountOverride extends SmartAccount | undefined = undefined,
+        calls extends readonly unknown[] = readonly unknown[]
+    >(
+        args: Parameters<
+            typeof sendTransaction<
+                TSmartAccount,
+                TChain,
+                accountOverride,
+                TChainOverride,
+                calls
+            >
+        >[1]
     ) => Promise<Hash>
     /**
      * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
@@ -143,12 +122,8 @@ export type SmartAccountActions<
      * })
      */
     signMessage: (
-        args: Parameters<
-            typeof signMessage<entryPoint, TTransport, TChain, TSmartAccount>
-        >[1]
-    ) => ReturnType<
-        typeof signMessage<entryPoint, TTransport, TChain, TSmartAccount>
-    >
+        args: Parameters<typeof signMessage<TSmartAccount>>[1]
+    ) => ReturnType<typeof signMessage<TSmartAccount>>
     /**
      * Signs typed data and calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
      *
@@ -250,64 +225,11 @@ export type SmartAccountActions<
         TPrimaryType extends string
     >(
         args: Parameters<
-            typeof signTypedData<
-                entryPoint,
-                TTypedData,
-                TPrimaryType,
-                TTransport,
-                TChain,
-                TSmartAccount
-            >
+            typeof signTypedData<TTypedData, TPrimaryType, TSmartAccount>
         >[1]
     ) => ReturnType<
-        typeof signTypedData<
-            entryPoint,
-            TTypedData,
-            TPrimaryType,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        typeof signTypedData<TTypedData, TPrimaryType, TSmartAccount>
     >
-    /**
-     * Deploys a contract to the network, given bytecode and constructor arguments.
-     * This function also allows you to sponsor this transaction if sender is a smartAccount
-     *
-     * - Docs: https://viem.sh/docs/contract/deployContract.html
-     * - Examples: https://stackblitz.com/github/wagmi-dev/viem/tree/main/examples/contracts/deploying-contracts
-     *
-     * @param args - {@link DeployContractParameters}
-     * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link DeployContractReturnType}
-     *
-     * @example
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const hash = await client.deployContract({
-     *   abi: [],
-     *   account: '0x…,
-     *   bytecode: '0x608060405260405161083e38038061083e833981016040819052610...',
-     * })
-     */
-    deployContract: <
-        const TAbi extends Abi | readonly unknown[],
-        TChainOverride extends Chain | undefined = undefined
-    >(
-        args: Prettify<
-            DeployContractParameters<
-                TAbi,
-                TChain,
-                TSmartAccount,
-                TChainOverride
-            >
-        >
-    ) => Promise<Hash>
     /**
      * Executes a write function on a contract.
      * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -379,8 +301,6 @@ export type SmartAccountActions<
         >
     ) => ReturnType<
         typeof writeContract<
-            entryPoint,
-            TTransport,
             TChain,
             TSmartAccount,
             TAbi,
@@ -389,219 +309,20 @@ export type SmartAccountActions<
             TChainOverride
         >
     >
-    prepareUserOperationRequest: <TTransport extends Transport>(
-        args: Prettify<
-            Parameters<
-                typeof prepareUserOperationRequest<
-                    entryPoint,
-                    TTransport,
-                    TChain,
-                    TSmartAccount
-                >
-            >[1]
-        >,
-        stateOverrides?: StateOverrides
-    ) => Promise<Prettify<PrepareUserOperationRequestReturnType<entryPoint>>>
-    sendUserOperation: <TTransport extends Transport>(
-        args: Prettify<
-            Parameters<
-                typeof sendUserOperation<
-                    entryPoint,
-                    TTransport,
-                    TChain,
-                    TSmartAccount
-                >
-            >[1]
-        >
-    ) => Promise<Hash>
-    /**
-     * Creates, signs, and sends a new transaction to the network.
-     * This function also allows you to sponsor this transaction if sender is a smartAccount
-     *
-     * - Docs: https://viem.sh/docs/actions/wallet/sendTransaction.html
-     * - Examples: https://stackblitz.com/github/wagmi-dev/viem/tree/main/examples/transactions/sending-transactions
-     * - JSON-RPC Methods:
-     *   - JSON-RPC Accounts: [`eth_sendTransaction`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_sendtransaction)
-     *   - Local Accounts: [`eth_sendRawTransaction`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_sendrawtransaction)
-     *
-     * @param args - {@link SendTransactionParameters}
-     * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link SendTransactionReturnType}
-     *
-     * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const hash = await client.sendTransaction([{
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n
-     * }, {
-     *   to: '0x61897970c51812dc3a010c7d01b50e0d17dc1234',
-     *   value: 10000000000000000n
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const hash = await client.sendTransaction([{
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n
-     * }, {
-     *   to: '0x61897970c51812dc3a010c7d01b50e0d17dc1234',
-     *   value: 10000000000000000n
-     * }])
-     */
-    sendTransactions: (
-        args: Prettify<
-            SendTransactionsWithPaymasterParameters<
-                entryPoint,
-                TTransport,
-                TChain,
-                TSmartAccount
-            >
-        >
-    ) => ReturnType<
-        typeof sendTransactions<TTransport, TChain, TSmartAccount, entryPoint>
-    >
 }
 
-export function smartAccountActions<entryPoint extends EntryPoint>({
-    middleware
-}: Middleware<entryPoint>) {
+export function smartAccountActions() {
     return <
-        TTransport extends Transport,
         TChain extends Chain | undefined = Chain | undefined,
-        TSmartAccount extends
-            | SmartAccount<entryPoint, string, TTransport, TChain>
-            | undefined =
-            | SmartAccount<entryPoint, string, TTransport, TChain>
+        TSmartAccount extends SmartAccount | undefined =
+            | SmartAccount
             | undefined
     >(
-        client: Client<TTransport, TChain, TSmartAccount>
-    ): SmartAccountActions<entryPoint, TTransport, TChain, TSmartAccount> => ({
-        prepareUserOperationRequest: (args, stateOverrides) =>
-            prepareUserOperationRequest(
-                client,
-                {
-                    ...args,
-                    middleware
-                },
-                stateOverrides
-            ),
-        deployContract: (args) =>
-            deployContract(client, {
-                ...args,
-                middleware
-            } as DeployContractParametersWithPaymaster<entryPoint>),
-        sendTransaction: (args) =>
-            sendTransaction<TTransport, TChain, TSmartAccount, entryPoint>(
-                client,
-                {
-                    ...args,
-                    middleware
-                } as SendTransactionWithPaymasterParameters<
-                    entryPoint,
-                    TTransport,
-                    TChain,
-                    TSmartAccount
-                >
-            ),
-        sendTransactions: (args) =>
-            sendTransactions<TTransport, TChain, TSmartAccount, entryPoint>(
-                client,
-                {
-                    ...args,
-                    middleware
-                }
-            ),
-        sendUserOperation: (args) =>
-            sendUserOperation<entryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                {
-                    ...args,
-                    middleware
-                } as SendUserOperationParameters<
-                    entryPoint,
-                    TTransport,
-                    TChain,
-                    TSmartAccount
-                >
-            ),
-        signMessage: (args) =>
-            signMessage<entryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        signTypedData: <
-            const TTypedData extends TypedData | { [key: string]: unknown },
-            TPrimaryType extends string
-        >(
-            args: Parameters<
-                typeof signTypedData<
-                    entryPoint,
-                    TTypedData,
-                    TPrimaryType,
-                    TTransport,
-                    TChain,
-                    TSmartAccount
-                >
-            >[1]
-        ) =>
-            signTypedData<
-                entryPoint,
-                TTypedData,
-                TPrimaryType,
-                TTransport,
-                TChain,
-                TSmartAccount
-            >(client, args),
-        writeContract: <
-            const TAbi extends Abi | readonly unknown[],
-            TFunctionName extends ContractFunctionName<
-                TAbi,
-                "nonpayable" | "payable"
-            > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
-            TArgs extends ContractFunctionArgs<
-                TAbi,
-                "nonpayable" | "payable",
-                TFunctionName
-            > = ContractFunctionArgs<
-                TAbi,
-                "nonpayable" | "payable",
-                TFunctionName
-            >,
-            TChainOverride extends Chain | undefined = undefined
-        >(
-            args: WriteContractParameters<
-                TAbi,
-                TFunctionName,
-                TArgs,
-                TChain,
-                TSmartAccount,
-                TChainOverride
-            >
-        ) =>
-            writeContract(client, {
-                ...args,
-                middleware
-            } as WriteContractWithPaymasterParameters<
-                entryPoint,
-                TTransport,
-                TChain,
-                TSmartAccount,
-                TAbi
-            >)
+        client: Client<Transport, TChain, TSmartAccount>
+    ): SmartAccountActions<TChain, TSmartAccount> => ({
+        sendTransaction: (args) => sendTransaction(client, args as any),
+        signMessage: (args) => signMessage(client, args),
+        signTypedData: (args) => signTypedData(client, args),
+        writeContract: (args) => writeContract(client, args)
     })
 }

@@ -1,7 +1,8 @@
 import type { Chain, Client, Hash, Transport } from "viem"
-import type { SmartAccount } from "../accounts"
-import type { GetAccountParameter } from "../types"
-import type { EntryPoint } from "../types/entrypoint"
+import type {
+    GetSmartAccountParameter,
+    SmartAccount
+} from "viem/account-abstraction"
 import { accountId } from "./erc7579/accountId"
 import {
     type InstallModuleParameters,
@@ -34,79 +35,30 @@ import {
     uninstallModules
 } from "./erc7579/uninstallModules"
 
-export type Erc7579Actions<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport,
-    TChain extends Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
-> = {
+export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     accountId: (
-        args?: TSmartAccount extends undefined
-            ? GetAccountParameter<
-                  TEntryPoint,
-                  TTransport,
-                  TChain,
-                  TSmartAccount
-              >
-            : undefined
+        args?: GetSmartAccountParameter<TSmartAccount>
     ) => Promise<string>
     installModule: (
-        args: InstallModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: InstallModuleParameters<TSmartAccount>
     ) => Promise<Hash>
     installModules: (
-        args: InstallModulesParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: InstallModulesParameters<TSmartAccount>
     ) => Promise<Hash>
     isModuleInstalled: (
-        args: IsModuleInstalledParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: IsModuleInstalledParameters<TSmartAccount>
     ) => Promise<boolean>
     supportsExecutionMode: (
-        args: SupportsExecutionModeParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: SupportsExecutionModeParameters<TSmartAccount>
     ) => Promise<boolean>
     supportsModule: (
-        args: SupportsModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: SupportsModuleParameters<TSmartAccount>
     ) => Promise<boolean>
     uninstallModule: (
-        args: UninstallModuleParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: UninstallModuleParameters<TSmartAccount>
     ) => Promise<Hash>
     uninstallModules: (
-        args: UninstallModulesParameters<
-            TEntryPoint,
-            TTransport,
-            TChain,
-            TSmartAccount
-        >
+        args: UninstallModulesParameters<TSmartAccount>
     ) => Promise<Hash>
 }
 
@@ -132,55 +84,17 @@ export {
     uninstallModules
 }
 
-export function erc7579Actions<TEntryPoint extends EntryPoint>(_args: {
-    entryPoint: TEntryPoint
-}) {
-    return <
-        TTransport extends Transport,
-        TChain extends Chain | undefined,
-        TSmartAccount extends
-            | SmartAccount<TEntryPoint, string, TTransport, TChain>
-            | undefined
-    >(
-        client: Client<TTransport, TChain, TSmartAccount>
-    ): Erc7579Actions<TEntryPoint, TTransport, TChain, TSmartAccount> => ({
+export function erc7579Actions() {
+    return <TSmartAccount extends SmartAccount | undefined>(
+        client: Client<Transport, Chain | undefined, TSmartAccount>
+    ): Erc7579Actions<TSmartAccount> => ({
         accountId: (args) => accountId(client, args),
-        installModule: (args) =>
-            installModule<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        installModules: (args) =>
-            installModules<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        isModuleInstalled: (args) =>
-            isModuleInstalled<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        supportsExecutionMode: (args) =>
-            supportsExecutionMode<
-                TEntryPoint,
-                TTransport,
-                TChain,
-                TSmartAccount
-            >(client, args),
-        supportsModule: (args) =>
-            supportsModule<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        uninstallModule: (args) =>
-            uninstallModule<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            ),
-        uninstallModules: (args) =>
-            uninstallModules<TEntryPoint, TTransport, TChain, TSmartAccount>(
-                client,
-                args
-            )
+        installModule: (args) => installModule(client, args),
+        installModules: (args) => installModules(client, args),
+        isModuleInstalled: (args) => isModuleInstalled(client, args),
+        supportsExecutionMode: (args) => supportsExecutionMode(client, args),
+        supportsModule: (args) => supportsModule(client, args),
+        uninstallModule: (args) => uninstallModule(client, args),
+        uninstallModules: (args) => uninstallModules(client, args)
     })
 }

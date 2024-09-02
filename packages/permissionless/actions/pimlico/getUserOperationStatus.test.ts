@@ -1,58 +1,50 @@
 import { isHash, zeroAddress } from "viem"
-import { generatePrivateKey } from "viem/accounts"
+import { entryPoint06Address } from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
-    getPimlicoBundlerClient,
-    getPimlicoPaymasterClient,
+    getBundlerClient,
+    getPimlicoClient,
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
-import { bundlerActions } from "../../clients/decorators/bundler"
-import { ENTRYPOINT_ADDRESS_V06, ENTRYPOINT_ADDRESS_V07 } from "../../utils"
 import { getUserOperationStatus } from "./getUserOperationStatus"
 
 describe("getUserOperationStatus", () => {
     testWithRpc("getUserOperationStatus_V06", async ({ rpc }) => {
-        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const { altoRpc } = rpc
 
-        const bundlerClientV06 = getPimlicoBundlerClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
+        const bundlerClient = getPimlicoClient({
+            entryPointVersion: "0.6",
             altoRpc: altoRpc
-        }).extend(bundlerActions(ENTRYPOINT_ADDRESS_V06))
-
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc,
-            paymasterClient: getPimlicoPaymasterClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V06,
-                paymasterRpc
-            })
         })
 
-        const userOperation =
-            await simpleAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await simpleAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    })
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.6"
                 }
-            })
+            }),
+            entryPoint: {
+                version: "0.6"
+            },
+            ...rpc
+        })
 
-        userOperation.signature =
-            await simpleAccountClient.account.signUserOperation(userOperation)
-
-        const opHash = await bundlerClientV06.sendUserOperation({
-            userOperation
+        const opHash = await simpleAccountClient.sendUserOperation({
+            calls: [
+                {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
         })
 
         expect(isHash(opHash)).toBe(true)
 
         const userOperationReceipt =
-            await bundlerClientV06.waitForUserOperationReceipt({
+            await bundlerClient.waitForUserOperationReceipt({
                 hash: opHash,
                 timeout: 100000
             })
@@ -60,7 +52,7 @@ describe("getUserOperationStatus", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClientV06.getUserOperationReceipt({
+        const receipt = await bundlerClient.getUserOperationReceipt({
             hash: opHash
         })
 
@@ -68,7 +60,7 @@ describe("getUserOperationStatus", () => {
             userOperationReceipt?.receipt.transactionHash
         )
         const userOperationStatus = await getUserOperationStatus(
-            bundlerClientV06,
+            bundlerClient,
             {
                 hash: opHash
             }
@@ -82,46 +74,40 @@ describe("getUserOperationStatus", () => {
     })
 
     testWithRpc("getUserOperationStatus_V07", async ({ rpc }) => {
-        const { anvilRpc, altoRpc, paymasterRpc } = rpc
+        const { altoRpc } = rpc
 
-        const bundlerClientV07 = getPimlicoBundlerClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
+        const bundlerClient = getPimlicoClient({
+            entryPointVersion: "0.7",
             altoRpc: altoRpc
-        }).extend(bundlerActions(ENTRYPOINT_ADDRESS_V07))
-
-        const simpleAccountClient = await getSimpleAccountClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V07,
-            privateKey: generatePrivateKey(),
-            altoRpc: altoRpc,
-            anvilRpc: anvilRpc,
-            paymasterClient: getPimlicoPaymasterClient({
-                entryPoint: ENTRYPOINT_ADDRESS_V07,
-                paymasterRpc
-            })
         })
 
-        const userOperation =
-            await simpleAccountClient.prepareUserOperationRequest({
-                userOperation: {
-                    callData: await simpleAccountClient.account.encodeCallData({
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    })
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.7"
                 }
-            })
+            }),
+            entryPoint: {
+                version: "0.7"
+            },
+            ...rpc
+        })
 
-        userOperation.signature =
-            await simpleAccountClient.account.signUserOperation(userOperation)
-
-        const opHash = await bundlerClientV07.sendUserOperation({
-            userOperation
+        const opHash = await simpleAccountClient.sendUserOperation({
+            calls: [
+                {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
         })
 
         expect(isHash(opHash)).toBe(true)
 
         const userOperationReceipt =
-            await bundlerClientV07.waitForUserOperationReceipt({
+            await bundlerClient.waitForUserOperationReceipt({
                 hash: opHash,
                 timeout: 100000
             })
@@ -129,7 +115,7 @@ describe("getUserOperationStatus", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClientV07.getUserOperationReceipt({
+        const receipt = await bundlerClient.getUserOperationReceipt({
             hash: opHash
         })
 
@@ -137,7 +123,7 @@ describe("getUserOperationStatus", () => {
             userOperationReceipt?.receipt.transactionHash
         )
         const userOperationStatus = await getUserOperationStatus(
-            bundlerClientV07,
+            bundlerClient,
             {
                 hash: opHash
             }

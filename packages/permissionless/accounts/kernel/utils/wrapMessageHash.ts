@@ -6,23 +6,22 @@ import {
     stringToHex
 } from "viem"
 import { type Address, domainSeparator } from "viem"
-import type { EntryPoint } from "../../../types"
-import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
+import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
 
 export type WrapMessageHashParams = {
-    accountVersion: KernelVersion<EntryPoint>
+    kernelVersion: KernelVersion<"0.6" | "0.7">
     accountAddress: Address
-    chainId?: number
+    chainId: number
 }
 
 export const wrapMessageHash = (
     messageHash: Hex,
-    { accountAddress, accountVersion, chainId }: WrapMessageHashParams
+    { accountAddress, kernelVersion, chainId }: WrapMessageHashParams
 ) => {
     const _domainSeparator = domainSeparator({
         domain: {
             name: "Kernel",
-            version: accountVersion,
+            version: kernelVersion,
             chainId,
             verifyingContract: accountAddress
         }

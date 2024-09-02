@@ -1,6 +1,5 @@
 import {
     type Address,
-    type CallParameters,
     type Chain,
     type Client,
     ContractFunctionExecutionError,
@@ -10,60 +9,38 @@ import {
     encodeFunctionData,
     getAddress
 } from "viem"
-import type { SmartAccount } from "../../accounts/types"
-import type { GetAccountParameter } from "../../types/"
-import type { EntryPoint } from "../../types/entrypoint"
-import { parseAccount } from "../../utils/"
-import { AccountOrClientNotFoundError } from "../../utils/signUserOperationHashWithECDSA"
+import type {
+    GetSmartAccountParameter,
+    SmartAccount
+} from "viem/account-abstraction"
+import { call, readContract } from "viem/actions"
+import { getAction, parseAccount } from "viem/utils"
+import { AccountNotFoundError } from "../../errors"
 import { type ModuleType, parseModuleTypeId } from "./supportsModule"
 
 export type IsModuleInstalledParameters<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
-> = GetAccountParameter<TEntryPoint, TTransport, TChain, TSmartAccount> & {
+    TSmartAccount extends SmartAccount | undefined
+> = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
     context: Hex
 }
 
 export async function isModuleInstalled<
-    TEntryPoint extends EntryPoint,
-    TTransport extends Transport = Transport,
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined =
-        | SmartAccount<TEntryPoint, string, TTransport, TChain>
-        | undefined
+    TSmartAccount extends SmartAccount | undefined
 >(
-    client: Client<TTransport, TChain, TSmartAccount>,
-    parameters: IsModuleInstalledParameters<
-        TEntryPoint,
-        TTransport,
-        TChain,
-        TSmartAccount
-    >
+    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    parameters: IsModuleInstalledParameters<TSmartAccount>
 ): Promise<boolean> {
     const { account: account_ = client.account, address, context } = parameters
 
     if (!account_) {
-        throw new AccountOrClientNotFoundError({
+        throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/sendTransaction"
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount<
-        TEntryPoint,
-        string,
-        TTransport,
-        TChain
-    >
+    const account = parseAccount(account_) as SmartAccount
 
     const publicClient = account.client
 
@@ -95,7 +72,11 @@ export async function isModuleInstalled<
     ] as const
 
     try {
-        return await publicClient.readContract({
+        return await getAction(
+            publicClient,
+            readContract,
+            "readContract"
+        )({
             abi,
             functionName: "isModuleInstalled",
             args: [
@@ -107,10 +88,13 @@ export async function isModuleInstalled<
         })
     } catch (error) {
         if (error instanceof ContractFunctionExecutionError) {
-            const factory = await account.getFactory()
-            const factoryData = await account.getFactoryData()
+            const { factory, factoryData } = await account.getFactoryArgs()
 
-            const result = await publicClient.call({
+            const result = await getAction(
+                publicClient,
+                call,
+                "call"
+            )({
                 factory: factory,
                 factoryData: factoryData,
                 to: account.address,
@@ -123,7 +107,7 @@ export async function isModuleInstalled<
                         context
                     ]
                 })
-            } as unknown as CallParameters<TChain>)
+            })
 
             if (!result || !result.data) {
                 throw new Error("accountId result is empty")

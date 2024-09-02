@@ -1,13 +1,12 @@
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import { getPimlicoBundlerClient } from "../../../permissionless-test/src/utils"
-import { ENTRYPOINT_ADDRESS_V06 } from "../../utils"
+import { getPimlicoClient } from "../../../permissionless-test/src/utils"
 import { getUserOperationGasPrice } from "./getUserOperationGasPrice"
 
 describe("getUserOperationGasPrice", () => {
     testWithRpc("getUserOperationGasPrice", async ({ rpc }) => {
-        const pimlicoBundlerClient = getPimlicoBundlerClient({
-            entryPoint: ENTRYPOINT_ADDRESS_V06,
+        const pimlicoBundlerClient = getPimlicoClient({
+            entryPointVersion: "0.6",
             altoRpc: rpc.altoRpc
         })
 

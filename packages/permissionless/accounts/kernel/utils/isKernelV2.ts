@@ -1,7 +1,6 @@
-import type { EntryPoint } from "../../../types"
-import type { KernelVersion } from "../signerToEcdsaKernelSmartAccount"
+import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
 
-export const isKernelV2 = (version: KernelVersion<EntryPoint>): boolean => {
+export const isKernelV2 = (version: KernelVersion<"0.6" | "0.7">): boolean => {
     const regex = /0\.2\.\d+/
     return regex.test(version)
 }

@@ -1,27 +1,13 @@
-import { type Address, type Hex, encodeFunctionData } from "viem"
+import { encodeFunctionData } from "viem"
 
-export const encodeCallData = async ({
-    args
-}: {
-    args:
-        | {
-              to: `0x${string}`
-              value: bigint
-              data: `0x${string}`
-          }
-        | {
-              to: `0x${string}`
-              value: bigint
-              data: `0x${string}`
-          }[]
-}) => {
-    if (Array.isArray(args)) {
-        const argsArray = args as {
-            to: Address
-            value: bigint
-            data: Hex
-        }[]
-
+export const encodeCallData = async (
+    calls: readonly {
+        to: `0x${string}`
+        value?: bigint | undefined
+        data?: `0x${string}` | undefined
+    }[]
+) => {
+    if (calls.length > 1) {
         return encodeFunctionData({
             abi: [
                 {
@@ -50,17 +36,11 @@ export const encodeCallData = async ({
             ],
             functionName: "executeBatch",
             args: [
-                argsArray.map((a) => a.to),
-                argsArray.map((a) => a.value),
-                argsArray.map((a) => a.data)
+                calls.map((a) => a.to),
+                calls.map((a) => a.value ?? 0n),
+                calls.map((a) => a.data ?? "0x")
             ]
         })
-    }
-
-    const { to, value, data } = args as {
-        to: Address
-        value: bigint
-        data: Hex
     }
 
     return encodeFunctionData({
@@ -90,6 +70,6 @@ export const encodeCallData = async ({
             }
         ],
         functionName: "execute",
-        args: [to, value, data]
+        args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? "0x"]
     })
 }
