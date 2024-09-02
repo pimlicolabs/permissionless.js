@@ -1,8 +1,4 @@
-import type { Client, Hash, Prettify } from "viem"
-import type {
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
+import type { Address, Client, Hash, Prettify } from "viem"
 import {
     type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
@@ -26,11 +22,6 @@ import {
 } from "../../actions/pimlico/sponsorUserOperation"
 
 export type PimlicoActions<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address =
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = {
     /**
@@ -111,38 +102,24 @@ export type PimlicoActions<
      */
     sponsorUserOperation: (
         args: Omit<
-            PimlicoSponsorUserOperationParameters<
-                entryPointAddress,
-                entryPointVersion
-            >,
+            PimlicoSponsorUserOperationParameters<entryPointVersion>,
             "entryPoint"
         >
     ) => Promise<Prettify<SponsorUserOperationReturnType<entryPointVersion>>>
     validateSponsorshipPolicies: (
         args: Prettify<
-            Omit<
-                ValidateSponsorshipPoliciesParameters<
-                    entryPointAddress,
-                    entryPointVersion
-                >,
-                "entryPoint"
-            >
+            Omit<ValidateSponsorshipPoliciesParameters, "entryPoint">
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
 }
 
 export const pimlicoActions =
-    <
-        entryPointAddress extends
-            | typeof entryPoint06Address
-            | typeof entryPoint07Address,
-        entryPointVersion extends "0.6" | "0.7"
-    >({
+    <entryPointVersion extends "0.6" | "0.7">({
         entryPoint
     }: {
-        entryPoint: { address: entryPointAddress; version: entryPointVersion }
+        entryPoint: { address: Address; version: entryPointVersion }
     }) =>
-    (client: Client): PimlicoActions<entryPointAddress, entryPointVersion> => ({
+    (client: Client): PimlicoActions<entryPointVersion> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters

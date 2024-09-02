@@ -8,18 +8,11 @@ import type {
     PartialBy,
     Transport
 } from "viem"
-import type {
-    UserOperation,
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
+import type { UserOperation } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 import { deepHexlify } from "../../utils/deepHexlify"
 
 export type PimlicoSponsorUserOperationParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7"
 > = {
     userOperation: OneOf<
@@ -43,7 +36,7 @@ export type PimlicoSponsorUserOperationParameters<
               : never)
     >
     entryPoint: {
-        address: entryPointAddress
+        address: Address
         version: entryPointVersion
     }
     sponsorshipPolicyId?: string
@@ -77,23 +70,15 @@ export type SponsorUserOperationReturnType<
  * @deprecated Use `getPaymasterData` instead
  */
 export const sponsorUserOperation = async <
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address =
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 >(
     client: Client<
         Transport,
         Chain | undefined,
         Account | undefined,
-        PimlicoRpcSchema<entryPointAddress, entryPointVersion>
+        PimlicoRpcSchema<entryPointVersion>
     >,
-    args: PimlicoSponsorUserOperationParameters<
-        entryPointAddress,
-        entryPointVersion
-    >
+    args: PimlicoSponsorUserOperationParameters<entryPointVersion>
 ): Promise<SponsorUserOperationReturnType<entryPointVersion>> => {
     const response = await client.request({
         method: "pm_sponsorUserOperation",

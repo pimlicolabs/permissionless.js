@@ -1,22 +1,11 @@
-import type { Account, Chain, Client, Transport } from "viem"
-import type {
-    UserOperation,
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
+import type { Account, Address, Chain, Client, Transport } from "viem"
+import type { UserOperation } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 import { deepHexlify } from "../../utils/deepHexlify"
 
-export type ValidateSponsorshipPoliciesParameters<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address =
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
-> = {
-    userOperation: UserOperation<entryPointVersion>
-    entryPointAddress: entryPointAddress
+export type ValidateSponsorshipPoliciesParameters = {
+    userOperation: UserOperation
+    entryPointAddress: Address
     sponsorshipPolicyIds: string[]
 }
 
@@ -65,24 +54,14 @@ export type ValidateSponsorshipPolicies = {
  *   }
  * ]
  */
-export const validateSponsorshipPolicies = async <
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address =
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
->(
+export const validateSponsorshipPolicies = async (
     client: Client<
         Transport,
         Chain | undefined,
         Account | undefined,
-        PimlicoRpcSchema<entryPointAddress, entryPointVersion>
+        PimlicoRpcSchema
     >,
-    args: ValidateSponsorshipPoliciesParameters<
-        entryPointAddress,
-        entryPointVersion
-    >
+    args: ValidateSponsorshipPoliciesParameters
 ): Promise<ValidateSponsorshipPolicies[]> => {
     return await client.request({
         method: "pm_validateSponsorshipPolicies",
