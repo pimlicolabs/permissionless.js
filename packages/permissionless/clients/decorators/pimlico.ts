@@ -94,7 +94,7 @@ export type PimlicoActions<
      */
     sendCompressedUserOperation: (
         args: Prettify<
-            Omit<SendCompressedUserOperationParameters, "entryPoint">
+            Omit<SendCompressedUserOperationParameters, "entryPointAddress">
         >
     ) => Promise<Hash>
     /**
@@ -108,7 +108,7 @@ export type PimlicoActions<
     ) => Promise<Prettify<SponsorUserOperationReturnType<entryPointVersion>>>
     validateSponsorshipPolicies: (
         args: Prettify<
-            Omit<ValidateSponsorshipPoliciesParameters, "entryPoint">
+            Omit<ValidateSponsorshipPoliciesParameters, "entryPointAddress">
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
 }
@@ -124,9 +124,7 @@ export const pimlicoActions =
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
         ) => getUserOperationStatus(client, args),
-        sendCompressedUserOperation: async (
-            args: Omit<SendCompressedUserOperationParameters, "entryPoint">
-        ) =>
+        sendCompressedUserOperation: async (args) =>
             sendCompressedUserOperation(client, {
                 ...args,
                 entryPointAddress: entryPoint.address
