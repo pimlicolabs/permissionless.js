@@ -186,12 +186,7 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
     entryPointVersion: entryPointVersion
     altoRpc: string
 }) =>
-    createPimlicoClient<
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Address
-            : typeof entryPoint07Address,
-        entryPointVersion
-    >({
+    createPimlicoClient({
         chain: foundry,
         entryPoint: {
             address: (entryPointVersion === "0.6"

@@ -119,7 +119,10 @@ export type PimlicoActions<
         TChainOverride extends Chain | undefined = Chain | undefined
     >(
         args: Prettify<
-            Omit<GetTokenQuotesParameters<TChain, TChainOverride>, "entryPoint">
+            Omit<
+                GetTokenQuotesParameters<TChain, TChainOverride>,
+                "entryPointAddress"
+            >
         >
     ) => Promise<Prettify<GetTokenQuotesReturnType>>
 }

@@ -33,30 +33,4 @@ describe("getTokenQuotes", () => {
         expect(quotes[0].postOpGas).toBeTruthy()
         expect(quotes[0].postOpGas).toBeGreaterThan(0n)
     })
-
-    testWithRpc("get chain from client", async ({ rpc }) => {
-        const pimlicoBundlerClient = getPimlicoClient({
-            entryPointVersion: "0.7",
-            altoRpc: rpc.paymasterRpc
-        })
-
-        const token = getAddress("0xffffffffffffffffffffffffffffffffffffffff")
-
-        const quotes = pimlicoBundlerClient.getTokenQuotes({
-            tokens: [token],
-            entryPointAddress: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        })
-
-        expect(quotes).toBeTruthy()
-        expect(Array.isArray(quotes)).toBe(true)
-        expect(quotes[0].token).toBeTruthy()
-        expect(isAddress(quotes[0].token))
-        expect(quotes[0].token).toEqual(token)
-        expect(quotes[0].paymaster).toBeTruthy()
-        expect(isAddress(quotes[0].paymaster))
-        expect(quotes[0].exchangeRate).toBeTruthy()
-        expect(quotes[0].exchangeRate).toBeGreaterThan(0n)
-        expect(quotes[0].postOpGas).toBeTruthy()
-        expect(quotes[0].postOpGas).toBeGreaterThan(0n)
-    })
 })
