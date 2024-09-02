@@ -2,12 +2,12 @@ import {
     type Account,
     type Address,
     type Chain,
+    ChainNotFoundError,
     type Client,
-    type Transport,
     type GetChainParameter,
+    type Transport,
     hexToBigInt,
-    numberToHex,
-    ChainNotFoundError
+    numberToHex
 } from "viem"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 
