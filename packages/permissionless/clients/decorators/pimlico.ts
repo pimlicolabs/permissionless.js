@@ -1,8 +1,11 @@
-import type { Address, Client, Hash, Prettify } from "viem"
+import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
 import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
     type SendCompressedUserOperationParameters,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
+    getTokenQuotes,
     sendCompressedUserOperation,
     validateSponsorshipPolicies
 } from "../../actions/pimlico"
@@ -22,6 +25,7 @@ import {
 } from "../../actions/pimlico/sponsorUserOperation"
 
 export type PimlicoActions<
+    TChain extends Chain | undefined,
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = {
     /**
@@ -111,6 +115,16 @@ export type PimlicoActions<
             Omit<ValidateSponsorshipPoliciesParameters, "entryPointAddress">
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
+    getTokenQuotes: <
+        TChainOverride extends Chain | undefined = Chain | undefined
+    >(
+        args: Prettify<
+            Omit<
+                GetTokenQuotesParameters<TChain, TChainOverride>,
+                "entryPointAddress"
+            >
+        >
+    ) => Promise<Prettify<GetTokenQuotesReturnType>>
 }
 
 export const pimlicoActions =
@@ -119,7 +133,12 @@ export const pimlicoActions =
     }: {
         entryPoint: { address: Address; version: entryPointVersion }
     }) =>
-    (client: Client): PimlicoActions<entryPointVersion> => ({
+    <
+        TTransport extends Transport,
+        TChain extends Chain | undefined = Chain | undefined
+    >(
+        client: Client<TTransport, TChain>
+    ): PimlicoActions<TChain, entryPointVersion> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
@@ -137,6 +156,12 @@ export const pimlicoActions =
         validateSponsorshipPolicies: async (args) =>
             validateSponsorshipPolicies(client, {
                 ...args,
+                entryPointAddress: entryPoint.address
+            }),
+        getTokenQuotes: async (args) =>
+            getTokenQuotes(client, {
+                ...args,
+                chain: args.chain,
                 entryPointAddress: entryPoint.address
             })
     })

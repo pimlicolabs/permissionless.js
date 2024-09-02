@@ -259,6 +259,14 @@ export const pmGetPaymasterStubDataParamsSchema = z
         return [val[0], val[1], val[2], val[3] ?? null] as const
     })
 
+export const pimlicoGetTokenQuotesSchema = z.tuple([
+    z.object({
+        tokens: z.array(addressSchema)
+    }),
+    addressSchema, // entryPoint
+    hexNumberSchema
+])
+
 export type UserOperationV7 = zodInfer<typeof userOperationSchemaPaymasterV7>
 export type UserOperationV6 = zodInfer<typeof userOperationSchemaPaymasterV6>
 export type JsonRpcSchema = zodInfer<typeof jsonRpcSchema>

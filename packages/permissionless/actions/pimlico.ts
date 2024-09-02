@@ -1,4 +1,9 @@
 import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
+    getTokenQuotes
+} from "./pimlico/getTokenQuotes"
+import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
 } from "./pimlico/getUserOperationGasPrice"
@@ -35,7 +40,9 @@ export type {
     SendCompressedUserOperationParameters,
     SponsorUserOperationReturnType,
     ValidateSponsorshipPolicies,
-    ValidateSponsorshipPoliciesParameters
+    ValidateSponsorshipPoliciesParameters,
+    GetTokenQuotesParameters,
+    GetTokenQuotesReturnType
 }
 
 export {
@@ -44,5 +51,6 @@ export {
     pimlicoActions,
     sendCompressedUserOperation,
     sponsorUserOperation,
-    validateSponsorshipPolicies
+    validateSponsorshipPolicies,
+    getTokenQuotes
 }

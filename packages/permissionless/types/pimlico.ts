@@ -28,6 +28,15 @@ export type PimlicoUserOperationStatus = {
     transactionHash: Hash | null
 }
 
+type GetTokenQuotesWithBigIntAsHex = {
+    quotes: {
+        paymaster: Address
+        token: Address
+        postOpGas: Hex
+        exchangeRate: Hex
+    }[]
+}
+
 export type PimlicoRpcSchema<
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = [
@@ -116,5 +125,10 @@ export type PimlicoRpcSchema<
                 description: string | null
             }
         }[]
+    },
+    {
+        Method: "pimlico_getTokenQuotes"
+        Parameters: [{ tokens: Address[] }, entryPoint: Address, chainId: Hex]
+        ReturnType: GetTokenQuotesWithBigIntAsHex
     }
 ]
