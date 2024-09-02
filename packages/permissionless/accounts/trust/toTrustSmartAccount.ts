@@ -74,7 +74,7 @@ export type ToTrustSmartAccountParameters = {
         | LocalAccount
     >
     factoryAddress?: Address
-    entryPoint?: {
+    entryPoint: {
         address: Address
         version: "0.6"
     }

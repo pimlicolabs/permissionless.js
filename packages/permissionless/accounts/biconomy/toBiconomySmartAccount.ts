@@ -90,7 +90,7 @@ export type ToBiconomySmartAccountParameters = Prettify<{
         >
     ]
     address?: Address | undefined
-    entryPoint?: {
+    entryPoint: {
         address: Address
         version: "0.6"
     }

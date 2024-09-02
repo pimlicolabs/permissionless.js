@@ -305,7 +305,11 @@ export const getTrustAccountClient = async <
 }: AAParamType<entryPointVersion>) => {
     return toTrustSmartAccount({
         client: getPublicClient(anvilRpc),
-        owner: privateKeyToAccount(generatePrivateKey())
+        owner: privateKeyToAccount(generatePrivateKey()),
+        entryPoint: {
+            address: entryPoint06Address,
+            version: "0.6"
+        }
     })
 }
 
@@ -317,7 +321,11 @@ export const getBiconomyClient = async <
 }: AAParamType<entryPointVersion>) => {
     return toBiconomySmartAccount({
         client: getPublicClient(anvilRpc),
-        owners: [privateKeyToAccount(generatePrivateKey())]
+        owners: [privateKeyToAccount(generatePrivateKey())],
+        entryPoint: {
+            address: entryPoint06Address,
+            version: "0.6"
+        }
     })
 }
 
