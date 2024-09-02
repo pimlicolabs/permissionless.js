@@ -429,7 +429,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
-        isEip1271Compliant: true
+        isEip1271Compliant: false
     },
     {
         name: "Simple",
