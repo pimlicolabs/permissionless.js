@@ -13,9 +13,7 @@ import {
     type SmartAccount,
     createBundlerClient,
     createPaymasterClient,
-    entryPoint06Abi,
     entryPoint06Address,
-    entryPoint07Abi,
     entryPoint07Address
 } from "viem/account-abstraction"
 import {
