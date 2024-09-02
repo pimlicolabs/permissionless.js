@@ -13,9 +13,7 @@ import {
     type SmartAccount,
     createBundlerClient,
     createPaymasterClient,
-    entryPoint06Abi,
     entryPoint06Address,
-    entryPoint07Abi,
     entryPoint07Address
 } from "viem/account-abstraction"
 import {
@@ -186,12 +184,7 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
     entryPointVersion: entryPointVersion
     altoRpc: string
 }) =>
-    createPimlicoClient<
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Address
-            : typeof entryPoint07Address,
-        entryPointVersion
-    >({
+    createPimlicoClient<entryPointVersion>({
         chain: foundry,
         entryPoint: {
             address: (entryPointVersion === "0.6"
