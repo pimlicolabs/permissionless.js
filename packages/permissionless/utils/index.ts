@@ -5,8 +5,7 @@ import {
     getRequiredPrefund
 } from "./getRequiredPrefund"
 import { isSmartAccountDeployed } from "./isSmartAccountDeployed"
-import { providerToSmartAccountSigner } from "./providerToSmartAccountSigner"
-import { walletClientToSmartAccountSigner } from "./walletClientToSmartAccountSigner"
+import { toOwner } from "./toOwner"
 
 import { decodeNonce } from "./decodeNonce"
 import { encodeNonce } from "./encodeNonce"
@@ -17,10 +16,9 @@ export {
     transactionReceiptStatus,
     deepHexlify,
     getRequiredPrefund,
-    walletClientToSmartAccountSigner,
+    toOwner,
     type GetRequiredPrefundReturnType,
     isSmartAccountDeployed,
-    providerToSmartAccountSigner,
     getAddressFromInitCodeOrPaymasterAndData,
     getPackedUserOperation,
     encodeNonce,

@@ -1,4 +1,12 @@
-import type { Assign } from "viem"
+import type {
+    Account,
+    Assign,
+    Chain,
+    EIP1193Provider,
+    OneOf,
+    Transport,
+    WalletClient
+} from "viem"
 import {
     type Address,
     type Client,
@@ -24,6 +32,7 @@ import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 import { KernelInitAbi } from "./abi/KernelAccountAbi"
 import { KernelV3InitAbi, KernelV3_1AccountAbi } from "./abi/KernelV3AccountAbi"
 import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi"
@@ -294,7 +303,13 @@ export type ToEcdsaKernelSmartAccountParameters<
     kernelVersion extends KernelVersion<entryPointVersion>
 > = {
     client: Client
-    owner: LocalAccount
+    owners: [
+        OneOf<
+            | EIP1193Provider
+            | WalletClient<Transport, Chain | undefined, Account>
+            | LocalAccount
+        >
+    ]
     entryPoint?: {
         address: Address
         version: entryPointVersion
@@ -352,13 +367,15 @@ export async function toEcdsaKernelSmartAccount<
         client,
         address,
         index = 0n,
-        owner,
+        owners,
         version,
         ecdsaValidatorAddress: _ecdsaValidatorAddress,
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress
     } = parameters
+
+    const localOwner = await toOwner({ owner: owners[0] })
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
@@ -389,7 +406,7 @@ export async function toEcdsaKernelSmartAccount<
         getAccountInitCode({
             entryPointVersion: entryPoint.version,
             kernelVersion,
-            owner: owner.address,
+            owner: localOwner.address,
             index,
             factoryAddress,
             accountLogicAddress,
@@ -461,7 +478,7 @@ export async function toEcdsaKernelSmartAccount<
         },
         async signMessage({ message }) {
             const signature = await signMessage({
-                owner: owner,
+                owner: localOwner,
                 message,
                 accountAddress: await this.getAddress(),
                 kernelVersion,
@@ -479,7 +496,7 @@ export async function toEcdsaKernelSmartAccount<
         },
         async signTypedData(typedData) {
             const signature = await signTypedData({
-                owner,
+                owner: localOwner,
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
                 accountAddress: await this.getAddress(),
@@ -510,7 +527,7 @@ export async function toEcdsaKernelSmartAccount<
                 entryPointVersion: entryPoint.version,
                 chainId: chainId
             })
-            const signature = await owner.signMessage({
+            const signature = await localOwner.signMessage({
                 message: { raw: hash }
             })
 

@@ -1,9 +1,5 @@
 import type { Address, Hash, Hex, OneOf, PartialBy } from "viem"
-import type {
-    UserOperation,
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
+import type { UserOperation } from "viem/account-abstraction"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {
@@ -42,10 +38,7 @@ type GetTokenQuotesWithBigIntAsHex = {
 }
 
 export type PimlicoRpcSchema<
-    entryPointAddress extends
-        | typeof entryPoint06Address
-        | typeof entryPoint07Address = typeof entryPoint07Address,
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
+    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = [
     {
         Method: "pimlico_getUserOperationGasPrice"
@@ -89,12 +82,12 @@ export type PimlicoRpcSchema<
                         >
                       : never)
             >,
-            entryPoint: entryPointAddress,
+            entryPoint: Address,
             metadata?: {
                 sponsorshipPolicyId?: string
             }
         ]
-        ReturnType: entryPointAddress extends "0.6"
+        ReturnType: entryPointVersion extends "0.6"
             ? {
                   paymasterAndData: Hex
                   preVerificationGas: Hex
@@ -120,7 +113,7 @@ export type PimlicoRpcSchema<
         Method: "pm_validateSponsorshipPolicies"
         Parameters: [
             userOperation: UserOperation<entryPointVersion, Hex>,
-            entryPoint: entryPointAddress,
+            entryPoint: Address,
             sponsorshipPolicyIds: string[]
         ]
         ReturnType: {

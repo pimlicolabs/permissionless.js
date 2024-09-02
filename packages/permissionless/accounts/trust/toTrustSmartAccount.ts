@@ -1,9 +1,15 @@
 import {
+    type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
+    type EIP1193Provider,
     type Hex,
     type LocalAccount,
+    type OneOf,
+    type Transport,
+    type WalletClient,
     hashMessage,
     hashTypedData
 } from "viem"
@@ -21,6 +27,7 @@ import {
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getFactoryData } from "./utils/getFactoryData"
 
@@ -59,15 +66,17 @@ export const TRUST_ADDRESSES: {
     factoryAddress: "0x729c310186a57833f622630a16d13f710b83272a"
 }
 
-export type ToTrustSmartAccountParameters<
-    entryPointVersion extends "0.6" = "0.6"
-> = {
+export type ToTrustSmartAccountParameters = {
     client: Client
-    owner: LocalAccount
+    owner: OneOf<
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
     factoryAddress?: Address
-    entryPoint?: {
+    entryPoint: {
         address: Address
-        version: entryPointVersion
+        version: "0.6"
     }
     index?: bigint
     address?: Address
@@ -75,12 +84,10 @@ export type ToTrustSmartAccountParameters<
     nonceKey?: bigint
 }
 
-export type TrustSmartAccountImplementation<
-    entryPointVersion extends "0.6" = "0.6"
-> = Assign<
+export type TrustSmartAccountImplementation = Assign<
     SmartAccountImplementation<
         typeof entryPoint06Abi,
-        entryPointVersion
+        "0.6"
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
         //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
@@ -90,20 +97,17 @@ export type TrustSmartAccountImplementation<
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
-export type ToTrustSmartAccountReturnType<
-    entryPointVersion extends "0.6" = "0.6"
-> = SmartAccount<TrustSmartAccountImplementation<entryPointVersion>>
+export type ToTrustSmartAccountReturnType =
+    SmartAccount<TrustSmartAccountImplementation>
 
 /**
  * @description Creates an Trust Smart Account from a private key.
  *
  * @returns A Private Key Trust Smart Account.
  */
-export async function toTrustSmartAccount<
-    entryPointVersion extends "0.6" = "0.6"
->(
-    parameters: ToTrustSmartAccountParameters<entryPointVersion>
-): Promise<ToTrustSmartAccountReturnType<entryPointVersion>> {
+export async function toTrustSmartAccount(
+    parameters: ToTrustSmartAccountParameters
+): Promise<ToTrustSmartAccountReturnType> {
     const {
         owner,
         client,
@@ -112,6 +116,8 @@ export async function toTrustSmartAccount<
         factoryAddress = TRUST_ADDRESSES.factoryAddress,
         secp256k1VerificationFacetAddress = TRUST_ADDRESSES.secp256k1VerificationFacetAddress
     } = parameters
+
+    const localOwner = await toOwner({ owner })
 
     let accountAddress: Address | undefined = address
 
@@ -135,7 +141,7 @@ export async function toTrustSmartAccount<
         return {
             factory: factoryAddress,
             factoryData: await getFactoryData({
-                bytes: owner.address,
+                bytes: localOwner.address,
                 secp256k1VerificationFacetAddress,
                 index
             })
@@ -178,7 +184,7 @@ export async function toTrustSmartAccount<
         },
         async signMessage({ message }) {
             return _signTypedData(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashMessage(message)
@@ -186,7 +192,7 @@ export async function toTrustSmartAccount<
         },
         async signTypedData(typedData) {
             return _signTypedData(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashTypedData(typedData)
@@ -197,7 +203,7 @@ export async function toTrustSmartAccount<
                 parameters
 
             return signMessage(client, {
-                account: owner,
+                account: localOwner,
                 message: {
                     raw: getUserOperationHash({
                         userOperation: {
@@ -206,7 +212,7 @@ export async function toTrustSmartAccount<
                                 userOperation.sender ??
                                 (await this.getAddress()),
                             signature: "0x"
-                        } as UserOperation<entryPointVersion>,
+                        } as UserOperation<"0.6">,
                         entryPointAddress: entryPoint.address,
                         entryPointVersion: entryPoint.version,
                         chainId: chainId
@@ -214,5 +220,5 @@ export async function toTrustSmartAccount<
                 }
             })
         }
-    }) as Promise<ToTrustSmartAccountReturnType<entryPointVersion>>
+    }) as Promise<ToTrustSmartAccountReturnType>
 }

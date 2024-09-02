@@ -7,16 +7,12 @@ import type {
     Hex,
     Transport
 } from "viem"
-import type {
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 
 export type SendCompressedUserOperationParameters = {
     compressedUserOperation: Hex
     inflatorAddress: Address
-    entryPointAddress: typeof entryPoint06Address | typeof entryPoint07Address
+    entryPointAddress: Address
 }
 
 /**

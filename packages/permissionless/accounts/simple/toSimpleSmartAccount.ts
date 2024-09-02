@@ -1,9 +1,15 @@
 import {
+    type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
+    type EIP1193Provider,
     type Hex,
     type LocalAccount,
+    type OneOf,
+    type Transport,
+    type WalletClient,
     encodeFunctionData
 } from "viem"
 import {
@@ -20,6 +26,7 @@ import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -63,7 +70,11 @@ export type ToSimpleSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7"
 > = {
     client: Client
-    owner: LocalAccount
+    owner: OneOf<
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
     factoryAddress?: Address
     entryPoint?: {
         address: Address
@@ -126,6 +137,8 @@ export async function toSimpleSmartAccount<
         nonceKey
     } = parameters
 
+    const localOwner = await toOwner({ owner })
+
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
@@ -155,7 +168,7 @@ export async function toSimpleSmartAccount<
     const getFactoryArgs = async () => {
         return {
             factory: factoryAddress,
-            factoryData: await getAccountInitCode(owner.address, index)
+            factoryData: await getAccountInitCode(localOwner.address, index)
         }
     }
 
@@ -296,7 +309,7 @@ export async function toSimpleSmartAccount<
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
             return signMessage(client, {
-                account: owner,
+                account: localOwner,
                 message: {
                     raw: getUserOperationHash({
                         userOperation: {

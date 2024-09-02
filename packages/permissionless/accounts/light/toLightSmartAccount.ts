@@ -1,9 +1,15 @@
 import {
+    type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
+    type EIP1193Provider,
     type Hex,
     type LocalAccount,
+    type OneOf,
+    type Transport,
+    type WalletClient,
     concat,
     encodeFunctionData,
     hashMessage,
@@ -23,6 +29,7 @@ import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { toOwner } from "../../utils/toOwner"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -73,7 +80,11 @@ export type ToLightSmartAccountParameters<
         address: Address
         version: entryPointVersion
     }
-    owner: LocalAccount
+    owner: OneOf<
+        | EIP1193Provider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
     version: LightAccountVersion<entryPointVersion>
     factoryAddress?: Address
     index?: bigint
@@ -176,6 +187,8 @@ export async function toLightSmartAccount<
         nonceKey
     } = parameters
 
+    const localOwner = await toOwner({ owner })
+
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
@@ -204,7 +217,7 @@ export async function toLightSmartAccount<
     const getFactoryArgs = async () => {
         return {
             factory: factoryAddress,
-            factoryData: await getAccountInitCode(owner.address, index)
+            factoryData: await getAccountInitCode(localOwner.address, index)
         }
     }
 
@@ -317,7 +330,7 @@ export async function toLightSmartAccount<
         },
         async signMessage({ message }) {
             const signature = await signWith1271WrapperV1(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashMessage(message)
@@ -334,7 +347,7 @@ export async function toLightSmartAccount<
         },
         async signTypedData(typedData) {
             const signature = await signWith1271WrapperV1(
-                owner,
+                localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
                 hashTypedData(typedData)
@@ -364,7 +377,7 @@ export async function toLightSmartAccount<
             })
 
             const signature = await signMessage(client, {
-                account: owner,
+                account: localOwner,
                 message: {
                     raw: hash
                 }

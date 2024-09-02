@@ -75,8 +75,7 @@ describe("getSenderAddress", () => {
 
         await expect(async () =>
             getSenderAddress(client, {
-                entryPointAddress:
-                    "0x0000000000000000000000000000000000000000" as typeof entryPoint06Address,
+                entryPointAddress: "0x0000000000000000000000000000000000000000",
                 initCode: concatHex([factory, factoryData])
             })
         ).rejects.toThrowError(/not a valid entry point/)

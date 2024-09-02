@@ -1,12 +1,18 @@
 import {
+    type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
+    type EIP1193Provider,
     type Hex,
     type LocalAccount,
+    type OneOf,
     type SignableMessage,
+    type Transport,
     type TypedData,
     type TypedDataDefinition,
+    type WalletClient,
     concat,
     concatHex,
     encodeAbiParameters,
@@ -34,7 +40,7 @@ import {
 import { getChainId, readContract, signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { isSmartAccountDeployed } from "../../utils"
+import { isSmartAccountDeployed, toOwner } from "../../utils"
 import { encode7579Calls } from "../../utils/encode7579Calls"
 
 export type SafeVersion = "1.4.1"
@@ -932,7 +938,13 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owner: LocalAccount
+    owners: [
+        OneOf<
+            | EIP1193Provider
+            | WalletClient<Transport, Chain | undefined, Account>
+            | LocalAccount
+        >
+    ]
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -1108,7 +1120,7 @@ export async function toSafeSmartAccount<
 ): Promise<ToSafeSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
-        owner,
+        owners,
         address,
         version,
         safe4337ModuleAddress: _safe4337ModuleAddress,
@@ -1123,6 +1135,8 @@ export async function toSafeSmartAccount<
         payment,
         paymentReceiver
     } = parameters
+
+    const localOwner = await toOwner({ owner: owners[0] })
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
@@ -1198,7 +1212,7 @@ export async function toSafeSmartAccount<
         return {
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
-                owner: owner.address,
+                owner: localOwner.address,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
@@ -1230,7 +1244,7 @@ export async function toSafeSmartAccount<
             // Get the sender address based on the init code
             accountAddress = await getAccountAddress({
                 client,
-                owner: owner.address,
+                owner: localOwner.address,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
@@ -1267,7 +1281,7 @@ export async function toSafeSmartAccount<
                         safe4337ModuleAddress,
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
-                        owner: owner.address,
+                        owner: localOwner.address,
                         validators,
                         executors,
                         fallbacks,
@@ -1375,7 +1389,7 @@ export async function toSafeSmartAccount<
 
             return adjustVInSignature(
                 "eth_sign",
-                await owner.signMessage({
+                await localOwner.signMessage({
                     message: {
                         raw: toBytes(messageHash)
                     }
@@ -1385,7 +1399,7 @@ export async function toSafeSmartAccount<
         async signTypedData(typedData) {
             return adjustVInSignature(
                 "eth_signTypedData",
-                await owner.signTypedData({
+                await localOwner.signTypedData({
                     domain: {
                         chainId: await getMemoizedChainId(),
                         verifyingContract: await this.getAddress()
@@ -1451,9 +1465,9 @@ export async function toSafeSmartAccount<
 
             const signatures = [
                 {
-                    signer: owner.address,
+                    signer: localOwner.address,
                     data: await signTypedData(client, {
-                        account: owner,
+                        account: localOwner,
                         domain: {
                             chainId,
                             verifyingContract
