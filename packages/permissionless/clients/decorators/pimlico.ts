@@ -1,4 +1,4 @@
-import type { Address, Client, Hash, Prettify } from "viem"
+import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
 import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
@@ -25,6 +25,7 @@ import {
 } from "../../actions/pimlico/sponsorUserOperation"
 
 export type PimlicoActions<
+    TChain extends Chain | undefined,
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 > = {
     /**
@@ -114,8 +115,12 @@ export type PimlicoActions<
             Omit<ValidateSponsorshipPoliciesParameters, "entryPoint">
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
-    getTokenQuotes: (
-        args: Prettify<Omit<GetTokenQuotesParameters, "entryPoint">>
+    getTokenQuotes: <
+        TChainOverride extends Chain | undefined = Chain | undefined
+    >(
+        args: Prettify<
+            Omit<GetTokenQuotesParameters<TChain, TChainOverride>, "entryPoint">
+        >
     ) => Promise<Prettify<GetTokenQuotesReturnType>>
 }
 
@@ -125,7 +130,12 @@ export const pimlicoActions =
     }: {
         entryPoint: { address: Address; version: entryPointVersion }
     }) =>
-    (client: Client): PimlicoActions<entryPointVersion> => ({
+    <
+        TTransport extends Transport,
+        TChain extends Chain | undefined = Chain | undefined
+    >(
+        client: Client<TTransport, TChain>
+    ): PimlicoActions<TChain, entryPointVersion> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
@@ -150,6 +160,7 @@ export const pimlicoActions =
         getTokenQuotes: async (args) =>
             getTokenQuotes(client, {
                 ...args,
+                chain: args.chain,
                 entryPointAddress: entryPoint.address
             })
     })

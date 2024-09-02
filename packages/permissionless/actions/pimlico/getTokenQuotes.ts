@@ -4,16 +4,20 @@ import {
     type Chain,
     type Client,
     type Transport,
+    type GetChainParameter,
     hexToBigInt,
-    numberToHex
+    numberToHex,
+    ChainNotFoundError
 } from "viem"
 import type { PimlicoRpcSchema } from "../../types/pimlico"
 
-export type GetTokenQuotesParameters = {
+export type GetTokenQuotesParameters<
+    TChain extends Chain | undefined,
+    TChainOverride extends Chain | undefined = Chain | undefined
+> = {
     tokens: Address[]
     entryPointAddress: Address
-    chainId: number
-}
+} & GetChainParameter<TChain, TChainOverride>
 
 export type GetTokenQuotesReturnType = {
     paymaster: Address
@@ -32,21 +36,26 @@ export type GetTokenQuotesReturnType = {
  * @returns quotes, see {@link GetTokenQuotesReturnType}
  *
  */
-export const getTokenQuotes = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PimlicoRpcSchema
-    >,
-    args: GetTokenQuotesParameters
+export const getTokenQuotes = async <
+    TChain extends Chain | undefined,
+    TTransport extends Transport = Transport,
+    TChainOverride extends Chain | undefined = Chain | undefined
+>(
+    client: Client<TTransport, TChain, Account | undefined, PimlicoRpcSchema>,
+    args: GetTokenQuotesParameters<TChain, TChainOverride>
 ): Promise<GetTokenQuotesReturnType> => {
+    const chainId = args.chain?.id ?? client.chain?.id
+
+    if (!chainId) {
+        throw new ChainNotFoundError()
+    }
+
     const res = await client.request({
         method: "pimlico_getTokenQuotes",
         params: [
             { tokens: args.tokens },
             args.entryPointAddress,
-            numberToHex(args.chainId)
+            numberToHex(chainId)
         ]
     })
 
