@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.0
+
+### Minor Changes
+
+- 2e4d504c12dbb4af6eeccc9b62648cae60193424: Permissionless 0.2 released. Migration guide - https://docs.pimlico.io/permissionless/how-to/migration-guide
+
 ## 0.1.45
 
 ### Patch Changes
