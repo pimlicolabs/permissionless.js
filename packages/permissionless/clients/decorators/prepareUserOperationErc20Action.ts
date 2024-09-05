@@ -1,7 +1,7 @@
 import type { Chain, Client, Transport } from "viem"
+import type { PublicClient } from "viem"
 import type { BundlerActions, SmartAccount } from "viem/account-abstraction"
 import { prepareUserOperationErc20 } from "../../actions/smartAccountErc20/prepareUserOperationErc20"
-import type { PublicClient } from "viem"
 
 export type PrepareUserOperationErc20Action<
     TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
