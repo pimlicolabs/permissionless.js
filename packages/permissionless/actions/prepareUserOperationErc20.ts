@@ -22,15 +22,15 @@ import {
     type SmartAccount,
     type UserOperation,
     type UserOperationCall,
-    estimateUserOperationGas
+    estimateUserOperationGas,
+    getPaymasterData as getPaymasterData_,
+    getPaymasterStubData as getPaymasterStubData_
 } from "viem/account-abstraction"
-import { getPaymasterData as getPaymasterData_ } from "viem/account-abstraction/actions/paymaster/getPaymasterData"
-import { getPaymasterStubData as getPaymasterStubData_ } from "viem/account-abstraction/actions/paymaster/getPaymasterStubData"
 import { estimateFeesPerGas } from "viem/actions"
 import { AccountNotFoundError } from "viem/errors/account"
 import { getAction, parseAccount } from "viem/utils"
-import { getRequiredPrefund } from "../../utils/getRequiredPrefund"
-import { getTokenQuotes } from "../pimlico"
+import { getRequiredPrefund } from "../utils/getRequiredPrefund"
+import { getTokenQuotes } from "./pimlico"
 
 const defaultParameters = [
     "factory",
