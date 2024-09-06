@@ -170,7 +170,7 @@ export async function prepareUserOperationErc20<
         {
             abi: parseAbi(["function approve(address,uint)"]),
             functionName: "approve",
-            args: [paymaster, maxUint256],
+            args: [paymasterAddress, maxUint256],
             to: paymasterContext.token
         },
         ...parameters.calls
