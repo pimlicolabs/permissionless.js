@@ -149,12 +149,6 @@ export async function prepareUserOperationErc20<
     ////////////////////////////////////////////////////////////////////////////////
     // *CUSTOM* inject custom approval call so that gas estimations are accurate
     ////////////////////////////////////////////////////////////////////////////////
-    if (parameters.callData) {
-        throw new Error(
-            "callData field not supported for this action, only `calls` is currently supported"
-        )
-    }
-
     if (
         !paymasterContext ||
         typeof paymasterContext !== "object" ||
@@ -166,11 +160,30 @@ export async function prepareUserOperationErc20<
         )
     }
 
+    const quotes = await getTokenQuotes(client, {
+        tokens: [getAddress(paymasterContext.token)],
+        entryPointAddress: account.entryPoint.address,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        chain: client.chain!
+    })
+
+    const {
+        postOpGas,
+        exchangeRate,
+        paymaster: paymasterERC20Address
+    } = quotes[0]
+
+    if (parameters.callData) {
+        throw new Error(
+            "callData field not supported for this action, only `calls` is currently supported"
+        )
+    }
+
     const calls = [
         {
             abi: parseAbi(["function approve(address,uint)"]),
             functionName: "approve",
-            args: [paymasterAddress, maxUint256],
+            args: [paymasterERC20Address, maxUint256],
             to: paymasterContext.token
         },
         ...parameters.calls
@@ -468,19 +481,6 @@ export async function prepareUserOperationErc20<
     ////////////////////////////////////////////////////////////////////////////////
     // *CUSTOM* Call pimlico_getTokenQuotes and calculate the approval amount
     ////////////////////////////////////////////////////////////////////////////////
-    const quotes = await getTokenQuotes(client, {
-        tokens: [getAddress(paymasterContext.token)],
-        entryPointAddress: account.entryPoint.address,
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        chain: client.chain!
-    })
-
-    const {
-        postOpGas,
-        exchangeRate,
-        paymaster: paymasterERC20Address
-    } = quotes[0]
-
     const paymasterContract = getContract({
         address: paymasterERC20Address,
         abi: parseAbi([
@@ -489,7 +489,8 @@ export async function prepareUserOperationErc20<
         client: publicClient
     })
 
-    const maxFeePerGas = fees?.maxFeePerGas ?? parameters_.maxFeePerGas
+    const maxFeePerGas =
+        (request.maxFeePerGas || fees?.maxFeePerGas) ?? parameters_.maxFeePerGas
 
     if (!maxFeePerGas) {
         throw new Error("failed to get maxFeePerGas")
@@ -512,7 +513,7 @@ export async function prepareUserOperationErc20<
         {
             abi: parseAbi(["function approve(address,uint)"]),
             functionName: "approve",
-            args: [paymaster, approvalAmount],
+            args: [paymasterERC20Address, approvalAmount],
             to: paymasterContext.token
         },
         ...parameters.calls
