@@ -256,7 +256,9 @@ export async function toSimpleSmartAccount<
                 })
             }
 
-            if (calls.length === 0) {
+            const call = calls.length === 0 ? undefined : calls[0]
+
+            if (!call) {
                 throw new Error("No calls to encode")
             }
 
@@ -287,7 +289,7 @@ export async function toSimpleSmartAccount<
                     }
                 ],
                 functionName: "execute",
-                args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? "0x"]
+                args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
         },
         async getNonce(args) {
