@@ -93,15 +93,21 @@ export function encode7579Calls<callType extends CallType>({
         })
     }
 
+    const call = callData.length === 0 ? undefined : callData[0]
+
+    if (!call) {
+        throw new Error("No calls to encode")
+    }
+
     return encodeFunctionData({
         abi: executeAbi,
         functionName: "execute",
         args: [
             encodeExecutionMode(mode),
             concatHex([
-                callData[0].to,
-                toHex(callData[0].value ?? 0n, { size: 32 }),
-                callData[0].data ?? "0x"
+                call.to,
+                toHex(call.value ?? 0n, { size: 32 }),
+                call.data ?? "0x"
             ])
         ]
     })

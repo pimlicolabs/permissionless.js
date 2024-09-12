@@ -191,12 +191,17 @@ export async function toBiconomySmartAccount(
                     ]
                 })
             }
-            const { to, value, data } = calls[0]
+
+            const call = calls.length === 0 ? undefined : calls[0]
+
+            if (!call) {
+                throw new Error("No calls to encode")
+            }
             // Encode a simple call
             return encodeFunctionData({
                 abi: BiconomyAbi,
                 functionName: "execute_ncC",
-                args: [to, value ?? 0n, data ?? "0x"]
+                args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
         },
         // Get simple dummy signature for ECDSA module authorization
