@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.1
+
+### Patch Changes
+
+- de9e50a460ef690b3fff3b0764c2fde998646081: Fixed: type checks before encoding calldata
+
 ## 0.2.0
 
 ### Minor Changes
