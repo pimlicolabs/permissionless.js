@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Fixed: type cheks before encoding calldata
+Fixed: type checks before encoding calldata
