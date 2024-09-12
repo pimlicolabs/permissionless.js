@@ -1348,6 +1348,10 @@ export async function toSafeSmartAccount<
                 )
                 operationType = 1
             } else {
+                if (calls.length === 0) {
+                    throw new Error("No calls to encode")
+                }
+
                 to = calls[0].to
                 data = calls[0].data ?? "0x"
                 value = calls[0].value ?? 0n

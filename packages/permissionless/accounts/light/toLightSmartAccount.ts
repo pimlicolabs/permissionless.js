@@ -275,6 +275,10 @@ export async function toLightSmartAccount<
                 })
             }
 
+            if (calls.length === 0) {
+                throw new Error("No calls to encode")
+            }
+
             return encodeFunctionData({
                 abi: [
                     {

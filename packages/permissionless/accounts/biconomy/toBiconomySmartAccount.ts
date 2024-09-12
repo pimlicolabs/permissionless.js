@@ -191,6 +191,9 @@ export async function toBiconomySmartAccount(
                     ]
                 })
             }
+            if (calls.length === 0) {
+                throw new Error("No calls to encode")
+            }
             const { to, value, data } = calls[0]
             // Encode a simple call
             return encodeFunctionData({

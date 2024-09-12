@@ -93,6 +93,10 @@ export function encode7579Calls<callType extends CallType>({
         })
     }
 
+    if (callData.length === 0) {
+        throw new Error("No calls to encode")
+    }
+
     return encodeFunctionData({
         abi: executeAbi,
         functionName: "execute",

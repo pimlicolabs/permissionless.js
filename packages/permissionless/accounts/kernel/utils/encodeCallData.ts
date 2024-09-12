@@ -30,6 +30,11 @@ export const encodeCallData = ({
                 ]
             })
         }
+
+        if (calls.length === 0) {
+            throw new Error("No calls to encode")
+        }
+
         // Encode a simple call
         return encodeFunctionData({
             abi: KernelExecuteAbi,
