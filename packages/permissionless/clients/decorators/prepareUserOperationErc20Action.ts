@@ -1,8 +1,8 @@
 import type { Chain, Client, Transport } from "viem"
 import {
-    prepareUserOperation,
     type BundlerActions,
-    type SmartAccount
+    type SmartAccount,
+    prepareUserOperation
 } from "viem/account-abstraction"
 
 export type PrepareUserOperationErc20Action<
