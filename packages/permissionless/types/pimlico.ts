@@ -34,6 +34,7 @@ type GetTokenQuotesWithBigIntAsHex = {
         token: Address
         postOpGas: Hex
         exchangeRate: Hex
+        tokenPriceInUsd: number
         exchangeRateInUsd: number
     }[]
 }
