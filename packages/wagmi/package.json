@@ -20,11 +20,7 @@
             "default": "./_cjs/index.js"
         }
     },
-    "dependencies": {
-        "permissionless": "0.0.36"
-    },
     "peerDependencies": {
-        "wagmi": "^2.5.1",
-        "viem": "2.9.17"
+        "wagmi": "^2.12.8"
     }
 }
