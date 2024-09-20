@@ -20,6 +20,10 @@ import {
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
     ERC_7579_TEST_MODULE_CREATECALL,
+    ETHERSPOT_BOOTSTRAP_CREATECALL,
+    ETHERSPOT_IMPLEMENTATION,
+    ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
+    ETHERSPOT_WALLET_FACTORY_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
     KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
     KERNEL_V06_FACTORY_CREATECALL,
@@ -320,6 +324,30 @@ export const setupContracts = async (rpc: string) => {
             data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_WALLET_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_IMPLEMENTATION,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_BOOTSTRAP_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
     ])
 
@@ -467,6 +495,11 @@ export const setupContracts = async (rpc: string) => {
         "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
         "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
-        "0xc98B026383885F41d9a995f85FC480E9bb8bB891" // ERC7579 Test Module
+        "0xc98B026383885F41d9a995f85FC480E9bb8bB891", // ERC7579 Test Module
+        "0xc98B026383885F41d9a995f85FC480E9bb8bB891", // ERC7579 Test Module
+        "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // Etherspot Factory
+        "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066", // Etherspot Bootstrap
+        "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143", // Etherspot Multiple Owner ECDSA Validator
+        "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9" // Etherspot implementation
     ])
 }

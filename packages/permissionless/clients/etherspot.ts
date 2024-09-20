@@ -11,16 +11,16 @@ import type {
 import { createClient } from "viem"
 import {
     type BundlerActions,
-    type PaymasterActions,
     type SmartAccount,
-    bundlerActions,
-    entryPoint07Address,
-    paymasterActions
+    bundlerActions
 } from "viem/account-abstraction"
-import type { PimlicoRpcSchema } from "../types/pimlico"
-import { type PimlicoActions, pimlicoActions } from "./decorators/pimlico"
+import type { EtherspotBundlerRpcSchema } from "../types/etherspot"
+import {
+    type EtherspotBundlerActions,
+    etherspotBundlerActions
+} from "./decorators/etherspot"
 
-export type PimlicoClient<
+export type EtherspotBundlerClient<
     entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
@@ -32,15 +32,13 @@ export type PimlicoClient<
         chain extends Chain ? chain : undefined,
         account,
         rpcSchema extends RpcSchema
-            ? [...BundlerRpcSchema, ...PimlicoRpcSchema, ...rpcSchema]
-            : [...BundlerRpcSchema, ...PimlicoRpcSchema],
-        BundlerActions<account> &
-            PaymasterActions &
-            PimlicoActions<chain, entryPointVersion>
+            ? [...BundlerRpcSchema, ...EtherspotBundlerRpcSchema, ...rpcSchema]
+            : [...BundlerRpcSchema, ...EtherspotBundlerRpcSchema],
+        BundlerActions<account> & EtherspotBundlerActions
     >
 >
 
-export type PimlicoClientConfig<
+export type EtherspotClientConfig<
     entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
@@ -65,45 +63,38 @@ export type PimlicoClientConfig<
     }
 }
 
-export function createPimlicoClient<
+export function createEtherspotBundlerClient<
     entryPointVersion extends "0.6" | "0.7" = "0.7",
     transport extends Transport = Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
     rpcSchema extends RpcSchema | undefined = undefined
 >(
-    parameters: PimlicoClientConfig<
+    parameters: EtherspotClientConfig<
         entryPointVersion,
         transport,
         chain,
         account,
         rpcSchema
     >
-): PimlicoClient<entryPointVersion, transport, chain, account, rpcSchema>
+): EtherspotBundlerClient<
+    entryPointVersion,
+    transport,
+    chain,
+    account,
+    rpcSchema
+>
 
-export function createPimlicoClient(
-    parameters: PimlicoClientConfig
-): PimlicoClient {
-    const {
-        key = "public",
-        name = "Pimlico Bundler Client",
-        entryPoint
-    } = parameters
-
-    return createClient({
+export function createEtherspotBundlerClient(
+    parameters: EtherspotClientConfig
+): EtherspotBundlerClient {
+    const { key = "public", name = "Etherspot Bundler Client" } = parameters
+    const client = createClient({
         ...parameters,
         key,
         name,
-        type: "pimlicoClient"
-    })
-        .extend(bundlerActions)
-        .extend(paymasterActions)
-        .extend(
-            pimlicoActions({
-                entryPoint: {
-                    address: entryPoint?.address ?? entryPoint07Address,
-                    version: entryPoint?.version ?? "0.7"
-                }
-            })
-        )
+        type: "etherspotBundlerClient"
+    }).extend(bundlerActions)
+
+    return client.extend(etherspotBundlerActions()) as EtherspotBundlerClient
 }
