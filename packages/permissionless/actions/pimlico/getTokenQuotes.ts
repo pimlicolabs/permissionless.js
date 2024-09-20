@@ -24,6 +24,8 @@ export type GetTokenQuotesReturnType = {
     token: Address
     postOpGas: bigint
     exchangeRate: bigint
+    tokenDecimals: number
+    tokenUsdPrice: number
 }[]
 
 /**
@@ -62,6 +64,8 @@ export const getTokenQuotes = async <
     return res.quotes.map((quote) => ({
         ...quote,
         postOpGas: hexToBigInt(quote.postOpGas),
-        exchangeRate: hexToBigInt(quote.exchangeRate)
+        exchangeRate: hexToBigInt(quote.exchangeRate),
+        tokenDecimals: quote.tokenDecimals,
+        tokenUsdPrice: quote.tokenUsdPrice
     }))
 }
