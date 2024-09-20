@@ -12,12 +12,12 @@ import {
     type BundlerActions,
     type BundlerClientConfig,
     type PaymasterActions,
+    type PrepareUserOperationParameters,
     type SmartAccount,
     type UserOperationRequest,
-    type prepareUserOperation as viemPrepareUserOperation,
-    type PrepareUserOperationParameters,
+    bundlerActions,
     createBundlerClient,
-    bundlerActions
+    type prepareUserOperation as viemPrepareUserOperation
 } from "viem/account-abstraction"
 import {
     type SmartAccountActions,
