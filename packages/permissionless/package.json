@@ -44,11 +44,6 @@
             "import": "./_esm/actions/smartAccount.js",
             "default": "./_cjs/actions/smartAccount.js"
         },
-        "./actions/erc20Paymaster": {
-            "types": "./_types/actions/erc20Paymaster.d.ts",
-            "import": "./_esm/actions/erc20Paymaster.js",
-            "default": "./_cjs/actions/erc20Paymaster.js"
-        },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
             "import": "./_esm/clients/index.js",

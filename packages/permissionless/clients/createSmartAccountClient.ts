@@ -14,7 +14,10 @@ import {
     type PaymasterActions,
     type SmartAccount,
     type UserOperationRequest,
-    createBundlerClient
+    type prepareUserOperation as viemPrepareUserOperation,
+    type PrepareUserOperationParameters,
+    createBundlerClient,
+    bundlerActions
 } from "viem/account-abstraction"
 import {
     type SmartAccountActions,
@@ -101,6 +104,8 @@ export type SmartAccountClientConfig<
                         userOperation: UserOperationRequest
                     }) => Promise<EstimateFeesPerGasReturnType<"eip1559">>)
                   | undefined
+              /** Prepare User Operation configuration. */
+              prepareUserOperation?: typeof viemPrepareUserOperation | undefined
           }
         | undefined
 }
@@ -145,5 +150,23 @@ export function createSmartAccountClient(
         userOperation
     })
 
-    return client.extend(smartAccountActions()) as unknown as SmartAccountClient
+    if (parameters.userOperation?.prepareUserOperation) {
+        console.log("has parameters.prepareUserOperation")
+        const prepareUserOp = parameters.userOperation.prepareUserOperation
+        client
+            .extend((client) => ({
+                prepareUserOperation: (
+                    args: PrepareUserOperationParameters
+                ) => {
+                    console.log("prepareUserOperation called with args:", args)
+                    return prepareUserOp(client, args)
+                }
+            }))
+            // @ts-ignore
+            .extend(bundlerActions)
+    }
+
+    client.extend(smartAccountActions())
+
+    return client as unknown as SmartAccountClient
 }
