@@ -2,7 +2,7 @@
     "workspaces": [
         "packages/permissionless",
         "packages/wagmi",
-        "packages/wagmi-demo",
+        "packages/wagmi-test-demo",
         "packages/create-permissionless-app"
     ],
     "private": true,
@@ -24,23 +24,7 @@
         "tslib": "^2.6.2",
         "@pimlico/alto": "^0.0.4",
         "prool": "^0.0.12",
-        "typescript": "^5.2.2",
-        "async-mutex": "^0.5.0",
-        "get-port": "^7.0.0",
-        "tsc-alias": "^1.8.8",
-        "vitest": "^1.2.0",
-        "viem": "^2.20.0",
-        "wagmi": "^2.12.8",
-        "@permissionless/wagmi": "workspace:packages/wagmi",
-        "@types/react": "^18.3.1",
-        "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.2.1",
-        "@wagmi/cli": "latest",
-        "buffer": "^6.0.3",
-        "vite": "^5.2.11",
-        "@tanstack/react-query": "5.45.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1"
+        "typescript": "^5.2.2"
     },
     "description": "",
     "keywords": [],
@@ -71,5 +55,12 @@
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"
+    },
+    "dependencies": {
+        "async-mutex": "^0.5.0",
+        "get-port": "^7.0.0",
+        "tsc-alias": "^1.8.8",
+        "vitest": "^1.2.0",
+        "viem": "2.20.0"
     }
 }
