@@ -24,8 +24,7 @@ export type GetTokenQuotesReturnType = {
     token: Address
     postOpGas: bigint
     exchangeRate: bigint
-    tokenDecimals: number
-    tokenUsdPrice: number
+    exchangeRateInUsd: number
 }[]
 
 /**
@@ -65,7 +64,6 @@ export const getTokenQuotes = async <
         ...quote,
         postOpGas: hexToBigInt(quote.postOpGas),
         exchangeRate: hexToBigInt(quote.exchangeRate),
-        tokenDecimals: quote.tokenDecimals,
-        tokenUsdPrice: quote.tokenUsdPrice
+        exchangeRateInUsd: quote.exchangeRateInUsd
     }))
 }
