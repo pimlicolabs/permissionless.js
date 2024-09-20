@@ -422,7 +422,7 @@ const handleMethod = async (
 
         const quotes = {
             [getAddress("0xffffffffffffffffffffffffffffffffffffffff")]: {
-                exchangeRateNativeToToken: "0x5cc717fbb3450c0000000",
+                exchangeRateNativeToUsd: "0x5cc717fbb3450c0000000",
                 exchangeRate: "0x5cc717fbb3450c0000",
                 postOpGas: "0xc350"
             }
