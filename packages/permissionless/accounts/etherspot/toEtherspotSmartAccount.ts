@@ -9,11 +9,11 @@ import {
     type LocalAccount,
     type OneOf,
     type Transport,
-    type TypedDataDefinition,
     type WalletClient,
     concatHex,
     encodeAbiParameters,
     encodeFunctionData,
+    encodePacked,
     toHex,
     zeroAddress
 } from "viem"
@@ -26,13 +26,12 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, readContract } from "viem/actions"
+import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { toOwner } from "../../utils"
 import { encode7579Calls } from "../../utils/encode7579Calls"
-import { EtherspotWalletFactoryAbi } from "./abi/EtherspotWalletFactoryAbi"
 import {
     DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
@@ -41,8 +40,6 @@ import {
 } from "./constants"
 import { getInitMSAData } from "./utils/getInitMSAData"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
-import { signMessage } from "./utils/signMessage"
-import { signTypedData } from "./utils/signTypedData"
 
 /**
  * The account creation ABI for a modular etherspot smart account
@@ -139,13 +136,11 @@ const getInitialisationData = ({
  * @param bootstrapAddress
  */
 const getAccountInitCode = async ({
-    entryPoint: entryPointAddress,
     owner,
     index,
     validatorAddress,
     bootstrapAddress
 }: {
-    entryPoint: Address
     owner: Address
     index: bigint
     validatorAddress: Address
@@ -240,7 +235,6 @@ export async function toEtherspotSmartAccount<entryPointVersion extends "0.7">(
     // Helper to generate the init code for the smart account
     const generateInitCode = () =>
         getAccountInitCode({
-            entryPoint: entryPoint.address,
             owner: localOwner.address,
             index,
             validatorAddress,
@@ -312,30 +306,40 @@ export async function toEtherspotSmartAccount<entryPointVersion extends "0.7">(
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            const signature = await signMessage({
-                owner: localOwner,
-                message,
-                accountAddress: await this.getAddress(),
-                chainId: await getMemoizedChainId()
+            let signature: Hex = await localOwner.signMessage({
+                message
             })
-
-            return concatHex([
-                getEcdsaValidatorIdentifier(validatorAddress),
-                signature
-            ])
+            const potentiallyIncorrectV = Number.parseInt(
+                signature.slice(-2),
+                16
+            )
+            if (![27, 28].includes(potentiallyIncorrectV)) {
+                const correctV = potentiallyIncorrectV + 27
+                signature = (signature.slice(0, -2) +
+                    correctV.toString(16)) as Hex
+            }
+            return encodePacked(
+                ["address", "bytes"],
+                [validatorAddress, signature]
+            )
         },
         async signTypedData(typedData) {
-            const signature = await signTypedData({
-                owner: localOwner,
-                chainId: await getMemoizedChainId(),
-                ...(typedData as TypedDataDefinition),
-                accountAddress: await this.getAddress()
-            })
+            let signature: Hex = await localOwner.signTypedData(typedData)
 
-            return concatHex([
-                getEcdsaValidatorIdentifier(validatorAddress),
-                signature
-            ])
+            const potentiallyIncorrectV = Number.parseInt(
+                signature.slice(-2),
+                16
+            )
+            if (![27, 28].includes(potentiallyIncorrectV)) {
+                const correctV = potentiallyIncorrectV + 27
+                signature = (signature.slice(0, -2) +
+                    correctV.toString(16)) as Hex
+            }
+
+            return encodePacked(
+                ["address", "bytes"],
+                [validatorAddress, signature]
+            )
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =

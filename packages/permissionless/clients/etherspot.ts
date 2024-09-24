@@ -21,7 +21,6 @@ import {
 } from "./decorators/etherspot"
 
 export type EtherspotBundlerClient<
-    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
@@ -77,13 +76,7 @@ export function createEtherspotBundlerClient<
         account,
         rpcSchema
     >
-): EtherspotBundlerClient<
-    entryPointVersion,
-    transport,
-    chain,
-    account,
-    rpcSchema
->
+): EtherspotBundlerClient<transport, chain, account, rpcSchema>
 
 export function createEtherspotBundlerClient(
     parameters: EtherspotClientConfig
