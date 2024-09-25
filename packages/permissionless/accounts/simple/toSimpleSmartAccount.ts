@@ -296,7 +296,7 @@ export async function toSimpleSmartAccount<
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey
+                key: nonceKey ?? args?.key
             })
         },
         async getStubSignature() {

@@ -173,7 +173,7 @@ export async function toTrustSmartAccount(
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? parameters?.nonceKey
+                key: parameters?.nonceKey ?? args?.key
             })
         },
         async getStubSignature() {
