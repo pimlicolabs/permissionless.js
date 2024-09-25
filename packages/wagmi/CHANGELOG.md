@@ -1,5 +1,11 @@
 # @permissionless/wagmi
 
+## 0.1.0
+
+### Minor Changes
+
+- c3f6a95fc4d4264a0d761931da74d9c46a052468: Added hooks for Erc5792
+
 ## 0.0.4
 
 ### Patch Changes
