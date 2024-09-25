@@ -4,11 +4,12 @@ import { useContext, useMemo } from "react"
 import type { WalletCapabilities, WalletSendCallsParameters } from "viem"
 import { useAccount } from "wagmi"
 import { useCapabilities } from "wagmi/experimental"
-import { Erc5792HelperContext } from "../context"
+import { PermissionlessContext } from "../context"
 
 export const useAvailableCapabilities = () => {
-    const { capabilities: capabilitiesConfigured } =
-        useContext(Erc5792HelperContext)
+    const { capabilities: capabilitiesConfigured } = useContext(
+        PermissionlessContext
+    )
 
     const account = useAccount()
 
