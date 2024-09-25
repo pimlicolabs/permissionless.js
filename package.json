@@ -46,7 +46,7 @@
     "keywords": [],
     "license": "MIT",
     "scripts": {
-        "build": "bun run build:permissionless",
+        "build": "bun run build:permissionless && bun run build:wagmi",
         "build:permissionless": "bun run clean:permissionless && bun run build:cjs && bun run build:esm && bun run build:types",
         "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:cjs && bun run build:wagmi:esm && bun run build:wagmi:types",
         "build:cjs": "tsc --project ./tsconfig/tsconfig.permissionless.cjs.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
