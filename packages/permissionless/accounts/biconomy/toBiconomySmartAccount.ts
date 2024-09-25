@@ -175,7 +175,7 @@ export async function toBiconomySmartAccount(
             return getAccountNonce(client, {
                 address,
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? parameters?.nonceKey
+                key: parameters?.nonceKey ?? args?.key
             })
         },
         encodeCalls: async (calls) => {
