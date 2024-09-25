@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.3
+
+### Patch Changes
+
+- 80176c6b99c3406d23bdf230f6c33b8e0e34bbb9: Fixed - give priority to nonceKey passed in parameters
+
 ## 0.2.2
 
 ### Patch Changes
