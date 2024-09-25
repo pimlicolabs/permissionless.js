@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 6cfab3199c3f5a8bf5301b932d8175cfef620a17: Added tokenDecimals and tokenUsdPrice to pimlico_getTokenQuotes
+- 6cfab3199c3f5a8bf5301b932d8175cfef620a17: Added exchangeRateNativeToUsd field to pimlico_getTokenQuotes return type
 
 ## 0.2.1
 
