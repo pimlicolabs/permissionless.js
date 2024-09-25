@@ -8,10 +8,10 @@ import type {
 import {
     type Config,
     type ResolvedRegister,
-    waitForTransactionReceipt,
     type WaitForTransactionReceiptErrorType,
     type WaitForTransactionReceiptReturnType,
-    getConnectorClient
+    getConnectorClient,
+    waitForTransactionReceipt
 } from "@wagmi/core"
 import { ConnectorNotConnectedError } from "@wagmi/core"
 import type {
@@ -22,14 +22,21 @@ import type {
 } from "@wagmi/core/experimental"
 import type { WaitForTransactionReceiptData } from "@wagmi/core/query"
 import {
-    isHash,
-    stringify,
-    WaitForTransactionReceiptTimeoutError,
     type Hash,
     type Prettify,
+    WaitForTransactionReceiptTimeoutError,
     type WalletCapabilities,
-    type WalletSendCallsParameters
+    type WalletSendCallsParameters,
+    isHash,
+    stringify
 } from "viem"
+import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
+import {
+    type GetCallsStatusReturnType,
+    type ShowCallsStatusErrorType,
+    getCallsStatus
+} from "viem/experimental"
+import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
     type UseQueryParameters,
@@ -38,16 +45,9 @@ import {
     type WaitForTransactionReceiptQueryFnData,
     useQuery
 } from "wagmi/query"
-import type { ConfigParameter } from "./useSendTransaction"
-import { useAvailableCapabilities } from "./useAvailableCapabilities"
-import {
-    getCallsStatus,
-    type GetCallsStatusReturnType,
-    type ShowCallsStatusErrorType
-} from "viem/experimental"
 import { observe } from "../utils/observe"
-import { getAction } from "viem/utils"
-import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
+import { useAvailableCapabilities } from "./useAvailableCapabilities"
+import type { ConfigParameter } from "./useSendTransaction"
 
 export type WaitForTransactionReceiptQueryKey<
     config extends Config,

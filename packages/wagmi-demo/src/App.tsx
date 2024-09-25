@@ -1,9 +1,9 @@
-import { useCallback } from "react"
-import { useAccount, useConnect, useDisconnect } from "wagmi"
 import {
     useSendTransaction,
     useWaitForTransactionReceipt
 } from "@permissionless/wagmi"
+import { useCallback } from "react"
+import { useAccount, useConnect, useDisconnect } from "wagmi"
 
 function App() {
     const account = useAccount()
