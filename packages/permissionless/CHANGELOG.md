@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.2
+
+### Patch Changes
+
+- 6cfab3199c3f5a8bf5301b932d8175cfef620a17: Added exchangeRateNativeToUsd field to pimlico_getTokenQuotes return type
+
 ## 0.2.1
 
 ### Patch Changes
