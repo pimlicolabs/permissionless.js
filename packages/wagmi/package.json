@@ -1,6 +1,6 @@
 {
     "name": "@permissionless/wagmi",
-    "version": "0.0.4",
+    "version": "0.1.0",
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless/wagmi",
     "repository": "github:pimlicolabs/permissionless.js",
@@ -20,11 +20,7 @@
             "default": "./_cjs/index.js"
         }
     },
-    "dependencies": {
-        "permissionless": "0.0.36"
-    },
     "peerDependencies": {
-        "wagmi": "^2.5.1",
-        "viem": "2.9.17"
+        "wagmi": "^2.12.8"
     }
 }

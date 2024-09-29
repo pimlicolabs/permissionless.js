@@ -1,5 +1,23 @@
 # permissionless
 
+## 0.2.3
+
+### Patch Changes
+
+- 80176c6b99c3406d23bdf230f6c33b8e0e34bbb9: Fixed - give priority to nonceKey passed in parameters
+
+## 0.2.2
+
+### Patch Changes
+
+- 6cfab3199c3f5a8bf5301b932d8175cfef620a17: Added exchangeRateNativeToUsd field to pimlico_getTokenQuotes return type
+
+## 0.2.1
+
+### Patch Changes
+
+- de9e50a460ef690b3fff3b0764c2fde998646081: Fixed: type checks before encoding calldata
+
 ## 0.2.0
 
 ### Minor Changes

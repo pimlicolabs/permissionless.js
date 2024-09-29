@@ -275,6 +275,12 @@ export async function toLightSmartAccount<
                 })
             }
 
+            const call = calls.length === 0 ? undefined : calls[0]
+
+            if (!call) {
+                throw new Error("No calls to encode")
+            }
+
             return encodeFunctionData({
                 abi: [
                     {
@@ -302,14 +308,14 @@ export async function toLightSmartAccount<
                     }
                 ],
                 functionName: "execute",
-                args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? "0x"]
+                args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
         },
         async getNonce(args) {
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey
+                key: nonceKey ?? args?.key
             })
         },
         async getStubSignature() {
