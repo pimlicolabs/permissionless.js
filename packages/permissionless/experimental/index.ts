@@ -1,3 +1,3 @@
-import { pimlicoPrepareUserOperationErc20 } from "./pimlicoPrepareUserOperationErc20"
+import { prepareUserOperationErc20 } from "./prepareUserOperationErc20"
 
-export { pimlicoPrepareUserOperationErc20 }
+export { prepareUserOperationErc20 }

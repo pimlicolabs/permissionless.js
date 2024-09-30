@@ -151,22 +151,27 @@ export function createSmartAccountClient(
     })
 
     if (parameters.userOperation?.prepareUserOperation) {
-        console.log("has parameters.prepareUserOperation")
-        const prepareUserOp = parameters.userOperation.prepareUserOperation
-        client
+        const customPrepareUserOp =
+            parameters.userOperation.prepareUserOperation
+
+        return client
             .extend((client) => ({
                 prepareUserOperation: (
                     args: PrepareUserOperationParameters
                 ) => {
-                    console.log("prepareUserOperation called with args:", args)
-                    return prepareUserOp(client, args)
+                    return customPrepareUserOp(client, args)
                 }
             }))
-            // @ts-ignore
             .extend(bundlerActions)
+            .extend((client) => ({
+                prepareUserOperation: (
+                    args: PrepareUserOperationParameters
+                ) => {
+                    return customPrepareUserOp(client, args)
+                }
+            }))
+            .extend(smartAccountActions()) as unknown as SmartAccountClient
     }
 
-    client.extend(smartAccountActions())
-
-    return client as unknown as SmartAccountClient
+    return client.extend(smartAccountActions()) as unknown as SmartAccountClient
 }

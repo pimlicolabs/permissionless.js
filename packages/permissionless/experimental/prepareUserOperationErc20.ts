@@ -1,6 +1,5 @@
 import {
     type Address,
-    type BundlerRpcSchema,
     type Chain,
     type Client,
     type ContractFunctionParameters,
@@ -11,38 +10,28 @@ import {
     parseAbi
 } from "viem"
 import {
-    type BundlerActions,
     type PrepareUserOperationParameters,
     type PrepareUserOperationRequest,
     type PrepareUserOperationReturnType,
     type SmartAccount,
     type UserOperationCall,
-    prepareUserOperation
+    prepareUserOperation,
+    getPaymasterData
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
-import { type PimlicoActions, getTokenQuotes } from "../actions/pimlico"
-import type { PimlicoRpcSchema } from "../types/pimlico"
-import { getRequiredPrefund } from "../utils/getRequiredPrefund"
+import { getTokenQuotes } from "../actions/pimlico"
 
-export async function pimlicoPrepareUserOperationErc20<
-    account extends SmartAccount,
+export async function prepareUserOperationErc20<
+    account extends SmartAccount | undefined,
     const calls extends readonly unknown[],
     const request extends PrepareUserOperationRequest<
         account,
         accountOverride,
         calls
     >,
-    accountOverride extends SmartAccount | undefined = undefined,
-    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
-    chain extends Chain | undefined = Chain | undefined
+    accountOverride extends SmartAccount | undefined = undefined
 >(
-    client: Client<
-        Transport,
-        Chain | undefined,
-        account,
-        [...BundlerRpcSchema, ...PimlicoRpcSchema],
-        BundlerActions<account> & PimlicoActions<chain, entryPointVersion>
-    >,
+    client: Client<Transport, Chain | undefined, account>,
     parameters_: PrepareUserOperationParameters<
         account,
         accountOverride,
@@ -52,9 +41,11 @@ export async function pimlicoPrepareUserOperationErc20<
 ): Promise<
     PrepareUserOperationReturnType<account, accountOverride, calls, request>
 > {
-    console.log("calling pimlicoPrepareUserOperationErc20")
     const parameters = parameters_ as PrepareUserOperationParameters
-    const account = parseAccount(parameters.account) as SmartAccount
+    const account_ = client.account
+
+    if (!account_) throw new Error("Account not found")
+    const account = parseAccount(account_)
 
     const { paymasterContext } = parameters
 
@@ -71,7 +62,7 @@ export async function pimlicoPrepareUserOperationErc20<
         const quotes = await getTokenQuotes(client, {
             tokens: [getAddress(paymasterContext.token)],
             entryPointAddress: account.entryPoint.address,
-            // biome-ignore lint/style/noNonNullAssertion: TODO FIX THIS (HOW TO ASSERT THAT THERE IS A CHAIN???)
+            // biome-ignore lint/style/noNonNullAssertion:
             chain: client.chain!
         })
 
@@ -101,39 +92,38 @@ export async function pimlicoPrepareUserOperationErc20<
         // Call prepareUserOperation
         ////////////////////////////////////////////////////////////////////////////////
 
-        const userOperation = (await getAction(
+        const userOperation = await getAction(
             client,
             prepareUserOperation,
             "prepareUserOperation"
         )({
             ...parameters,
             calls: callsWithApproval
-        })) as PrepareUserOperationReturnType<
-            account,
-            accountOverride,
-            calls,
-            request
-        >
+        } as unknown as PrepareUserOperationParameters)
 
         ////////////////////////////////////////////////////////////////////////////////
         // Call pimlico_getTokenQuotes and calculate the approval amount needed for op
         ////////////////////////////////////////////////////////////////////////////////
 
-        const maxFeePerGas = parameters.maxFeePerGas
+        const maxFeePerGas =
+            parameters.maxFeePerGas ?? userOperation.maxFeePerGas
 
         if (!maxFeePerGas) {
             throw new Error("failed to get maxFeePerGas")
         }
 
-        const userOperationPrefund = getRequiredPrefund({
-            // @ts-ignore
-            userOperation,
-            entryPointVersion: client.account.entryPoint.version
-        })
+        const userOperationMaxGas =
+            userOperation.preVerificationGas +
+            userOperation.callGasLimit +
+            userOperation.verificationGasLimit +
+            (userOperation.paymasterPostOpGasLimit || 0n) +
+            (userOperation.paymasterVerificationGasLimit || 0n)
+        const userOperationMaxCost =
+            userOperationMaxGas * userOperation.maxFeePerGas
 
         // using formula here https://github.com/pimlicolabs/singleton-paymaster/blob/main/src/base/BaseSingletonPaymaster.sol#L334-L341
         const maxCostInToken =
-            ((userOperationPrefund + postOpGas * maxFeePerGas) * exchangeRate) /
+            ((userOperationMaxCost + postOpGas * maxFeePerGas) * exchangeRate) /
             BigInt(1e18)
 
         const finalCalls = [
@@ -146,7 +136,6 @@ export async function pimlicoPrepareUserOperationErc20<
             ...parameters.calls
         ]
 
-        // @ts-ignore
         userOperation.callData = await account.encodeCalls(
             finalCalls.map((call_) => {
                 const call = call_ as
@@ -164,14 +153,39 @@ export async function pimlicoPrepareUserOperationErc20<
                 return call as UserOperationCall
             })
         )
+        parameters.calls = finalCalls
 
-        return userOperation
+        const paymasterData = await getAction(
+            client,
+            getPaymasterData,
+            "getPaymasterData"
+        )({
+            // biome-ignore lint/style/noNonNullAssertion:
+            chainId: client.chain!.id!,
+            entryPointAddress: account.entryPoint.address,
+            context: paymasterContext,
+            ...userOperation
+        })
+
+        return {
+            ...userOperation,
+            ...paymasterData
+        } as unknown as PrepareUserOperationReturnType<
+            account,
+            accountOverride,
+            calls,
+            request
+        >
     }
 
-    // @ts-ignore
-    return getAction(
+    return (await getAction(
         client,
         prepareUserOperation,
         "prepareUserOperation"
-    )(parameters)
+    )(parameters)) as unknown as PrepareUserOperationReturnType<
+        account,
+        accountOverride,
+        calls,
+        request
+    >
 }
