@@ -1,35 +1,35 @@
 import {
+    http,
     type Account,
     type Address,
     type Chain,
+    type GetContractReturnType,
     type Hex,
+    type PublicClient,
     type Transport,
     type WalletClient,
-    type GetContractReturnType,
-    type PublicClient,
-    http,
     concat,
     createPublicClient,
+    encodePacked,
     getContract,
     getContractAddress,
+    getCreate2Address,
     pad,
     parseEther,
     slice,
-    encodePacked,
-    toBytes,
-    getCreate2Address
+    toBytes
 } from "viem"
 import {
-    toPackedUserOperation,
-    type UserOperation
+    type UserOperation,
+    toPackedUserOperation
 } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
+import { getPublicClient } from "../../src/utils"
 import {
     SINGLETON_PAYMASTER_V06_ABI,
     SINGLETON_PAYMASTER_V07_ABI
 } from "./helpers/abi"
 import type { PaymasterMode } from "./helpers/utils"
-import { getPublicClient } from "../../src/utils"
 
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 

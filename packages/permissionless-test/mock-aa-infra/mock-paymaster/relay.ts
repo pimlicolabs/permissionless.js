@@ -2,8 +2,8 @@ import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
     type Address,
-    type RpcRequestError,
     BaseError,
+    type RpcRequestError,
     getAddress,
     toHex
 } from "viem"
@@ -26,13 +26,13 @@ import {
     pmSponsorUserOperationParamsSchema
 } from "./helpers/schema"
 import {
+    type PaymasterMode,
     isTokenSupported,
-    maxBigInt,
-    type PaymasterMode
+    maxBigInt
 } from "./helpers/utils"
 import {
-    type SingletonPaymasterV07,
     type SingletonPaymasterV06,
+    type SingletonPaymasterV07,
     getDummyPaymasterData
 } from "./singletonPaymasters"
 

@@ -4,12 +4,12 @@ import { defineInstance } from "prool"
 import { http, createPublicClient } from "viem"
 import { createBundlerClient } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
+import { deployErc20Token } from "../../src/erc20-utils"
 import { getAnvilWalletClient } from "./helpers/utils"
 import { createRpcHandler } from "./relay"
-import { deployErc20Token } from "../../src/erc20-utils"
 import {
-    SingletonPaymasterV07,
-    SingletonPaymasterV06
+    SingletonPaymasterV06,
+    SingletonPaymasterV07
 } from "./singletonPaymasters"
 
 export const paymaster = defineInstance(

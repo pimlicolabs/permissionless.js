@@ -1,8 +1,8 @@
-import { http, createWalletClient, type Address, type Hex } from "viem"
+import { http, type Address, type Hex, createWalletClient } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { ERC20_ADDRESS } from "../../../src/erc20-utils"
-import { ValidationErrors, RpcError } from "./schema"
+import { RpcError, ValidationErrors } from "./schema"
 
 /// Returns the bigger of two BigInts.
 export const maxBigInt = (a: bigint, b: bigint) => {
