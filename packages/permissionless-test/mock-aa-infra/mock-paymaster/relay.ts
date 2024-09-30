@@ -1,19 +1,9 @@
 import util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    type Account,
     type Address,
-    BaseError,
-    type Chain,
-    type Client,
-    type GetContractReturnType,
-    type Hex,
-    type PublicClient,
     type RpcRequestError,
-    type Transport,
-    type WalletClient,
-    concat,
-    encodeAbiParameters,
+    BaseError,
     getAddress,
     toHex
 } from "viem"
@@ -23,13 +13,7 @@ import {
     entryPoint06Address,
     entryPoint07Address
 } from "viem/account-abstraction"
-import { readContract } from "viem/actions"
 import { fromZodError } from "zod-validation-error"
-import { getPackedUserOperation } from "../../../permissionless"
-import {
-    VERIFYING_PAYMASTER_V06_ABI,
-    VERIFYING_PAYMASTER_V07_ABI
-} from "./helpers/abi"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
@@ -41,24 +25,33 @@ import {
     pmGetPaymasterStubDataParamsSchema,
     pmSponsorUserOperationParamsSchema
 } from "./helpers/schema"
-import { maxBigInt } from "./helpers/utils"
+import {
+    isTokenSupported,
+    maxBigInt,
+    type PaymasterMode
+} from "./helpers/utils"
+import {
+    type SingletonPaymasterV07,
+    type SingletonPaymasterV06,
+    getDummyPaymasterData
+} from "./singletonPaymasters"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"0.6">,
+    paymasterMode: PaymasterMode,
     bundler: BundlerClient,
-    verifyingPaymasterV06: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V06_ABI
-    >,
-    publicClient: Client,
-    walletClient: WalletClient<Transport, Chain, Account>,
+    singletonPaymasterV06: SingletonPaymasterV06,
     estimateGas: boolean
 ) => {
     let op = {
         ...userOperation,
-        paymasterAndData: concat([
-            verifyingPaymasterV06.address,
-            "0x000000000000000000000000000000000000000000000000000000006602f66a0000000000000000000000000000000000000000000000000000000000000000dba7a71bd49ae0174b1e4577b28f8b7c262d4085cfa192f1c19b516c85d2d1ef17eadeb549d71caf5d5f24fb6519088c1c13427343843131dd6ec19a3c6a350e1b"
-        ])
+        ...getDummyPaymasterData(
+            true,
+            singletonPaymasterV06.singletonPaymaster.address,
+            {
+                mode: "verifying"
+            }
+        )
     }
 
     const callGasLimit = userOperation.callGasLimit
@@ -100,47 +93,11 @@ const handleMethodV06 = async (
         )
     }
 
-    const validAfter = 0
-    const validUntil = Math.floor(Date.now() / 1000) + 6000
-    op.paymasterAndData = concat([
-        verifyingPaymasterV06.address,
-        encodeAbiParameters(
-            [
-                { name: "validUntil", type: "uint48" },
-                { name: "validAfter", type: "uint48" }
-            ],
-            [validUntil, validAfter]
-        ),
-        toHex(0, { size: 65 })
-    ])
-
-    const hash = await readContract(publicClient, {
-        abi: VERIFYING_PAYMASTER_V06_ABI,
-        functionName: "getHash",
-        address: verifyingPaymasterV06.address,
-        args: [{ ...op, initCode: op.initCode ?? "0x" }, validUntil, validAfter]
-    })
-
-    const sig = await walletClient.signMessage({
-        message: { raw: hash }
-    })
-    const paymasterAndData = concat([
-        verifyingPaymasterV06.address,
-        encodeAbiParameters(
-            [
-                { name: "validUntil", type: "uint48" },
-                { name: "validAfter", type: "uint48" }
-            ],
-            [validUntil, validAfter]
-        ),
-        sig
-    ])
-
     const result = {
         preVerificationGas: toHex(op.preVerificationGas),
         callGasLimit: toHex(op.callGasLimit),
         verificationGasLimit: toHex(op.verificationGasLimit || 0),
-        paymasterAndData
+        ...(await singletonPaymasterV06.encodePaymasterData(op, paymasterMode))
     }
 
     return result
@@ -148,19 +105,16 @@ const handleMethodV06 = async (
 
 const handleMethodV07 = async (
     userOperation: UserOperation<"0.7">,
+    paymasterMode: PaymasterMode,
     bundler: BundlerClient,
-    verifyingPaymasterV07: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V07_ABI
-    >,
-    publicClient: Client,
-    walletClient: WalletClient<Transport, Chain, Account>,
+    singletonPaymasterV07: SingletonPaymasterV07,
     estimateGas: boolean
 ) => {
     let op = {
         ...userOperation,
-        paymaster: verifyingPaymasterV07.address,
-        paymasterData:
-            "0x000000000000000000000000000000000000000000000000000000006602f66a0000000000000000000000000000000000000000000000000000000000000000dba7a71bd49ae0174b1e4577b28f8b7c262d4085cfa192f1c19b516c85d2d1ef17eadeb549d71caf5d5f24fb6519088c1c13427343843131dd6ec19a3c6a350e1b" as Hex
+        ...singletonPaymasterV07.getDummyPaymasterData({
+            mode: "verifying"
+        })
     }
 
     const callGasLimit = userOperation.callGasLimit
@@ -202,42 +156,6 @@ const handleMethodV07 = async (
             ValidationErrors.InvalidFields
         )
     }
-
-    const validAfter = 0
-    const validUntil = Math.floor(Date.now() / 1000) + 6000
-    op.paymasterData = concat([
-        encodeAbiParameters(
-            [
-                { name: "validUntil", type: "uint48" },
-                { name: "validAfter", type: "uint48" }
-            ],
-            [validUntil, validAfter]
-        ),
-        toHex(0, { size: 65 })
-    ])
-    op.paymaster = verifyingPaymasterV07.address
-
-    const hash = await readContract(publicClient, {
-        abi: VERIFYING_PAYMASTER_V07_ABI,
-        functionName: "getHash",
-        address: verifyingPaymasterV07.address,
-        args: [getPackedUserOperation(op), validUntil, validAfter]
-    })
-
-    const sig = await walletClient.signMessage({
-        message: { raw: hash }
-    })
-    const paymaster = verifyingPaymasterV07.address
-    const paymasterData = concat([
-        encodeAbiParameters(
-            [
-                { name: "validUntil", type: "uint48" },
-                { name: "validAfter", type: "uint48" }
-            ],
-            [validUntil, validAfter]
-        ),
-        sig
-    ])
 
     const result = {
         preVerificationGas: toHex(op.preVerificationGas),
@@ -247,8 +165,7 @@ const handleMethodV07 = async (
         ),
         paymasterPostOpGasLimit: toHex(op.paymasterPostOpGasLimit || 0),
         verificationGasLimit: toHex(op.verificationGasLimit || 0),
-        paymaster,
-        paymasterData
+        ...(await singletonPaymasterV07.encodePaymasterData(op, paymasterMode))
     }
 
     return result
@@ -256,14 +173,8 @@ const handleMethodV07 = async (
 
 const handleMethod = async (
     bundler: BundlerClient,
-    verifyingPaymasterV07: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V07_ABI
-    >,
-    verifyingPaymasterV06: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V06_ABI
-    >,
-    publicClient: PublicClient<Transport, Chain>,
-    walletClient: WalletClient<Transport, Chain, Account>,
+    singletonPaymasterV07: SingletonPaymasterV07,
+    singletonPaymasterV06: SingletonPaymasterV06,
     parsedBody: JsonRpcSchema
 ) => {
     if (parsedBody.method === "pm_sponsorUserOperation") {
@@ -283,10 +194,9 @@ const handleMethod = async (
         if (entryPoint === entryPoint07Address) {
             return await handleMethodV07(
                 userOperation,
+                { mode: "verifying" },
                 bundler,
-                verifyingPaymasterV07,
-                publicClient,
-                walletClient,
+                singletonPaymasterV07,
                 true
             )
         }
@@ -294,10 +204,9 @@ const handleMethod = async (
         if (entryPoint === entryPoint06Address) {
             return await handleMethodV06(
                 userOperation,
+                { mode: "verifying" },
                 bundler,
-                verifyingPaymasterV06,
-                publicClient,
-                walletClient,
+                singletonPaymasterV06,
                 true
             )
         }
@@ -320,7 +229,11 @@ const handleMethod = async (
             )
         }
 
-        const [, entryPoint] = params.data
+        const [, entryPoint, , data] = params.data
+
+        if (data !== null && "token" in data) {
+            isTokenSupported(data.token)
+        }
 
         const sponsorData = {
             name: "Pimlico",
@@ -329,11 +242,11 @@ const handleMethod = async (
 
         if (entryPoint === entryPoint07Address) {
             return {
-                paymaster: verifyingPaymasterV07.address,
-                paymasterData:
-                    "0x00000000000000000000000000000000000000000000000000000101010101010000000000000000000000000000000000000000000000000000000000000000cd91f19f0f19ce862d7bec7b7d9b95457145afc6f639c28fd0360f488937bfa41e6eedcd3a46054fd95fcd0e3ef6b0bc0a615c4d975eef55c8a3517257904d5b1c",
+                ...singletonPaymasterV07.getDummyPaymasterData({
+                    mode: "verifying"
+                }),
                 paymasterVerificationGasLimit: toHex(50_000n),
-                paymasterPostOpGasLimit: toHex(20_000n),
+                paymasterPostOpGasLimit: toHex(100_000n),
                 sponsor: sponsorData,
                 isFinal: false
             }
@@ -341,7 +254,9 @@ const handleMethod = async (
 
         if (entryPoint === entryPoint06Address) {
             return {
-                paymasterAndData: `${verifyingPaymasterV06.address}00000000000000000000000000000000000000000000000000000101010101010000000000000000000000000000000000000000000000000000000000000000cd91f19f0f19ce862d7bec7b7d9b95457145afc6f639c28fd0360f488937bfa41e6eedcd3a46054fd95fcd0e3ef6b0bc0a615c4d975eef55c8a3517257904d5b1c`,
+                ...singletonPaymasterV06.getDummyPaymasterData({
+                    mode: "verifying"
+                }),
                 sponsor: sponsorData,
                 isFinal: false
             }
@@ -368,10 +283,9 @@ const handleMethod = async (
         if (entryPoint === entryPoint07Address) {
             return await handleMethodV07(
                 userOperation as UserOperation<"0.7">,
+                { mode: "verifying" },
                 bundler,
-                verifyingPaymasterV07,
-                publicClient,
-                walletClient,
+                singletonPaymasterV07,
                 false
             )
         }
@@ -379,10 +293,9 @@ const handleMethod = async (
         if (entryPoint === entryPoint06Address) {
             return await handleMethodV06(
                 userOperation,
+                { mode: "verifying" },
                 bundler,
-                verifyingPaymasterV06,
-                publicClient,
-                walletClient,
+                singletonPaymasterV06,
                 false
             )
         }
@@ -430,9 +343,9 @@ const handleMethod = async (
 
         let paymaster: Address
         if (entryPoint === entryPoint07Address) {
-            paymaster = verifyingPaymasterV07.address
+            paymaster = singletonPaymasterV07.singletonPaymaster.address
         } else {
-            paymaster = verifyingPaymasterV06.address
+            paymaster = singletonPaymasterV06.singletonPaymaster.address
         }
 
         return {
@@ -454,14 +367,8 @@ const handleMethod = async (
 
 export const createRpcHandler = (
     bundler: BundlerClient,
-    verifyingPaymasterV07: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V07_ABI
-    >,
-    verifyingPaymasterV06: GetContractReturnType<
-        typeof VERIFYING_PAYMASTER_V06_ABI
-    >,
-    publicClient: PublicClient<Transport, Chain>,
-    walletClient: WalletClient<Transport, Chain, Account>
+    singletonPaymasterV07: SingletonPaymasterV07,
+    singletonPaymasterV06: SingletonPaymasterV06
 ) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
         const body = request.body
@@ -476,10 +383,8 @@ export const createRpcHandler = (
         try {
             const result = await handleMethod(
                 bundler,
-                verifyingPaymasterV07,
-                verifyingPaymasterV06,
-                publicClient,
-                walletClient,
+                singletonPaymasterV07,
+                singletonPaymasterV06,
                 parsedBody.data
             )
 

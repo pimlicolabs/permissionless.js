@@ -29,7 +29,7 @@
         "get-port": "^7.0.0",
         "tsc-alias": "^1.8.8",
         "vitest": "^1.2.0",
-        "viem": "^2.20.0",
+        "viem": "2.20.0",
         "wagmi": "^2.12.8",
         "@permissionless/wagmi": "workspace:packages/wagmi",
         "@types/react": "^18.3.1",

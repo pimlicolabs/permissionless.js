@@ -5,11 +5,12 @@ import { http, createPublicClient } from "viem"
 import { createBundlerClient } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { getAnvilWalletClient } from "./helpers/utils"
-import {
-    setupVerifyingPaymasterV06,
-    setupVerifyingPaymasterV07
-} from "./helpers/verifyingPaymasters"
 import { createRpcHandler } from "./relay"
+import { deployErc20Token } from "../../src/erc20-utils"
+import {
+    SingletonPaymasterV07,
+    SingletonPaymasterV06
+} from "./singletonPaymasters"
 
 export const paymaster = defineInstance(
     ({
@@ -26,24 +27,27 @@ export const paymaster = defineInstance(
             name: "mock-paymaster",
             start: async ({ port = _port }) => {
                 const walletClient = getAnvilWalletClient(anvilRpc)
-                const verifyingPaymasterV07 = await setupVerifyingPaymasterV07(
-                    walletClient,
-                    anvilRpc
-                )
-                const verifyingPaymasterV06 = await setupVerifyingPaymasterV06(
-                    walletClient,
-                    anvilRpc
-                )
-
                 const publicClient = createPublicClient({
                     transport: http(anvilRpc),
                     chain: foundry
                 })
-
                 const bundler = createBundlerClient({
                     chain: foundry,
                     transport: http(altoRpc)
                 })
+
+                const singletonPaymasterV07 = new SingletonPaymasterV07(
+                    walletClient,
+                    anvilRpc
+                )
+                const singletonPaymasterV06 = new SingletonPaymasterV06(
+                    walletClient,
+                    anvilRpc
+                )
+
+                await singletonPaymasterV06.setup()
+                await singletonPaymasterV07.setup()
+                await deployErc20Token(walletClient, publicClient)
 
                 app.register(cors, {
                     origin: "*",
@@ -52,10 +56,8 @@ export const paymaster = defineInstance(
 
                 const rpcHandler = createRpcHandler(
                     bundler,
-                    verifyingPaymasterV07,
-                    verifyingPaymasterV06,
-                    publicClient,
-                    walletClient
+                    singletonPaymasterV07,
+                    singletonPaymasterV06
                 )
                 app.post("/", {}, rpcHandler)
 
