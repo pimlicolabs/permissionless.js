@@ -347,7 +347,6 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
 export const getCoreSmartAccounts = () => [
     {
         name: "Trust",
-        getAccount: async (conf) => await getTrustAccountClient(conf),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) => {
@@ -362,11 +361,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "LightAccount 1.1.0",
-        getAccount: async (conf) =>
-            await getLightAccountClient({
-                ...conf,
-                version: "1.1.0" as LightAccountVersion<"0.6" | "0.7">
-            }),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -383,11 +377,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "LightAccount 2.0.0",
-        getAccount: async (conf) =>
-            await getLightAccountClient({
-                ...conf,
-                version: "2.0.0" as LightAccountVersion<"0.6" | "0.7">
-            }),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -404,7 +393,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Simple",
-        getAccount: async (conf) => await getSimpleAccountClient(conf),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -418,7 +406,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Kernel",
-        getAccount: async (conf) => await getKernelEcdsaClient(conf),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -432,11 +419,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Kernel 7579 0.3.0-beta",
-        getAccount: async (conf) =>
-            await getKernelEcdsaClient({
-                ...conf,
-                version: "0.3.0-beta" as KernelVersion<"0.6" | "0.7">
-            }),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -465,11 +447,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Kernel 7579 0.3.1",
-        getAccount: async (conf) =>
-            await getKernelEcdsaClient({
-                ...conf,
-                version: "0.3.1" as KernelVersion<"0.6" | "0.7">
-            }),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -498,7 +475,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Biconomy",
-        getAccount: async (conf) => await getBiconomyClient(conf),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -512,7 +488,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Safe",
-        getAccount: async (conf) => await getSafeClient(conf),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
@@ -526,8 +501,6 @@ export const getCoreSmartAccounts = () => [
     },
     {
         name: "Safe 7579",
-        getAccount: async (conf) =>
-            await getSafeClient({ ...conf, erc7579: true }),
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>

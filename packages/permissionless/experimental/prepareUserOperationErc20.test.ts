@@ -21,18 +21,24 @@ import { prepareUserOperationErc20 } from "./prepareUserOperationErc20.ts"
 
 describe.each(getCoreSmartAccounts())(
     "prepareUserOperationErc20 $name",
-    ({ getAccount, supportsEntryPointV06, supportsEntryPointV07 }) => {
+    ({
+        getSmartAccountClient,
+        supportsEntryPointV06,
+        supportsEntryPointV07
+    }) => {
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "prepareUserOperationErc20_v06",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const account = await getAccount({
-                    entryPoint: {
-                        version: "0.6"
-                    },
-                    ...rpc
-                })
+                const account = (
+                    await getSmartAccountClient({
+                        entryPoint: {
+                            version: "0.6"
+                        },
+                        ...rpc
+                    })
+                ).account
 
                 const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
@@ -108,12 +114,14 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const account = await getAccount({
-                    entryPoint: {
-                        version: "0.7"
-                    },
-                    ...rpc
-                })
+                const account = (
+                    await getSmartAccountClient({
+                        entryPoint: {
+                            version: "0.7"
+                        },
+                        ...rpc
+                    })
+                ).account
 
                 const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
