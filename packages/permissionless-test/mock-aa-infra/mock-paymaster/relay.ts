@@ -273,23 +273,27 @@ const handleMethod = async (
         const paymasterMode = getPaymasterMode(data)
 
         if (entryPoint === entryPoint07Address) {
-            return await handleMethodV07(
+            const { paymaster, paymasterData } = await handleMethodV07(
                 userOperation as UserOperation<"0.7">,
                 paymasterMode,
                 bundler,
                 singletonPaymasterV07,
                 false
             )
+
+            return { paymaster, paymasterData }
         }
 
         if (entryPoint === entryPoint06Address) {
-            return await handleMethodV06(
+            const { paymasterAndData } = await handleMethodV06(
                 userOperation,
                 paymasterMode,
                 bundler,
                 singletonPaymasterV06,
                 false
             )
+
+            return { paymasterAndData }
         }
 
         throw new RpcError(
