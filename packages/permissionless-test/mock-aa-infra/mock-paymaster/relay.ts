@@ -35,6 +35,7 @@ import {
     type SingletonPaymasterV07,
     getDummyPaymasterData
 } from "./singletonPaymasters"
+import { ERC20_ADDRESS } from "../../src/erc20-utils"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"0.6">,
@@ -326,6 +327,11 @@ const handleMethod = async (
 
         const quotes = {
             [getAddress("0xffffffffffffffffffffffffffffffffffffffff")]: {
+                exchangeRateNativeToUsd: "0x1a2b3c4d5e6f7890abcdef",
+                exchangeRate: "0x3a7b9c8d6e5f4321",
+                postOpGas: "0x1a2b3c"
+            },
+            [ERC20_ADDRESS]: {
                 exchangeRateNativeToUsd: "0x5cc717fbb3450c0000000",
                 exchangeRate: "0x5cc717fbb3450c0000",
                 postOpGas: "0xc350"

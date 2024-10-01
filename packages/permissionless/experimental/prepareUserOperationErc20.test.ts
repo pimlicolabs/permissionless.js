@@ -31,7 +31,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const paymaster = createPimlicoClient({
+                const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
                     entryPoint: {
                         address: entryPoint07Address,
@@ -44,9 +44,10 @@ describe.each(getCoreSmartAccounts())(
                     client: getPublicClient(anvilRpc),
                     chain: foundry,
                     account,
-                    paymaster,
+                    paymaster: pimlicoClient,
                     userOperation: {
-                        prepareUserOperation: prepareUserOperationErc20
+                        prepareUserOperation:
+                            prepareUserOperationErc20(pimlicoClient)
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
@@ -105,7 +106,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const paymaster = createPimlicoClient({
+                const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
                     entryPoint: {
                         address: entryPoint07Address,
@@ -118,9 +119,10 @@ describe.each(getCoreSmartAccounts())(
                     client: getPublicClient(anvilRpc),
                     chain: foundry,
                     account,
-                    paymaster,
+                    paymaster: pimlicoClient,
                     userOperation: {
-                        prepareUserOperation: prepareUserOperationErc20
+                        prepareUserOperation:
+                            prepareUserOperationErc20(pimlicoClient)
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
