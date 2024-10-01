@@ -345,171 +345,171 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
 }
 
 export const getCoreSmartAccounts = () => [
-    //{
-    //    name: "Trust",
-    //    getAccount: async (conf) => await getTrustAccountClient(conf),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) => {
-    //        return getBundlerClient({
-    //            account: await getTrustAccountClient(conf),
-    //            ...conf
-    //        })
-    //    },
-    //    supportsEntryPointV06: true,
-    //    supportsEntryPointV07: false,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "LightAccount 1.1.0",
-    //    getAccount: async (conf) =>
-    //        await getLightAccountClient({
-    //            ...conf,
-    //            version: "1.1.0" as LightAccountVersion<"0.6" | "0.7">
-    //        }),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getLightAccountClient({
-    //                ...conf,
-    //                version: "1.1.0" as LightAccountVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: true,
-    //    supportsEntryPointV07: false,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "LightAccount 2.0.0",
-    //    getAccount: async (conf) =>
-    //        await getLightAccountClient({
-    //            ...conf,
-    //            version: "2.0.0" as LightAccountVersion<"0.6" | "0.7">
-    //        }),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getLightAccountClient({
-    //                ...conf,
-    //                version: "2.0.0" as LightAccountVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: false,
-    //    supportsEntryPointV07: true,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "Simple",
-    //    getAccount: async (conf) => await getSimpleAccountClient(conf),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getSimpleAccountClient(conf),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: true,
-    //    supportsEntryPointV07: true,
-    //    isEip1271Compliant: false
-    //},
-    //{
-    //    name: "Kernel",
-    //    getAccount: async (conf) => await getKernelEcdsaClient(conf),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getKernelEcdsaClient(conf),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: true,
-    //    supportsEntryPointV07: true,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "Kernel 7579 0.3.0-beta",
-    //    getAccount: async (conf) =>
-    //        await getKernelEcdsaClient({
-    //            ...conf,
-    //            version: "0.3.0-beta" as KernelVersion<"0.6" | "0.7">
-    //        }),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getKernelEcdsaClient({
-    //                ...conf,
-    //                version: "0.3.0-beta" as KernelVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    getErc7579SmartAccountClient: async <
-    //        entryPointVersion extends "0.6" | "0.7"
-    //    >(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getSmartAccountClient({
-    //            account: await getKernelEcdsaClient({
-    //                ...conf,
-    //                version: "0.3.0-beta" as KernelVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: false,
-    //    supportsEntryPointV07: true,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "Kernel 7579 0.3.1",
-    //    getAccount: async (conf) =>
-    //        await getKernelEcdsaClient({
-    //            ...conf,
-    //            version: "0.3.1" as KernelVersion<"0.6" | "0.7">
-    //        }),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getKernelEcdsaClient({
-    //                ...conf,
-    //                version: "0.3.1" as KernelVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    getErc7579SmartAccountClient: async <
-    //        entryPointVersion extends "0.6" | "0.7"
-    //    >(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getSmartAccountClient({
-    //            account: await getKernelEcdsaClient({
-    //                ...conf,
-    //                version: "0.3.1" as KernelVersion<entryPointVersion>
-    //            }),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: false,
-    //    supportsEntryPointV07: true,
-    //    isEip1271Compliant: true
-    //},
-    //{
-    //    name: "Biconomy",
-    //    getAccount: async (conf) => await getBiconomyClient(conf),
-    //    getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
-    //        conf: AAParamType<entryPointVersion>
-    //    ) =>
-    //        getBundlerClient({
-    //            account: await getBiconomyClient(conf),
-    //            ...conf
-    //        }),
-    //    supportsEntryPointV06: true,
-    //    supportsEntryPointV07: false,
-    //    isEip1271Compliant: true
-    //},
+    {
+        name: "Trust",
+        getAccount: async (conf) => await getTrustAccountClient(conf),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) => {
+            return getBundlerClient({
+                account: await getTrustAccountClient(conf),
+                ...conf
+            })
+        },
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "LightAccount 1.1.0",
+        getAccount: async (conf) =>
+            await getLightAccountClient({
+                ...conf,
+                version: "1.1.0" as LightAccountVersion<"0.6" | "0.7">
+            }),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getLightAccountClient({
+                    ...conf,
+                    version: "1.1.0" as LightAccountVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "LightAccount 2.0.0",
+        getAccount: async (conf) =>
+            await getLightAccountClient({
+                ...conf,
+                version: "2.0.0" as LightAccountVersion<"0.6" | "0.7">
+            }),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getLightAccountClient({
+                    ...conf,
+                    version: "2.0.0" as LightAccountVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Simple",
+        getAccount: async (conf) => await getSimpleAccountClient(conf),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSimpleAccountClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: false
+    },
+    {
+        name: "Kernel",
+        getAccount: async (conf) => await getKernelEcdsaClient(conf),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.0-beta",
+        getAccount: async (conf) =>
+            await getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.0-beta" as KernelVersion<"0.6" | "0.7">
+            }),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.0-beta" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.0-beta" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.1",
+        getAccount: async (conf) =>
+            await getKernelEcdsaClient({
+                ...conf,
+                version: "0.3.1" as KernelVersion<"0.6" | "0.7">
+            }),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.1" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.1" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Biconomy",
+        getAccount: async (conf) => await getBiconomyClient(conf),
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getBiconomyClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
     {
         name: "Safe",
         getAccount: async (conf) => await getSafeClient(conf),

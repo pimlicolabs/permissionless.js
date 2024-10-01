@@ -103,8 +103,6 @@ export const prepareUserOperationErc20 =
                 calls: callsWithApproval
             } as unknown as PrepareUserOperationParameters)
 
-            console.log({ userOperation })
-
             ////////////////////////////////////////////////////////////////////////////////
             // Call pimlico_getTokenQuotes and calculate the approval amount needed for op
             ////////////////////////////////////////////////////////////////////////////////
@@ -122,18 +120,6 @@ export const prepareUserOperationErc20 =
                 userOperation.verificationGasLimit +
                 (userOperation.paymasterPostOpGasLimit || 0n) +
                 (userOperation.paymasterVerificationGasLimit || 0n)
-
-            console.log({
-                preVerificationGas: userOperation.preVerificationGas,
-                callGasLimit: userOperation.callGasLimit,
-                verificationGasLimit: userOperation.verificationGasLimit,
-                paymasterPostOpGasLimit:
-                    userOperation.paymasterPostOpGasLimit || 0n,
-                paymasterVerificationGasLimit:
-                    userOperation.paymasterVerificationGasLimit || 0n
-            })
-
-            console.log({ userOperationMaxGas })
 
             const userOperationMaxCost =
                 userOperationMaxGas * userOperation.maxFeePerGas
