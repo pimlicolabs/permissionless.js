@@ -160,7 +160,7 @@ export const prepareUserOperationErc20 =
             parameters.calls = finalCalls
 
             ////////////////////////////////////////////////////////////////////////////////
-            // Declare Paymaster properties.
+            // Declare Paymaster properties. (taken from viem)
             ////////////////////////////////////////////////////////////////////////////////
 
             const bundlerClient = client as unknown as BundlerClient
@@ -194,6 +194,10 @@ export const prepareUserOperationErc20 =
                     getPaymasterData: pimlicoClient.getPaymasterData
                 }
             })()
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // Re-calculate Paymaster data fields.
+            ////////////////////////////////////////////////////////////////////////////////
 
             const paymasterData = await getPaymasterData({
                 // biome-ignore lint/style/noNonNullAssertion:
