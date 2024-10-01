@@ -14,6 +14,7 @@ import {
     entryPoint07Address
 } from "viem/account-abstraction"
 import { fromZodError } from "zod-validation-error"
+import { ERC20_ADDRESS } from "../../src/erc20-utils"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
@@ -35,7 +36,6 @@ import {
     type SingletonPaymasterV07,
     getDummyPaymasterData
 } from "./singletonPaymasters"
-import { ERC20_ADDRESS } from "../../src/erc20-utils"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"0.6">,
