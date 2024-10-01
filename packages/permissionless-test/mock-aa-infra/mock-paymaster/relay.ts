@@ -48,9 +48,7 @@ const handleMethodV06 = async (
         ...getDummyPaymasterData(
             true,
             singletonPaymasterV06.singletonPaymaster.address,
-            {
-                mode: "verifying"
-            }
+            paymasterMode
         )
     }
 
@@ -112,9 +110,7 @@ const handleMethodV07 = async (
 ) => {
     let op = {
         ...userOperation,
-        ...singletonPaymasterV07.getDummyPaymasterData({
-            mode: "verifying"
-        })
+        ...singletonPaymasterV07.getDummyPaymasterData(paymasterMode)
     }
 
     const callGasLimit = userOperation.callGasLimit
@@ -231,9 +227,7 @@ const handleMethod = async (
 
         const [, entryPoint, , data] = params.data
 
-        if (data !== null && "token" in data) {
-            isTokenSupported(data.token)
-        }
+        const paymasterMode = getPaymasterMode(data)
 
         const sponsorData = {
             name: "Pimlico",
@@ -242,9 +236,7 @@ const handleMethod = async (
 
         if (entryPoint === entryPoint07Address) {
             return {
-                ...singletonPaymasterV07.getDummyPaymasterData({
-                    mode: "verifying"
-                }),
+                ...singletonPaymasterV07.getDummyPaymasterData(paymasterMode),
                 paymasterVerificationGasLimit: toHex(50_000n),
                 paymasterPostOpGasLimit: toHex(100_000n),
                 sponsor: sponsorData,
@@ -254,9 +246,7 @@ const handleMethod = async (
 
         if (entryPoint === entryPoint06Address) {
             return {
-                ...singletonPaymasterV06.getDummyPaymasterData({
-                    mode: "verifying"
-                }),
+                ...singletonPaymasterV06.getDummyPaymasterData(paymasterMode),
                 sponsor: sponsorData,
                 isFinal: false
             }
@@ -278,12 +268,13 @@ const handleMethod = async (
             )
         }
 
-        const [userOperation, entryPoint] = params.data
+        const [userOperation, entryPoint, , data] = params.data
+        const paymasterMode = getPaymasterMode(data)
 
         if (entryPoint === entryPoint07Address) {
             return await handleMethodV07(
                 userOperation as UserOperation<"0.7">,
-                { mode: "verifying" },
+                paymasterMode,
                 bundler,
                 singletonPaymasterV07,
                 false
@@ -293,7 +284,7 @@ const handleMethod = async (
         if (entryPoint === entryPoint06Address) {
             return await handleMethodV06(
                 userOperation,
-                { mode: "verifying" },
+                paymasterMode,
                 bundler,
                 singletonPaymasterV06,
                 false
@@ -412,4 +403,14 @@ export const createRpcHandler = (
             }
         }
     }
+}
+
+const getPaymasterMode = (data: any): PaymasterMode => {
+    if (data !== null && "token" in data) {
+        isTokenSupported(data.token)
+
+        return { mode: "erc20", token: data.token }
+    }
+
+    return { mode: "verifying" }
 }

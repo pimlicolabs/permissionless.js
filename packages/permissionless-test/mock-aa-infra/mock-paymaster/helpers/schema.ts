@@ -237,11 +237,7 @@ export const pmGetPaymasterData = z
             eip7677UserOperationSchema,
             addressSchema,
             hexNumberSchema,
-            z.union([
-                z.object({ token: addressSchema }),
-                z.object({}),
-                z.null()
-            ])
+            z.union([z.object({ token: addressSchema }), z.null()])
         ]),
         z.tuple([eip7677UserOperationSchema, addressSchema, hexNumberSchema])
     ])

@@ -156,7 +156,7 @@ export async function prepareUserOperationErc20<
         parameters.calls = finalCalls
 
         const paymasterData = await getAction(
-            client,
+            paymaster,
             getPaymasterData,
             "getPaymasterData"
         )({
