@@ -34,6 +34,13 @@ describe.each(getCoreSmartAccounts())(
 
                 const opHash = await installModules(smartClient, {
                     account: smartClient.account,
+                    calls: [
+                        {
+                            to: smartClient.account.address,
+                            value: 0n,
+                            data: "0x"
+                        }
+                    ],
                     modules: [
                         {
                             type: "executor",

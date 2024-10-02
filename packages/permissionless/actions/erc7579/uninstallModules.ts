@@ -1,32 +1,16 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport,
-    encodeFunctionData,
-    getAddress
-} from "viem"
-import {
-    type GetSmartAccountParameter,
-    type SmartAccount,
-    sendUserOperation
-} from "viem/account-abstraction"
+import type { Chain, Client, Hex, Transport } from "viem"
+import { type SmartAccount, sendUserOperation } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import {
+    type EncodeUninstallModuleParameters,
+    encodeUninstallModule
+} from "../../utils/encodeUninstallModule"
 
 export type UninstallModulesParameters<
     TSmartAccount extends SmartAccount | undefined
-> = GetSmartAccountParameter<TSmartAccount> & {
-    modules: [
-        {
-            type: ModuleType
-            address: Address
-            context: Hex
-        }
-    ]
+> = EncodeUninstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
@@ -59,36 +43,10 @@ export async function uninstallModules<
         sendUserOperation,
         "sendUserOperation"
     )({
-        calls: modules.map(({ type, address, context }) => ({
-            to: account.address,
-            value: BigInt(0),
-            data: encodeFunctionData({
-                abi: [
-                    {
-                        name: "uninstallModule",
-                        type: "function",
-                        stateMutability: "nonpayable",
-                        inputs: [
-                            {
-                                type: "uint256",
-                                name: "moduleTypeId"
-                            },
-                            {
-                                type: "address",
-                                name: "module"
-                            },
-                            {
-                                type: "bytes",
-                                name: "deInitData"
-                            }
-                        ],
-                        outputs: []
-                    }
-                ],
-                functionName: "uninstallModule",
-                args: [parseModuleTypeId(type), getAddress(address), context]
-            })
-        })),
+        calls: encodeUninstallModule({
+            account,
+            modules
+        }),
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
