@@ -23,7 +23,7 @@ import {
 import { getAction, parseAccount } from "viem/utils"
 import type { PimlicoClient } from "../clients/pimlico"
 
-export const prepareUserOperationErc20 =
+export const prepareUserOperationWithErc20Paymaster =
     (pimlicoClient: PimlicoClient) =>
     async <
         account extends SmartAccount | undefined,

@@ -1,3 +1,3 @@
-import { prepareUserOperationErc20 } from "./prepareUserOperationErc20"
+import { prepareUserOperationWithErc20Paymaster } from "./prepareUserOperationWithErc20Paymaster"
 
-export { prepareUserOperationErc20 }
+export { prepareUserOperationWithErc20Paymaster }

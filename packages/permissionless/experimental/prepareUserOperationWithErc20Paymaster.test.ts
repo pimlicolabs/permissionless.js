@@ -17,17 +17,17 @@ import {
 } from "../../permissionless-test/src/utils"
 import { createSmartAccountClient } from "../clients/createSmartAccountClient.ts"
 import { createPimlicoClient } from "../clients/pimlico.ts"
-import { prepareUserOperationErc20 } from "./prepareUserOperationErc20.ts"
+import { prepareUserOperationWithErc20Paymaster } from "./prepareUserOperationWithErc20Paymaster.ts"
 
 describe.each(getCoreSmartAccounts())(
-    "prepareUserOperationErc20 $name",
+    "prepareUserOperationWithErc20Paymaster $name",
     ({
         getSmartAccountClient,
         supportsEntryPointV06,
         supportsEntryPointV07
     }) => {
         testWithRpc.skipIf(!supportsEntryPointV06)(
-            "prepareUserOperationErc20_v06",
+            "prepareUserOperationWithErc20Paymaster_v06",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
@@ -51,14 +51,14 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-ignore
-                    client: getPublicClient(anvilRpc),
-                    chain: foundry,
                     account,
                     paymaster: pimlicoClient,
+                    chain: foundry,
                     userOperation: {
                         prepareUserOperation:
-                            prepareUserOperationErc20(pimlicoClient)
+                            prepareUserOperationWithErc20Paymaster(
+                                pimlicoClient
+                            )
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
@@ -110,7 +110,7 @@ describe.each(getCoreSmartAccounts())(
         )
 
         testWithRpc.skipIf(!supportsEntryPointV07)(
-            "prepareUserOperationErc20_v07",
+            "prepareUserOperationWithErc20Paymaster_v07",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
@@ -123,6 +123,8 @@ describe.each(getCoreSmartAccounts())(
                     })
                 ).account
 
+                const publicClient = getPublicClient(anvilRpc)
+
                 const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
                     entryPoint: {
@@ -131,17 +133,15 @@ describe.each(getCoreSmartAccounts())(
                     }
                 })
 
-                const publicClient = getPublicClient(anvilRpc)
-
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-ignore
-                    client: getPublicClient(anvilRpc),
-                    chain: foundry,
                     account,
                     paymaster: pimlicoClient,
+                    chain: foundry,
                     userOperation: {
                         prepareUserOperation:
-                            prepareUserOperationErc20(pimlicoClient)
+                            prepareUserOperationWithErc20Paymaster(
+                                pimlicoClient
+                            )
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
