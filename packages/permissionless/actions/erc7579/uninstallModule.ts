@@ -1,7 +1,17 @@
-import type { Address, Chain, Client, Hex, OneOf, Transport } from "viem"
+import type {
+    Address,
+    Chain,
+    Client,
+    Hex,
+    Narrow,
+    OneOf,
+    Transport
+} from "viem"
 import {
     type GetSmartAccountParameter,
+    type PaymasterActions,
     type SmartAccount,
+    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
@@ -11,13 +21,31 @@ import { encodeUninstallModule } from "../../utils/encodeUninstallModule"
 import type { ModuleType } from "./supportsModule"
 
 export type UninstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[] = readonly unknown[]
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
+    calls?: UserOperationCalls<Narrow<calls>>
+    paymaster?:
+        | Address
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown | undefined
 } & OneOf<
         | {
               deInitData: Hex
@@ -41,7 +69,10 @@ export async function uninstallModule<
         address,
         context,
         deInitData,
-        type
+        type,
+        calls,
+        paymaster,
+        paymasterContext
     } = parameters
 
     if (!account_) {
@@ -57,10 +88,15 @@ export async function uninstallModule<
         sendUserOperation,
         "sendUserOperation"
     )({
-        calls: encodeUninstallModule({
-            account,
-            modules: [{ type, address, context: context ?? deInitData }]
-        }),
+        calls: [
+            ...encodeUninstallModule({
+                account,
+                modules: [{ type, address, context: context ?? deInitData }]
+            }),
+            ...(calls ?? [])
+        ],
+        paymaster,
+        paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
