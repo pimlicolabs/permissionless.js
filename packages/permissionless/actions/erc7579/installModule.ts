@@ -1,29 +1,50 @@
-import {
-    type Address,
-    type Client,
-    type Hex,
-    encodeFunctionData,
-    getAddress
-} from "viem"
+import type { Address, Client, Hex, Narrow, OneOf } from "viem"
 import {
     type GetSmartAccountParameter,
+    type PaymasterActions,
     type SmartAccount,
+    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import { encodeInstallModule } from "../../utils"
+import type { ModuleType } from "./supportsModule"
 
 export type InstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[] = readonly unknown[]
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
-    context: Hex
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-}
+    calls?: UserOperationCalls<Narrow<calls>>
+    paymaster?:
+        | Address
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown | undefined
+} & OneOf<
+        | {
+              context: Hex
+          }
+        | {
+              initData: Hex
+          }
+    >
 
 export async function installModule<
     TSmartAccount extends SmartAccount | undefined
@@ -37,7 +58,12 @@ export async function installModule<
         maxPriorityFeePerGas,
         nonce,
         address,
-        context
+        context,
+        initData,
+        type,
+        calls,
+        paymaster,
+        paymasterContext
     } = parameters
 
     if (!account_) {
@@ -54,41 +80,14 @@ export async function installModule<
         "sendUserOperation"
     )({
         calls: [
-            {
-                to: account.address,
-                value: BigInt(0),
-                data: encodeFunctionData({
-                    abi: [
-                        {
-                            name: "installModule",
-                            type: "function",
-                            stateMutability: "nonpayable",
-                            inputs: [
-                                {
-                                    type: "uint256",
-                                    name: "moduleTypeId"
-                                },
-                                {
-                                    type: "address",
-                                    name: "module"
-                                },
-                                {
-                                    type: "bytes",
-                                    name: "initData"
-                                }
-                            ],
-                            outputs: []
-                        }
-                    ],
-                    functionName: "installModule",
-                    args: [
-                        parseModuleTypeId(parameters.type),
-                        getAddress(address),
-                        context
-                    ]
-                })
-            }
+            ...encodeInstallModule({
+                account,
+                modules: [{ address, context: context ?? initData, type }]
+            }),
+            ...(calls ?? [])
         ],
+        paymaster,
+        paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,

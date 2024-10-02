@@ -10,7 +10,13 @@ import { toOwner } from "./toOwner"
 import { decodeNonce } from "./decodeNonce"
 import { encodeNonce } from "./encodeNonce"
 
+import {
+    type EncodeInstallModuleParameters,
+    encodeInstallModule
+} from "./encodeInstallModule"
 import { getPackedUserOperation } from "./getPackedUserOperation"
+
+import { type EncodeCallDataParams, encode7579Calls } from "./encode7579Calls"
 
 export {
     transactionReceiptStatus,
@@ -22,5 +28,9 @@ export {
     getAddressFromInitCodeOrPaymasterAndData,
     getPackedUserOperation,
     encodeNonce,
-    decodeNonce
+    decodeNonce,
+    type EncodeInstallModuleParameters,
+    encodeInstallModule,
+    type EncodeCallDataParams,
+    encode7579Calls
 }
