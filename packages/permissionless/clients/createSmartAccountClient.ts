@@ -136,6 +136,7 @@ export function createSmartAccountClient(
 
     const client = createBundlerClient({
         ...parameters,
+        client: client_,
         chain: parameters.chain ?? client_?.chain,
         key,
         name,
