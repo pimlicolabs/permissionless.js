@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.5
+
+### Patch Changes
+
+- b09bb1cf484b4b2af9df35c5e6cc2a5d0a371050: Forwarded the client for fees estimation
+
 ## 0.2.4
 
 ### Patch Changes
