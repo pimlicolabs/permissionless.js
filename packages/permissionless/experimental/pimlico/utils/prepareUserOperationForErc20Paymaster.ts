@@ -23,7 +23,7 @@ import {
 import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
-import { getTokenQuotes } from "../../actions/pimlico"
+import { getTokenQuotes } from "../../../actions/pimlico"
 
 export const prepareUserOperationForErc20Paymaster =
     (pimlicoClient: Client) =>
