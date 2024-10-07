@@ -9,7 +9,6 @@ import {
     getAddress,
     maxUint256
 } from "viem"
-import { getChainId as getChainId_ } from "viem/actions"
 import {
     type BundlerClient,
     type PrepareUserOperationParameters,
@@ -21,6 +20,7 @@ import {
     getPaymasterData as getPaymasterData_,
     prepareUserOperation
 } from "viem/account-abstraction"
+import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../actions/pimlico"
