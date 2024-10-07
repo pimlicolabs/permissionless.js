@@ -1,12 +1,13 @@
-import type {
-    BundlerRpcSchema,
-    Chain,
-    Client,
-    ClientConfig,
-    EstimateFeesPerGasReturnType,
-    Prettify,
-    RpcSchema,
-    Transport
+import {
+    createClient,
+    type BundlerRpcSchema,
+    type Chain,
+    type Client,
+    type ClientConfig,
+    type EstimateFeesPerGasReturnType,
+    type Prettify,
+    type RpcSchema,
+    type Transport
 } from "viem"
 import {
     type BundlerActions,
@@ -16,7 +17,6 @@ import {
     type SmartAccount,
     type UserOperationRequest,
     bundlerActions,
-    createBundlerClient,
     type prepareUserOperation as viemPrepareUserOperation
 } from "viem/account-abstraction"
 import {
@@ -139,16 +139,17 @@ export function createSmartAccountClient(
         userOperation
     } = parameters
 
-    const client = createBundlerClient({
-        ...parameters,
-        chain: parameters.chain ?? client_?.chain,
-        key,
-        name,
-        transport: bundlerTransport,
-        paymaster,
-        paymasterContext,
-        userOperation
-    })
+    const client = Object.assign(
+        createClient({
+            ...parameters,
+            chain: parameters.chain ?? client_?.chain,
+            transport: bundlerTransport,
+            key,
+            name,
+            type: "bundlerClient" // TODO: is this okay?
+        }),
+        { client: client_, paymaster, paymasterContext, userOperation }
+    )
 
     if (parameters.userOperation?.prepareUserOperation) {
         const customPrepareUserOp =
@@ -170,8 +171,10 @@ export function createSmartAccountClient(
                     return customPrepareUserOp(client, args)
                 }
             }))
-            .extend(smartAccountActions()) as unknown as SmartAccountClient
+            .extend(smartAccountActions()) as SmartAccountClient
     }
 
-    return client.extend(smartAccountActions()) as unknown as SmartAccountClient
+    return client
+        .extend(bundlerActions)
+        .extend(smartAccountActions()) as SmartAccountClient
 }

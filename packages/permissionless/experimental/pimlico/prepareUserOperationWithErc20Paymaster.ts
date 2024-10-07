@@ -7,7 +7,7 @@ import {
     encodeFunctionData,
     getAddress,
     maxUint256,
-    parseAbi
+    erc20Abi
 } from "viem"
 import {
     type BundlerClient,
@@ -21,10 +21,11 @@ import {
     prepareUserOperation
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
-import type { PimlicoClient } from "../clients/pimlico"
+import { getTokenQuotes } from "../../actions/pimlico"
+import { readContract } from "viem/actions"
 
 export const prepareUserOperationWithErc20Paymaster =
-    (pimlicoClient: PimlicoClient) =>
+    (pimlicoClient: Client) =>
     async <
         account extends SmartAccount | undefined,
         const calls extends readonly unknown[],
@@ -51,7 +52,11 @@ export const prepareUserOperationWithErc20Paymaster =
         if (!account_) throw new Error("Account not found")
         const account = parseAccount(account_)
 
-        const { paymasterContext } = parameters
+        const bundlerClient = client as unknown as BundlerClient
+
+        const paymasterContext = parameters.paymasterContext
+            ? parameters.paymasterContext
+            : bundlerClient?.paymasterContext
 
         if (
             typeof paymasterContext === "object" &&
@@ -63,9 +68,14 @@ export const prepareUserOperationWithErc20Paymaster =
             // Inject custom approval before calling prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
-            const quotes = await pimlicoClient.getTokenQuotes({
+            const quotes = await getAction(
+                client,
+                getTokenQuotes,
+                "getTokenQuotes"
+            )({
                 tokens: [getAddress(paymasterContext.token)],
-                chain: pimlicoClient.chain ?? (client.chain as Chain)
+                chain: pimlicoClient.chain ?? (client.chain as Chain),
+                entryPointAddress: account.entryPoint.address
             })
 
             const {
@@ -74,9 +84,9 @@ export const prepareUserOperationWithErc20Paymaster =
                 paymaster: paymasterERC20Address
             } = quotes[0]
 
-            const callsWithApproval = [
+            const callsWithDummyApproval = [
                 {
-                    abi: parseAbi(["function approve(address,uint)"]),
+                    abi: erc20Abi,
                     functionName: "approve",
                     args: [paymasterERC20Address, maxUint256], // dummy approval to ensure simulation passes
                     to: paymasterContext.token
@@ -86,7 +96,7 @@ export const prepareUserOperationWithErc20Paymaster =
 
             if (parameters.callData) {
                 throw new Error(
-                    "callData not supported in erc20 approval+sponsor flow"
+                    "callData not supported in ERC-20 approval+sponsor flow"
                 )
             }
 
@@ -100,19 +110,14 @@ export const prepareUserOperationWithErc20Paymaster =
                 "prepareUserOperation"
             )({
                 ...parameters,
-                calls: callsWithApproval
-            } as unknown as PrepareUserOperationParameters)
+                calls: callsWithDummyApproval
+            } as PrepareUserOperationParameters)
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call pimlico_getTokenQuotes and calculate the approval amount needed for op
             ////////////////////////////////////////////////////////////////////////////////
 
-            const maxFeePerGas =
-                parameters.maxFeePerGas ?? userOperation.maxFeePerGas
-
-            if (!maxFeePerGas) {
-                throw new Error("failed to get maxFeePerGas")
-            }
+            const maxFeePerGas = userOperation.maxFeePerGas
 
             const userOperationMaxGas =
                 userOperation.preVerificationGas +
@@ -121,8 +126,7 @@ export const prepareUserOperationWithErc20Paymaster =
                 (userOperation.paymasterPostOpGasLimit || 0n) +
                 (userOperation.paymasterVerificationGasLimit || 0n)
 
-            const userOperationMaxCost =
-                userOperationMaxGas * userOperation.maxFeePerGas
+            const userOperationMaxCost = userOperationMaxGas * maxFeePerGas
 
             // using formula here https://github.com/pimlicolabs/singleton-paymaster/blob/main/src/base/BaseSingletonPaymaster.sol#L334-L341
             const maxCostInToken =
@@ -130,15 +134,37 @@ export const prepareUserOperationWithErc20Paymaster =
                     exchangeRate) /
                 BigInt(1e18)
 
-            const finalCalls = [
-                {
-                    abi: parseAbi(["function approve(address,uint)"]),
-                    functionName: "approve",
-                    args: [paymasterERC20Address, maxCostInToken],
-                    to: paymasterContext.token
-                },
-                ...parameters.calls
-            ]
+            ////////////////////////////////////////////////////////////////////////////////
+            // Check if we need to approve the token
+            // If the user has existing approval that is sufficient, skip approval injection
+            ////////////////////////////////////////////////////////////////////////////////
+
+            const publicClient = account.client
+
+            const tokenBalance = await getAction(
+                publicClient,
+                readContract,
+                "readContract"
+            )({
+                abi: erc20Abi,
+                functionName: "allowance",
+                args: [account.address, paymasterERC20Address],
+                address: account.address
+            })
+
+            const hasSufficientApproval = tokenBalance >= maxCostInToken
+
+            const finalCalls = hasSufficientApproval
+                ? parameters.calls
+                : [
+                      {
+                          abi: erc20Abi,
+                          functionName: "approve",
+                          args: [paymasterERC20Address, maxCostInToken],
+                          to: paymasterContext.token
+                      },
+                      ...parameters.calls
+                  ]
 
             userOperation.callData = await account.encodeCalls(
                 finalCalls.map((call_) => {
@@ -162,8 +188,6 @@ export const prepareUserOperationWithErc20Paymaster =
             ////////////////////////////////////////////////////////////////////////////////
             // Declare Paymaster properties. (taken from viem)
             ////////////////////////////////////////////////////////////////////////////////
-
-            const bundlerClient = client as unknown as BundlerClient
 
             const paymaster = parameters.paymaster ?? bundlerClient?.paymaster
             const { getPaymasterData } = (() => {
@@ -189,10 +213,9 @@ export const prepareUserOperationWithErc20Paymaster =
                     }
                 }
 
-                // No Paymaster functions, use paymasterFunction from Pimlico client.
-                return {
-                    getPaymasterData: pimlicoClient.getPaymasterData
-                }
+                throw new Error(
+                    "Expected paymaster: cannot sponsor ERC-20 without paymaster"
+                )
             })()
 
             ////////////////////////////////////////////////////////////////////////////////

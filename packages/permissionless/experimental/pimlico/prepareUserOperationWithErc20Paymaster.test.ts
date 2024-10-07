@@ -9,14 +9,14 @@ import {
     ERC20_ADDRESS,
     sudoMintTokens,
     tokenBalanceOf
-} from "../../permissionless-test/src/erc20-utils.ts"
-import { testWithRpc } from "../../permissionless-test/src/testWithRpc.ts"
+} from "../../../permissionless-test/src/erc20-utils.ts"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc.ts"
 import {
     getCoreSmartAccounts,
     getPublicClient
-} from "../../permissionless-test/src/utils"
-import { createSmartAccountClient } from "../clients/createSmartAccountClient.ts"
-import { createPimlicoClient } from "../clients/pimlico.ts"
+} from "../../../permissionless-test/src/utils"
+import { createSmartAccountClient } from "../../clients/createSmartAccountClient.ts"
+import { createPimlicoClient } from "../../clients/pimlico.ts"
 import { prepareUserOperationWithErc20Paymaster } from "./prepareUserOperationWithErc20Paymaster.ts"
 
 describe.each(getCoreSmartAccounts())(
