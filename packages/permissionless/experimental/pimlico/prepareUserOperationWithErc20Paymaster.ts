@@ -65,8 +65,10 @@ export const prepareUserOperationWithErc20Paymaster =
             "token" in paymasterContext &&
             typeof paymasterContext.token === "string"
         ) {
-            if (!isAddress(paymasterContext.token)) {
-                throw new Error("paymasterContext.token is not a valid address")
+            if (!isAddress(paymasterContext.token, { strict: false })) {
+                throw new Error(
+                    "paymasterContext.token should be of type Address"
+                )
             }
 
             ////////////////////////////////////////////////////////////////////////////////
