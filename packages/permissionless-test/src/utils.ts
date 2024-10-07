@@ -1,14 +1,4 @@
-import {
-    http,
-    type Account,
-    type Address,
-    type Chain,
-    type Transport,
-    type WalletClient,
-    createPublicClient,
-    createWalletClient,
-    parseEther
-} from "viem"
+import { http, createPublicClient, createWalletClient } from "viem"
 import {
     type SmartAccount,
     createBundlerClient,
@@ -199,9 +189,12 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
 
 export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {
-        onFetchRequest: async (request) => {
-            // console.log("fetching", await request.json())
-        }
+        //onFetchRequest: async (req) => {
+        //    console.log(await req.json(), "request")
+        //},
+        //onFetchResponse: async (response) => {
+        //    console.log(await response.clone().json(), "response")
+        //}
     })
 
     return createPublicClient({
@@ -209,39 +202,6 @@ export const getPublicClient = (anvilRpc: string) => {
         transport: transport,
         pollingInterval: 100
     })
-}
-
-const usedWallets = new Set<Address>()
-
-export const fund = async ({
-    to,
-    anvilRpc
-}: { to: Address; anvilRpc: string }) => {
-    let funder: WalletClient<Transport, Chain, Account>
-
-    const wallets = Array.from({ length: 10 }, (_, index) =>
-        getAnvilWalletClient({ addressIndex: index, anvilRpc })
-    )
-    const publicClient = getPublicClient(anvilRpc)
-
-    do {
-        const availableFunders = wallets.filter(
-            (wallet) => !usedWallets.has(wallet.account.address)
-        )
-        const randomIndex = Math.floor(Math.random() * availableFunders.length)
-        funder = availableFunders[randomIndex]
-    } while (!funder)
-
-    // mark the funder as used
-    usedWallets.add(funder.account.address)
-
-    const hash = await funder.sendTransaction({
-        to,
-        value: parseEther("1")
-    })
-
-    // wait for funding confirmation
-    await publicClient.waitForTransactionReceipt({ hash })
 }
 
 export const getSimpleAccountClient = async <
