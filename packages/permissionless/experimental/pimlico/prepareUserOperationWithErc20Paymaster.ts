@@ -7,6 +7,7 @@ import {
     encodeFunctionData,
     erc20Abi,
     getAddress,
+    isAddress,
     maxUint256
 } from "viem"
 import {
@@ -64,12 +65,16 @@ export const prepareUserOperationWithErc20Paymaster =
             "token" in paymasterContext &&
             typeof paymasterContext.token === "string"
         ) {
+            if (!isAddress(paymasterContext.token)) {
+                throw new Error("paymasterContext.token is not a valid address")
+            }
+
             ////////////////////////////////////////////////////////////////////////////////
             // Inject custom approval before calling prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
             const quotes = await getAction(
-                client,
+                pimlicoClient,
                 getTokenQuotes,
                 "getTokenQuotes"
             )({
@@ -111,7 +116,7 @@ export const prepareUserOperationWithErc20Paymaster =
             )({
                 ...parameters,
                 calls: callsWithDummyApproval
-            } as PrepareUserOperationParameters)
+            } as unknown as PrepareUserOperationParameters)
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call pimlico_getTokenQuotes and calculate the approval amount needed for op
@@ -149,7 +154,7 @@ export const prepareUserOperationWithErc20Paymaster =
                 abi: erc20Abi,
                 functionName: "allowance",
                 args: [account.address, paymasterERC20Address],
-                address: account.address
+                address: paymasterContext.token
             })
 
             const hasSufficientApproval = tokenBalance >= maxCostInToken

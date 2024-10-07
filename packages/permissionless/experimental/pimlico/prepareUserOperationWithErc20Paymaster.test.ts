@@ -51,6 +51,8 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const smartAccountClient = createSmartAccountClient({
+                    // @ts-ignore
+                    client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
                     chain: foundry,
@@ -134,6 +136,8 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const smartAccountClient = createSmartAccountClient({
+                    // @ts-ignore
+                    client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
                     chain: foundry,
