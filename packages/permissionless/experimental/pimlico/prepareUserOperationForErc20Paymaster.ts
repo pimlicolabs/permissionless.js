@@ -71,13 +71,27 @@ export const prepareUserOperationForErc20Paymaster =
 
             const token = getAddress(paymasterContext.token)
 
+            let chainId: number | undefined
+            async function getChainId(): Promise<number> {
+                if (chainId) return chainId
+                if (client.chain) return client.chain.id
+                const chainId_ = await getAction(
+                    client,
+                    getChainId_,
+                    "getChainId"
+                )({})
+                chainId = chainId_
+                return chainId
+            }
+
             const quotes = await getAction(
                 pimlicoClient,
                 getTokenQuotes,
                 "getTokenQuotes"
             )({
                 tokens: [token],
-                chain: pimlicoClient.chain ?? (client.chain as Chain),
+                chain:
+                    pimlicoClient.chain ?? client.chain ?? account.client.chain,
                 entryPointAddress: account.entryPoint.address
             })
 
@@ -224,19 +238,6 @@ export const prepareUserOperationForErc20Paymaster =
             ////////////////////////////////////////////////////////////////////////////////
             // Re-calculate Paymaster data fields.
             ////////////////////////////////////////////////////////////////////////////////
-
-            let chainId: number | undefined
-            async function getChainId(): Promise<number> {
-                if (chainId) return chainId
-                if (client.chain) return client.chain.id
-                const chainId_ = await getAction(
-                    client,
-                    getChainId_,
-                    "getChainId"
-                )({})
-                chainId = chainId_
-                return chainId
-            }
 
             const paymasterData = await getPaymasterData({
                 chainId: await getChainId(),
