@@ -36,7 +36,7 @@ describe.each(getCoreSmartAccounts())(
                     account: smartClient.account,
                     type: "executor",
                     address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
-                    context: name.startsWith("Kernel 7579")
+                    initData: name.startsWith("Kernel 7579")
                         ? encodePacked(
                               ["address", "bytes"],
                               [

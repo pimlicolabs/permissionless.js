@@ -1,35 +1,42 @@
+import type { Address, Chain, Client, Hex, Narrow, Transport } from "viem"
 import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport,
-    encodeFunctionData,
-    getAddress
-} from "viem"
-import {
-    type GetSmartAccountParameter,
+    type PaymasterActions,
     type SmartAccount,
+    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import {
+    type EncodeUninstallModuleParameters,
+    encodeUninstallModule
+} from "../../utils/encodeUninstallModule"
 
 export type UninstallModulesParameters<
-    TSmartAccount extends SmartAccount | undefined
-> = GetSmartAccountParameter<TSmartAccount> & {
-    modules: [
-        {
-            type: ModuleType
-            address: Address
-            context: Hex
-        }
-    ]
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[] = readonly unknown[]
+> = EncodeUninstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
+    calls?: UserOperationCalls<Narrow<calls>>
+    paymaster?:
+        | Address
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown | undefined
 }
 
 export async function uninstallModules<
@@ -43,7 +50,10 @@ export async function uninstallModules<
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
-        modules
+        modules,
+        calls,
+        paymaster,
+        paymasterContext
     } = parameters
 
     if (!account_) {
@@ -59,36 +69,15 @@ export async function uninstallModules<
         sendUserOperation,
         "sendUserOperation"
     )({
-        calls: modules.map(({ type, address, context }) => ({
-            to: account.address,
-            value: BigInt(0),
-            data: encodeFunctionData({
-                abi: [
-                    {
-                        name: "uninstallModule",
-                        type: "function",
-                        stateMutability: "nonpayable",
-                        inputs: [
-                            {
-                                type: "uint256",
-                                name: "moduleTypeId"
-                            },
-                            {
-                                type: "address",
-                                name: "module"
-                            },
-                            {
-                                type: "bytes",
-                                name: "deInitData"
-                            }
-                        ],
-                        outputs: []
-                    }
-                ],
-                functionName: "uninstallModule",
-                args: [parseModuleTypeId(type), getAddress(address), context]
-            })
-        })),
+        calls: [
+            ...encodeUninstallModule({
+                account,
+                modules
+            }),
+            ...(calls ?? [])
+        ],
+        paymaster,
+        paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
