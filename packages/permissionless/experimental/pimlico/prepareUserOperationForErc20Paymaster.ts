@@ -9,6 +9,7 @@ import {
     getAddress,
     maxUint256
 } from "viem"
+import { getChainId as getChainId_ } from "viem/actions"
 import {
     type BundlerClient,
     type PrepareUserOperationParameters,
@@ -20,7 +21,6 @@ import {
     getPaymasterData as getPaymasterData_,
     prepareUserOperation
 } from "viem/account-abstraction"
-import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../actions/pimlico"
@@ -98,7 +98,6 @@ export const prepareUserOperationForErc20Paymaster =
             ]
 
             if (parameters.callData) {
-                console.log(`parameters.callData: ${parameters.callData}`)
                 throw new Error(
                     "parameter callData is not supported with prepareUserOperationForErc20Paymaster"
                 )
