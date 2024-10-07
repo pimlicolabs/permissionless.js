@@ -64,10 +64,10 @@
             "import": "./_esm/errors/index.js",
             "default": "./_cjs/errors/index.js"
         },
-        "./experimental": {
-            "types": "./_types/experimental/index.d.ts",
-            "import": "./_esm/experimental/index.js",
-            "default": "./_cjs/experimental/index.js"
+        "./experimental/pimlico": {
+            "types": "./_types/experimental/pimlico/index.d.ts",
+            "import": "./_esm/experimental/pimlico/index.js",
+            "default": "./_cjs/experimental/pimlico/index.js"
         }
     },
     "peerDependencies": {

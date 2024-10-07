@@ -7,9 +7,9 @@ import {
     encodeFunctionData,
     erc20Abi,
     getAddress,
-    isAddress,
     maxUint256
 } from "viem"
+import { getChainId as getChainId_ } from "viem/actions"
 import {
     type BundlerClient,
     type PrepareUserOperationParameters,
@@ -25,7 +25,7 @@ import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../actions/pimlico"
 
-export const prepareUserOperationWithErc20Paymaster =
+export const prepareUserOperationForErc20Paymaster =
     (pimlicoClient: Client) =>
     async <
         account extends SmartAccount | undefined,
@@ -65,22 +65,18 @@ export const prepareUserOperationWithErc20Paymaster =
             "token" in paymasterContext &&
             typeof paymasterContext.token === "string"
         ) {
-            if (!isAddress(paymasterContext.token, { strict: false })) {
-                throw new Error(
-                    "paymasterContext.token should be of type Address"
-                )
-            }
-
             ////////////////////////////////////////////////////////////////////////////////
             // Inject custom approval before calling prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
+
+            const token = getAddress(paymasterContext.token)
 
             const quotes = await getAction(
                 pimlicoClient,
                 getTokenQuotes,
                 "getTokenQuotes"
             )({
-                tokens: [getAddress(paymasterContext.token)],
+                tokens: [token],
                 chain: pimlicoClient.chain ?? (client.chain as Chain),
                 entryPointAddress: account.entryPoint.address
             })
@@ -102,8 +98,9 @@ export const prepareUserOperationWithErc20Paymaster =
             ]
 
             if (parameters.callData) {
+                console.log(`parameters.callData: ${parameters.callData}`)
                 throw new Error(
-                    "callData not supported in ERC-20 approval+sponsor flow"
+                    "parameter callData is not supported with prepareUserOperationForErc20Paymaster"
                 )
             }
 
@@ -156,7 +153,7 @@ export const prepareUserOperationWithErc20Paymaster =
                 abi: erc20Abi,
                 functionName: "allowance",
                 args: [account.address, paymasterERC20Address],
-                address: paymasterContext.token
+                address: token
             })
 
             const hasSufficientApproval = tokenBalance >= maxCostInToken
@@ -229,9 +226,21 @@ export const prepareUserOperationWithErc20Paymaster =
             // Re-calculate Paymaster data fields.
             ////////////////////////////////////////////////////////////////////////////////
 
+            let chainId: number | undefined
+            async function getChainId(): Promise<number> {
+                if (chainId) return chainId
+                if (client.chain) return client.chain.id
+                const chainId_ = await getAction(
+                    client,
+                    getChainId_,
+                    "getChainId"
+                )({})
+                chainId = chainId_
+                return chainId
+            }
+
             const paymasterData = await getPaymasterData({
-                // biome-ignore lint/style/noNonNullAssertion:
-                chainId: client.chain!.id!,
+                chainId: await getChainId(),
                 entryPointAddress: account.entryPoint.address,
                 context: paymasterContext,
                 ...(userOperation as UserOperation)

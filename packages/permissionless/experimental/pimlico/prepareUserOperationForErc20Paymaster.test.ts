@@ -17,17 +17,17 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { createSmartAccountClient } from "../../clients/createSmartAccountClient.ts"
 import { createPimlicoClient } from "../../clients/pimlico.ts"
-import { prepareUserOperationWithErc20Paymaster } from "./prepareUserOperationWithErc20Paymaster.ts"
+import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster.ts"
 
 describe.each(getCoreSmartAccounts())(
-    "prepareUserOperationWithErc20Paymaster $name",
+    "prepareUserOperationForErc20Paymaster $name",
     ({
         getSmartAccountClient,
         supportsEntryPointV06,
         supportsEntryPointV07
     }) => {
         testWithRpc.skipIf(!supportsEntryPointV06)(
-            "prepareUserOperationWithErc20Paymaster_v06",
+            "prepareUserOperationForErc20Paymaster_v06",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
@@ -58,9 +58,7 @@ describe.each(getCoreSmartAccounts())(
                     chain: foundry,
                     userOperation: {
                         prepareUserOperation:
-                            prepareUserOperationWithErc20Paymaster(
-                                pimlicoClient
-                            )
+                            prepareUserOperationForErc20Paymaster(pimlicoClient)
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
@@ -112,7 +110,7 @@ describe.each(getCoreSmartAccounts())(
         )
 
         testWithRpc.skipIf(!supportsEntryPointV07)(
-            "prepareUserOperationWithErc20Paymaster_v07",
+            "prepareUserOperationForErc20Paymaster_v07",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
@@ -143,9 +141,7 @@ describe.each(getCoreSmartAccounts())(
                     chain: foundry,
                     userOperation: {
                         prepareUserOperation:
-                            prepareUserOperationWithErc20Paymaster(
-                                pimlicoClient
-                            )
+                            prepareUserOperationForErc20Paymaster(pimlicoClient)
                     },
                     bundlerTransport: http(rpc.altoRpc)
                 })
