@@ -164,6 +164,14 @@ export function createSmartAccountClient(
                     return customPrepareUserOp(client, args)
                 }
             }))
+            .extend(bundlerActions)
+            .extend((client) => ({
+                prepareUserOperation: (
+                    args: PrepareUserOperationParameters
+                ) => {
+                    return customPrepareUserOp(client, args)
+                }
+            }))
             .extend(smartAccountActions()) as SmartAccountClient
     }
 

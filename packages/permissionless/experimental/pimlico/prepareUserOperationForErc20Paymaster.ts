@@ -158,7 +158,7 @@ export const prepareUserOperationForErc20Paymaster =
 
             const publicClient = account.client
 
-            const tokenBalance = await getAction(
+            const allowance = await getAction(
                 publicClient,
                 readContract,
                 "readContract"
@@ -169,7 +169,7 @@ export const prepareUserOperationForErc20Paymaster =
                 address: token
             })
 
-            const hasSufficientApproval = tokenBalance >= maxCostInToken
+            const hasSufficientApproval = allowance >= maxCostInToken
 
             const finalCalls = hasSufficientApproval
                 ? parameters.calls
