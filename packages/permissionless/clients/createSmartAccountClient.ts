@@ -1,5 +1,4 @@
 import {
-    createClient,
     type BundlerRpcSchema,
     type Chain,
     type Client,
@@ -7,7 +6,8 @@ import {
     type EstimateFeesPerGasReturnType,
     type Prettify,
     type RpcSchema,
-    type Transport
+    type Transport,
+    createClient
 } from "viem"
 import {
     type BundlerActions,

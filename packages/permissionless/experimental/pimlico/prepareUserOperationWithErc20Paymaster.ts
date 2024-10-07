@@ -5,9 +5,9 @@ import {
     type ContractFunctionParameters,
     type Transport,
     encodeFunctionData,
+    erc20Abi,
     getAddress,
-    maxUint256,
-    erc20Abi
+    maxUint256
 } from "viem"
 import {
     type BundlerClient,
@@ -20,9 +20,9 @@ import {
     getPaymasterData as getPaymasterData_,
     prepareUserOperation
 } from "viem/account-abstraction"
+import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../actions/pimlico"
-import { readContract } from "viem/actions"
 
 export const prepareUserOperationWithErc20Paymaster =
     (pimlicoClient: Client) =>
