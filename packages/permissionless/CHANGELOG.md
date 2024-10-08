@@ -1,5 +1,25 @@
 # permissionless
 
+## 0.2.6
+
+### Patch Changes
+
+- 9c27191bdde4bc534732487ddc27f9f2d8e5be1d: Added prepareUserOperationForErc20Paymaster under pimlico/experimental
+
+## 0.2.5
+
+### Patch Changes
+
+- b09bb1cf484b4b2af9df35c5e6cc2a5d0a371050: Forwarded the client for fees estimation
+
+## 0.2.4
+
+### Patch Changes
+
+- 7d4602c831430744916dda33983be0583d9b0662: Added utility functions to encode 7579 function calldata
+- d23ee0d5b530134756ea098f6233910f79cba83e: Added support to send calls with 7579 functions and override paymaster props
+- d23ee0d5b530134756ea098f6233910f79cba83e: Added support for initData & deInitData
+
 ## 0.2.3
 
 ### Patch Changes

@@ -4,6 +4,7 @@ import {
     type Client,
     ContractFunctionExecutionError,
     type Hex,
+    type OneOf,
     type Transport,
     decodeFunctionResult,
     encodeFunctionData,
@@ -23,8 +24,14 @@ export type IsModuleInstalledParameters<
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
-    context: Hex
-}
+} & OneOf<
+        | {
+              additionalContext: Hex
+          }
+        | {
+              context: Hex
+          }
+    >
 
 export async function isModuleInstalled<
     TSmartAccount extends SmartAccount | undefined
@@ -32,7 +39,12 @@ export async function isModuleInstalled<
     client: Client<Transport, Chain | undefined, TSmartAccount>,
     parameters: IsModuleInstalledParameters<TSmartAccount>
 ): Promise<boolean> {
-    const { account: account_ = client.account, address, context } = parameters
+    const {
+        account: account_ = client.account,
+        address,
+        context,
+        additionalContext
+    } = parameters
 
     if (!account_) {
         throw new AccountNotFoundError({
@@ -82,7 +94,7 @@ export async function isModuleInstalled<
             args: [
                 parseModuleTypeId(parameters.type),
                 getAddress(address),
-                context
+                context ?? additionalContext
             ],
             address: account.address
         })
@@ -104,7 +116,7 @@ export async function isModuleInstalled<
                     args: [
                         parseModuleTypeId(parameters.type),
                         getAddress(address),
-                        context
+                        context ?? additionalContext
                     ]
                 })
             })

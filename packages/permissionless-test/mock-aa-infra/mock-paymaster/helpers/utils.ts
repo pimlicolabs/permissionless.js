@@ -1,6 +1,8 @@
-import { http, createWalletClient } from "viem"
+import { http, type Address, type Hex, createWalletClient } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
+import { ERC20_ADDRESS } from "../../../src/erc20-utils"
+import { RpcError, ValidationErrors } from "./schema"
 
 /// Returns the bigger of two BigInts.
 export const maxBigInt = (a: bigint, b: bigint) => {
@@ -24,3 +26,21 @@ export const getAnvilWalletClient = (anvilRpc: string) => {
 
     return walletClient
 }
+
+export const isTokenSupported = async (token: Address) => {
+    if (token !== ERC20_ADDRESS) {
+        throw new RpcError(
+            "Token is not supported",
+            ValidationErrors.InvalidFields
+        )
+    }
+}
+
+export type PaymasterMode =
+    | {
+          mode: "verifying"
+      }
+    | {
+          mode: "erc20"
+          token: Address
+      }

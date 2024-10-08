@@ -1,20 +1,23 @@
-import type {
-    BundlerRpcSchema,
-    Chain,
-    Client,
-    ClientConfig,
-    EstimateFeesPerGasReturnType,
-    Prettify,
-    RpcSchema,
-    Transport
+import {
+    type BundlerRpcSchema,
+    type Chain,
+    type Client,
+    type ClientConfig,
+    type EstimateFeesPerGasReturnType,
+    type Prettify,
+    type RpcSchema,
+    type Transport,
+    createClient
 } from "viem"
 import {
     type BundlerActions,
     type BundlerClientConfig,
     type PaymasterActions,
+    type PrepareUserOperationParameters,
     type SmartAccount,
     type UserOperationRequest,
-    createBundlerClient
+    bundlerActions,
+    type prepareUserOperation as viemPrepareUserOperation
 } from "viem/account-abstraction"
 import {
     type SmartAccountActions,
@@ -101,6 +104,8 @@ export type SmartAccountClientConfig<
                         userOperation: UserOperationRequest
                     }) => Promise<EstimateFeesPerGasReturnType<"eip1559">>)
                   | undefined
+              /** Prepare User Operation configuration. */
+              prepareUserOperation?: typeof viemPrepareUserOperation | undefined
           }
         | undefined
 }
@@ -134,16 +139,43 @@ export function createSmartAccountClient(
         userOperation
     } = parameters
 
-    const client = createBundlerClient({
-        ...parameters,
-        chain: parameters.chain ?? client_?.chain,
-        key,
-        name,
-        transport: bundlerTransport,
-        paymaster,
-        paymasterContext,
-        userOperation
-    })
+    const client = Object.assign(
+        createClient({
+            ...parameters,
+            chain: parameters.chain ?? client_?.chain,
+            transport: bundlerTransport,
+            key,
+            name,
+            type: "bundlerClient" // TODO: is this okay?
+        }),
+        { client: client_, paymaster, paymasterContext, userOperation }
+    )
 
-    return client.extend(smartAccountActions()) as unknown as SmartAccountClient
+    if (parameters.userOperation?.prepareUserOperation) {
+        const customPrepareUserOp =
+            parameters.userOperation.prepareUserOperation
+
+        return client
+            .extend(bundlerActions)
+            .extend((client) => ({
+                prepareUserOperation: (
+                    args: PrepareUserOperationParameters
+                ) => {
+                    return customPrepareUserOp(client, args)
+                }
+            }))
+            .extend(bundlerActions)
+            .extend((client) => ({
+                prepareUserOperation: (
+                    args: PrepareUserOperationParameters
+                ) => {
+                    return customPrepareUserOp(client, args)
+                }
+            }))
+            .extend(smartAccountActions()) as SmartAccountClient
+    }
+
+    return client
+        .extend(bundlerActions)
+        .extend(smartAccountActions()) as SmartAccountClient
 }
