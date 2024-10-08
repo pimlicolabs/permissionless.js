@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.6
+
+### Patch Changes
+
+- 9c27191bdde4bc534732487ddc27f9f2d8e5be1d: Added prepareUserOperationForErc20Paymaster under pimlico/experimental
+
 ## 0.2.5
 
 ### Patch Changes
