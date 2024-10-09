@@ -215,7 +215,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
-                        version: "0.6"
+                        version: "0.7"
                     },
                     privateKey:
                         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", // anvil private key
