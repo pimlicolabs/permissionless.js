@@ -951,7 +951,6 @@ export type ToSafeSmartAccountParameters<
         version: entryPointVersion
     }
     safe4337ModuleAddress?: Address
-    erc7569LaunchpadAddress?: Address
     erc7579LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address

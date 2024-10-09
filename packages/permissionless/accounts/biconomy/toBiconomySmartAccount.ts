@@ -15,6 +15,10 @@ import {
     type LocalAccount,
     encodeAbiParameters,
     encodeFunctionData,
+    encodePacked,
+    getContractAddress,
+    hexToBigInt,
+    keccak256,
     parseAbiParameters
 } from "viem"
 import {
@@ -31,6 +35,9 @@ import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { toOwner } from "../../utils/toOwner"
 import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi"
 
+const BICONOMY_PROXY_CREATION_CODE =
+    "0x6080346100aa57601f61012038819003918201601f19168301916001600160401b038311848410176100af578084926020946040528339810103126100aa57516001600160a01b0381168082036100aa5715610065573055604051605a90816100c68239f35b60405162461bcd60e51b815260206004820152601e60248201527f496e76616c696420696d706c656d656e746174696f6e206164647265737300006044820152606490fd5b600080fd5b634e487b7160e01b600052604160045260246000fdfe608060405230546000808092368280378136915af43d82803e156020573d90f35b3d90fdfea2646970667358221220a03b18dce0be0b4c9afe58a9eb85c35205e2cf087da098bbf1d23945bf89496064736f6c63430008110033"
+
 /**
  * The account creation ABI for Biconomy Smart Account (from the biconomy SmartAccountFactory)
  */
@@ -41,10 +48,15 @@ import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi"
 const BICONOMY_ADDRESSES: {
     ECDSA_OWNERSHIP_REGISTRY_MODULE: Address
     FACTORY_ADDRESS: Address
+    ACCOUNT_V2_0_LOGIC: Address
+    DEFAULT_FALLBACK_HANDLER_ADDRESS: Address
 } = {
     ECDSA_OWNERSHIP_REGISTRY_MODULE:
         "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e",
-    FACTORY_ADDRESS: "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5"
+    FACTORY_ADDRESS: "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5",
+    ACCOUNT_V2_0_LOGIC: "0x0000002512019Dafb59528B82CB92D3c5D2423aC",
+    DEFAULT_FALLBACK_HANDLER_ADDRESS:
+        "0x0bBa6d96BD616BedC6BFaa341742FD43c60b83C1"
 }
 
 /**
@@ -98,6 +110,8 @@ export type ToBiconomySmartAccountParameters = Prettify<{
     index?: bigint
     factoryAddress?: Address
     ecdsaModuleAddress?: Address
+    accountLogicAddress?: Address
+    fallbackHandlerAddress?: Address
 }>
 
 export type BiconomySmartAccountImplementation = Assign<
@@ -108,6 +122,59 @@ export type BiconomySmartAccountImplementation = Assign<
 export type ToBiconomySmartAccountReturnType = Prettify<
     SmartAccount<BiconomySmartAccountImplementation>
 >
+
+const getAccountAddress = async ({
+    factoryAddress,
+    accountLogicAddress,
+    fallbackHandlerAddress,
+    ecdsaModuleAddress,
+    owner,
+    index = BigInt(0)
+}: {
+    factoryAddress: Address
+    accountLogicAddress: Address
+    fallbackHandlerAddress: Address
+    ecdsaModuleAddress: Address
+    owner: Address
+    index?: bigint
+}): Promise<Address> => {
+    // Build the module setup data
+    const ecdsaOwnershipInitData = encodeFunctionData({
+        abi: BiconomyAbi,
+        functionName: "initForSmartAccount",
+        args: [owner]
+    })
+
+    // Build account init code
+    const initialisationData = encodeFunctionData({
+        abi: BiconomyAbi,
+        functionName: "init",
+        args: [
+            fallbackHandlerAddress,
+            ecdsaModuleAddress,
+            ecdsaOwnershipInitData
+        ]
+    })
+
+    const deploymentCode = encodePacked(
+        ["bytes", "uint256"],
+        [BICONOMY_PROXY_CREATION_CODE, hexToBigInt(accountLogicAddress)]
+    )
+
+    const salt = keccak256(
+        encodePacked(
+            ["bytes32", "uint256"],
+            [keccak256(encodePacked(["bytes"], [initialisationData])), index]
+        )
+    )
+
+    return getContractAddress({
+        from: factoryAddress,
+        salt,
+        bytecode: deploymentCode,
+        opcode: "CREATE2"
+    })
+}
 
 /**
  * Build a Biconomy modular smart account from a private key, that use the ECDSA signer behind the scene
@@ -122,7 +189,16 @@ export type ToBiconomySmartAccountReturnType = Prettify<
 export async function toBiconomySmartAccount(
     parameters: ToBiconomySmartAccountParameters
 ): Promise<ToBiconomySmartAccountReturnType> {
-    const { owners, client, index = 0n, address } = parameters
+    const {
+        owners,
+        client,
+        index = 0n,
+        address,
+        accountLogicAddress = BICONOMY_ADDRESSES.ACCOUNT_V2_0_LOGIC,
+        fallbackHandlerAddress = BICONOMY_ADDRESSES.DEFAULT_FALLBACK_HANDLER_ADDRESS,
+        ecdsaModuleAddress = BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE,
+        factoryAddress = BICONOMY_ADDRESSES.FACTORY_ADDRESS
+    } = parameters
 
     const localOwner = await toOwner({ owner: owners[0] })
 
@@ -132,14 +208,7 @@ export async function toBiconomySmartAccount(
         version: parameters.entryPoint?.version ?? "0.6"
     }
 
-    const factoryAddress =
-        parameters.factoryAddress ?? BICONOMY_ADDRESSES.FACTORY_ADDRESS
-
     let accountAddress: Address | undefined = address
-
-    const ecdsaModuleAddress =
-        parameters.ecdsaModuleAddress ??
-        BICONOMY_ADDRESSES.ECDSA_OWNERSHIP_REGISTRY_MODULE
 
     const getFactoryArgs = async () => {
         return {
@@ -159,13 +228,14 @@ export async function toBiconomySmartAccount(
         async getAddress() {
             if (accountAddress) return accountAddress
 
-            const { factory, factoryData } = await getFactoryArgs()
-
             // Get the sender address based on the init code
-            accountAddress = await getSenderAddress(client, {
-                factory,
-                factoryData,
-                entryPointAddress: entryPoint.address
+            accountAddress = await getAccountAddress({
+                owner: localOwner.address,
+                ecdsaModuleAddress,
+                factoryAddress,
+                accountLogicAddress,
+                fallbackHandlerAddress,
+                index
             })
 
             return accountAddress
