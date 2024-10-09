@@ -208,7 +208,8 @@ export const getSimpleAccountClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
     entryPoint,
-    anvilRpc
+    anvilRpc,
+    privateKey
 }: AAParamType<entryPointVersion>): Promise<
     ToSimpleSmartAccountReturnType<entryPointVersion>
 > => {
@@ -223,7 +224,7 @@ export const getSimpleAccountClient = async <
                 ? "0.6"
                 : "0.7") as entryPointVersion
         },
-        owner: privateKeyToAccount(generatePrivateKey())
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
 
@@ -232,7 +233,8 @@ export const getLightAccountClient = async <
 >({
     entryPoint,
     anvilRpc,
-    version
+    version,
+    privateKey
 }: AAParamType<entryPointVersion> & {
     version?: LightAccountVersion<entryPointVersion>
 }) => {
@@ -246,7 +248,7 @@ export const getLightAccountClient = async <
         },
         client: getPublicClient(anvilRpc),
         version: version ?? "1.1.0",
-        owner: privateKeyToAccount(generatePrivateKey())
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
 
@@ -254,11 +256,12 @@ export const getLightAccountClient = async <
 export const getTrustAccountClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
-    anvilRpc
+    anvilRpc,
+    privateKey
 }: AAParamType<entryPointVersion>) => {
     return toTrustSmartAccount({
         client: getPublicClient(anvilRpc),
-        owner: privateKeyToAccount(generatePrivateKey()),
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey()),
         entryPoint: {
             address: entryPoint06Address,
             version: "0.6"
@@ -270,11 +273,12 @@ export const getTrustAccountClient = async <
 export const getBiconomyClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
-    anvilRpc
+    anvilRpc,
+    privateKey
 }: AAParamType<entryPointVersion>) => {
     return toBiconomySmartAccount({
         client: getPublicClient(anvilRpc),
-        owners: [privateKeyToAccount(generatePrivateKey())],
+        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         entryPoint: {
             address: entryPoint06Address,
             version: "0.6"
@@ -287,7 +291,8 @@ export const getKernelEcdsaClient = async <
 >({
     entryPoint,
     anvilRpc,
-    version
+    version,
+    privateKey
 }: AAParamType<entryPointVersion> & {
     version?: KernelVersion<entryPointVersion>
 }) => {
@@ -309,7 +314,7 @@ export const getKernelEcdsaClient = async <
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owners: [privateKeyToAccount(generatePrivateKey())],
+        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version
     })
 }
@@ -317,7 +322,8 @@ export const getKernelEcdsaClient = async <
 export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     entryPoint,
     anvilRpc,
-    erc7579
+    erc7579,
+    privateKey
 }: {
     erc7579?: boolean
 } & AAParamType<entryPointVersion>) => {
@@ -332,7 +338,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owners: [privateKeyToAccount(generatePrivateKey())],
+        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579

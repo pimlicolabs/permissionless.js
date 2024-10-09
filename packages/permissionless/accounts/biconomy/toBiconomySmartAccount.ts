@@ -31,7 +31,6 @@ import {
 } from "viem/account-abstraction"
 import { signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { toOwner } from "../../utils/toOwner"
 import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi"
 
