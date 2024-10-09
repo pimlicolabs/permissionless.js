@@ -182,7 +182,7 @@ describe.each(getCoreSmartAccounts())(
         )
 
         testWithRpc.skipIf(!supportsEntryPointV07)(
-            "sendTransaction_v07",
+            "sendTransaction_v07 post deployment",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
