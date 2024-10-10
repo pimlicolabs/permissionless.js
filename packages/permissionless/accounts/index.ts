@@ -43,6 +43,13 @@ import {
     toBiconomySmartAccount
 } from "./biconomy/toBiconomySmartAccount"
 
+import {
+    type ThirdwebSmartAccountImplementation,
+    type ToThirdwebSmartAccountParameters,
+    type ToThirdwebSmartAccountReturnType,
+    toThirdwebSmartAccount
+} from "./thirdweb/toThirdwebSmartAccount"
+
 export {
     type ToSimpleSmartAccountParameters,
     type SimpleSmartAccountImplementation,
@@ -70,5 +77,9 @@ export {
     type ToBiconomySmartAccountReturnType,
     type ToBiconomySmartAccountParameters,
     type BiconomySmartAccountImplementation,
-    toBiconomySmartAccount
+    toBiconomySmartAccount,
+    type ToThirdwebSmartAccountReturnType,
+    type ToThirdwebSmartAccountParameters,
+    type ThirdwebSmartAccountImplementation,
+    toThirdwebSmartAccount
 }
