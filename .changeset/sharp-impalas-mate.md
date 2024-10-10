@@ -2,4 +2,4 @@
 "permissionless": minor
 ---
 
-Adds support for thirdweb smart accounts
+Added support for thirdweb smart account

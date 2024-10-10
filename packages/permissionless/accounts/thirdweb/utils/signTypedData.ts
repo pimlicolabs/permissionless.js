@@ -29,6 +29,7 @@ export async function signTypedData(
             ...typedData
         })
     }
+
     const { message, primaryType, types: _types, domain } = typedData
     const types = {
         EIP712Domain: getTypesForEIP712Domain({

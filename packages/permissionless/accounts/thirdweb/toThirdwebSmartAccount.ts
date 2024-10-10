@@ -11,7 +11,6 @@ import type {
     TypedDataDefinition,
     WalletClient
 } from "viem"
-import { signMessage as viemSignMessage } from "viem/actions"
 import { getChainId } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 
@@ -36,15 +35,18 @@ import { signTypedData } from "./utils/signTypedData"
 /**
  * Default addresses for Thirdweb Smart Account
  */
-export const THIRDWEB_ADDRESSES: {
-    factoryAddressV0_6: Address
-    factoryAddressV0_7: Address
-} = {
-    factoryAddressV0_6: "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00",
-    factoryAddressV0_7: "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb"
+export const THIRDWEB_ADDRESSES = {
+    "0.6": {
+        factoryAddress: "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00" as Address
+    },
+    "0.7": {
+        factoryAddress: "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" as Address
+    }
 }
 
-export type ToThirdwebSmartAccountParameters = {
+export type ToThirdwebSmartAccountParameters<
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = {
     client: Client
     owner: OneOf<
         | EIP1193Provider
@@ -52,9 +54,9 @@ export type ToThirdwebSmartAccountParameters = {
         | LocalAccount
     >
     factoryAddress?: Address
-    entryPoint: {
+    entryPoint?: {
         address: Address
-        version: "0.6" | "0.7"
+        version: entryPointVersion
     }
     salt?: string
     address?: Address
@@ -62,26 +64,36 @@ export type ToThirdwebSmartAccountParameters = {
     nonceKey?: bigint
 }
 
-export type ThirdwebSmartAccountImplementation = Assign<
-    SmartAccountImplementation<typeof entryPoint07Abi, "0.7">,
+export type ThirdwebSmartAccountImplementation<
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = Assign<
+    SmartAccountImplementation<
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : typeof entryPoint07Abi,
+        entryPointVersion
+    >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
-export type ToThirdwebSmartAccountReturnType =
-    SmartAccount<ThirdwebSmartAccountImplementation>
+export type ToThirdwebSmartAccountReturnType<
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+> = SmartAccount<ThirdwebSmartAccountImplementation<entryPointVersion>>
 
 /**
  * @description Creates a Thirdweb Smart Account from a private key.
  *
  * @returns A Private Key Thirdweb Smart Account.
  */
-export async function toThirdwebSmartAccount(
-    parameters: ToThirdwebSmartAccountParameters
-): Promise<ToThirdwebSmartAccountReturnType> {
+export async function toThirdwebSmartAccount<
+    entryPointVersion extends "0.6" | "0.7" = "0.7"
+>(
+    parameters: ToThirdwebSmartAccountParameters<entryPointVersion>
+): Promise<ToThirdwebSmartAccountReturnType<entryPointVersion>> {
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
-            parameters.entryPoint?.version === "0.6"
+            (parameters.entryPoint?.version ?? "0.7") === "0.6"
                 ? entryPoint06Abi
                 : entryPoint07Abi,
         version: parameters.entryPoint?.version ?? "0.7"
@@ -92,9 +104,7 @@ export async function toThirdwebSmartAccount(
         client,
         salt,
         address,
-        factoryAddress = entryPoint.version === "0.7"
-            ? THIRDWEB_ADDRESSES.factoryAddressV0_7
-            : THIRDWEB_ADDRESSES.factoryAddressV0_6
+        factoryAddress = THIRDWEB_ADDRESSES[entryPoint.version].factoryAddress
     } = parameters
 
     const admin = await toOwner({ owner })
@@ -172,8 +182,7 @@ export async function toThirdwebSmartAccount(
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
 
-            return viemSignMessage(client, {
-                account: admin,
+            return admin.signMessage({
                 message: {
                     raw: getUserOperationHash({
                         userOperation: {
@@ -182,7 +191,7 @@ export async function toThirdwebSmartAccount(
                                 userOperation.sender ??
                                 (await this.getAddress()),
                             signature: "0x"
-                        } as UserOperation<"0.6">,
+                        } as UserOperation<entryPointVersion>,
                         entryPointAddress: entryPoint.address,
                         entryPointVersion: entryPoint.version,
                         chainId: chainId
@@ -190,5 +199,5 @@ export async function toThirdwebSmartAccount(
                 }
             })
         }
-    }) as Promise<ToThirdwebSmartAccountReturnType>
+    }) as Promise<ToThirdwebSmartAccountReturnType<entryPointVersion>>
 }

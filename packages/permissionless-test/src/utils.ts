@@ -12,6 +12,7 @@ import {
     privateKeyToAccount
 } from "viem/accounts"
 import { foundry } from "viem/chains"
+import { toThirdwebSmartAccount } from "../../permissionless/accounts"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type KernelVersion,
@@ -350,6 +351,31 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     })
 }
 
+export const getThirdwebClient = async <
+    entryPointVersion extends "0.6" | "0.7"
+>({
+    entryPoint,
+    anvilRpc,
+    privateKey
+    // erc7579
+}: {
+    // erc7579?: boolean
+} & AAParamType<entryPointVersion>) => {
+    const publicClient = getPublicClient(anvilRpc)
+
+    return toThirdwebSmartAccount({
+        client: publicClient,
+        entryPoint: {
+            address:
+                entryPoint.version === "0.6"
+                    ? entryPoint06Address
+                    : entryPoint07Address,
+            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
+        },
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
+    })
+}
+
 export const getCoreSmartAccounts = () => [
     {
         name: "Trust",
@@ -524,6 +550,28 @@ export const getCoreSmartAccounts = () => [
                 ...conf
             }),
         supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Thirdweb",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getThirdwebClient({ ...conf }),
+                ...conf
+            }),
+        // getErc7579SmartAccountClient: async <
+        //     entryPointVersion extends "0.6" | "0.7"
+        // >(
+        //     conf: AAParamType<entryPointVersion>
+        // ) =>
+        //     getSmartAccountClient({
+        //         account: await getSafeClient({ ...conf, erc7579: true }),
+        //         ...conf
+        //     }),
+        supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     }

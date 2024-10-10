@@ -13,9 +13,8 @@ export const getAccountAddress = async (
     args: GetAccountAddressParams
 ): Promise<Address> => {
     const { adminAddress, factoryAddress, salt } = args
-    console.log("getAccountAddress", adminAddress, factoryAddress, salt)
 
-    return await getAction(
+    return getAction(
         client,
         readContract,
         "readContract"
