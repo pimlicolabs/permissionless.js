@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.7
+
+### Patch Changes
+
+- e8d4f350c6c754ce4c9c4ed06af13dab0c1a5cc7: Fix: Biconomy sender address calculation post deploy
+
 ## 0.2.6
 
 ### Patch Changes
