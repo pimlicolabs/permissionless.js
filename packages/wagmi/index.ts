@@ -3,5 +3,13 @@ export {
     type PermissionlessProviderProps
 } from "./context"
 
-export { useSendTransaction } from "./hooks/useSendTransaction"
-export { useWaitForTransactionReceipt } from "./hooks/useWaitForTransactionReceipt"
+export {
+    useSendTransaction,
+    type UseSendTransactionParameters,
+    type UseSendTransactionReturnType
+} from "./hooks/useSendTransaction"
+export {
+    useWaitForTransactionReceipt,
+    type UseWaitForTransactionReceiptParameters,
+    type UseWaitForTransactionReceiptReturnType
+} from "./hooks/useWaitForTransactionReceipt"
