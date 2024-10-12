@@ -16,19 +16,18 @@ complexity.
 # Overview
 
 ```tsx [main.tsx]
-import { PermissionlessProvider } from "@permissionless/wagmi"; // [!code ++] // [!code focus]
+import { PermissionlessProvider } from "@permissionless/wagmi";
 
 function Main() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <PermissionlessProvider // [!code ++] // [!code focus]
-          capabilities={capabilities} // [!code ++] // [!code focus]
+        <PermissionlessProvider
+          capabilities={capabilities}
         >
-          // [!code ++] // [!code focus]
           {/** ... */}
-        </PermissionlessProvider>{" "}
-        // [!code ++] // [!code focus]
+        </PermissionlessProvider>
+        {" "}
       </QueryClientProvider>
     </WagmiProvider>
   );
@@ -36,31 +35,31 @@ function Main() {
 ```
 
 ```tsx [app.tsx]
-import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi" // [!code --] // [!code focus]
-import {  // [!code ++] // [!code focus]
-    useSendTransaction,  // [!code ++] // [!code focus]
-    useWaitForTransactionReceipt  // [!code ++] // [!code focus]
-} from "@permissionless/wagmi"  // [!code ++] // [!code focus]
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
+import { 
+    useSendTransaction, 
+    useWaitForTransactionReceipt 
+} from "@permissionless/wagmi" 
 
 function App() {
   const {
-    sendTransaction, // [!code focus]
+    sendTransaction,
     data: transactionReference,
     isPending
-  } = useSendTransaction() // [!code focus]
+  } = useSendTransaction()
   
-  const { data: receipt, isPending: isReceiptPending } = // [!code focus]
-    useWaitForTransactionReceipt({ // [!code focus]
-      hash: "0x1234" // [!code --] // [!code focus]
-      id: transactionReference  // [!code ++] // [!code focus]
-    }) // [!code focus]
+  const { data: receipt, isPending: isReceiptPending } =
+    useWaitForTransactionReceipt({
+      hash: "0x1234"
+      id: transactionReference 
+    })
 
   const sendTransactionCallback = useCallback(async () => {
     console.log("Sending transaction...")
-    sendTransaction({ // [!code focus]
-      to: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045", // [!code focus]
-      data: "0x1234" // [!code focus]
-    }) // [!code focus]
+    sendTransaction({
+      to: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      data: "0x1234"
+    })
   }, [sendTransaction])
 
 }
