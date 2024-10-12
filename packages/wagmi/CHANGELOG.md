@@ -1,5 +1,11 @@
 # @permissionless/wagmi
 
+## 0.1.1
+
+### Patch Changes
+
+- a5593ef8ee73001434ff717b39fe1298cba196d3: Added exports for parameters and return types
+
 ## 0.1.0
 
 ### Minor Changes
