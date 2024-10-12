@@ -1,11 +1,3 @@
----
-showOutline: false
-content:
-  width: 100%
-description: Build with ERC-4337 smart accounts, bundlers, paymasters, and user operations
-title: permissionless.js
----
-
 <h1 className='vocs_HomePage_title'>@permissionless/wagmi</h1>
   Enable gas sponsorship and transaction batching for your app with just a couple lines of cod.
 <br />
