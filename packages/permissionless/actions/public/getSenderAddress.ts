@@ -8,6 +8,7 @@ import {
     InvalidInputRpcError,
     type OneOf,
     type Prettify,
+    RawContractError,
     RpcRequestError,
     UnknownRpcError,
     concat,
@@ -179,19 +180,21 @@ export const getSenderAddress = async (
         }
 
         if (revertError instanceof InvalidInputRpcError) {
-            const hexStringRegex = /0x[a-fA-F0-9]+/
-            // biome-ignore lint/suspicious/noExplicitAny:
-            const match = (revertError as unknown as any).cause.data.match(
-                hexStringRegex
-            )
+            const { data: data_ } = (
+                e instanceof RawContractError
+                    ? e
+                    : e instanceof BaseError
+                      ? e.walk((err) => "data" in (err as Error)) || e.walk()
+                      : {}
+            ) as RawContractError
 
-            if (!match) {
+            const data = typeof data_ === "string" ? data_ : data_?.data
+
+            if (data === undefined) {
                 throw new Error(
                     "Failed to parse revert bytes from RPC response"
                 )
             }
-
-            const data: Hex = match[0]
 
             const error = decodeErrorResult({
                 abi: [
