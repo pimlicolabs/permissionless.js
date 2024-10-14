@@ -8,11 +8,11 @@ import {
     InvalidInputRpcError,
     type OneOf,
     type Prettify,
+    RawContractError,
     RpcRequestError,
     UnknownRpcError,
     concat,
-    decodeErrorResult,
-    RawContractError
+    decodeErrorResult
 } from "viem"
 
 import { simulateContract } from "viem/actions"
@@ -182,13 +182,13 @@ export const getSenderAddress = async (
         if (revertError instanceof InvalidInputRpcError) {
             const { data: data_ } = (
                 e instanceof RawContractError
-                  ? e
-                  : e instanceof BaseError
-                    ? e.walk((err) => 'data' in (err as Error)) || e.walk()
-                    : {}
+                    ? e
+                    : e instanceof BaseError
+                      ? e.walk((err) => "data" in (err as Error)) || e.walk()
+                      : {}
             ) as RawContractError
 
-            const data = typeof data_ === 'string' ? data_ : data_?.data
+            const data = typeof data_ === "string" ? data_ : data_?.data
 
             if (data === undefined) {
                 throw new Error(
