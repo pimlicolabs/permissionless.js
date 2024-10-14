@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.8
+
+### Patch Changes
+
+- fda964a92d87ed6e141dc1a82cd39ecc4e682e4d: Added support for eth_call returning code -32000 for sender address calculation
+
 ## 0.2.7
 
 ### Patch Changes
