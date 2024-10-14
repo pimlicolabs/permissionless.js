@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.0
+
+### Minor Changes
+
+- 0af2b590861915f806098b83c8f8159b33923bb7: Added support for thirdweb smart account
+
 ## 0.2.8
 
 ### Patch Changes
