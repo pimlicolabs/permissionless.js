@@ -46,6 +46,8 @@ import {
     SAFE_V07_MODULE_SETUP_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+    THIRDWEB_FACTORY_V06_CREATECALL,
+    THIRDWEB_FACTORY_V07_CREATECALL,
     TRUST_ACCOUNT_FACET_CREATE_CALL,
     TRUST_DEFAULT_FALLBACK_HANDLER,
     TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
@@ -288,6 +290,18 @@ export const setupContracts = async (rpc: string) => {
             data: ERC_7579_TEST_MODULE_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: THIRDWEB_FACTORY_V06_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: THIRDWEB_FACTORY_V07_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
     ])
 
@@ -467,6 +481,8 @@ export const setupContracts = async (rpc: string) => {
         "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
         "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
-        "0xc98B026383885F41d9a995f85FC480E9bb8bB891" // ERC7579 Test Module
+        "0xc98B026383885F41d9a995f85FC480E9bb8bB891", // ERC7579 Test Module
+        "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
+        "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" // Thirdweb factory 0.7
     ])
 }
