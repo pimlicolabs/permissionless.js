@@ -141,6 +141,18 @@ export const getSenderAddress = async <
                 err instanceof UnknownRpcError
         )
 
+        if (!revertError) {
+            const cause = (e as ContractFunctionExecutionErrorType).cause as any
+            const errorName = cause?.data?.errorName ?? ""
+            if (
+                errorName === "SenderAddressResult" &&
+                cause?.data?.args &&
+                cause?.data?.args[0]
+            ) {
+                return cause.data?.args[0] as Address
+            }
+        }
+
         if (revertError instanceof ContractFunctionRevertedError) {
             const errorName = revertError.data?.errorName ?? ""
             if (
