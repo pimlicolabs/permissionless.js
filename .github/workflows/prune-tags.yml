@@ -17,7 +17,7 @@ jobs:
           node-version: 'latest'
 
       - name: Setup .npmrc file
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
 
