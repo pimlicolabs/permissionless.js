@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.10
+
+### Patch Changes
+
+- 31cedea722382daa12f1d2c6dd70ab54b38deca1: Added getSenderAddress to support for more RPCs.
+
 ## 0.2.9
 
 ### Patch Changes
