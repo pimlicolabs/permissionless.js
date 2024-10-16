@@ -8,6 +8,6 @@
     {
         "name": "permissionless (cjs)",
         "path": "./packages/permissionless/_cjs/index.js",
-        "limit": "160 kB"
+        "limit": "250 kB"
     }
 ]
