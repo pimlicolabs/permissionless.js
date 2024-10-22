@@ -107,7 +107,7 @@ export const prepareUserOperationForErc20Paymaster =
                 postOpGas,
                 exchangeRate,
                 balanceSlot,
-                approvalSlot,
+                allowanceSlot,
                 paymaster: paymasterERC20Address
             } = quotes[0]
 
@@ -137,7 +137,7 @@ export const prepareUserOperationForErc20Paymaster =
                           token,
                           owner: account.address,
                           spender: paymasterERC20Address,
-                          slot: approvalSlot
+                          slot: allowanceSlot
                       }),
                       erc20BalanceOverride({
                           token,

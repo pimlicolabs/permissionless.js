@@ -36,7 +36,7 @@ type GetTokenQuotesWithBigIntAsHex = {
         exchangeRate: Hex
         exchangeRateNativeToUsd: Hex
         balanceSlot: Hex
-        approvalSlot: Hex
+        allowanceSlot: Hex
     }[]
 }
 
