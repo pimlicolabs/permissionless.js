@@ -24,9 +24,17 @@ import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico"
+import { erc20ApprovalOverride, erc20BalanceOverride } from "../../../utils"
 
 export const prepareUserOperationForErc20Paymaster =
-    (pimlicoClient: Client) =>
+    (
+        pimlicoClient: Client,
+        {
+            balanceOverride = false
+        }: {
+            balanceOverride?: boolean
+        } = {}
+    ) =>
     async <
         account extends SmartAccount | undefined,
         const calls extends readonly unknown[],
@@ -98,6 +106,8 @@ export const prepareUserOperationForErc20Paymaster =
             const {
                 postOpGas,
                 exchangeRate,
+                balanceSlot,
+                approvalSlot,
                 paymaster: paymasterERC20Address
             } = quotes[0]
 
@@ -120,6 +130,22 @@ export const prepareUserOperationForErc20Paymaster =
             ////////////////////////////////////////////////////////////////////////////////
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
+
+            parameters.stateOverride = balanceOverride
+                ? (parameters.stateOverride ?? []).concat(
+                      erc20ApprovalOverride({
+                          token,
+                          owner: account.address,
+                          spender: paymasterERC20Address,
+                          slot: approvalSlot
+                      }),
+                      erc20BalanceOverride({
+                          token,
+                          owner: account.address,
+                          slot: balanceSlot
+                      })
+                  )
+                : parameters.stateOverride
 
             const userOperation = await getAction(
                 client,
