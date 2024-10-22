@@ -1,0 +1,59 @@
+import { toHex } from "viem"
+import { describe, expect, test } from "vitest"
+import {
+    type Erc20ApprovalOverrideParameters,
+    erc20ApprovalOverride
+} from "./erc20ApprovalOverride"
+
+describe("erc20ApprovalOverride", () => {
+    test("should return the correct structure for valid inputs", () => {
+        const params = {
+            token: "0xTokenAddress",
+            owner: "0xOwnerAddress",
+            spender: "0xSpenderAddress",
+            slot: BigInt(1),
+            amount: BigInt(100)
+        } as const
+
+        const result = erc20ApprovalOverride(params)
+
+        expect(result).toEqual([
+            {
+                address: params.token,
+                stateDiff: [
+                    {
+                        slot: expect.any(String), // Slot will be a keccak256 hash
+                        value: toHex(params.amount)
+                    }
+                ]
+            }
+        ])
+    })
+
+    test("should use the default amount when none is provided", () => {
+        const params: Erc20ApprovalOverrideParameters = {
+            token: "0xTokenAddress",
+            owner: "0xOwnerAddress",
+            spender: "0xSpenderAddress",
+            slot: BigInt(1)
+        }
+
+        const result = erc20ApprovalOverride(params)
+
+        const expectedDefaultAmount = BigInt(
+            "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        )
+
+        expect(result).toEqual([
+            {
+                address: params.token,
+                stateDiff: [
+                    {
+                        slot: expect.any(String), // Slot will be a keccak256 hash
+                        value: toHex(expectedDefaultAmount)
+                    }
+                ]
+            }
+        ])
+    })
+})
