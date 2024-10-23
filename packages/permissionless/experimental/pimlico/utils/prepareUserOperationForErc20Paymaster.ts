@@ -30,9 +30,13 @@ export const prepareUserOperationForErc20Paymaster =
     (
         pimlicoClient: Client,
         {
-            balanceOverride = false
+            balanceOverride = false,
+            balanceSlot: _balanceSlot,
+            allowanceSlot: _allowanceSlot
         }: {
             balanceOverride?: boolean
+            balanceSlot?: bigint
+            allowanceSlot?: bigint
         } = {}
     ) =>
     async <
@@ -106,8 +110,6 @@ export const prepareUserOperationForErc20Paymaster =
             const {
                 postOpGas,
                 exchangeRate,
-                balanceSlot,
-                allowanceSlot,
                 paymaster: paymasterERC20Address
             } = quotes[0]
 
@@ -128,14 +130,18 @@ export const prepareUserOperationForErc20Paymaster =
             }
 
             ////////////////////////////////////////////////////////////////////////////////
+
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
+
+            const allowanceSlot = _allowanceSlot ?? quotes[0].allowanceSlot
+            const balanceSlot = _balanceSlot ?? quotes[0].balanceSlot
 
             const hasSlot = allowanceSlot && balanceSlot
 
             if (!hasSlot && balanceOverride) {
                 throw new Error(
-                    `balanceOverride is not supported for token ${token}`
+                    `balanceOverride is not supported for token ${token}, provide custom slot for balance & allowance overrides`
                 )
             }
 
