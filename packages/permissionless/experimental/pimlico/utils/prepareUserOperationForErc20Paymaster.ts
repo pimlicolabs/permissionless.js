@@ -131,21 +131,30 @@ export const prepareUserOperationForErc20Paymaster =
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
-            parameters.stateOverride = balanceOverride
-                ? (parameters.stateOverride ?? []).concat(
-                      erc20ApprovalOverride({
-                          token,
-                          owner: account.address,
-                          spender: paymasterERC20Address,
-                          slot: allowanceSlot
-                      }),
-                      erc20BalanceOverride({
-                          token,
-                          owner: account.address,
-                          slot: balanceSlot
-                      })
-                  )
-                : parameters.stateOverride
+            const hasSlot = allowanceSlot && balanceSlot
+
+            if (!hasSlot && balanceOverride) {
+                throw new Error(
+                    `balanceOverride is not supported for token ${token}`
+                )
+            }
+
+            parameters.stateOverride =
+                balanceOverride && allowanceSlot && balanceSlot // allowanceSlot && balanceSlot is cuz of TypeScript :/
+                    ? (parameters.stateOverride ?? []).concat(
+                          erc20ApprovalOverride({
+                              token,
+                              owner: account.address,
+                              spender: paymasterERC20Address,
+                              slot: allowanceSlot
+                          }),
+                          erc20BalanceOverride({
+                              token,
+                              owner: account.address,
+                              slot: balanceSlot
+                          })
+                      )
+                    : parameters.stateOverride
 
             const userOperation = await getAction(
                 client,
