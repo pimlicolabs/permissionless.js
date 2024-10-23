@@ -1,11 +1,11 @@
 import { toHex } from "viem"
 import { describe, expect, test } from "vitest"
 import {
-    type Erc20ApprovalOverrideParameters,
-    erc20ApprovalOverride
-} from "./erc20ApprovalOverride"
+    type Erc20AllowanceOverrideParameters,
+    erc20AllowanceOverride
+} from "./erc20AllowanceOverride"
 
-describe("erc20ApprovalOverride", () => {
+describe("erc20AllowanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
         const params = {
             token: "0xTokenAddress",
@@ -15,7 +15,7 @@ describe("erc20ApprovalOverride", () => {
             amount: BigInt(100)
         } as const
 
-        const result = erc20ApprovalOverride(params)
+        const result = erc20AllowanceOverride(params)
 
         expect(result).toEqual([
             {
@@ -31,14 +31,14 @@ describe("erc20ApprovalOverride", () => {
     })
 
     test("should use the default amount when none is provided", () => {
-        const params: Erc20ApprovalOverrideParameters = {
+        const params: Erc20AllowanceOverrideParameters = {
             token: "0xTokenAddress",
             owner: "0xOwnerAddress",
             spender: "0xSpenderAddress",
             slot: BigInt(1)
         }
 
-        const result = erc20ApprovalOverride(params)
+        const result = erc20AllowanceOverride(params)
 
         const expectedDefaultAmount = BigInt(
             "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"

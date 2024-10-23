@@ -6,7 +6,7 @@ import {
     toHex
 } from "viem"
 
-export type Erc20ApprovalOverrideParameters = {
+export type Erc20AllowanceOverrideParameters = {
     token: Address
     owner: Address
     spender: Address
@@ -14,7 +14,7 @@ export type Erc20ApprovalOverrideParameters = {
     amount?: bigint
 }
 
-export function erc20ApprovalOverride({
+export function erc20AllowanceOverride({
     token,
     owner,
     spender,
@@ -22,7 +22,7 @@ export function erc20ApprovalOverride({
     amount = BigInt(
         "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     )
-}: Erc20ApprovalOverrideParameters): StateOverride {
+}: Erc20AllowanceOverrideParameters): StateOverride {
     const smartAccountErc20AllowanceSlot = keccak256(
         encodeAbiParameters(
             [

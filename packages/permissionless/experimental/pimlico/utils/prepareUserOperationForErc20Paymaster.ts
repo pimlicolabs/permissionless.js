@@ -3,6 +3,7 @@ import {
     type Chain,
     type Client,
     type ContractFunctionParameters,
+    RpcError,
     type Transport,
     encodeFunctionData,
     erc20Abi,
@@ -24,7 +25,7 @@ import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico"
-import { erc20ApprovalOverride, erc20BalanceOverride } from "../../../utils"
+import { erc20AllowanceOverride, erc20BalanceOverride } from "../../../utils"
 
 export const prepareUserOperationForErc20Paymaster =
     (
@@ -107,6 +108,13 @@ export const prepareUserOperationForErc20Paymaster =
                 entryPointAddress: account.entryPoint.address
             })
 
+            if (quotes.length === 0) {
+                throw new RpcError(new Error("Quotes not found"), {
+                    shortMessage:
+                        "client didn't return token quotes, check if the token is supported"
+                })
+            }
+
             const {
                 postOpGas,
                 exchangeRate,
@@ -145,21 +153,38 @@ export const prepareUserOperationForErc20Paymaster =
                 )
             }
 
+            const balanceStateOverride =
+                balanceOverride && balanceSlot
+                    ? erc20BalanceOverride({
+                          token,
+                          owner: account.address,
+                          slot: balanceSlot
+                      })[0]
+                    : undefined
+
+            const allowanceStateOverride =
+                balanceOverride && allowanceSlot
+                    ? erc20AllowanceOverride({
+                          token,
+                          owner: account.address,
+                          spender: paymasterERC20Address,
+                          slot: allowanceSlot
+                      })[0]
+                    : undefined
+
             parameters.stateOverride =
-                balanceOverride && allowanceSlot && balanceSlot // allowanceSlot && balanceSlot is cuz of TypeScript :/
-                    ? (parameters.stateOverride ?? []).concat(
-                          erc20ApprovalOverride({
-                              token,
-                              owner: account.address,
-                              spender: paymasterERC20Address,
-                              slot: allowanceSlot
-                          }),
-                          erc20BalanceOverride({
-                              token,
-                              owner: account.address,
-                              slot: balanceSlot
-                          })
-                      )
+                balanceOverride &&
+                balanceStateOverride &&
+                allowanceStateOverride // allowanceSlot && balanceSlot is cuz of TypeScript :/
+                    ? (parameters.stateOverride ?? []).concat([
+                          {
+                              address: token,
+                              stateDiff: [
+                                  ...(allowanceStateOverride.stateDiff ?? []),
+                                  ...(balanceStateOverride.stateDiff ?? [])
+                              ]
+                          }
+                      ])
                     : parameters.stateOverride
 
             const userOperation = await getAction(
