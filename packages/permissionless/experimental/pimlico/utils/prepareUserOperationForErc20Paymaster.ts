@@ -3,6 +3,7 @@ import {
     type Chain,
     type Client,
     type ContractFunctionParameters,
+    RpcError,
     type Transport,
     encodeFunctionData,
     erc20Abi,
@@ -24,9 +25,21 @@ import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico"
+import { erc20AllowanceOverride, erc20BalanceOverride } from "../../../utils"
 
 export const prepareUserOperationForErc20Paymaster =
-    (pimlicoClient: Client) =>
+    (
+        pimlicoClient: Client,
+        {
+            balanceOverride = false,
+            balanceSlot: _balanceSlot,
+            allowanceSlot: _allowanceSlot
+        }: {
+            balanceOverride?: boolean
+            balanceSlot?: bigint
+            allowanceSlot?: bigint
+        } = {}
+    ) =>
     async <
         account extends SmartAccount | undefined,
         const calls extends readonly unknown[],
@@ -95,6 +108,13 @@ export const prepareUserOperationForErc20Paymaster =
                 entryPointAddress: account.entryPoint.address
             })
 
+            if (quotes.length === 0) {
+                throw new RpcError(new Error("Quotes not found"), {
+                    shortMessage:
+                        "client didn't return token quotes, check if the token is supported"
+                })
+            }
+
             const {
                 postOpGas,
                 exchangeRate,
@@ -118,8 +138,54 @@ export const prepareUserOperationForErc20Paymaster =
             }
 
             ////////////////////////////////////////////////////////////////////////////////
+
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
+
+            const allowanceSlot = _allowanceSlot ?? quotes[0].allowanceSlot
+            const balanceSlot = _balanceSlot ?? quotes[0].balanceSlot
+
+            const hasSlot = allowanceSlot && balanceSlot
+
+            if (!hasSlot && balanceOverride) {
+                throw new Error(
+                    `balanceOverride is not supported for token ${token}, provide custom slot for balance & allowance overrides`
+                )
+            }
+
+            const balanceStateOverride =
+                balanceOverride && balanceSlot
+                    ? erc20BalanceOverride({
+                          token,
+                          owner: account.address,
+                          slot: balanceSlot
+                      })[0]
+                    : undefined
+
+            const allowanceStateOverride =
+                balanceOverride && allowanceSlot
+                    ? erc20AllowanceOverride({
+                          token,
+                          owner: account.address,
+                          spender: paymasterERC20Address,
+                          slot: allowanceSlot
+                      })[0]
+                    : undefined
+
+            parameters.stateOverride =
+                balanceOverride &&
+                balanceStateOverride &&
+                allowanceStateOverride // allowanceSlot && balanceSlot is cuz of TypeScript :/
+                    ? (parameters.stateOverride ?? []).concat([
+                          {
+                              address: token,
+                              stateDiff: [
+                                  ...(allowanceStateOverride.stateDiff ?? []),
+                                  ...(balanceStateOverride.stateDiff ?? [])
+                              ]
+                          }
+                      ])
+                    : parameters.stateOverride
 
             const userOperation = await getAction(
                 client,

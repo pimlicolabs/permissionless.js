@@ -17,6 +17,14 @@ import {
 import { getPackedUserOperation } from "./getPackedUserOperation"
 
 import { type EncodeCallDataParams, encode7579Calls } from "./encode7579Calls"
+import {
+    type Erc20AllowanceOverrideParameters,
+    erc20AllowanceOverride
+} from "./erc20AllowanceOverride"
+import {
+    type Erc20BalanceOverrideParameters,
+    erc20BalanceOverride
+} from "./erc20BalanceOverride"
 
 export {
     transactionReceiptStatus,
@@ -32,5 +40,9 @@ export {
     type EncodeInstallModuleParameters,
     encodeInstallModule,
     type EncodeCallDataParams,
-    encode7579Calls
+    encode7579Calls,
+    erc20AllowanceOverride,
+    erc20BalanceOverride,
+    type Erc20AllowanceOverrideParameters,
+    type Erc20BalanceOverrideParameters
 }

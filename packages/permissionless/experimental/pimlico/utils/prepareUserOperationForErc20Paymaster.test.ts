@@ -191,5 +191,93 @@ describe.each(getCoreSmartAccounts())(
                 expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
             }
         )
+
+        testWithRpc.skipIf(!supportsEntryPointV07)(
+            "prepareUserOperationForErc20Paymaster_v07",
+            async ({ rpc }) => {
+                const { anvilRpc } = rpc
+
+                const account = (
+                    await getSmartAccountClient({
+                        entryPoint: {
+                            version: "0.7"
+                        },
+                        ...rpc
+                    })
+                ).account
+
+                const publicClient = getPublicClient(anvilRpc)
+
+                const pimlicoClient = createPimlicoClient({
+                    transport: http(rpc.paymasterRpc),
+                    entryPoint: {
+                        address: entryPoint07Address,
+                        version: "0.7"
+                    }
+                })
+
+                const smartAccountClient = createSmartAccountClient({
+                    // @ts-ignore
+                    client: getPublicClient(anvilRpc),
+                    account,
+                    paymaster: pimlicoClient,
+                    chain: foundry,
+                    userOperation: {
+                        prepareUserOperation:
+                            prepareUserOperationForErc20Paymaster(
+                                pimlicoClient,
+                                {
+                                    balanceOverride: true
+                                }
+                            )
+                    },
+                    bundlerTransport: http(rpc.altoRpc)
+                })
+
+                const INITIAL_TOKEN_BALANCE = parseEther("100")
+                const INTIAL_ETH_BALANCE = await publicClient.getBalance({
+                    address: smartAccountClient.account.address
+                })
+
+                sudoMintTokens({
+                    amount: INITIAL_TOKEN_BALANCE,
+                    to: smartAccountClient.account.address,
+                    anvilRpc
+                })
+
+                const opHash = await smartAccountClient.sendUserOperation({
+                    calls: [
+                        {
+                            to: zeroAddress,
+                            data: "0x",
+                            value: 0n
+                        }
+                    ],
+                    paymasterContext: {
+                        token: ERC20_ADDRESS
+                    }
+                })
+
+                const receipt =
+                    await smartAccountClient.waitForUserOperationReceipt({
+                        hash: opHash
+                    })
+
+                expect(receipt).toBeTruthy()
+                expect(receipt).toBeTruthy()
+                expect(receipt.success).toBeTruthy()
+
+                const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+                const FINAL_ETH_BALANCE = await publicClient.getBalance({
+                    address: smartAccountClient.account.address
+                })
+
+                expect(FINAL_TOKEN_BALANCE).toBeLessThan(INITIAL_TOKEN_BALANCE) // Token balance should be deducted
+                expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
+            }
+        )
     }
 )
