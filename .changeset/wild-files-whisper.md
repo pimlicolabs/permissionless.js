@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Handle case when slot overrides returned from pimlico_getTokenQuotes are zero
+Fixed when slot overrides returned from pimlico_getTokenQuotes are zero
