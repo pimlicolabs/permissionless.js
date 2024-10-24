@@ -145,7 +145,8 @@ export const prepareUserOperationForErc20Paymaster =
             const allowanceSlot = _allowanceSlot ?? quotes[0].allowanceSlot
             const balanceSlot = _balanceSlot ?? quotes[0].balanceSlot
 
-            const hasSlot = allowanceSlot && balanceSlot
+            const hasSlot =
+                allowanceSlot !== undefined && balanceSlot !== undefined
 
             if (!hasSlot && balanceOverride) {
                 throw new Error(
