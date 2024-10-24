@@ -10,7 +10,7 @@ describe("erc20AllowanceOverride", () => {
         const params = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
             owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-            spender: "0xSpenderAddress",
+            spender: "0xDDdDddDdDdddDDddDDddDDDDdDdDDdDDdDDDDDDd",
             slot: BigInt(1),
             amount: BigInt(100)
         } as const
@@ -34,7 +34,7 @@ describe("erc20AllowanceOverride", () => {
         const params: Erc20AllowanceOverrideParameters = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
             owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-            spender: "0xSpenderAddress",
+            spender: "0xDDdDddDdDdddDDddDDddDDDDdDdDDdDDdDDDDDDd",
             slot: BigInt(1)
         }
 
