@@ -333,11 +333,15 @@ const handleMethod = async (
             [getAddress("0xffffffffffffffffffffffffffffffffffffffff")]: {
                 exchangeRateNativeToUsd: "0x1a2b3c4d5e6f7890abcdef",
                 exchangeRate: "0x3a7b9c8d6e5f4321",
+                balanceSlot: "0x0",
+                allowanceSlot: "0x1",
                 postOpGas: "0x1a2b3c"
             },
             [ERC20_ADDRESS]: {
                 exchangeRateNativeToUsd: "0x5cc717fbb3450c0000000",
                 exchangeRate: "0x5cc717fbb3450c0000",
+                balanceSlot: "0x5",
+                allowanceSlot: "0x0",
                 postOpGas: "0xc350"
             }
         }

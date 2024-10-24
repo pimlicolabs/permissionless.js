@@ -193,7 +193,7 @@ describe.each(getCoreSmartAccounts())(
         )
 
         testWithRpc.skipIf(!supportsEntryPointV07)(
-            "prepareUserOperationForErc20Paymaster_v07",
+            "prepareUserOperationForErc20Paymaster_v07 (balanceOverride enabled)",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 

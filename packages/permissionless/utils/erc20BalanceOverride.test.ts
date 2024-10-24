@@ -8,8 +8,8 @@ import {
 describe("erc20BalanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
         const params = {
-            token: "0xTokenAddress",
-            owner: "0xOwnerAddress",
+            token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+            owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             slot: BigInt(1),
             balance: BigInt(1000)
         } as const
@@ -31,8 +31,8 @@ describe("erc20BalanceOverride", () => {
 
     test("should use the default balance when none is provided", () => {
         const params: Erc20BalanceOverrideParameters = {
-            token: "0xTokenAddress",
-            owner: "0xOwnerAddress",
+            token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+            owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             slot: BigInt(1)
         }
 
