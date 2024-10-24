@@ -8,8 +8,8 @@ import {
 describe("erc20AllowanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
         const params = {
-            token: "0xTokenAddress",
-            owner: "0xOwnerAddress",
+            token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+            owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             spender: "0xSpenderAddress",
             slot: BigInt(1),
             amount: BigInt(100)
@@ -32,8 +32,8 @@ describe("erc20AllowanceOverride", () => {
 
     test("should use the default amount when none is provided", () => {
         const params: Erc20AllowanceOverrideParameters = {
-            token: "0xTokenAddress",
-            owner: "0xOwnerAddress",
+            token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+            owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             spender: "0xSpenderAddress",
             slot: BigInt(1)
         }
