@@ -138,15 +138,16 @@ export const prepareUserOperationForErc20Paymaster =
             }
 
             ////////////////////////////////////////////////////////////////////////////////
-
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
             const allowanceSlot = _allowanceSlot ?? quotes[0].allowanceSlot
             const balanceSlot = _balanceSlot ?? quotes[0].balanceSlot
 
-            const hasSlot =
-                allowanceSlot !== undefined && balanceSlot !== undefined
+            const hasAllowanceSlot = allowanceSlot !== undefined
+            const hasBalanceSlot = balanceSlot !== undefined
+
+            const hasSlot = hasAllowanceSlot && hasBalanceSlot
 
             if (!hasSlot && balanceOverride) {
                 throw new Error(
@@ -155,7 +156,7 @@ export const prepareUserOperationForErc20Paymaster =
             }
 
             const balanceStateOverride =
-                balanceOverride && balanceSlot
+                balanceOverride && hasBalanceSlot
                     ? erc20BalanceOverride({
                           token,
                           owner: account.address,
@@ -164,7 +165,7 @@ export const prepareUserOperationForErc20Paymaster =
                     : undefined
 
             const allowanceStateOverride =
-                balanceOverride && allowanceSlot
+                balanceOverride && hasAllowanceSlot
                     ? erc20AllowanceOverride({
                           token,
                           owner: account.address,
