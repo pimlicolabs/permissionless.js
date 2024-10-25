@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.12
+
+### Patch Changes
+
+- 6a7b673f66565b5d0d6d2fe1fe17e7758975a624: Fixed when slot overrides returned from pimlico_getTokenQuotes are zero
+
 ## 0.2.11
 
 ### Patch Changes
