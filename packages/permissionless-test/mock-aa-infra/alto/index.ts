@@ -149,13 +149,13 @@ export const setupContracts = async (rpc: string) => {
         }),
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_7579_LAUNCHPAD_CREATECALL,
+            data: SAFE_V07_MODULE_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_V07_MODULE_CREATECALL,
+            data: SAFE_7579_REGISTRY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -331,7 +331,7 @@ export const setupContracts = async (rpc: string) => {
         }),
         walletClient.sendTransaction({
             to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_CREATECALL,
+            data: SAFE_7579_LAUNCHPAD_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         })
