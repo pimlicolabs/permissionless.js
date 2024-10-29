@@ -28,7 +28,7 @@
         "async-mutex": "^0.5.0",
         "get-port": "^7.0.0",
         "tsc-alias": "^1.8.8",
-        "vitest": "^1.2.0",
+        "vitest": "^1.6.0",
         "viem": "2.21.22",
         "wagmi": "^2.12.8",
         "@permissionless/wagmi": "workspace:packages/wagmi",
@@ -37,7 +37,7 @@
         "@vitejs/plugin-react": "^4.2.1",
         "@wagmi/cli": "latest",
         "buffer": "^6.0.3",
-        "vite": "^5.2.11",
+        "vite": "^5.4.10",
         "@tanstack/react-query": "5.45.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1"
