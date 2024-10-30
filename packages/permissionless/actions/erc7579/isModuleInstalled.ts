@@ -58,28 +58,23 @@ export async function isModuleInstalled<
 
     const abi = [
         {
-            name: "isModuleInstalled",
             type: "function",
-            stateMutability: "view",
+            name: "isModuleInstalled",
             inputs: [
                 {
+                    name: "moduleType",
                     type: "uint256",
-                    name: "moduleTypeId"
+                    internalType: "uint256"
                 },
+                { name: "module", type: "address", internalType: "address" },
                 {
-                    type: "address",
-                    name: "module"
-                },
-                {
+                    name: "additionalContext",
                     type: "bytes",
-                    name: "additionalContext"
+                    internalType: "bytes"
                 }
             ],
-            outputs: [
-                {
-                    type: "bool"
-                }
-            ]
+            outputs: [{ name: "", type: "bool", internalType: "bool" }],
+            stateMutability: "view"
         }
     ] as const
 
