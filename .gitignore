@@ -11,6 +11,7 @@ coverage
 node_modules
 tsconfig*.tsbuildinfo
 esbuild-why-permissionless*
+temp.ts
 
 # local env files
 .env
