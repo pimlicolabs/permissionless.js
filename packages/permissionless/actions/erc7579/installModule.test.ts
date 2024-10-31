@@ -35,7 +35,7 @@ describe.each(getCoreSmartAccounts())(
                 const opHash = await installModule(smartClient, {
                     account: smartClient.account,
                     type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     initData: name.startsWith("Kernel 7579")
                         ? encodePacked(
                               ["address", "bytes"],
@@ -74,7 +74,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const isModuleInstalled = await smartClient.isModuleInstalled({
                     type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     context: "0x"
                 })
 
@@ -127,7 +127,7 @@ describe.each(getCoreSmartAccounts())(
                 const opHash = await installModule(smartClient, {
                     account: smartClient.account,
                     type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     context: name.startsWith("Kernel 7579")
                         ? encodePacked(
                               ["address", "bytes"],
@@ -165,7 +165,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const isModuleInstalled = await smartClient.isModuleInstalled({
                     type: "executor",
-                    address: "0xc98B026383885F41d9a995f85FC480E9bb8bB891",
+                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     context: "0x"
                 })
 
