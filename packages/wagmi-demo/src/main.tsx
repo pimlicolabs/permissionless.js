@@ -7,10 +7,9 @@ import ReactDOM from "react-dom/client"
 import { WagmiProvider } from "wagmi"
 
 import App from "./App.tsx"
-import { config } from "./wagmi.ts"
+import { capabilities, config } from "./wagmi.ts"
 
 import "./index.css"
-import { baseSepolia } from "viem/chains"
 
 globalThis.Buffer = Buffer
 
@@ -25,15 +24,7 @@ ReactDOM.createRoot(root).render(
         <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
                 {/* Call it generic 5792 provider */}
-                <PermissionlessProvider
-                    capabilities={{
-                        paymasterService: {
-                            [baseSepolia.id]: {
-                                url: `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=`
-                            }
-                        }
-                    }}
-                >
+                <PermissionlessProvider capabilities={capabilities}>
                     <App />
                 </PermissionlessProvider>
             </QueryClientProvider>

@@ -29,9 +29,24 @@ const sendTransactionMutationOptions = <config extends Config>(
     return {
         mutationFn(variables) {
             if (parameters.capabilities) {
+                const client = config.getClient({ chainId: variables.chainId })
+
+                const paymasterServiceUrl = parameters.capabilities
+                    ?.paymasterService?.url
+                    ? parameters.capabilities?.paymasterService?.url
+                    : parameters.capabilities?.paymasterService[client.chain.id]
+                          ?.url
+
                 return sendCalls(config, {
                     calls: [variables],
-                    capabilities: parameters.capabilities
+                    capabilities: {
+                        ...parameters.capabilities,
+                        paymasterService: paymasterServiceUrl
+                            ? {
+                                  url: paymasterServiceUrl
+                              }
+                            : undefined
+                    }
                 })
             }
 

@@ -1,16 +1,29 @@
-import { baseSepolia } from "viem/chains"
+import { sepolia } from "viem/chains"
 import { http, createConfig } from "wagmi"
 import { coinbaseWallet } from "wagmi/connectors"
 
+const pimlicoApiKey = process.env.PIMLICO_API_KEY
+
 export const config = createConfig({
-    chains: [baseSepolia],
+    chains: [sepolia],
     connectors: [
-        coinbaseWallet({ appName: "Pimlico", preference: "smartWalletOnly" })
+        coinbaseWallet({
+            appName: "Pimlico Test",
+            preference: "smartWalletOnly"
+        })
     ],
     transports: {
-        [baseSepolia.id]: http("https://sepolia.base.org")
+        [sepolia.id]: http("https://sepolia.base.org")
     }
 })
+
+export const capabilities = {
+    paymasterService: {
+        [sepolia.id]: {
+            url: `https://api.pimlico.io/v2/${sepolia.id}/rpc?apikey=${pimlicoApiKey}`
+        }
+    }
+}
 
 declare module "wagmi" {
     interface Register {
