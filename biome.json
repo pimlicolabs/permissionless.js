@@ -11,7 +11,8 @@
             "_cjs",
             "_esm",
             "_types",
-            "bun.lockb"
+            "bun.lockb",
+            "temp.ts"
         ]
     },
     "organizeImports": {
