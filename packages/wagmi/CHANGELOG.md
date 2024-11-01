@@ -1,5 +1,11 @@
 # @permissionless/wagmi
 
+## 0.1.2
+
+### Patch Changes
+
+- b98ef55211af81647ca96d963e2d12bed5282146: Fixed sendTransaction when multiple chainIds are configured
+
 ## 0.1.1
 
 ### Patch Changes
