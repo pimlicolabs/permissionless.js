@@ -54,24 +54,27 @@ export function encodeInstallModule<
         data: encodeFunctionData({
             abi: [
                 {
-                    name: "installModule",
                     type: "function",
-                    stateMutability: "nonpayable",
+                    name: "installModule",
                     inputs: [
                         {
+                            name: "moduleType",
                             type: "uint256",
-                            name: "moduleTypeId"
+                            internalType: "uint256"
                         },
                         {
+                            name: "module",
                             type: "address",
-                            name: "module"
+                            internalType: "address"
                         },
                         {
+                            name: "initData",
                             type: "bytes",
-                            name: "initData"
+                            internalType: "bytes"
                         }
                     ],
-                    outputs: []
+                    outputs: [],
+                    stateMutability: "nonpayable"
                 }
             ],
             functionName: "installModule",

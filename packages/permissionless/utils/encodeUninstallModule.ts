@@ -54,24 +54,27 @@ export function encodeUninstallModule<
         data: encodeFunctionData({
             abi: [
                 {
-                    name: "uninstallModule",
                     type: "function",
-                    stateMutability: "nonpayable",
+                    name: "uninstallModule",
                     inputs: [
                         {
+                            name: "moduleType",
                             type: "uint256",
-                            name: "moduleTypeId"
+                            internalType: "uint256"
                         },
                         {
+                            name: "module",
                             type: "address",
-                            name: "module"
+                            internalType: "address"
                         },
                         {
+                            name: "deInitData",
                             type: "bytes",
-                            name: "deInitData"
+                            internalType: "bytes"
                         }
                     ],
-                    outputs: []
+                    outputs: [],
+                    stateMutability: "nonpayable"
                 }
             ],
             functionName: "uninstallModule",

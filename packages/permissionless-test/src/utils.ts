@@ -343,11 +343,17 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
         version: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
-            ? "0x3Fdb5BC686e861480ef99A6E3FaAe03c0b9F32e2"
+            ? "0x7579EE8307284F293B1927136486880611F20002"
             : undefined,
         erc7579LaunchpadAddress: erc7579
-            ? "0xEBe001b3D534B9B6E2500FB78E67a1A137f561CE"
-            : undefined
+            ? "0x7579011aB74c46090561ea277Ba79D510c6C00ff"
+            : undefined,
+        ...(erc7579
+            ? {
+                  attesters: ["0x000000333034E9f539ce08819E12c1b8Cb29084d"],
+                  attestersThreshold: 1
+              }
+            : {})
     })
 }
 
