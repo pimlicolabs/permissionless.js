@@ -191,9 +191,9 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
 
 export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {
-        //onFetchRequest: async (req) => {
-        //    console.log(await req.json(), "request")
-        //},
+        // onFetchRequest: async (req) => {
+        //     console.log(await req.json(), "request")
+        // }
         //onFetchResponse: async (response) => {
         //    console.log(await response.clone().json(), "response")
         //}
@@ -294,7 +294,8 @@ export const getNexusClient = async <entryPointVersion extends "0.6" | "0.7">({
 }: AAParamType<entryPointVersion>) => {
     return toNexusSmartAccount({
         client: getPublicClient(anvilRpc),
-        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())]
+        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
+        nexusVersion: "1.0.0"
     })
 }
 

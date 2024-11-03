@@ -14,8 +14,14 @@ import {
     type Hex,
     type LocalAccount,
     concat,
+    concatHex,
+    domainSeparator,
+    encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
+    hashMessage,
+    keccak256,
+    stringToHex,
     toHex
 } from "viem"
 import {
@@ -26,10 +32,43 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { readContract } from "viem/actions"
+import { getChainId, readContract } from "viem/actions"
+import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { encode7579Calls } from "../../utils"
 import { toOwner } from "../../utils/toOwner"
+
+const wrapMessageHash = (
+    messageHash: Hex,
+    {
+        accountAddress,
+        nexusVersion,
+        chainId
+    }: {
+        accountAddress: Address
+        nexusVersion: "1.0.0"
+        chainId: number
+    }
+) => {
+    const _domainSeparator = domainSeparator({
+        domain: {
+            name: "Nexus",
+            version: nexusVersion,
+            chainId,
+            verifyingContract: accountAddress
+        }
+    })
+    const parentStructHash = keccak256(
+        encodeAbiParameters(
+            [{ type: "bytes32" }, { type: "bytes32" }],
+            [
+                keccak256(stringToHex("PersonalSign(bytes prefixed)")),
+                messageHash
+            ]
+        )
+    )
+    return keccak256(concatHex(["0x1901", _domainSeparator, parentStructHash]))
+}
 
 /**
  * The account creation ABI for Biconomy Smart Account (from the biconomy SmartAccountFactory)
@@ -55,6 +94,7 @@ export type ToNexusSmartAccountParameters = Prettify<{
             | LocalAccount
         >
     ]
+    nexusVersion: "1.0.0"
     address?: Address | undefined
     entryPoint?: {
         address: Address
@@ -84,6 +124,7 @@ export async function toNexusSmartAccount(
         client,
         index = 0n,
         address,
+        nexusVersion,
         factoryAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_FACTORY_ADDRESS,
         validatorAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_ADDRESS,
         attesters = [],
@@ -122,6 +163,15 @@ export async function toNexusSmartAccount(
                 args: [localOwner.address, index, attesters, threshold]
             })
         }
+    }
+
+    let chainId: number
+    const getMemoizedChainId = async () => {
+        if (chainId) return chainId
+        chainId = client.chain
+            ? client.chain.id
+            : await getAction(client, getChainId, "getChainId")({})
+        return chainId
     }
 
     return toSmartAccount({
@@ -190,8 +240,16 @@ export async function toNexusSmartAccount(
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            const wrappedMessageHash = wrapMessageHash(hashMessage(message), {
+                nexusVersion,
+                accountAddress: await this.getAddress(),
+                chainId: await getMemoizedChainId()
+            })
+
             const signature = await localOwner.signMessage({
-                message
+                message: {
+                    raw: wrappedMessageHash
+                }
             })
 
             return encodePacked(
@@ -204,7 +262,8 @@ export async function toNexusSmartAccount(
             return "0x"
         },
         async signUserOperation(parameters) {
-            const { chainId = client.chain?.id, ...userOperation } = parameters
+            const { chainId = await getMemoizedChainId(), ...userOperation } =
+                parameters
 
             if (!chainId) throw new Error("Chain id not found")
 
