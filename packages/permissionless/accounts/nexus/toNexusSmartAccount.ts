@@ -26,8 +26,8 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
+import { readContract } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
 import { encode7579Calls } from "../../utils"
 import { toOwner } from "../../utils/toOwner"
 
@@ -131,12 +131,24 @@ export async function toNexusSmartAccount(
         async getAddress() {
             if (accountAddress) return accountAddress
 
-            const { factory, factoryData } = await getFactoryArgs()
-
-            accountAddress = await getSenderAddress(client, {
-                factory,
-                factoryData,
-                entryPointAddress: entryPoint.address
+            accountAddress = await readContract(client, {
+                address: factoryAddress,
+                abi: [
+                    {
+                        name: "computeAccountAddress",
+                        type: "function",
+                        stateMutability: "view",
+                        inputs: [
+                            { type: "address", name: "eoaOwner" },
+                            { type: "uint256", name: "index" },
+                            { type: "address[]", name: "attesters" },
+                            { type: "uint8", name: "threshold" }
+                        ],
+                        outputs: [{ type: "address" }]
+                    }
+                ],
+                functionName: "computeAccountAddress",
+                args: [localOwner.address, index, attesters, threshold]
             })
 
             return accountAddress
