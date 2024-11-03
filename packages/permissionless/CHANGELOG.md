@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.2.14
+
+### Patch Changes
+
+- d58a8aa474e6a6d717f3623833e0cf5489d1c46f: Added support for Biconomy's Nexus account
+- b293e3e97749e4382628f1b4d9d2e34a0b493c59: Fixed support for latest audited 7579 contracts
+
 ## 0.2.13
 
 ### Patch Changes
