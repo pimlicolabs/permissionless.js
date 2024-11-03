@@ -295,7 +295,7 @@ export const getNexusClient = async <entryPointVersion extends "0.6" | "0.7">({
     return toNexusSmartAccount({
         client: getPublicClient(anvilRpc),
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
-        nexusVersion: "1.0.0"
+        version: "1.0.0"
     })
 }
 

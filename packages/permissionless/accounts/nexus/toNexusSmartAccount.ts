@@ -46,18 +46,18 @@ const wrapMessageHash = (
     messageHash: Hex,
     {
         accountAddress,
-        nexusVersion,
+        version,
         chainId
     }: {
         accountAddress: Address
-        nexusVersion: "1.0.0"
+        version: "1.0.0"
         chainId: number
     }
 ) => {
     const _domainSeparator = domainSeparator({
         domain: {
             name: "Nexus",
-            version: nexusVersion,
+            version: version,
             chainId,
             verifyingContract: accountAddress
         }
@@ -128,7 +128,7 @@ export async function toNexusSmartAccount(
         client,
         index = 0n,
         address,
-        version: nexusVersion,
+        version,
         factoryAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_FACTORY_ADDRESS,
         validatorAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_ADDRESS,
         attesters = [],
@@ -208,7 +208,8 @@ export async function toNexusSmartAccount(
             return accountAddress
         },
         async getNonce(args) {
-            const defaultedKey = (args?.key ?? 0n) % 16777215n // max value for size 3
+            const TIMESTAMP_ADJUSTMENT = 16777215n // max value for size 3
+            const defaultedKey = (args?.key ?? 0n) % TIMESTAMP_ADJUSTMENT
             const defaultedValidationMode = "0x00"
             const key = concat([
                 toHex(defaultedKey, { size: 3 }),
@@ -244,7 +245,7 @@ export async function toNexusSmartAccount(
         },
         async signMessage({ message }) {
             const wrappedMessageHash = wrapMessageHash(hashMessage(message), {
-                nexusVersion,
+                version,
                 accountAddress: await this.getAddress(),
                 chainId: await getMemoizedChainId()
             })
@@ -290,7 +291,7 @@ export async function toNexusSmartAccount(
             })
 
             const wrappedMessageHash = wrapMessageHash(typedHash, {
-                nexusVersion,
+                version,
                 accountAddress: await this.getAddress(),
                 chainId: await getMemoizedChainId()
             })
