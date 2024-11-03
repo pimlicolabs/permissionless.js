@@ -176,15 +176,9 @@ const getAccountAddress = async ({
 }
 
 /**
- * Build a Biconomy modular smart account from a private key, that use the ECDSA signer behind the scene
- * @param client
- * @param privateKey
- * @param entryPoint
- * @param index
- * @param factoryAddress
- * @param ecdsaModuleAddress
+ * @deprecated Biconomy Smart Account is deprecated. Please use toNexusSmartAccount instead.
+ * @see toNexusSmartAccount
  */
-
 export async function toBiconomySmartAccount(
     parameters: ToBiconomySmartAccountParameters
 ): Promise<ToBiconomySmartAccountReturnType> {
