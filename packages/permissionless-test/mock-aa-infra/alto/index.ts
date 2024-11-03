@@ -32,6 +32,11 @@ import {
     KERNEL_V07_V3_1_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+    NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
+    NEXUS_ACCOUNT_IMPLEMENTATION_CREATECALL,
+    NEXUS_BOOTSTRAP_LIB_CREATECALL,
+    NEXUS_K1_VALIDATOR_CREATECALL,
+    NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
     SAFE_7579_LAUNCHPAD_CREATECALL,
     SAFE_7579_MODULE_CREATECALL,
     SAFE_7579_REGISTRY_CREATECALL,
@@ -318,6 +323,12 @@ export const setupContracts = async (rpc: string) => {
             data: THIRDWEB_FACTORY_V07_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: NEXUS_BOOTSTRAP_LIB_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
     ])
 
@@ -386,10 +397,33 @@ export const setupContracts = async (rpc: string) => {
             gas: 15_000_000n,
             nonce: nonce++
         }),
-
         walletClient.sendTransaction({
             to: BICONOMY_SINGLETON_FACTORY,
             data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_K1_VALIDATOR_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_ACCOUNT_IMPLEMENTATION_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         })
@@ -555,6 +589,11 @@ export const setupContracts = async (rpc: string) => {
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
         "0x4Fd8d57b94966982B62e9588C27B4171B55E8354", // ERC7579 Test Module
         "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
-        "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" // Thirdweb factory 0.7
+        "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb", // Thirdweb factory 0.7
+        "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55", // Nexus K1 Validator Factory
+        "0x00000004171351c442B202678c48D8AB5B321E8f", // Nexus K1 Validator
+        "0x000000039dfcAd030719B07296710F045F0558f7", // Nexus Account Implementation
+        "0x00000008c901d8871b6F6942De0B5D9cCf3873d3", // Nexus Account Bootstrapper
+        "0x6c77ddf87a1717465d29f8f16f44711eb0c839c0" // Nexus BootstrapLib
     ])
 }

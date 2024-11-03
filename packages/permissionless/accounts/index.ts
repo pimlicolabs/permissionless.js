@@ -44,6 +44,13 @@ import {
 } from "./biconomy/toBiconomySmartAccount"
 
 import {
+    type NexusSmartAccountImplementation,
+    type ToNexusSmartAccountParameters,
+    type ToNexusSmartAccountReturnType,
+    toNexusSmartAccount
+} from "./nexus/toNexusSmartAccount"
+
+import {
     type ThirdwebSmartAccountImplementation,
     type ToThirdwebSmartAccountParameters,
     type ToThirdwebSmartAccountReturnType,
@@ -74,6 +81,10 @@ export {
     type SafeVersion,
     type KernelVersion,
     toEcdsaKernelSmartAccount,
+    type NexusSmartAccountImplementation,
+    type ToNexusSmartAccountParameters,
+    type ToNexusSmartAccountReturnType,
+    toNexusSmartAccount,
     type ToBiconomySmartAccountReturnType,
     type ToBiconomySmartAccountParameters,
     type BiconomySmartAccountImplementation,
