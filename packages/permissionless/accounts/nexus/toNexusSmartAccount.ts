@@ -98,7 +98,7 @@ export type ToNexusSmartAccountParameters = Prettify<{
             | LocalAccount
         >
     ]
-    nexusVersion: "1.0.0"
+    version: "1.0.0"
     address?: Address | undefined
     entryPoint?: {
         address: Address
@@ -128,7 +128,7 @@ export async function toNexusSmartAccount(
         client,
         index = 0n,
         address,
-        nexusVersion,
+        version: nexusVersion,
         factoryAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_FACTORY_ADDRESS,
         validatorAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_ADDRESS,
         attesters = [],
@@ -208,8 +208,7 @@ export async function toNexusSmartAccount(
             return accountAddress
         },
         async getNonce(args) {
-            const TIMESTAMP_ADJUSTMENT = 16777215n
-            const defaultedKey = (args?.key ?? 0n) % TIMESTAMP_ADJUSTMENT
+            const defaultedKey = (args?.key ?? 0n) % 16777215n // max value for size 3
             const defaultedValidationMode = "0x00"
             const key = concat([
                 toHex(defaultedKey, { size: 3 }),
