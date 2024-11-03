@@ -6,6 +6,7 @@ import type {
     OneOf,
     Prettify,
     Transport,
+    TypedDataDefinition,
     WalletClient
 } from "viem"
 import {
@@ -19,10 +20,13 @@ import {
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
+    getTypesForEIP712Domain,
     hashMessage,
+    hashTypedData,
     keccak256,
     stringToHex,
-    toHex
+    toHex,
+    validateTypedData
 } from "viem"
 import {
     type SmartAccount,
@@ -257,9 +261,51 @@ export async function toNexusSmartAccount(
                 [validatorAddress, signature]
             )
         },
-        // TODO: Implement this
-        async signTypedData(_typedData) {
-            return "0x"
+        async signTypedData(typedData) {
+            const {
+                message,
+                primaryType,
+                types: _types,
+                domain
+            } = typedData as TypedDataDefinition
+
+            const types = {
+                EIP712Domain: getTypesForEIP712Domain({
+                    domain: domain
+                }),
+                ..._types
+            }
+
+            validateTypedData({
+                domain,
+                message,
+                primaryType,
+                types
+            })
+
+            const typedHash = hashTypedData({
+                message,
+                primaryType,
+                types,
+                domain
+            })
+
+            const wrappedMessageHash = wrapMessageHash(typedHash, {
+                nexusVersion,
+                accountAddress: await this.getAddress(),
+                chainId: await getMemoizedChainId()
+            })
+
+            const signature = await localOwner.signMessage({
+                message: {
+                    raw: wrappedMessageHash
+                }
+            })
+
+            return encodePacked(
+                ["address", "bytes"],
+                [validatorAddress, signature]
+            )
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
