@@ -32,6 +32,8 @@ import {
     KERNEL_V07_V3_1_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+    NEXUS_K1_VALIDATOR_ADDRESS,
+    NEXUS_K1_VALIDATOR_FACTORY_ADDRESS,
     SAFE_7579_LAUNCHPAD_CREATECALL,
     SAFE_7579_MODULE_CREATECALL,
     SAFE_7579_REGISTRY_CREATECALL,
@@ -363,10 +365,21 @@ export const setupContracts = async (rpc: string) => {
             gas: 15_000_000n,
             nonce: nonce++
         }),
-
         walletClient.sendTransaction({
             to: BICONOMY_SINGLETON_FACTORY,
             data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_K1_VALIDATOR_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: BICONOMY_SINGLETON_FACTORY,
+            data: NEXUS_K1_VALIDATOR_FACTORY_ADDRESS,
             gas: 15_000_000n,
             nonce: nonce++
         })
@@ -483,6 +496,8 @@ export const setupContracts = async (rpc: string) => {
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
         "0xc98B026383885F41d9a995f85FC480E9bb8bB891", // ERC7579 Test Module
         "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
-        "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" // Thirdweb factory 0.7
+        "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb", // Thirdweb factory 0.7
+        "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55", // Nexus K1 Validator Factory
+        "0x00000004171351c442B202678c48D8AB5B321E8f" // Nexus K1 Validator
     ])
 }

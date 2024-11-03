@@ -22,6 +22,7 @@ import {
     type LightAccountVersion,
     toLightSmartAccount
 } from "../../permissionless/accounts/light/toLightSmartAccount"
+import { toNexusSmartAccount } from "../../permissionless/accounts/nexus/toNexusSmartAccount"
 import { toSafeSmartAccount } from "../../permissionless/accounts/safe/toSafeSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
@@ -287,6 +288,16 @@ export const getBiconomyClient = async <
     })
 }
 
+export const getNexusClient = async <entryPointVersion extends "0.6" | "0.7">({
+    anvilRpc,
+    privateKey
+}: AAParamType<entryPointVersion>) => {
+    return toNexusSmartAccount({
+        client: getPublicClient(anvilRpc),
+        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())]
+    })
+}
+
 export const getKernelEcdsaClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
@@ -516,6 +527,28 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Nexus",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getNexusClient(conf),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getNexusClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
     {
