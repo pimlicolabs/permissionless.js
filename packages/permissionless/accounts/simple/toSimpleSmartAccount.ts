@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -26,7 +25,7 @@ import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils/toOwner"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -71,7 +70,7 @@ export type ToSimpleSmartAccountParameters<
 > = {
     client: Client
     owner: OneOf<
-        | EIP1193Provider
+        | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >

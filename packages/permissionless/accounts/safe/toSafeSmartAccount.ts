@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -42,6 +41,7 @@ import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { isSmartAccountDeployed, toOwner } from "../../utils"
 import { encode7579Calls } from "../../utils/encode7579Calls"
+import type { EthereumProvider } from "../../utils/toOwner"
 
 export type SafeVersion = "1.4.1"
 
@@ -940,7 +940,7 @@ export type ToSafeSmartAccountParameters<
     client: Client
     owners: [
         OneOf<
-            | EIP1193Provider
+            | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
             | LocalAccount
         >
