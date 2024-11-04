@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.15
+
+### Patch Changes
+
+- fc37a3e023b8a279de2eb09c50cdf4f46aa94e8c: Fixed ethereum provider by changing type of EIP1193Provider to EthereumProvider
+
 ## 0.2.14
 
 ### Patch Changes
