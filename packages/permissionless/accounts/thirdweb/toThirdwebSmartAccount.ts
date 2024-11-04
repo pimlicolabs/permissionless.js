@@ -4,7 +4,6 @@ import type {
     Assign,
     Chain,
     Client,
-    EIP1193Provider,
     LocalAccount,
     OneOf,
     Transport,
@@ -25,7 +24,7 @@ import {
     toSmartAccount
 } from "viem/account-abstraction"
 import { getAction, toHex } from "viem/utils"
-import { toOwner } from "../../utils/toOwner"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
 import { encodeCallData } from "./utils/encodeCallData"
 import { getAccountAddress } from "./utils/getAccountAddress"
 import { getFactoryData } from "./utils/getFactoryData"
@@ -49,7 +48,7 @@ export type ToThirdwebSmartAccountParameters<
 > = {
     client: Client
     owner: OneOf<
-        | EIP1193Provider
+        | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >

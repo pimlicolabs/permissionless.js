@@ -2,7 +2,6 @@ import type {
     Account,
     Assign,
     Chain,
-    EIP1193Provider,
     OneOf,
     Transport,
     WalletClient
@@ -32,7 +31,7 @@ import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce"
 import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils/toOwner"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
 import { KernelInitAbi } from "./abi/KernelAccountAbi"
 import { KernelV3InitAbi, KernelV3_1AccountAbi } from "./abi/KernelV3AccountAbi"
 import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi"
@@ -305,7 +304,7 @@ export type ToEcdsaKernelSmartAccountParameters<
     client: Client
     owners: [
         OneOf<
-            | EIP1193Provider
+            | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
             | LocalAccount
         >
