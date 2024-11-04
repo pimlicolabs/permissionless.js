@@ -2,8 +2,6 @@ import {
     type Account,
     type Address,
     type Chain,
-    type EIP1193RequestFn,
-    type EIP1474Methods,
     type LocalAccount,
     type OneOf,
     type Transport,
