@@ -11,7 +11,7 @@
         "../packages/wagmi/**/*.bench.ts"
     ],
     "compilerOptions": {
-        "moduleResolution": "node",
+        "moduleResolution": "Bundler",
         "sourceMap": true,
         "rootDir": "../packages/wagmi"
     },

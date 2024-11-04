@@ -3,6 +3,7 @@
     "extends": "./tsconfig.permissionless.json",
     "compilerOptions": {
         "module": "commonjs",
+        "moduleResolution": "Node",
         "outDir": "../packages/permissionless/_cjs",
         "removeComments": true,
         "verbatimModuleSyntax": false

@@ -312,7 +312,7 @@ export async function waitForCallsStatus<
     })
 }
 
-export function waitForTransactionReceiptQueryOptions<
+function waitForTransactionReceiptQueryOptions<
     config extends Config,
     chainId extends
         config["chains"][number]["id"] = config["chains"][number]["id"]
