@@ -7,7 +7,7 @@ import type {
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
 import { parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
+import { AccountNotFoundError } from "../../errors/index.js"
 
 /**
  * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.

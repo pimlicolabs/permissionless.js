@@ -45,9 +45,9 @@ import {
     type WaitForTransactionReceiptQueryFnData,
     useQuery
 } from "wagmi/query"
-import { observe } from "../utils/observe"
-import { useAvailableCapabilities } from "./useAvailableCapabilities"
-import type { ConfigParameter } from "./useSendTransaction"
+import { observe } from "../utils/observe.js"
+import { useAvailableCapabilities } from "./useAvailableCapabilities.js"
+import type { ConfigParameter } from "./useSendTransaction.js"
 
 export type WaitForTransactionReceiptQueryKey<
     config extends Config,

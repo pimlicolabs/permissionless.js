@@ -11,10 +11,10 @@ import type {
     WriteContractParameters
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
-import { sendTransaction } from "../../actions/smartAccount/sendTransaction"
-import { signMessage } from "../../actions/smartAccount/signMessage"
-import { signTypedData } from "../../actions/smartAccount/signTypedData"
-import { writeContract } from "../../actions/smartAccount/writeContract"
+import { sendTransaction } from "../../actions/smartAccount/sendTransaction.js"
+import { signMessage } from "../../actions/smartAccount/signMessage.js"
+import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
+import { writeContract } from "../../actions/smartAccount/writeContract.js"
 
 export type SmartAccountActions<
     TChain extends Chain | undefined = Chain | undefined,

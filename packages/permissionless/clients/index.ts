@@ -1,2 +1,2 @@
-export * from "./createSmartAccountClient"
-export * from "./decorators/smartAccount"
+export * from "./createSmartAccountClient.js"
+export * from "./decorators/smartAccount.js"

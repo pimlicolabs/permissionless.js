@@ -16,8 +16,8 @@ import type {
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import { AccountNotFoundError } from "../../errors/index.js"
+import { type ModuleType, parseModuleTypeId } from "./supportsModule.js"
 
 export type IsModuleInstalledParameters<
     TSmartAccount extends SmartAccount | undefined

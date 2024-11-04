@@ -6,8 +6,11 @@ import {
     hashTypedData,
     validateTypedData
 } from "viem"
-import { isKernelV2 } from "./isKernelV2"
-import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
+import { isKernelV2 } from "./isKernelV2.js"
+import {
+    type WrapMessageHashParams,
+    wrapMessageHash
+} from "./wrapMessageHash.js"
 
 export async function signTypedData(
     parameters: TypedDataDefinition &

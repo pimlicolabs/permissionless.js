@@ -24,9 +24,9 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils/toOwner"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { toOwner } from "../../utils/toOwner.js"
 
 const getAccountInitCode = async (
     owner: Address,
