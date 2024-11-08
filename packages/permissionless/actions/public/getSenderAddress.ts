@@ -117,7 +117,7 @@ export const getSenderAddress = async (
         data: encodeDeployData({
             abi: GetSenderAddressHelperAbi,
             bytecode: GetSenderAddressHelperByteCode,
-            args: [args.entryPointAddress, formattedInitCode]
+            args: [entryPointAddress, formattedInitCode]
         })
     })
 
