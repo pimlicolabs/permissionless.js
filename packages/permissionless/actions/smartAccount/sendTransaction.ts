@@ -12,7 +12,7 @@ import {
     waitForUserOperationReceipt
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
+import { AccountNotFoundError } from "../../errors/index.js"
 
 /**
  * Creates, signs, and sends a new transaction to the network.

@@ -12,8 +12,8 @@ import type {
 import {
     type ModuleType,
     parseModuleTypeId
-} from "../actions/erc7579/supportsModule"
-import { AccountNotFoundError } from "../errors"
+} from "../actions/erc7579/supportsModule.js"
+import { AccountNotFoundError } from "../errors/index.js"
 
 export type EncodeInstallModuleParameter = {
     type: ModuleType

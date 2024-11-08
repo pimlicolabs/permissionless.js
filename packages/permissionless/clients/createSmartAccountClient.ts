@@ -22,7 +22,7 @@ import {
 import {
     type SmartAccountActions,
     smartAccountActions
-} from "./decorators/smartAccount"
+} from "./decorators/smartAccount.js"
 
 /**
  * TODO:
@@ -172,10 +172,10 @@ export function createSmartAccountClient(
                     return customPrepareUserOp(client, args)
                 }
             }))
-            .extend(smartAccountActions()) as SmartAccountClient
+            .extend(smartAccountActions) as SmartAccountClient
     }
 
     return client
         .extend(bundlerActions)
-        .extend(smartAccountActions()) as SmartAccountClient
+        .extend(smartAccountActions) as SmartAccountClient
 }

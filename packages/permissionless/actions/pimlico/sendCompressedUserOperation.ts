@@ -7,7 +7,7 @@ import type {
     Hex,
     Transport
 } from "viem"
-import type { PimlicoRpcSchema } from "../../types/pimlico"
+import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 
 export type SendCompressedUserOperationParameters = {
     compressedUserOperation: Hex

@@ -8,21 +8,21 @@ import {
     getTokenQuotes,
     sendCompressedUserOperation,
     validateSponsorshipPolicies
-} from "../../actions/pimlico"
+} from "../../actions/pimlico.js"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
-} from "../../actions/pimlico/getUserOperationGasPrice"
+} from "../../actions/pimlico/getUserOperationGasPrice.js"
 import {
     type GetUserOperationStatusParameters,
     type GetUserOperationStatusReturnType,
     getUserOperationStatus
-} from "../../actions/pimlico/getUserOperationStatus"
+} from "../../actions/pimlico/getUserOperationStatus.js"
 import {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "../../actions/pimlico/sponsorUserOperation"
+} from "../../actions/pimlico/sponsorUserOperation.js"
 
 export type PimlicoActions<
     TChain extends Chain | undefined,

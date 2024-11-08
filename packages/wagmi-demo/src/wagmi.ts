@@ -2,7 +2,9 @@ import { sepolia } from "viem/chains"
 import { http, createConfig } from "wagmi"
 import { coinbaseWallet } from "wagmi/connectors"
 
-const pimlicoApiKey = process.env.PIMLICO_API_KEY
+// TODO: Replace with your Pimlico API key
+// @ts-ignore
+const pimlicoApiKey = PIMLICO_API_KEY
 
 export const config = createConfig({
     chains: [sepolia],

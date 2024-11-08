@@ -5,8 +5,11 @@ import {
     hashMessage
 } from "viem"
 import { signMessage as _signMessage } from "viem/actions"
-import { isKernelV2 } from "./isKernelV2"
-import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
+import { isKernelV2 } from "./isKernelV2.js"
+import {
+    type WrapMessageHashParams,
+    wrapMessageHash
+} from "./wrapMessageHash.js"
 
 export async function signMessage({
     message,

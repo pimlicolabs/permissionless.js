@@ -1,7 +1,7 @@
 import type { Account, Address, Chain, Client, Transport } from "viem"
 import type { UserOperation } from "viem/account-abstraction"
-import type { PimlicoRpcSchema } from "../../types/pimlico"
-import { deepHexlify } from "../../utils/deepHexlify"
+import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type ValidateSponsorshipPoliciesParameters = {
     userOperation: UserOperation
