@@ -127,7 +127,7 @@ export const getSenderAddress = async (
         }
 
         return getAddress(data)
-    } catch (e) {
+    } catch {
         throw new InvalidEntryPointError({ entryPointAddress })
     }
 }
