@@ -2,22 +2,15 @@ import {
     type Address,
     BaseError,
     type Client,
-    type ContractFunctionExecutionErrorType,
-    ContractFunctionRevertedError,
     type Hex,
-    InvalidInputRpcError,
     type OneOf,
     type Prettify,
-    RawContractError,
-    RpcRequestError,
-    UnknownRpcError,
     concat,
-    decodeErrorResult,
     encodeDeployData,
     getAddress
 } from "viem"
 
-import { call, simulateContract } from "viem/actions"
+import { call } from "viem/actions"
 import { getAction } from "viem/utils"
 
 // https://github.com/pimlicolabs/entrypoint-estimations/blob/main/src/GetSenderAddressHelper.sol
