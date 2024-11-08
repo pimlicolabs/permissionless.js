@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -27,7 +26,7 @@ import {
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import { toOwner } from "../../utils/toOwner.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { encodeCallData } from "./utils/encodeCallData.js"
 import { getFactoryData } from "./utils/getFactoryData.js"
 
@@ -69,7 +68,7 @@ export const TRUST_ADDRESSES: {
 export type ToTrustSmartAccountParameters = {
     client: Client
     owner: OneOf<
-        | EIP1193Provider
+        | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >

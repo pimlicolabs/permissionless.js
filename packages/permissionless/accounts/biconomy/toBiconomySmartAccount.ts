@@ -2,7 +2,6 @@ import type {
     Account,
     Assign,
     Chain,
-    EIP1193Provider,
     OneOf,
     Prettify,
     Transport,
@@ -31,7 +30,7 @@ import {
 } from "viem/account-abstraction"
 import { signMessage } from "viem/actions"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { toOwner } from "../../utils/toOwner.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { BiconomyAbi, FactoryAbi } from "./abi/BiconomySmartAccountAbi.js"
 
 const BICONOMY_PROXY_CREATION_CODE =
@@ -95,7 +94,7 @@ export type ToBiconomySmartAccountParameters = Prettify<{
     client: Client
     owners: [
         OneOf<
-            | EIP1193Provider
+            | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
             | LocalAccount
         >

@@ -2,7 +2,6 @@ import type {
     Account,
     Assign,
     Chain,
-    EIP1193Provider,
     OneOf,
     Prettify,
     Transport,
@@ -40,7 +39,7 @@ import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
-import { toOwner } from "../../utils/toOwner.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 
 const wrapMessageHash = (
     messageHash: Hex,
@@ -93,7 +92,7 @@ export type ToNexusSmartAccountParameters = Prettify<{
     client: Client
     owners: [
         OneOf<
-            | EIP1193Provider
+            | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
             | LocalAccount
         >
