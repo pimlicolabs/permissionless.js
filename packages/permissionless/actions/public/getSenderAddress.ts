@@ -109,25 +109,21 @@ export const getSenderAddress = async (
     const formattedInitCode =
         initCode || concat([factory as Hex, factoryData as Hex])
 
-    try {
-        const { data } = await getAction(
-            client,
-            call,
-            "call"
-        )({
-            data: encodeDeployData({
-                abi: GetSenderAddressHelperAbi,
-                bytecode: GetSenderAddressHelperByteCode,
-                args: [args.entryPointAddress, formattedInitCode]
-            })
+    const { data } = await getAction(
+        client,
+        call,
+        "call"
+    )({
+        data: encodeDeployData({
+            abi: GetSenderAddressHelperAbi,
+            bytecode: GetSenderAddressHelperByteCode,
+            args: [args.entryPointAddress, formattedInitCode]
         })
+    })
 
-        if (!data) {
-            throw new Error("Failed to get sender address")
-        }
-
-        return getAddress(data)
-    } catch {
-        throw new InvalidEntryPointError({ entryPointAddress })
+    if (!data) {
+        throw new Error("Failed to get sender address")
     }
+
+    return getAddress(data)
 }
