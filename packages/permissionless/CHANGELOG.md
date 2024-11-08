@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.2.16
+
+### Patch Changes
+
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Upgraded moduleResolution to nodenext for esm & types build
+- 22de50df7305dd59301e7b4511b63abffc857daa: Improved `getSenderAddress` to avoid relying on EntryPoint reverts with RPC.
+
 ## 0.2.15
 
 ### Patch Changes
