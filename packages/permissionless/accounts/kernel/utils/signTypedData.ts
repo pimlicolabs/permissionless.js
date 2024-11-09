@@ -23,7 +23,7 @@ export async function signTypedData(
         ...typedData
     } = parameters
 
-    if (isKernelV2(accountVersion)) {
+    if (accountVersion === "0.2.1" || accountVersion === "0.2.2") {
         return owner.signTypedData({
             ...typedData
         })
