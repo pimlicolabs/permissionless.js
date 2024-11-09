@@ -1,3 +1,3 @@
-export * from "./utils/"
-export * from "./errors/"
-export * from "./clients/"
+export * from "./utils/index.js"
+export * from "./errors/index.js"
+export * from "./clients/index.js"

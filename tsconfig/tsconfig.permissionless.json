@@ -12,7 +12,6 @@
         "../packages/permissionless/**/*.bench.ts"
     ],
     "compilerOptions": {
-        "moduleResolution": "node",
         "sourceMap": true,
         "rootDir": "../packages/permissionless"
     }

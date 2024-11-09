@@ -1,5 +1,12 @@
 # @permissionless/wagmi
 
+## 0.1.3
+
+### Patch Changes
+
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Changed moduleResolution to Bundler for esm & types build
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Dropped support for cjs build
+
 ## 0.1.2
 
 ### Patch Changes

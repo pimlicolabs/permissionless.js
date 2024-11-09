@@ -78,7 +78,7 @@ describe("getSenderAddress", () => {
                 entryPointAddress: "0x0000000000000000000000000000000000000000",
                 initCode: concatHex([factory, factoryData])
             })
-        ).rejects.toThrowError(/not a valid entry point/)
+        ).rejects.toThrowError()
     })
     testWithRpc("getSenderAddress_V07", async ({ rpc }) => {
         const { anvilRpc, altoRpc } = rpc

@@ -5,7 +5,10 @@ import {
     hashMessage
 } from "viem"
 import { signMessage as _signMessage } from "viem/actions"
-import { type WrapMessageHashParams, wrapMessageHash } from "./wrapMessageHash"
+import {
+    type WrapMessageHashParams,
+    wrapMessageHash
+} from "./wrapMessageHash.js"
 
 export async function signMessage({
     message,

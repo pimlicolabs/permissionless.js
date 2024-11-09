@@ -1,6 +1,6 @@
 {
     "name": "@permissionless/wagmi",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless/wagmi",
     "repository": "github:pimlicolabs/permissionless.js",

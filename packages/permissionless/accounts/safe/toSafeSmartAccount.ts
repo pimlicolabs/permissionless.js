@@ -38,10 +38,10 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, readContract, signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { isSmartAccountDeployed, toOwner } from "../../utils"
-import { encode7579Calls } from "../../utils/encode7579Calls"
-import type { EthereumProvider } from "../../utils/toOwner"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { encode7579Calls } from "../../utils/encode7579Calls.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 
 export type SafeVersion = "1.4.1"
 

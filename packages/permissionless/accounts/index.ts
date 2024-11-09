@@ -3,7 +3,7 @@ import {
     type ToSimpleSmartAccountParameters,
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
-} from "./simple/toSimpleSmartAccount"
+} from "./simple/toSimpleSmartAccount.js"
 
 import {
     type LightAccountVersion,
@@ -11,14 +11,14 @@ import {
     type ToLightSmartAccountParameters,
     type ToLightSmartAccountReturnType,
     toLightSmartAccount
-} from "./light/toLightSmartAccount"
+} from "./light/toLightSmartAccount.js"
 
 import {
     type ToTrustSmartAccountParameters,
     type ToTrustSmartAccountReturnType,
     type TrustSmartAccountImplementation,
     toTrustSmartAccount
-} from "./trust/toTrustSmartAccount"
+} from "./trust/toTrustSmartAccount.js"
 
 import {
     type SafeSmartAccountImplementation,
@@ -26,7 +26,7 @@ import {
     type ToSafeSmartAccountParameters,
     type ToSafeSmartAccountReturnType,
     toSafeSmartAccount
-} from "./safe/toSafeSmartAccount"
+} from "./safe/toSafeSmartAccount.js"
 
 import {
     type EcdsaKernelSmartAccountImplementation,
@@ -34,28 +34,28 @@ import {
     type ToEcdsaKernelSmartAccountParameters,
     type ToEcdsaKernelSmartAccountReturnType,
     toEcdsaKernelSmartAccount
-} from "./kernel/toEcdsaKernelSmartAccount"
+} from "./kernel/toEcdsaKernelSmartAccount.js"
 
 import {
     type BiconomySmartAccountImplementation,
     type ToBiconomySmartAccountParameters,
     type ToBiconomySmartAccountReturnType,
     toBiconomySmartAccount
-} from "./biconomy/toBiconomySmartAccount"
+} from "./biconomy/toBiconomySmartAccount.js"
 
 import {
     type NexusSmartAccountImplementation,
     type ToNexusSmartAccountParameters,
     type ToNexusSmartAccountReturnType,
     toNexusSmartAccount
-} from "./nexus/toNexusSmartAccount"
+} from "./nexus/toNexusSmartAccount.js"
 
 import {
     type ThirdwebSmartAccountImplementation,
     type ToThirdwebSmartAccountParameters,
     type ToThirdwebSmartAccountReturnType,
     toThirdwebSmartAccount
-} from "./thirdweb/toThirdwebSmartAccount"
+} from "./thirdweb/toThirdwebSmartAccount.js"
 
 export {
     type ToSimpleSmartAccountParameters,

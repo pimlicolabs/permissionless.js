@@ -6,8 +6,8 @@ import {
     stringToHex
 } from "viem"
 import { type Address, domainSeparator } from "viem"
-import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
-import { isKernelV2 } from "./isKernelV2"
+import type { KernelVersion } from "../toEcdsaKernelSmartAccount.js"
+import { isKernelV2 } from "./isKernelV2.js"
 
 export type WrapMessageHashParams = {
     kernelVersion: KernelVersion<"0.6" | "0.7">
