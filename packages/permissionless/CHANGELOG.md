@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.17
+
+### Patch Changes
+
+- 7ad534ed914b53e595844ca029afd0c8a0377e56: Fixed signMessage & signTypeData for Kernel version 0.2.3 and 0.2.4
+
 ## 0.2.16
 
 ### Patch Changes
