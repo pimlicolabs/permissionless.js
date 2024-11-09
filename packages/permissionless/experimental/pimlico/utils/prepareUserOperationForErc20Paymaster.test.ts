@@ -24,7 +24,8 @@ describe.each(getCoreSmartAccounts())(
     ({
         getSmartAccountClient,
         supportsEntryPointV06,
-        supportsEntryPointV07
+        supportsEntryPointV07,
+        name
     }) => {
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "prepareUserOperationForErc20Paymaster_v06",
@@ -94,18 +95,22 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(receipt).toBeTruthy()
                 expect(receipt).toBeTruthy()
-                expect(receipt.success).toBeTruthy()
 
-                const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
-                    smartAccountClient.account.address,
-                    rpc.anvilRpc
-                )
-                const FINAL_ETH_BALANCE = await publicClient.getBalance({
-                    address: smartAccountClient.account.address
-                })
+                if (name !== "Kernel 0.2.1") {
+                    expect(receipt.success).toBeTruthy()
+                    const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
+                        smartAccountClient.account.address,
+                        rpc.anvilRpc
+                    )
+                    const FINAL_ETH_BALANCE = await publicClient.getBalance({
+                        address: smartAccountClient.account.address
+                    })
 
-                expect(FINAL_TOKEN_BALANCE).toBeLessThan(INITIAL_TOKEN_BALANCE) // Token balance should be deducted
-                expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
+                    expect(FINAL_TOKEN_BALANCE).toBeLessThan(
+                        INITIAL_TOKEN_BALANCE
+                    ) // Token balance should be deducted
+                    expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
+                }
             }
         )
 

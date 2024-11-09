@@ -20,7 +20,10 @@ import {
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
     ERC_7579_TEST_MODULE_CREATECALL,
+    KERNEL_V06_ACCOUNT_V2_1_LOGIC_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
+    KERNEL_V06_ACCOUNT_V2_3_LOGIC_CREATECALL,
+    KERNEL_V06_ACCOUNT_V2_4_LOGIC_CREATECALL,
     KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
     KERNEL_V06_FACTORY_CREATECALL,
     KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
@@ -183,6 +186,24 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_ACCOUNT_V2_3_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_ACCOUNT_V2_4_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V06_ACCOUNT_V2_1_LOGIC_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -496,6 +517,27 @@ export const setupContracts = async (rpc: string) => {
         data: "0xbb30a9740000000000000000000000000da6a956b9488ed4dd761e59f52fdc6c8068e6b50000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
     })
 
+    // register 0xf048AD83CB2dfd6037A43902a2A5Be04e53cd2Eb
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
+        data: "0xbb30a974000000000000000000000000f048ad83cb2dfd6037a43902a2a5be04e53cd2eb0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
+    })
+
+    // register 0xD3F582F6B4814E989Ee8E96bc3175320B5A540ab
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
+        data: "0xbb30a974000000000000000000000000d3f582f6b4814e989ee8e96bc3175320b5a540ab0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
+    })
+
+    // register 0xd3082872F8B06073A021b4602e022d5A070d7cfC
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
+        data: "0xbb30a974000000000000000000000000d3082872f8b06073a021b4602e022d5a070d7cfc0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
+    })
+
     // register 0x6723b44Abeec4E71eBE3232BD5B455805baDD22f
     await sendTransaction(walletClient, {
         account: kernelFactoryOwner,
@@ -566,9 +608,12 @@ export const setupContracts = async (rpc: string) => {
         "0x0000002512019Dafb59528B82CB92D3c5D2423ac", // Biconomy Account Logic V0.2
         "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5", // Biconomy Factory Address
         "0x0bBa6d96BD616BedC6BFaa341742FD43c60b83C1", // Biconomy Default Fallback Handler
+        "0xf048AD83CB2dfd6037A43902a2A5Be04e53cd2Eb", // Kernel 0.2.1 Account Logic
         "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390", // Kernel v0.2.2 ECDSA Valdiator
         "0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5", // Kernel v0.2.2 Account Logic
+        "0xD3F582F6B4814E989Ee8E96bc3175320B5A540ab", // Kernel v0.2.3 Account Logic
         "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3", // Kernel v0.2.2 Factory
+        "0xd3082872F8B06073A021b4602e022d5A070d7cfC", // Kernel v0.2.4 Factory
         "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43", // Kernel v0.3.0 ECDSA Valdiator
         "0x94F097E1ebEB4ecA3AAE54cabb08905B239A7D27", // Kernel v0.3.0 Account Logic
         "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f", // Kernel v0.3.0 Factory

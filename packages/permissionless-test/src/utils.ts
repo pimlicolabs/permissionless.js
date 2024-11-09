@@ -455,16 +455,67 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: false
     },
     {
-        name: "Kernel",
+        name: "Kernel 0.2.1",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
             getBundlerClient({
-                account: await getKernelEcdsaClient(conf),
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.2.1" as KernelVersion<entryPointVersion>
+                }),
                 ...conf
             }),
         supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 0.2.2",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.2.2" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 0.2.3",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.2.3" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 0.2.4",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.2.4" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: false,
         isEip1271Compliant: true
     },
     {

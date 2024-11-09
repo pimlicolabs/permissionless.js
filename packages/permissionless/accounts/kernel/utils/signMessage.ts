@@ -5,7 +5,6 @@ import {
     hashMessage
 } from "viem"
 import { signMessage as _signMessage } from "viem/actions"
-import { isKernelV2 } from "./isKernelV2.js"
 import {
     type WrapMessageHashParams,
     wrapMessageHash
@@ -22,7 +21,7 @@ export async function signMessage({
     message: SignableMessage
     owner: LocalAccount
 } & WrapMessageHashParams): Promise<SignMessageReturnType> {
-    if (isKernelV2(accountVersion)) {
+    if (accountVersion === "0.2.1" || accountVersion === "0.2.2") {
         return owner.signMessage({
             message
         })
