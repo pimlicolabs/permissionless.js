@@ -6,7 +6,6 @@ import {
     hashTypedData,
     validateTypedData
 } from "viem"
-import { isKernelV2 } from "./isKernelV2.js"
 import {
     type WrapMessageHashParams,
     wrapMessageHash
