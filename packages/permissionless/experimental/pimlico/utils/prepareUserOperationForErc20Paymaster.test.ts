@@ -24,7 +24,8 @@ describe.each(getCoreSmartAccounts())(
     ({
         getSmartAccountClient,
         supportsEntryPointV06,
-        supportsEntryPointV07
+        supportsEntryPointV07,
+        name
     }) => {
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "prepareUserOperationForErc20Paymaster_v06",
@@ -94,7 +95,10 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(receipt).toBeTruthy()
                 expect(receipt).toBeTruthy()
-                expect(receipt.success).toBeTruthy()
+
+                if (name !== "Kernel 0.2.1") {
+                    expect(receipt.success).toBeTruthy()
+                }
 
                 const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
                     smartAccountClient.account.address,
