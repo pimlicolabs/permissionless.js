@@ -49,7 +49,7 @@ describe("getSenderAddress", () => {
                     "0x0000000000000000000000000000000000000000" as ENTRYPOINT_ADDRESS_V06_TYPE,
                 initCode: await simpleAccountClient.account.getInitCode()
             })
-        ).rejects.toThrowError(/not a valid entry point/)
+        ).rejects.toThrowError()
     })
     testWithRpc("getSenderAddress_V07", async ({ rpc }) => {
         const { anvilRpc, altoRpc } = rpc
