@@ -27,7 +27,7 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { signMessage as _signMessage, getChainId } from "viem/actions"
+import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
@@ -44,6 +44,7 @@ import {
     VALIDATOR_TYPE
 } from "./constants.js"
 import { encodeCallData } from "./utils/encodeCallData.js"
+import { getActualKernelVersion } from "./utils/getActualKernelVersion.js"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey.js"
 import { isKernelV2 } from "./utils/isKernelV2.js"
 import { signMessage } from "./utils/signMessage.js"
@@ -479,15 +480,22 @@ export async function toEcdsaKernelSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            const accountAddress = await this.getAddress()
+            const actualKernelVersion = await getActualKernelVersion(
+                client,
+                accountAddress,
+                kernelVersion
+            )
+
             const signature = await signMessage({
                 owner: localOwner,
                 message,
                 accountAddress: await this.getAddress(),
-                kernelVersion,
+                kernelVersion: actualKernelVersion,
                 chainId: await getMemoizedChainId()
             })
 
-            if (isKernelV2(kernelVersion)) {
+            if (isKernelV2(actualKernelVersion)) {
                 return signature
             }
 
@@ -497,15 +505,22 @@ export async function toEcdsaKernelSmartAccount<
             ])
         },
         async signTypedData(typedData) {
+            const accountAddress = await this.getAddress()
+            const actualKernelVersion = await getActualKernelVersion(
+                client,
+                accountAddress,
+                kernelVersion
+            )
+
             const signature = await signTypedData({
                 owner: localOwner,
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
                 accountAddress: await this.getAddress(),
-                kernelVersion
+                kernelVersion: actualKernelVersion
             })
 
-            if (isKernelV2(kernelVersion)) {
+            if (isKernelV2(actualKernelVersion)) {
                 return signature
             }
 
