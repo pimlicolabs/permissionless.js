@@ -1,5 +1,5 @@
 import { type Address, type Client, getContract } from "viem"
-import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
+import type { KernelVersion } from "../toEcdsaKernelSmartAccount.js"
 
 // If the kernel contract is already deployed, we can get the actual version from the contract
 export async function getActualKernelVersion(
