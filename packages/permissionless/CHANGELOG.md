@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.1.47
+
+- e59eec4d5ed2aa6fbcf6de3883726650de922bf2: Backported the getSenderAddress fix 
+
+## 0.1.46
+
+- 31cedea722382daa12f1d2c6dd70ab54b38deca1: Backport the commit to permissionless@0.1.x.
+
 ## 0.1.45
 
 ### Patch Changes
