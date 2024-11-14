@@ -36,10 +36,16 @@ import { signTypedData } from "./utils/signTypedData.js"
  */
 export const THIRDWEB_ADDRESSES = {
     "0.6": {
-        factoryAddress: "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00" as Address
+        "1.5.20": {
+            factoryAddress:
+                "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00" as Address
+        }
     },
     "0.7": {
-        factoryAddress: "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" as Address
+        "1.5.20": {
+            factoryAddress:
+                "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb" as Address
+        }
     }
 }
 
@@ -57,6 +63,7 @@ export type ToThirdwebSmartAccountParameters<
         address: Address
         version: entryPointVersion
     }
+    version?: "1.5.20"
     salt?: string
     address?: Address
     secp256k1VerificationFacetAddress?: Address
@@ -102,8 +109,11 @@ export async function toThirdwebSmartAccount<
         owner,
         client,
         salt,
+        version,
         address,
-        factoryAddress = THIRDWEB_ADDRESSES[entryPoint.version].factoryAddress
+        factoryAddress = THIRDWEB_ADDRESSES[entryPoint.version][
+            version ?? "1.5.20"
+        ].factoryAddress
     } = parameters
 
     const admin = await toOwner({ owner })
