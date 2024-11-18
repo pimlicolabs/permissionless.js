@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.18
+
+### Patch Changes
+
+- b23471a3daa08cda57d09366c01356f38564fd7a: Added thirdweb factory version
+
 ## 0.2.17
 
 ### Patch Changes
