@@ -383,6 +383,7 @@ export const getThirdwebClient = async <
 
     return toThirdwebSmartAccount({
         client: publicClient,
+        version: "1.5.20",
         entryPoint: {
             address:
                 entryPoint.version === "0.6"

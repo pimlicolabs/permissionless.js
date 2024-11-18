@@ -10,7 +10,7 @@
     "type": "module",
     "sideEffects": false,
     "devDependencies": {
-        "@vitest/coverage-v8": "^1.2.0",
+        "@vitest/coverage-v8": "^2.1.5",
         "@biomejs/biome": "^1.0.0",
         "@changesets/changelog-git": "^0.1.14",
         "@changesets/changelog-github": "^0.4.8",
@@ -28,7 +28,7 @@
         "async-mutex": "^0.5.0",
         "get-port": "^7.0.0",
         "tsc-alias": "^1.8.8",
-        "vitest": "^1.6.0",
+        "vitest": "^2.1.5",
         "viem": "2.21.22",
         "wagmi": "^2.12.8",
         "@permissionless/wagmi": "workspace:packages/wagmi",
