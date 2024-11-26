@@ -131,7 +131,11 @@ export type PimlicoRpcSchema<
     },
     {
         Method: "pimlico_getTokenQuotes"
-        Parameters: [{ tokens: Address[] }, entryPoint: Address, chainId: Hex]
+        Parameters: [
+            tokens: { tokens: Address[] },
+            entryPoint: Address,
+            chainId: Hex
+        ]
         ReturnType: GetTokenQuotesWithBigIntAsHex
     }
 ]
