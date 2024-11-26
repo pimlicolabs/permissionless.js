@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.20
+
+### Patch Changes
+
+- 4ad2c5a1acdbd385ba1737752b7e0795b95e2d56: Downgraded GetSenderAddressHelper bytecode to london EVM version
+
 ## 0.2.19
 
 ### Patch Changes
