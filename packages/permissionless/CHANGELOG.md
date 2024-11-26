@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.19
+
+### Patch Changes
+
+- f82cd134ae25ec871318cfb698b10130c24dc94b: Fixed typescript error to name all tuple members
+
 ## 0.2.18
 
 ### Patch Changes
