@@ -196,6 +196,7 @@ export const prepareUserOperationForErc20Paymaster =
                 "prepareUserOperation"
             )({
                 ...parameters,
+                paymaster: null,
                 calls: callsWithDummyApproval
             } as unknown as PrepareUserOperationParameters)
 
