@@ -21,7 +21,6 @@ import {
     type UserOperation,
     type UserOperationCall,
     getPaymasterData as getPaymasterData_,
-    getPaymasterStubData,
     prepareUserOperation
 } from "viem/account-abstraction"
 import { getChainId as getChainId_ } from "viem/actions"
