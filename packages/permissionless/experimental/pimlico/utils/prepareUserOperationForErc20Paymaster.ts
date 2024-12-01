@@ -201,13 +201,24 @@ export const prepareUserOperationForErc20Paymaster =
                 ...parameters,
                 paymaster: {
                     getPaymasterData: (
-                        parameters: GetPaymasterDataParameters
+                        args: GetPaymasterDataParameters
                     ): Promise<GetPaymasterDataReturnType> => {
+                        const paymaster =
+                            parameters.paymaster ?? bundlerClient?.paymaster
+
+                        if (typeof paymaster === "object") {
+                            const { getPaymasterStubData } = paymaster
+
+                            if (getPaymasterStubData) {
+                                return getPaymasterStubData(args)
+                            }
+                        }
+
                         return getAction(
-                            client,
-                            getPaymasterStubData,
-                            "getPaymasterStubData"
-                        )(parameters)
+                            bundlerClient,
+                            getPaymasterData_,
+                            "getPaymasterData"
+                        )(args)
                     }
                 },
                 calls: callsWithDummyApproval
