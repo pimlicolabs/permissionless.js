@@ -12,6 +12,8 @@ import {
 } from "viem"
 import {
     type BundlerClient,
+    type GetPaymasterDataParameters,
+    type GetPaymasterDataReturnType,
     type PrepareUserOperationParameters,
     type PrepareUserOperationRequest,
     type PrepareUserOperationReturnType,
@@ -196,6 +198,28 @@ export const prepareUserOperationForErc20Paymaster =
                 "prepareUserOperation"
             )({
                 ...parameters,
+                paymaster: {
+                    getPaymasterData: (
+                        args: GetPaymasterDataParameters
+                    ): Promise<GetPaymasterDataReturnType> => {
+                        const paymaster =
+                            parameters.paymaster ?? bundlerClient?.paymaster
+
+                        if (typeof paymaster === "object") {
+                            const { getPaymasterStubData } = paymaster
+
+                            if (getPaymasterStubData) {
+                                return getPaymasterStubData(args)
+                            }
+                        }
+
+                        return getAction(
+                            bundlerClient,
+                            getPaymasterData_,
+                            "getPaymasterData"
+                        )(args)
+                    }
+                },
                 calls: callsWithDummyApproval
             } as unknown as PrepareUserOperationParameters)
 
