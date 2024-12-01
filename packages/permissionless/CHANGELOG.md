@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.21
+
+### Patch Changes
+
+- 41e3a2b8258b1770a3d81fba1c949fe194965c47: Fixed use of getPaymasterData twice in prepareUserOperationForErc20Paymaster
+
 ## 0.2.20
 
 ### Patch Changes
