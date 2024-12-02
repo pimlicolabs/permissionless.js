@@ -10,6 +10,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "permissionless": "workspace:packages/permissionless",
         "@permissionless/wagmi": "workspace:packages/wagmi"
     }
 }

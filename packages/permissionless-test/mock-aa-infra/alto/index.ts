@@ -33,6 +33,7 @@ import {
     KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
     KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
     KERNEL_V07_V3_1_FACTORY_CREATECALL,
+    KERNEL_V07_V3_1_WEB_AUTHN_VALIDATOR_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
     NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
@@ -252,6 +253,12 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: KERNEL_V07_V3_1_WEB_AUTHN_VALIDATOR_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -621,6 +628,7 @@ export const setupContracts = async (rpc: string) => {
         "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57", // Kernel v0.3.1 ECDSA Valdiator
         "0xBAC849bB641841b44E965fB01A4Bf5F074f84b4D", // Kernel v0.3.1 Account Logic
         "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419", // Kernel v0.3.1 Factory
+        "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd", // Kernel v0.3.1 WebAuthn Validator
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
         "0x0000000000400CdFef5E2714E63d8040b700BC24", // LightAccountFactory v2.0.0

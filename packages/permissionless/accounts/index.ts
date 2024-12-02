@@ -30,11 +30,18 @@ import {
 
 import {
     type EcdsaKernelSmartAccountImplementation,
-    type KernelVersion,
     type ToEcdsaKernelSmartAccountParameters,
     type ToEcdsaKernelSmartAccountReturnType,
     toEcdsaKernelSmartAccount
 } from "./kernel/toEcdsaKernelSmartAccount.js"
+
+import {
+    type KernelSmartAccountImplementation,
+    type KernelVersion,
+    type ToKernelSmartAccountParameters,
+    type ToKernelSmartAccountReturnType,
+    toKernelSmartAccount
+} from "./kernel/toKernelSmartAccount.js"
 
 import {
     type BiconomySmartAccountImplementation,
@@ -74,13 +81,17 @@ export {
     type ToSafeSmartAccountParameters,
     type SafeSmartAccountImplementation,
     type ToSafeSmartAccountReturnType,
+    type SafeVersion,
     toSafeSmartAccount,
     type ToEcdsaKernelSmartAccountParameters,
     type EcdsaKernelSmartAccountImplementation,
     type ToEcdsaKernelSmartAccountReturnType,
-    type SafeVersion,
-    type KernelVersion,
     toEcdsaKernelSmartAccount,
+    type KernelSmartAccountImplementation,
+    type ToKernelSmartAccountReturnType,
+    type ToKernelSmartAccountParameters,
+    type KernelVersion,
+    toKernelSmartAccount,
     type NexusSmartAccountImplementation,
     type ToNexusSmartAccountParameters,
     type ToNexusSmartAccountReturnType,

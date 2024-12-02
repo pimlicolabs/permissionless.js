@@ -10,6 +10,7 @@ import App from "./App.tsx"
 import { capabilities, config } from "./wagmi.ts"
 
 import "./index.css"
+import { PasskeysDemo } from "./PasskeysDemo"
 
 globalThis.Buffer = Buffer
 
@@ -26,6 +27,7 @@ ReactDOM.createRoot(root).render(
                 {/* Call it generic 5792 provider */}
                 <PermissionlessProvider capabilities={capabilities}>
                     <App />
+                    <PasskeysDemo />
                 </PermissionlessProvider>
             </QueryClientProvider>
         </WagmiProvider>

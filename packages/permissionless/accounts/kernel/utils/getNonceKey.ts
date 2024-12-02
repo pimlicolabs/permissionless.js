@@ -1,6 +1,6 @@
 import { type Address, concatHex, maxUint16, pad, toHex } from "viem"
 import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants.js"
-import type { KernelVersion } from "../toEcdsaKernelSmartAccount.js"
+import type { KernelVersion } from "../toKernelSmartAccount.js"
 import { isKernelV2 } from "./isKernelV2.js"
 
 export const getNonceKeyWithEncoding = (
