@@ -30,7 +30,14 @@ export async function signMessage({
         let messageContent: string
         if (typeof message === "string") {
             // message is a string
-            messageContent = message
+            messageContent = wrapMessageHash(hashMessage(message), {
+                kernelVersion: accountVersion,
+                accountAddress,
+                chainId
+                // chainId: client.chain
+                //     ? client.chain.id
+                //     : await client.extend(publicActions).getChainId()
+            })
         } else if ("raw" in message && typeof message.raw === "string") {
             // message.raw is a Hex string
             messageContent = message.raw

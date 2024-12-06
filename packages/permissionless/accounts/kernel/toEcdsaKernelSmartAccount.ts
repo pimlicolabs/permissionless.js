@@ -36,14 +36,8 @@ export type ToEcdsaKernelSmartAccountReturnType<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = ToKernelSmartAccountReturnType<entryPointVersion>
 /**
- * Build a kernel smart account from a private key, that use the ECDSA signer behind the scene
- * @param client
- * @param privateKey
- * @param entryPoint
- * @param index
- * @param factoryAddress
- * @param accountLogicAddress
- * @param ecdsaValidatorAddress
+ * @deprecated ECDSA Kernel Smart Account is deprecated. Please use toKernelSmartAccount instead.
+ * @see toKernelSmartAccount
  */
 export async function toEcdsaKernelSmartAccount<
     entryPointVersion extends "0.6" | "0.7",
