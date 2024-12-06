@@ -13,7 +13,7 @@ import type { ModuleType } from "./supportsModule.js"
 
 export type InstallModuleParameters<
     TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[] = readonly unknown[]
+    calls extends readonly unknown[]
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
@@ -47,10 +47,11 @@ export type InstallModuleParameters<
     >
 
 export async function installModule<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 >(
     client: Client,
-    parameters: InstallModuleParameters<TSmartAccount>
+    parameters: InstallModuleParameters<TSmartAccount, calls>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -84,7 +85,11 @@ export async function installModule<
                 account,
                 modules: [{ address, context: context ?? initData, type }]
             }),
-            ...(calls ?? [])
+            ...((calls ?? []) as readonly {
+                to: `0x${string}`
+                value: bigint
+                data: `0x${string}`
+            }[])
         ],
         paymaster,
         paymasterContext,

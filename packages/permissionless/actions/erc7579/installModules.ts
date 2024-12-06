@@ -14,7 +14,7 @@ import {
 
 export type InstallModulesParameters<
     TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[] = readonly unknown[]
+    calls extends readonly unknown[]
 > = EncodeInstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
@@ -39,10 +39,11 @@ export type InstallModulesParameters<
 }
 
 export async function installModules<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: InstallModulesParameters<TSmartAccount>
+    parameters: InstallModulesParameters<TSmartAccount, calls>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -72,7 +73,11 @@ export async function installModules<
                 account,
                 modules
             }),
-            ...(calls ?? [])
+            ...((calls ?? []) as readonly {
+                to: `0x${string}`
+                value: bigint
+                data: `0x${string}`
+            }[])
         ],
         paymaster,
         paymasterContext,

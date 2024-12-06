@@ -15,7 +15,7 @@ import {
 
 export type UninstallModulesParameters<
     TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[] = readonly unknown[]
+    calls extends readonly unknown[]
 > = EncodeUninstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
@@ -40,10 +40,11 @@ export type UninstallModulesParameters<
 }
 
 export async function uninstallModules<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: UninstallModulesParameters<TSmartAccount>
+    parameters: UninstallModulesParameters<TSmartAccount, calls>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -74,7 +75,11 @@ export async function uninstallModules<
                 account,
                 modules
             }),
-            ...(calls ?? [])
+            ...((calls ?? []) as readonly {
+                to: `0x${string}`
+                value: bigint
+                data: `0x${string}`
+            }[])
         ],
         paymaster,
         paymasterContext,
