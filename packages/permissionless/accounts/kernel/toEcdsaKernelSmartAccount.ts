@@ -1,4 +1,13 @@
-import type { Address } from "viem"
+import type {
+    Account,
+    Address,
+    Chain,
+    LocalAccount,
+    OneOf,
+    Transport,
+    WalletClient
+} from "viem"
+import type { EthereumProvider } from "../../utils/toOwner.js"
 import {
     type KernelSmartAccountImplementation,
     type KernelVersion,
@@ -9,8 +18,13 @@ import {
 
 export type ToEcdsaKernelSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
-    kernelVersion extends KernelVersion<entryPointVersion>
-> = ToKernelSmartAccountParameters<entryPointVersion, kernelVersion> & {
+    kernelVersion extends KernelVersion<entryPointVersion>,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
+> = ToKernelSmartAccountParameters<entryPointVersion, kernelVersion, owner> & {
     ecdsaValidatorAddress?: Address
 }
 
@@ -33,11 +47,17 @@ export type ToEcdsaKernelSmartAccountReturnType<
  */
 export async function toEcdsaKernelSmartAccount<
     entryPointVersion extends "0.6" | "0.7",
-    kernelVersion extends KernelVersion<entryPointVersion>
+    kernelVersion extends KernelVersion<entryPointVersion>,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >
 >(
     parameters: ToEcdsaKernelSmartAccountParameters<
         entryPointVersion,
-        kernelVersion
+        kernelVersion,
+        owner
     >
 ): Promise<ToEcdsaKernelSmartAccountReturnType<entryPointVersion>> {
     return toKernelSmartAccount({

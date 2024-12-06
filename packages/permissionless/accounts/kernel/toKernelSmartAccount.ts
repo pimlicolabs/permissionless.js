@@ -32,7 +32,12 @@ import {
 } from "viem/account-abstraction"
 import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import { parsePublicKey } from "webauthn-p256"
+import {
+    type P256Credential,
+    base64UrlToBytes,
+    bytesToHex,
+    parsePublicKey
+} from "webauthn-p256"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
@@ -266,9 +271,10 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
     }
 
     if (isWebAuthnAccount(owner)) {
-        console.log({ publicKey: owner.publicKey })
         const parsedPublicKey = parsePublicKey(owner.publicKey)
-        const authenticatorIdHash = keccak256(owner.publicKey)
+        const authenticatorIdHash = keccak256(
+            bytesToHex(base64UrlToBytes(owner.id))
+        )
 
         return encodeAbiParameters(
             [
@@ -351,17 +357,16 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
 
 export type ToKernelSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
-    kernelVersion extends KernelVersion<entryPointVersion>
+    kernelVersion extends KernelVersion<entryPointVersion>,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+        | WebAuthnAccount
+    >
 > = {
     client: Client
-    owners: [
-        OneOf<
-            | EthereumProvider
-            | WalletClient<Transport, Chain | undefined, Account>
-            | LocalAccount
-            | WebAuthnAccount
-        >
-    ]
+    owners: [owner]
     entryPoint?: {
         address: Address
         version: entryPointVersion
@@ -374,7 +379,14 @@ export type ToKernelSmartAccountParameters<
     accountLogicAddress?: Address
     validatorAddress?: Address
     nonceKey?: bigint
-}
+} & (owner extends WebAuthnAccount
+    ? {
+          credential: {
+              id: P256Credential["id"]
+              publicKey: P256Credential["publicKey"]
+          }
+      }
+    : never)
 
 export type KernelSmartAccountImplementation<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
@@ -408,9 +420,19 @@ export type ToKernelSmartAccountReturnType<
  */
 export async function toKernelSmartAccount<
     entryPointVersion extends "0.6" | "0.7",
-    kernelVersion extends KernelVersion<entryPointVersion>
+    kernelVersion extends KernelVersion<entryPointVersion>,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+        | WebAuthnAccount
+    >
 >(
-    parameters: ToKernelSmartAccountParameters<entryPointVersion, kernelVersion>
+    parameters: ToKernelSmartAccountParameters<
+        entryPointVersion,
+        kernelVersion,
+        owner
+    >
 ): Promise<ToKernelSmartAccountReturnType<entryPointVersion>> {
     const {
         client,

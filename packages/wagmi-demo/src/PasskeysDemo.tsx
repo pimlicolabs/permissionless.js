@@ -42,7 +42,8 @@ export function PasskeysDemo() {
         toKernelSmartAccount({
             client: publicClient,
             version: "0.3.1",
-            owners: [toWebAuthnAccount({ credential })]
+            owners: [toWebAuthnAccount({ credential })],
+            credential
         }).then((account) => {
             setSmartAccountClient(
                 createSmartAccountClient({
