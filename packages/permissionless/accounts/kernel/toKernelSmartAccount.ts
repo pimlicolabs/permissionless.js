@@ -32,12 +32,7 @@ import {
 } from "viem/account-abstraction"
 import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import {
-    type P256Credential,
-    base64UrlToBytes,
-    bytesToHex,
-    parsePublicKey
-} from "webauthn-p256"
+import { base64UrlToBytes, bytesToHex, parsePublicKey } from "webauthn-p256"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
@@ -379,14 +374,7 @@ export type ToKernelSmartAccountParameters<
     accountLogicAddress?: Address
     validatorAddress?: Address
     nonceKey?: bigint
-} & (owner extends WebAuthnAccount
-    ? {
-          credential: {
-              id: P256Credential["id"]
-              publicKey: P256Credential["publicKey"]
-          }
-      }
-    : never)
+}
 
 export type KernelSmartAccountImplementation<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
