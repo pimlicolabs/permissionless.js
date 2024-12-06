@@ -3,19 +3,19 @@ import {
     createSmartAccountClient
 } from "permissionless"
 import {
-    toKernelSmartAccount,
-    type ToKernelSmartAccountReturnType
+    type ToKernelSmartAccountReturnType,
+    toKernelSmartAccount
 } from "permissionless/accounts"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import * as React from "react"
 import {
     http,
-    type Hex,
-    createPublicClient,
-    parseEther,
-    type Transport,
     type Chain,
-    getAddress
+    type Hex,
+    type Transport,
+    createPublicClient,
+    getAddress,
+    parseEther
 } from "viem"
 import {
     type P256Credential,
