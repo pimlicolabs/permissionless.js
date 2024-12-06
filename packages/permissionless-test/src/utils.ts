@@ -4,7 +4,8 @@ import {
     createBundlerClient,
     createPaymasterClient,
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    toWebAuthnAccount
 } from "viem/account-abstraction"
 import {
     generatePrivateKey,
@@ -12,7 +13,10 @@ import {
     privateKeyToAccount
 } from "viem/accounts"
 import { foundry } from "viem/chains"
-import { toThirdwebSmartAccount } from "../../permissionless/accounts"
+import {
+    toKernelSmartAccount,
+    toThirdwebSmartAccount
+} from "../../permissionless/accounts"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type KernelVersion,
@@ -299,15 +303,23 @@ export const getNexusClient = async <entryPointVersion extends "0.6" | "0.7">({
     })
 }
 
+const credential = {
+    id: "m1-bMPuAqpWhCxHZQZTT6e-lSPntQbh3opIoGe7g4Qs",
+    publicKey:
+        "0x7da44d4bc972affd138c619a211ef0afe0926b813fec67d15587cf8625b2bf185f5044ae96640a63b32aa1eb6f8f993006bbd26292b81cb07a0672302c69a866"
+} as const
+
 export const getKernelEcdsaClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
     entryPoint,
     anvilRpc,
     version,
+    passkeys,
     privateKey
 }: AAParamType<entryPointVersion> & {
     version?: KernelVersion<entryPointVersion>
+    passkeys?: boolean
 }) => {
     const publicClient = getPublicClient(anvilRpc)
 
@@ -318,7 +330,48 @@ export const getKernelEcdsaClient = async <
         throw new Error("ERC7579 is not supported for V06")
     }
 
-    return toEcdsaKernelSmartAccount({
+    const passKeyAccount = toWebAuthnAccount({
+        credential,
+        getFn() {
+            return Promise.resolve({
+                response: {
+                    authenticatorData: [
+                        73, 150, 13, 229, 136, 14, 140, 104, 116, 52, 23, 15,
+                        100, 118, 96, 91, 143, 228, 174, 185, 162, 134, 50, 199,
+                        153, 92, 243, 186, 131, 29, 151, 99, 5, 0, 0, 0, 0
+                    ],
+                    clientDataJSON: [
+                        123, 34, 116, 121, 112, 101, 34, 58, 34, 119, 101, 98,
+                        97, 117, 116, 104, 110, 46, 103, 101, 116, 34, 44, 34,
+                        99, 104, 97, 108, 108, 101, 110, 103, 101, 34, 58, 34,
+                        49, 80, 49, 79, 71, 74, 69, 121, 74, 122, 65, 50, 82,
+                        74, 95, 74, 52, 82, 71, 89, 120, 122, 107, 87, 71, 48,
+                        119, 66, 70, 113, 109, 105, 51, 77, 51, 54, 72, 69, 107,
+                        103, 66, 118, 69, 34, 44, 34, 111, 114, 105, 103, 105,
+                        110, 34, 58, 34, 104, 116, 116, 112, 58, 47, 47, 108,
+                        111, 99, 97, 108, 104, 111, 115, 116, 58, 53, 49, 55,
+                        51, 34, 44, 34, 99, 114, 111, 115, 115, 79, 114, 105,
+                        103, 105, 110, 34, 58, 102, 97, 108, 115, 101, 125
+                    ],
+                    signature: [
+                        48, 69, 2, 33, 0, 198, 106, 113, 129, 35, 170, 51, 12,
+                        13, 0, 67, 158, 211, 55, 188, 103, 33, 194, 2, 152, 190,
+                        159, 181, 11, 176, 232, 114, 59, 99, 64, 167, 220, 2,
+                        32, 101, 188, 55, 216, 145, 203, 39, 137, 83, 114, 45,
+                        10, 147, 246, 218, 247, 132, 221, 228, 225, 57, 110,
+                        143, 87, 172, 198, 76, 141, 30, 169, 166, 2
+                    ]
+                }
+            } as any)
+        },
+        rpId: ""
+    })
+
+    const owner = passkeys
+        ? passKeyAccount
+        : privateKeyToAccount(privateKey ?? generatePrivateKey())
+
+    return toKernelSmartAccount({
         client: publicClient,
         entryPoint: {
             address:
@@ -327,7 +380,7 @@ export const getKernelEcdsaClient = async <
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
+        owners: [owner],
         version
     })
 }
@@ -575,6 +628,36 @@ export const getCoreSmartAccounts = () => [
         supportsEntryPointV07: true,
         isEip1271Compliant: true
     },
+    // {
+    //     name: "Kernel passkeys 0.3.1",
+    //     getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+    //         conf: AAParamType<entryPointVersion>
+    //     ) =>
+    //         getBundlerClient({
+    //             account: await getKernelEcdsaClient({
+    //                 ...conf,
+    //                 passkeys: true,
+    //                 version: "0.3.1" as KernelVersion<entryPointVersion>
+    //             }),
+    //             ...conf
+    //         }),
+    //     getErc7579SmartAccountClient: async <
+    //         entryPointVersion extends "0.6" | "0.7"
+    //     >(
+    //         conf: AAParamType<entryPointVersion>
+    //     ) =>
+    //         getSmartAccountClient({
+    //             account: await getKernelEcdsaClient({
+    //                 ...conf,
+    //                 passkeys: true,
+    //                 version: "0.3.1" as KernelVersion<entryPointVersion>
+    //             }),
+    //             ...conf
+    //         }),
+    //     supportsEntryPointV06: false,
+    //     supportsEntryPointV07: true,
+    //     isEip1271Compliant: true
+    // }
     {
         name: "Biconomy",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(

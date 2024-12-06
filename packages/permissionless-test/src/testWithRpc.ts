@@ -11,8 +11,11 @@ import {
     setupContracts
 } from "../mock-aa-infra/alto"
 import { paymaster } from "../mock-aa-infra/mock-paymaster"
+import { createTestClient, parseEther } from "viem"
+import { http } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 
-export const getAltoInstance = async ({
+export const getInstances = async ({
     anvilPort,
     altoPort,
     paymasterPort
@@ -23,12 +26,17 @@ export const getAltoInstance = async ({
     const anvilPrivateKey =
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
+    const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as
+        | string
+        | undefined
+
     const anvilInstance = anvil({
         chainId: foundry.id,
-        port: anvilPort
+        port: anvilPort,
+        forkUrl
     })
 
-    const instance = alto({
+    const altoInstance = alto({
         entrypoints: [entryPoint06Address, entryPoint07Address],
         rpcUrl: anvilRpc,
         executorPrivateKeys: [anvilPrivateKey],
@@ -49,12 +57,16 @@ export const getAltoInstance = async ({
         port: paymasterPort,
         altoRpc
     })
+
     await anvilInstance.start()
-    await setupContracts(anvilRpc)
-    await instance.start()
+    await altoInstance.start()
     await paymasterInstance.start()
 
-    return [anvilInstance, instance, paymasterInstance]
+    if (!forkUrl) {
+        await setupContracts(anvilRpc)
+    }
+
+    return [anvilInstance, altoInstance, paymasterInstance]
 }
 
 let ports: number[] = []
@@ -85,7 +97,7 @@ export const testWithRpc = test.extend<{
         const altoRpc = `http://localhost:${altoPort}`
         const paymasterRpc = `http://localhost:${paymasterPort}`
 
-        const instances = await getAltoInstance({
+        const instances = await getInstances({
             anvilPort,
             altoPort,
             paymasterPort
