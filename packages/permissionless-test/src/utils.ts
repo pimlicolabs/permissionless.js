@@ -12,12 +12,12 @@ import {
     privateKeyToAccount
 } from "viem/accounts"
 import { foundry } from "viem/chains"
-import { toThirdwebSmartAccount } from "../../permissionless/accounts"
-import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type KernelVersion,
-    toEcdsaKernelSmartAccount
-} from "../../permissionless/accounts/kernel/toEcdsaKernelSmartAccount"
+    toKernelSmartAccount,
+    toThirdwebSmartAccount
+} from "../../permissionless/accounts"
+import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
 import {
     type LightAccountVersion,
     toLightSmartAccount
@@ -318,7 +318,7 @@ export const getKernelEcdsaClient = async <
         throw new Error("ERC7579 is not supported for V06")
     }
 
-    return toEcdsaKernelSmartAccount({
+    return toKernelSmartAccount({
         client: publicClient,
         entryPoint: {
             address:

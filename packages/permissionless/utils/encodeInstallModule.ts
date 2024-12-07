@@ -48,41 +48,44 @@ export function encodeInstallModule<
         ? parameters.modules
         : [parameters.modules]
 
-    return modules.map(({ type, address, context, initData }) => ({
-        to: account.address,
-        value: BigInt(0),
-        data: encodeFunctionData({
-            abi: [
-                {
-                    type: "function",
-                    name: "installModule",
-                    inputs: [
+    return modules.map(
+        ({ type, address, context, initData }) =>
+            ({
+                to: account.address,
+                value: BigInt(0),
+                data: encodeFunctionData({
+                    abi: [
                         {
-                            name: "moduleType",
-                            type: "uint256",
-                            internalType: "uint256"
-                        },
-                        {
-                            name: "module",
-                            type: "address",
-                            internalType: "address"
-                        },
-                        {
-                            name: "initData",
-                            type: "bytes",
-                            internalType: "bytes"
+                            type: "function",
+                            name: "installModule",
+                            inputs: [
+                                {
+                                    name: "moduleType",
+                                    type: "uint256",
+                                    internalType: "uint256"
+                                },
+                                {
+                                    name: "module",
+                                    type: "address",
+                                    internalType: "address"
+                                },
+                                {
+                                    name: "initData",
+                                    type: "bytes",
+                                    internalType: "bytes"
+                                }
+                            ],
+                            outputs: [],
+                            stateMutability: "nonpayable"
                         }
                     ],
-                    outputs: [],
-                    stateMutability: "nonpayable"
-                }
-            ],
-            functionName: "installModule",
-            args: [
-                parseModuleTypeId(type),
-                getAddress(address),
-                context ?? initData
-            ]
-        })
-    }))
+                    functionName: "installModule",
+                    args: [
+                        parseModuleTypeId(type),
+                        getAddress(address),
+                        context ?? initData
+                    ]
+                })
+            }) as const
+    )
 }

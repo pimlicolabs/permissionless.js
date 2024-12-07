@@ -31,6 +31,9 @@ jobs:
 
       - name: Build
         run: bun run build:permissionless
+      - name: Create .env file
+        run: |
+          echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
 
       - name: Run tests & coverage
         run: bun run test:ci

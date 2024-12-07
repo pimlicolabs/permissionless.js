@@ -6,6 +6,9 @@ import {
     hashTypedData,
     validateTypedData
 } from "viem"
+import type { WebAuthnAccount } from "viem/account-abstraction"
+import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
+import { signMessage } from "./signMessage.js"
 import {
     type WrapMessageHashParams,
     wrapMessageHash
@@ -14,7 +17,7 @@ import {
 export async function signTypedData(
     parameters: TypedDataDefinition &
         WrapMessageHashParams & {
-            owner: LocalAccount
+            owner: LocalAccount | WebAuthnAccount
         }
 ): Promise<SignTypedDataReturnType> {
     const {
@@ -25,11 +28,15 @@ export async function signTypedData(
         ...typedData
     } = parameters
 
-    if (accountVersion === "0.2.1" || accountVersion === "0.2.2") {
+    if (
+        (accountVersion === "0.2.1" || accountVersion === "0.2.2") &&
+        !isWebAuthnAccount(owner)
+    ) {
         return owner.signTypedData({
             ...typedData
         })
     }
+
     const { message, primaryType, types: _types, domain } = typedData
     const types = {
         EIP712Domain: getTypesForEIP712Domain({
@@ -54,6 +61,16 @@ export async function signTypedData(
         accountAddress,
         chainId: chainId
     })
+
+    if (isWebAuthnAccount(owner)) {
+        return signMessage({
+            message: { raw: wrappedMessageHash },
+            owner,
+            accountAddress,
+            kernelVersion: accountVersion,
+            chainId
+        })
+    }
 
     return owner.signMessage({
         message: { raw: wrappedMessageHash }
