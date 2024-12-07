@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.2.22
+
+### Patch Changes
+
+- fb7be6286b2023b20ff9951d5c602eaa2f589e3f: Added toKernelSmartAccount with passkeys support
+- fb7be6286b2023b20ff9951d5c602eaa2f589e3f: Depricated toEcdsaKernelSmartAccount
+
 ## 0.2.21
 
 ### Patch Changes
