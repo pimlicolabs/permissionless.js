@@ -1,5 +1,0 @@
----
-"permissionless": patch
----
-
-Depricated toEcdsaKernelSmartAccount
