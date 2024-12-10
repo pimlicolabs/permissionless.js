@@ -499,7 +499,7 @@ export const setupContracts = async (rpc: string) => {
         "0xc98B026383885F41d9a995f85FC480E9bb8bB891", // ERC7579 Test Module
         "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // Etherspot Factory
         "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066", // Etherspot Bootstrap
-        "0x8c4496Ba340aFe5ac4148cfEA9ccbBCD54093143", // Etherspot Multiple Owner ECDSA Validator
+        "0x0261c9625d598c91188969537e6f01e13b466553", // Etherspot Multiple Owner ECDSA Validator
         "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9" // Etherspot implementation
     ])
 }
