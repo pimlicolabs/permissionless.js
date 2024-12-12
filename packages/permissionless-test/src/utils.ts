@@ -18,6 +18,7 @@ import {
     toThirdwebSmartAccount
 } from "../../permissionless/accounts"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
+import { toEtherspotSmartAccount } from "../../permissionless/accounts/etherspot/toEtherspotSmartAccount"
 import {
     type LightAccountVersion,
     toLightSmartAccount
@@ -395,6 +396,21 @@ export const getThirdwebClient = async <
     })
 }
 
+export const getEtherspotClient = async <
+    entryPointVersion extends "0.6" | "0.7"
+>({
+    anvilRpc
+}: AAParamType<entryPointVersion>) => {
+    return toEtherspotSmartAccount({
+        client: getPublicClient(anvilRpc),
+        owners: [privateKeyToAccount(generatePrivateKey())],
+        entryPoint: {
+            address: entryPoint07Address,
+            version: "0.7"
+        }
+    })
+}
+
 export const getCoreSmartAccounts = () => [
     {
         name: "Trust",
@@ -639,6 +655,19 @@ export const getCoreSmartAccounts = () => [
         ) =>
             getSmartAccountClient({
                 account: await getSafeClient({ ...conf, erc7579: true }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Etherspot",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getEtherspotClient(conf),
                 ...conf
             }),
         supportsEntryPointV06: false,

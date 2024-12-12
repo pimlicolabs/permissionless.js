@@ -20,6 +20,10 @@ import {
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
     ERC_7579_TEST_MODULE_CREATECALL,
+    ETHERSPOT_BOOTSTRAP_CREATECALL,
+    ETHERSPOT_IMPLEMENTATION,
+    ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
+    ETHERSPOT_WALLET_FACTORY_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_1_LOGIC_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
     KERNEL_V06_ACCOUNT_V2_3_LOGIC_CREATECALL,
@@ -386,6 +390,30 @@ export const setupContracts = async (rpc: string) => {
             nonce: nonce++
         }),
         walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_WALLET_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_IMPLEMENTATION,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_BOOTSTRAP_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
             to: SAFE_SINGLETON_FACTORY,
             data: SAFE_7579_MODULE_CREATECALL,
             gas: 15_000_000n,
@@ -640,6 +668,10 @@ export const setupContracts = async (rpc: string) => {
         "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
         "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
+        "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // Etherspot Factory
+        "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066", // Etherspot Bootstrap
+        "0x7aCEE15c9FFc1e8f287C26E0f4C8244A0729F557", // Etherspot Multiple Owner ECDSA Validator
+        "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9", // Etherspot implementation
         "0x4Fd8d57b94966982B62e9588C27B4171B55E8354", // ERC7579 Test Module
         "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
         "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb", // Thirdweb factory 0.7
