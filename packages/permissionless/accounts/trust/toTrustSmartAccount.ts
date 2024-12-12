@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -14,7 +13,7 @@ import {
     hashTypedData
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 
 import {
     type SmartAccount,
@@ -26,10 +25,10 @@ import {
     toSmartAccount
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils/toOwner"
-import { encodeCallData } from "./utils/encodeCallData"
-import { getFactoryData } from "./utils/getFactoryData"
+import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { encodeCallData } from "./utils/encodeCallData.js"
+import { getFactoryData } from "./utils/getFactoryData.js"
 
 async function _signTypedData(
     signer: LocalAccount,
@@ -69,7 +68,7 @@ export const TRUST_ADDRESSES: {
 export type ToTrustSmartAccountParameters = {
     client: Client
     owner: OneOf<
-        | EIP1193Provider
+        | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >
@@ -173,7 +172,7 @@ export async function toTrustSmartAccount(
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? parameters?.nonceKey
+                key: parameters?.nonceKey ?? args?.key
             })
         },
         async getStubSignature() {

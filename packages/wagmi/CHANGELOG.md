@@ -1,5 +1,30 @@
 # @permissionless/wagmi
 
+## 0.1.3
+
+### Patch Changes
+
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Changed moduleResolution to Bundler for esm & types build
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Dropped support for cjs build
+
+## 0.1.2
+
+### Patch Changes
+
+- b98ef55211af81647ca96d963e2d12bed5282146: Fixed sendTransaction when multiple chainIds are configured
+
+## 0.1.1
+
+### Patch Changes
+
+- a5593ef8ee73001434ff717b39fe1298cba196d3: Added exports for parameters and return types
+
+## 0.1.0
+
+### Minor Changes
+
+- c3f6a95fc4d4264a0d761931da74d9c46a052468: Added hooks for Erc5792
+
 ## 0.0.4
 
 ### Patch Changes

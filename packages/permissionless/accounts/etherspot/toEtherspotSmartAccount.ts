@@ -98,7 +98,7 @@ const getDefaultAddresses = ({
     }
 }
 
-export const getEcdsaValidatorIdentifier = (validatorAddress: Address) => {
+const getEcdsaValidatorIdentifier = (validatorAddress: Address) => {
     return concatHex([VALIDATOR_TYPE.VALIDATOR, validatorAddress])
 }
 

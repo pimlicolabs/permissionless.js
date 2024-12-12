@@ -1,38 +1,66 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport,
-    encodeFunctionData,
-    getAddress
+import type {
+    Address,
+    Chain,
+    Client,
+    Hex,
+    Narrow,
+    OneOf,
+    Transport
 } from "viem"
 import {
     type GetSmartAccountParameter,
+    type PaymasterActions,
     type SmartAccount,
+    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import { AccountNotFoundError } from "../../errors/index.js"
+import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
+import type { ModuleType } from "./supportsModule.js"
 
 export type UninstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
-    context: Hex
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-}
+    calls?: UserOperationCalls<Narrow<calls>>
+    paymaster?:
+        | Address
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown | undefined
+} & OneOf<
+        | {
+              deInitData: Hex
+          }
+        | {
+              context: Hex
+          }
+    >
 
 export async function uninstallModule<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: UninstallModuleParameters<TSmartAccount>
+    parameters: UninstallModuleParameters<TSmartAccount, calls>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -40,7 +68,12 @@ export async function uninstallModule<
         maxPriorityFeePerGas,
         nonce,
         address,
-        context
+        context,
+        deInitData,
+        type,
+        calls,
+        paymaster,
+        paymasterContext
     } = parameters
 
     if (!account_) {
@@ -57,41 +90,18 @@ export async function uninstallModule<
         "sendUserOperation"
     )({
         calls: [
-            {
-                to: account.address,
-                value: BigInt(0),
-                data: encodeFunctionData({
-                    abi: [
-                        {
-                            name: "uninstallModule",
-                            type: "function",
-                            stateMutability: "nonpayable",
-                            inputs: [
-                                {
-                                    type: "uint256",
-                                    name: "moduleTypeId"
-                                },
-                                {
-                                    type: "address",
-                                    name: "module"
-                                },
-                                {
-                                    type: "bytes",
-                                    name: "deInitData"
-                                }
-                            ],
-                            outputs: []
-                        }
-                    ],
-                    functionName: "uninstallModule",
-                    args: [
-                        parseModuleTypeId(parameters.type),
-                        getAddress(address),
-                        context
-                    ]
-                })
-            }
+            ...encodeUninstallModule({
+                account,
+                modules: [{ type, address, context: context ?? deInitData }]
+            }),
+            ...((calls ?? []) as readonly {
+                to: `0x${string}`
+                value: bigint
+                data: `0x${string}`
+            }[])
         ],
+        paymaster,
+        paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,

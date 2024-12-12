@@ -1,46 +1,59 @@
+import type { Address, Chain, Client, Hex, Narrow, Transport } from "viem"
 import {
-    type Address,
-    type Chain,
-    type Client,
-    type Hex,
-    type Transport,
-    encodeFunctionData,
-    getAddress
-} from "viem"
-import {
-    type GetSmartAccountParameter,
+    type PaymasterActions,
     type SmartAccount,
+    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import { AccountNotFoundError } from "../../errors/index.js"
+import {
+    type EncodeInstallModuleParameters,
+    encodeInstallModule
+} from "../../utils/encodeInstallModule.js"
 
 export type InstallModulesParameters<
-    TSmartAccount extends SmartAccount | undefined
-> = GetSmartAccountParameter<TSmartAccount> & {
-    modules: {
-        type: ModuleType
-        address: Address
-        context: Hex
-    }[]
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
+> = EncodeInstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
+    calls?: UserOperationCalls<Narrow<calls>>
+    paymaster?:
+        | Address
+        | true
+        | {
+              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
+              getPaymasterData?:
+                  | PaymasterActions["getPaymasterData"]
+                  | undefined
+              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
+              getPaymasterStubData?:
+                  | PaymasterActions["getPaymasterStubData"]
+                  | undefined
+          }
+        | undefined
+    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    paymasterContext?: unknown | undefined
 }
 
 export async function installModules<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount | undefined,
+    calls extends readonly unknown[]
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: InstallModulesParameters<TSmartAccount>
+    parameters: InstallModulesParameters<TSmartAccount, calls>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
-        modules
+        modules,
+        paymaster,
+        paymasterContext,
+        calls
     } = parameters
 
     if (!account_) {
@@ -55,36 +68,19 @@ export async function installModules<
         sendUserOperation,
         "sendUserOperation"
     )({
-        calls: modules.map(({ type, address, context }) => ({
-            to: account.address,
-            value: BigInt(0),
-            data: encodeFunctionData({
-                abi: [
-                    {
-                        name: "installModule",
-                        type: "function",
-                        stateMutability: "nonpayable",
-                        inputs: [
-                            {
-                                type: "uint256",
-                                name: "moduleTypeId"
-                            },
-                            {
-                                type: "address",
-                                name: "module"
-                            },
-                            {
-                                type: "bytes",
-                                name: "initData"
-                            }
-                        ],
-                        outputs: []
-                    }
-                ],
-                functionName: "installModule",
-                args: [parseModuleTypeId(type), getAddress(address), context]
-            })
-        })),
+        calls: [
+            ...encodeInstallModule({
+                account,
+                modules
+            }),
+            ...((calls ?? []) as readonly {
+                to: `0x${string}`
+                value: bigint
+                data: `0x${string}`
+            }[])
+        ],
+        paymaster,
+        paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,

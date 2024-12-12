@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -24,9 +23,9 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils/toOwner"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -71,7 +70,7 @@ export type ToSimpleSmartAccountParameters<
 > = {
     client: Client
     owner: OneOf<
-        | EIP1193Provider
+        | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >
@@ -296,7 +295,7 @@ export async function toSimpleSmartAccount<
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey
+                key: nonceKey ?? args?.key
             })
         },
         async getStubSignature() {

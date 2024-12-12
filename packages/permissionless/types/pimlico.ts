@@ -34,6 +34,9 @@ type GetTokenQuotesWithBigIntAsHex = {
         token: Address
         postOpGas: Hex
         exchangeRate: Hex
+        exchangeRateNativeToUsd: Hex
+        balanceSlot?: Hex
+        allowanceSlot?: Hex
     }[]
 }
 
@@ -128,7 +131,11 @@ export type PimlicoRpcSchema<
     },
     {
         Method: "pimlico_getTokenQuotes"
-        Parameters: [{ tokens: Address[] }, entryPoint: Address, chainId: Hex]
+        Parameters: [
+            tokens: { tokens: Address[] },
+            entryPoint: Address,
+            chainId: Hex
+        ]
         ReturnType: GetTokenQuotesWithBigIntAsHex
     }
 ]

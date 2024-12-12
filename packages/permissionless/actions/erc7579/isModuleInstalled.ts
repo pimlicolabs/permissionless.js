@@ -4,6 +4,7 @@ import {
     type Client,
     ContractFunctionExecutionError,
     type Hex,
+    type OneOf,
     type Transport,
     decodeFunctionResult,
     encodeFunctionData,
@@ -15,16 +16,22 @@ import type {
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
-import { type ModuleType, parseModuleTypeId } from "./supportsModule"
+import { AccountNotFoundError } from "../../errors/index.js"
+import { type ModuleType, parseModuleTypeId } from "./supportsModule.js"
 
 export type IsModuleInstalledParameters<
     TSmartAccount extends SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
-    context: Hex
-}
+} & OneOf<
+        | {
+              additionalContext: Hex
+          }
+        | {
+              context: Hex
+          }
+    >
 
 export async function isModuleInstalled<
     TSmartAccount extends SmartAccount | undefined
@@ -32,7 +39,12 @@ export async function isModuleInstalled<
     client: Client<Transport, Chain | undefined, TSmartAccount>,
     parameters: IsModuleInstalledParameters<TSmartAccount>
 ): Promise<boolean> {
-    const { account: account_ = client.account, address, context } = parameters
+    const {
+        account: account_ = client.account,
+        address,
+        context,
+        additionalContext
+    } = parameters
 
     if (!account_) {
         throw new AccountNotFoundError({
@@ -46,28 +58,23 @@ export async function isModuleInstalled<
 
     const abi = [
         {
-            name: "isModuleInstalled",
             type: "function",
-            stateMutability: "view",
+            name: "isModuleInstalled",
             inputs: [
                 {
+                    name: "moduleType",
                     type: "uint256",
-                    name: "moduleTypeId"
+                    internalType: "uint256"
                 },
+                { name: "module", type: "address", internalType: "address" },
                 {
-                    type: "address",
-                    name: "module"
-                },
-                {
+                    name: "additionalContext",
                     type: "bytes",
-                    name: "additionalContext"
+                    internalType: "bytes"
                 }
             ],
-            outputs: [
-                {
-                    type: "bool"
-                }
-            ]
+            outputs: [{ name: "", type: "bool", internalType: "bool" }],
+            stateMutability: "view"
         }
     ] as const
 
@@ -82,7 +89,7 @@ export async function isModuleInstalled<
             args: [
                 parseModuleTypeId(parameters.type),
                 getAddress(address),
-                context
+                context ?? additionalContext
             ],
             address: account.address
         })
@@ -104,7 +111,7 @@ export async function isModuleInstalled<
                     args: [
                         parseModuleTypeId(parameters.type),
                         getAddress(address),
-                        context
+                        context ?? additionalContext
                     ]
                 })
             })

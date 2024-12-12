@@ -4,7 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type EIP1193Provider,
     type Hex,
     type LocalAccount,
     type OneOf,
@@ -39,9 +38,10 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, readContract, signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { isSmartAccountDeployed, toOwner } from "../../utils"
-import { encode7579Calls } from "../../utils/encode7579Calls"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { encode7579Calls } from "../../utils/encode7579Calls.js"
+import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 
 export type SafeVersion = "1.4.1"
 
@@ -940,7 +940,7 @@ export type ToSafeSmartAccountParameters<
     client: Client
     owners: [
         OneOf<
-            | EIP1193Provider
+            | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
             | LocalAccount
         >
@@ -951,7 +951,6 @@ export type ToSafeSmartAccountParameters<
         version: entryPointVersion
     }
     safe4337ModuleAddress?: Address
-    erc7569LaunchpadAddress?: Address
     erc7579LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
@@ -1369,7 +1368,7 @@ export async function toSafeSmartAccount<
             return getAccountNonce(client, {
                 address: await this.getAddress(),
                 entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey
+                key: nonceKey ?? args?.key
             })
         },
         async getStubSignature() {
@@ -1440,12 +1439,9 @@ export async function toSafeSmartAccount<
                 entryPoint: entryPoint.address
             }
 
-            let isDeployed = false
-
             if ("initCode" in userOperation) {
                 message.paymasterAndData =
                     userOperation.paymasterAndData ?? "0x"
-                isDeployed = userOperation.initCode === "0x"
             }
 
             if ("factory" in userOperation) {
@@ -1459,14 +1455,6 @@ export async function toSafeSmartAccount<
                     ...userOperation,
                     sender: userOperation.sender ?? (await this.getAddress())
                 })
-                isDeployed = !userOperation.factory
-            }
-
-            let verifyingContract = safe4337ModuleAddress
-
-            if (erc7579LaunchpadAddress && !isDeployed) {
-                verifyingContract =
-                    userOperation.sender ?? (await this.getAddress())
             }
 
             const signatures = [
@@ -1476,7 +1464,7 @@ export async function toSafeSmartAccount<
                         account: localOwner,
                         domain: {
                             chainId,
-                            verifyingContract
+                            verifyingContract: safe4337ModuleAddress
                         },
                         types:
                             entryPoint.version === "0.6"

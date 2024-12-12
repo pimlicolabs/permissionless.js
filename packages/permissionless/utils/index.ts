@@ -1,16 +1,33 @@
-import { deepHexlify, transactionReceiptStatus } from "./deepHexlify"
-import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData"
+import { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
+import { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
 import {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
-} from "./getRequiredPrefund"
-import { isSmartAccountDeployed } from "./isSmartAccountDeployed"
-import { toOwner } from "./toOwner"
+} from "./getRequiredPrefund.js"
+import { isSmartAccountDeployed } from "./isSmartAccountDeployed.js"
+import { toOwner } from "./toOwner.js"
 
-import { decodeNonce } from "./decodeNonce"
-import { encodeNonce } from "./encodeNonce"
+import { decodeNonce } from "./decodeNonce.js"
+import { encodeNonce } from "./encodeNonce.js"
 
-import { getPackedUserOperation } from "./getPackedUserOperation"
+import {
+    type EncodeInstallModuleParameters,
+    encodeInstallModule
+} from "./encodeInstallModule.js"
+import { getPackedUserOperation } from "./getPackedUserOperation.js"
+
+import {
+    type EncodeCallDataParams,
+    encode7579Calls
+} from "./encode7579Calls.js"
+import {
+    type Erc20AllowanceOverrideParameters,
+    erc20AllowanceOverride
+} from "./erc20AllowanceOverride.js"
+import {
+    type Erc20BalanceOverrideParameters,
+    erc20BalanceOverride
+} from "./erc20BalanceOverride.js"
 
 export {
     transactionReceiptStatus,
@@ -22,5 +39,13 @@ export {
     getAddressFromInitCodeOrPaymasterAndData,
     getPackedUserOperation,
     encodeNonce,
-    decodeNonce
+    decodeNonce,
+    type EncodeInstallModuleParameters,
+    encodeInstallModule,
+    type EncodeCallDataParams,
+    encode7579Calls,
+    erc20AllowanceOverride,
+    erc20BalanceOverride,
+    type Erc20AllowanceOverrideParameters,
+    type Erc20BalanceOverrideParameters
 }

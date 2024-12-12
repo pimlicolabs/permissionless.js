@@ -2,7 +2,7 @@
     "workspaces": [
         "packages/permissionless",
         "packages/wagmi",
-        "packages/wagmi-test-demo",
+        "packages/wagmi-demo",
         "packages/create-permissionless-app"
     ],
     "private": true,
@@ -10,7 +10,7 @@
     "type": "module",
     "sideEffects": false,
     "devDependencies": {
-        "@vitest/coverage-v8": "^1.2.0",
+        "@vitest/coverage-v8": "^2.1.5",
         "@biomejs/biome": "^1.0.0",
         "@changesets/changelog-git": "^0.1.14",
         "@changesets/changelog-github": "^0.4.8",
@@ -24,15 +24,31 @@
         "tslib": "^2.6.2",
         "@pimlico/alto": "^0.0.4",
         "prool": "^0.0.12",
-        "typescript": "^5.2.2"
+        "typescript": "^5.2.2",
+        "async-mutex": "^0.5.0",
+        "get-port": "^7.0.0",
+        "tsc-alias": "^1.8.8",
+        "vitest": "^2.1.5",
+        "viem": "2.21.54",
+        "wagmi": "^2.12.8",
+        "@permissionless/wagmi": "workspace:packages/wagmi",
+        "@types/react": "^18.3.1",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@wagmi/cli": "latest",
+        "buffer": "^6.0.3",
+        "vite": "^5.4.10",
+        "@tanstack/react-query": "5.45.1",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
     },
     "description": "",
     "keywords": [],
     "license": "MIT",
     "scripts": {
-        "build": "bun run build:permissionless",
+        "build": "bun run build:permissionless && bun run build:wagmi",
         "build:permissionless": "bun run clean:permissionless && bun run build:cjs && bun run build:esm && bun run build:types",
-        "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:cjs && bun run build:wagmi:esm && bun run build:wagmi:types",
+        "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:esm && bun run build:wagmi:types",
         "build:cjs": "tsc --project ./tsconfig/tsconfig.permissionless.cjs.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
         "build:esm": "tsc --project ./tsconfig/tsconfig.permissionless.esm.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
         "build:types": "tsc --project ./tsconfig/tsconfig.permissionless.types.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.types.json",
@@ -48,19 +64,11 @@
         "test": "vitest dev -c ./packages/permissionless/vitest.config.ts",
         "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
-        "build:wagmi:cjs": "tsc --project ./tsconfig/tsconfig.wagmi.cjs.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/wagmi/_cjs/package.json",
         "build:wagmi:esm": "tsc --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
         "build:wagmi:types": "tsc --project ./tsconfig/tsconfig.wagmi.types.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.types.json",
         "test:setup": "docker compose -f \"packages/permissionless-test/mock-aa-infra/docker-compose.yml\" up"
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"
-    },
-    "dependencies": {
-        "async-mutex": "^0.5.0",
-        "get-port": "^7.0.0",
-        "tsc-alias": "^1.8.8",
-        "vitest": "^1.2.0",
-        "viem": "2.20.0"
     }
 }

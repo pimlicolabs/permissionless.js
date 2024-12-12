@@ -1,5 +1,137 @@
 # permissionless
 
+## 0.2.22
+
+### Patch Changes
+
+- fb7be6286b2023b20ff9951d5c602eaa2f589e3f: Added toKernelSmartAccount with passkeys support
+- fb7be6286b2023b20ff9951d5c602eaa2f589e3f: Depricated toEcdsaKernelSmartAccount
+
+## 0.2.21
+
+### Patch Changes
+
+- 41e3a2b8258b1770a3d81fba1c949fe194965c47: Fixed use of getPaymasterData twice in prepareUserOperationForErc20Paymaster
+
+## 0.2.20
+
+### Patch Changes
+
+- 4ad2c5a1acdbd385ba1737752b7e0795b95e2d56: Downgraded GetSenderAddressHelper bytecode to london EVM version
+
+## 0.2.19
+
+### Patch Changes
+
+- f82cd134ae25ec871318cfb698b10130c24dc94b: Fixed typescript error to name all tuple members
+
+## 0.2.18
+
+### Patch Changes
+
+- b23471a3daa08cda57d09366c01356f38564fd7a: Added thirdweb factory version
+
+## 0.2.17
+
+### Patch Changes
+
+- 7ad534ed914b53e595844ca029afd0c8a0377e56: Fixed signMessage & signTypeData for Kernel version 0.2.3 and 0.2.4
+
+## 0.2.16
+
+### Patch Changes
+
+- a0730b515bf9e8b21dcfecfad546f41619f5eabe: Upgraded moduleResolution to nodenext for esm & types build
+- 22de50df7305dd59301e7b4511b63abffc857daa: Improved `getSenderAddress` to avoid relying on EntryPoint reverts with RPC.
+
+## 0.2.15
+
+### Patch Changes
+
+- fc37a3e023b8a279de2eb09c50cdf4f46aa94e8c: Fixed ethereum provider by changing type of EIP1193Provider to EthereumProvider
+
+## 0.2.14
+
+### Patch Changes
+
+- d58a8aa474e6a6d717f3623833e0cf5489d1c46f: Added support for Biconomy's Nexus account
+- b293e3e97749e4382628f1b4d9d2e34a0b493c59: Fixed support for latest audited 7579 contracts
+
+## 0.2.13
+
+### Patch Changes
+
+- 25ee9a9c56a99bd3aa5bc0b079e478e3617be542: Fixed when slot overrides returned from pimlico_getTokenQuotes are zero
+
+## 0.2.12
+
+### Patch Changes
+
+- 6a7b673f66565b5d0d6d2fe1fe17e7758975a624: Fixed when slot overrides returned from pimlico_getTokenQuotes are zero
+
+## 0.2.11
+
+### Patch Changes
+
+- bfc278b5cc3d8e6536d84005cc94e55e3c99eb9d: Added utils to create erc20 state overrides
+- bfc278b5cc3d8e6536d84005cc94e55e3c99eb9d: Added balanceOverride to prepareUserOperationForErc20Paymaster
+
+## 0.2.10
+
+### Patch Changes
+
+- 31cedea722382daa12f1d2c6dd70ab54b38deca1: Added getSenderAddress to support for more RPCs.
+
+## 0.2.9
+
+### Patch Changes
+
+- 0af2b590861915f806098b83c8f8159b33923bb7: Added support for thirdweb smart account
+
+## 0.2.8
+
+### Patch Changes
+
+- fda964a92d87ed6e141dc1a82cd39ecc4e682e4d: Added support for eth_call returning code -32000 for sender address calculation
+
+## 0.2.7
+
+### Patch Changes
+
+- e8d4f350c6c754ce4c9c4ed06af13dab0c1a5cc7: Fix: Biconomy sender address calculation post deploy
+
+## 0.2.6
+
+### Patch Changes
+
+- 9c27191bdde4bc534732487ddc27f9f2d8e5be1d: Added prepareUserOperationForErc20Paymaster under pimlico/experimental
+
+## 0.2.5
+
+### Patch Changes
+
+- b09bb1cf484b4b2af9df35c5e6cc2a5d0a371050: Forwarded the client for fees estimation
+
+## 0.2.4
+
+### Patch Changes
+
+- 7d4602c831430744916dda33983be0583d9b0662: Added utility functions to encode 7579 function calldata
+- d23ee0d5b530134756ea098f6233910f79cba83e: Added support to send calls with 7579 functions and override paymaster props
+- d23ee0d5b530134756ea098f6233910f79cba83e: Added support for initData & deInitData
+
+## 0.2.3
+
+### Patch Changes
+
+- 80176c6b99c3406d23bdf230f6c33b8e0e34bbb9: Fixed - give priority to nonceKey passed in parameters
+
+## 0.2.2
+
+### Patch Changes
+
+- 6cfab3199c3f5a8bf5301b932d8175cfef620a17: Added exchangeRateNativeToUsd field to pimlico_getTokenQuotes return type
+
 ## 0.2.1
 
 ### Patch Changes

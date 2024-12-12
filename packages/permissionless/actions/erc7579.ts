@@ -3,47 +3,50 @@ import type {
     GetSmartAccountParameter,
     SmartAccount
 } from "viem/account-abstraction"
-import { accountId } from "./erc7579/accountId"
+import { accountId } from "./erc7579/accountId.js"
 import {
     type InstallModuleParameters,
     installModule
-} from "./erc7579/installModule"
+} from "./erc7579/installModule.js"
 import {
     type InstallModulesParameters,
     installModules
-} from "./erc7579/installModules"
+} from "./erc7579/installModules.js"
 import {
     type IsModuleInstalledParameters,
     isModuleInstalled
-} from "./erc7579/isModuleInstalled"
+} from "./erc7579/isModuleInstalled.js"
 import {
     type SupportsExecutionModeParameters,
     supportsExecutionMode
-} from "./erc7579/supportsExecutionMode"
-import type { CallType, ExecutionMode } from "./erc7579/supportsExecutionMode"
+} from "./erc7579/supportsExecutionMode.js"
+import type {
+    CallType,
+    ExecutionMode
+} from "./erc7579/supportsExecutionMode.js"
 import {
     type SupportsModuleParameters,
     supportsModule
-} from "./erc7579/supportsModule"
-import type { ModuleType } from "./erc7579/supportsModule"
+} from "./erc7579/supportsModule.js"
+import type { ModuleType } from "./erc7579/supportsModule.js"
 import {
     type UninstallModuleParameters,
     uninstallModule
-} from "./erc7579/uninstallModule"
+} from "./erc7579/uninstallModule.js"
 import {
     type UninstallModulesParameters,
     uninstallModules
-} from "./erc7579/uninstallModules"
+} from "./erc7579/uninstallModules.js"
 
 export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     accountId: (
         args?: GetSmartAccountParameter<TSmartAccount>
     ) => Promise<string>
-    installModule: (
-        args: InstallModuleParameters<TSmartAccount>
+    installModule: <callsType extends readonly unknown[]>(
+        args: InstallModuleParameters<TSmartAccount, callsType>
     ) => Promise<Hash>
-    installModules: (
-        args: InstallModulesParameters<TSmartAccount>
+    installModules: <callsType extends readonly unknown[]>(
+        args: InstallModulesParameters<TSmartAccount, callsType>
     ) => Promise<Hash>
     isModuleInstalled: (
         args: IsModuleInstalledParameters<TSmartAccount>
@@ -54,11 +57,11 @@ export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     supportsModule: (
         args: SupportsModuleParameters<TSmartAccount>
     ) => Promise<boolean>
-    uninstallModule: (
-        args: UninstallModuleParameters<TSmartAccount>
+    uninstallModule: <callsType extends readonly unknown[]>(
+        args: UninstallModuleParameters<TSmartAccount, callsType>
     ) => Promise<Hash>
-    uninstallModules: (
-        args: UninstallModulesParameters<TSmartAccount>
+    uninstallModules: <callsType extends readonly unknown[]>(
+        args: UninstallModulesParameters<TSmartAccount, callsType>
     ) => Promise<Hash>
 }
 

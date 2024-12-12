@@ -2,9 +2,6 @@ import {
     type Account,
     type Address,
     type Chain,
-    type EIP1193Provider,
-    type EIP1193RequestFn,
-    type EIP1474Methods,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -17,12 +14,14 @@ import { toAccount } from "viem/accounts"
 import { signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 
-export async function toOwner({
+export type EthereumProvider = { request(...args: any): Promise<any> }
+
+export async function toOwner<provider extends EthereumProvider>({
     owner,
     address
 }: {
     owner: OneOf<
-        | EIP1193Provider
+        | provider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
     >
@@ -39,15 +38,11 @@ export async function toOwner({
     if ("request" in owner) {
         if (!address) {
             try {
-                ;[address] = await (
-                    owner.request as EIP1193RequestFn<EIP1474Methods>
-                )({
+                ;[address] = await (owner as EthereumProvider).request({
                     method: "eth_requestAccounts"
                 })
             } catch {
-                ;[address] = await (
-                    owner.request as EIP1193RequestFn<EIP1474Methods>
-                )({
+                ;[address] = await (owner as EthereumProvider).request({
                     method: "eth_accounts"
                 })
             }
@@ -58,7 +53,7 @@ export async function toOwner({
         }
         walletClient = createWalletClient({
             account: address,
-            transport: custom(owner as EIP1193Provider)
+            transport: custom(owner as EthereumProvider)
         })
     }
 

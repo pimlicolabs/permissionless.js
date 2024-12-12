@@ -6,7 +6,8 @@ import {
     stringToHex
 } from "viem"
 import { type Address, domainSeparator } from "viem"
-import type { KernelVersion } from "../toEcdsaKernelSmartAccount"
+import type { KernelVersion } from "../toKernelSmartAccount.js"
+import { isKernelV2 } from "./isKernelV2.js"
 
 export type WrapMessageHashParams = {
     kernelVersion: KernelVersion<"0.6" | "0.7">
@@ -26,12 +27,15 @@ export const wrapMessageHash = (
             verifyingContract: accountAddress
         }
     })
-    const wrappedMessageHash = keccak256(
-        encodeAbiParameters(
-            [{ type: "bytes32" }, { type: "bytes32" }],
-            [keccak256(stringToHex("Kernel(bytes32 hash)")), messageHash]
-        )
-    )
+    const wrappedMessageHash = isKernelV2(kernelVersion)
+        ? messageHash
+        : keccak256(
+              encodeAbiParameters(
+                  [{ type: "bytes32" }, { type: "bytes32" }],
+                  [keccak256(stringToHex("Kernel(bytes32 hash)")), messageHash]
+              )
+          )
+
     const digest = keccak256(
         concatHex(["0x1901", _domainSeparator, wrappedMessageHash])
     )

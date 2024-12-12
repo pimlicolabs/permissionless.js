@@ -9,7 +9,7 @@ import {
     hexToBigInt,
     numberToHex
 } from "viem"
-import type { PimlicoRpcSchema } from "../../types/pimlico"
+import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 
 export type GetTokenQuotesParameters<
     TChain extends Chain | undefined,
@@ -24,6 +24,9 @@ export type GetTokenQuotesReturnType = {
     token: Address
     postOpGas: bigint
     exchangeRate: bigint
+    exchangeRateNativeToUsd: bigint
+    balanceSlot?: bigint
+    allowanceSlot?: bigint
 }[]
 
 /**
@@ -61,7 +64,14 @@ export const getTokenQuotes = async <
 
     return res.quotes.map((quote) => ({
         ...quote,
+        balanceSlot: quote.balanceSlot
+            ? hexToBigInt(quote.balanceSlot)
+            : undefined,
+        allowanceSlot: quote.allowanceSlot
+            ? hexToBigInt(quote.allowanceSlot)
+            : undefined,
         postOpGas: hexToBigInt(quote.postOpGas),
-        exchangeRate: hexToBigInt(quote.exchangeRate)
+        exchangeRate: hexToBigInt(quote.exchangeRate),
+        exchangeRateNativeToUsd: hexToBigInt(quote.exchangeRateNativeToUsd)
     }))
 }

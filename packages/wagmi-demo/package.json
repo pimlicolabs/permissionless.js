@@ -1,0 +1,16 @@
+{
+    "name": "wagmi-demo",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "lint": "biome check .",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "permissionless": "workspace:packages/permissionless",
+        "@permissionless/wagmi": "workspace:packages/wagmi"
+    }
+}
