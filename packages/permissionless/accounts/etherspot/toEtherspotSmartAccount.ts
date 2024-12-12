@@ -10,7 +10,6 @@ import {
     type OneOf,
     type Transport,
     type WalletClient,
-    concatHex,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
@@ -28,18 +27,17 @@ import {
 } from "viem/account-abstraction"
 import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce"
-import { getSenderAddress } from "../../actions/public/getSenderAddress"
-import { toOwner } from "../../utils"
-import { encode7579Calls } from "../../utils/encode7579Calls"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { encode7579Calls } from "../../utils/encode7579Calls.js"
+import { toOwner } from "../../utils/index.js"
 import {
     DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
-    type NetworkAddresses,
-    VALIDATOR_TYPE
-} from "./constants"
-import { getInitMSAData } from "./utils/getInitMSAData"
-import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
+    type NetworkAddresses
+} from "./constants.js"
+import { getInitMSAData } from "./utils/getInitMSAData.js"
+import { getNonceKeyWithEncoding } from "./utils/getNonceKey.js"
 
 /**
  * The account creation ABI for a modular etherspot smart account
@@ -96,10 +94,6 @@ const getDefaultAddresses = ({
         metaFactoryAddress,
         bootstrapAddress
     }
-}
-
-const getEcdsaValidatorIdentifier = (validatorAddress: Address) => {
-    return concatHex([VALIDATOR_TYPE.VALIDATOR, validatorAddress])
 }
 
 /**

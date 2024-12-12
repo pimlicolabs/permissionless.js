@@ -2,7 +2,7 @@ import { encodeFunctionData, zeroAddress } from "viem"
 import {
     EtherspotBootstrapAbi,
     EtherspotOnInstallAbi
-} from "../abi/EtherspotBootstrapAbi"
+} from "../abi/EtherspotBootstrapAbi.js"
 
 export const getInitMSAData = (ecdsaValidatorAddress: `0x${string}`) => {
     const validators = makeBootstrapConfig(ecdsaValidatorAddress, "0x")
