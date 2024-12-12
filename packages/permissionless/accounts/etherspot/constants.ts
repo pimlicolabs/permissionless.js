@@ -35,5 +35,5 @@ export type NetworkAddresses = {
 export const DEFAULT_CONTRACT_ADDRESS: NetworkAddresses = {
     metaFactoryAddress: "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // modularEtherspotWalletFactory
     bootstrapAddress: "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066",
-    validatorAddress: "0x0261c9625d598c91188969537e6f01e13b466553" // multipleOwnerECDSAValidator
+    validatorAddress: "0x7aCEE15c9FFc1e8f287C26E0f4C8244A0729F557" // multipleOwnerECDSAValidator
 }
