@@ -39,6 +39,11 @@
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
+        "./actions/etherspot": {
+            "types": "./_types/actions/etherspot.d.ts",
+            "import": "./_esm/actions/etherspot.js",
+            "default": "./_cjs/actions/etherspot.js"
+        },
         "./actions/smartAccount": {
             "types": "./_types/actions/smartAccount.d.ts",
             "import": "./_esm/actions/smartAccount.js",

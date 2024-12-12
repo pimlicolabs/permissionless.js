@@ -21,6 +21,13 @@ import {
 } from "./trust/toTrustSmartAccount.js"
 
 import {
+    type EtherspotSmartAccountImplementation,
+    type ToEtherspotSmartAccountParameters,
+    type ToEtherspotSmartAccountReturnType,
+    toEtherspotSmartAccount
+} from "./etherspot/toEtherspotSmartAccount.js"
+
+import {
     type SafeSmartAccountImplementation,
     type SafeVersion,
     type ToSafeSmartAccountParameters,
@@ -103,5 +110,9 @@ export {
     type ToThirdwebSmartAccountReturnType,
     type ToThirdwebSmartAccountParameters,
     type ThirdwebSmartAccountImplementation,
-    toThirdwebSmartAccount
+    toThirdwebSmartAccount,
+    type ToEtherspotSmartAccountParameters,
+    type EtherspotSmartAccountImplementation,
+    type ToEtherspotSmartAccountReturnType,
+    toEtherspotSmartAccount
 }
