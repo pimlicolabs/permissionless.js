@@ -25,11 +25,17 @@ export type PimlicoClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
+    client extends Client | undefined = Client | undefined,
     rpcSchema extends RpcSchema | undefined = undefined
 > = Prettify<
     Client<
         transport,
-        chain extends Chain ? chain : undefined,
+        chain extends Chain
+            ? chain
+            : // biome-ignore lint/suspicious/noExplicitAny: We need any to infer the chain type
+              client extends Client<any, infer chain>
+              ? chain
+              : undefined,
         account,
         rpcSchema extends RpcSchema
             ? [...BundlerRpcSchema, ...PimlicoRpcSchema, ...rpcSchema]
@@ -70,6 +76,7 @@ export function createPimlicoClient<
     transport extends Transport = Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
+    client extends Client | undefined = undefined,
     rpcSchema extends RpcSchema | undefined = undefined
 >(
     parameters: PimlicoClientConfig<
@@ -79,7 +86,14 @@ export function createPimlicoClient<
         account,
         rpcSchema
     >
-): PimlicoClient<entryPointVersion, transport, chain, account, rpcSchema>
+): PimlicoClient<
+    entryPointVersion,
+    transport,
+    chain,
+    account,
+    client,
+    rpcSchema
+>
 
 export function createPimlicoClient(
     parameters: PimlicoClientConfig

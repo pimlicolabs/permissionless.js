@@ -24,36 +24,6 @@
             "import": "./_esm/accounts/index.js",
             "default": "./_cjs/accounts/index.js"
         },
-        "./accounts/kernel": {
-            "types": "./_types/accounts/kernel/index.d.ts",
-            "import": "./_esm/accounts/kernel/index.js",
-            "default": "./_cjs/accounts/kernel/index.js"
-        },
-        "./accounts/light": {
-            "types": "./_types/accounts/light/index.d.ts",
-            "import": "./_esm/accounts/light/index.js",
-            "default": "./_cjs/accounts/light/index.js"
-        },
-        "./accounts/safe": {
-            "types": "./_types/accounts/safe/index.d.ts",
-            "import": "./_esm/accounts/safe/index.js",
-            "default": "./_cjs/accounts/safe/index.js"
-        },
-        "./accounts/simple": {
-            "types": "./_types/accounts/simple/index.d.ts",
-            "import": "./_esm/accounts/simple/index.js",
-            "default": "./_cjs/accounts/simple/index.js"
-        },
-        "./accounts/trust": {
-            "types": "./_types/accounts/trust/index.d.ts",
-            "import": "./_esm/accounts/trust/index.js",
-            "default": "./_cjs/accounts/trust/index.js"
-        },
-        "./accounts/etherspot": {
-            "types": "./_types/accounts/etherspot/index.d.ts",
-            "import": "./_esm/accounts/etherspot/index.js",
-            "default": "./_cjs/accounts/etherspot/index.js"
-        },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
             "import": "./_esm/actions/index.js",
