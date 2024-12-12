@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.23
+
+### Patch Changes
+
+- aa7850385a016a1f964639e292f8844929fc16a9: Added support for Etherspot Smart Account
+
 ## 0.2.22
 
 ### Patch Changes
