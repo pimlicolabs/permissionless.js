@@ -7,14 +7,14 @@ import type {
     Transport,
     WalletClient
 } from "viem"
-import type { EthereumProvider } from "../../utils/toOwner.js"
+import type { EthereumProvider } from "../../utils/toOwner"
 import {
     type KernelSmartAccountImplementation,
     type KernelVersion,
     type ToKernelSmartAccountParameters,
     type ToKernelSmartAccountReturnType,
     toKernelSmartAccount
-} from "./toKernelSmartAccount.js"
+} from "./toKernelSmartAccount"
 
 export type ToEcdsaKernelSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",

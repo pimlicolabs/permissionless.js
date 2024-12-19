@@ -6,11 +6,11 @@ import {
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors/index.js"
+import { AccountNotFoundError } from "../../errors/index"
 import {
     type EncodeInstallModuleParameters,
     encodeInstallModule
-} from "../../utils/encodeInstallModule.js"
+} from "../../utils/encodeInstallModule"
 
 export type InstallModulesParameters<
     TSmartAccount extends SmartAccount | undefined,

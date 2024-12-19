@@ -1,9 +1,9 @@
-import { sendTransaction } from "./smartAccount/sendTransaction.js"
+import { sendTransaction } from "./smartAccount/sendTransaction"
 
-import { signMessage } from "./smartAccount/signMessage.js"
+import { signMessage } from "./smartAccount/signMessage"
 
-import { signTypedData } from "./smartAccount/signTypedData.js"
+import { signTypedData } from "./smartAccount/signTypedData"
 
-import { writeContract } from "./smartAccount/writeContract.js"
+import { writeContract } from "./smartAccount/writeContract"
 
 export { sendTransaction, signMessage, signTypedData, writeContract }

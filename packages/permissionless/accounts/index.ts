@@ -3,7 +3,7 @@ import {
     type ToSimpleSmartAccountParameters,
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
-} from "./simple/toSimpleSmartAccount.js"
+} from "./simple/toSimpleSmartAccount"
 
 import {
     type LightAccountVersion,
@@ -11,21 +11,21 @@ import {
     type ToLightSmartAccountParameters,
     type ToLightSmartAccountReturnType,
     toLightSmartAccount
-} from "./light/toLightSmartAccount.js"
+} from "./light/toLightSmartAccount"
 
 import {
     type ToTrustSmartAccountParameters,
     type ToTrustSmartAccountReturnType,
     type TrustSmartAccountImplementation,
     toTrustSmartAccount
-} from "./trust/toTrustSmartAccount.js"
+} from "./trust/toTrustSmartAccount"
 
 import {
     type EtherspotSmartAccountImplementation,
     type ToEtherspotSmartAccountParameters,
     type ToEtherspotSmartAccountReturnType,
     toEtherspotSmartAccount
-} from "./etherspot/toEtherspotSmartAccount.js"
+} from "./etherspot/toEtherspotSmartAccount"
 
 import {
     type SafeSmartAccountImplementation,
@@ -33,14 +33,14 @@ import {
     type ToSafeSmartAccountParameters,
     type ToSafeSmartAccountReturnType,
     toSafeSmartAccount
-} from "./safe/toSafeSmartAccount.js"
+} from "./safe/toSafeSmartAccount"
 
 import {
     type EcdsaKernelSmartAccountImplementation,
     type ToEcdsaKernelSmartAccountParameters,
     type ToEcdsaKernelSmartAccountReturnType,
     toEcdsaKernelSmartAccount
-} from "./kernel/toEcdsaKernelSmartAccount.js"
+} from "./kernel/toEcdsaKernelSmartAccount"
 
 import {
     type KernelSmartAccountImplementation,
@@ -48,28 +48,28 @@ import {
     type ToKernelSmartAccountParameters,
     type ToKernelSmartAccountReturnType,
     toKernelSmartAccount
-} from "./kernel/toKernelSmartAccount.js"
+} from "./kernel/toKernelSmartAccount"
 
 import {
     type BiconomySmartAccountImplementation,
     type ToBiconomySmartAccountParameters,
     type ToBiconomySmartAccountReturnType,
     toBiconomySmartAccount
-} from "./biconomy/toBiconomySmartAccount.js"
+} from "./biconomy/toBiconomySmartAccount"
 
 import {
     type NexusSmartAccountImplementation,
     type ToNexusSmartAccountParameters,
     type ToNexusSmartAccountReturnType,
     toNexusSmartAccount
-} from "./nexus/toNexusSmartAccount.js"
+} from "./nexus/toNexusSmartAccount"
 
 import {
     type ThirdwebSmartAccountImplementation,
     type ToThirdwebSmartAccountParameters,
     type ToThirdwebSmartAccountReturnType,
     toThirdwebSmartAccount
-} from "./thirdweb/toThirdwebSmartAccount.js"
+} from "./thirdweb/toThirdwebSmartAccount"
 
 export {
     type ToSimpleSmartAccountParameters,

@@ -18,7 +18,7 @@ import type {
     UseMutationParameters,
     UseMutationReturnType
 } from "wagmi/query"
-import { useAvailableCapabilities } from "./useAvailableCapabilities.js"
+import { useAvailableCapabilities } from "./useAvailableCapabilities"
 
 const sendTransactionMutationOptions = <config extends Config>(
     config: config,

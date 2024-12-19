@@ -13,7 +13,7 @@ import {
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
-import { sendTransaction } from "./sendTransaction.js"
+import { sendTransaction } from "./sendTransaction"
 
 export async function writeContract<
     TChain extends Chain | undefined,

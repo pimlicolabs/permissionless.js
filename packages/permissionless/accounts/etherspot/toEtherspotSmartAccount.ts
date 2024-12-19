@@ -27,17 +27,17 @@ import {
 } from "viem/account-abstraction"
 import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import { encode7579Calls } from "../../utils/encode7579Calls.js"
-import { toOwner } from "../../utils/index.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { encode7579Calls } from "../../utils/encode7579Calls"
+import { toOwner } from "../../utils/index"
 import {
     DEFAULT_CONTRACT_ADDRESS,
     DUMMY_ECDSA_SIGNATURE,
     type NetworkAddresses
-} from "./constants.js"
-import { getInitMSAData } from "./utils/getInitMSAData.js"
-import { getNonceKeyWithEncoding } from "./utils/getNonceKey.js"
+} from "./constants"
+import { getInitMSAData } from "./utils/getInitMSAData"
+import { getNonceKeyWithEncoding } from "./utils/getNonceKey"
 
 /**
  * The account creation ABI for a modular etherspot smart account

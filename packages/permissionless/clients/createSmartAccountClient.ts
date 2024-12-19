@@ -22,7 +22,7 @@ import {
 import {
     type SmartAccountActions,
     smartAccountActions
-} from "./decorators/smartAccount.js"
+} from "./decorators/smartAccount"
 
 /**
  * TODO:

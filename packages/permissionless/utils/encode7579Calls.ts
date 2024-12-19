@@ -10,7 +10,7 @@ import {
     type CallType,
     type ExecutionMode,
     encodeExecutionMode
-} from "../actions/erc7579/supportsExecutionMode.js"
+} from "../actions/erc7579/supportsExecutionMode"
 
 export type EncodeCallDataParams<callType extends CallType> = {
     mode: ExecutionMode<callType>

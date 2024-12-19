@@ -13,7 +13,7 @@ import type {
 import { call, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors/index.js"
+import { AccountNotFoundError } from "../../errors/index"
 
 export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 

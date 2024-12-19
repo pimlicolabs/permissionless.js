@@ -2,7 +2,7 @@ import type { Account, Chain, Client, Hash, Transport } from "viem"
 import type {
     PimlicoRpcSchema,
     PimlicoUserOperationStatus
-} from "../../types/pimlico.js"
+} from "../../types/pimlico"
 
 export type GetUserOperationStatusParameters = {
     hash: Hash

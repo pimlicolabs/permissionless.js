@@ -1,5 +1,5 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { EtherspotBundlerRpcSchema } from "../../types/etherspot.js"
+import type { EtherspotBundlerRpcSchema } from "../../types/etherspot"
 
 export type GetGasPriceResponseReturnType = {
     maxFeePerGas: bigint
