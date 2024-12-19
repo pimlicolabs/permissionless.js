@@ -1,5 +1,5 @@
 import { type Address, concatHex, pad, toHex } from "viem"
-import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants.js"
+import { VALIDATOR_MODE, VALIDATOR_TYPE } from "../constants"
 
 export const getNonceKeyWithEncoding = (
     validatorAddress: Address,

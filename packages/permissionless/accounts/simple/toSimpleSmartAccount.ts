@@ -23,9 +23,9 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
 
 const getAccountInitCode = async (
     owner: Address,

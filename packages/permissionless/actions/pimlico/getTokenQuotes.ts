@@ -9,7 +9,7 @@ import {
     hexToBigInt,
     numberToHex
 } from "viem"
-import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import type { PimlicoRpcSchema } from "../../types/pimlico"
 
 export type GetTokenQuotesParameters<
     TChain extends Chain | undefined,

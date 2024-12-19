@@ -11,7 +11,7 @@ import type {
     WalletClient
 } from "viem"
 import { getChainId } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
 
 import {
     type SmartAccount,
@@ -24,12 +24,12 @@ import {
     toSmartAccount
 } from "viem/account-abstraction"
 import { getAction, toHex } from "viem/utils"
-import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
-import { encodeCallData } from "./utils/encodeCallData.js"
-import { getAccountAddress } from "./utils/getAccountAddress.js"
-import { getFactoryData } from "./utils/getFactoryData.js"
-import { signMessage } from "./utils/signMessage.js"
-import { signTypedData } from "./utils/signTypedData.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
+import { encodeCallData } from "./utils/encodeCallData"
+import { getAccountAddress } from "./utils/getAccountAddress"
+import { getFactoryData } from "./utils/getFactoryData"
+import { signMessage } from "./utils/signMessage"
+import { signTypedData } from "./utils/signTypedData"
 
 /**
  * Default addresses for Thirdweb Smart Account

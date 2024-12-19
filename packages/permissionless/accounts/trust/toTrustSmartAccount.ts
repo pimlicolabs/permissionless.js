@@ -13,7 +13,7 @@ import {
     hashTypedData
 } from "viem"
 import { getChainId, signMessage } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
 
 import {
     type SmartAccount,
@@ -25,10 +25,10 @@ import {
     toSmartAccount
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
-import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
-import { encodeCallData } from "./utils/encodeCallData.js"
-import { getFactoryData } from "./utils/getFactoryData.js"
+import { getSenderAddress } from "../../actions/public/getSenderAddress"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
+import { encodeCallData } from "./utils/encodeCallData"
+import { getFactoryData } from "./utils/getFactoryData"
 
 async function _signTypedData(
     signer: LocalAccount,

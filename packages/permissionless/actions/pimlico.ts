@@ -2,34 +2,34 @@ import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
     getTokenQuotes
-} from "./pimlico/getTokenQuotes.js"
+} from "./pimlico/getTokenQuotes"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
-} from "./pimlico/getUserOperationGasPrice.js"
+} from "./pimlico/getUserOperationGasPrice"
 import {
     type GetUserOperationStatusParameters,
     type GetUserOperationStatusReturnType,
     getUserOperationStatus
-} from "./pimlico/getUserOperationStatus.js"
+} from "./pimlico/getUserOperationStatus"
 import {
     type SendCompressedUserOperationParameters,
     sendCompressedUserOperation
-} from "./pimlico/sendCompressedUserOperation.js"
+} from "./pimlico/sendCompressedUserOperation"
 import {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
-} from "./pimlico/sponsorUserOperation.js"
+} from "./pimlico/sponsorUserOperation"
 
-import type { PimlicoActions } from "../clients/decorators/pimlico.js"
-import { pimlicoActions } from "../clients/decorators/pimlico.js"
+import type { PimlicoActions } from "../clients/decorators/pimlico"
+import { pimlicoActions } from "../clients/decorators/pimlico"
 
 import {
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
     validateSponsorshipPolicies
-} from "./pimlico/validateSponsorshipPolicies.js"
+} from "./pimlico/validateSponsorshipPolicies"
 
 export type {
     GetUserOperationGasPriceReturnType,

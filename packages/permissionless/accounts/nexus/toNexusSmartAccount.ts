@@ -37,9 +37,9 @@ import {
 } from "viem/account-abstraction"
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { encode7579Calls } from "../../utils/encode7579Calls.js"
-import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { getAccountNonce } from "../../actions/public/getAccountNonce"
+import { encode7579Calls } from "../../utils/encode7579Calls"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner"
 
 const wrapMessageHash = (
     messageHash: Hex,

@@ -16,9 +16,9 @@ import {
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import { parseAccount } from "viem/utils"
-import { AccountNotFoundError } from "../../errors/index.js"
-import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
-import type { ModuleType } from "./supportsModule.js"
+import { AccountNotFoundError } from "../../errors/index"
+import { encodeUninstallModule } from "../../utils/encodeUninstallModule"
+import type { ModuleType } from "./supportsModule"
 
 export type UninstallModuleParameters<
     TSmartAccount extends SmartAccount | undefined,

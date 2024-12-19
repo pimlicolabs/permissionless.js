@@ -1,5 +1,5 @@
 import type { Account, Chain, Client, Transport } from "viem"
-import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import type { PimlicoRpcSchema } from "../../types/pimlico"
 
 export type GetUserOperationGasPriceReturnType = {
     slow: {
