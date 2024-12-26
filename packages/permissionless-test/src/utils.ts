@@ -29,7 +29,10 @@ import {
     toLightSmartAccount
 } from "../../permissionless/accounts/light/toLightSmartAccount"
 import { toNexusSmartAccount } from "../../permissionless/accounts/nexus/toNexusSmartAccount"
-import { toSafeSmartAccount } from "../../permissionless/accounts/safe/toSafeSmartAccount"
+import {
+    toSafeSmartAccount,
+    ToSafeSmartAccountReturnType
+} from "../../permissionless/accounts/safe/toSafeSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
@@ -347,7 +350,9 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
 }: {
     erc7579?: boolean
     owners?: LocalAccount[]
-} & AAParamType<entryPointVersion>) => {
+} & AAParamType<entryPointVersion>): Promise<
+    ToSafeSmartAccountReturnType<entryPointVersion>
+> => {
     const publicClient = getPublicClient(anvilRpc)
 
     return toSafeSmartAccount({
@@ -376,7 +381,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                   attestersThreshold: 1
               }
             : {})
-    })
+    }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }
 
 export const getThirdwebClient = async <

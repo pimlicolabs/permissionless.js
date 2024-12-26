@@ -36,7 +36,7 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, readContract, signTypedData } from "viem/actions"
+import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
@@ -364,7 +364,7 @@ const executeUserOpWithErrorStringAbi = [
     }
 ] as const
 
-const EIP712_SAFE_OPERATION_TYPE_V06 = {
+export const EIP712_SAFE_OPERATION_TYPE_V06 = {
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "uint256", name: "nonce" },
@@ -382,7 +382,7 @@ const EIP712_SAFE_OPERATION_TYPE_V06 = {
     ]
 }
 
-const EIP712_SAFE_OPERATION_TYPE_V07 = {
+export const EIP712_SAFE_OPERATION_TYPE_V07 = {
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "uint256", name: "nonce" },
@@ -741,7 +741,7 @@ const getInitializerCode = async ({
     })
 }
 
-function getPaymasterAndData(unpackedUserOperation: UserOperation) {
+export function getPaymasterAndData(unpackedUserOperation: UserOperation) {
     return unpackedUserOperation.paymaster
         ? concat([
               unpackedUserOperation.paymaster,
@@ -846,7 +846,7 @@ const getAccountInitCode = async ({
     return initCodeCallData
 }
 
-const getDefaultAddresses = (
+export const getDefaultAddresses = (
     safeVersion: SafeVersion,
     entryPointVersion: "0.6" | "0.7",
     {
@@ -1376,7 +1376,7 @@ export async function toSafeSmartAccount<
                     0,
                     `0x${owners
                         .map(
-                            (owner) =>
+                            (_) =>
                                 "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                         )
                         .join("")}`
@@ -1493,8 +1493,7 @@ export async function toSafeSmartAccount<
             const signatures = await Promise.all(
                 localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
-                    data: await signTypedData(client, {
-                        account: localOwner,
+                    data: await localOwner.signTypedData({
                         domain: {
                             chainId,
                             verifyingContract: safe4337ModuleAddress
