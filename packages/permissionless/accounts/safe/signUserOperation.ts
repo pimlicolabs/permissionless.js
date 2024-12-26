@@ -1,26 +1,26 @@
 import {
+    type Account,
+    type Address,
+    type Hex,
+    type LocalAccount,
+    type OneOf,
+    type UnionPartialBy,
     concat,
     concatHex,
-    type UnionPartialBy,
-    encodePacked,
-    type Address,
-    type Account,
-    type OneOf,
-    type LocalAccount,
-    type Hex,
+    decodeAbiParameters,
     encodeAbiParameters,
-    decodeAbiParameters
+    encodePacked
 } from "viem"
 import type { UserOperation } from "viem/account-abstraction"
+import { toOwner } from "../../utils/index.js"
+import type { EthereumProvider } from "../../utils/toOwner.js"
 import {
     EIP712_SAFE_OPERATION_TYPE_V06,
     EIP712_SAFE_OPERATION_TYPE_V07,
+    type SafeVersion,
     getDefaultAddresses,
-    getPaymasterAndData,
-    type SafeVersion
+    getPaymasterAndData
 } from "./toSafeSmartAccount.js"
-import { toOwner } from "../../utils/index.js"
-import type { EthereumProvider } from "../../utils/toOwner.js"
 
 export async function signUserOperation(
     parameters: UnionPartialBy<UserOperation, "sender"> & {

@@ -1,19 +1,19 @@
-import { describe, expect } from "vitest"
-import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import { createPublicClient, http } from "viem"
-import {
-    getBundlerClient,
-    getSafeClient
-} from "../../../permissionless-test/src/utils"
+import { http, createPublicClient } from "viem"
+import { entryPoint06Address } from "viem/account-abstraction"
 import {
     generatePrivateKey,
     privateKeyToAccount,
     toAccount
 } from "viem/accounts"
-import { aw } from "vitest/dist/chunks/reporters.D7Jzd9GS.js"
-import { signUserOperation } from "./signUserOperation"
 import { foundry } from "viem/chains"
-import { entryPoint06Address } from "viem/account-abstraction"
+import { describe, expect } from "vitest"
+import { aw } from "vitest/dist/chunks/reporters.D7Jzd9GS.js"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
+import {
+    getBundlerClient,
+    getSafeClient
+} from "../../../permissionless-test/src/utils"
+import { signUserOperation } from "./signUserOperation"
 
 describe("signUserOperation", () => {
     testWithRpc("signUserOperation_V06", async ({ rpc }) => {

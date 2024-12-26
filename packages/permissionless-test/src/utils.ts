@@ -30,8 +30,8 @@ import {
 } from "../../permissionless/accounts/light/toLightSmartAccount"
 import { toNexusSmartAccount } from "../../permissionless/accounts/nexus/toNexusSmartAccount"
 import {
-    toSafeSmartAccount,
-    ToSafeSmartAccountReturnType
+    type ToSafeSmartAccountReturnType,
+    toSafeSmartAccount
 } from "../../permissionless/accounts/safe/toSafeSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
