@@ -1,4 +1,9 @@
-import { http, createPublicClient, createWalletClient } from "viem"
+import {
+    http,
+    type LocalAccount,
+    createPublicClient,
+    createWalletClient
+} from "viem"
 import {
     type SmartAccount,
     createBundlerClient,
@@ -337,9 +342,11 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     entryPoint,
     anvilRpc,
     erc7579,
-    privateKey
+    privateKey,
+    owners
 }: {
     erc7579?: boolean
+    owners?: LocalAccount[]
 } & AAParamType<entryPointVersion>) => {
     const publicClient = getPublicClient(anvilRpc)
 
@@ -352,7 +359,9 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
+        owners: owners ?? [
+            privateKeyToAccount(privateKey ?? generatePrivateKey())
+        ],
         version: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
@@ -633,6 +642,26 @@ export const getCoreSmartAccounts = () => [
         ) =>
             getBundlerClient({
                 account: await getSafeClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe multiple owners",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...conf,
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
                 ...conf
             }),
         supportsEntryPointV06: true,

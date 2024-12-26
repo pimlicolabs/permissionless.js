@@ -525,7 +525,7 @@ const get7579LaunchPadInitData = ({
     safe4337ModuleAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
-    owner,
+    owners,
     validators,
     executors,
     fallbacks,
@@ -536,7 +536,7 @@ const get7579LaunchPadInitData = ({
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     erc7579LaunchpadAddress: Address
-    owner: Address
+    owners: Address[]
     executors: {
         address: Address
         context: Address
@@ -549,7 +549,7 @@ const get7579LaunchPadInitData = ({
 }) => {
     const initData = {
         singleton: safeSingletonAddress,
-        owners: [owner],
+        owners: owners,
         threshold: BigInt(1),
         setupTo: erc7579LaunchpadAddress,
         setupData: encodeFunctionData({
@@ -581,7 +581,7 @@ const get7579LaunchPadInitData = ({
 }
 
 const getInitializerCode = async ({
-    owner,
+    owners,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     multiSendAddress,
@@ -599,7 +599,7 @@ const getInitializerCode = async ({
     payment = BigInt(0),
     paymentReceiver = zeroAddress
 }: {
-    owner: Address
+    owners: Address[]
     safeSingletonAddress: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
@@ -629,7 +629,7 @@ const getInitializerCode = async ({
             safe4337ModuleAddress,
             safeSingletonAddress,
             erc7579LaunchpadAddress,
-            owner,
+            owners,
             validators,
             executors,
             fallbacks,
@@ -729,7 +729,7 @@ const getInitializerCode = async ({
         abi: setupAbi,
         functionName: "setup",
         args: [
-            [owner],
+            owners,
             BigInt(1),
             multiSendAddress,
             multiSendCallData,
@@ -768,7 +768,7 @@ function getPaymasterAndData(unpackedUserOperation: UserOperation) {
 }
 
 const getAccountInitCode = async ({
-    owner,
+    owners,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
@@ -787,7 +787,7 @@ const getAccountInitCode = async ({
     attesters = [],
     attestersThreshold = 0
 }: {
-    owner: Address
+    owners: Address[]
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
@@ -813,12 +813,8 @@ const getAccountInitCode = async ({
     payment?: bigint
     paymentReceiver?: Address
 }): Promise<Hex> => {
-    if (!owner) {
-        throw new Error("Owner account not found")
-    }
-
     const initializer = await getInitializerCode({
-        owner,
+        owners,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -938,13 +934,12 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owners: [
-        OneOf<
-            | EthereumProvider
-            | WalletClient<Transport, Chain | undefined, Account>
-            | LocalAccount
-        >
-    ]
+    owners: OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >[]
+
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -988,7 +983,7 @@ const proxyCreationCodeAbi = [
 
 const getAccountAddress = async ({
     client,
-    owner,
+    owners,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
@@ -1009,7 +1004,7 @@ const getAccountAddress = async ({
     attestersThreshold = 0
 }: {
     client: Client
-    owner: Address
+    owners: Address[]
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
@@ -1043,7 +1038,7 @@ const getAccountAddress = async ({
     })
 
     const initializer = await getInitializerCode({
-        owner,
+        owners,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -1135,7 +1130,9 @@ export async function toSafeSmartAccount<
         paymentReceiver
     } = parameters
 
-    const localOwner = await toOwner({ owner: owners[0] })
+    const localOwners = await Promise.all(
+        owners.map((owner) => toOwner({ owner: owner }))
+    )
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
@@ -1211,7 +1208,7 @@ export async function toSafeSmartAccount<
         return {
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
-                owner: localOwner.address,
+                owners: localOwners.map((owner) => owner.address),
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
@@ -1243,7 +1240,7 @@ export async function toSafeSmartAccount<
             // Get the sender address based on the init code
             accountAddress = await getAccountAddress({
                 client,
-                owner: localOwner.address,
+                owners: localOwners.map((owner) => owner.address),
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
@@ -1280,7 +1277,7 @@ export async function toSafeSmartAccount<
                         safe4337ModuleAddress,
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
-                        owner: localOwner.address,
+                        owners: localOwners.map((owner) => owner.address),
                         validators,
                         executors,
                         fallbacks,
@@ -1372,7 +1369,19 @@ export async function toSafeSmartAccount<
             })
         },
         async getStubSignature() {
-            return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            return encodePacked(
+                ["uint48", "uint48", "bytes"],
+                [
+                    0,
+                    0,
+                    `0x${owners
+                        .map(
+                            (owner) =>
+                                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                        )
+                        .join("")}`
+                ]
+            )
         },
         async sign({ hash }) {
             return this.signMessage({ message: hash })
@@ -1392,32 +1401,56 @@ export async function toSafeSmartAccount<
                 }
             })
 
-            return adjustVInSignature(
-                "eth_sign",
-                await localOwner.signMessage({
-                    message: {
-                        raw: toBytes(messageHash)
-                    }
-                })
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => ({
+                    signer: localOwner.address,
+                    data: await localOwner.signMessage({
+                        message: {
+                            raw: toBytes(messageHash)
+                        }
+                    })
+                }))
             )
+
+            signatures.sort((left, right) =>
+                left.signer
+                    .toLowerCase()
+                    .localeCompare(right.signer.toLowerCase())
+            )
+
+            const signatureBytes = concat(signatures.map((sig) => sig.data))
+
+            return adjustVInSignature("eth_sign", signatureBytes)
         },
         async signTypedData(typedData) {
-            return adjustVInSignature(
-                "eth_signTypedData",
-                await localOwner.signTypedData({
-                    domain: {
-                        chainId: await getMemoizedChainId(),
-                        verifyingContract: await this.getAddress()
-                    },
-                    types: {
-                        SafeMessage: [{ name: "message", type: "bytes" }]
-                    },
-                    primaryType: "SafeMessage",
-                    message: {
-                        message: generateSafeMessageMessage(typedData)
-                    }
-                })
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => ({
+                    signer: localOwner.address,
+                    data: await localOwner.signTypedData({
+                        domain: {
+                            chainId: await getMemoizedChainId(),
+                            verifyingContract: await this.getAddress()
+                        },
+                        types: {
+                            SafeMessage: [{ name: "message", type: "bytes" }]
+                        },
+                        primaryType: "SafeMessage",
+                        message: {
+                            message: generateSafeMessageMessage(typedData)
+                        }
+                    })
+                }))
             )
+
+            signatures.sort((left, right) =>
+                left.signer
+                    .toLowerCase()
+                    .localeCompare(right.signer.toLowerCase())
+            )
+
+            const signatureBytes = concat(signatures.map((sig) => sig.data))
+
+            return adjustVInSignature("eth_signTypedData", signatureBytes)
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
@@ -1457,8 +1490,8 @@ export async function toSafeSmartAccount<
                 })
             }
 
-            const signatures = [
-                {
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
                     data: await signTypedData(client, {
                         account: localOwner,
@@ -1473,8 +1506,8 @@ export async function toSafeSmartAccount<
                         primaryType: "SafeOp",
                         message: message
                     })
-                }
-            ]
+                }))
+            )
 
             signatures.sort((left, right) =>
                 left.signer
