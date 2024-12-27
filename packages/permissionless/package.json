@@ -24,6 +24,11 @@
             "import": "./_esm/accounts/index.js",
             "default": "./_cjs/accounts/index.js"
         },
+        "./accounts/safe": {
+            "types": "./_types/accounts/safe/index.d.ts",
+            "import": "./_esm/accounts/safe/index.js",
+            "default": "./_cjs/accounts/safe/index.js"
+        },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
             "import": "./_esm/actions/index.js",

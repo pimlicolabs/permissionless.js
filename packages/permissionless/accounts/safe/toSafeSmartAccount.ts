@@ -13,7 +13,6 @@ import {
     type TypedDataDefinition,
     type WalletClient,
     concat,
-    concatHex,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
@@ -36,12 +35,13 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, readContract, signTypedData } from "viem/actions"
+import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { signUserOperation } from "./signUserOperation.js"
 
 export type SafeVersion = "1.4.1"
 
@@ -364,7 +364,7 @@ const executeUserOpWithErrorStringAbi = [
     }
 ] as const
 
-const EIP712_SAFE_OPERATION_TYPE_V06 = {
+export const EIP712_SAFE_OPERATION_TYPE_V06 = {
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "uint256", name: "nonce" },
@@ -382,7 +382,7 @@ const EIP712_SAFE_OPERATION_TYPE_V06 = {
     ]
 }
 
-const EIP712_SAFE_OPERATION_TYPE_V07 = {
+export const EIP712_SAFE_OPERATION_TYPE_V07 = {
     SafeOp: [
         { type: "address", name: "safe" },
         { type: "uint256", name: "nonce" },
@@ -525,18 +525,19 @@ const get7579LaunchPadInitData = ({
     safe4337ModuleAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
-    owner,
+    owners,
     validators,
     executors,
     fallbacks,
     hooks,
     attesters,
+    threshold,
     attestersThreshold
 }: {
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     erc7579LaunchpadAddress: Address
-    owner: Address
+    owners: Address[]
     executors: {
         address: Address
         context: Address
@@ -545,12 +546,13 @@ const get7579LaunchPadInitData = ({
     fallbacks: { address: Address; context: Address }[]
     hooks: { address: Address; context: Address }[]
     attesters: Address[]
+    threshold: bigint
     attestersThreshold: number
 }) => {
     const initData = {
         singleton: safeSingletonAddress,
-        owners: [owner],
-        threshold: BigInt(1),
+        owners: owners,
+        threshold: threshold,
         setupTo: erc7579LaunchpadAddress,
         setupData: encodeFunctionData({
             abi: initSafe7579Abi,
@@ -581,7 +583,8 @@ const get7579LaunchPadInitData = ({
 }
 
 const getInitializerCode = async ({
-    owner,
+    owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     multiSendAddress,
@@ -599,7 +602,8 @@ const getInitializerCode = async ({
     payment = BigInt(0),
     paymentReceiver = zeroAddress
 }: {
-    owner: Address
+    owners: Address[]
+    threshold: bigint
     safeSingletonAddress: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
@@ -629,10 +633,11 @@ const getInitializerCode = async ({
             safe4337ModuleAddress,
             safeSingletonAddress,
             erc7579LaunchpadAddress,
-            owner,
+            owners,
             validators,
             executors,
             fallbacks,
+            threshold,
             hooks,
             attesters,
             attestersThreshold
@@ -729,7 +734,7 @@ const getInitializerCode = async ({
         abi: setupAbi,
         functionName: "setup",
         args: [
-            [owner],
+            owners,
             BigInt(1),
             multiSendAddress,
             multiSendCallData,
@@ -741,7 +746,7 @@ const getInitializerCode = async ({
     })
 }
 
-function getPaymasterAndData(unpackedUserOperation: UserOperation) {
+export function getPaymasterAndData(unpackedUserOperation: UserOperation) {
     return unpackedUserOperation.paymaster
         ? concat([
               unpackedUserOperation.paymaster,
@@ -768,7 +773,8 @@ function getPaymasterAndData(unpackedUserOperation: UserOperation) {
 }
 
 const getAccountInitCode = async ({
-    owner,
+    owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
@@ -787,7 +793,8 @@ const getAccountInitCode = async ({
     attesters = [],
     attestersThreshold = 0
 }: {
-    owner: Address
+    owners: Address[]
+    threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
@@ -813,12 +820,9 @@ const getAccountInitCode = async ({
     payment?: bigint
     paymentReceiver?: Address
 }): Promise<Hex> => {
-    if (!owner) {
-        throw new Error("Owner account not found")
-    }
-
     const initializer = await getInitializerCode({
-        owner,
+        owners,
+        threshold,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -850,7 +854,7 @@ const getAccountInitCode = async ({
     return initCodeCallData
 }
 
-const getDefaultAddresses = (
+export const getDefaultAddresses = (
     safeVersion: SafeVersion,
     entryPointVersion: "0.6" | "0.7",
     {
@@ -938,13 +942,8 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owners: [
-        OneOf<
-            | EthereumProvider
-            | WalletClient<Transport, Chain | undefined, Account>
-            | LocalAccount
-        >
-    ]
+    owners: (Account | WalletClient<Transport, Chain | undefined, Account>)[]
+    threshold?: bigint
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -988,7 +987,8 @@ const proxyCreationCodeAbi = [
 
 const getAccountAddress = async ({
     client,
-    owner,
+    owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
@@ -1009,7 +1009,8 @@ const getAccountAddress = async ({
     attestersThreshold = 0
 }: {
     client: Client
-    owner: Address
+    owners: Address[]
+    threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
@@ -1043,7 +1044,8 @@ const getAccountAddress = async ({
     })
 
     const initializer = await getInitializerCode({
-        owner,
+        owners,
+        threshold,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -1119,8 +1121,9 @@ export async function toSafeSmartAccount<
 ): Promise<ToSafeSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
-        owners,
+        owners: _owners,
         address,
+        threshold = BigInt(_owners.length),
         version,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
@@ -1135,7 +1138,38 @@ export async function toSafeSmartAccount<
         paymentReceiver
     } = parameters
 
-    const localOwner = await toOwner({ owner: owners[0] })
+    const owners = _owners.map((owner) =>
+        "account" in owner ? owner.account : owner
+    )
+
+    const localOwners = await Promise.all(
+        _owners
+            .filter((owner) => {
+                if ("type" in owner && owner.type === "local") {
+                    return true
+                }
+
+                if ("request" in owner) {
+                    return true
+                }
+
+                if ("account" in owner) {
+                    // walletClient
+                    return true
+                }
+
+                return false
+            })
+            .map((owner) =>
+                toOwner({
+                    owner: owner as OneOf<
+                        | LocalAccount
+                        | EthereumProvider
+                        | WalletClient<Transport, Chain | undefined, Account>
+                    >
+                })
+            )
+    )
 
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
@@ -1211,7 +1245,8 @@ export async function toSafeSmartAccount<
         return {
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
-                owner: localOwner.address,
+                owners: owners.map((owner) => owner.address),
+                threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
@@ -1243,7 +1278,8 @@ export async function toSafeSmartAccount<
             // Get the sender address based on the init code
             accountAddress = await getAccountAddress({
                 client,
-                owner: localOwner.address,
+                owners: owners.map((owner) => owner.address),
+                threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
@@ -1280,7 +1316,8 @@ export async function toSafeSmartAccount<
                         safe4337ModuleAddress,
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
-                        owner: localOwner.address,
+                        owners: owners.map((owner) => owner.address),
+                        threshold,
                         validators,
                         executors,
                         fallbacks,
@@ -1372,12 +1409,30 @@ export async function toSafeSmartAccount<
             })
         },
         async getStubSignature() {
-            return "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            return encodePacked(
+                ["uint48", "uint48", "bytes"],
+                [
+                    0,
+                    0,
+                    `0x${owners
+                        .map(
+                            (_) =>
+                                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                        )
+                        .join("")}`
+                ]
+            )
         },
         async sign({ hash }) {
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch, currently not supported"
+                )
+            }
+
             const messageHash = hashTypedData({
                 domain: {
                     chainId: await getMemoizedChainId(),
@@ -1392,89 +1447,19 @@ export async function toSafeSmartAccount<
                 }
             })
 
-            return adjustVInSignature(
-                "eth_sign",
-                await localOwner.signMessage({
-                    message: {
-                        raw: toBytes(messageHash)
-                    }
-                })
-            )
-        },
-        async signTypedData(typedData) {
-            return adjustVInSignature(
-                "eth_signTypedData",
-                await localOwner.signTypedData({
-                    domain: {
-                        chainId: await getMemoizedChainId(),
-                        verifyingContract: await this.getAddress()
-                    },
-                    types: {
-                        SafeMessage: [{ name: "message", type: "bytes" }]
-                    },
-                    primaryType: "SafeMessage",
-                    message: {
-                        message: generateSafeMessageMessage(typedData)
-                    }
-                })
-            )
-        },
-        async signUserOperation(parameters) {
-            const { chainId = await getMemoizedChainId(), ...userOperation } =
-                parameters
-
-            const message = {
-                safe: await this.getAddress(),
-                callData: userOperation.callData,
-                nonce: userOperation.nonce,
-                initCode: userOperation.initCode ?? "0x",
-                maxFeePerGas: userOperation.maxFeePerGas,
-                maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
-                preVerificationGas: userOperation.preVerificationGas,
-                verificationGasLimit: userOperation.verificationGasLimit,
-                callGasLimit: userOperation.callGasLimit,
-                paymasterAndData: userOperation.paymasterAndData ?? "0x",
-                validAfter: validAfter,
-                validUntil: validUntil,
-                entryPoint: entryPoint.address
-            }
-
-            if ("initCode" in userOperation) {
-                message.paymasterAndData =
-                    userOperation.paymasterAndData ?? "0x"
-            }
-
-            if ("factory" in userOperation) {
-                if (userOperation.factory && userOperation.factoryData) {
-                    message.initCode = concatHex([
-                        userOperation.factory,
-                        userOperation.factoryData
-                    ])
-                }
-                message.paymasterAndData = getPaymasterAndData({
-                    ...userOperation,
-                    sender: userOperation.sender ?? (await this.getAddress())
-                })
-            }
-
-            const signatures = [
-                {
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
-                    data: await signTypedData(client, {
-                        account: localOwner,
-                        domain: {
-                            chainId,
-                            verifyingContract: safe4337ModuleAddress
-                        },
-                        types:
-                            entryPoint.version === "0.6"
-                                ? EIP712_SAFE_OPERATION_TYPE_V06
-                                : EIP712_SAFE_OPERATION_TYPE_V07,
-                        primaryType: "SafeOp",
-                        message: message
-                    })
-                }
-            ]
+                    data: adjustVInSignature(
+                        "eth_sign",
+                        await localOwner.signMessage({
+                            message: {
+                                raw: toBytes(messageHash)
+                            }
+                        })
+                    )
+                }))
+            )
 
             signatures.sort((left, right) =>
                 left.signer
@@ -1484,10 +1469,86 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return encodePacked(
-                ["uint48", "uint48", "bytes"],
-                [validAfter, validUntil, signatureBytes]
+            return signatureBytes
+        },
+        async signTypedData(typedData) {
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch, currently not supported"
+                )
+            }
+
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => ({
+                    signer: localOwner.address,
+                    data: adjustVInSignature(
+                        "eth_signTypedData",
+
+                        await localOwner.signTypedData({
+                            domain: {
+                                chainId: await getMemoizedChainId(),
+                                verifyingContract: await this.getAddress()
+                            },
+                            types: {
+                                SafeMessage: [
+                                    { name: "message", type: "bytes" }
+                                ]
+                            },
+                            primaryType: "SafeMessage",
+                            message: {
+                                message: generateSafeMessageMessage(typedData)
+                            }
+                        })
+                    )
+                }))
             )
+
+            signatures.sort((left, right) =>
+                left.signer
+                    .toLowerCase()
+                    .localeCompare(right.signer.toLowerCase())
+            )
+
+            const signatureBytes = concat(signatures.map((sig) => sig.data))
+
+            return signatureBytes
+        },
+        async signUserOperation(parameters) {
+            const { chainId = await getMemoizedChainId(), ...userOperation } =
+                parameters
+
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch use SafeSmartAccount.signUserOperation from `permissionless/accounts/safe`"
+                )
+            }
+
+            let signatures: Hex | undefined = undefined
+
+            for (const owner of owners) {
+                signatures = await signUserOperation({
+                    ...userOperation,
+                    version,
+                    entryPoint,
+                    owners: localOwners,
+                    account: owner as OneOf<
+                        | EthereumProvider
+                        | WalletClient<Transport, Chain | undefined, Account>
+                        | LocalAccount
+                    >,
+                    chainId: await getMemoizedChainId(),
+                    signatures,
+                    validAfter,
+                    validUntil,
+                    safe4337ModuleAddress
+                })
+            }
+
+            if (!signatures) {
+                throw new Error("No signatures found")
+            }
+
+            return signatures
         }
     }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }

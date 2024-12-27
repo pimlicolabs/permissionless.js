@@ -1,4 +1,9 @@
-import { http, createPublicClient, createWalletClient } from "viem"
+import {
+    http,
+    type Account,
+    createPublicClient,
+    createWalletClient
+} from "viem"
 import {
     type SmartAccount,
     createBundlerClient,
@@ -24,7 +29,10 @@ import {
     toLightSmartAccount
 } from "../../permissionless/accounts/light/toLightSmartAccount"
 import { toNexusSmartAccount } from "../../permissionless/accounts/nexus/toNexusSmartAccount"
-import { toSafeSmartAccount } from "../../permissionless/accounts/safe/toSafeSmartAccount"
+import {
+    type ToSafeSmartAccountReturnType,
+    toSafeSmartAccount
+} from "../../permissionless/accounts/safe/toSafeSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
@@ -129,11 +137,11 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
         }
     })
 
-    return createBundlerClient({
+    return createSmartAccountClient({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
-        transport: http(altoRpc),
+        bundlerTransport: http(altoRpc),
         userOperation: {
             estimateFeesPerGas: async () => {
                 return (await pimlicoBundler.getUserOperationGasPrice()).fast
@@ -337,10 +345,14 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     entryPoint,
     anvilRpc,
     erc7579,
-    privateKey
+    privateKey,
+    owners
 }: {
     erc7579?: boolean
-} & AAParamType<entryPointVersion>) => {
+    owners?: Account[]
+} & AAParamType<entryPointVersion>): Promise<
+    ToSafeSmartAccountReturnType<entryPointVersion>
+> => {
     const publicClient = getPublicClient(anvilRpc)
 
     return toSafeSmartAccount({
@@ -352,7 +364,9 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
-        owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
+        owners: owners ?? [
+            privateKeyToAccount(privateKey ?? generatePrivateKey())
+        ],
         version: "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
@@ -367,7 +381,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
                   attestersThreshold: 1
               }
             : {})
-    })
+    }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }
 
 export const getThirdwebClient = async <
@@ -640,12 +654,62 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: true
     },
     {
+        name: "Safe multiple owners",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...conf,
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
         name: "Safe 7579",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
         ) =>
             getBundlerClient({
                 account: await getSafeClient({ ...conf, erc7579: true }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getSafeClient({ ...conf, erc7579: true }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe 7579 Multiple Owners",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...conf,
+                    erc7579: true,
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
                 ...conf
             }),
         getErc7579SmartAccountClient: async <
