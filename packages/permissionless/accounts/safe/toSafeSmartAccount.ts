@@ -35,7 +35,6 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import { toAccount } from "viem/accounts"
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
