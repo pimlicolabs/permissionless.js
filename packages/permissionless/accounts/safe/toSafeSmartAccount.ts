@@ -1130,7 +1130,7 @@ export async function toSafeSmartAccount<
     )
 
     const localOwners = await Promise.all(
-        owners
+        _owners
             .filter((owner) => {
                 if ("type" in owner && owner.type === "local") {
                     return true
@@ -1140,11 +1140,20 @@ export async function toSafeSmartAccount<
                     return true
                 }
 
+                if ("account" in owner) {
+                    // walletClient
+                    return true
+                }
+
                 return false
             })
             .map((owner) =>
                 toOwner({
-                    owner: owner as OneOf<LocalAccount | EthereumProvider>
+                    owner: owner as OneOf<
+                        | LocalAccount
+                        | EthereumProvider
+                        | WalletClient<Transport, Chain | undefined, Account>
+                    >
                 })
             )
     )
