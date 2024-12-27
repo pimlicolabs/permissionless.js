@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.24
+
+### Patch Changes
+
+- 30c73e027c5966cb23b3a5d74454d473627098c3: Added support for multi-sig in Safe
+
 ## 0.2.23
 
 ### Patch Changes
