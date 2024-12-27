@@ -1484,12 +1484,13 @@ export async function toSafeSmartAccount<
 
             return signUserOperation({
                 ...userOperation,
+                version,
+                entryPoint,
+                owners: localOwners,
                 chainId: await getMemoizedChainId(),
                 validAfter,
                 validUntil,
-                owners: localOwners,
-                entryPoint,
-                version
+                safe4337ModuleAddress
             })
         }
     }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
