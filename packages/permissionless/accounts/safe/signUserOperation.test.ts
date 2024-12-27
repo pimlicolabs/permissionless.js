@@ -69,6 +69,7 @@ describe("signUserOperation", () => {
             chainId: foundry.id,
             owners: owners.map((owner) => toAccount(owner.address)),
             account: owners[1],
+            signatures: partialSignatures,
             ...unSignedUserOperation
         })
 
@@ -152,6 +153,7 @@ describe("signUserOperation", () => {
             chainId: foundry.id,
             owners: owners.map((owner) => toAccount(owner.address)),
             account: owners[1],
+            signatures: partialSignatures,
             ...unSignedUserOperation
         })
 
@@ -237,6 +239,7 @@ describe("signUserOperation", () => {
             chainId: foundry.id,
             owners: owners.map((owner) => toAccount(owner.address)),
             account: owners[1],
+            signatures: partialSignatures,
             safe4337ModuleAddress: "0x7579EE8307284F293B1927136486880611F20002",
             ...unSignedUserOperation
         })
@@ -325,6 +328,7 @@ describe("signUserOperation", () => {
             chainId: foundry.id,
             owners: owners.map((owner) => toAccount(owner.address)),
             account: owners[1],
+            signatures: partialSignatures,
             ...unSignedUserOperation
         })
 
