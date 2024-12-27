@@ -2,18 +2,14 @@ import {
     type Account,
     type Address,
     type Assign,
-    type Chain,
     type Client,
     type Hex,
     type LocalAccount,
     type OneOf,
     type SignableMessage,
-    type Transport,
     type TypedData,
     type TypedDataDefinition,
-    type WalletClient,
     concat,
-    concatHex,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
@@ -42,6 +38,7 @@ import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { signUserOperation } from "./signUserOperation.js"
 
 export type SafeVersion = "1.4.1"
 
@@ -934,12 +931,7 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owners: OneOf<
-        | EthereumProvider
-        | WalletClient<Transport, Chain | undefined, Account>
-        | LocalAccount
-    >[]
-
+    owners: Account[]
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -1131,7 +1123,23 @@ export async function toSafeSmartAccount<
     } = parameters
 
     const localOwners = await Promise.all(
-        owners.map((owner) => toOwner({ owner: owner }))
+        owners
+            .filter((owner) => {
+                if ("type" in owner && owner.type === "local") {
+                    return true
+                }
+
+                if ("request" in owner) {
+                    return true
+                }
+
+                return false
+            })
+            .map((owner) =>
+                toOwner({
+                    owner: owner as OneOf<LocalAccount | EthereumProvider>
+                })
+            )
     )
 
     const entryPoint = {
@@ -1208,7 +1216,7 @@ export async function toSafeSmartAccount<
         return {
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
-                owners: localOwners.map((owner) => owner.address),
+                owners: owners.map((owner) => owner.address),
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
@@ -1240,7 +1248,7 @@ export async function toSafeSmartAccount<
             // Get the sender address based on the init code
             accountAddress = await getAccountAddress({
                 client,
-                owners: localOwners.map((owner) => owner.address),
+                owners: owners.map((owner) => owner.address),
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
@@ -1277,7 +1285,7 @@ export async function toSafeSmartAccount<
                         safe4337ModuleAddress,
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
-                        owners: localOwners.map((owner) => owner.address),
+                        owners: owners.map((owner) => owner.address),
                         validators,
                         executors,
                         fallbacks,
@@ -1456,70 +1464,21 @@ export async function toSafeSmartAccount<
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
 
-            const message = {
-                safe: await this.getAddress(),
-                callData: userOperation.callData,
-                nonce: userOperation.nonce,
-                initCode: userOperation.initCode ?? "0x",
-                maxFeePerGas: userOperation.maxFeePerGas,
-                maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
-                preVerificationGas: userOperation.preVerificationGas,
-                verificationGasLimit: userOperation.verificationGasLimit,
-                callGasLimit: userOperation.callGasLimit,
-                paymasterAndData: userOperation.paymasterAndData ?? "0x",
-                validAfter: validAfter,
-                validUntil: validUntil,
-                entryPoint: entryPoint.address
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch use signUserOperation from `permissionless/accounts/safe`"
+                )
             }
 
-            if ("initCode" in userOperation) {
-                message.paymasterAndData =
-                    userOperation.paymasterAndData ?? "0x"
-            }
-
-            if ("factory" in userOperation) {
-                if (userOperation.factory && userOperation.factoryData) {
-                    message.initCode = concatHex([
-                        userOperation.factory,
-                        userOperation.factoryData
-                    ])
-                }
-                message.paymasterAndData = getPaymasterAndData({
-                    ...userOperation,
-                    sender: userOperation.sender ?? (await this.getAddress())
-                })
-            }
-
-            const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => ({
-                    signer: localOwner.address,
-                    data: await localOwner.signTypedData({
-                        domain: {
-                            chainId,
-                            verifyingContract: safe4337ModuleAddress
-                        },
-                        types:
-                            entryPoint.version === "0.6"
-                                ? EIP712_SAFE_OPERATION_TYPE_V06
-                                : EIP712_SAFE_OPERATION_TYPE_V07,
-                        primaryType: "SafeOp",
-                        message: message
-                    })
-                }))
-            )
-
-            signatures.sort((left, right) =>
-                left.signer
-                    .toLowerCase()
-                    .localeCompare(right.signer.toLowerCase())
-            )
-
-            const signatureBytes = concat(signatures.map((sig) => sig.data))
-
-            return encodePacked(
-                ["uint48", "uint48", "bytes"],
-                [validAfter, validUntil, signatureBytes]
-            )
+            return signUserOperation({
+                ...userOperation,
+                chainId: await getMemoizedChainId(),
+                validAfter,
+                validUntil,
+                owners: localOwners,
+                entryPoint,
+                version
+            })
         }
     }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }

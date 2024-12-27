@@ -1,6 +1,6 @@
 import {
     http,
-    type LocalAccount,
+    type Account,
     createPublicClient,
     createWalletClient
 } from "viem"
@@ -137,11 +137,11 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
         }
     })
 
-    return createBundlerClient({
+    return createSmartAccountClient({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
-        transport: http(altoRpc),
+        bundlerTransport: http(altoRpc),
         userOperation: {
             estimateFeesPerGas: async () => {
                 return (await pimlicoBundler.getUserOperationGasPrice()).fast
@@ -349,7 +349,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     owners
 }: {
     erc7579?: boolean
-    owners?: LocalAccount[]
+    owners?: Account[]
 } & AAParamType<entryPointVersion>): Promise<
     ToSafeSmartAccountReturnType<entryPointVersion>
 > => {
