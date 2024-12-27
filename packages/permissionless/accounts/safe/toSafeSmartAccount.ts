@@ -1519,14 +1519,14 @@ export async function toSafeSmartAccount<
 
             if (localOwners.length !== owners.length) {
                 throw new Error(
-                    "Owners length mismatch use signUserOperation from `permissionless/accounts/safe`"
+                    "Owners length mismatch use SafeSmartAccount.signUserOperation from `permissionless/accounts/safe`"
                 )
             }
 
-            let signature: Hex = "0x"
+            let signatures: Hex | undefined = undefined
 
             for (const owner of owners) {
-                signature = await signUserOperation({
+                signatures = await signUserOperation({
                     ...userOperation,
                     version,
                     entryPoint,
@@ -1537,13 +1537,18 @@ export async function toSafeSmartAccount<
                         | LocalAccount
                     >,
                     chainId: await getMemoizedChainId(),
+                    signatures,
                     validAfter,
                     validUntil,
                     safe4337ModuleAddress
                 })
             }
 
-            return signature
+            if (!signatures) {
+                throw new Error("No signatures found")
+            }
+
+            return signatures
         }
     }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }
