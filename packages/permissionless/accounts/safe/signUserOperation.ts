@@ -1,10 +1,13 @@
 import {
     type Account,
     type Address,
+    type Chain,
     type Hex,
     type LocalAccount,
     type OneOf,
+    type Transport,
     type UnionPartialBy,
+    type WalletClient,
     concat,
     concatHex,
     decodeAbiParameters,
@@ -30,6 +33,11 @@ export async function signUserOperation(
             version: "0.6" | "0.7"
         }
         owners: Account[]
+        account: OneOf<
+            | EthereumProvider
+            | WalletClient<Transport, Chain | undefined, Account>
+            | LocalAccount
+        >
         chainId: number
         signatures?: Hex
         validAfter?: number
@@ -46,6 +54,7 @@ export async function signUserOperation(
         version,
         owners,
         signatures: existingSignatures,
+        account,
         ...userOperation
     } = parameters
 
@@ -93,25 +102,11 @@ export async function signUserOperation(
         })
     }
 
-    const localOwners = await Promise.all(
-        owners
-            .filter((owner) => {
-                if ("type" in owner && owner.type === "local") {
-                    return true
-                }
-
-                if ("request" in owner) {
-                    return true
-                }
-
-                return false
-            })
-            .map((owner) =>
-                toOwner({
-                    owner: owner as OneOf<LocalAccount | EthereumProvider>
-                })
-            )
-    )
+    const localOwners = [
+        await toOwner({
+            owner: account as OneOf<LocalAccount | EthereumProvider>
+        })
+    ]
 
     let unPackedSignatures: readonly { signer: Address; data: Hex }[] = []
 

@@ -531,6 +531,7 @@ const get7579LaunchPadInitData = ({
     fallbacks,
     hooks,
     attesters,
+    threshold,
     attestersThreshold
 }: {
     safe4337ModuleAddress: Address
@@ -545,12 +546,13 @@ const get7579LaunchPadInitData = ({
     fallbacks: { address: Address; context: Address }[]
     hooks: { address: Address; context: Address }[]
     attesters: Address[]
+    threshold: bigint
     attestersThreshold: number
 }) => {
     const initData = {
         singleton: safeSingletonAddress,
         owners: owners,
-        threshold: BigInt(1),
+        threshold: threshold,
         setupTo: erc7579LaunchpadAddress,
         setupData: encodeFunctionData({
             abi: initSafe7579Abi,
@@ -582,6 +584,7 @@ const get7579LaunchPadInitData = ({
 
 const getInitializerCode = async ({
     owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     multiSendAddress,
@@ -600,6 +603,7 @@ const getInitializerCode = async ({
     paymentReceiver = zeroAddress
 }: {
     owners: Address[]
+    threshold: bigint
     safeSingletonAddress: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
@@ -633,6 +637,7 @@ const getInitializerCode = async ({
             validators,
             executors,
             fallbacks,
+            threshold,
             hooks,
             attesters,
             attestersThreshold
@@ -769,6 +774,7 @@ export function getPaymasterAndData(unpackedUserOperation: UserOperation) {
 
 const getAccountInitCode = async ({
     owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeSingletonAddress,
@@ -788,6 +794,7 @@ const getAccountInitCode = async ({
     attestersThreshold = 0
 }: {
     owners: Address[]
+    threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
@@ -815,6 +822,7 @@ const getAccountInitCode = async ({
 }): Promise<Hex> => {
     const initializer = await getInitializerCode({
         owners,
+        threshold,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -935,6 +943,7 @@ export type ToSafeSmartAccountParameters<
 > = {
     client: Client
     owners: (Account | WalletClient<Transport, Chain | undefined, Account>)[]
+    threshold?: bigint
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -979,6 +988,7 @@ const proxyCreationCodeAbi = [
 const getAccountAddress = async ({
     client,
     owners,
+    threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
     safeProxyFactoryAddress,
@@ -1000,6 +1010,7 @@ const getAccountAddress = async ({
 }: {
     client: Client
     owners: Address[]
+    threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
@@ -1034,6 +1045,7 @@ const getAccountAddress = async ({
 
     const initializer = await getInitializerCode({
         owners,
+        threshold,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
         multiSendAddress,
@@ -1111,6 +1123,7 @@ export async function toSafeSmartAccount<
         client,
         owners: _owners,
         address,
+        threshold = BigInt(_owners.length),
         version,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
@@ -1233,6 +1246,7 @@ export async function toSafeSmartAccount<
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
                 owners: owners.map((owner) => owner.address),
+                threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
@@ -1265,6 +1279,7 @@ export async function toSafeSmartAccount<
             accountAddress = await getAccountAddress({
                 client,
                 owners: owners.map((owner) => owner.address),
+                threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
@@ -1302,6 +1317,7 @@ export async function toSafeSmartAccount<
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
                         owners: owners.map((owner) => owner.address),
+                        threshold,
                         validators,
                         executors,
                         fallbacks,
@@ -1507,16 +1523,27 @@ export async function toSafeSmartAccount<
                 )
             }
 
-            return signUserOperation({
-                ...userOperation,
-                version,
-                entryPoint,
-                owners: localOwners,
-                chainId: await getMemoizedChainId(),
-                validAfter,
-                validUntil,
-                safe4337ModuleAddress
-            })
+            let signature: Hex = "0x"
+
+            for (const owner of owners) {
+                signature = await signUserOperation({
+                    ...userOperation,
+                    version,
+                    entryPoint,
+                    owners: localOwners,
+                    account: owner as OneOf<
+                        | EthereumProvider
+                        | WalletClient<Transport, Chain | undefined, Account>
+                        | LocalAccount
+                    >,
+                    chainId: await getMemoizedChainId(),
+                    validAfter,
+                    validUntil,
+                    safe4337ModuleAddress
+                })
+            }
+
+            return signature
         }
     }) as Promise<ToSafeSmartAccountReturnType<entryPointVersion>>
 }

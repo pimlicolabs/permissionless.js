@@ -8,11 +8,15 @@ import {
 
 import { signUserOperation } from "./signUserOperation.js"
 
+const SafeSmartAccount = {
+    toSafeSmartAccount,
+    signUserOperation
+}
+
 export {
     type SafeSmartAccountImplementation,
     type SafeVersion,
     type ToSafeSmartAccountParameters,
     type ToSafeSmartAccountReturnType,
-    toSafeSmartAccount,
-    signUserOperation
+    SafeSmartAccount
 }
