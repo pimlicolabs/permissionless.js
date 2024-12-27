@@ -696,6 +696,36 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: true
     },
     {
+        name: "Safe 7579 Multiple Owners",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...conf,
+                    erc7579: true,
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getSafeClient({ ...conf, erc7579: true }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
         name: "Etherspot",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>

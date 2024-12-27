@@ -46,8 +46,20 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
+                if (!smartClient.account) {
+                    throw new Error("Account not found")
+                }
+
+                if (name.includes("Safe 7579")) {
+                    // Due to 7579 launchpad, we can't verify the signature before deploying the account.
+                    await smartClient.sendTransaction({
+                        calls: [{ to: zeroAddress, value: 0n }]
+                    })
+                }
+
                 const signature = await signMessage(smartClient, {
-                    message: "slowly and steadily burning the private keys"
+                    message: "slowly and steadily burning the private keys",
+                    account: smartClient.account
                 })
 
                 const publicClient = getPublicClient(anvilRpc)
@@ -92,17 +104,25 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
+                if (name === "LightAccount 2.0.0") {
+                    // LightAccount 2.0.0 doesn't support EIP-1271
+                    return
+                }
+
+                if (name.includes("Safe 7579")) {
+                    return
+
+                    // Due to 7579 launchpad, we can't verify the signature before deploying the account.
+                    // await smartClient.sendTransaction({
+                    //     calls: [{ to: zeroAddress, value: 0n }]
+                    // })
+                }
+
                 const signature = await signMessage(smartClient, {
                     message: "slowly and steadily burning the private keys"
                 })
 
                 const publicClient = getPublicClient(anvilRpc)
-
-                if (name === "Safe 7579" || name === "LightAccount 2.0.0") {
-                    // Due to 7579 launchpad, we can't verify the signature as of now.
-                    // Awaiting for the fix
-                    return
-                }
 
                 const isVerified = await publicClient.verifyMessage({
                     address: smartClient.account.address,
