@@ -1434,11 +1434,14 @@ export async function toSafeSmartAccount<
             const signatures = await Promise.all(
                 localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
-                    data: await localOwner.signMessage({
-                        message: {
-                            raw: toBytes(messageHash)
-                        }
-                    })
+                    data: adjustVInSignature(
+                        "eth_sign",
+                        await localOwner.signMessage({
+                            message: {
+                                raw: toBytes(messageHash)
+                            }
+                        })
+                    )
                 }))
             )
 
@@ -1450,7 +1453,7 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return adjustVInSignature("eth_sign", signatureBytes)
+            return signatureBytes
         },
         async signTypedData(typedData) {
             if (localOwners.length !== owners.length) {
@@ -1462,19 +1465,25 @@ export async function toSafeSmartAccount<
             const signatures = await Promise.all(
                 localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
-                    data: await localOwner.signTypedData({
-                        domain: {
-                            chainId: await getMemoizedChainId(),
-                            verifyingContract: await this.getAddress()
-                        },
-                        types: {
-                            SafeMessage: [{ name: "message", type: "bytes" }]
-                        },
-                        primaryType: "SafeMessage",
-                        message: {
-                            message: generateSafeMessageMessage(typedData)
-                        }
-                    })
+                    data: adjustVInSignature(
+                        "eth_signTypedData",
+
+                        await localOwner.signTypedData({
+                            domain: {
+                                chainId: await getMemoizedChainId(),
+                                verifyingContract: await this.getAddress()
+                            },
+                            types: {
+                                SafeMessage: [
+                                    { name: "message", type: "bytes" }
+                                ]
+                            },
+                            primaryType: "SafeMessage",
+                            message: {
+                                message: generateSafeMessageMessage(typedData)
+                            }
+                        })
+                    )
                 }))
             )
 
@@ -1486,7 +1495,7 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return adjustVInSignature("eth_signTypedData", signatureBytes)
+            return signatureBytes
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
