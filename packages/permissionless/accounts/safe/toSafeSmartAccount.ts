@@ -2,13 +2,16 @@ import {
     type Account,
     type Address,
     type Assign,
+    type Chain,
     type Client,
     type Hex,
     type LocalAccount,
     type OneOf,
     type SignableMessage,
+    type Transport,
     type TypedData,
     type TypedDataDefinition,
+    type WalletClient,
     concat,
     encodeAbiParameters,
     encodeFunctionData,
@@ -32,6 +35,7 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
+import { toAccount } from "viem/accounts"
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
@@ -931,7 +935,7 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owners: Account[]
+    owners: (Account | WalletClient<Transport, Chain | undefined, Account>)[]
     version: SafeVersion
     entryPoint?: {
         address: Address
@@ -1106,7 +1110,7 @@ export async function toSafeSmartAccount<
 ): Promise<ToSafeSmartAccountReturnType<entryPointVersion>> {
     const {
         client,
-        owners,
+        owners: _owners,
         address,
         version,
         safe4337ModuleAddress: _safe4337ModuleAddress,
@@ -1121,6 +1125,10 @@ export async function toSafeSmartAccount<
         payment,
         paymentReceiver
     } = parameters
+
+    const owners = _owners.map((owner) =>
+        "account" in owner ? owner.account : owner
+    )
 
     const localOwners = await Promise.all(
         owners
