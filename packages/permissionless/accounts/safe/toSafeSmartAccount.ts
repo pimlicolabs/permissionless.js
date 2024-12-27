@@ -1395,6 +1395,12 @@ export async function toSafeSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch, currently not supported"
+                )
+            }
+
             const messageHash = hashTypedData({
                 domain: {
                     chainId: await getMemoizedChainId(),
@@ -1431,6 +1437,12 @@ export async function toSafeSmartAccount<
             return adjustVInSignature("eth_sign", signatureBytes)
         },
         async signTypedData(typedData) {
+            if (localOwners.length !== owners.length) {
+                throw new Error(
+                    "Owners length mismatch, currently not supported"
+                )
+            }
+
             const signatures = await Promise.all(
                 localOwners.map(async (localOwner) => ({
                     signer: localOwner.address,
