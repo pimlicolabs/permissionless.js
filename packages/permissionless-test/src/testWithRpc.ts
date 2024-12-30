@@ -42,7 +42,8 @@ export const getInstances = async ({
         executorPrivateKeys: [anvilPrivateKey],
         entrypointSimulationContract: ENTRY_POINT_SIMULATIONS_ADDRESS,
         safeMode: false,
-        port: altoPort
+        port: altoPort,
+        utilityPrivateKey: anvilPrivateKey
     })
 
     // instance.on("stderr", (data) => {
@@ -59,12 +60,13 @@ export const getInstances = async ({
     })
 
     await anvilInstance.start()
-    await altoInstance.start()
-    await paymasterInstance.start()
 
     if (!forkUrl) {
         await setupContracts(anvilRpc)
     }
+
+    await altoInstance.start()
+    await paymasterInstance.start()
 
     return [anvilInstance, altoInstance, paymasterInstance]
 }

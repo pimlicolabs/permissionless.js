@@ -79,11 +79,11 @@ const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
 const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
 export const ENTRY_POINT_SIMULATIONS_ADDRESS =
-    "0x74Cb5e4eE81b86e70f9045036a1C5477de69eE87"
+    "0xe1b9bcD4DbfAE61585691bdB9A100fbaAF6C8dB0"
 
 const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
     for (const address of addresses) {
-        const bytecode = await client.getBytecode({
+        const bytecode = await client.getCode({
             address
         })
 
@@ -625,7 +625,7 @@ export const setupContracts = async (rpc: string) => {
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
         "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint v0.7
         "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory V0.7
-        ENTRY_POINT_SIMULATIONS_ADDRESS, // EntryPoint Simulations (Needed for v0.7)
+        // ENTRY_POINT_SIMULATIONS_ADDRESS, // EntryPoint Simulations (Needed for v0.7)
         "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47", // Safe V0.7 Module Setup
         "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226", // Safe V0.7 4337 Module
         "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb", // Safe V0.6 Module Setup
