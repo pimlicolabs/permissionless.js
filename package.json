@@ -62,6 +62,7 @@
         "lint": "biome check .",
         "lint:fix": "bun run lint --write",
         "test": "vitest dev -c ./packages/permissionless/vitest.config.ts",
+        "test:ci-no-coverage": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --pool=forks",
         "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
         "build:wagmi:esm": "tsc --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
