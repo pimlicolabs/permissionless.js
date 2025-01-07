@@ -1525,7 +1525,7 @@ export async function toSafeSmartAccount<
 
             let signatures: Hex | undefined = undefined
 
-            for (const owner of owners) {
+            for (const owner of localOwners) {
                 signatures = await signUserOperation({
                     ...userOperation,
                     version,
