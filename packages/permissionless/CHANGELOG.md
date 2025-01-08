@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.25
+
+### Patch Changes
+
+- 35418aeccd0cca9a3b6ff067158fcb5fd5548d42: Fixed `signUserOperation` for `toSafeSmartAccount` when owner is not a LocalAccount.
+
 ## 0.2.24
 
 ### Patch Changes
