@@ -30,11 +30,16 @@ export const getInstances = async ({
         | string
         | undefined
 
-    const anvilInstance = anvil({
-        chainId: foundry.id,
-        port: anvilPort,
-        forkUrl
-    })
+    const anvilInstance = forkUrl
+        ? anvil({
+              chainId: foundry.id,
+              port: anvilPort,
+              forkUrl
+          })
+        : anvil({
+              chainId: foundry.id,
+              port: anvilPort
+          })
 
     const altoInstance = alto({
         entrypoints: [entryPoint06Address, entryPoint07Address],
