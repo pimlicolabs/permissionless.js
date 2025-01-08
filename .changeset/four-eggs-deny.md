@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-fix safe userOp signing
+Fixed `signUserOperation` for `toSafeSmartAccount` when owner is not a LocalAccount.
