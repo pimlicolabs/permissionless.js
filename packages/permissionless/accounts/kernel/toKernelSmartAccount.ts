@@ -41,6 +41,7 @@ import {
     KernelV3InitAbi,
     KernelV3_1AccountAbi
 } from "./abi/KernelV3AccountAbi.js"
+import { KernelV3FactoryAbi } from "./abi/KernelV3FactoryAbi.js"
 import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi.js"
 import {
     DUMMY_ECDSA_SIGNATURE,
@@ -315,7 +316,8 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
     index,
     factoryAddress,
     accountLogicAddress,
-    validatorAddress
+    validatorAddress,
+    useMetaFactory
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
     entryPointVersion: entryPointVersion
@@ -324,6 +326,7 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
     factoryAddress: Address
     accountLogicAddress: Address
     validatorAddress: Address
+    useMetaFactory: boolean
 }): Promise<Hex> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
@@ -340,6 +343,14 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
             abi: createAccountAbi,
             functionName: "createAccount",
             args: [accountLogicAddress, initializationData, index]
+        })
+    }
+
+    if (!useMetaFactory) {
+        return encodeFunctionData({
+            abi: KernelV3FactoryAbi,
+            functionName: "createAccount",
+            args: [initializationData, toHex(index, { size: 32 })]
         })
     }
 
@@ -374,6 +385,7 @@ export type ToKernelSmartAccountParameters<
     accountLogicAddress?: Address
     validatorAddress?: Address
     nonceKey?: bigint
+    useMetaFactory?: boolean
 }
 
 export type KernelSmartAccountImplementation<
@@ -431,7 +443,8 @@ export async function toKernelSmartAccount<
         validatorAddress: _validatorAddress,
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
-        accountLogicAddress: _accountLogicAddress
+        accountLogicAddress: _accountLogicAddress,
+        useMetaFactory = true
     } = parameters
 
     const isWebAuthn = owners[0].type === "webAuthn"
@@ -484,7 +497,8 @@ export async function toKernelSmartAccount<
             index,
             factoryAddress,
             accountLogicAddress,
-            validatorAddress
+            validatorAddress,
+            useMetaFactory
         })
 
     let accountAddress: Address | undefined = address
@@ -502,7 +516,7 @@ export async function toKernelSmartAccount<
     const getFactoryArgs = async () => {
         return {
             factory:
-                entryPoint.version === "0.6"
+                entryPoint.version === "0.6" || useMetaFactory === false
                     ? factoryAddress
                     : metaFactoryAddress,
             factoryData: await generateInitCode()
