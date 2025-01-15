@@ -41,8 +41,8 @@ import {
     KernelV3InitAbi,
     KernelV3_1AccountAbi
 } from "./abi/KernelV3AccountAbi.js"
-import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi.js"
 import { KernelV3FactoryAbi } from "./abi/KernelV3FactoryAbi.js"
+import { KernelV3MetaFactoryDeployWithFactoryAbi } from "./abi/KernelV3MetaFactoryAbi.js"
 import {
     DUMMY_ECDSA_SIGNATURE,
     ROOT_MODE_KERNEL_V2,
