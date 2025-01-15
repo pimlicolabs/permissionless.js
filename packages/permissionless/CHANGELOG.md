@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.26
+
+### Patch Changes
+
+- 86dc887aa1c3c5990751b5ed7d4237fc4ee0afbc: Added useMetaFactory flag for toEcdsaKernelSmartAccount
+
 ## 0.2.25
 
 ### Patch Changes
