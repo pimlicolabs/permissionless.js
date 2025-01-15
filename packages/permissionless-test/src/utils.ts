@@ -314,9 +314,11 @@ export const getKernelEcdsaClient = async <
     entryPoint,
     anvilRpc,
     version,
-    privateKey
+    privateKey,
+    useMetaFactory
 }: AAParamType<entryPointVersion> & {
     version?: KernelVersion<entryPointVersion>
+    useMetaFactory?: boolean
 }) => {
     const publicClient = getPublicClient(anvilRpc)
 
@@ -336,6 +338,7 @@ export const getKernelEcdsaClient = async <
                     : entryPoint07Address,
             version: entryPoint.version === "0.6" ? "0.6" : "0.7"
         },
+        useMetaFactory,
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version
     })
@@ -550,6 +553,36 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: true
     },
     {
+        name: "Kernel 7579 0.3.0-beta (non meta factory deployment)",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.0-beta" as KernelVersion<entryPointVersion>,
+                    useMetaFactory: false
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.0-beta" as KernelVersion<entryPointVersion>,
+                    useMetaFactory: false
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
         name: "Kernel 7579 0.3.0-beta",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
@@ -570,6 +603,36 @@ export const getCoreSmartAccounts = () => [
                 account: await getKernelEcdsaClient({
                     ...conf,
                     version: "0.3.0-beta" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.1 (non meta factory deployment)",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.1" as KernelVersion<entryPointVersion>,
+                    useMetaFactory: false
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.1" as KernelVersion<entryPointVersion>,
+                    useMetaFactory: false
                 }),
                 ...conf
             }),
