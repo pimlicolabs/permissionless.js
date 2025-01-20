@@ -16,7 +16,7 @@ export type SendCompressedUserOperationParameters = {
 }
 
 /**
- * @deprecated Support for compressed userOperations has been deprecated due to EIP-4844 blobs. Please use sendUserOperation instead.
+ * @deprecated pimlico_sendCompressedUserOperation has been deprecated due to EIP-4844 blobs. Please use sendUserOperation instead.
  * Sends a compressed user operation to the bundler
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/sendCompressedUserOperation
