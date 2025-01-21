@@ -361,6 +361,18 @@ export const setupContracts = async (rpc: string) => {
             data: NEXUS_BOOTSTRAP_LIB_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: NEXUS_K1_VALIDATOR_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
         })
     ])
 
@@ -456,18 +468,6 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: BICONOMY_SINGLETON_FACTORY,
             data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_K1_VALIDATOR_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -675,8 +675,8 @@ export const setupContracts = async (rpc: string) => {
         "0x4Fd8d57b94966982B62e9588C27B4171B55E8354", // ERC7579 Test Module
         "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
         "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb", // Thirdweb factory 0.7
-        "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55", // Nexus K1 Validator Factory
-        "0x00000004171351c442B202678c48D8AB5B321E8f", // Nexus K1 Validator
+        "0x00000024115AA990F0bAE0B6b0D5B8F68b684cd6", // Nexus K1 Validator Factory
+        "0x0000002D6DB27c52E3C11c1Cf24072004AC75cBa", // Nexus K1 Validator
         "0x000000039dfcAd030719B07296710F045F0558f7", // Nexus Account Implementation
         "0x00000008c901d8871b6F6942De0B5D9cCf3873d3", // Nexus Account Bootstrapper
         "0x6c77ddf87a1717465d29f8f16f44711eb0c839c0" // Nexus BootstrapLib
