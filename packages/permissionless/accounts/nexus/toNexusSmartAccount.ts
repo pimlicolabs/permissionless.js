@@ -38,6 +38,7 @@ import {
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 
@@ -234,6 +235,9 @@ export async function toNexusSmartAccount(
                 },
                 callData: calls
             })
+        },
+        async decodeCalls(callData) {
+            return decode7579Calls(callData).callData
         },
         async getStubSignature() {
             const dynamicPart = validatorAddress.substring(2).padEnd(40, "0")

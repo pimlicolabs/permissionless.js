@@ -9,6 +9,7 @@ import {
     type OneOf,
     type Transport,
     type WalletClient,
+    decodeFunctionData,
     encodeFunctionData
 } from "viem"
 import {
@@ -290,6 +291,132 @@ export async function toSimpleSmartAccount<
                 functionName: "execute",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
+        },
+        decodeCalls: async (callData) => {
+            try {
+                const decodedV6 = decodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address[]",
+                                    name: "dest",
+                                    type: "address[]"
+                                },
+                                {
+                                    internalType: "bytes[]",
+                                    name: "func",
+                                    type: "bytes[]"
+                                }
+                            ],
+                            name: "executeBatch",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
+                    data: callData
+                })
+
+                const calls: {
+                    to: Address
+                    data: Hex
+                    value?: bigint
+                }[] = []
+
+                for (let i = 0; i < decodedV6.args.length; i++) {
+                    calls.push({
+                        to: decodedV6.args[0][i],
+                        data: decodedV6.args[1][i],
+                        value: 0n
+                    })
+                }
+
+                return calls
+            } catch (_) {
+                try {
+                    const decodedV7 = decodeFunctionData({
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address[]",
+                                        name: "dest",
+                                        type: "address[]"
+                                    },
+                                    {
+                                        internalType: "uint256[]",
+                                        name: "value",
+                                        type: "uint256[]"
+                                    },
+                                    {
+                                        internalType: "bytes[]",
+                                        name: "func",
+                                        type: "bytes[]"
+                                    }
+                                ],
+                                name: "executeBatch",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
+                        data: callData
+                    })
+
+                    const calls: {
+                        to: Address
+                        data: Hex
+                        value?: bigint
+                    }[] = []
+
+                    for (let i = 0; i < decodedV7.args[0].length; i++) {
+                        calls.push({
+                            to: decodedV7.args[0][i],
+                            value: decodedV7.args[1][i],
+                            data: decodedV7.args[2][i]
+                        })
+                    }
+
+                    return calls
+                } catch (_) {
+                    const decodedSingle = decodeFunctionData({
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address",
+                                        name: "dest",
+                                        type: "address"
+                                    },
+                                    {
+                                        internalType: "uint256",
+                                        name: "value",
+                                        type: "uint256"
+                                    },
+                                    {
+                                        internalType: "bytes",
+                                        name: "func",
+                                        type: "bytes"
+                                    }
+                                ],
+                                name: "execute",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
+                        data: callData
+                    })
+                    return [
+                        {
+                            to: decodedSingle.args[0],
+                            value: decodedSingle.args[1],
+                            data: decodedSingle.args[2]
+                        }
+                    ]
+                }
+            }
         },
         async getNonce(args) {
             return getAccountNonce(client, {

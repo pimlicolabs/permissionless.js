@@ -48,6 +48,7 @@ import {
     ROOT_MODE_KERNEL_V2,
     VALIDATOR_TYPE
 } from "./constants.js"
+import { decodeCallData } from "./utils/decodeCallData.js"
 import { encodeCallData } from "./utils/encodeCallData.js"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey.js"
 import { isKernelV2 } from "./utils/isKernelV2.js"
@@ -543,6 +544,9 @@ export async function toKernelSmartAccount<
         },
         async encodeCalls(calls) {
             return encodeCallData({ calls, kernelVersion })
+        },
+        async decodeCalls(callData) {
+            return decodeCallData({ callData, kernelVersion })
         },
         async getNonce(_args) {
             return getAccountNonce(client, {
