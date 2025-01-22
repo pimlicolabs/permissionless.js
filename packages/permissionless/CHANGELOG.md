@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.27
+
+### Patch Changes
+
+- 0c2d20fa944ac00c9f9eda242d32dc04c9091fe8: Added decode calls function to all smart accounts
+
 ## 0.2.26
 
 ### Patch Changes
