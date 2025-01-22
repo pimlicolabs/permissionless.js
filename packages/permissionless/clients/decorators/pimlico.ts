@@ -73,6 +73,7 @@ export type PimlicoActions<
         args: Prettify<GetUserOperationStatusParameters>
     ) => Promise<Prettify<GetUserOperationStatusReturnType>>
     /**
+     * @deprecated pimlico_sendCompressedUserOperation has been deprecated due to EIP-4844 blobs. Please use sendUserOperation instead.
      * Sends a compressed user operation to the bundler
      *
      * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/sendCompressedUserOperation
