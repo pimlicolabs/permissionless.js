@@ -326,7 +326,7 @@ export const getKernelEcdsaClient = async <
         (version === "0.3.0-beta" || version === "0.3.1") &&
         entryPoint.version === "0.6"
     ) {
-        throw new Error("ERC7579 is not supported for V06")
+        throw new Error("Kernel ERC7579 is not supported for V06")
     }
 
     return toKernelSmartAccount({

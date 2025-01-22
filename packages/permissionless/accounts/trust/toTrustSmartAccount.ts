@@ -27,6 +27,7 @@ import {
 import { getAction } from "viem/utils"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { decodeCallData } from "./utils/decodeCallData.js"
 import { encodeCallData } from "./utils/encodeCallData.js"
 import { getFactoryData } from "./utils/getFactoryData.js"
 
@@ -167,6 +168,9 @@ export async function toTrustSmartAccount(
         },
         async encodeCalls(calls) {
             return encodeCallData(calls)
+        },
+        async decodeCalls(callData) {
+            return decodeCallData(callData)
         },
         async getNonce(args) {
             return getAccountNonce(client, {
