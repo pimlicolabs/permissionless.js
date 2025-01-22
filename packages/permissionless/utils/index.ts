@@ -20,6 +20,12 @@ import {
     type EncodeCallDataParams,
     encode7579Calls
 } from "./encode7579Calls.js"
+
+import {
+    type DecodeCallDataReturnType,
+    decode7579Calls
+} from "./decode7579Calls.js"
+
 import {
     type Erc20AllowanceOverrideParameters,
     erc20AllowanceOverride
@@ -44,6 +50,8 @@ export {
     encodeInstallModule,
     type EncodeCallDataParams,
     encode7579Calls,
+    decode7579Calls,
+    type DecodeCallDataReturnType,
     erc20AllowanceOverride,
     erc20BalanceOverride,
     type Erc20AllowanceOverrideParameters,

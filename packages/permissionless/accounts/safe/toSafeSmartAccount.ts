@@ -13,15 +13,19 @@ import {
     type TypedDataDefinition,
     type WalletClient,
     concat,
+    decodeFunctionData,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
+    getAddress,
     getContractAddress,
     hashMessage,
     hashTypedData,
     hexToBigInt,
     keccak256,
     pad,
+    size,
+    slice,
     toBytes,
     toHex,
     zeroAddress
@@ -38,6 +42,7 @@ import {
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
@@ -490,6 +495,11 @@ const encodeInternalTransaction = (tx: {
     operation: 0 | 1
 }): string => {
     const encoded = encodePacked(
+        // uint8 = 1 byte for operation
+        // address = 20 bytes for to address
+        // uint256 = 32 bytes for value
+        // uint256 = 32 bytes for data length
+        // bytes = dynamic length for data
         ["uint8", "address", "uint256", "uint256", "bytes"],
         [
             tx.operation,
@@ -1400,6 +1410,81 @@ export async function toSafeSmartAccount<
                 functionName: "executeUserOpWithErrorString",
                 args: [to, value, data, operationType]
             })
+        },
+        async decodeCalls(callData) {
+            try {
+                const decoded = decodeFunctionData({
+                    abi: setupSafeAbi,
+                    data: callData
+                })
+
+                return decode7579Calls(decoded.args[0].callData).callData
+            } catch (_) {}
+
+            try {
+                return decode7579Calls(callData).callData
+            } catch (_) {}
+
+            const decoded = decodeFunctionData({
+                abi: executeUserOpWithErrorStringAbi,
+                data: callData
+            })
+
+            const to = decoded.args[0]
+            const value = decoded.args[1]
+            const data = decoded.args[2]
+
+            if (to === multiSendCallOnlyAddress) {
+                const decodedMultiSend = decodeFunctionData({
+                    abi: multiSendAbi,
+                    data: data
+                })
+
+                const dataToDecode = decodedMultiSend.args[0]
+                const transactions: {
+                    to: Address
+                    value: bigint
+                    data: Hex
+                }[] = []
+
+                let position = 0
+                const dataLength = size(dataToDecode)
+
+                while (position < dataLength) {
+                    // skip the operation type
+                    position += 1
+
+                    const to = getAddress(
+                        slice(dataToDecode, position, position + 20)
+                    )
+                    position += 20
+
+                    const value = BigInt(
+                        slice(dataToDecode, position, position + 32)
+                    )
+                    position += 32
+
+                    const dataLength = Number(
+                        BigInt(slice(dataToDecode, position, position + 32)) *
+                            BigInt(2)
+                    )
+
+                    position += 32
+
+                    const data = slice(
+                        dataToDecode,
+                        position,
+                        position + dataLength
+                    )
+                    position += dataLength
+
+                    transactions.push({ to, value, data })
+                }
+
+                return transactions
+            }
+
+            return [{ to, value, data }]
         },
         async getNonce(args) {
             return getAccountNonce(client, {

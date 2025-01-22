@@ -10,6 +10,7 @@ import {
     type Transport,
     type WalletClient,
     concat,
+    decodeFunctionData,
     encodeFunctionData,
     hashMessage,
     hashTypedData
@@ -309,6 +310,95 @@ export async function toLightSmartAccount<
                 functionName: "execute",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
+        },
+        async decodeCalls(callData) {
+            try {
+                const decoded = decodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address[]",
+                                    name: "dest",
+                                    type: "address[]"
+                                },
+                                {
+                                    internalType: "uint256[]",
+                                    name: "value",
+                                    type: "uint256[]"
+                                },
+                                {
+                                    internalType: "bytes[]",
+                                    name: "func",
+                                    type: "bytes[]"
+                                }
+                            ],
+                            name: "executeBatch",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
+                    data: callData
+                })
+
+                if (decoded.functionName === "executeBatch") {
+                    const calls: {
+                        to: Address
+                        value: bigint
+                        data: Hex
+                    }[] = []
+
+                    for (let i = 0; i < decoded.args[0].length; i++) {
+                        calls.push({
+                            to: decoded.args[0][i],
+                            value: decoded.args[1][i],
+                            data: decoded.args[2][i]
+                        })
+                    }
+
+                    return calls
+                }
+
+                throw new Error("Invalid function name")
+            } catch (_) {
+                const decoded = decodeFunctionData({
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address",
+                                    name: "dest",
+                                    type: "address"
+                                },
+                                {
+                                    internalType: "uint256",
+                                    name: "value",
+                                    type: "uint256"
+                                },
+                                {
+                                    internalType: "bytes",
+                                    name: "func",
+                                    type: "bytes"
+                                }
+                            ],
+                            name: "execute",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
+                    data: callData
+                })
+
+                return [
+                    {
+                        to: decoded.args[0],
+                        value: decoded.args[1],
+                        data: decoded.args[2]
+                    }
+                ]
+            }
         },
         async getNonce(args) {
             return getAccountNonce(client, {

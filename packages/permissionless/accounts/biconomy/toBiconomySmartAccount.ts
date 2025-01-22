@@ -12,6 +12,7 @@ import {
     type Client,
     type Hex,
     type LocalAccount,
+    decodeFunctionData,
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
@@ -265,6 +266,35 @@ export async function toBiconomySmartAccount(
                 functionName: "execute_ncC",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
+        },
+        decodeCalls: async (data) => {
+            const decoded = decodeFunctionData({
+                abi: BiconomyAbi,
+                data
+            })
+            if (decoded.functionName === "execute_ncC") {
+                return [
+                    {
+                        to: decoded.args[0],
+                        value: decoded.args[1],
+                        data: decoded.args[2]
+                    }
+                ]
+            }
+            if (decoded.functionName === "executeBatch_y6U") {
+                const calls: { to: Address; value: bigint; data: Hex }[] = []
+
+                for (let i = 0; i < decoded.args[0].length; i++) {
+                    calls.push({
+                        to: decoded.args[0][i],
+                        value: decoded.args[1][i],
+                        data: decoded.args[2][i]
+                    })
+                }
+
+                return calls
+            }
+            throw new Error("Invalid function name")
         },
         // Get simple dummy signature for ECDSA module authorization
         async getStubSignature() {

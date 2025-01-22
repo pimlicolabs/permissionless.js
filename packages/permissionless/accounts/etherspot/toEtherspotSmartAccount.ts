@@ -29,6 +29,7 @@ import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { toOwner } from "../../utils/index.js"
 import {
@@ -282,6 +283,9 @@ export async function toEtherspotSmartAccount<entryPointVersion extends "0.7">(
                 },
                 callData: calls
             })
+        },
+        async decodeCalls(callData) {
+            return decode7579Calls(callData).callData
         },
         async getNonce(_args) {
             return getAccountNonce(client, {
