@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.28
+
+### Patch Changes
+
+- 496e975f705e1d75bb38009512ed38daceae5d62: Deprecated pimlico_sendCompressedUserOperation
+
 ## 0.2.27
 
 ### Patch Changes
