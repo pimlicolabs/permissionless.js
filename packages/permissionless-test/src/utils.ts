@@ -202,10 +202,10 @@ export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {
         // onFetchRequest: async (req) => {
         //     console.log(await req.json(), "request")
+        // },
+        // onFetchResponse: async (response) => {
+        //     console.log(await response.clone().json(), "response")
         // }
-        //onFetchResponse: async (response) => {
-        //    console.log(await response.clone().json(), "response")
-        //}
     })
 
     return createPublicClient({

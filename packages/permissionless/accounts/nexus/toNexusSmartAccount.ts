@@ -131,8 +131,8 @@ export async function toNexusSmartAccount(
         version,
         factoryAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_FACTORY_ADDRESS,
         validatorAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_ADDRESS,
-        attesters = [],
-        threshold = 0
+        attesters = ["0x000000333034E9f539ce08819E12c1b8Cb29084d"],
+        threshold = 1
     } = parameters
 
     const localOwner = await toOwner({ owner: owners[0] })
