@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.29
+
+### Patch Changes
+
+- d3f92b923432051c978d4fcbf1675b7b49a01c74: Added support for EthereumProvider in safe
+
 ## 0.2.28
 
 ### Patch Changes
