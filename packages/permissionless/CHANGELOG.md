@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.30
+
+### Patch Changes
+
+- aa813f670cdae435f83594a78050861fa55b15bf: Fixed support viem>=2.21.59
+
 ## 0.2.29
 
 ### Patch Changes
