@@ -1,10 +1,10 @@
-import { encodeFunctionData } from "viem"
+import { type Address, type Hex, encodeFunctionData } from "viem"
 
 export const encodeCallData = async (
     calls: readonly {
-        to: `0x${string}`
+        to: Address
         value?: bigint | undefined
-        data?: `0x${string}` | undefined
+        data?: Hex | undefined
     }[]
 ) => {
     if (calls.length > 1) {

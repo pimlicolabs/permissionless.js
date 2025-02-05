@@ -42,11 +42,11 @@ export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     accountId: (
         args?: GetSmartAccountParameter<TSmartAccount>
     ) => Promise<string>
-    installModule: <callsType extends readonly unknown[]>(
-        args: InstallModuleParameters<TSmartAccount, callsType>
+    installModule: (
+        args: InstallModuleParameters<TSmartAccount>
     ) => Promise<Hash>
-    installModules: <callsType extends readonly unknown[]>(
-        args: InstallModulesParameters<TSmartAccount, callsType>
+    installModules: (
+        args: InstallModulesParameters<TSmartAccount>
     ) => Promise<Hash>
     isModuleInstalled: (
         args: IsModuleInstalledParameters<TSmartAccount>
@@ -57,11 +57,11 @@ export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     supportsModule: (
         args: SupportsModuleParameters<TSmartAccount>
     ) => Promise<boolean>
-    uninstallModule: <callsType extends readonly unknown[]>(
-        args: UninstallModuleParameters<TSmartAccount, callsType>
+    uninstallModule: (
+        args: UninstallModuleParameters<TSmartAccount>
     ) => Promise<Hash>
-    uninstallModules: <callsType extends readonly unknown[]>(
-        args: UninstallModulesParameters<TSmartAccount, callsType>
+    uninstallModules: (
+        args: UninstallModulesParameters<TSmartAccount>
     ) => Promise<Hash>
 }
 

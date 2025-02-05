@@ -1211,8 +1211,8 @@ export async function toSafeSmartAccount<
     let _multiSendCallOnlyAddress: Address | undefined = undefined
     let safeModules: Address[] | undefined = undefined
     let setupTransactions: {
-        to: `0x${string}`
-        data: `0x${string}`
+        to: Address
+        data: Hex
         value: bigint
     }[] = []
     let validators: { address: Address; context: Address }[] = []

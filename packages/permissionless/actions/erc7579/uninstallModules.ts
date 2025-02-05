@@ -1,8 +1,7 @@
-import type { Address, Chain, Client, Hex, Narrow, Transport } from "viem"
+import type { Address, Chain, Client, Hex, Transport } from "viem"
 import {
     type PaymasterActions,
     type SmartAccount,
-    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
@@ -14,13 +13,16 @@ import {
 } from "../../utils/encodeUninstallModule.js"
 
 export type UninstallModulesParameters<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
+    TSmartAccount extends SmartAccount | undefined
 > = EncodeUninstallModuleParameters<TSmartAccount> & {
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-    calls?: UserOperationCalls<Narrow<calls>>
+    calls?: readonly {
+        to: Address
+        value?: bigint | undefined
+        data?: Hex | undefined
+    }[]
     paymaster?:
         | Address
         | true
@@ -40,11 +42,10 @@ export type UninstallModulesParameters<
 }
 
 export async function uninstallModules<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
+    TSmartAccount extends SmartAccount | undefined
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: UninstallModulesParameters<TSmartAccount, calls>
+    parameters: UninstallModulesParameters<TSmartAccount>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -75,11 +76,7 @@ export async function uninstallModules<
                 account,
                 modules
             }),
-            ...((calls ?? []) as readonly {
-                to: `0x${string}`
-                value: bigint
-                data: `0x${string}`
-            }[])
+            ...(calls ?? [])
         ],
         paymaster,
         paymasterContext,

@@ -1,9 +1,8 @@
-import type { Address, Client, Hex, Narrow, OneOf } from "viem"
+import type { Address, Client, Hex, OneOf } from "viem"
 import {
     type GetSmartAccountParameter,
     type PaymasterActions,
     type SmartAccount,
-    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction, parseAccount } from "viem/utils"
@@ -12,15 +11,18 @@ import { encodeInstallModule } from "../../utils/encodeInstallModule.js"
 import type { ModuleType } from "./supportsModule.js"
 
 export type InstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
+    TSmartAccount extends SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-    calls?: UserOperationCalls<Narrow<calls>>
+    calls?: readonly {
+        to: Address
+        value?: bigint | undefined
+        data?: Hex | undefined
+    }[]
     paymaster?:
         | Address
         | true
@@ -46,12 +48,9 @@ export type InstallModuleParameters<
           }
     >
 
-export async function installModule<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
->(
+export function installModule<TSmartAccount extends SmartAccount | undefined>(
     client: Client,
-    parameters: InstallModuleParameters<TSmartAccount, calls>
+    parameters: InstallModuleParameters<TSmartAccount>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -85,11 +84,7 @@ export async function installModule<
                 account,
                 modules: [{ address, context: context ?? initData, type }]
             }),
-            ...((calls ?? []) as readonly {
-                to: `0x${string}`
-                value: bigint
-                data: `0x${string}`
-            }[])
+            ...(calls ?? [])
         ],
         paymaster,
         paymasterContext,
