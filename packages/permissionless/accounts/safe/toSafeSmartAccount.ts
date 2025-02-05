@@ -952,7 +952,11 @@ export type ToSafeSmartAccountParameters<
     TErc7579 extends Address | undefined
 > = {
     client: Client
-    owners: (Account | WalletClient<Transport, Chain | undefined, Account>)[]
+    owners: (
+        | Account
+        | WalletClient<Transport, Chain | undefined, Account>
+        | EthereumProvider
+    )[]
     threshold?: bigint
     version: SafeVersion
     entryPoint?: {
@@ -1148,8 +1152,20 @@ export async function toSafeSmartAccount<
         paymentReceiver
     } = parameters
 
-    const owners = _owners.map((owner) =>
-        "account" in owner ? owner.account : owner
+    const owners = await Promise.all(
+        _owners.map(async (owner) => {
+            if ("account" in owner) {
+                return owner.account
+            }
+
+            if ("request" in owner) {
+                return toOwner({
+                    owner: owner as EthereumProvider
+                })
+            }
+
+            return owner
+        })
     )
 
     const localOwners = await Promise.all(
