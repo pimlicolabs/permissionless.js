@@ -2,6 +2,7 @@ import {
     type Account,
     type Address,
     type Chain,
+    type EIP1193Provider,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -14,7 +15,9 @@ import { toAccount } from "viem/accounts"
 import { signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 
-export type EthereumProvider = { request(...args: any): Promise<any> }
+export type EthereumProvider = OneOf<
+    { request(...args: any): Promise<any> } | EIP1193Provider
+>
 
 export async function toOwner<provider extends EthereumProvider>({
     owner,
