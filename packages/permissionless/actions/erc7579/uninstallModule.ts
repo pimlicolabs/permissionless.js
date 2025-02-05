@@ -1,17 +1,8 @@
-import type {
-    Address,
-    Chain,
-    Client,
-    Hex,
-    Narrow,
-    OneOf,
-    Transport
-} from "viem"
+import type { Address, Chain, Client, Hex, OneOf, Transport } from "viem"
 import {
     type GetSmartAccountParameter,
     type PaymasterActions,
     type SmartAccount,
-    type UserOperationCalls,
     sendUserOperation
 } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
@@ -21,15 +12,18 @@ import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
 import type { ModuleType } from "./supportsModule.js"
 
 export type UninstallModuleParameters<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
+    TSmartAccount extends SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
     address: Address
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
-    calls?: UserOperationCalls<Narrow<calls>>
+    calls?: readonly {
+        to: Address
+        value?: bigint | undefined
+        data?: Hex | undefined
+    }[]
     paymaster?:
         | Address
         | true
@@ -56,11 +50,10 @@ export type UninstallModuleParameters<
     >
 
 export async function uninstallModule<
-    TSmartAccount extends SmartAccount | undefined,
-    calls extends readonly unknown[]
+    TSmartAccount extends SmartAccount | undefined
 >(
     client: Client<Transport, Chain | undefined, TSmartAccount>,
-    parameters: UninstallModuleParameters<TSmartAccount, calls>
+    parameters: UninstallModuleParameters<TSmartAccount>
 ): Promise<Hex> {
     const {
         account: account_ = client.account,
@@ -94,11 +87,7 @@ export async function uninstallModule<
                 account,
                 modules: [{ type, address, context: context ?? deInitData }]
             }),
-            ...((calls ?? []) as readonly {
-                to: `0x${string}`
-                value: bigint
-                data: `0x${string}`
-            }[])
+            ...(calls ?? [])
         ],
         paymaster,
         paymasterContext,

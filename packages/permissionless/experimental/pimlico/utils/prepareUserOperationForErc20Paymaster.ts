@@ -3,6 +3,7 @@ import {
     type Chain,
     type Client,
     type ContractFunctionParameters,
+    type Hex,
     RpcError,
     type Transport,
     encodeFunctionData,
@@ -19,7 +20,6 @@ import {
     type PrepareUserOperationReturnType,
     type SmartAccount,
     type UserOperation,
-    type UserOperationCall,
     getPaymasterData as getPaymasterData_,
     prepareUserOperation
 } from "viem/account-abstraction"
@@ -279,7 +279,11 @@ export const prepareUserOperationForErc20Paymaster =
             userOperation.callData = await account.encodeCalls(
                 finalCalls.map((call_) => {
                     const call = call_ as
-                        | UserOperationCall
+                        | {
+                              to: Address
+                              value: bigint
+                              data: Hex
+                          }
                         | (ContractFunctionParameters & {
                               to: Address
                               value: bigint
@@ -289,8 +293,8 @@ export const prepareUserOperationForErc20Paymaster =
                             data: encodeFunctionData(call),
                             to: call.to,
                             value: call.value
-                        } as UserOperationCall
-                    return call as UserOperationCall
+                        }
+                    return call
                 })
             )
             parameters.calls = finalCalls
