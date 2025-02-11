@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.31
+
+### Patch Changes
+
+- bfa8da45e85b2481405f1349b5553ea86b04647b: Fixed signMessage for safe 7579 when deployed
+
 ## 0.2.30
 
 ### Patch Changes
