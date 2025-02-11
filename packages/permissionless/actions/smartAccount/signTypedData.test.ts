@@ -1,4 +1,4 @@
-import { getAddress } from "viem"
+import { getAddress, zeroAddress } from "viem"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -124,15 +124,17 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                if (
-                    name.includes("Safe 7579") ||
-                    name === "LightAccount 2.0.0"
-                ) {
-                    // Due to 7579 launchpad, we can't verify the signature as of now.
-                    // Awaiting for the fix
+                if (name === "LightAccount 2.0.0") {
+                    // LightAccount 2.0.0 doesn't support EIP-1271
                     return
                 }
 
+                if (name.includes("Safe 7579")) {
+                    // Due to 7579 launchpad, we can't verify the signature before deploying the account.
+                    await smartClient.sendTransaction({
+                        calls: [{ to: zeroAddress, value: 0n }]
+                    })
+                }
                 const isVerified = await publicClient.verifyTypedData({
                     ...typedData,
                     address: smartClient.account.address,
