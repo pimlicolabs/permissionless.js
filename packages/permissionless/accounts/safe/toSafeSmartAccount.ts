@@ -1570,7 +1570,9 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return signatureBytes
+            return erc7579LaunchpadAddress
+                ? concat([zeroAddress, signatureBytes])
+                : signatureBytes
         },
         async signTypedData(typedData) {
             if (localOwners.length !== owners.length) {
