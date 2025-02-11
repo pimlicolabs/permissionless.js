@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.32
+
+### Patch Changes
+
+- 49e634973da560ca0e6fe333fce125fda7c96ec3: Fixed signTypedData for safe 7579 when deployed
+
 ## 0.2.31
 
 ### Patch Changes
