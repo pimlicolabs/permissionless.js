@@ -124,6 +124,12 @@ export const prepareUserOperationForErc20Paymaster =
                 paymaster: paymasterERC20Address
             } = quotes[0]
 
+            let calls = parameters.calls
+
+            if (parameters.callData && account.decodeCalls) {
+                calls = await account.decodeCalls(parameters.callData)
+            }
+
             const callsWithDummyApproval = [
                 {
                     abi: erc20Abi,
@@ -131,14 +137,8 @@ export const prepareUserOperationForErc20Paymaster =
                     args: [paymasterERC20Address, maxUint256], // dummy approval to ensure simulation passes
                     to: paymasterContext.token
                 },
-                ...(parameters.calls ? parameters.calls : [])
+                ...(calls ? calls : [])
             ]
-
-            if (parameters.callData) {
-                throw new Error(
-                    "parameter callData is not supported with prepareUserOperationForErc20Paymaster"
-                )
-            }
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call prepareUserOperation
@@ -265,7 +265,7 @@ export const prepareUserOperationForErc20Paymaster =
             const hasSufficientApproval = allowance >= maxCostInToken
 
             const finalCalls = hasSufficientApproval
-                ? parameters.calls
+                ? (calls ?? [])
                 : [
                       {
                           abi: erc20Abi,
@@ -273,7 +273,7 @@ export const prepareUserOperationForErc20Paymaster =
                           args: [paymasterERC20Address, maxCostInToken],
                           to: paymasterContext.token
                       },
-                      ...parameters.calls
+                      ...(calls ?? [])
                   ]
 
             userOperation.callData = await account.encodeCalls(
