@@ -23,7 +23,7 @@ import {
     getPaymasterData as getPaymasterData_,
     prepareUserOperation
 } from "viem/account-abstraction"
-import { call, getChainId as getChainId_ } from "viem/actions"
+import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico.js"
