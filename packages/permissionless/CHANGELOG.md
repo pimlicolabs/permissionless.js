@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.33
+
+### Patch Changes
+
+- cdf7b2ba79f9ff50192a2084140dd13ff5118774: Added support for decode calls in prepareUserOperationForErc20Paymaster
+
 ## 0.2.32
 
 ### Patch Changes
