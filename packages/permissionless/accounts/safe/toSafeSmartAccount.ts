@@ -928,7 +928,7 @@ type GetErc7579Params<TErc7579 extends Address | undefined> =
               safeModuleSetupAddress?: Address
               multiSendAddress?: Address
               multiSendCallOnlyAddress?: Address
-              // @deprecated This field is deprecated. We recommend making any setup transactions in the userOperation's calldata.
+              // @deprecated This field is deprecated. It is recommended to make any setup transactions in the userOperation's calldata.
               setupTransactions?: {
                   to: Address
                   data: Address
