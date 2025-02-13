@@ -1,12 +1,12 @@
 import {
     http,
     type Account,
+    type Hex,
     createPublicClient,
     createWalletClient
 } from "viem"
 import {
     type SmartAccount,
-    createBundlerClient,
     createPaymasterClient,
     entryPoint06Address,
     entryPoint07Address
@@ -349,10 +349,12 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     anvilRpc,
     erc7579,
     privateKey,
-    owners
+    owners,
+    onchainIdentifier
 }: {
     erc7579?: boolean
     owners?: Account[]
+    onchainIdentifier?: Hex
 } & AAParamType<entryPointVersion>): Promise<
     ToSafeSmartAccountReturnType<entryPointVersion>
 > => {
@@ -360,6 +362,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
 
     return toSafeSmartAccount({
         client: publicClient,
+        onchainIdentifier,
         entryPoint: {
             address:
                 entryPoint.version === "0.6"
@@ -710,6 +713,22 @@ export const getCoreSmartAccounts = () => [
         ) =>
             getBundlerClient({
                 account: await getSafeClient(conf),
+                ...conf
+            }),
+        supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe (with onchain identifier)",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...conf,
+                    onchainIdentifier: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+                }),
                 ...conf
             }),
         supportsEntryPointV06: true,
