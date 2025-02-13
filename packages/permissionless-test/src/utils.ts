@@ -1,9 +1,9 @@
 import {
     http,
     type Account,
+    type Hex,
     createPublicClient,
-    createWalletClient,
-    Hex
+    createWalletClient
 } from "viem"
 import {
     type SmartAccount,
