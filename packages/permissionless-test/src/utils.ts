@@ -725,10 +725,12 @@ export const getCoreSmartAccounts = () => [
             conf: AAParamType<entryPointVersion>
         ) =>
             getBundlerClient({
-                account: await getSafeClient(conf),
+                account: await getSafeClient({
+                    ...conf,
+                    onchainIdentifier: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+                }),
                 ...conf
             }),
-        onchainIdentifier: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         isEip1271Compliant: true
