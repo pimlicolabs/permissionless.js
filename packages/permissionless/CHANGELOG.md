@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.2.34
+
+### Patch Changes
+
+- caced42687f2de9950938be64af65089f9c0f6c7: Deprecated toSafeSmartAccount's setupTransactions field
+- caced42687f2de9950938be64af65089f9c0f6c7: Added onchainIdentier param for toSafeSmartAccount
+
 ## 0.2.33
 
 ### Patch Changes
