@@ -110,12 +110,10 @@ describe.each(getCoreSmartAccounts())(
                 }
 
                 if (name.includes("Safe 7579")) {
-                    return
-
                     // Due to 7579 launchpad, we can't verify the signature before deploying the account.
-                    // await smartClient.sendTransaction({
-                    //     calls: [{ to: zeroAddress, value: 0n }]
-                    // })
+                    await smartClient.sendTransaction({
+                        calls: [{ to: zeroAddress, value: 0n }]
+                    })
                 }
 
                 const signature = await signMessage(smartClient, {

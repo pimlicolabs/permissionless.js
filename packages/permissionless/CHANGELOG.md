@@ -1,5 +1,30 @@
 # permissionless
 
+## 0.2.34
+
+### Patch Changes
+
+- caced42687f2de9950938be64af65089f9c0f6c7: Deprecated toSafeSmartAccount's setupTransactions field
+- caced42687f2de9950938be64af65089f9c0f6c7: Added onchainIdentier param for toSafeSmartAccount
+
+## 0.2.33
+
+### Patch Changes
+
+- cdf7b2ba79f9ff50192a2084140dd13ff5118774: Added support for decode calls in prepareUserOperationForErc20Paymaster
+
+## 0.2.32
+
+### Patch Changes
+
+- 49e634973da560ca0e6fe333fce125fda7c96ec3: Fixed signTypedData for safe 7579 when deployed
+
+## 0.2.31
+
+### Patch Changes
+
+- bfa8da45e85b2481405f1349b5553ea86b04647b: Fixed signMessage for safe 7579 when deployed
+
 ## 0.2.30
 
 ### Patch Changes

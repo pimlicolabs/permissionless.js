@@ -928,6 +928,7 @@ type GetErc7579Params<TErc7579 extends Address | undefined> =
               safeModuleSetupAddress?: Address
               multiSendAddress?: Address
               multiSendCallOnlyAddress?: Address
+              // @deprecated This field is deprecated. It is recommended to make any setup transactions in the userOperation's calldata.
               setupTransactions?: {
                   to: Address
                   data: Address
@@ -975,6 +976,7 @@ export type ToSafeSmartAccountParameters<
     paymentToken?: Address
     payment?: bigint
     paymentReceiver?: Address
+    onchainIdentifier?: Hex
 } & GetErc7579Params<TErc7579>
 
 function isErc7579Args<entryPointVersion extends "0.6" | "0.7" = "0.7">(
@@ -1149,7 +1151,8 @@ export async function toSafeSmartAccount<
         nonceKey,
         paymentToken,
         payment,
-        paymentReceiver
+        paymentReceiver,
+        onchainIdentifier
     } = parameters
 
     const owners = await Promise.all(
@@ -1421,11 +1424,17 @@ export async function toSafeSmartAccount<
                 value = call.value ?? 0n
             }
 
-            return encodeFunctionData({
+            const calldata = encodeFunctionData({
                 abi: executeUserOpWithErrorStringAbi,
                 functionName: "executeUserOpWithErrorString",
                 args: [to, value, data, operationType]
             })
+
+            if (onchainIdentifier) {
+                return concat([calldata, onchainIdentifier])
+            }
+
+            return calldata
         },
         async decodeCalls(callData) {
             try {
@@ -1570,7 +1579,9 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return signatureBytes
+            return erc7579LaunchpadAddress
+                ? concat([zeroAddress, signatureBytes])
+                : signatureBytes
         },
         async signTypedData(typedData) {
             if (localOwners.length !== owners.length) {
@@ -1612,7 +1623,9 @@ export async function toSafeSmartAccount<
 
             const signatureBytes = concat(signatures.map((sig) => sig.data))
 
-            return signatureBytes
+            return erc7579LaunchpadAddress
+                ? concat([zeroAddress, signatureBytes])
+                : signatureBytes
         },
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
