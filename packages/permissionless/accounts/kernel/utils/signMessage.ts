@@ -1,3 +1,4 @@
+import { Signature } from "ox"
 import {
     type Hash,
     type LocalAccount,
@@ -8,7 +9,6 @@ import {
 } from "viem"
 import type { WebAuthnAccount } from "viem/account-abstraction"
 import { signMessage as _signMessage } from "viem/actions"
-import { parseSignature } from "webauthn-p256"
 import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
 import {
     type WrapMessageHashParams,
@@ -51,7 +51,7 @@ export async function signMessage({
         const { signature: signatureData, webauthn } = await owner.sign({
             hash: messageContent as Hash
         })
-        const signature = parseSignature(signatureData)
+        const signature = Signature.fromHex(signatureData)
 
         // encode signature
         const encodedSignature = encodeAbiParameters(

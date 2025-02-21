@@ -81,7 +81,7 @@
         }
     },
     "peerDependencies": {
-        "viem": "^2.21.54",
-        "webauthn-p256": "0.0.10"
+        "viem": "^2.23.2",
+        "ox": "0.6.7"
     }
 }

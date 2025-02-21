@@ -1,3 +1,4 @@
+import { Base64, Hex, PublicKey } from "ox"
 import type {
     Account,
     Assign,
@@ -9,7 +10,6 @@ import type {
 import {
     type Address,
     type Client,
-    type Hex,
     type LocalAccount,
     type TypedDataDefinition,
     concatHex,
@@ -32,7 +32,6 @@ import {
 } from "viem/account-abstraction"
 import { signMessage as _signMessage, getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import { base64UrlToBytes, bytesToHex, parsePublicKey } from "webauthn-p256"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
@@ -225,7 +224,7 @@ const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
     entryPoint: {
         version: entryPointVersion
     }
-    validatorData: Hex
+    validatorData: Hex.Hex
     validatorAddress: Address
 }) => {
     if (entryPointVersion === "0.6") {
@@ -268,9 +267,9 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
     }
 
     if (isWebAuthnAccount(owner)) {
-        const parsedPublicKey = parsePublicKey(owner.publicKey)
+        const parsedPublicKey = PublicKey.fromHex(owner.publicKey)
         const authenticatorIdHash = keccak256(
-            bytesToHex(base64UrlToBytes(owner.id))
+            Hex.fromBytes(Base64.toBytes(owner.id))
         )
 
         return encodeAbiParameters(
@@ -322,13 +321,13 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
     entryPointVersion: entryPointVersion
-    validatorData: Hex
+    validatorData: Hex.Hex
     index: bigint
     factoryAddress: Address
     accountLogicAddress: Address
     validatorAddress: Address
     useMetaFactory: boolean
-}): Promise<Hex> => {
+}): Promise<Hex.Hex> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
         entryPoint: { version: entryPointVersion },

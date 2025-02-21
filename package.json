@@ -29,8 +29,8 @@
         "get-port": "^7.0.0",
         "tsc-alias": "^1.8.8",
         "vitest": "^2.1.5",
-        "viem": "2.21.54",
-        "wagmi": "^2.12.8",
+        "viem": "2.23.2",
+        "wagmi": "^2.14.11",
         "@permissionless/wagmi": "workspace:packages/wagmi",
         "@types/react": "^18.3.1",
         "@types/react-dom": "^18.3.0",
@@ -40,6 +40,7 @@
         "vite": "^5.4.10",
         "@tanstack/react-query": "5.45.1",
         "react": "^18.3.1",
+        "ox": "0.6.7",
         "react-dom": "^18.3.1"
     },
     "description": "",
