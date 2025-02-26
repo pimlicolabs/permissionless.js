@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.35
+
+### Patch Changes
+
+- e46dbdb8d55613ee348ea8f562c4a1ae7501c243: Added support for passkey server
+
 ## 0.2.34
 
 ### Patch Changes
