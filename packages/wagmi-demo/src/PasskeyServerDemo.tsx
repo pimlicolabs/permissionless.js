@@ -6,6 +6,7 @@ import {
     type ToKernelSmartAccountReturnType,
     toKernelSmartAccount
 } from "permissionless/accounts"
+import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import * as React from "react"
 import {
@@ -18,7 +19,6 @@ import {
     parseEther
 } from "viem"
 import {
-    type P256Credential,
     createWebAuthnCredential,
     entryPoint07Address,
     toWebAuthnAccount
@@ -72,7 +72,14 @@ const pimlicoClient = createPimlicoClient({
     transport: http(pimlicoUrl)
 })
 
-export function PasskeysDemo() {
+const passkeyServerClient = createPasskeyServerClient({
+    chain,
+    transport: http(
+        `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${pimlicoApiKey}`
+    )
+})
+
+export function PasskeyServerDemo() {
     const [smartAccountClient, setSmartAccountClient] =
         React.useState<
             SmartAccountClient<
@@ -81,9 +88,10 @@ export function PasskeysDemo() {
                 ToKernelSmartAccountReturnType<"0.7">
             >
         >()
-    const [credential, setCredential] = React.useState<P256Credential>(() =>
-        JSON.parse(localStorage.getItem("credential") || "null")
-    )
+    const [credential, setCredential] = React.useState<{
+        id: string
+        publicKey: Hex
+    }>()
 
     const [hash, setHash] = React.useState<Hex>()
     const [userOpHash, setUserOpHash] = React.useState<Hex>()
@@ -121,11 +129,36 @@ export function PasskeysDemo() {
     }, [credential])
 
     const createCredential = async () => {
-        const credential = await createWebAuthnCredential({
-            name: "Wallet"
+        const credential = await createWebAuthnCredential(
+            await passkeyServerClient.startRegistration({
+                context: {
+                    userName: "plusminushalf"
+                }
+            })
+        )
+        const verifiedCredential = await passkeyServerClient.verifyRegistration(
+            {
+                credential,
+                context: {
+                    userName: "plusminushalf"
+                }
+            }
+        )
+
+        console.log({ verifiedCredential })
+
+        setCredential(verifiedCredential)
+    }
+
+    const loginCredential = async () => {
+        const credentials = await passkeyServerClient.getCredentials({
+            context: {
+                userName: "plusminushalf"
+            }
         })
-        localStorage.setItem("credential", JSON.stringify(credential))
-        setCredential(credential)
+        console.log(credentials)
+
+        setCredential(credentials[0])
     }
 
     const sendUserOperation = async (
@@ -190,7 +223,14 @@ export function PasskeysDemo() {
         return (
             <>
                 <h2>Account</h2>
-                <button type="button" onClick={createCredential}>
+                <button type="button" onClick={loginCredential}>
+                    Use existing credential
+                </button>
+                <button
+                    style={{ marginLeft: 8 }}
+                    type="button"
+                    onClick={createCredential}
+                >
                     Create credential
                 </button>
             </>
