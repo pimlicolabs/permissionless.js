@@ -34,8 +34,6 @@ import {
     type Erc20BalanceOverrideParameters,
     erc20BalanceOverride
 } from "./erc20BalanceOverride.js"
-import { startWebAuthnRegistration } from "./startWebAuthnRegistration.js"
-import { verifyWebAuthnRegistration } from "./verifyWebAuthnRegistration.js"
 
 export {
     transactionReceiptStatus,
@@ -57,7 +55,5 @@ export {
     erc20AllowanceOverride,
     erc20BalanceOverride,
     type Erc20AllowanceOverrideParameters,
-    type Erc20BalanceOverrideParameters,
-    startWebAuthnRegistration,
-    verifyWebAuthnRegistration
+    type Erc20BalanceOverrideParameters
 }

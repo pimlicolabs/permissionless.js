@@ -1,5 +1,7 @@
 import { Base64 } from "ox"
+import type { Account, Chain, Client, Transport } from "viem"
 import type { CreateWebAuthnCredentialParameters } from "viem/account-abstraction"
+import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
 const validateAttestation = (attestation: unknown): boolean => {
     return (
@@ -34,7 +36,8 @@ const validateChallenge = (challenge: unknown): boolean => {
 }
 
 const validateExtensions = (extensions: unknown): boolean => {
-    if (!extensions || typeof extensions !== "object") return false
+    if (!extensions) return true
+    if (typeof extensions !== "object") return false
 
     const ext = extensions as Record<string, unknown>
 
@@ -51,24 +54,6 @@ const validateExtensions = (extensions: unknown): boolean => {
     // Optional minPinLength must be boolean if present
     if ("minPinLength" in ext && typeof ext.minPinLength !== "boolean")
         return false
-
-    // Optional prf must have valid eval.first string if present
-    if ("prf" in ext) {
-        const prf = ext.prf as Record<string, unknown>
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        if (!prf?.eval || typeof (prf.eval as any).first !== "string")
-            return false
-    }
-
-    // Optional largeBlob must have valid support enum if present
-    if ("largeBlob" in ext) {
-        const blob = ext.largeBlob as Record<string, unknown>
-        if (
-            !blob?.support ||
-            !["required", "preferred"].includes(blob.support as string)
-        )
-            return false
-    }
 
     return true
 }
@@ -88,65 +73,52 @@ const validateUser = (user: any): boolean => {
     )
 }
 
-export const startWebAuthnRegistration = async ({
-    passKeyServerUrl,
-    userName
-}: {
-    passKeyServerUrl: string
-    userName: string
-}): Promise<CreateWebAuthnCredentialParameters> => {
-    const response = await fetch(passKeyServerUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            userName
-        })
+export type StartRegistrationParameters = {
+    context?: Record<string, unknown>
+}
+export type StartRegistrationReturnType = CreateWebAuthnCredentialParameters
+
+export const startRegistration = async (
+    client: Client<
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PasskeyServerRpcSchema
+    >,
+    args?: StartRegistrationParameters
+): Promise<StartRegistrationReturnType> => {
+    const response = await client.request({
+        method: "pks_startRegistration",
+        params: [args?.context]
     })
-
-    if (!response.ok) {
-        throw new Error("Failed to register passkey", {
-            cause: response
-        })
-    }
-
-    const jsonResponse = await response.json()
 
     // Validate the response matches expected schema
     if (
-        !validateAttestation(jsonResponse.attestation) ||
-        !validateAuthenticatorSelection(jsonResponse.authenticatorSelection) ||
-        !validateChallenge(jsonResponse.challenge) ||
-        !validateExtensions(jsonResponse.extensions) ||
-        !validateRp(jsonResponse.rp) ||
-        !validateUser(jsonResponse.user)
+        !validateAttestation(response.attestation) ||
+        !validateAuthenticatorSelection(response.authenticatorSelection) ||
+        !validateChallenge(response.challenge) ||
+        !validateExtensions(response.extensions) ||
+        !validateRp(response.rp) ||
+        !validateUser(response.user)
     ) {
         throw new Error("Invalid response format from passkey server")
     }
 
-    const credentialOptions: CreateWebAuthnCredentialParameters = {
-        attestation: jsonResponse.attestation,
-        authenticatorSelection: jsonResponse.authenticatorSelection,
-        challenge: Base64.toBytes(jsonResponse.challenge),
-        extensions: {
-            ...jsonResponse.extensions,
-            prf: jsonResponse.extensions?.prf
-                ? {
-                      eval: {
-                          first: Base64.toBytes(
-                              jsonResponse.extensions.prf.eval.first
-                          )
-                      }
-                  }
-                : undefined
-        },
-        rp: jsonResponse.rp,
-        timeout: jsonResponse.timeout,
+    const credentialOptions: StartRegistrationReturnType = {
+        attestation: response.attestation,
+        authenticatorSelection: response.authenticatorSelection,
+        challenge: Base64.toBytes(response.challenge),
+        extensions: response.extensions
+            ? {
+                  ...response.extensions
+              }
+            : undefined,
+        rp: response.rp,
+        timeout: response.timeout,
         user: {
-            id: Base64.toBytes(jsonResponse.user.id),
-            name: jsonResponse.user.name,
-            displayName: jsonResponse.user.displayName
+            id: Base64.toBytes(response.user.id),
+            name: response.user.name,
+            displayName: response.user.displayName
         }
     }
     return credentialOptions

@@ -1,14 +1,12 @@
-import { Base64 } from "ox"
 import {
     type SmartAccountClient,
-    createSmartAccountClient,
-    startWebAuthnRegistration,
-    verifyWebAuthnRegistration
+    createSmartAccountClient
 } from "permissionless"
 import {
     type ToKernelSmartAccountReturnType,
     toKernelSmartAccount
 } from "permissionless/accounts"
+import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import * as React from "react"
 import {
@@ -21,15 +19,11 @@ import {
     parseEther
 } from "viem"
 import {
-    type CreateWebAuthnCredentialParameters,
-    type CreateWebAuthnCredentialReturnType,
-    type P256Credential,
     createWebAuthnCredential,
     entryPoint07Address,
     toWebAuthnAccount
 } from "viem/account-abstraction"
 import { baseSepolia } from "viem/chains"
-import { z } from "zod"
 
 const chain = baseSepolia
 const pimlicoUrl = `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${pimlicoApiKey}`
@@ -76,6 +70,13 @@ const publicClient = createPublicClient({
 const pimlicoClient = createPimlicoClient({
     chain,
     transport: http(pimlicoUrl)
+})
+
+const passkeyServerClient = createPasskeyServerClient({
+    chain,
+    transport: http(
+        `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${pimlicoApiKey}`
+    )
 })
 
 export function PasskeyServerDemo() {
@@ -129,53 +130,35 @@ export function PasskeyServerDemo() {
 
     const createCredential = async () => {
         const credential = await createWebAuthnCredential(
-            await startWebAuthnRegistration({
-                passKeyServerUrl: `http://0.0.0.0:8080/v2/passkeys/register/options?apikey=${pimlicoApiKey}`,
-                userName: "plusminushalf"
+            await passkeyServerClient.startRegistration({
+                context: {
+                    userName: "plusminushalf"
+                }
             })
         )
-        const verifiedCredential = await verifyWebAuthnRegistration({
-            passKeyServerUrl: `http://0.0.0.0:8080/v2/passkeys/register/verify?apikey=${pimlicoApiKey}`,
-            credential,
-            userName: "plusminushalf"
-        })
+        const verifiedCredential = await passkeyServerClient.verifyRegistration(
+            {
+                credential,
+                context: {
+                    userName: "plusminushalf"
+                }
+            }
+        )
 
         console.log({ verifiedCredential })
 
         setCredential(verifiedCredential)
     }
 
-    const fetchPasskeys = async ({
-        userName
-    }: {
-        userName: string
-    }) => {
-        const response = await fetch(
-            `http://0.0.0.0:8080/v2/passkeys/${userName}?apikey=${pimlicoApiKey}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        )
-
-        if (!response.ok) {
-            console.error("Failed to register:", response.statusText)
-        } else {
-            console.log("Registration successful")
-        }
-
-        return response.json()
-    }
-
     const loginCredential = async () => {
-        const options = await fetchPasskeys({
-            userName: "plusminushalf"
+        const credentials = await passkeyServerClient.getCredentials({
+            context: {
+                userName: "plusminushalf"
+            }
         })
-        console.log(options.passkeys)
+        console.log(credentials)
 
-        setCredential(options.passkeys[0])
+        setCredential(credentials[0])
     }
 
     const sendUserOperation = async (

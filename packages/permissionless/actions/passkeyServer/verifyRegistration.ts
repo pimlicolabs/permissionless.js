@@ -1,20 +1,30 @@
 import { Base64 } from "ox"
-import type { Hex } from "viem"
+import type { Account, Chain, Client, Hex, Transport } from "viem"
 import type { CreateWebAuthnCredentialReturnType } from "viem/account-abstraction"
+import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
-export const verifyWebAuthnRegistration = async ({
-    passKeyServerUrl,
-    credential,
-    userName
-}: {
-    passKeyServerUrl: string
+export type VerifyRegistrationParameters = {
     credential: CreateWebAuthnCredentialReturnType
-    userName: string
-}): Promise<{
+    context: unknown
+}
+
+export type VerifyRegistrationReturnType = {
     success: boolean
     id: string
     publicKey: Hex
-}> => {
+}
+
+export const verifyRegistration = async (
+    client: Client<
+        Transport,
+        Chain | undefined,
+        Account | undefined,
+        PasskeyServerRpcSchema
+    >,
+    args: VerifyRegistrationParameters
+): Promise<VerifyRegistrationReturnType> => {
+    const { credential, context } = args
+
     const response = credential.raw
         .response as unknown as AuthenticatorAttestationResponse
 
@@ -38,19 +48,15 @@ export const verifyWebAuthnRegistration = async ({
         }
     }
 
-    const serverResponse = await (
-        await fetch(passKeyServerUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+    const serverResponse = await client.request({
+        method: "pks_verifyRegistration",
+        params: [
+            {
                 id: credential.id,
                 rawId: Base64.fromBytes(new Uint8Array(credential.raw.rawId), {
                     pad: false,
                     url: true
                 }),
-                userName: userName,
                 response: {
                     clientDataJSON: Base64.fromBytes(
                         new Uint8Array(response.clientDataJSON)
@@ -63,18 +69,28 @@ export const verifyWebAuthnRegistration = async ({
                     ),
                     transports:
                         typeof response.getTransports === "function"
-                            ? response.getTransports()
+                            ? (response.getTransports() as (
+                                  | "ble"
+                                  | "cable"
+                                  | "hybrid"
+                                  | "internal"
+                                  | "nfc"
+                                  | "smart-card"
+                                  | "usb"
+                              )[])
                             : undefined,
                     publicKeyAlgorithm: responsePublicKeyAlgorithm,
                     authenticatorData: responseAuthenticatorData
                 },
-                authenticatorAttachment: credential.raw.authenticatorAttachment,
+                authenticatorAttachment: credential.raw
+                    .authenticatorAttachment as "cross-platform" | "platform",
                 clientExtensionResults:
                     credential.raw.getClientExtensionResults(),
-                type: credential.raw.type
-            })
-        })
-    ).json()
+                type: credential.raw.type as "public-key"
+            },
+            context
+        ]
+    })
 
     const success = Boolean(serverResponse?.success)
     const id = serverResponse?.id

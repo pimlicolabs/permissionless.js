@@ -44,6 +44,11 @@
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
+        "./actions/passkeyServer": {
+            "types": "./_types/actions/passkeyServer.d.ts",
+            "import": "./_esm/actions/passkeyServer.js",
+            "default": "./_cjs/actions/passkeyServer.js"
+        },
         "./actions/etherspot": {
             "types": "./_types/actions/etherspot.d.ts",
             "import": "./_esm/actions/etherspot.js",
@@ -63,6 +68,11 @@
             "types": "./_types/clients/pimlico.d.ts",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
+        },
+        "./clients/passkeyServer": {
+            "types": "./_types/clients/passkeyServer.d.ts",
+            "import": "./_esm/clients/passkeyServer.js",
+            "default": "./_cjs/clients/passkeyServer.js"
         },
         "./utils": {
             "types": "./_types/utils/index.d.ts",
