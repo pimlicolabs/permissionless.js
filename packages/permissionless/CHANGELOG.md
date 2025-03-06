@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.36
+
+### Patch Changes
+
+- 58f1e783d67e5021caef58582953b5146f0328b5: Fixed sorting of attesters for safe and nexus
+
 ## 0.2.35
 
 ### Patch Changes
