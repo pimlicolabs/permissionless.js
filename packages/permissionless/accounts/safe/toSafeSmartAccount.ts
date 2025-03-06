@@ -581,7 +581,9 @@ const get7579LaunchPadInitData = ({
                     module: hook.address,
                     initData: hook.context
                 })),
-                attesters,
+                attesters.sort((left, right) =>
+                    left.toLowerCase().localeCompare(right.toLowerCase())
+                ),
                 attestersThreshold
             ]
         }),

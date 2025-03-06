@@ -164,7 +164,14 @@ export async function toNexusSmartAccount(
                     }
                 ],
                 functionName: "createAccount",
-                args: [localOwner.address, index, attesters, threshold]
+                args: [
+                    localOwner.address,
+                    index,
+                    attesters.sort((left, right) =>
+                        left.toLowerCase().localeCompare(right.toLowerCase())
+                    ),
+                    threshold
+                ]
             })
         }
     }
@@ -202,7 +209,14 @@ export async function toNexusSmartAccount(
                     }
                 ],
                 functionName: "computeAccountAddress",
-                args: [localOwner.address, index, attesters, threshold]
+                args: [
+                    localOwner.address,
+                    index,
+                    attesters.sort((left, right) =>
+                        left.toLowerCase().localeCompare(right.toLowerCase())
+                    ),
+                    threshold
+                ]
             })
 
             return accountAddress
