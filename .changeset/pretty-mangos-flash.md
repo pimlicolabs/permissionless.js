@@ -2,4 +2,4 @@
 "permissionless": patch
 ---
 
-Fixed sorting of attestors for safe and nexus
+Fixed sorting of attesters for safe and nexus
