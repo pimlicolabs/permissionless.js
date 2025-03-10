@@ -24,17 +24,17 @@ import {
     toPackedUserOperation
 } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
-import { getPublicClient } from "../../src/utils"
 import {
     SINGLETON_PAYMASTER_V06_ABI,
     SINGLETON_PAYMASTER_V07_ABI
-} from "./helpers/abi"
-import type { PaymasterMode } from "./helpers/utils"
+} from "./helpers/abi.js"
+import { getPublicClient } from "./helpers/utils.js"
+import type { PaymasterMode } from "./helpers/utils.js"
 
 const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 
-const EXCHANGE_RATE = 30_000_000
-const POST_OP_GAS_OVERHEAD = 100_000
+const EXCHANGE_RATE = 30_000_000n
+const POST_OP_GAS_OVERHEAD = 100_000n
 
 export const getDummyPaymasterData = (
     isV6: boolean,

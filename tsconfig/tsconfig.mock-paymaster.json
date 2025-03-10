@@ -1,0 +1,17 @@
+{
+    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    "extends": "./tsconfig.base.json",
+    "include": [
+        "../packages/mock-paymaster"
+    ],
+    "exclude": [
+        "../packages/mock-paymaster/**/setupTests.ts",
+        "../packages/mock-paymaster/**/*.test.ts",
+        "../packages/mock-paymaster/**/*.test-d.ts",
+        "../packages/mock-paymaster/**/*.bench.ts"
+    ],
+    "compilerOptions": {
+        "sourceMap": true,
+        "rootDir": "../packages/mock-paymaster"
+    }
+}

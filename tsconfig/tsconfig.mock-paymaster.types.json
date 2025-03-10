@@ -1,0 +1,13 @@
+{
+    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    "extends": "./tsconfig.mock-paymaster.json",
+    "compilerOptions": {
+        "moduleResolution": "NodeNext",
+        "module": "NodeNext",
+        "outDir": "../packages/mock-paymaster/_esm",
+        "declarationDir": "../packages/mock-paymaster/_types",
+        "emitDeclarationOnly": true,
+        "declaration": true,
+        "declarationMap": true,
+    }
+}

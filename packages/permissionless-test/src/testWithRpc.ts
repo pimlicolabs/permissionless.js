@@ -1,19 +1,16 @@
+import { paymaster } from "@pimlico/mock-paymaster"
 import getPort from "get-port"
 import { alto, anvil } from "prool/instances"
-import { createTestClient, parseEther } from "viem"
-import { http } from "viem"
 import {
     entryPoint06Address,
     entryPoint07Address
 } from "viem/account-abstraction"
-import { privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { test } from "vitest"
 import {
     ENTRY_POINT_SIMULATIONS_ADDRESS,
     setupContracts
 } from "../mock-aa-infra/alto"
-import { paymaster } from "../mock-aa-infra/mock-paymaster"
 
 export const getInstances = async ({
     anvilPort,
