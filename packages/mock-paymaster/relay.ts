@@ -1,4 +1,4 @@
-import util from "node:util"
+import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
     type Address,
@@ -14,7 +14,7 @@ import {
     entryPoint07Address
 } from "viem/account-abstraction"
 import { fromZodError } from "zod-validation-error"
-import { ERC20_ADDRESS } from "../../src/erc20-utils"
+import { ERC20_ADDRESS } from "./helpers/erc20-utils.js"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
@@ -25,17 +25,17 @@ import {
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
     pmSponsorUserOperationParamsSchema
-} from "./helpers/schema"
+} from "./helpers/schema.js"
 import {
     type PaymasterMode,
     isTokenSupported,
     maxBigInt
-} from "./helpers/utils"
+} from "./helpers/utils.js"
 import {
     type SingletonPaymasterV06,
     type SingletonPaymasterV07,
     getDummyPaymasterData
-} from "./singletonPaymasters"
+} from "./singletonPaymasters.js"
 
 const handleMethodV06 = async (
     userOperation: UserOperation<"0.6">,
@@ -44,7 +44,7 @@ const handleMethodV06 = async (
     singletonPaymasterV06: SingletonPaymasterV06,
     estimateGas: boolean
 ) => {
-    let op = {
+    let op: UserOperation<"0.6"> = {
         ...userOperation,
         ...getDummyPaymasterData(
             true,

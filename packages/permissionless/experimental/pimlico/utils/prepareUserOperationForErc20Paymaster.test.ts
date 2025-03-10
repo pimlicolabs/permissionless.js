@@ -9,7 +9,7 @@ import {
     ERC20_ADDRESS,
     sudoMintTokens,
     tokenBalanceOf
-} from "../../../../permissionless-test/src/erc20-utils.ts"
+} from "../../../../mock-paymaster/helpers/erc20-utils.ts"
 import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc.ts"
 import {
     getCoreSmartAccounts,

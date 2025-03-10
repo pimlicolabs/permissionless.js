@@ -1,0 +1,32 @@
+{
+    "name": "@pimlico/mock-paymaster",
+    "version": "0.0.1",
+    "author": "Pimlico",
+    "homepage": "https://docs.pimlico.io/permissionless",
+    "repository": "github:pimlicolabs/permissionless.js",
+    "main": "./_cjs/index.js",
+    "module": "./_esm/index.js",
+    "types": "./_types/index.d.ts",
+    "typings": "./_types/index.d.ts",
+    "type": "module",
+    "sideEffects": false,
+    "description": "A utility library that allows you to create a mock-paymaster instance with Prool",
+    "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "prool"],
+    "license": "MIT",
+    "exports": {
+        ".": {
+            "types": "./_types/index.d.ts",
+            "import": "./_esm/index.js",
+            "default": "./_cjs/index.js"
+        }
+    },
+    "peerDependencies": {
+        "viem": "^2.23.2",
+        "prool": "^0.0.23"
+    },
+    "dependencies": {
+        "@fastify/cors": "^11.0.0",
+        "fastify": "^5.2.1",
+        "zod": "^3.24.2"
+    }
+}
