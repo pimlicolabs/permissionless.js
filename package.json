@@ -3,7 +3,6 @@
         "packages/permissionless",
         "packages/wagmi",
         "packages/wagmi-demo",
-        "packages/create-permissionless-app",
         "packages/mock-paymaster"
     ],
     "private": true,
