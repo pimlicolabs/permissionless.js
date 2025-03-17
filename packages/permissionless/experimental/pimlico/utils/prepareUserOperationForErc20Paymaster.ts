@@ -27,7 +27,6 @@ import { getChainId as getChainId_ } from "viem/actions"
 import { readContract } from "viem/actions"
 import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico.js"
-import { erc20AllowanceOverride } from "../../../utils/erc20AllowanceOverride.js"
 import { erc20BalanceOverride } from "../../../utils/erc20BalanceOverride.js"
 
 export const prepareUserOperationForErc20Paymaster =
@@ -35,12 +34,10 @@ export const prepareUserOperationForErc20Paymaster =
         pimlicoClient: Client,
         {
             balanceOverride = false,
-            balanceSlot: _balanceSlot,
-            allowanceSlot: _allowanceSlot
+            balanceSlot: _balanceSlot
         }: {
             balanceOverride?: boolean
             balanceSlot?: bigint
-            allowanceSlot?: bigint
         } = {}
     ) =>
     async <
@@ -144,15 +141,10 @@ export const prepareUserOperationForErc20Paymaster =
             // Call prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
-            const allowanceSlot = _allowanceSlot ?? quotes[0].allowanceSlot
             const balanceSlot = _balanceSlot ?? quotes[0].balanceSlot
-
-            const hasAllowanceSlot = allowanceSlot !== undefined
             const hasBalanceSlot = balanceSlot !== undefined
 
-            const hasSlot = hasAllowanceSlot && hasBalanceSlot
-
-            if (!hasSlot && balanceOverride) {
+            if (!hasBalanceSlot && balanceOverride) {
                 throw new Error(
                     `balanceOverride is not supported for token ${token}, provide custom slot for balance & allowance overrides`
                 )
@@ -167,25 +159,12 @@ export const prepareUserOperationForErc20Paymaster =
                       })[0]
                     : undefined
 
-            const allowanceStateOverride =
-                balanceOverride && hasAllowanceSlot
-                    ? erc20AllowanceOverride({
-                          token,
-                          owner: account.address,
-                          spender: paymasterERC20Address,
-                          slot: allowanceSlot
-                      })[0]
-                    : undefined
-
             parameters.stateOverride =
-                balanceOverride &&
-                balanceStateOverride &&
-                allowanceStateOverride // allowanceSlot && balanceSlot is cuz of TypeScript :/
+                balanceOverride && balanceStateOverride
                     ? (parameters.stateOverride ?? []).concat([
                           {
                               address: token,
                               stateDiff: [
-                                  ...(allowanceStateOverride.stateDiff ?? []),
                                   ...(balanceStateOverride.stateDiff ?? [])
                               ]
                           }
