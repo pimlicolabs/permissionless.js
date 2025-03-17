@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.37
+
+### Patch Changes
+
+- da27fd39cb0baecc5bc7a33f1a4da7150d05ba17: Removed allowance override in prepareUserOperationForErc20Paymaster
+
 ## 0.2.36
 
 ### Patch Changes
