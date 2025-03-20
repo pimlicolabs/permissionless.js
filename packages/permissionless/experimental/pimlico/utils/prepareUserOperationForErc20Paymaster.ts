@@ -29,6 +29,10 @@ import { getAction, parseAccount } from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico.js"
 import { erc20BalanceOverride } from "../../../utils/erc20BalanceOverride.js"
 
+const MAINNET_USDT_ADDRESS = getAddress(
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+)
+
 export const prepareUserOperationForErc20Paymaster =
     (
         pimlicoClient: Client,
@@ -127,6 +131,7 @@ export const prepareUserOperationForErc20Paymaster =
                 calls = await account.decodeCalls(parameters.callData)
             }
 
+            // Create basic approval call array with max approval
             const callsWithDummyApproval = [
                 {
                     abi: erc20Abi,
@@ -136,6 +141,16 @@ export const prepareUserOperationForErc20Paymaster =
                 },
                 ...(calls ? calls : [])
             ]
+
+            // For USDT on mainnet, add zero approval at the beginning
+            if (token === MAINNET_USDT_ADDRESS) {
+                callsWithDummyApproval.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, 0n],
+                    to: MAINNET_USDT_ADDRESS
+                })
+            }
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call prepareUserOperation
@@ -243,17 +258,26 @@ export const prepareUserOperationForErc20Paymaster =
 
             const hasSufficientApproval = allowance >= maxCostInToken
 
-            const finalCalls = hasSufficientApproval
-                ? (calls ?? [])
-                : [
-                      {
-                          abi: erc20Abi,
-                          functionName: "approve",
-                          args: [paymasterERC20Address, maxCostInToken],
-                          to: paymasterContext.token
-                      },
-                      ...(calls ?? [])
-                  ]
+            const finalCalls: unknown[] = calls ? [...calls] : []
+
+            if (!hasSufficientApproval) {
+                finalCalls.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, maxCostInToken],
+                    to: paymasterContext.token
+                })
+            }
+
+            // For USDT on mainnet, add zero approval at the beginning
+            if (token === MAINNET_USDT_ADDRESS) {
+                finalCalls.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, 0n],
+                    to: MAINNET_USDT_ADDRESS
+                })
+            }
 
             userOperation.callData = await account.encodeCalls(
                 finalCalls.map((call_) => {
