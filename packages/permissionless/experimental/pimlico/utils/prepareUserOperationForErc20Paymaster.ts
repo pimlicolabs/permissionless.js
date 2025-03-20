@@ -131,32 +131,26 @@ export const prepareUserOperationForErc20Paymaster =
                 calls = await account.decodeCalls(parameters.callData)
             }
 
-            const callsWithDummyApproval =
-                token === MAINNET_USDT_ADDRESS
-                    ? [
-                          {
-                              abi: erc20Abi,
-                              functionName: "approve",
-                              args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
-                              to: paymasterContext.token
-                          },
-                          {
-                              abi: erc20Abi,
-                              functionName: "approve",
-                              args: [paymasterERC20Address, maxUint256],
-                              to: paymasterContext.token
-                          },
-                          ...(calls ? calls : [])
-                      ]
-                    : [
-                          {
-                              abi: erc20Abi,
-                              functionName: "approve",
-                              args: [paymasterERC20Address, maxUint256], // dummy approval to ensure simulation passes
-                              to: paymasterContext.token
-                          },
-                          ...(calls ? calls : [])
-                      ]
+            // Create basic approval call array with max approval
+            const callsWithDummyApproval = [
+                {
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, maxUint256], // dummy approval to ensure simulation passes
+                    to: paymasterContext.token
+                },
+                ...(calls ? calls : [])
+            ]
+
+            // For USDT on mainnet, add zero approval at the beginning
+            if (token === MAINNET_USDT_ADDRESS) {
+                callsWithDummyApproval.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
+                    to: paymasterContext.token
+                })
+            }
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call prepareUserOperation
@@ -264,33 +258,29 @@ export const prepareUserOperationForErc20Paymaster =
 
             const hasSufficientApproval = allowance >= maxCostInToken
 
-            const finalCalls = hasSufficientApproval
-                ? (calls ?? [])
-                : token === MAINNET_USDT_ADDRESS
-                  ? [
-                        {
-                            abi: erc20Abi,
-                            functionName: "approve",
-                            args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
-                            to: paymasterContext.token
-                        },
-                        {
-                            abi: erc20Abi,
-                            functionName: "approve",
-                            args: [paymasterERC20Address, maxCostInToken],
-                            to: paymasterContext.token
-                        },
-                        ...(calls ?? [])
-                    ]
-                  : [
-                        {
-                            abi: erc20Abi,
-                            functionName: "approve",
-                            args: [paymasterERC20Address, maxCostInToken],
-                            to: paymasterContext.token
-                        },
-                        ...(calls ?? [])
-                    ]
+            let finalCalls: unknown[] = calls ? [...calls] : []
+
+            if (!hasSufficientApproval) {
+                finalCalls.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [
+                        paymasterERC20Address,
+                        hasSufficientApproval ? maxCostInToken : 0n
+                    ],
+                    to: paymasterContext.token
+                })
+            }
+
+            // For USDT on mainnet, add zero approval at the beginning
+            if (token === MAINNET_USDT_ADDRESS) {
+                finalCalls.unshift({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
+                    to: paymasterContext.token
+                })
+            }
 
             userOperation.callData = await account.encodeCalls(
                 finalCalls.map((call_) => {
