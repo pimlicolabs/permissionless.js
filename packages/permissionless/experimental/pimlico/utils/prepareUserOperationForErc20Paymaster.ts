@@ -258,7 +258,7 @@ export const prepareUserOperationForErc20Paymaster =
 
             const hasSufficientApproval = allowance >= maxCostInToken
 
-            let finalCalls: unknown[] = calls ? [...calls] : []
+            const finalCalls: unknown[] = calls ? [...calls] : []
 
             if (!hasSufficientApproval) {
                 finalCalls.unshift({
