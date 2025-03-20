@@ -148,7 +148,7 @@ export const prepareUserOperationForErc20Paymaster =
                     abi: erc20Abi,
                     functionName: "approve",
                     args: [paymasterERC20Address, 0n],
-                    to: paymasterContext.token
+                    to: MAINNET_USDT_ADDRESS
                 })
             }
 
@@ -278,7 +278,7 @@ export const prepareUserOperationForErc20Paymaster =
                     abi: erc20Abi,
                     functionName: "approve",
                     args: [paymasterERC20Address, 0n],
-                    to: paymasterContext.token
+                    to: MAINNET_USDT_ADDRESS
                 })
             }
 
