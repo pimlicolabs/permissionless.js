@@ -264,10 +264,7 @@ export const prepareUserOperationForErc20Paymaster =
                 finalCalls.unshift({
                     abi: erc20Abi,
                     functionName: "approve",
-                    args: [
-                        paymasterERC20Address,
-                        hasSufficientApproval ? maxCostInToken : 0n
-                    ],
+                    args: [paymasterERC20Address, maxCostInToken],
                     to: paymasterContext.token
                 })
             }
