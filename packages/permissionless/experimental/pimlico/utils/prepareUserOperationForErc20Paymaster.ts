@@ -147,7 +147,7 @@ export const prepareUserOperationForErc20Paymaster =
                 callsWithDummyApproval.unshift({
                     abi: erc20Abi,
                     functionName: "approve",
-                    args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
+                    args: [paymasterERC20Address, 0n],
                     to: paymasterContext.token
                 })
             }
@@ -277,7 +277,7 @@ export const prepareUserOperationForErc20Paymaster =
                 finalCalls.unshift({
                     abi: erc20Abi,
                     functionName: "approve",
-                    args: [paymasterERC20Address, 0n], // USDT on mainnet requires zero approval first
+                    args: [paymasterERC20Address, 0n],
                     to: paymasterContext.token
                 })
             }
