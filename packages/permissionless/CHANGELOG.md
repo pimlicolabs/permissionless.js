@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.38
+
+### Patch Changes
+
+- 97f1ba07b3dd6b2dd4b1622aed2e06c80cde0b59: Added flow to handle USDT approval flow on mainnet in prepareUserOperationForErc20Paymaster
+
 ## 0.2.37
 
 ### Patch Changes
