@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.39
+
+### Patch Changes
+
+- f0070a5e6be409f1f8a250d3bfc36324bc33f9c3: Updated GetSenderAddressHelper.sol to return abi encoded address (fixes edgecase when sender starts with 0xef...)
+
 ## 0.2.38
 
 ### Patch Changes
