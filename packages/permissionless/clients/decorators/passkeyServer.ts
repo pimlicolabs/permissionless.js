@@ -5,10 +5,19 @@ import {
     getCredentials
 } from "../../actions/passkeyServer/getCredentials.js"
 import {
+    type StartAuthenticationReturnType,
+    startAuthentication
+} from "../../actions/passkeyServer/startAuthentication.js"
+import {
     type StartRegistrationParameters,
     type StartRegistrationReturnType,
     startRegistration
 } from "../../actions/passkeyServer/startRegistration.js"
+import {
+    type VerifyAuthenticationParameters,
+    type VerifyAuthenticationReturnType,
+    verifyAuthentication
+} from "../../actions/passkeyServer/verifyAuthentication.js"
 import {
     type VerifyRegistrationParameters,
     type VerifyRegistrationReturnType,
@@ -23,6 +32,10 @@ export type PasskeyServerActions = {
     verifyRegistration: (
         args: VerifyRegistrationParameters
     ) => Promise<VerifyRegistrationReturnType>
+    startAuthentication: () => Promise<StartAuthenticationReturnType>
+    verifyAuthentication: (
+        args: VerifyAuthenticationParameters
+    ) => Promise<VerifyAuthenticationReturnType>
     getCredentials: (
         args: GetCredentialsParameters
     ) => Promise<GetCredentialsReturnType>
@@ -38,5 +51,7 @@ export const passkeyServerActions = (
 ): PasskeyServerActions => ({
     startRegistration: (args) => startRegistration(client, args),
     verifyRegistration: (args) => verifyRegistration(client, args),
-    getCredentials: (args) => getCredentials(client, args)
+    getCredentials: (args) => getCredentials(client, args),
+    startAuthentication: () => startAuthentication(client),
+    verifyAuthentication: (args) => verifyAuthentication(client, args)
 })

@@ -2,6 +2,17 @@ import type { Hex } from "viem"
 
 export type PasskeyServerRpcSchema = [
     {
+        Method: "pks_startAuthentication"
+        Parameters: []
+        ReturnType: {
+            challenge: string
+            rpId: string
+            timeout?: number
+            userVerification?: "required" | "preferred" | "discouraged"
+            uuid: string
+        }
+    },
+    {
         Method: "pks_startRegistration"
         Parameters: [context: unknown]
         ReturnType: {
@@ -52,6 +63,36 @@ export type PasskeyServerRpcSchema = [
                     )[]
                     publicKeyAlgorithm?: number
                     publicKeyType?: string
+                }
+                authenticatorAttachment: "cross-platform" | "platform"
+                clientExtensionResults: {
+                    appid?: boolean
+                    credProps?: {
+                        rk?: boolean
+                    }
+                    hmacCreateSecret?: boolean
+                }
+                type: "public-key"
+            },
+            context: unknown
+        ]
+        ReturnType: {
+            success: boolean
+            id: string
+            publicKey: Hex
+        }
+    },
+    {
+        Method: "pks_verifyAuthentication"
+        Parameters: [
+            {
+                id: string
+                rawId: string
+                response: {
+                    clientDataJSON: string
+                    authenticatorData: string
+                    signature: string
+                    userHandle?: string
                 }
                 authenticatorAttachment: "cross-platform" | "platform"
                 clientExtensionResults: {
