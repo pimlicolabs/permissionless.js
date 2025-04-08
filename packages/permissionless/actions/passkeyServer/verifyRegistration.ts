@@ -48,49 +48,59 @@ export const verifyRegistration = async (
         }
     }
 
-    const serverResponse = await client.request({
-        method: "pks_verifyRegistration",
-        params: [
-            {
-                id: credential.id,
-                rawId: Base64.fromBytes(new Uint8Array(credential.raw.rawId), {
-                    pad: false,
-                    url: true
-                }),
-                response: {
-                    clientDataJSON: Base64.fromBytes(
-                        new Uint8Array(response.clientDataJSON)
-                    ),
-                    attestationObject: Base64.fromBytes(
-                        new Uint8Array(response.attestationObject),
+    const serverResponse = await client.request(
+        {
+            method: "pks_verifyRegistration",
+            params: [
+                {
+                    id: credential.id,
+                    rawId: Base64.fromBytes(
+                        new Uint8Array(credential.raw.rawId),
                         {
+                            pad: false,
                             url: true
                         }
                     ),
-                    transports:
-                        typeof response.getTransports === "function"
-                            ? (response.getTransports() as (
-                                  | "ble"
-                                  | "cable"
-                                  | "hybrid"
-                                  | "internal"
-                                  | "nfc"
-                                  | "smart-card"
-                                  | "usb"
-                              )[])
-                            : undefined,
-                    publicKeyAlgorithm: responsePublicKeyAlgorithm,
-                    authenticatorData: responseAuthenticatorData
+                    response: {
+                        clientDataJSON: Base64.fromBytes(
+                            new Uint8Array(response.clientDataJSON)
+                        ),
+                        attestationObject: Base64.fromBytes(
+                            new Uint8Array(response.attestationObject),
+                            {
+                                url: true
+                            }
+                        ),
+                        transports:
+                            typeof response.getTransports === "function"
+                                ? (response.getTransports() as (
+                                      | "ble"
+                                      | "cable"
+                                      | "hybrid"
+                                      | "internal"
+                                      | "nfc"
+                                      | "smart-card"
+                                      | "usb"
+                                  )[])
+                                : undefined,
+                        publicKeyAlgorithm: responsePublicKeyAlgorithm,
+                        authenticatorData: responseAuthenticatorData
+                    },
+                    authenticatorAttachment: credential.raw
+                        .authenticatorAttachment as
+                        | "cross-platform"
+                        | "platform",
+                    clientExtensionResults:
+                        credential.raw.getClientExtensionResults(),
+                    type: credential.raw.type as "public-key"
                 },
-                authenticatorAttachment: credential.raw
-                    .authenticatorAttachment as "cross-platform" | "platform",
-                clientExtensionResults:
-                    credential.raw.getClientExtensionResults(),
-                type: credential.raw.type as "public-key"
-            },
-            context
-        ]
-    })
+                context
+            ]
+        },
+        {
+            retryCount: 0
+        }
+    )
 
     const success = Boolean(serverResponse?.success)
     const id = serverResponse?.id

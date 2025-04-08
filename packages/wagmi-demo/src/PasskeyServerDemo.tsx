@@ -1,3 +1,4 @@
+import { WebAuthnP256 } from "ox"
 import {
     type SmartAccountClient,
     createSmartAccountClient
@@ -129,10 +130,11 @@ export function PasskeyServerDemo() {
     }, [credential])
 
     const createCredential = async () => {
+        const userName = crypto.randomUUID()
         const credential = await createWebAuthnCredential(
             await passkeyServerClient.startRegistration({
                 context: {
-                    userName: "plusminushalf"
+                    userName
                 }
             })
         )
@@ -140,25 +142,26 @@ export function PasskeyServerDemo() {
             {
                 credential,
                 context: {
-                    userName: "plusminushalf"
+                    userName
                 }
             }
         )
-
-        console.log({ verifiedCredential })
 
         setCredential(verifiedCredential)
     }
 
     const loginCredential = async () => {
-        const credentials = await passkeyServerClient.getCredentials({
-            context: {
-                userName: "plusminushalf"
-            }
-        })
-        console.log(credentials)
+        const credentials = await passkeyServerClient.startAuthentication()
 
-        setCredential(credentials[0])
+        const response = await WebAuthnP256.sign(credentials)
+
+        const verifiedCredential =
+            await passkeyServerClient.verifyAuthentication({
+                ...response,
+                uuid: credentials.uuid
+            })
+
+        setCredential(verifiedCredential)
     }
 
     const sendUserOperation = async (
