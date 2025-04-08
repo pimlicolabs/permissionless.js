@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.40
+
+### Patch Changes
+
+- 9448c6fc5275f4be21916cb9f91dc067452baa6b: Added passkeys authentication flow
+
 ## 0.2.39
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @permissionless/wagmi
 
+## 0.1.4
+
+### Patch Changes
+
+- 18823bbd94de463ac5967ae857886de2ce15a742: Fixed useWaitForTransactionReceipt when the receipt is in pending state
+
 ## 0.1.3
 
 ### Patch Changes
