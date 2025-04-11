@@ -85,8 +85,8 @@ const BICONOMY_ADDRESSES: {
     K1_VALIDATOR_FACTORY_ADDRESS: Address
     K1_VALIDATOR_ADDRESS: Address
 } = {
-    K1_VALIDATOR_FACTORY_ADDRESS: "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55",
-    K1_VALIDATOR_ADDRESS: "0x00000004171351c442B202678c48D8AB5B321E8f"
+    K1_VALIDATOR_FACTORY_ADDRESS: "0x00000024115AA990F0bAE0B6b0D5B8F68b684cd6",
+    K1_VALIDATOR_ADDRESS: "0x0000002D6DB27c52E3C11c1Cf24072004AC75cBa"
 }
 
 export type ToNexusSmartAccountParameters = Prettify<{
@@ -131,8 +131,8 @@ export async function toNexusSmartAccount(
         version,
         factoryAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_FACTORY_ADDRESS,
         validatorAddress = BICONOMY_ADDRESSES.K1_VALIDATOR_ADDRESS,
-        attesters = [],
-        threshold = 0
+        attesters = ["0x000000333034E9f539ce08819E12c1b8Cb29084d"],
+        threshold = 1
     } = parameters
 
     const localOwner = await toOwner({ owner: owners[0] })
