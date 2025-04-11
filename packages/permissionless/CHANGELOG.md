@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.41
+
+### Patch Changes
+
+- 3e413ee36e89b8c055d504403776c9868cb598e4: Added optional value to useMetaFactory
+
 ## 0.2.40
 
 ### Patch Changes
