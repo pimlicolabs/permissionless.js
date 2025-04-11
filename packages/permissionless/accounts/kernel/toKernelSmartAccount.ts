@@ -385,7 +385,7 @@ export type ToKernelSmartAccountParameters<
     accountLogicAddress?: Address
     validatorAddress?: Address
     nonceKey?: bigint
-    useMetaFactory?: boolean
+    useMetaFactory?: boolean | "optional"
 }
 
 export type KernelSmartAccountImplementation<
@@ -489,7 +489,7 @@ export async function toKernelSmartAccount<
     }
 
     // Helper to generate the init code for the smart account
-    const generateInitCode = async () =>
+    const generateInitCode = async (_useMetaFactory: boolean) =>
         getAccountInitCode({
             entryPointVersion: entryPoint.version,
             kernelVersion,
@@ -498,10 +498,8 @@ export async function toKernelSmartAccount<
             factoryAddress,
             accountLogicAddress,
             validatorAddress,
-            useMetaFactory
+            useMetaFactory: _useMetaFactory
         })
-
-    let accountAddress: Address | undefined = address
 
     let chainId: number
 
@@ -513,32 +511,56 @@ export async function toKernelSmartAccount<
         return chainId
     }
 
-    const getFactoryArgs = async () => {
+    const getFactoryArgsFunc = (_useMetaFactory: boolean) => async () => {
         return {
             factory:
-                entryPoint.version === "0.6" || useMetaFactory === false
+                entryPoint.version === "0.6" || _useMetaFactory === false
                     ? factoryAddress
                     : metaFactoryAddress,
-            factoryData: await generateInitCode()
+            factoryData: await generateInitCode(_useMetaFactory)
         }
     }
+
+    const { accountAddress, getFactoryArgs } = await (async () => {
+        let getFactoryArgs = getFactoryArgsFunc(
+            useMetaFactory === "optional" ? true : useMetaFactory
+        )
+
+        if (address && useMetaFactory !== "optional") {
+            return { accountAddress: address, getFactoryArgs }
+        }
+
+        const { factory, factoryData } = await getFactoryArgs()
+
+        let accountAddress = await getSenderAddress(client, {
+            factory,
+            factoryData,
+            entryPointAddress: entryPoint.address
+        })
+
+        if (address === accountAddress) {
+            return { accountAddress, getFactoryArgs }
+        }
+
+        if (useMetaFactory === "optional" && accountAddress === zeroAddress) {
+            getFactoryArgs = getFactoryArgsFunc(false)
+            const { factory, factoryData } = await getFactoryArgs()
+
+            accountAddress = await getSenderAddress(client, {
+                factory,
+                factoryData,
+                entryPointAddress: entryPoint.address
+            })
+        }
+
+        return { accountAddress, getFactoryArgs }
+    })()
 
     return toSmartAccount({
         client,
         entryPoint,
         getFactoryArgs,
         async getAddress() {
-            if (accountAddress) return accountAddress
-
-            const { factory, factoryData } = await getFactoryArgs()
-
-            // Get the sender address based on the init code
-            accountAddress = await getSenderAddress(client, {
-                factory,
-                factoryData,
-                entryPointAddress: entryPoint.address
-            })
-
             return accountAddress
         },
         async encodeCalls(calls) {
