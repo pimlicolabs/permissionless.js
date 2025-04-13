@@ -1,4 +1,4 @@
-<p align="center"><a href="https://docs.pimlico/permissionless"><img width="1000" title="Permissionless" src='https://raw.githubusercontent.com/pimlicolabs/permissionless.js/main/assets/banner.png' /></a></p>
+<p align="center"><a href="https://docs.pimlico.io/permissionless"><img width="1000" title="Permissionless" src='https://raw.githubusercontent.com/pimlicolabs/permissionless.js/main/assets/banner.png' /></a></p>
 
 # permissionless.js
 
