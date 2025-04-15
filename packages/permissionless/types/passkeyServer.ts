@@ -80,6 +80,7 @@ export type PasskeyServerRpcSchema = [
             success: boolean
             id: string
             publicKey: Hex
+            userName: string
         }
     },
     {
@@ -110,6 +111,7 @@ export type PasskeyServerRpcSchema = [
             success: boolean
             id: string
             publicKey: Hex
+            userName: string
         }
     },
     {
