@@ -11,6 +11,7 @@ export type VerifyAuthenticationReturnType = {
     success: boolean
     id: string
     publicKey: Hex
+    userName: string
 }
 
 export const verifyAuthentication = async (
@@ -102,6 +103,7 @@ export const verifyAuthentication = async (
     const success = Boolean(serverResponse?.success)
     const id = serverResponse?.id
     const publicKey = serverResponse?.publicKey
+    const userName = serverResponse?.userName
 
     if (typeof id !== "string") {
         throw new Error("Invalid passkey id returned from server")
@@ -113,9 +115,14 @@ export const verifyAuthentication = async (
         )
     }
 
+    if (typeof userName !== "string") {
+        throw new Error("Invalid user name returned from server")
+    }
+
     return {
         success,
         id,
-        publicKey: publicKey as Hex
+        publicKey: publicKey as Hex,
+        userName
     }
 }
