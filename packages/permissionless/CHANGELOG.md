@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.42
+
+### Patch Changes
+
+- d9ec1ec588781684d1cd2d6aeec1c9dc73ac4aa8: Added return of userName for passkeys verification actions
+
 ## 0.2.41
 
 ### Patch Changes
