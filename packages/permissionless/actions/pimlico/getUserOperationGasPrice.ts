@@ -19,7 +19,7 @@ export type GetUserOperationGasPriceReturnType = {
 /**
  * Returns the live gas prices that you can use to send a user operation.
  *
- * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationGasPrice
+ * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-actions/getUserOperationGasPrice
  *
  * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
