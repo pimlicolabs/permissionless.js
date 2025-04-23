@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.43
+
+### Patch Changes
+
+- e050d86574791b210d9de183e85281bbdfe4e498: Added support for kernel 0.3.2 & 0.3.3
+
 ## 0.2.42
 
 ### Patch Changes
