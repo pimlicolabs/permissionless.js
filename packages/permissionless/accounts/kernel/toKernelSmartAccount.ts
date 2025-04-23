@@ -93,7 +93,7 @@ const createAccountAbi = [
 export type KernelVersion<entryPointVersion extends "0.6" | "0.7"> =
     entryPointVersion extends "0.6"
         ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
-        : "0.3.0-beta" | "0.3.1"
+        : "0.3.0-beta" | "0.3.1" | "0.3.2" | "0.3.3"
 
 /**
  * Default addresses map for different kernel smart account versions
@@ -140,6 +140,18 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
         FACTORY_ADDRESS: "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
         META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
         WEB_AUTHN_VALIDATOR: "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd"
+    },
+    "0.3.2": {
+        ECDSA_VALIDATOR: "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57",
+        ACCOUNT_LOGIC: "0xD830D15D3dc0C269F3dBAa0F3e8626d33CFdaBe1",
+        FACTORY_ADDRESS: "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe",
+        META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
+    },
+    "0.3.3": {
+        ECDSA_VALIDATOR: "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57",
+        ACCOUNT_LOGIC: "0xE264dCCc54e4b6906c0D1Fee11D4326c06D33c80",
+        FACTORY_ADDRESS: "0xE30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA",
+        META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
     }
 }
 
@@ -616,7 +628,9 @@ export async function toKernelSmartAccount<
                 owner,
                 message,
                 accountAddress: await this.getAddress(),
-                kernelVersion,
+                kernelVersion:
+                    // TODO: remove this once 0.3.3 is released
+                    kernelVersion === "0.3.3" ? "0.3.2" : kernelVersion,
                 chainId: await getMemoizedChainId()
             })
 
@@ -635,7 +649,9 @@ export async function toKernelSmartAccount<
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
                 accountAddress: await this.getAddress(),
-                kernelVersion
+                kernelVersion:
+                    // TODO: remove this once 0.3.3 is released
+                    kernelVersion === "0.3.3" ? "0.3.2" : kernelVersion
             })
 
             if (isKernelV2(kernelVersion)) {
