@@ -672,6 +672,62 @@ export const getCoreSmartAccounts = () => [
         isEip1271Compliant: true
     },
     {
+        name: "Kernel 7579 0.3.2",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.2" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.2" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.3",
+        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.3" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async <
+            entryPointVersion extends "0.6" | "0.7"
+        >(
+            conf: AAParamType<entryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...conf,
+                    version: "0.3.3" as KernelVersion<entryPointVersion>
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        isEip1271Compliant: true
+    },
+    {
         name: "Biconomy",
         getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
             conf: AAParamType<entryPointVersion>
