@@ -5,6 +5,7 @@ import {
     type Chain,
     type Client,
     type Hex,
+    JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -67,7 +68,11 @@ export const TRUST_ADDRESSES: {
 }
 
 export type ToTrustSmartAccountParameters = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owner: OneOf<
         | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>

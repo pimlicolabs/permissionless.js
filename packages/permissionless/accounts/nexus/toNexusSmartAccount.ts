@@ -2,6 +2,7 @@ import type {
     Account,
     Assign,
     Chain,
+    JsonRpcAccount,
     OneOf,
     Prettify,
     Transport,
@@ -90,7 +91,11 @@ const BICONOMY_ADDRESSES: {
 }
 
 export type ToNexusSmartAccountParameters = Prettify<{
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owners: [
         OneOf<
             | EthereumProvider

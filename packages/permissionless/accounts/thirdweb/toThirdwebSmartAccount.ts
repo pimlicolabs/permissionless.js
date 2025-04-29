@@ -4,6 +4,7 @@ import type {
     Assign,
     Chain,
     Client,
+    JsonRpcAccount,
     LocalAccount,
     OneOf,
     Transport,
@@ -53,7 +54,11 @@ export const THIRDWEB_ADDRESSES = {
 export type ToThirdwebSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owner: OneOf<
         | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
