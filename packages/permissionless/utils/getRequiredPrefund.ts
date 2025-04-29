@@ -1,7 +1,7 @@
-import type { UserOperation } from "viem/account-abstraction"
+import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 
 export type GetRequiredPrefundReturnType<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7"
 > = {
     userOperation: UserOperation<entryPointVersion>
     entryPointVersion: entryPointVersion
@@ -21,7 +21,9 @@ export type GetRequiredPrefundReturnType<
  *     userOperation
  * })
  */
-export const getRequiredPrefund = <entryPointVersion extends "0.6" | "0.7">({
+export const getRequiredPrefund = <
+    entryPointVersion extends EntryPointVersion
+>({
     userOperation,
     entryPointVersion
 }: GetRequiredPrefundReturnType<entryPointVersion>): bigint => {
@@ -41,7 +43,7 @@ export const getRequiredPrefund = <entryPointVersion extends "0.6" | "0.7">({
         )
     }
 
-    const userOperationV07 = userOperation as UserOperation<"0.7">
+    const userOperationV07 = userOperation as UserOperation<"0.7" | "0.8">
 
     const requiredGas =
         userOperationV07.verificationGasLimit +

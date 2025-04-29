@@ -253,9 +253,11 @@ export const getLightAccountClient = async <
     version?: LightAccountVersion<entryPointVersion>
 }) => {
     return toLightSmartAccount({
-        entryPoint: getEntryPointFromVersion<"0.6" | "0.7">(entryPoint.version),
+        entryPoint: getEntryPointFromVersion<entryPointVersion>(
+            entryPoint.version
+        ),
         client: getPublicClient(anvilRpc),
-        version: version ?? "1.1.0",
+        version: version ?? ("1.1.0" as LightAccountVersion<entryPointVersion>),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
@@ -322,7 +324,9 @@ export const getKernelEcdsaClient = async <
 
     return toKernelSmartAccount({
         client: publicClient,
-        entryPoint: getEntryPointFromVersion(entryPoint.version),
+        entryPoint: getEntryPointFromVersion<entryPointVersion>(
+            entryPoint.version
+        ),
         useMetaFactory,
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version
@@ -384,7 +388,9 @@ export const getThirdwebClient = async <
     return toThirdwebSmartAccount({
         client: publicClient,
         version: "1.5.20",
-        entryPoint: getEntryPointFromVersion(entryPoint.version),
+        entryPoint: getEntryPointFromVersion<entryPointVersion>(
+            entryPoint.version
+        ),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
@@ -397,7 +403,7 @@ export const getEtherspotClient = async <
     return toEtherspotSmartAccount({
         client: getPublicClient(anvilRpc),
         owners: [privateKeyToAccount(generatePrivateKey())],
-        entryPoint: getEntryPointFromVersion("0.7")
+        entryPoint: getEntryPointFromVersion<"0.7">("0.7")
     })
 }
 

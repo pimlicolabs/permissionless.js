@@ -1,5 +1,5 @@
 import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
-import type { EntryPointVersion } from "viem/_types/account-abstraction/index.js"
+import type { EntryPointVersion } from "viem/account-abstraction"
 import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
