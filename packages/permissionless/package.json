@@ -91,7 +91,7 @@
         }
     },
     "peerDependencies": {
-        "viem": "^2.23.2",
+        "viem": "^2.24.0",
         "ox": "0.6.9"
     },
     "peerDependenciesMeta": {
