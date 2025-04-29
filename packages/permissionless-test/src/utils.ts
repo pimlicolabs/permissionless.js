@@ -3,13 +3,16 @@ import {
     type Account,
     type Hex,
     createPublicClient,
-    createWalletClient
+    createWalletClient,
+    Address
 } from "viem"
 import {
+    EntryPointVersion,
     type SmartAccount,
     createPaymasterClient,
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    entryPoint08Address
 } from "viem/account-abstraction"
 import {
     generatePrivateKey,
@@ -98,6 +101,33 @@ export const getAnvilWalletClient = ({
     })
 }
 
+const getEntryPointFromVersion = <entryPointVersion extends EntryPointVersion>(
+    version: EntryPointVersion
+): {
+    address: Address
+    version: entryPointVersion
+} => {
+    switch (version) {
+        case "0.6":
+            return {
+                address: entryPoint06Address,
+                version: "0.6" as entryPointVersion
+            }
+        case "0.7":
+            return {
+                address: entryPoint07Address,
+                version: "0.7" as entryPointVersion
+            }
+        case "0.8":
+            return {
+                address: entryPoint08Address,
+                version: "0.8" as entryPointVersion
+            }
+        default:
+            throw new Error("Unknown EntryPoint version")
+    }
+}
+
 export const getBundlerClient = <account extends SmartAccount | undefined>({
     altoRpc,
     anvilRpc,
@@ -110,31 +140,19 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
     anvilRpc: string
     account?: account
     entryPoint: {
-        version: "0.6" | "0.7"
+        version: EntryPointVersion
     }
 }) => {
     const paymaster = paymasterRpc
         ? createPimlicoClient({
               transport: http(paymasterRpc),
-              entryPoint: {
-                  address:
-                      entryPoint.version === "0.6"
-                          ? entryPoint06Address
-                          : entryPoint07Address,
-                  version: entryPoint.version
-              }
+              entryPoint: getEntryPointFromVersion(entryPoint.version)
           })
         : undefined
 
     const pimlicoBundler = createPimlicoClient({
         transport: http(altoRpc),
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: entryPoint.version
-        }
+        entryPoint: getEntryPointFromVersion(entryPoint.version)
     })
 
     return createSmartAccountClient({
@@ -178,7 +196,7 @@ export const getSmartAccountClient = <
     })
 }
 
-export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
+export const getPimlicoClient = <entryPointVersion extends EntryPointVersion>({
     entryPointVersion,
     altoRpc
 }: {
@@ -187,14 +205,7 @@ export const getPimlicoClient = <entryPointVersion extends "0.6" | "0.7">({
 }) =>
     createPimlicoClient({
         chain: foundry,
-        entryPoint: {
-            address: (entryPointVersion === "0.6"
-                ? entryPoint06Address
-                : entryPoint07Address) as entryPointVersion extends "0.6"
-                ? typeof entryPoint06Address
-                : typeof entryPoint07Address,
-            version: entryPointVersion
-        },
+        entryPoint: getEntryPointFromVersion(entryPointVersion),
         transport: http(altoRpc)
     })
 
@@ -216,7 +227,7 @@ export const getPublicClient = (anvilRpc: string) => {
 }
 
 export const getSimpleAccountClient = async <
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 >({
     entryPoint,
     anvilRpc,
@@ -226,15 +237,7 @@ export const getSimpleAccountClient = async <
 > => {
     return toSimpleSmartAccount<entryPointVersion>({
         client: getPublicClient(anvilRpc),
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: (entryPoint.version === "0.6"
-                ? "0.6"
-                : "0.7") as entryPointVersion
-        },
+        entryPoint: getEntryPointFromVersion(entryPoint.version),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
@@ -250,13 +253,7 @@ export const getLightAccountClient = async <
     version?: LightAccountVersion<entryPointVersion>
 }) => {
     return toLightSmartAccount({
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
-        },
+        entryPoint: getEntryPointFromVersion<"0.6" | "0.7">(entryPoint.version),
         client: getPublicClient(anvilRpc),
         version: version ?? "1.1.0",
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
@@ -273,10 +270,7 @@ export const getTrustAccountClient = async <
     return toTrustSmartAccount({
         client: getPublicClient(anvilRpc),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey()),
-        entryPoint: {
-            address: entryPoint06Address,
-            version: "0.6"
-        }
+        entryPoint: getEntryPointFromVersion("0.6")
     })
 }
 
@@ -290,10 +284,7 @@ export const getBiconomyClient = async <
     return toBiconomySmartAccount({
         client: getPublicClient(anvilRpc),
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
-        entryPoint: {
-            address: entryPoint06Address,
-            version: "0.6"
-        }
+        entryPoint: getEntryPointFromVersion("0.6")
     })
 }
 
@@ -331,13 +322,7 @@ export const getKernelEcdsaClient = async <
 
     return toKernelSmartAccount({
         client: publicClient,
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
-        },
+        entryPoint: getEntryPointFromVersion(entryPoint.version),
         useMetaFactory,
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version
@@ -363,13 +348,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     return toSafeSmartAccount({
         client: publicClient,
         onchainIdentifier,
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
-        },
+        entryPoint: getEntryPointFromVersion(entryPoint.version),
         owners: owners ?? [
             privateKeyToAccount(privateKey ?? generatePrivateKey())
         ],
@@ -405,13 +384,7 @@ export const getThirdwebClient = async <
     return toThirdwebSmartAccount({
         client: publicClient,
         version: "1.5.20",
-        entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint07Address,
-            version: entryPoint.version === "0.6" ? "0.6" : "0.7"
-        },
+        entryPoint: getEntryPointFromVersion(entryPoint.version),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
@@ -424,10 +397,7 @@ export const getEtherspotClient = async <
     return toEtherspotSmartAccount({
         client: getPublicClient(anvilRpc),
         owners: [privateKeyToAccount(generatePrivateKey())],
-        entryPoint: {
-            address: entryPoint07Address,
-            version: "0.7"
-        }
+        entryPoint: getEntryPointFromVersion("0.7")
     })
 }
 
@@ -444,6 +414,7 @@ export const getCoreSmartAccounts = () => [
         },
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -460,6 +431,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -476,11 +448,14 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
         name: "Simple",
-        getSmartAccountClient: async <entryPointVersion extends "0.6" | "0.7">(
+        getSmartAccountClient: async <
+            entryPointVersion extends EntryPointVersion
+        >(
             conf: AAParamType<entryPointVersion>
         ) =>
             getBundlerClient({
@@ -489,6 +464,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: true,
         isEip1271Compliant: false
     },
     {
@@ -505,6 +481,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -521,6 +498,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -537,6 +515,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -553,6 +532,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -583,6 +563,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -611,6 +592,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -641,6 +623,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -669,6 +652,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -697,6 +681,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -725,6 +710,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -738,6 +724,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: false,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -760,6 +747,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -773,6 +761,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -789,6 +778,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -809,6 +799,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -831,6 +822,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -861,6 +853,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -874,6 +867,7 @@ export const getCoreSmartAccounts = () => [
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
@@ -896,6 +890,7 @@ export const getCoreSmartAccounts = () => [
         //     }),
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     }
 ]

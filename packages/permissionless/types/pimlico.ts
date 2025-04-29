@@ -1,5 +1,5 @@
 import type { Address, Hash, Hex, OneOf, PartialBy } from "viem"
-import type { UserOperation } from "viem/account-abstraction"
+import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {
@@ -41,7 +41,7 @@ type GetTokenQuotesWithBigIntAsHex = {
 }
 
 export type PimlicoRpcSchema<
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = EntryPointVersion
 > = [
     {
         Method: "pimlico_getUserOperationGasPrice"

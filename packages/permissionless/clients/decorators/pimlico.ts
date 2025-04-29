@@ -23,10 +23,11 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
+import { EntryPointVersion } from "viem/_types/account-abstraction/index.js"
 
 export type PimlicoActions<
     TChain extends Chain | undefined,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = EntryPointVersion
 > = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
@@ -129,7 +130,7 @@ export type PimlicoActions<
 }
 
 export const pimlicoActions =
-    <entryPointVersion extends "0.6" | "0.7">({
+    <entryPointVersion extends EntryPointVersion>({
         entryPoint
     }: {
         entryPoint: { address: Address; version: entryPointVersion }
