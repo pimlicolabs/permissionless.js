@@ -23,6 +23,7 @@ import {
     entryPoint07Address,
     entryPoint08Abi,
     getUserOperationHash,
+    getUserOperationTypedData,
     toSmartAccount
 } from "viem/account-abstraction"
 import { getChainId, signMessage } from "viem/actions"
@@ -30,6 +31,7 @@ import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { version } from "react"
 
 const getAccountInitCode = async (
     owner: Address,
@@ -326,6 +328,21 @@ export async function toSimpleSmartAccount<
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
+
+            // 0.8 Signs using typed data
+            if (version === "0.8") {
+                const address = await this.getAddress()
+                const typedData = getUserOperationTypedData({
+                    chainId,
+                    entryPointAddress: entryPoint.address,
+                    userOperation: {
+                        ...userOperation,
+                        sender: address
+                    }
+                })
+                return await localOwner.signTypedData(typedData)
+            }
+
             return signMessage(client, {
                 account: localOwner,
                 message: {

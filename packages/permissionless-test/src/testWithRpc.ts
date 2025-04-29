@@ -3,14 +3,12 @@ import getPort from "get-port"
 import { alto, anvil } from "prool/instances"
 import {
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    entryPoint08Address
 } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { test } from "vitest"
-import {
-    ENTRY_POINT_SIMULATIONS_ADDRESS,
-    setupContracts
-} from "../mock-aa-infra/alto"
+import { setupContracts } from "../mock-aa-infra/alto"
 
 export const getInstances = async ({
     anvilPort,
@@ -39,10 +37,13 @@ export const getInstances = async ({
           })
 
     const altoInstance = alto({
-        entrypoints: [entryPoint06Address, entryPoint07Address],
+        entrypoints: [
+            entryPoint06Address,
+            entryPoint07Address,
+            entryPoint08Address
+        ],
         rpcUrl: anvilRpc,
         executorPrivateKeys: [anvilPrivateKey],
-        entrypointSimulationContract: ENTRY_POINT_SIMULATIONS_ADDRESS,
         safeMode: false,
         port: altoPort,
         utilityPrivateKey: anvilPrivateKey

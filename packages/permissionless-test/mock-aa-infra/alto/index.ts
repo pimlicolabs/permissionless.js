@@ -16,9 +16,9 @@ import {
     BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
     BICONOMY_FACTORY_CREATECALL,
     BICONOMY_SINGLETON_FACTORY_BYTECODE,
-    ENTRY_POINT_SIMULATIONS_CREATECALL,
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
+    ENTRY_POINT_V08_CREATECALL,
     ERC_7579_TEST_MODULE_CREATECALL,
     ETHERSPOT_BOOTSTRAP_CREATECALL,
     ETHERSPOT_IMPLEMENTATION,
@@ -67,6 +67,7 @@ import {
     SAFE_V07_MODULE_SETUP_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+    SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
     THIRDWEB_FACTORY_V06_CREATECALL,
     THIRDWEB_FACTORY_V07_CREATECALL,
     TRUST_ACCOUNT_FACET_CREATE_CALL,
@@ -82,8 +83,6 @@ const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
 const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
-export const ENTRY_POINT_SIMULATIONS_ADDRESS =
-    "0xe1b9bcD4DbfAE61585691bdB9A100fbaAF6C8dB0"
 
 const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
     for (const address of addresses) {
@@ -128,6 +127,18 @@ export const setupContracts = async (rpc: string) => {
     await Promise.all([
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
+            data: ENTRY_POINT_V08_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
             data: ENTRY_POINT_V07_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
@@ -135,12 +146,6 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ENTRY_POINT_SIMULATIONS_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -663,11 +668,12 @@ export const setupContracts = async (rpc: string) => {
 
     await verifyDeployed(client, [
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
+        "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
+        "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
-        "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint v0.7
-        "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory V0.7
-        // ENTRY_POINT_SIMULATIONS_ADDRESS, // EntryPoint Simulations (Needed for v0.7)
+        "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint 0.7
+        "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory 0.7
         "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47", // Safe V0.7 Module Setup
         "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226", // Safe V0.7 4337 Module
         "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb", // Safe V0.6 Module Setup
@@ -679,8 +685,8 @@ export const setupContracts = async (rpc: string) => {
         "0x7579EE8307284F293B1927136486880611F20002", // Safe 7579 module
         "0x7579011aB74c46090561ea277Ba79D510c6C00ff", // Safe 7579 launchpad
         "0x000000000069E2a187AEFFb852bF3cCdC95151B2", // Safe 7579 Registry
-        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint V0.6
-        "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory V0.6
+        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint 0.6
+        "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory 0.6
         "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e", // Biconomy ECDSA Ownership Registry Module
         "0x0000002512019Dafb59528B82CB92D3c5D2423ac", // Biconomy Account Logic V0.2
         "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5", // Biconomy Factory Address
