@@ -5,7 +5,7 @@ import {
     type Chain,
     type Client,
     type Hex,
-    JsonRpcAccount,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -14,7 +14,7 @@ import {
     encodeFunctionData
 } from "viem"
 import {
-    EntryPointVersion,
+    type EntryPointVersion,
     type SmartAccount,
     type SmartAccountImplementation,
     type UserOperation,

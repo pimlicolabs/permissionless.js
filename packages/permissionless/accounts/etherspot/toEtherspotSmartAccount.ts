@@ -6,7 +6,7 @@ import {
     type Client,
     type EIP1193Provider,
     type Hex,
-    JsonRpcAccount,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,

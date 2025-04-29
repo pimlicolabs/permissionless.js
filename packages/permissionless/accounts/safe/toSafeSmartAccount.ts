@@ -5,7 +5,7 @@ import {
     type Chain,
     type Client,
     type Hex,
-    JsonRpcAccount,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type SignableMessage,
