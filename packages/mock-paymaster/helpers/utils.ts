@@ -11,7 +11,7 @@ import {
 } from "viem"
 import { mnemonicToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
-import { ERC20_ADDRESS } from "./erc20-utils.js"
+import { erc20Address } from "./erc20-utils.js"
 import { RpcError, ValidationErrors } from "./schema.js"
 
 /// Returns the bigger of two BigInts.
@@ -59,7 +59,7 @@ export const getAnvilWalletClient = ({
 }
 
 export const isTokenSupported = async (token: Address) => {
-    if (token !== ERC20_ADDRESS) {
+    if (token !== erc20Address) {
         throw new RpcError(
             "Token is not supported",
             ValidationErrors.InvalidFields

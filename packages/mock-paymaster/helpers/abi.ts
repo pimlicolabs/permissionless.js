@@ -1,4 +1,4 @@
-export const SINGLETON_PAYMASTER_V07_ABI = [
+export const singletonPaymaster07Abi = [
     {
         type: "constructor",
         inputs: [
@@ -621,7 +621,7 @@ export const SINGLETON_PAYMASTER_V07_ABI = [
     }
 ] as const
 
-export const SINGLETON_PAYMASTER_V06_ABI = [
+export const singletonPaymaster06Abi = [
     {
         inputs: [
             { internalType: "address", name: "_entryPoint", type: "address" },
