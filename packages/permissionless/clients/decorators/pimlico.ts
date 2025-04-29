@@ -1,4 +1,5 @@
 import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
+import type { EntryPointVersion } from "viem/_types/account-abstraction/index.js"
 import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
@@ -23,7 +24,6 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
-import { EntryPointVersion } from "viem/_types/account-abstraction/index.js"
 
 export type PimlicoActions<
     TChain extends Chain | undefined,

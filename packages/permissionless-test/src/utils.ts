@@ -1,13 +1,13 @@
 import {
     http,
     type Account,
+    type Address,
     type Hex,
     createPublicClient,
-    createWalletClient,
-    Address
+    createWalletClient
 } from "viem"
 import {
-    EntryPointVersion,
+    type EntryPointVersion,
     type SmartAccount,
     createPaymasterClient,
     entryPoint06Address,

@@ -1,5 +1,5 @@
 import type { Hex } from "viem"
-import { EntryPointVersion } from "viem/account-abstraction"
+import type { EntryPointVersion } from "viem/account-abstraction"
 
 export type AAParamType<entryPointVersion extends EntryPointVersion> = {
     entryPoint: {

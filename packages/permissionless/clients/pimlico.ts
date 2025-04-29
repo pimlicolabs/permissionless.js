@@ -11,9 +11,9 @@ import type {
 import { createClient } from "viem"
 import {
     type BundlerActions,
+    type EntryPointVersion,
     type PaymasterActions,
     type SmartAccount,
-    type EntryPointVersion,
     bundlerActions,
     entryPoint07Address,
     paymasterActions
