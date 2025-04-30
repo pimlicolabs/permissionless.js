@@ -21,12 +21,6 @@ import {
 } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import {
-    singletonPaymaster06Abi,
-    singletonPaymaster07Abi
-} from "./helpers/abi.js"
-import { getPublicClient } from "./helpers/utils.js"
-import type { PaymasterMode } from "./helpers/utils.js"
-import {
     constants,
     getSingletonPaymaster06Address,
     getSingletonPaymaster06InitCode,
@@ -35,6 +29,12 @@ import {
     getSingletonPaymaster08Address,
     getSingletonPaymaster08InitCode
 } from "./constants"
+import {
+    singletonPaymaster06Abi,
+    singletonPaymaster07Abi
+} from "./helpers/abi.js"
+import { getPublicClient } from "./helpers/utils.js"
+import type { PaymasterMode } from "./helpers/utils.js"
 
 export const getDummyPaymasterData = (
     isV6: boolean,
@@ -121,7 +121,7 @@ export const getPaymasterData = async (
     const validUntil = Math.floor(Date.now() / 1000) + constants.validForSeconds
 
     const mode = 1
-    let allowAllBundlers = true
+    const allowAllBundlers = true
     const modeAndAllowBundlers = (mode << 1) | (allowAllBundlers ? 1 : 0)
     const paymasterValidationGasLimit = 1n
 
