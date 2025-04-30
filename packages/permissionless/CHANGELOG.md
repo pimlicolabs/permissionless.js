@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.44
+
+### Patch Changes
+
+- 576a63439dd2b72e21edf480be7fd4458e08c4ba: Added validForSeconds field to pm_sponsorUserOperation, removed deprecated label on pm_sponsorUserOperation
+
 ## 0.2.43
 
 ### Patch Changes
