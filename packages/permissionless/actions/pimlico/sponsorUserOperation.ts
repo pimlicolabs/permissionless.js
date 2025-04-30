@@ -84,7 +84,7 @@ export const sponsorUserOperation = async <
     const { sponsorshipPolicyId, validForSeconds } = args
 
     const hasPaymasterContext =
-        sponsorshipPolicyId != undefined || validForSeconds != undefined
+        sponsorshipPolicyId !== undefined || validForSeconds !== undefined
 
     const response = await client.request({
         method: "pm_sponsorUserOperation",
