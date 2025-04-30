@@ -67,9 +67,6 @@ export type SponsorUserOperationReturnType<
           : never)
 >
 
-/**
- * @deprecated Use `getPaymasterData` instead
- */
 export const sponsorUserOperation = async <
     entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
 >(
