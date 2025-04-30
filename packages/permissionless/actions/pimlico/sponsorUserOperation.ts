@@ -40,6 +40,7 @@ export type PimlicoSponsorUserOperationParameters<
         version: entryPointVersion
     }
     sponsorshipPolicyId?: string
+    validForSeconds?: number
 }
 
 export type SponsorUserOperationReturnType<
@@ -80,14 +81,20 @@ export const sponsorUserOperation = async <
     >,
     args: PimlicoSponsorUserOperationParameters<entryPointVersion>
 ): Promise<SponsorUserOperationReturnType<entryPointVersion>> => {
+    const { sponsorshipPolicyId, validForSeconds } = args
+
+    const hasPaymasterContext =
+        sponsorshipPolicyId != undefined || validForSeconds != undefined
+
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: args.sponsorshipPolicyId
+        params: hasPaymasterContext
             ? [
                   deepHexlify(args.userOperation),
                   args.entryPoint.address,
                   {
-                      sponsorshipPolicyId: args.sponsorshipPolicyId
+                      ...(sponsorshipPolicyId ? { sponsorshipPolicyId } : {}),
+                      ...(validForSeconds ? { validForSeconds } : {})
                   }
               ]
             : [deepHexlify(args.userOperation), args.entryPoint.address]
