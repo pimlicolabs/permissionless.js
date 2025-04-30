@@ -11,10 +11,11 @@ import {
     type BundlerClient,
     type UserOperation,
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    entryPoint08Address
 } from "viem/account-abstraction"
 import { fromZodError } from "zod-validation-error"
-import { ERC20_ADDRESS } from "./helpers/erc20-utils.js"
+import { erc20Address } from "./helpers/erc20-utils.js"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
@@ -34,6 +35,7 @@ import {
 import {
     type SingletonPaymasterV06,
     type SingletonPaymasterV07,
+    type SingletonPaymasterV08,
     getDummyPaymasterData
 } from "./singletonPaymasters.js"
 
@@ -168,12 +170,85 @@ const handleMethodV07 = async (
     return result
 }
 
-const handleMethod = async (
+const handleMethodV08 = async (
+    userOperation: UserOperation<"0.7">,
+    paymasterMode: PaymasterMode,
     bundler: BundlerClient,
-    singletonPaymasterV07: SingletonPaymasterV07,
-    singletonPaymasterV06: SingletonPaymasterV06,
-    parsedBody: JsonRpcSchema
+    singletonPaymasterV08: SingletonPaymasterV08,
+    estimateGas: boolean
 ) => {
+    let op = {
+        ...userOperation,
+        ...singletonPaymasterV08.getDummyPaymasterData(paymasterMode)
+    }
+
+    const callGasLimit = userOperation.callGasLimit
+    const verificationGasLimit = userOperation.verificationGasLimit
+    const preVerificationGas = userOperation.preVerificationGas
+
+    if (estimateGas) {
+        try {
+            const gasEstimates = await bundler.estimateUserOperationGas({
+                ...op
+            })
+
+            op = {
+                ...op,
+                ...gasEstimates
+            }
+
+            op.callGasLimit = maxBigInt(op.callGasLimit, callGasLimit)
+            op.preVerificationGas = maxBigInt(
+                op.preVerificationGas,
+                preVerificationGas
+            )
+            op.verificationGasLimit = maxBigInt(
+                op.verificationGasLimit,
+                verificationGasLimit
+            )
+        } catch (e: unknown) {
+            if (!(e instanceof BaseError)) throw new InternalBundlerError()
+            const err = e.walk() as RpcRequestError
+            throw err
+        }
+    } else if (
+        userOperation.preVerificationGas === 1n ||
+        userOperation.verificationGasLimit === 1n ||
+        userOperation.callGasLimit === 1n
+    ) {
+        throw new RpcError(
+            "Gas Limit values (preVerificationGas, verificationGasLimit, callGasLimit) must be set",
+            ValidationErrors.InvalidFields
+        )
+    }
+
+    const result = {
+        preVerificationGas: toHex(op.preVerificationGas),
+        callGasLimit: toHex(op.callGasLimit),
+        paymasterVerificationGasLimit: toHex(
+            op.paymasterVerificationGasLimit || 0
+        ),
+        paymasterPostOpGasLimit: toHex(op.paymasterPostOpGasLimit || 0),
+        verificationGasLimit: toHex(op.verificationGasLimit || 0),
+        ...(await singletonPaymasterV08.encodePaymasterData(op, paymasterMode))
+    }
+
+    return result
+}
+
+const handleMethod = async ({
+    parsedBody,
+    bundler,
+    singletonPaymasterV08,
+    singletonPaymasterV07,
+    singletonPaymasterV06
+}: {
+    bundler: BundlerClient
+    singletonPaymasterV08: SingletonPaymasterV08
+    singletonPaymasterV07: SingletonPaymasterV07
+    singletonPaymasterV06: SingletonPaymasterV06
+    parsedBody: JsonRpcSchema
+}) => {
     if (parsedBody.method === "pm_sponsorUserOperation") {
         const params = pmSponsorUserOperationParamsSchema.safeParse(
             parsedBody.params
@@ -187,6 +262,16 @@ const handleMethod = async (
         }
 
         const [userOperation, entryPoint] = params.data
+
+        if (entryPoint === entryPoint08Address) {
+            return await handleMethodV08(
+                userOperation,
+                { mode: "verifying" },
+                bundler,
+                singletonPaymasterV08,
+                true
+            )
+        }
 
         if (entryPoint === entryPoint07Address) {
             return await handleMethodV07(
@@ -337,7 +422,7 @@ const handleMethod = async (
                 allowanceSlot: "0x1",
                 postOpGas: "0x1a2b3c"
             },
-            [ERC20_ADDRESS]: {
+            [erc20Address]: {
                 exchangeRateNativeToUsd: "0x5cc717fbb3450c0000000",
                 exchangeRate: "0x5cc717fbb3450c0000",
                 balanceSlot: "0x5",
@@ -370,11 +455,17 @@ const handleMethod = async (
     )
 }
 
-export const createRpcHandler = (
-    bundler: BundlerClient,
-    singletonPaymasterV07: SingletonPaymasterV07,
+export const createRpcHandler = ({
+    bundler,
+    singletonPaymasterV07,
+    singletonPaymasterV06,
+    singletonPaymasterV08
+}: {
+    bundler: BundlerClient
+    singletonPaymasterV07: SingletonPaymasterV07
     singletonPaymasterV06: SingletonPaymasterV06
-) => {
+    singletonPaymasterV08: SingletonPaymasterV08
+}) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
@@ -386,12 +477,13 @@ export const createRpcHandler = (
         }
 
         try {
-            const result = await handleMethod(
+            const result = await handleMethod({
                 bundler,
                 singletonPaymasterV07,
                 singletonPaymasterV06,
-                parsedBody.data
-            )
+                singletonPaymasterV08,
+                parsedBody: parsedBody.data
+            })
 
             return {
                 jsonrpc: "2.0",

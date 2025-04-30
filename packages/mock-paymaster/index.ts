@@ -9,7 +9,8 @@ import { getAnvilWalletClient } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import {
     SingletonPaymasterV06,
-    SingletonPaymasterV07
+    SingletonPaymasterV07,
+    SingletonPaymasterV08
 } from "./singletonPaymasters.js"
 
 export const paymaster = defineInstance(
@@ -39,6 +40,10 @@ export const paymaster = defineInstance(
                     transport: http(altoRpc)
                 })
 
+                const singletonPaymasterV08 = new SingletonPaymasterV08(
+                    walletClient,
+                    anvilRpc
+                )
                 const singletonPaymasterV07 = new SingletonPaymasterV07(
                     walletClient,
                     anvilRpc
@@ -48,8 +53,10 @@ export const paymaster = defineInstance(
                     anvilRpc
                 )
 
-                await singletonPaymasterV06.setup()
+                await singletonPaymasterV08.setup()
                 await singletonPaymasterV07.setup()
+                await singletonPaymasterV06.setup()
+
                 await deployErc20Token(walletClient, publicClient)
 
                 app.register(cors, {
@@ -57,11 +64,12 @@ export const paymaster = defineInstance(
                     methods: ["POST", "GET", "OPTIONS"]
                 })
 
-                const rpcHandler = createRpcHandler(
+                const rpcHandler = createRpcHandler({
                     bundler,
+                    singletonPaymasterV08,
                     singletonPaymasterV07,
                     singletonPaymasterV06
-                )
+                })
                 app.post("/", {}, rpcHandler)
 
                 app.get("/ping", async (_request, reply) => {
