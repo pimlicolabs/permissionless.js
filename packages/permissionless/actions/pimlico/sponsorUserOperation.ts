@@ -12,6 +12,13 @@ import type { UserOperation } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
+type PaymasterContext = {
+    sponsorshipPolicyId?: string
+    validForSeconds?: number
+    meta?: Record<string, string>
+    [key: string]: unknown
+}
+
 export type PimlicoSponsorUserOperationParameters<
     entryPointVersion extends "0.6" | "0.7"
 > = {
@@ -40,7 +47,7 @@ export type PimlicoSponsorUserOperationParameters<
         version: entryPointVersion
     }
     sponsorshipPolicyId?: string
-    validForSeconds?: number
+    paymasterContext?: PaymasterContext | unknown
 }
 
 export type SponsorUserOperationReturnType<
@@ -78,26 +85,29 @@ export const sponsorUserOperation = async <
     >,
     args: PimlicoSponsorUserOperationParameters<entryPointVersion>
 ): Promise<SponsorUserOperationReturnType<entryPointVersion>> => {
-    const { sponsorshipPolicyId, validForSeconds } = args
+    const { sponsorshipPolicyId, paymasterContext, userOperation, entryPoint } =
+        args
 
-    const hasPaymasterContext =
-        sponsorshipPolicyId !== undefined || validForSeconds !== undefined
+    const finalPaymasterContext =
+        sponsorshipPolicyId !== undefined
+            ? {
+                  ...(paymasterContext ?? {}),
+                  sponsorshipPolicyId
+              }
+            : paymasterContext
 
     const response = await client.request({
         method: "pm_sponsorUserOperation",
-        params: hasPaymasterContext
+        params: finalPaymasterContext
             ? [
-                  deepHexlify(args.userOperation),
-                  args.entryPoint.address,
-                  {
-                      ...(sponsorshipPolicyId ? { sponsorshipPolicyId } : {}),
-                      ...(validForSeconds ? { validForSeconds } : {})
-                  }
+                  deepHexlify(userOperation),
+                  entryPoint.address,
+                  finalPaymasterContext
               ]
-            : [deepHexlify(args.userOperation), args.entryPoint.address]
+            : [deepHexlify(userOperation), entryPoint.address]
     })
 
-    if (args.entryPoint.version === "0.6") {
+    if (entryPoint.version === "0.6") {
         const responseV06 = response as {
             paymasterAndData: Hex
             preVerificationGas: Hex
