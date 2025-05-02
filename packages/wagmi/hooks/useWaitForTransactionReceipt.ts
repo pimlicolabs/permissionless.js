@@ -30,15 +30,12 @@ import {
     isHash,
     stringify
 } from "viem"
+import type { GetCallsStatusReturnType, ShowCallsStatusErrorType } from "viem"
 import {
     getCallsStatus,
     getTransactionReceipt,
     watchBlockNumber
 } from "viem/actions"
-import {
-    type GetCallsStatusReturnType,
-    type ShowCallsStatusErrorType
-} from "viem"
 import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
