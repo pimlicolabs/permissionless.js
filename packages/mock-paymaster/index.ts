@@ -8,6 +8,7 @@ import { deployErc20Token } from "./helpers/erc20-utils.js"
 import { getAnvilWalletClient } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import {
+    deployPaymasters,
     SingletonPaymasterV06,
     SingletonPaymasterV07,
     SingletonPaymasterV08
@@ -40,23 +41,7 @@ export const paymaster = defineInstance(
                     transport: http(altoRpc)
                 })
 
-                const singletonPaymasterV08 = new SingletonPaymasterV08(
-                    walletClient,
-                    anvilRpc
-                )
-                const singletonPaymasterV07 = new SingletonPaymasterV07(
-                    walletClient,
-                    anvilRpc
-                )
-                const singletonPaymasterV06 = new SingletonPaymasterV06(
-                    walletClient,
-                    anvilRpc
-                )
-
-                await singletonPaymasterV08.setup()
-                await singletonPaymasterV07.setup()
-                await singletonPaymasterV06.setup()
-
+                await deployPaymasters({ walletClient, publicClient })
                 await deployErc20Token(walletClient, publicClient)
 
                 app.register(cors, {
@@ -66,9 +51,7 @@ export const paymaster = defineInstance(
 
                 const rpcHandler = createRpcHandler({
                     bundler,
-                    singletonPaymasterV08,
-                    singletonPaymasterV07,
-                    singletonPaymasterV06
+                    paymasterSigner: walletClient
                 })
                 app.post("/", {}, rpcHandler)
 

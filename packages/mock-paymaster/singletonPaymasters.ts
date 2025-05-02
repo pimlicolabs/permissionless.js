@@ -1,15 +1,12 @@
 import {
-    http,
     type Account,
     type Address,
     type Chain,
-    type GetContractReturnType,
     type Hex,
     type PublicClient,
     type Transport,
     type WalletClient,
     concat,
-    createPublicClient,
     encodePacked,
     getContract,
     parseEther,
@@ -19,7 +16,6 @@ import {
     type UserOperation,
     toPackedUserOperation
 } from "viem/account-abstraction"
-import { foundry } from "viem/chains"
 import {
     constants,
     getSingletonPaymaster06Address,
@@ -31,16 +27,18 @@ import {
 } from "./constants"
 import {
     singletonPaymaster06Abi,
-    singletonPaymaster07Abi
+    singletonPaymaster07Abi,
+    singletonPaymaster08Abi
 } from "./helpers/abi.js"
-import { getPublicClient } from "./helpers/utils.js"
 import type { PaymasterMode } from "./helpers/utils.js"
 
-export const getDummyPaymasterData = (
-    isV6: boolean,
-    paymaster: Address,
-    paymasterMode: PaymasterMode
-): { paymaster: Address; paymasterData: Hex } | { paymasterAndData: Hex } => {
+export const getDummyPaymasterData = ({
+    is06,
+    paymaster,
+    paymasterMode
+}: { is06: boolean; paymaster: Address; paymasterMode: PaymasterMode }):
+    | { paymaster: Address; paymasterData: Hex }
+    | { paymasterAndData: Hex } => {
     let encodedDummyData: Hex
 
     const validUntil = 0
@@ -98,7 +96,7 @@ export const getDummyPaymasterData = (
         )
     }
 
-    if (isV6) {
+    if (is06) {
         return {
             paymasterAndData: concat([paymaster, encodedDummyData])
         }
@@ -110,11 +108,19 @@ export const getDummyPaymasterData = (
     }
 }
 
-export const getPaymasterData = async (
-    isV6: boolean,
-    paymaster: Address,
+export const getSignedPaymasterData = async ({
+    publicClient,
+    signer,
+    userOp,
+    paymaster,
+    paymasterMode
+}: {
+    publicClient: PublicClient
+    signer: WalletClient<Transport, Chain, Account>
+    userOp: UserOperation
+    paymaster: Address
     paymasterMode: PaymasterMode
-) => {
+}) => {
     let paymasterData: Hex
 
     const validAfter = 0
@@ -170,303 +176,140 @@ export const getPaymasterData = async (
         )
     }
 
-    // get signature
-    encodedDummyData = encodePacked(
-        ["bytes", "bytes"],
-        [encodedDummyData, constants.dummySignature]
-    )
-
-    const hash = await this.singletonPaymaster.read.getHash([
-        mode,
-        toPackedUserOperation(op)
-    ])
-
-    const sig = await this.walletClient.signMessage({
-        message: { raw: toBytes(hash) }
-    })
-
-    return paymasterAndData
-}
-
-export class SingletonPaymasterV07 {
-    protected anvilRpc: string
-    protected walletClient: WalletClient<Transport, Chain, Account>
-    public singletonPaymaster: GetContractReturnType<
-        typeof singletonPaymaster07Abi,
-        {
-            public: PublicClient<Transport, Chain>
-            wallet: WalletClient<Transport, Chain, Account>
-        }
-    >
-
-    constructor(
-        walletClient: WalletClient<Transport, Chain, Account>,
-        anvilRpc: string
-    ) {
-        this.walletClient = walletClient
-        this.singletonPaymaster = getContract({
-            address: getSingletonPaymaster07Address(
-                walletClient.account.address
-            ),
-            abi: singletonPaymaster07Abi,
-            client: {
-                wallet: walletClient,
-                public: getPublicClient(anvilRpc)
-            }
+    if ("initCode" in userOp && "paymasterAndData" in userOp) {
+        const singletonPaymaster = getContract({
+            address: paymaster,
+            abi: singletonPaymaster06Abi,
+            client: publicClient
         })
-        this.anvilRpc = anvilRpc
-    }
 
-    public getDummyPaymasterData(paymasterMode: PaymasterMode): {
-        paymaster: Address
-        paymasterData: Hex
-    } {
-        return getDummyPaymasterData(
-            false,
-            this.singletonPaymaster.address,
-            paymasterMode
-        ) as {
-            paymaster: Address
-            paymasterData: Hex
-        }
-    }
-
-    async encodePaymasterData(
-        op: UserOperation<"0.7">,
-        paymasterMode: PaymasterMode
-    ) {
-        const validAfter = 0
-        const validUntil = Math.floor(Date.now() / 1000) + 60_000
-
-        const mode = paymasterMode.mode === "verifying" ? 0 : 1
-        op.paymaster = this.singletonPaymaster.address
-        op.paymasterData = encodePacked(
-            ["uint8", "uint48", "uint48"],
-            [mode, validUntil, validAfter]
-        )
-
-        // if ERC-20 mode, add extra ERC-20 fields
-        if (paymasterMode.mode === "erc20") {
-            op.paymasterData = encodePacked(
-                ["bytes", "address", "uint128", "uint256"],
-                [
-                    op.paymasterData,
-                    paymasterMode.token,
-                    constants.postOpGasOverhead,
-                    constants.exchangeRate
-                ]
-            )
-        }
-
-        const hash = await this.singletonPaymaster.read.getHash([
+        const hash = await singletonPaymaster.read.getHash([
             mode,
-            toPackedUserOperation(op)
+            {
+                sender: userOp.sender,
+                nonce: userOp.nonce,
+                initCode: userOp.initCode || "0x",
+                callData: userOp.callData,
+                callGasLimit: userOp.callGasLimit,
+                verificationGasLimit: userOp.verificationGasLimit,
+                preVerificationGas: userOp.preVerificationGas,
+                maxFeePerGas: userOp.maxFeePerGas,
+                maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
+                paymasterAndData: userOp.paymasterAndData || "0x",
+                signature: userOp.signature
+            }
         ])
 
-        const sig = await this.walletClient.signMessage({
+        const sig = await signer.signMessage({
             message: { raw: toBytes(hash) }
         })
 
+        paymasterData = encodePacked(["bytes", "bytes"], [paymasterData, sig])
+
         return {
-            paymaster: this.singletonPaymaster.address,
-            paymasterData: encodePacked(
-                ["bytes", "bytes"],
-                [op.paymasterData, sig]
-            )
+            paymasterAndData: concat([paymaster, paymasterData])
         }
     }
 
-    async setup() {
-        const owner = this.walletClient.account.address
+    // userOperation is v07
+    const singletonPaymaster = getContract({
+        address: paymaster,
+        abi: singletonPaymaster07Abi,
+        client: publicClient
+    })
 
-        const publicClient = createPublicClient({
-            transport: http(this.anvilRpc),
-            chain: foundry
-        })
+    const hash = await singletonPaymaster.read.getHash([
+        mode,
+        toPackedUserOperation(userOp)
+    ])
 
-        await this.walletClient
-            .sendTransaction({
-                to: constants.deterministicDeployer,
-                data: concat([
-                    constants.create2Salt,
-                    getSingletonPaymaster07InitCode(owner)
-                ])
-            })
-            .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
+    const sig = await signer.signMessage({
+        message: { raw: toBytes(hash) }
+    })
 
-        const singletonPaymaster = getContract({
-            address: getSingletonPaymaster06Address(owner),
-            abi: singletonPaymaster07Abi,
-            client: this.walletClient
-        })
+    paymasterData = encodePacked(["bytes", "bytes"], [paymasterData, sig])
 
-        await singletonPaymaster.write.deposit({
-            value: parseEther("50")
-        })
-
-        return singletonPaymaster
+    return {
+        paymaster,
+        paymasterData
     }
 }
 
-export class SingletonPaymasterV08 extends SingletonPaymasterV07 {
-    constructor(
-        walletClient: WalletClient<Transport, Chain, Account>,
-        anvilRpc: string
-    ) {
-        super(walletClient, anvilRpc)
-        this.singletonPaymaster = getContract({
-            address: getSingletonPaymaster08Address(
-                walletClient.account.address
-            ),
+export const deployPaymasters = async ({
+    walletClient,
+    publicClient
+}: {
+    walletClient: WalletClient<Transport, Chain, Account>
+    publicClient: PublicClient<Transport, Chain>
+}) => {
+    const owner = walletClient.account.address
+
+    let nonce = await publicClient.getTransactionCount({
+        address: walletClient.account.address
+    })
+
+    // Deploy singleton paymaster 06.
+    await walletClient.sendTransaction({
+        to: constants.deterministicDeployer,
+        data: concat([
+            constants.create2Salt,
+            getSingletonPaymaster06InitCode(walletClient.account.address)
+        ]),
+        nonce: nonce++
+    })
+
+    // Deploy singleton paymaster 07.
+    await walletClient.sendTransaction({
+        to: constants.deterministicDeployer,
+        data: concat([
+            constants.create2Salt,
+            getSingletonPaymaster07InitCode(walletClient.account.address)
+        ]),
+        nonce: nonce++
+    })
+
+    // Deploy singleton paymaster 08.
+    await walletClient.sendTransaction({
+        to: constants.deterministicDeployer,
+        data: concat([
+            constants.create2Salt,
+            getSingletonPaymaster08InitCode(walletClient.account.address)
+        ]),
+        nonce: nonce++
+    })
+
+    // Initialize contract instances.
+    const [singletonPaymaster06, singletonPaymaster07, singletonPaymaster08] = [
+        getContract({
+            address: getSingletonPaymaster06Address(owner),
+            abi: singletonPaymaster06Abi,
+            client: walletClient
+        }),
+        getContract({
+            address: getSingletonPaymaster07Address(owner),
             abi: singletonPaymaster07Abi,
-            client: {
-                wallet: walletClient,
-                public: getPublicClient(anvilRpc)
-            }
-        })
-    }
-
-    async setup() {
-        const owner = this.walletClient.account.address
-
-        const publicClient = createPublicClient({
-            transport: http(this.anvilRpc),
-            chain: foundry
-        })
-
-        await this.walletClient
-            .sendTransaction({
-                to: constants.deterministicDeployer,
-                data: concat([
-                    constants.create2Salt,
-                    getSingletonPaymaster08InitCode(owner)
-                ])
-            })
-            .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
-
-        const singletonPaymaster = getContract({
+            client: walletClient
+        }),
+        getContract({
             address: getSingletonPaymaster08Address(owner),
-            abi: singletonPaymaster07Abi,
-            client: this.walletClient
+            abi: singletonPaymaster08Abi,
+            client: walletClient
         })
+    ]
 
-        await singletonPaymaster.write.deposit({
-            value: parseEther("50")
-        })
+    // Fund the paymasters.
+    await singletonPaymaster06.write.deposit({
+        value: parseEther("50"),
+        nonce: nonce++
+    })
 
-        return singletonPaymaster
-    }
-}
+    await singletonPaymaster07.write.deposit({
+        value: parseEther("50"),
+        nonce: nonce++
+    })
 
-export class SingletonPaymasterV06 {
-    private walletClient: WalletClient<Transport, Chain, Account>
-    public singletonPaymaster: GetContractReturnType<
-        typeof singletonPaymaster06Abi,
-        {
-            public: PublicClient<Transport, Chain>
-            wallet: WalletClient<Transport, Chain, Account>
-        }
-    >
-    private anvilRpc: string
-
-    constructor(
-        walletClient: WalletClient<Transport, Chain, Account>,
-        anvilRpc: string
-    ) {
-        this.walletClient = walletClient
-        this.singletonPaymaster = getContract({
-            address: getSingletonPaymaster06Address(
-                walletClient.account.address
-            ),
-            abi: singletonPaymaster06Abi,
-            client: {
-                wallet: walletClient,
-                public: getPublicClient(anvilRpc)
-            }
-        })
-        this.anvilRpc = anvilRpc
-    }
-
-    public getDummyPaymasterData(paymasterMode: PaymasterMode): {
-        paymasterAndData: Hex
-    } {
-        return getDummyPaymasterData(
-            true,
-            this.singletonPaymaster.address,
-            paymasterMode
-        ) as {
-            paymasterAndData: Hex
-        }
-    }
-
-    async encodePaymasterData(
-        op: UserOperation<"0.6">,
-        paymasterMode: PaymasterMode
-    ) {
-        const validAfter = 0
-        const validUntil = Math.floor(Date.now() / 1000) + 60_000
-        const mode = paymasterMode.mode === "verifying" ? 0 : 1
-        op.paymasterAndData = encodePacked(
-            ["address", "uint8", "uint48", "uint48"],
-            [this.singletonPaymaster.address, mode, validUntil, validAfter]
-        )
-
-        if (paymasterMode.mode === "erc20") {
-            op.paymasterAndData = encodePacked(
-                ["bytes", "address", "uint128", "uint256"],
-                [
-                    op.paymasterAndData,
-                    paymasterMode.token,
-                    constants.postOpGasOverhead,
-                    constants.exchangeRate
-                ]
-            )
-        }
-
-        const hash = await this.singletonPaymaster.read.getHash([
-            mode,
-            {
-                ...op,
-                initCode: op.initCode || "0x",
-                paymasterAndData: op.paymasterAndData || "0x"
-            }
-        ])
-        const sig = await this.walletClient.signMessage({
-            message: { raw: hash }
-        })
-
-        return {
-            paymasterAndData: encodePacked(
-                ["bytes", "bytes"],
-                [op.paymasterAndData, sig]
-            )
-        }
-    }
-
-    async setup() {
-        const owner = this.walletClient.account.address
-
-        const publicClient = createPublicClient({
-            transport: http(this.anvilRpc),
-            chain: foundry
-        })
-
-        await this.walletClient
-            .sendTransaction({
-                to: constants.deterministicDeployer,
-                data: concat([
-                    constants.create2Salt,
-                    getSingletonPaymaster06InitCode(owner)
-                ])
-            })
-            .then((hash) => publicClient.waitForTransactionReceipt({ hash }))
-
-        const singletonPaymaster = getContract({
-            address: getSingletonPaymaster06Address(owner),
-            abi: singletonPaymaster06Abi,
-            client: this.walletClient
-        })
-
-        return singletonPaymaster
-    }
+    await singletonPaymaster08.write.deposit({
+        value: parseEther("50"),
+        nonce: nonce++
+    })
 }
