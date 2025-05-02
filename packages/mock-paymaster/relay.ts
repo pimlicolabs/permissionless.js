@@ -1,14 +1,14 @@
 import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    Account,
+    type Account,
     type Address,
     BaseError,
-    Chain,
-    PublicClient,
+    type Chain,
+    type PublicClient,
     type RpcRequestError,
-    Transport,
-    WalletClient,
+    type Transport,
+    type WalletClient,
     getAddress,
     toHex
 } from "viem"
@@ -20,6 +20,11 @@ import {
     entryPoint08Address
 } from "viem/account-abstraction"
 import { fromZodError } from "zod-validation-error"
+import {
+    getSingletonPaymaster06Address,
+    getSingletonPaymaster07Address,
+    getSingletonPaymaster08Address
+} from "./constants.js"
 import { erc20Address } from "./helpers/erc20-utils.js"
 import {
     InternalBundlerError,
@@ -41,11 +46,6 @@ import {
     getDummyPaymasterData,
     getSignedPaymasterData
 } from "./singletonPaymasters.js"
-import {
-    getSingletonPaymaster06Address,
-    getSingletonPaymaster07Address,
-    getSingletonPaymaster08Address
-} from "./constants.js"
 
 const handleSponsorship = async ({
     userOperation,

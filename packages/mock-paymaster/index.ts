@@ -8,10 +8,10 @@ import { deployErc20Token } from "./helpers/erc20-utils.js"
 import { getAnvilWalletClient } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import {
-    deployPaymasters,
     SingletonPaymasterV06,
     SingletonPaymasterV07,
-    SingletonPaymasterV08
+    SingletonPaymasterV08,
+    deployPaymasters
 } from "./singletonPaymasters.js"
 
 export const paymaster = defineInstance(
