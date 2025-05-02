@@ -11,7 +11,7 @@ import type {
     WalletCapabilities,
     WalletSendCallsParameters
 } from "viem"
-import type { SendCallsErrorType } from "viem/experimental"
+import type { SendCallsErrorType } from "viem"
 import { type Config, type ResolvedRegister, useConfig } from "wagmi"
 import type {
     SendTransactionVariables,
@@ -47,7 +47,7 @@ const sendTransactionMutationOptions = <config extends Config>(
                               }
                             : undefined
                     }
-                })
+                }) as unknown as Promise<string>
             }
 
             return sendTransaction(config, variables) as Promise<string>

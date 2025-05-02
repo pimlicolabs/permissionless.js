@@ -30,12 +30,15 @@ import {
     isHash,
     stringify
 } from "viem"
-import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
+import {
+    getCallsStatus,
+    getTransactionReceipt,
+    watchBlockNumber
+} from "viem/actions"
 import {
     type GetCallsStatusReturnType,
-    type ShowCallsStatusErrorType,
-    getCallsStatus
-} from "viem/experimental"
+    type ShowCallsStatusErrorType
+} from "viem"
 import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
@@ -78,13 +81,13 @@ export function filterQueryOptions<type extends Record<string, unknown>>(
     const {
       // import('@tanstack/query-core').QueryOptions
       _defaulted, behavior, gcTime, initialData, initialDataUpdatedAt, maxPages, meta, networkMode, queryFn, queryHash, queryKey, queryKeyHashFn, retry, retryDelay, structuralSharing,
-  
+
       // import('@tanstack/query-core').InfiniteQueryObserverOptions
       getPreviousPageParam, getNextPageParam, initialPageParam,
-      
+
       // import('@tanstack/react-query').UseQueryOptions
       _optimisticResults, enabled, notifyOnChangeProps, placeholderData, refetchInterval, refetchIntervalInBackground, refetchOnMount, refetchOnReconnect, refetchOnWindowFocus, retryOnMount, select, staleTime, suspense, throwOnError,
-  
+
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // wagmi
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +214,7 @@ export async function waitForCallsStatus<
                     try {
                         // If we already have a valid receipt, let's check if we have enough
                         // confirmations. If we do, then we can resolve.
-                        if (receipt && receipt.status !== "PENDING") {
+                        if (receipt && receipt.status !== "pending") {
                             if (
                                 confirmations > 1 &&
                                 (!receipt.receipts?.[0]?.blockNumber ||
@@ -257,7 +260,7 @@ export async function waitForCallsStatus<
                             "getCallsStatus"
                         )({ id })
 
-                        if (receipt.status === "PENDING") {
+                        if (receipt.status === "pending") {
                             return
                         }
 
