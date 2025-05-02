@@ -7,12 +7,7 @@ import { foundry } from "viem/chains"
 import { deployErc20Token } from "./helpers/erc20-utils.js"
 import { getAnvilWalletClient } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
-import {
-    SingletonPaymasterV06,
-    SingletonPaymasterV07,
-    SingletonPaymasterV08,
-    deployPaymasters
-} from "./singletonPaymasters.js"
+import { deployPaymasters } from "./singletonPaymasters.js"
 
 export const paymaster = defineInstance(
     ({
@@ -51,6 +46,7 @@ export const paymaster = defineInstance(
 
                 const rpcHandler = createRpcHandler({
                     bundler,
+                    publicClient,
                     paymasterSigner: walletClient
                 })
                 app.post("/", {}, rpcHandler)
