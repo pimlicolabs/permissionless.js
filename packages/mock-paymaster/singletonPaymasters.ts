@@ -24,7 +24,7 @@ import {
     getSingletonPaymaster07InitCode,
     getSingletonPaymaster08Address,
     getSingletonPaymaster08InitCode
-} from "./constants"
+} from "./constants.js"
 import {
     singletonPaymaster06Abi,
     singletonPaymaster07Abi,
