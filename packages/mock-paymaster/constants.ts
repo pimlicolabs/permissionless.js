@@ -12,7 +12,7 @@ import {
     entryPoint06Address,
     entryPoint07Address,
     entryPoint08Address
-} from "viem/_types/constants/address"
+} from "viem/account-abstraction"
 
 export const constants = {
     deterministicDeployer: getAddress(
