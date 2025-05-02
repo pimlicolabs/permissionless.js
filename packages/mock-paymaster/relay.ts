@@ -160,7 +160,7 @@ const handleMethod = async ({
         getSingletonPaymaster08Address(paymasterSigner.account.address)
     ]
 
-    const epToPaymaster = {
+    const epToPaymaster: Record<`0x${string}`, `0x${string}`> = {
         [entryPoint06Address]: paymaster06,
         [entryPoint07Address]: paymaster07,
         [entryPoint08Address]: paymaster08
