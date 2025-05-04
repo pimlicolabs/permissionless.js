@@ -34,7 +34,7 @@ export const getSingletonPaymaster08InitCode = (owner: Address): Hex =>
         pad(entryPoint08Address, { size: 32 }),
         pad(owner, { size: 32 }),
         pad(owner, { size: 32 }),
-        encodeAbiParameters(parseAbiParameters("address[]"), [owner])
+        encodeAbiParameters(parseAbiParameters("address[]"), [[owner]])
     ])
 
 export const getSingletonPaymaster07InitCode = (owner: Address): Hex =>
@@ -43,7 +43,7 @@ export const getSingletonPaymaster07InitCode = (owner: Address): Hex =>
         pad(entryPoint07Address, { size: 32 }),
         pad(owner, { size: 32 }),
         pad(owner, { size: 32 }),
-        encodeAbiParameters(parseAbiParameters("address[]"), [owner])
+        encodeAbiParameters(parseAbiParameters("address[]"), [[owner]])
     ])
 
 export const getSingletonPaymaster06InitCode = (owner: Address): Hex =>
@@ -52,7 +52,7 @@ export const getSingletonPaymaster06InitCode = (owner: Address): Hex =>
         pad(entryPoint06Address, { size: 32 }),
         pad(owner, { size: 32 }),
         pad(owner, { size: 32 }),
-        encodeAbiParameters(parseAbiParameters("address[]"), [owner])
+        encodeAbiParameters(parseAbiParameters("address[]"), [[owner]])
     ])
 
 export const getSingletonPaymaster08Address = (owner: Address) =>
