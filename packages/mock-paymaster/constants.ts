@@ -59,7 +59,6 @@ export const getSingletonPaymaster06InitCode = (owner: Address): Hex =>
         pad(owner) // signer
     ])
 
-
 export const getSingletonPaymaster08Address = (owner: Address) =>
     getCreate2Address({
         from: constants.deterministicDeployer,
