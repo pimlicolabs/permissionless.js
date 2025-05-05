@@ -48,7 +48,7 @@ import {
     getSignedPaymasterData
 } from "./singletonPaymasters.js"
 
-const handleSponsorship = async ({
+const handlePmSponsor = async ({
     userOperation,
     paymasterMode,
     bundler,
@@ -65,9 +65,11 @@ const handleSponsorship = async ({
     paymasterSigner: WalletClient<Transport, Chain, Account>
     estimateGas: boolean
 }) => {
+    const is06 = paymaster === entryPoint06Address
+
     let op = {
         ...userOperation,
-        ...getDummyPaymasterData({ is06: false, paymaster, paymasterMode })
+        ...getDummyPaymasterData({ is06, paymaster, paymasterMode })
     } as UserOperation
 
     const callGasLimit = userOperation.callGasLimit
@@ -181,7 +183,7 @@ const handleMethod = async ({
         const [userOperation, entryPoint] = params.data
         validateEntryPoint(entryPoint)
 
-        return await handleSponsorship({
+        return await handlePmSponsor({
             userOperation,
             paymasterMode: { mode: "verifying" },
             bundler,
@@ -214,17 +216,18 @@ const handleMethod = async ({
             icon: sponsorshipIcon
         }
 
-        const dummyPaymasterGas =
-            entryPoint === entryPoint06Address
-                ? {}
-                : {
-                      paymasterVerificationGasLimit: toHex(50_000n),
-                      paymasterPostOpGasLimit: toHex(100_000n)
-                  }
+        const is06 = entryPoint === entryPoint06Address
+
+        const dummyPaymasterGas = is06
+            ? {}
+            : {
+                  paymasterVerificationGasLimit: toHex(50_000n),
+                  paymasterPostOpGasLimit: toHex(100_000n)
+              }
 
         return {
             ...getDummyPaymasterData({
-                is06: false,
+                is06,
                 paymaster: epToPaymaster[entryPoint],
                 paymasterMode
             }),
@@ -247,16 +250,12 @@ const handleMethod = async ({
         const [userOperation, entryPoint, , data] = params.data
         validateEntryPoint(entryPoint)
 
-        const paymasterMode = getPaymasterMode(data)
-
-        return await handleSponsorship({
-            userOperation: userOperation as UserOperation,
-            paymasterMode,
-            bundler,
+        return await getSignedPaymasterData({
+            signer: paymasterSigner,
+            userOp: userOperation as UserOperation,
+            paymasterMode: getPaymasterMode(data),
             paymaster: epToPaymaster[entryPoint],
-            publicClient,
-            paymasterSigner,
-            estimateGas: false
+            publicClient
         })
     }
 
@@ -377,7 +376,6 @@ export const createRpcHandler = ({
 const getPaymasterMode = (data: any): PaymasterMode => {
     if (data !== null && "token" in data) {
         isTokenSupported(data.token)
-
         return { mode: "erc20", token: data.token }
     }
 

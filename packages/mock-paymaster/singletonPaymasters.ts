@@ -126,19 +126,9 @@ export const getSignedPaymasterData = async ({
     const validAfter = 0
     const validUntil = Math.floor(Date.now() / 1000) + constants.validForSeconds
 
-    const mode = 1
+    const mode = paymasterMode.mode === "verifying" ? 0 : 1
     const allowAllBundlers = true
     const modeAndAllowBundlers = (mode << 1) | (allowAllBundlers ? 1 : 0)
-    const paymasterValidationGasLimit = 1n
-
-    const constantFeePresent = false
-    const recipientPresent = false
-    const preFundPresent = false
-
-    const constantFeeAndRecipientAndPreFund =
-        ((preFundPresent ? 1 : 0) << 2) |
-        ((recipientPresent ? 1 : 0) << 1) |
-        (constantFeePresent ? 1 : 0)
 
     if (paymasterMode.mode === "verifying") {
         paymasterData = encodePacked(
@@ -150,6 +140,17 @@ export const getSignedPaymasterData = async ({
             [modeAndAllowBundlers, validUntil, validAfter]
         )
     } else {
+        const paymasterValidationGasLimit = 1n
+
+        const constantFeePresent = false
+        const recipientPresent = false
+        const preFundPresent = false
+
+        const constantFeeAndRecipientAndPreFund =
+            ((preFundPresent ? 1 : 0) << 2) |
+            ((recipientPresent ? 1 : 0) << 1) |
+            (constantFeePresent ? 1 : 0)
+
         paymasterData = encodePacked(
             [
                 "uint8", // combined byte (mode and allowAllBundlers)
@@ -195,7 +196,7 @@ export const getSignedPaymasterData = async ({
                 preVerificationGas: userOp.preVerificationGas,
                 maxFeePerGas: userOp.maxFeePerGas,
                 maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
-                paymasterAndData: userOp.paymasterAndData || "0x",
+                paymasterAndData: concat([paymaster, paymasterData]),
                 signature: userOp.signature
             }
         ])
@@ -204,10 +205,8 @@ export const getSignedPaymasterData = async ({
             message: { raw: toBytes(hash) }
         })
 
-        paymasterData = encodePacked(["bytes", "bytes"], [paymasterData, sig])
-
         return {
-            paymasterAndData: concat([paymaster, paymasterData])
+            paymasterAndData: concat([paymaster, paymasterData, sig])
         }
     }
 
@@ -220,7 +219,12 @@ export const getSignedPaymasterData = async ({
 
     const hash = await singletonPaymaster.read.getHash([
         mode,
-        toPackedUserOperation(userOp)
+        // paymaster signs over paymasterData so we add paymaster + paymasterData
+        toPackedUserOperation({
+            ...userOp,
+            paymaster,
+            paymasterData
+        } as UserOperation)
     ])
 
     const sig = await signer.signMessage({
