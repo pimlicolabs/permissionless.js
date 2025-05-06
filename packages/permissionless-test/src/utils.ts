@@ -54,9 +54,7 @@ export const ensureBundlerIsReady = async ({
     const bundlerClient = getBundlerClient({
         altoRpc: altoRpc,
         anvilRpc,
-        entryPoint: {
-            version: "0.6"
-        }
+        entryPointVersion: "0.6"
     })
 
     while (true) {
@@ -133,26 +131,24 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
     anvilRpc,
     account,
     paymasterRpc,
-    entryPoint
+    entryPointVersion
 }: {
     altoRpc: string
     paymasterRpc?: string
     anvilRpc: string
     account?: account
-    entryPoint: {
-        version: EntryPointVersion
-    }
+    entryPointVersion: EntryPointVersion
 }) => {
     const paymaster = paymasterRpc
         ? createPimlicoClient({
               transport: http(paymasterRpc),
-              entryPoint: getEntryPointFromVersion(entryPoint.version)
+              entryPoint: getEntryPointFromVersion(entryPointVersion)
           })
         : undefined
 
     const pimlicoBundler = createPimlicoClient({
         transport: http(altoRpc),
-        entryPoint: getEntryPointFromVersion(entryPoint.version)
+        entryPoint: getEntryPointFromVersion(entryPointVersion)
     })
 
     return createSmartAccountClient({
@@ -229,7 +225,7 @@ export const getPublicClient = (anvilRpc: string) => {
 export const getSimpleAccountClient = async <
     entryPointVersion extends EntryPointVersion
 >({
-    entryPoint,
+    entryPointVersion,
     anvilRpc,
     privateKey
 }: AAParamType<entryPointVersion>): Promise<
@@ -237,7 +233,7 @@ export const getSimpleAccountClient = async <
 > => {
     return toSimpleSmartAccount<entryPointVersion>({
         client: getPublicClient(anvilRpc),
-        entryPoint: getEntryPointFromVersion(entryPoint.version),
+        entryPoint: getEntryPointFromVersion(entryPointVersion),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
@@ -245,7 +241,7 @@ export const getSimpleAccountClient = async <
 export const getLightAccountClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
-    entryPoint,
+    entryPointVersion,
     anvilRpc,
     version,
     privateKey
@@ -253,9 +249,8 @@ export const getLightAccountClient = async <
     version?: LightAccountVersion<entryPointVersion>
 }) => {
     return toLightSmartAccount({
-        entryPoint: getEntryPointFromVersion<entryPointVersion>(
-            entryPoint.version
-        ),
+        entryPoint:
+            getEntryPointFromVersion<entryPointVersion>(entryPointVersion),
         client: getPublicClient(anvilRpc),
         version: version ?? ("1.1.0" as LightAccountVersion<entryPointVersion>),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
@@ -304,7 +299,7 @@ export const getNexusClient = async <entryPointVersion extends "0.6" | "0.7">({
 export const getKernelEcdsaClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
-    entryPoint,
+    entryPointVersion,
     anvilRpc,
     version,
     privateKey,
@@ -317,16 +312,15 @@ export const getKernelEcdsaClient = async <
 
     if (
         (version === "0.3.0-beta" || version === "0.3.1") &&
-        entryPoint.version === "0.6"
+        entryPointVersion === "0.6"
     ) {
         throw new Error("Kernel ERC7579 is not supported for V06")
     }
 
     return toKernelSmartAccount({
         client: publicClient,
-        entryPoint: getEntryPointFromVersion<entryPointVersion>(
-            entryPoint.version
-        ),
+        entryPoint:
+            getEntryPointFromVersion<entryPointVersion>(entryPointVersion),
         useMetaFactory,
         owners: [privateKeyToAccount(privateKey ?? generatePrivateKey())],
         version
@@ -334,7 +328,7 @@ export const getKernelEcdsaClient = async <
 }
 
 export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
-    entryPoint,
+    entryPointVersion,
     anvilRpc,
     erc7579,
     privateKey,
@@ -352,7 +346,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     return toSafeSmartAccount({
         client: publicClient,
         onchainIdentifier,
-        entryPoint: getEntryPointFromVersion(entryPoint.version),
+        entryPoint: getEntryPointFromVersion(entryPointVersion),
         owners: owners ?? [
             privateKeyToAccount(privateKey ?? generatePrivateKey())
         ],
@@ -376,7 +370,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
 export const getThirdwebClient = async <
     entryPointVersion extends "0.6" | "0.7"
 >({
-    entryPoint,
+    entryPointVersion,
     anvilRpc,
     privateKey
     // erc7579
@@ -388,9 +382,8 @@ export const getThirdwebClient = async <
     return toThirdwebSmartAccount({
         client: publicClient,
         version: "1.5.20",
-        entryPoint: getEntryPointFromVersion<entryPointVersion>(
-            entryPoint.version
-        ),
+        entryPoint:
+            getEntryPointFromVersion<entryPointVersion>(entryPointVersion),
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
 }
