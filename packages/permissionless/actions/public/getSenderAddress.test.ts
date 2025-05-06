@@ -1,7 +1,8 @@
 import { http, concatHex, createPublicClient } from "viem"
 import {
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    entryPoint08Address
 } from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
@@ -109,6 +110,41 @@ describe("getSenderAddress", () => {
 
         const address = await getSenderAddress(client, {
             entryPointAddress: entryPoint07Address,
+            factory,
+            factoryData
+        })
+
+        expect(address).toBe(simpleAccountClient.account.address)
+    })
+    testWithRpc("getSenderAddress_V08", async ({ rpc }) => {
+        const { anvilRpc, altoRpc } = rpc
+
+        const client = createPublicClient({
+            transport: http(anvilRpc)
+        })
+
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.8"
+                }
+            }),
+            entryPoint: {
+                version: "0.8"
+            },
+            ...rpc
+        })
+
+        const { factory, factoryData } =
+            await simpleAccountClient.account.getFactoryArgs()
+
+        if (!factory || !factoryData) {
+            throw new Error("Factory or factoryData not found")
+        }
+
+        const address = await getSenderAddress(client, {
+            entryPointAddress: entryPoint08Address,
             factory,
             factoryData
         })

@@ -21,7 +21,7 @@
         }
     },
     "peerDependencies": {
-        "viem": "^2.23.2",
+        "viem": "^2.28.1",
         "prool": "^0.0.23"
     },
     "dependencies": {

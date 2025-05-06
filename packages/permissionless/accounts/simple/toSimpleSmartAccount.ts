@@ -1,4 +1,3 @@
-import { version } from "react"
 import {
     type Account,
     type Address,
@@ -100,39 +99,30 @@ const getFactoryAddress = (
 ): Address => {
     if (factoryAddress) return factoryAddress
 
-    switch (entryPointVersion) {
-        case "0.8":
-            return "0x13E9ed32155810FDbd067D4522C492D6f68E5944"
-        case "0.7":
-            return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
-        default:
-            return "0x9406Cc6185a346906296840746125a0E44976454"
+    if (entryPointVersion === "0.6") {
+        return "0x9406Cc6185a346906296840746125a0E44976454"
     }
-}
-
-type EntryPointAbiMap = {
-    "0.6": typeof entryPoint06Abi
-    "0.7": typeof entryPoint07Abi
-    "0.8": typeof entryPoint08Abi
-}
-
-const getEntryPointAbi = (entryPointVersion: EntryPointVersion) => {
-    switch (entryPointVersion) {
-        case "0.8":
-            return entryPoint08Abi
-        case "0.7":
-            return entryPoint07Abi
-        default:
-            return entryPoint06Abi
+    if (entryPointVersion === "0.7") {
+        return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
     }
+    return "0x9406Cc6185a346906296840746125a0E44976454"
 }
 
 export type SimpleSmartAccountImplementation<
     entryPointVersion extends EntryPointVersion = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        EntryPointAbiMap[entryPointVersion],
+        entryPointVersion extends "0.6"
+            ? typeof entryPoint06Abi
+            : entryPointVersion extends "0.8"
+              ? typeof entryPoint07Abi
+              : typeof entryPoint08Abi,
         entryPointVersion
+        // {
+        //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
+        //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
+        //     factory: { abi: typeof FactoryAbi; address: Address }
+        // }
     >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
@@ -162,17 +152,16 @@ export async function toSimpleSmartAccount<
 
     const localOwner = await toOwner({ owner })
 
-    const entryPoint = parameters.entryPoint
-        ? {
-              address: parameters.entryPoint.address,
-              abi: getEntryPointAbi(parameters.entryPoint.version),
-              version: parameters.entryPoint.version
-          }
-        : ({
-              address: entryPoint07Address,
-              abi: getEntryPointAbi("0.7"),
-              version: "0.7"
-          } as const)
+    const entryPoint = {
+        address: parameters.entryPoint?.address ?? entryPoint07Address,
+        abi:
+            (parameters.entryPoint?.version ?? "0.7") === "0.6"
+                ? entryPoint06Abi
+                : (parameters.entryPoint?.version ?? "0.7") === "0.7"
+                  ? entryPoint07Abi
+                  : entryPoint08Abi,
+        version: parameters.entryPoint?.version ?? "0.7"
+    } as const
 
     const factoryAddress = getFactoryAddress(
         entryPoint.version,
@@ -220,7 +209,26 @@ export async function toSimpleSmartAccount<
             if (calls.length > 1) {
                 if (entryPoint.version === "0.6") {
                     return encodeFunctionData({
-                        abi: simpleAccount06Abi,
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address[]",
+                                        name: "dest",
+                                        type: "address[]"
+                                    },
+                                    {
+                                        internalType: "bytes[]",
+                                        name: "func",
+                                        type: "bytes[]"
+                                    }
+                                ],
+                                name: "executeBatch",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
                         functionName: "executeBatch",
                         args: [
                             calls.map((a) => a.to),
@@ -229,7 +237,31 @@ export async function toSimpleSmartAccount<
                     })
                 }
                 return encodeFunctionData({
-                    abi: simpleAccount07Abi,
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address[]",
+                                    name: "dest",
+                                    type: "address[]"
+                                },
+                                {
+                                    internalType: "uint256[]",
+                                    name: "value",
+                                    type: "uint256[]"
+                                },
+                                {
+                                    internalType: "bytes[]",
+                                    name: "func",
+                                    type: "bytes[]"
+                                }
+                            ],
+                            name: "executeBatch",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
                     functionName: "executeBatch",
                     args: [
                         calls.map((a) => a.to),
@@ -246,7 +278,31 @@ export async function toSimpleSmartAccount<
             }
 
             return encodeFunctionData({
-                abi: simpleAccount07Abi,
+                abi: [
+                    {
+                        inputs: [
+                            {
+                                internalType: "address",
+                                name: "dest",
+                                type: "address"
+                            },
+                            {
+                                internalType: "uint256",
+                                name: "value",
+                                type: "uint256"
+                            },
+                            {
+                                internalType: "bytes",
+                                name: "func",
+                                type: "bytes"
+                            }
+                        ],
+                        name: "execute",
+                        outputs: [],
+                        stateMutability: "nonpayable",
+                        type: "function"
+                    }
+                ],
                 functionName: "execute",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
@@ -254,7 +310,26 @@ export async function toSimpleSmartAccount<
         decodeCalls: async (callData) => {
             try {
                 const decodedV6 = decodeFunctionData({
-                    abi: simpleAccount06Abi,
+                    abi: [
+                        {
+                            inputs: [
+                                {
+                                    internalType: "address[]",
+                                    name: "dest",
+                                    type: "address[]"
+                                },
+                                {
+                                    internalType: "bytes[]",
+                                    name: "func",
+                                    type: "bytes[]"
+                                }
+                            ],
+                            name: "executeBatch",
+                            outputs: [],
+                            stateMutability: "nonpayable",
+                            type: "function"
+                        }
+                    ],
                     data: callData
                 })
 
@@ -274,12 +349,36 @@ export async function toSimpleSmartAccount<
 
                 return calls
             } catch (_) {
-                const decodedV7 = decodeFunctionData({
-                    abi: simpleAccount07Abi,
-                    data: callData
-                })
+                try {
+                    const decodedV7 = decodeFunctionData({
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address[]",
+                                        name: "dest",
+                                        type: "address[]"
+                                    },
+                                    {
+                                        internalType: "uint256[]",
+                                        name: "value",
+                                        type: "uint256[]"
+                                    },
+                                    {
+                                        internalType: "bytes[]",
+                                        name: "func",
+                                        type: "bytes[]"
+                                    }
+                                ],
+                                name: "executeBatch",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
+                        data: callData
+                    })
 
-                if (decodedV7.functionName === "executeBatch") {
                     const calls: {
                         to: Address
                         data: Hex
@@ -295,15 +394,43 @@ export async function toSimpleSmartAccount<
                     }
 
                     return calls
+                } catch (_) {
+                    const decodedSingle = decodeFunctionData({
+                        abi: [
+                            {
+                                inputs: [
+                                    {
+                                        internalType: "address",
+                                        name: "dest",
+                                        type: "address"
+                                    },
+                                    {
+                                        internalType: "uint256",
+                                        name: "value",
+                                        type: "uint256"
+                                    },
+                                    {
+                                        internalType: "bytes",
+                                        name: "func",
+                                        type: "bytes"
+                                    }
+                                ],
+                                name: "execute",
+                                outputs: [],
+                                stateMutability: "nonpayable",
+                                type: "function"
+                            }
+                        ],
+                        data: callData
+                    })
+                    return [
+                        {
+                            to: decodedSingle.args[0],
+                            value: decodedSingle.args[1],
+                            data: decodedSingle.args[2]
+                        }
+                    ]
                 }
-
-                return [
-                    {
-                        to: decodedV7.args[0],
-                        value: decodedV7.args[1],
-                        data: decodedV7.args[2]
-                    }
-                ]
             }
         },
         async getNonce(args) {
@@ -330,7 +457,7 @@ export async function toSimpleSmartAccount<
                 parameters
 
             // 0.8 Signs using typed data
-            if (version === "0.8") {
+            if (entryPoint.version === "0.8") {
                 const address = await this.getAddress()
                 const typedData = getUserOperationTypedData({
                     chainId,
@@ -363,73 +490,3 @@ export async function toSimpleSmartAccount<
         }
     }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion>>
 }
-
-const simpleAccount06Abi = [
-    {
-        inputs: [
-            {
-                internalType: "address[]",
-                name: "dest",
-                type: "address[]"
-            },
-            {
-                internalType: "bytes[]",
-                name: "func",
-                type: "bytes[]"
-            }
-        ],
-        name: "executeBatch",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function"
-    }
-] as const
-
-const simpleAccount07Abi = [
-    {
-        inputs: [
-            {
-                internalType: "address[]",
-                name: "dest",
-                type: "address[]"
-            },
-            {
-                internalType: "uint256[]",
-                name: "value",
-                type: "uint256[]"
-            },
-            {
-                internalType: "bytes[]",
-                name: "func",
-                type: "bytes[]"
-            }
-        ],
-        name: "executeBatch",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function"
-    },
-    {
-        inputs: [
-            {
-                internalType: "address",
-                name: "dest",
-                type: "address"
-            },
-            {
-                internalType: "uint256",
-                name: "value",
-                type: "uint256"
-            },
-            {
-                internalType: "bytes",
-                name: "func",
-                type: "bytes"
-            }
-        ],
-        name: "execute",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function"
-    }
-] as const

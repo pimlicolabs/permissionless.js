@@ -30,12 +30,12 @@ import {
     isHash,
     stringify
 } from "viem"
-import type { GetCallsStatusReturnType, ShowCallsStatusErrorType } from "viem"
+import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
 import {
-    getCallsStatus,
-    getTransactionReceipt,
-    watchBlockNumber
-} from "viem/actions"
+    type GetCallsStatusReturnType,
+    type ShowCallsStatusErrorType,
+    getCallsStatus
+} from "viem/experimental"
 import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
@@ -78,13 +78,13 @@ export function filterQueryOptions<type extends Record<string, unknown>>(
     const {
       // import('@tanstack/query-core').QueryOptions
       _defaulted, behavior, gcTime, initialData, initialDataUpdatedAt, maxPages, meta, networkMode, queryFn, queryHash, queryKey, queryKeyHashFn, retry, retryDelay, structuralSharing,
-
+  
       // import('@tanstack/query-core').InfiniteQueryObserverOptions
       getPreviousPageParam, getNextPageParam, initialPageParam,
-
+      
       // import('@tanstack/react-query').UseQueryOptions
       _optimisticResults, enabled, notifyOnChangeProps, placeholderData, refetchInterval, refetchIntervalInBackground, refetchOnMount, refetchOnReconnect, refetchOnWindowFocus, retryOnMount, select, staleTime, suspense, throwOnError,
-
+  
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // wagmi
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

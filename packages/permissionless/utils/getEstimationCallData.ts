@@ -1,5 +1,6 @@
 import { type Address, type Hex, encodeFunctionData } from "viem"
 import {
+    type EntryPointVersion,
     type UserOperation,
     entryPoint06Abi,
     toPackedUserOperation
@@ -44,7 +45,7 @@ function getPimlicoEstimationCallData06({
 function encodeSimulateHandleOpLast({
     userOperation
 }: {
-    userOperation: UserOperation<"0.7">
+    userOperation: UserOperation<"0.7" | "0.8">
 }): Hex {
     const userOperations = [userOperation]
     const packedUserOperations = userOperations.map((uop) => ({
@@ -177,11 +178,11 @@ function getPimlicoEstimationCallData07({
     estimationAddress,
     entrypoint
 }: {
-    userOperation: UserOperation<"0.7">
+    userOperation: UserOperation<"0.7" | "0.8">
     estimationAddress?: Address
     entrypoint: {
         address: Address
-        version: "0.7"
+        version: "0.7" | "0.8"
     }
 }): { to: Address; data: Hex } {
     const simulateHandleOpLast = encodeSimulateHandleOpLast({
@@ -224,7 +225,7 @@ function getPimlicoEstimationCallData07({
 }
 
 export type GetPimlicoEstimationCallDataParams<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 > = {
     userOperation: UserOperation<entryPointVersion>
     entrypoint: {
@@ -238,19 +239,25 @@ export type GetPimlicoEstimationCallDataParams<
     : { estimationAddress?: Address })
 
 function isEntryPoint06(
-    args: GetPimlicoEstimationCallDataParams<"0.6" | "0.7">
+    args: GetPimlicoEstimationCallDataParams<EntryPointVersion>
 ): args is GetPimlicoEstimationCallDataParams<"0.6"> {
     return args.entrypoint.version === "0.6"
 }
 
 function isEntryPoint07(
-    args: GetPimlicoEstimationCallDataParams<"0.6" | "0.7">
+    args: GetPimlicoEstimationCallDataParams<EntryPointVersion>
 ): args is GetPimlicoEstimationCallDataParams<"0.7"> {
     return args.entrypoint.version === "0.7"
 }
 
+function isEntryPoint08(
+    args: GetPimlicoEstimationCallDataParams<EntryPointVersion>
+): args is GetPimlicoEstimationCallDataParams<"0.8"> {
+    return args.entrypoint.version === "0.8"
+}
+
 export function getPimlicoEstimationCallData<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 >(
     args: GetPimlicoEstimationCallDataParams<entryPointVersion>
 ): { to: Address; data: Hex } {
@@ -271,6 +278,17 @@ export function getPimlicoEstimationCallData<
             entrypoint: {
                 address: args.entrypoint.address,
                 version: "0.7"
+            }
+        })
+    }
+
+    if (isEntryPoint08(args)) {
+        return getPimlicoEstimationCallData07({
+            userOperation: args.userOperation,
+            estimationAddress: args.estimationAddress,
+            entrypoint: {
+                address: args.entrypoint.address,
+                version: "0.8"
             }
         })
     }

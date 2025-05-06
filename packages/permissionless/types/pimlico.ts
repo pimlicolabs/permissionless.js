@@ -84,6 +84,16 @@ export type PimlicoRpcSchema<
                             | "paymasterPostOpGasLimit"
                         >
                       : never)
+                | (entryPointVersion extends "0.8"
+                      ? PartialBy<
+                            UserOperation<"0.7", Hex>,
+                            | "callGasLimit"
+                            | "preVerificationGas"
+                            | "verificationGasLimit"
+                            | "paymasterVerificationGasLimit"
+                            | "paymasterPostOpGasLimit"
+                        >
+                      : never)
             >,
             entryPoint: Address,
             metadata?: {

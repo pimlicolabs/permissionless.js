@@ -3,7 +3,8 @@ import {
     type MutationOptions,
     useMutation
 } from "@tanstack/react-query"
-import { sendCalls, sendTransaction } from "@wagmi/core"
+import { sendTransaction } from "@wagmi/core"
+import { sendCalls } from "@wagmi/core"
 import type {
     Prettify,
     SendTransactionErrorType,

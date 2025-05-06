@@ -65,14 +65,10 @@ export const prepareUserOperationForErc20Paymaster =
         PrepareUserOperationReturnType<account, accountOverride, calls, request>
     > => {
         const parameters = parameters_ as PrepareUserOperationParameters
-        const { account: account_ = client.account } = parameters
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Assert that an Account is defined.
-        ////////////////////////////////////////////////////////////////////////////////
+        const account_ = client.account
 
         if (!account_) throw new Error("Account not found")
-        const account = parseAccount(account_)
+        const account = parseAccount<SmartAccount>(account_)
 
         const bundlerClient = client as unknown as BundlerClient
 
