@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.45
+
+### Patch Changes
+
+- 28c248502253929c5542876f5f8bf21f1c4c1e69: Forward all args to sendUserOperation action
+
 ## 0.2.44
 
 ### Patch Changes
