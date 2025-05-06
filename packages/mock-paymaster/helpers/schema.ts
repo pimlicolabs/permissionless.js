@@ -231,13 +231,23 @@ const eip7677UserOperationSchema = z.union([
     eip7677UserOperationSchemaV7
 ])
 
+const paymasterContextSchema = z.union([
+    z.object({ token: addressSchema }),
+    z.object({
+        sponsorshipPolicyId: z.string().optional(),
+        validForSeconds: z.number().optional(),
+        meta: z.record(z.string(), z.string()).optional()
+    }),
+    z.null()
+])
+
 export const pmGetPaymasterData = z
     .union([
         z.tuple([
             eip7677UserOperationSchema,
             addressSchema,
             hexNumberSchema,
-            z.union([z.object({ token: addressSchema }), z.null()])
+            paymasterContextSchema.nullable()
         ]),
         z.tuple([eip7677UserOperationSchema, addressSchema, hexNumberSchema])
     ])
@@ -251,7 +261,7 @@ export const pmGetPaymasterStubDataParamsSchema = z
             eip7677UserOperationSchema,
             addressSchema,
             hexNumberSchema,
-            z.union([z.object({ token: addressSchema }), z.null()])
+            paymasterContextSchema.nullable()
         ]),
         z.tuple([eip7677UserOperationSchema, addressSchema, hexNumberSchema])
     ])
