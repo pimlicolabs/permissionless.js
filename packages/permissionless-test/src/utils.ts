@@ -411,9 +411,7 @@ export const getCoreSmartAccounts = () => [
                 ...conf
             })
         },
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -428,9 +426,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -445,9 +441,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -461,9 +455,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getSimpleAccountClient(conf),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: true,
+        supportedVersions: ["0.6", "0.7", "0.8"],
         isEip1271Compliant: false
     },
     {
@@ -478,9 +470,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -495,9 +485,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -512,9 +500,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -529,9 +515,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -560,9 +544,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -589,9 +571,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -620,9 +600,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -649,9 +627,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -678,9 +654,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -707,9 +681,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -721,9 +693,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getBiconomyClient(conf),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: false,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6"],
         isEip1271Compliant: true
     },
     {
@@ -744,9 +714,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getNexusClient(conf),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -758,9 +726,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getSafeClient(conf),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6", "0.7"],
         isEip1271Compliant: true
     },
     {
@@ -775,9 +741,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6", "0.7"],
         isEip1271Compliant: true
     },
     {
@@ -796,9 +760,7 @@ export const getCoreSmartAccounts = () => [
                 }),
                 ...conf
             }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6", "0.7"],
         isEip1271Compliant: true
     },
     {
@@ -819,9 +781,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getSafeClient({ ...conf, erc7579: true }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -850,9 +810,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getSafeClient({ ...conf, erc7579: true }),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -864,9 +822,7 @@ export const getCoreSmartAccounts = () => [
                 account: await getEtherspotClient(conf),
                 ...conf
             }),
-        supportsEntryPointV06: false,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.7"],
         isEip1271Compliant: true
     },
     {
@@ -887,9 +843,7 @@ export const getCoreSmartAccounts = () => [
         //         account: await getSafeClient({ ...conf, erc7579: true }),
         //         ...conf
         //     }),
-        supportsEntryPointV06: true,
-        supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportedVersions: ["0.6", "0.7"],
         isEip1271Compliant: true
     }
 ]
