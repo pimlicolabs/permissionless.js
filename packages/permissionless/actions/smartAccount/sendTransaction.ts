@@ -100,6 +100,7 @@ export async function sendTransaction<
             sendUserOperation,
             "sendUserOperation"
         )({
+            ...args,
             calls: [
                 {
                     to,
