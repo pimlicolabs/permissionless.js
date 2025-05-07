@@ -236,15 +236,16 @@ export const getSimpleAccountClient = async <
 }: AAParamType<entryPointVersion>): Promise<
     ToSimpleSmartAccountReturnType<entryPointVersion>
 > => {
+    const entryPointMapping = {
+        "0.6": entryPoint06Address,
+        "0.7": entryPoint07Address,
+        "0.8": entryPoint08Address
+    }
+
     return toSimpleSmartAccount<entryPointVersion>({
         client: getPublicClient(anvilRpc),
         entryPoint: {
-            address:
-                entryPoint.version === "0.6"
-                    ? entryPoint06Address
-                    : entryPoint.version === "0.7"
-                      ? entryPoint07Address
-                      : entryPoint08Address,
+            address: entryPointMapping[entryPoint.version],
             version: entryPoint.version as entryPointVersion
         },
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())

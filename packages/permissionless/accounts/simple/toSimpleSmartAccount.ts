@@ -99,30 +99,33 @@ const getFactoryAddress = (
 ): Address => {
     if (factoryAddress) return factoryAddress
 
-    if (entryPointVersion === "0.6") {
-        return "0x9406Cc6185a346906296840746125a0E44976454"
+    switch (entryPointVersion) {
+        case "0.8":
+            return "0x13E9ed32155810FDbd067D4522C492D6f68E5944"
+        case "0.7":
+            return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
+        default:
+            return "0x9406Cc6185a346906296840746125a0E44976454"
     }
-    if (entryPointVersion === "0.7") {
-        return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
+}
+
+const getEntryPointAbi = (entryPointVersion: EntryPointVersion) => {
+    switch (entryPointVersion) {
+        case "0.8":
+            return entryPoint08Abi
+        case "0.7":
+            return entryPoint07Abi
+        default:
+            return entryPoint06Abi
     }
-    return "0x9406Cc6185a346906296840746125a0E44976454"
 }
 
 export type SimpleSmartAccountImplementation<
     entryPointVersion extends EntryPointVersion = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Abi
-            : entryPointVersion extends "0.8"
-              ? typeof entryPoint07Abi
-              : typeof entryPoint08Abi,
+        ReturnType<typeof getEntryPointAbi>,
         entryPointVersion
-        // {
-        //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
-        //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
-        //     factory: { abi: typeof FactoryAbi; address: Address }
-        // }
     >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
@@ -152,16 +155,17 @@ export async function toSimpleSmartAccount<
 
     const localOwner = await toOwner({ owner })
 
-    const entryPoint = {
-        address: parameters.entryPoint?.address ?? entryPoint07Address,
-        abi:
-            (parameters.entryPoint?.version ?? "0.7") === "0.6"
-                ? entryPoint06Abi
-                : (parameters.entryPoint?.version ?? "0.7") === "0.7"
-                  ? entryPoint07Abi
-                  : entryPoint08Abi,
-        version: parameters.entryPoint?.version ?? "0.7"
-    } as const
+    const entryPoint = parameters.entryPoint
+        ? {
+              address: parameters.entryPoint.address,
+              abi: getEntryPointAbi(parameters.entryPoint.version),
+              version: parameters.entryPoint.version
+          }
+        : ({
+              address: entryPoint07Address,
+              abi: getEntryPointAbi("0.7"),
+              version: "0.7"
+          } as const)
 
     const factoryAddress = getFactoryAddress(
         entryPoint.version,
@@ -458,13 +462,14 @@ export async function toSimpleSmartAccount<
 
             // 0.8 Signs using typed data
             if (entryPoint.version === "0.8") {
-                const address = await this.getAddress()
                 const typedData = getUserOperationTypedData({
                     chainId,
                     entryPointAddress: entryPoint.address,
                     userOperation: {
                         ...userOperation,
-                        sender: address
+                        sender:
+                            userOperation.sender ?? (await this.getAddress()),
+                        signature: "0x"
                     }
                 })
                 return await localOwner.signTypedData(typedData)
