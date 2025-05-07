@@ -73,8 +73,7 @@
         "test": "vitest dev -c ./packages/permissionless/vitest.config.ts",
         "test:ci-no-coverage": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --pool=forks",
         "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
-        "wagmi-demo": "bun run --cwd packages/wagmi-demo dev",
-        "test:setup": "docker compose -f \"packages/permissionless-test/mock-aa-infra/docker-compose.yml\" up"
+        "wagmi-demo": "bun run --cwd packages/wagmi-demo dev"
     },
     "simple-git-hooks": {
         "pre-commit": "bun run format && bun run lint:fix"

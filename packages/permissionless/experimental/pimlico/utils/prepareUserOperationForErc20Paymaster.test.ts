@@ -10,15 +10,15 @@ import {
     erc20Address,
     sudoMintTokens,
     tokenBalanceOf
-} from "../../../../mock-paymaster/helpers/erc20-utils.ts"
-import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc.ts"
+} from "../../../../mock-paymaster/helpers/erc20-utils"
+import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../../permissionless-test/src/utils"
 import { createSmartAccountClient } from "../../../clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../../clients/pimlico"
-import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster.ts"
+import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster"
 
 describe.each(getCoreSmartAccounts())(
     "prepareUserOperationForErc20Paymaster $name",
@@ -370,7 +370,7 @@ describe.each(getCoreSmartAccounts())(
             }
         )
 
-        testWithRpc.skipIf(!supportsEntryPointV07)(
+        testWithRpc.skipIf(!supportsEntryPointV08)(
             "prepareUserOperationForErc20Paymaster_v08 (balanceOverride enabled)",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
@@ -389,7 +389,7 @@ describe.each(getCoreSmartAccounts())(
                 const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
                     entryPoint: {
-                        address: entryPoint07Address,
+                        address: entryPoint08Address,
                         version: "0.8"
                     }
                 })
