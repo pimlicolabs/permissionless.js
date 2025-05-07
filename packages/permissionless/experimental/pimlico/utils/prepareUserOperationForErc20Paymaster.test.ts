@@ -7,7 +7,7 @@ import {
 import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import {
-    ERC20_ADDRESS,
+    erc20Address,
     sudoMintTokens,
     tokenBalanceOf
 } from "../../../../mock-paymaster/helpers/erc20-utils.ts"
@@ -16,8 +16,8 @@ import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../../permissionless-test/src/utils"
-import { createSmartAccountClient } from "../../../clients/createSmartAccountClient.ts"
-import { createPimlicoClient } from "../../../clients/pimlico.ts"
+import { createSmartAccountClient } from "../../../clients/createSmartAccountClient"
+import { createPimlicoClient } from "../../../clients/pimlico"
 import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster.ts"
 
 describe.each(getCoreSmartAccounts())(
@@ -86,7 +86,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -173,7 +173,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -256,7 +256,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -344,7 +344,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -432,7 +432,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -515,7 +515,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ]),
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -602,7 +602,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ]),
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -690,7 +690,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ]),
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
