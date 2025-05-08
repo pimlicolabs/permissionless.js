@@ -211,65 +211,37 @@ export async function toSimpleSmartAccount<
         },
         async encodeCalls(calls) {
             if (calls.length > 1) {
-                if (entryPoint.version === "0.6") {
+                if (entryPoint.version === "0.8") {
                     return encodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address[]",
-                                        name: "dest",
-                                        type: "address[]"
-                                    },
-                                    {
-                                        internalType: "bytes[]",
-                                        name: "func",
-                                        type: "bytes[]"
-                                    }
-                                ],
-                                name: "executeBatch",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                        abi: executeBatch08Abi,
+                        functionName: "executeBatch",
+                        args: [
+                            calls.map((a) => ({
+                                target: a.to,
+                                value: a.value ?? 0n,
+                                data: a.data ?? "0x"
+                            }))
+                        ]
+                    })
+                }
+
+                if (entryPoint.version === "0.7") {
+                    return encodeFunctionData({
+                        abi: executeBatch07Abi,
                         functionName: "executeBatch",
                         args: [
                             calls.map((a) => a.to),
+                            calls.map((a) => a.value ?? 0n),
                             calls.map((a) => a.data ?? "0x")
                         ]
                     })
                 }
+
                 return encodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address[]",
-                                    name: "dest",
-                                    type: "address[]"
-                                },
-                                {
-                                    internalType: "uint256[]",
-                                    name: "value",
-                                    type: "uint256[]"
-                                },
-                                {
-                                    internalType: "bytes[]",
-                                    name: "func",
-                                    type: "bytes[]"
-                                }
-                            ],
-                            name: "executeBatch",
-                            outputs: [],
-                            stateMutability: "nonpayable",
-                            type: "function"
-                        }
-                    ],
+                    abi: executeBatch06Abi,
                     functionName: "executeBatch",
                     args: [
                         calls.map((a) => a.to),
-                        calls.map((a) => a.value ?? 0n),
                         calls.map((a) => a.data ?? "0x")
                     ]
                 })
@@ -281,160 +253,93 @@ export async function toSimpleSmartAccount<
                 throw new Error("No calls to encode")
             }
 
+            // 0.6, 0.7 and 0.8 all use the same for "execute"
             return encodeFunctionData({
-                abi: [
-                    {
-                        inputs: [
-                            {
-                                internalType: "address",
-                                name: "dest",
-                                type: "address"
-                            },
-                            {
-                                internalType: "uint256",
-                                name: "value",
-                                type: "uint256"
-                            },
-                            {
-                                internalType: "bytes",
-                                name: "func",
-                                type: "bytes"
-                            }
-                        ],
-                        name: "execute",
-                        outputs: [],
-                        stateMutability: "nonpayable",
-                        type: "function"
-                    }
-                ],
+                abi: executeSingleAbi,
                 functionName: "execute",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
         },
         decodeCalls: async (callData) => {
             try {
-                const decodedV6 = decodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address[]",
-                                    name: "dest",
-                                    type: "address[]"
-                                },
-                                {
-                                    internalType: "bytes[]",
-                                    name: "func",
-                                    type: "bytes[]"
-                                }
-                            ],
-                            name: "executeBatch",
-                            outputs: [],
-                            stateMutability: "nonpayable",
-                            type: "function"
-                        }
-                    ],
-                    data: callData
-                })
-
                 const calls: {
                     to: Address
                     data: Hex
                     value?: bigint
                 }[] = []
 
-                for (let i = 0; i < decodedV6.args.length; i++) {
-                    calls.push({
-                        to: decodedV6.args[0][i],
-                        data: decodedV6.args[1][i],
-                        value: 0n
-                    })
-                }
-
-                return calls
-            } catch (_) {
-                try {
-                    const decodedV7 = decodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address[]",
-                                        name: "dest",
-                                        type: "address[]"
-                                    },
-                                    {
-                                        internalType: "uint256[]",
-                                        name: "value",
-                                        type: "uint256[]"
-                                    },
-                                    {
-                                        internalType: "bytes[]",
-                                        name: "func",
-                                        type: "bytes[]"
-                                    }
-                                ],
-                                name: "executeBatch",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                if (entryPoint.version === "0.8") {
+                    const decodedV8 = decodeFunctionData({
+                        abi: executeBatch08Abi,
                         data: callData
                     })
 
-                    const calls: {
-                        to: Address
-                        data: Hex
-                        value?: bigint
-                    }[] = []
-
-                    for (let i = 0; i < decodedV7.args[0].length; i++) {
+                    for (const call of decodedV8.args[0]) {
                         calls.push({
-                            to: decodedV7.args[0][i],
-                            value: decodedV7.args[1][i],
-                            data: decodedV7.args[2][i]
+                            to: call.target,
+                            data: call.data,
+                            value: call.value
                         })
                     }
 
                     return calls
-                } catch (_) {
-                    const decodedSingle = decodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address",
-                                        name: "dest",
-                                        type: "address"
-                                    },
-                                    {
-                                        internalType: "uint256",
-                                        name: "value",
-                                        type: "uint256"
-                                    },
-                                    {
-                                        internalType: "bytes",
-                                        name: "func",
-                                        type: "bytes"
-                                    }
-                                ],
-                                name: "execute",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                }
+
+                if (entryPoint.version === "0.7") {
+                    const decodedV7 = decodeFunctionData({
+                        abi: executeBatch07Abi,
                         data: callData
                     })
-                    return [
-                        {
-                            to: decodedSingle.args[0],
-                            value: decodedSingle.args[1],
-                            data: decodedSingle.args[2]
-                        }
-                    ]
+
+                    const destinations = decodedV7.args[0]
+                    const values = decodedV7.args[1]
+                    const datas = decodedV7.args[2]
+
+                    for (let i = 0; i < destinations.length; i++) {
+                        calls.push({
+                            to: destinations[i],
+                            data: datas[i],
+                            value: values[i]
+                        })
+                    }
+
+                    return calls
                 }
+
+                if (entryPoint.version === "0.6") {
+                    const decodedV6 = decodeFunctionData({
+                        abi: executeBatch06Abi,
+                        data: callData
+                    })
+
+                    const destinations = decodedV6.args[0]
+                    const datas = decodedV6.args[1]
+
+                    for (let i = 0; i < destinations.length; i++) {
+                        calls.push({
+                            to: destinations[i],
+                            data: datas[i],
+                            value: 0n
+                        })
+                    }
+
+                    return calls
+                }
+
+                return calls
+            } catch (_) {
+                const decodedSingle = decodeFunctionData({
+                    abi: executeSingleAbi,
+                    data: callData
+                })
+
+                return [
+                    {
+                        to: decodedSingle.args[0],
+                        value: decodedSingle.args[1],
+                        data: decodedSingle.args[2]
+                    }
+                ]
             }
         },
         async getNonce(args) {
@@ -495,3 +400,109 @@ export async function toSimpleSmartAccount<
         }
     }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion>>
 }
+
+const executeSingleAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "dest",
+                type: "address"
+            },
+            {
+                internalType: "uint256",
+                name: "value",
+                type: "uint256"
+            },
+            {
+                internalType: "bytes",
+                name: "func",
+                type: "bytes"
+            }
+        ],
+        name: "execute",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch06Abi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "dest",
+                type: "address[]"
+            },
+            {
+                internalType: "bytes[]",
+                name: "func",
+                type: "bytes[]"
+            }
+        ],
+        name: "executeBatch",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch07Abi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "dest",
+                type: "address[]"
+            },
+            {
+                internalType: "uint256[]",
+                name: "value",
+                type: "uint256[]"
+            },
+            {
+                internalType: "bytes[]",
+                name: "func",
+                type: "bytes[]"
+            }
+        ],
+        name: "executeBatch",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch08Abi = [
+    {
+        type: "function",
+        name: "executeBatch",
+        inputs: [
+            {
+                name: "calls",
+                type: "tuple[]",
+                internalType: "struct BaseAccount.Call[]",
+                components: [
+                    {
+                        name: "target",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "value",
+                        type: "uint256",
+                        internalType: "uint256"
+                    },
+                    {
+                        name: "data",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const
