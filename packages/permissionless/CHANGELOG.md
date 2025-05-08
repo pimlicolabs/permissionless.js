@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.46
+
+### Patch Changes
+
+- bdf11dfb49a872d9a89580b7f8607fbcfcc5a238: Added SimpleAccount 0.8
+
 ## 0.2.45
 
 ### Patch Changes
