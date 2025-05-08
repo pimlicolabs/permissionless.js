@@ -67,7 +67,7 @@ const handlePmSponsor = async ({
     paymasterSigner: WalletClient<Transport, Chain, Account>
     estimateGas: boolean
 }) => {
-    const is06 = paymaster === entryPoint06Address
+    const is06 = entryPoint === entryPoint06Address
 
     let op = {
         ...userOperation,
