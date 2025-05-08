@@ -11,6 +11,7 @@ import type {
 import { createClient } from "viem"
 import {
     type BundlerActions,
+    type EntryPointVersion,
     type PaymasterActions,
     type SmartAccount,
     bundlerActions,
@@ -21,7 +22,7 @@ import type { PimlicoRpcSchema } from "../types/pimlico.js"
 import { type PimlicoActions, pimlicoActions } from "./decorators/pimlico.js"
 
 export type PimlicoClient<
-    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
+    entryPointVersion extends EntryPointVersion = EntryPointVersion,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
@@ -47,7 +48,7 @@ export type PimlicoClient<
 >
 
 export type PimlicoClientConfig<
-    entryPointVersion extends "0.6" | "0.7" = "0.7" | "0.6",
+    entryPointVersion extends EntryPointVersion = EntryPointVersion,
     transport extends Transport = Transport,
     chain extends Chain | undefined = Chain | undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,
@@ -72,7 +73,7 @@ export type PimlicoClientConfig<
 }
 
 export function createPimlicoClient<
-    entryPointVersion extends "0.6" | "0.7" = "0.7",
+    entryPointVersion extends EntryPointVersion = "0.7",
     transport extends Transport = Transport,
     chain extends Chain | undefined = undefined,
     account extends SmartAccount | undefined = SmartAccount | undefined,

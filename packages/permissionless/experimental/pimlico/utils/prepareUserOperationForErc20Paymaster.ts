@@ -68,7 +68,7 @@ export const prepareUserOperationForErc20Paymaster =
         const account_ = client.account
 
         if (!account_) throw new Error("Account not found")
-        const account = parseAccount(account_)
+        const account = parseAccount<SmartAccount>(account_)
 
         const bundlerClient = client as unknown as BundlerClient
 

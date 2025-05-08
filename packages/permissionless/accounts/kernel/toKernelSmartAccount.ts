@@ -3,6 +3,7 @@ import type {
     Account,
     Assign,
     Chain,
+    JsonRpcAccount,
     OneOf,
     Transport,
     WalletClient
@@ -383,7 +384,11 @@ export type ToKernelSmartAccountParameters<
         | WebAuthnAccount
     >
 > = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owners: [owner]
     entryPoint?: {
         address: Address

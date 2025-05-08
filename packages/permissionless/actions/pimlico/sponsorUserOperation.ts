@@ -8,7 +8,7 @@ import type {
     PartialBy,
     Transport
 } from "viem"
-import type { UserOperation } from "viem/account-abstraction"
+import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
@@ -20,7 +20,7 @@ type PaymasterContext = {
 }
 
 export type PimlicoSponsorUserOperationParameters<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 > = {
     userOperation: OneOf<
         | (entryPointVersion extends "0.6"
@@ -51,7 +51,7 @@ export type PimlicoSponsorUserOperationParameters<
 }
 
 export type SponsorUserOperationReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7"
 > = OneOf<
     | (entryPointVersion extends "0.6"
           ? {
@@ -75,7 +75,7 @@ export type SponsorUserOperationReturnType<
 >
 
 export const sponsorUserOperation = async <
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = EntryPointVersion
 >(
     client: Client<
         Transport,

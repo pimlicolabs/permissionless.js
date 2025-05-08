@@ -110,4 +110,55 @@ describe("sponsorUserOperation", () => {
             userOperationReceipt?.receipt.transactionHash
         )
     })
+
+    testWithRpc("sponsorUserOperation_V08", async ({ rpc }) => {
+        const { altoRpc } = rpc
+
+        const bundlerClient = getPimlicoClient({
+            entryPointVersion: "0.8",
+            altoRpc: altoRpc
+        })
+
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.8"
+                }
+            }),
+            entryPoint: {
+                version: "0.8"
+            },
+            ...rpc
+        })
+
+        const opHash = await simpleAccountClient.sendUserOperation({
+            calls: [
+                {
+                    to: zeroAddress,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
+        })
+
+        expect(isHash(opHash)).toBe(true)
+
+        const userOperationReceipt =
+            await bundlerClient.waitForUserOperationReceipt({
+                hash: opHash,
+                timeout: 100000
+            })
+        expect(userOperationReceipt).not.toBeNull()
+        expect(userOperationReceipt?.userOpHash).toBe(opHash)
+        expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
+
+        const receipt = await bundlerClient.getUserOperationReceipt({
+            hash: opHash
+        })
+
+        expect(receipt?.receipt.transactionHash).toBe(
+            userOperationReceipt?.receipt.transactionHash
+        )
+    })
 })

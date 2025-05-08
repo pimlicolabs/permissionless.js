@@ -6,6 +6,7 @@ import {
     type Client,
     type EIP1193Provider,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -160,7 +161,11 @@ const getAccountInitCode = async ({
 export type ToEtherspotSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7"
 > = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owners: [
         OneOf<
             | EIP1193Provider

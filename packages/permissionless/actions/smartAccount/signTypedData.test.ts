@@ -48,6 +48,7 @@ describe.each(getCoreSmartAccounts())(
         isEip1271Compliant,
         supportsEntryPointV06,
         supportsEntryPointV07,
+        supportsEntryPointV08,
         name
     }) => {
         testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV06)(
@@ -116,6 +117,59 @@ describe.each(getCoreSmartAccounts())(
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
                         version: "0.7"
+                    },
+                    ...rpc
+                })
+
+                const signature = await signTypedData(smartClient, typedData)
+
+                const publicClient = getPublicClient(anvilRpc)
+
+                if (name === "LightAccount 2.0.0") {
+                    // LightAccount 2.0.0 doesn't support EIP-1271
+                    return
+                }
+
+                if (name.includes("Safe 7579")) {
+                    // Due to 7579 launchpad, we can't verify the signature before deploying the account.
+                    await smartClient.sendTransaction({
+                        calls: [{ to: zeroAddress, value: 0n }]
+                    })
+                }
+                const isVerified = await publicClient.verifyTypedData({
+                    ...typedData,
+                    address: smartClient.account.address,
+                    signature
+                })
+
+                expect(isVerified).toBeTruthy()
+            }
+        )
+
+        testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV08)(
+            "not isEip1271Compliant_v08",
+            async ({ rpc }) => {
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: {
+                        version: "0.8"
+                    },
+                    ...rpc
+                })
+
+                await expect(async () =>
+                    signTypedData(smartClient, typedData)
+                ).rejects.toThrow()
+            }
+        )
+
+        testWithRpc.skipIf(!isEip1271Compliant || !supportsEntryPointV08)(
+            "isEip1271Compliant_v08",
+            async ({ rpc }) => {
+                const { anvilRpc } = rpc
+
+                const smartClient = await getSmartAccountClient({
+                    entryPoint: {
+                        version: "0.8"
                     },
                     ...rpc
                 })

@@ -1,4 +1,5 @@
 import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
+import type { EntryPointVersion } from "viem/account-abstraction"
 import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
@@ -26,7 +27,7 @@ import {
 
 export type PimlicoActions<
     TChain extends Chain | undefined,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = EntryPointVersion
 > = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
@@ -126,7 +127,7 @@ export type PimlicoActions<
 }
 
 export const pimlicoActions =
-    <entryPointVersion extends "0.6" | "0.7">({
+    <entryPointVersion extends EntryPointVersion>({
         entryPoint
     }: {
         entryPoint: { address: Address; version: entryPointVersion }

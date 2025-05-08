@@ -5,6 +5,7 @@ import {
     type Chain,
     type Client,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -13,13 +14,16 @@ import {
     encodeFunctionData
 } from "viem"
 import {
+    type EntryPointVersion,
     type SmartAccount,
     type SmartAccountImplementation,
     type UserOperation,
     entryPoint06Abi,
     entryPoint07Abi,
     entryPoint07Address,
+    entryPoint08Abi,
     getUserOperationHash,
+    getUserOperationTypedData,
     toSmartAccount
 } from "viem/account-abstraction"
 import { getChainId, signMessage } from "viem/actions"
@@ -67,9 +71,13 @@ const getAccountInitCode = async (
 }
 
 export type ToSimpleSmartAccountParameters<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 > = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owner: OneOf<
         | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
@@ -86,36 +94,44 @@ export type ToSimpleSmartAccountParameters<
 }
 
 const getFactoryAddress = (
-    entryPointVersion: "0.6" | "0.7",
+    entryPointVersion: EntryPointVersion,
     factoryAddress?: Address
 ): Address => {
     if (factoryAddress) return factoryAddress
 
-    if (entryPointVersion === "0.6") {
-        return "0x9406Cc6185a346906296840746125a0E44976454"
+    switch (entryPointVersion) {
+        case "0.8":
+            return "0x13E9ed32155810FDbd067D4522C492D6f68E5944"
+        case "0.7":
+            return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
+        default:
+            return "0x9406Cc6185a346906296840746125a0E44976454"
     }
-    return "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
+}
+
+const getEntryPointAbi = (entryPointVersion: EntryPointVersion) => {
+    switch (entryPointVersion) {
+        case "0.8":
+            return entryPoint08Abi
+        case "0.7":
+            return entryPoint07Abi
+        default:
+            return entryPoint06Abi
+    }
 }
 
 export type SimpleSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7"
 > = Assign<
     SmartAccountImplementation<
-        entryPointVersion extends "0.6"
-            ? typeof entryPoint06Abi
-            : typeof entryPoint07Abi,
+        ReturnType<typeof getEntryPointAbi>,
         entryPointVersion
-        // {
-        //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
-        //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
-        //     factory: { abi: typeof FactoryAbi; address: Address }
-        // }
     >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
 export type ToSimpleSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7"
 > = SmartAccount<SimpleSmartAccountImplementation<entryPointVersion>>
 
 /**
@@ -124,7 +140,7 @@ export type ToSimpleSmartAccountReturnType<
  * @returns A Private Key Simple Account.
  */
 export async function toSimpleSmartAccount<
-    entryPointVersion extends "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion
 >(
     parameters: ToSimpleSmartAccountParameters<entryPointVersion>
 ): Promise<ToSimpleSmartAccountReturnType<entryPointVersion>> {
@@ -139,14 +155,17 @@ export async function toSimpleSmartAccount<
 
     const localOwner = await toOwner({ owner })
 
-    const entryPoint = {
-        address: parameters.entryPoint?.address ?? entryPoint07Address,
-        abi:
-            (parameters.entryPoint?.version ?? "0.7") === "0.6"
-                ? entryPoint06Abi
-                : entryPoint07Abi,
-        version: parameters.entryPoint?.version ?? "0.7"
-    } as const
+    const entryPoint = parameters.entryPoint
+        ? {
+              address: parameters.entryPoint.address,
+              abi: getEntryPointAbi(parameters.entryPoint.version),
+              version: parameters.entryPoint.version
+          }
+        : ({
+              address: entryPoint07Address,
+              abi: getEntryPointAbi("0.7"),
+              version: "0.7"
+          } as const)
 
     const factoryAddress = getFactoryAddress(
         entryPoint.version,
@@ -192,65 +211,37 @@ export async function toSimpleSmartAccount<
         },
         async encodeCalls(calls) {
             if (calls.length > 1) {
-                if (entryPoint.version === "0.6") {
+                if (entryPoint.version === "0.8") {
                     return encodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address[]",
-                                        name: "dest",
-                                        type: "address[]"
-                                    },
-                                    {
-                                        internalType: "bytes[]",
-                                        name: "func",
-                                        type: "bytes[]"
-                                    }
-                                ],
-                                name: "executeBatch",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                        abi: executeBatch08Abi,
+                        functionName: "executeBatch",
+                        args: [
+                            calls.map((a) => ({
+                                target: a.to,
+                                value: a.value ?? 0n,
+                                data: a.data ?? "0x"
+                            }))
+                        ]
+                    })
+                }
+
+                if (entryPoint.version === "0.7") {
+                    return encodeFunctionData({
+                        abi: executeBatch07Abi,
                         functionName: "executeBatch",
                         args: [
                             calls.map((a) => a.to),
+                            calls.map((a) => a.value ?? 0n),
                             calls.map((a) => a.data ?? "0x")
                         ]
                     })
                 }
+
                 return encodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address[]",
-                                    name: "dest",
-                                    type: "address[]"
-                                },
-                                {
-                                    internalType: "uint256[]",
-                                    name: "value",
-                                    type: "uint256[]"
-                                },
-                                {
-                                    internalType: "bytes[]",
-                                    name: "func",
-                                    type: "bytes[]"
-                                }
-                            ],
-                            name: "executeBatch",
-                            outputs: [],
-                            stateMutability: "nonpayable",
-                            type: "function"
-                        }
-                    ],
+                    abi: executeBatch06Abi,
                     functionName: "executeBatch",
                     args: [
                         calls.map((a) => a.to),
-                        calls.map((a) => a.value ?? 0n),
                         calls.map((a) => a.data ?? "0x")
                     ]
                 })
@@ -262,160 +253,93 @@ export async function toSimpleSmartAccount<
                 throw new Error("No calls to encode")
             }
 
+            // 0.6, 0.7 and 0.8 all use the same for "execute"
             return encodeFunctionData({
-                abi: [
-                    {
-                        inputs: [
-                            {
-                                internalType: "address",
-                                name: "dest",
-                                type: "address"
-                            },
-                            {
-                                internalType: "uint256",
-                                name: "value",
-                                type: "uint256"
-                            },
-                            {
-                                internalType: "bytes",
-                                name: "func",
-                                type: "bytes"
-                            }
-                        ],
-                        name: "execute",
-                        outputs: [],
-                        stateMutability: "nonpayable",
-                        type: "function"
-                    }
-                ],
+                abi: executeSingleAbi,
                 functionName: "execute",
                 args: [call.to, call.value ?? 0n, call.data ?? "0x"]
             })
         },
         decodeCalls: async (callData) => {
             try {
-                const decodedV6 = decodeFunctionData({
-                    abi: [
-                        {
-                            inputs: [
-                                {
-                                    internalType: "address[]",
-                                    name: "dest",
-                                    type: "address[]"
-                                },
-                                {
-                                    internalType: "bytes[]",
-                                    name: "func",
-                                    type: "bytes[]"
-                                }
-                            ],
-                            name: "executeBatch",
-                            outputs: [],
-                            stateMutability: "nonpayable",
-                            type: "function"
-                        }
-                    ],
-                    data: callData
-                })
-
                 const calls: {
                     to: Address
                     data: Hex
                     value?: bigint
                 }[] = []
 
-                for (let i = 0; i < decodedV6.args.length; i++) {
-                    calls.push({
-                        to: decodedV6.args[0][i],
-                        data: decodedV6.args[1][i],
-                        value: 0n
-                    })
-                }
-
-                return calls
-            } catch (_) {
-                try {
-                    const decodedV7 = decodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address[]",
-                                        name: "dest",
-                                        type: "address[]"
-                                    },
-                                    {
-                                        internalType: "uint256[]",
-                                        name: "value",
-                                        type: "uint256[]"
-                                    },
-                                    {
-                                        internalType: "bytes[]",
-                                        name: "func",
-                                        type: "bytes[]"
-                                    }
-                                ],
-                                name: "executeBatch",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                if (entryPoint.version === "0.8") {
+                    const decodedV8 = decodeFunctionData({
+                        abi: executeBatch08Abi,
                         data: callData
                     })
 
-                    const calls: {
-                        to: Address
-                        data: Hex
-                        value?: bigint
-                    }[] = []
-
-                    for (let i = 0; i < decodedV7.args[0].length; i++) {
+                    for (const call of decodedV8.args[0]) {
                         calls.push({
-                            to: decodedV7.args[0][i],
-                            value: decodedV7.args[1][i],
-                            data: decodedV7.args[2][i]
+                            to: call.target,
+                            data: call.data,
+                            value: call.value
                         })
                     }
 
                     return calls
-                } catch (_) {
-                    const decodedSingle = decodeFunctionData({
-                        abi: [
-                            {
-                                inputs: [
-                                    {
-                                        internalType: "address",
-                                        name: "dest",
-                                        type: "address"
-                                    },
-                                    {
-                                        internalType: "uint256",
-                                        name: "value",
-                                        type: "uint256"
-                                    },
-                                    {
-                                        internalType: "bytes",
-                                        name: "func",
-                                        type: "bytes"
-                                    }
-                                ],
-                                name: "execute",
-                                outputs: [],
-                                stateMutability: "nonpayable",
-                                type: "function"
-                            }
-                        ],
+                }
+
+                if (entryPoint.version === "0.7") {
+                    const decodedV7 = decodeFunctionData({
+                        abi: executeBatch07Abi,
                         data: callData
                     })
-                    return [
-                        {
-                            to: decodedSingle.args[0],
-                            value: decodedSingle.args[1],
-                            data: decodedSingle.args[2]
-                        }
-                    ]
+
+                    const destinations = decodedV7.args[0]
+                    const values = decodedV7.args[1]
+                    const datas = decodedV7.args[2]
+
+                    for (let i = 0; i < destinations.length; i++) {
+                        calls.push({
+                            to: destinations[i],
+                            data: datas[i],
+                            value: values[i]
+                        })
+                    }
+
+                    return calls
                 }
+
+                if (entryPoint.version === "0.6") {
+                    const decodedV6 = decodeFunctionData({
+                        abi: executeBatch06Abi,
+                        data: callData
+                    })
+
+                    const destinations = decodedV6.args[0]
+                    const datas = decodedV6.args[1]
+
+                    for (let i = 0; i < destinations.length; i++) {
+                        calls.push({
+                            to: destinations[i],
+                            data: datas[i],
+                            value: 0n
+                        })
+                    }
+
+                    return calls
+                }
+
+                return calls
+            } catch (_) {
+                const decodedSingle = decodeFunctionData({
+                    abi: executeSingleAbi,
+                    data: callData
+                })
+
+                return [
+                    {
+                        to: decodedSingle.args[0],
+                        value: decodedSingle.args[1],
+                        data: decodedSingle.args[2]
+                    }
+                ]
             }
         },
         async getNonce(args) {
@@ -440,6 +364,22 @@ export async function toSimpleSmartAccount<
         async signUserOperation(parameters) {
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
+
+            // 0.8 Signs using typed data
+            if (entryPoint.version === "0.8") {
+                const typedData = getUserOperationTypedData({
+                    chainId,
+                    entryPointAddress: entryPoint.address,
+                    userOperation: {
+                        ...userOperation,
+                        sender:
+                            userOperation.sender ?? (await this.getAddress()),
+                        signature: "0x"
+                    }
+                })
+                return await localOwner.signTypedData(typedData)
+            }
+
             return signMessage(client, {
                 account: localOwner,
                 message: {
@@ -460,3 +400,109 @@ export async function toSimpleSmartAccount<
         }
     }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion>>
 }
+
+const executeSingleAbi = [
+    {
+        inputs: [
+            {
+                internalType: "address",
+                name: "dest",
+                type: "address"
+            },
+            {
+                internalType: "uint256",
+                name: "value",
+                type: "uint256"
+            },
+            {
+                internalType: "bytes",
+                name: "func",
+                type: "bytes"
+            }
+        ],
+        name: "execute",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch06Abi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "dest",
+                type: "address[]"
+            },
+            {
+                internalType: "bytes[]",
+                name: "func",
+                type: "bytes[]"
+            }
+        ],
+        name: "executeBatch",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch07Abi = [
+    {
+        inputs: [
+            {
+                internalType: "address[]",
+                name: "dest",
+                type: "address[]"
+            },
+            {
+                internalType: "uint256[]",
+                name: "value",
+                type: "uint256[]"
+            },
+            {
+                internalType: "bytes[]",
+                name: "func",
+                type: "bytes[]"
+            }
+        ],
+        name: "executeBatch",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const executeBatch08Abi = [
+    {
+        type: "function",
+        name: "executeBatch",
+        inputs: [
+            {
+                name: "calls",
+                type: "tuple[]",
+                internalType: "struct BaseAccount.Call[]",
+                components: [
+                    {
+                        name: "target",
+                        type: "address",
+                        internalType: "address"
+                    },
+                    {
+                        name: "value",
+                        type: "uint256",
+                        internalType: "uint256"
+                    },
+                    {
+                        name: "data",
+                        type: "bytes",
+                        internalType: "bytes"
+                    }
+                ]
+            }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+] as const

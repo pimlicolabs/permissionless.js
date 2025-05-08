@@ -5,6 +5,7 @@ import {
     type Chain,
     type Client,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
@@ -75,7 +76,11 @@ export type LightAccountVersion<entryPointVersion extends "0.6" | "0.7"> =
 export type ToLightSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7" = "0.7"
 > = {
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     entryPoint?: {
         address: Address
         version: entryPointVersion
