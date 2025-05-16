@@ -748,7 +748,7 @@ const getInitializerCode = async ({
         functionName: "setup",
         args: [
             owners,
-            BigInt(1),
+            threshold,
             multiSendAddress,
             multiSendCallData,
             safe4337ModuleAddress,
