@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.47
+
+### Patch Changes
+
+- ad6fc0eadc2c7ebb93b097ced501922947b71984: Fixed threshold for safe
+
 ## 0.2.46
 
 ### Patch Changes
