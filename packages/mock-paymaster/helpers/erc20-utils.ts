@@ -36,7 +36,7 @@ export const deployErc20Token = async (
 }
 
 export const tokenBalanceOf = async (holder: Address, anvilRpc: string) => {
-    const publicClient = getPublicClient(anvilRpc)
+    const publicClient = await getPublicClient(anvilRpc)
 
     const balance = await publicClient.call({
         to: erc20Address,
@@ -59,7 +59,10 @@ export const sudoMintTokens = async ({
     to: Address
     anvilRpc: string
 }) => {
-    const walletClient = getAnvilWalletClient({ addressIndex: 0, anvilRpc })
+    const walletClient = await getAnvilWalletClient({
+        addressIndex: 0,
+        anvilRpc
+    })
 
     await walletClient.sendTransaction({
         to: erc20Address,
