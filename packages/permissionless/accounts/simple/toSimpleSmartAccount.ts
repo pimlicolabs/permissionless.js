@@ -91,6 +91,7 @@ export type ToSimpleSmartAccountParameters<
     index?: bigint
     address?: Address
     nonceKey?: bigint
+    use7702?: boolean
 }
 
 const getFactoryAddress = (
@@ -150,7 +151,8 @@ export async function toSimpleSmartAccount<
         factoryAddress: _factoryAddress,
         index = BigInt(0),
         address,
-        nonceKey
+        nonceKey,
+        use7702 = false
     } = parameters
 
     const localOwner = await toOwner({ owner })
@@ -174,6 +176,10 @@ export async function toSimpleSmartAccount<
 
     let accountAddress: Address | undefined = address
 
+    if (use7702 && !address) {
+        accountAddress = localOwner.address
+    }
+
     let chainId: number
 
     const getMemoizedChainId = async () => {
@@ -185,6 +191,13 @@ export async function toSimpleSmartAccount<
     }
 
     const getFactoryArgs = async () => {
+        if (use7702) {
+            return {
+                factory: "0x7702" as Hex,
+                factoryData: "0x" as Hex
+            }
+        }
+
         return {
             factory: factoryAddress,
             factoryData: await getAccountInitCode(localOwner.address, index)
