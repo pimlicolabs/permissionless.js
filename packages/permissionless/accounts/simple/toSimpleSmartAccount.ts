@@ -372,12 +372,11 @@ export async function toSimpleSmartAccount<
                     entryPointAddress: entryPoint.address,
                     userOperation: {
                         ...userOperation,
-                        sender:
-                            userOperation.sender ?? (await this.getAddress()),
+                        sender: await this.getAddress(),
                         signature: "0x"
                     }
                 })
-                return await localOwner.signTypedData(typedData)
+                return localOwner.signTypedData(typedData)
             }
 
             return signMessage(client, {
