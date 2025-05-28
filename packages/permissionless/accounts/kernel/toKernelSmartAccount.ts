@@ -32,7 +32,7 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, signMessage as signMessageViem } from "viem/actions"
+import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"

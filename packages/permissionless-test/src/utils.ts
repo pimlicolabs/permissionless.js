@@ -23,6 +23,7 @@ import {
 import { foundry } from "viem/chains"
 import {
     type KernelVersion,
+    to7702KernelSmartAccount,
     toKernelSmartAccount,
     toThirdwebSmartAccount
 } from "../../permissionless/accounts"
@@ -345,14 +346,9 @@ export const getKernelEcdsaClient = async <
     }
 
     if (eip7702) {
-        return toKernelSmartAccount({
+        return to7702KernelSmartAccount({
             client: publicClient,
-            entryPoint: {
-                address: entryPoint08Address,
-                version: "0.8"
-            },
-            owner: privateKeyToAccount(privateKey ?? generatePrivateKey()),
-            eip7702: true
+            owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
         })
     }
 
@@ -751,7 +747,8 @@ export const getCoreSmartAccounts = (): Array<{
             getBundlerClient({
                 account: await getKernelEcdsaClient({
                     ...(conf as AAParamType<"0.6" | "0.7">),
-                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">
+                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
+                    eip7702: true
                 }),
                 ...conf
             }),
@@ -761,7 +758,8 @@ export const getCoreSmartAccounts = (): Array<{
             getSmartAccountClient({
                 account: await getKernelEcdsaClient({
                     ...(conf as AAParamType<"0.6" | "0.7">),
-                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">
+                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
+                    eip7702: true
                 }),
                 ...conf
             }),

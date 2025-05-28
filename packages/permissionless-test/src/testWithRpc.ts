@@ -21,20 +21,16 @@ export const getInstances = async ({
     const anvilPrivateKey =
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
-    const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as
-        | string
-        | undefined
+    const forkUrl =
+        ((import.meta as any).env.VITE_FORK_RPC_URL as string | undefined) ??
+        "https://rpc.sepolia.org"
 
-    const anvilInstance = forkUrl
-        ? anvil({
-              chainId: foundry.id,
-              port: anvilPort,
-              forkUrl
-          })
-        : anvil({
-              chainId: foundry.id,
-              port: anvilPort
-          })
+    const anvilInstance = anvil({
+        chainId: foundry.id,
+        port: anvilPort,
+        forkUrl,
+        hardfork: "Prague"
+    })
 
     const altoInstance = alto({
         entrypoints: [
@@ -49,10 +45,10 @@ export const getInstances = async ({
         utilityPrivateKey: anvilPrivateKey
     })
 
-    // instance.on("stderr", (data) => {
+    // altoInstance.on("stderr", (data) => {
     //     console.error(data.toString())
     // })
-    // instance.on("stdout", (data) => {
+    // altoInstance.on("stdout", (data) => {
     //     console.log(data.toString())
     // })
 

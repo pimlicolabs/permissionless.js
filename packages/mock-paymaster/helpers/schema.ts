@@ -60,6 +60,27 @@ export const hexDataSchema = z
     .regex(hexDataPattern, { message: "not valid hex data" })
     .transform((val) => val.toLowerCase() as Hex)
 
+const signedAuthorizationSchema = z.union([
+    z.object({
+        contractAddress: addressSchema,
+        chainId: hexNumberSchema.transform((val) => Number(val)),
+        nonce: hexNumberSchema.transform((val) => Number(val)),
+        r: hexDataSchema.transform((val) => val as Hex),
+        s: hexDataSchema.transform((val) => val as Hex),
+        v: hexNumberSchema.optional(),
+        yParity: hexNumberSchema.transform((val) => Number(val))
+    }),
+    z.object({
+        address: addressSchema,
+        chainId: hexNumberSchema.transform((val) => Number(val)),
+        nonce: hexNumberSchema.transform((val) => Number(val)),
+        r: hexDataSchema.transform((val) => val as Hex),
+        s: hexDataSchema.transform((val) => val as Hex),
+        v: hexNumberSchema.optional(),
+        yParity: hexNumberSchema.transform((val) => Number(val))
+    })
+])
+
 const userOperationSchemaPaymasterV6 = z
     .object({
         sender: addressSchema,
@@ -80,7 +101,8 @@ const userOperationSchemaPaymasterV6 = z
                 return "0x"
             }
             return val
-        })
+        }),
+        eip7702Auth: signedAuthorizationSchema.optional().nullable()
     })
     .strict()
     .transform((val) => {
@@ -122,7 +144,8 @@ const userOperationSchemaPaymasterV7 = z
                 return "0x"
             }
             return val
-        })
+        }),
+        eip7702Auth: signedAuthorizationSchema.optional().nullable()
     })
     .strict()
     .transform((val) => {
@@ -173,7 +196,8 @@ const eip7677UserOperationSchemaV6 = z
             .optional()
             .transform((_) => {
                 return "0x" as Hex
-            })
+            }),
+        eip7702Auth: signedAuthorizationSchema.optional().nullable()
     })
     .strict()
     .transform((val) => {
@@ -219,7 +243,8 @@ const eip7677UserOperationSchemaV7 = z
                 return "0x"
             }
             return val
-        })
+        }),
+        eip7702Auth: signedAuthorizationSchema.optional().nullable()
     })
     .strict()
     .transform((val) => {

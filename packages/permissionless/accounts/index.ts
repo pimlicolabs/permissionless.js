@@ -43,6 +43,13 @@ import {
 } from "./kernel/toEcdsaKernelSmartAccount.js"
 
 import {
+    type To7702KernelSmartAccountImplementation,
+    type To7702KernelSmartAccountParameters,
+    type To7702KernelSmartAccountReturnType,
+    to7702KernelSmartAccount
+} from "./kernel/to7702KernelSmartAccount.js"
+
+import {
     type KernelSmartAccountImplementation,
     type KernelVersion,
     type ToKernelSmartAccountParameters,
@@ -114,5 +121,9 @@ export {
     type ToEtherspotSmartAccountParameters,
     type EtherspotSmartAccountImplementation,
     type ToEtherspotSmartAccountReturnType,
-    toEtherspotSmartAccount
+    toEtherspotSmartAccount,
+    type To7702KernelSmartAccountParameters,
+    type To7702KernelSmartAccountImplementation,
+    type To7702KernelSmartAccountReturnType,
+    to7702KernelSmartAccount
 }
