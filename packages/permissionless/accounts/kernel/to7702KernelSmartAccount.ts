@@ -3,6 +3,7 @@ import type {
     Chain,
     LocalAccount,
     OneOf,
+    Prettify,
     Transport,
     WalletClient
 } from "viem"
@@ -47,10 +48,12 @@ export async function to7702KernelSmartAccount<
         | LocalAccount
     >
 >(
-    parameters: To7702KernelSmartAccountParameters<
-        entryPointVersion,
-        kernelVersion,
-        owner
+    parameters: Prettify<
+        To7702KernelSmartAccountParameters<
+            entryPointVersion,
+            kernelVersion,
+            owner
+        >
     >
 ): Promise<To7702KernelSmartAccountReturnType<entryPointVersion>> {
     return toKernelSmartAccount({
