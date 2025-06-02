@@ -634,6 +634,13 @@ export const setupContracts = async (rpc: string) => {
         data: "0x6e7dbabb000000000000000000000000E30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA0000000000000000000000000000000000000000000000000000000000000001"
     })
 
+    // register 0x2577507b78c2008Ff367261CB6285d44ba5eF2E9
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
+        data: "0x6e7dbabb0000000000000000000000002577507b78c2008Ff367261CB6285d44ba5eF2E90000000000000000000000000000000000000000000000000000000000000001"
+    })
+
     await sendTransaction(walletClient, {
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
@@ -707,8 +714,8 @@ export const setupContracts = async (rpc: string) => {
         "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd", // Kernel v0.3.1 WebAuthn Validator
         "0xD830D15D3dc0C269F3dBAa0F3e8626d33CFdaBe1", // Kernel v0.3.2 Account Logic
         "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe", // Kernel v0.3.2 Factory
-        "0xE264dCCc54e4b6906c0D1Fee11D4326c06D33c80", // Kernel v0.3.3 Account Logic
-        "0xE30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA", // Kernel v0.3.3 Factory
+        "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28", // Kernel v0.3.3 Account Logic
+        "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9", // Kernel v0.3.3 Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
         "0x0000000000400CdFef5E2714E63d8040b700BC24", // LightAccountFactory v2.0.0

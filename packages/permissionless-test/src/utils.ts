@@ -23,6 +23,7 @@ import {
 import { foundry } from "viem/chains"
 import {
     type KernelVersion,
+    to7702KernelSmartAccount,
     toKernelSmartAccount,
     toThirdwebSmartAccount
 } from "../../permissionless/accounts"
@@ -328,10 +329,12 @@ export const getKernelEcdsaClient = async <
     anvilRpc,
     version,
     privateKey,
-    useMetaFactory
+    useMetaFactory,
+    eip7702 = false
 }: AAParamType<entryPointVersion> & {
     version?: KernelVersion<entryPointVersion>
     useMetaFactory?: boolean
+    eip7702?: boolean
 }) => {
     const publicClient = getPublicClient(anvilRpc)
 
@@ -340,6 +343,13 @@ export const getKernelEcdsaClient = async <
         entryPoint.version === "0.6"
     ) {
         throw new Error("Kernel ERC7579 is not supported for V06")
+    }
+
+    if (eip7702) {
+        return to7702KernelSmartAccount({
+            client: publicClient,
+            owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
+        })
     }
 
     return toKernelSmartAccount({
@@ -449,6 +459,7 @@ export const getCoreSmartAccounts = (): Array<{
     supportsEntryPointV06: boolean
     supportsEntryPointV07: boolean
     supportsEntryPointV08: boolean
+    isEip7702Compliant?: boolean
     isEip1271Compliant: boolean
     getSmartAccountClient: (
         conf: AAParamType<EntryPointVersion>
@@ -727,8 +738,36 @@ export const getCoreSmartAccounts = (): Array<{
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
-        supportsEntryPointV08: false,
+        supportsEntryPointV08: true,
         isEip1271Compliant: true
+    },
+    {
+        name: "Kernel 7579 0.3.3 + EIP-7702",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getKernelEcdsaClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
+                    eip7702: true
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async (
+            conf: AAParamType<EntryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getKernelEcdsaClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
+                    eip7702: true
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip7702Compliant: true,
+        isEip1271Compliant: false
     },
     {
         name: "Biconomy",

@@ -29,10 +29,12 @@ export const getInstances = async ({
         ? anvil({
               chainId: foundry.id,
               port: anvilPort,
+              hardfork: "Prague",
               forkUrl
           })
         : anvil({
               chainId: foundry.id,
+              hardfork: "Prague",
               port: anvilPort
           })
 
@@ -49,10 +51,10 @@ export const getInstances = async ({
         utilityPrivateKey: anvilPrivateKey
     })
 
-    // instance.on("stderr", (data) => {
+    // altoInstance.on("stderr", (data) => {
     //     console.error(data.toString())
     // })
-    // instance.on("stdout", (data) => {
+    // altoInstance.on("stdout", (data) => {
     //     console.log(data.toString())
     // })
 
