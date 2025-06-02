@@ -14,6 +14,7 @@ import {
 export type InstallModulesParameters<
     TSmartAccount extends SmartAccount | undefined
 > = EncodeInstallModuleParameters<TSmartAccount> & {
+    authorization?: SignedAuthorization<number> | undefined
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
@@ -54,6 +55,7 @@ export async function installModules<
         modules,
         paymaster,
         paymasterContext,
+        authorization,
         calls
     } = parameters
 
@@ -80,6 +82,7 @@ export async function installModules<
         paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,
+        authorization,
         nonce,
         account: account
     })

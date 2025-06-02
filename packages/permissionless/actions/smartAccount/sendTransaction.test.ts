@@ -73,16 +73,16 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(
+                const privateKey =
                     "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
-                )
+
+                const privateKeyAccount = privateKeyToAccount(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
                         version: "0.7"
                     },
-                    privateKey:
-                        "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356", // anvil private key
+                    privateKey, // anvil private key
                     ...rpc
                 })
 

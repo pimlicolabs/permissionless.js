@@ -1,13 +1,17 @@
 import { encodeAbiParameters, encodePacked, isHash, zeroAddress } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
-import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
+import {
+    getCoreSmartAccounts,
+    getPublicClient
+} from "../../../permissionless-test/src/utils"
 import { erc7579Actions } from "../erc7579"
 import { installModules } from "./installModules"
 
 describe.each(getCoreSmartAccounts())(
     "installModules $name",
-    ({ getErc7579SmartAccountClient, name }) => {
+    ({ getErc7579SmartAccountClient, name, isEip7702Compliant }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
             "installModules",
             async ({ rpc }) => {
@@ -15,13 +19,21 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
+                const privateKey =
+                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
                 const smartClientWithoutExtend =
                     await getErc7579SmartAccountClient({
                         entryPoint: {
                             version: "0.7"
                         },
+                        privateKey,
                         ...rpc
                     })
+
+                const publicClient = getPublicClient(rpc.anvilRpc)
 
                 const smartClient = smartClientWithoutExtend.extend(
                     erc7579Actions()
@@ -41,6 +53,16 @@ describe.each(getCoreSmartAccounts())(
                             data: "0x"
                         }
                     ],
+                    authorization: isEip7702Compliant
+                        ? await privateKeyAccount.signAuthorization({
+                              address: (smartClient.account as any)
+                                  .implementation,
+                              chainId: smartClient.chain.id,
+                              nonce: await publicClient.getTransactionCount({
+                                  address: smartClient.account.address
+                              })
+                          })
+                        : undefined,
                     modules: [
                         {
                             type: "executor",
@@ -102,19 +124,36 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
+                const privateKey =
+                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
                 const smartClientWithoutExtend =
                     await getErc7579SmartAccountClient({
                         entryPoint: {
                             version: "0.7"
                         },
+                        privateKey,
                         ...rpc
                     })
+                const publicClient = getPublicClient(rpc.anvilRpc)
 
                 const smartClient = smartClientWithoutExtend.extend(
                     erc7579Actions()
                 )
 
                 const userOpHash = await smartClient.sendUserOperation({
+                    authorization: isEip7702Compliant
+                        ? await privateKeyAccount.signAuthorization({
+                              address: (smartClient.account as any)
+                                  .implementation,
+                              chainId: smartClient.chain.id,
+                              nonce: await publicClient.getTransactionCount({
+                                  address: smartClient.account.address
+                              })
+                          })
+                        : undefined,
                     calls: [
                         {
                             to: smartClient.account.address,

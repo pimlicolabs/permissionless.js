@@ -766,7 +766,7 @@ export const getCoreSmartAccounts = (): Array<{
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
-        isEip7702Compliant: true,
+        isEip7702Compliant: false,
         isEip1271Compliant: false
     },
     {
