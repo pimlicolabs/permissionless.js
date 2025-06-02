@@ -1,4 +1,11 @@
-import type { Address, Chain, Client, Hex, Transport } from "viem"
+import type {
+    Address,
+    Chain,
+    Client,
+    Hex,
+    SignedAuthorization,
+    Transport
+} from "viem"
 import {
     type PaymasterActions,
     type SmartAccount,
