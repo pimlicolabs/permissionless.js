@@ -1,4 +1,4 @@
-import type { Address, Client, Hex, OneOf } from "viem"
+import type { Address, Client, Hex, OneOf, SignedAuthorization } from "viem"
 import {
     type GetSmartAccountParameter,
     type PaymasterActions,
@@ -13,6 +13,7 @@ import type { ModuleType } from "./supportsModule.js"
 export type InstallModuleParameters<
     TSmartAccount extends SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
+    authorization?: SignedAuthorization<number> | undefined
     type: ModuleType
     address: Address
     maxFeePerGas?: bigint
@@ -63,6 +64,7 @@ export function installModule<TSmartAccount extends SmartAccount | undefined>(
         type,
         calls,
         paymaster,
+        authorization,
         paymasterContext
     } = parameters
 
@@ -91,6 +93,7 @@ export function installModule<TSmartAccount extends SmartAccount | undefined>(
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        authorization,
         account
     })
 }
