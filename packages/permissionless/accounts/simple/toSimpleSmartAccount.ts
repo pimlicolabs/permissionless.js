@@ -22,6 +22,7 @@ import {
     entryPoint07Abi,
     entryPoint07Address,
     entryPoint08Abi,
+    entryPoint08Address,
     getUserOperationHash,
     getUserOperationTypedData,
     toSmartAccount
@@ -91,7 +92,7 @@ export type ToSimpleSmartAccountParameters<
     index?: bigint
     address?: Address
     nonceKey?: bigint
-    use7702?: boolean
+    eip7702?: boolean
 }
 
 const getFactoryAddress = (
@@ -152,7 +153,7 @@ export async function toSimpleSmartAccount<
         index = BigInt(0),
         address,
         nonceKey,
-        use7702 = false
+        eip7702 = false
     } = parameters
 
     const localOwner = await toOwner({ owner })
@@ -163,11 +164,17 @@ export async function toSimpleSmartAccount<
               abi: getEntryPointAbi(parameters.entryPoint.version),
               version: parameters.entryPoint.version
           }
-        : ({
-              address: entryPoint07Address,
-              abi: getEntryPointAbi("0.7"),
-              version: "0.7"
-          } as const)
+        : eip7702
+          ? ({
+                address: entryPoint08Address,
+                abi: getEntryPointAbi("0.8"),
+                version: "0.8"
+            } as const)
+          : ({
+                address: entryPoint07Address,
+                abi: getEntryPointAbi("0.7"),
+                version: "0.7"
+            } as const)
 
     const factoryAddress = getFactoryAddress(
         entryPoint.version,
@@ -176,7 +183,7 @@ export async function toSimpleSmartAccount<
 
     let accountAddress: Address | undefined = address
 
-    if (use7702 && !address) {
+    if (eip7702 && !address) {
         accountAddress = localOwner.address
     }
 
@@ -191,7 +198,7 @@ export async function toSimpleSmartAccount<
     }
 
     const getFactoryArgs = async () => {
-        if (use7702) {
+        if (eip7702) {
             return {
                 factory: "0x7702" as Hex,
                 factoryData: "0x" as Hex
