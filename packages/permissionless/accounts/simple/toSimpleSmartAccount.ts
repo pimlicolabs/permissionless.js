@@ -8,6 +8,7 @@ import {
     type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
+    type PrivateKeyAccount,
     type Transport,
     type WalletClient,
     decodeFunctionData,
@@ -72,28 +73,44 @@ const getAccountInitCode = async (
 }
 
 export type ToSimpleSmartAccountParameters<
-    entryPointVersion extends EntryPointVersion
+    entryPointVersion extends EntryPointVersion,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >,
+    eip7702 extends boolean = false
 > = {
     client: Client<
         Transport,
         Chain | undefined,
         JsonRpcAccount | LocalAccount | undefined
     >
-    owner: OneOf<
-        | EthereumProvider
-        | WalletClient<Transport, Chain | undefined, Account>
-        | LocalAccount
-    >
-    factoryAddress?: Address
-    entryPoint?: {
-        address: Address
-        version: entryPointVersion
-    }
-    index?: bigint
-    address?: Address
-    nonceKey?: bigint
-    eip7702?: boolean
-}
+    owner: owner
+    eip7702?: eip7702
+} & (eip7702 extends true
+    ? {
+          entryPoint?: {
+              address: Address
+              version: "0.8"
+          }
+          factoryAddress?: never
+          index?: never
+          address?: never
+          nonceKey?: never
+          accountLogicAddress?: Address
+      }
+    : {
+          entryPoint?: {
+              address: Address
+              version: entryPointVersion
+          }
+          factoryAddress?: Address
+          index?: bigint
+          address?: Address
+          nonceKey?: bigint
+          accountLogicAddress?: Address
+      })
 
 const getFactoryAddress = (
     entryPointVersion: EntryPointVersion,
@@ -123,18 +140,24 @@ const getEntryPointAbi = (entryPointVersion: EntryPointVersion) => {
 }
 
 export type SimpleSmartAccountImplementation<
-    entryPointVersion extends EntryPointVersion = "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7",
+    eip7702 extends boolean = false
 > = Assign<
     SmartAccountImplementation<
         ReturnType<typeof getEntryPointAbi>,
-        entryPointVersion
+        entryPointVersion,
+        eip7702 extends true ? object : object,
+        eip7702
     >,
     { sign: NonNullable<SmartAccountImplementation["sign"]> }
 >
 
 export type ToSimpleSmartAccountReturnType<
-    entryPointVersion extends EntryPointVersion = "0.7"
-> = SmartAccount<SimpleSmartAccountImplementation<entryPointVersion>>
+    entryPointVersion extends EntryPointVersion = "0.7",
+    eip7702 extends boolean = false
+> = eip7702 extends true
+    ? SmartAccount<SimpleSmartAccountImplementation<entryPointVersion, true>>
+    : SmartAccount<SimpleSmartAccountImplementation<entryPointVersion, false>>
 
 /**
  * @description Creates an Simple Account from a private key.
@@ -142,10 +165,20 @@ export type ToSimpleSmartAccountReturnType<
  * @returns A Private Key Simple Account.
  */
 export async function toSimpleSmartAccount<
-    entryPointVersion extends EntryPointVersion
+    entryPointVersion extends EntryPointVersion,
+    owner extends OneOf<
+        | EthereumProvider
+        | WalletClient<Transport, Chain | undefined, Account>
+        | LocalAccount
+    >,
+    eip7702 extends boolean = false
 >(
-    parameters: ToSimpleSmartAccountParameters<entryPointVersion>
-): Promise<ToSimpleSmartAccountReturnType<entryPointVersion>> {
+    parameters: ToSimpleSmartAccountParameters<
+        entryPointVersion,
+        owner,
+        eip7702
+    >
+): Promise<ToSimpleSmartAccountReturnType<entryPointVersion, eip7702>> {
     const {
         client,
         owner,
@@ -153,7 +186,8 @@ export async function toSimpleSmartAccount<
         index = BigInt(0),
         address,
         nonceKey,
-        eip7702 = false
+        eip7702 = false,
+        accountLogicAddress = "0xe6Cae83BdE06E4c305530e199D7217f42808555B"
     } = parameters
 
     const localOwner = await toOwner({ owner })
@@ -215,6 +249,17 @@ export async function toSimpleSmartAccount<
         client,
         entryPoint,
         getFactoryArgs,
+        extend: eip7702
+            ? {
+                  implementation: accountLogicAddress
+              }
+            : undefined,
+        authorization: eip7702
+            ? {
+                  address: accountLogicAddress as Address,
+                  account: localOwner as PrivateKeyAccount
+              }
+            : undefined,
         async getAddress() {
             if (accountAddress) return accountAddress
 
@@ -417,7 +462,7 @@ export async function toSimpleSmartAccount<
                 }
             })
         }
-    }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion>>
+    }) as Promise<ToSimpleSmartAccountReturnType<entryPointVersion, eip7702>>
 }
 
 const executeSingleAbi = [
