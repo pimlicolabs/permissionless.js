@@ -215,12 +215,6 @@ export async function toSimpleSmartAccount<
         _factoryAddress
     )
 
-    let accountAddress: Address | undefined = address
-
-    if (eip7702 && !address) {
-        accountAddress = localOwner.address
-    }
-
     let chainId: number
 
     const getMemoizedChainId = async () => {
@@ -231,19 +225,42 @@ export async function toSimpleSmartAccount<
         return chainId
     }
 
-    const getFactoryArgs = async () => {
-        if (eip7702) {
-            return {
-                factory: "0x7702" as Hex,
-                factoryData: "0x" as Hex
-            }
-        }
-
+    const getFactoryArgsFunc = () => async () => {
         return {
             factory: factoryAddress,
             factoryData: await getAccountInitCode(localOwner.address, index)
         }
     }
+
+    const { accountAddress, getFactoryArgs } = await (async () => {
+        if (eip7702) {
+            return {
+                accountAddress: localOwner.address,
+                getFactoryArgs: async () => {
+                    return {
+                        factory: undefined,
+                        factoryData: undefined
+                    }
+                }
+            }
+        }
+
+        const getFactoryArgs = getFactoryArgsFunc()
+
+        if (address) {
+            return { accountAddress: address, getFactoryArgs }
+        }
+
+        const { factory, factoryData } = await getFactoryArgs()
+
+        const accountAddress = await getSenderAddress(client, {
+            factory,
+            factoryData,
+            entryPointAddress: entryPoint.address
+        })
+
+        return { accountAddress, getFactoryArgs }
+    })()
 
     return toSmartAccount({
         client,
@@ -261,17 +278,6 @@ export async function toSimpleSmartAccount<
               }
             : undefined,
         async getAddress() {
-            if (accountAddress) return accountAddress
-
-            const { factory, factoryData } = await getFactoryArgs()
-
-            // Get the sender address based on the init code
-            accountAddress = await getSenderAddress(client, {
-                factory,
-                factoryData,
-                entryPointAddress: entryPoint.address
-            })
-
             return accountAddress
         },
         async encodeCalls(calls) {

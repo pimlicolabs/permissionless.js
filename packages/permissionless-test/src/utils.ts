@@ -3,6 +3,7 @@ import {
     type Account,
     type Chain,
     type Hex,
+    type LocalAccount,
     type Transport,
     createPublicClient,
     createWalletClient
@@ -38,6 +39,10 @@ import {
     type ToSafeSmartAccountReturnType,
     toSafeSmartAccount
 } from "../../permissionless/accounts/safe/toSafeSmartAccount"
+import {
+    type To7702SimpleSmartAccountReturnType,
+    to7702SimpleSmartAccount
+} from "../../permissionless/accounts/simple/to7702SimpleSmartAccount"
 import {
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
@@ -243,11 +248,25 @@ export const getSimpleAccountClient = async <
         "0.8": entryPoint08Address
     }
 
-    return toSimpleSmartAccount<entryPointVersion>({
+    return toSimpleSmartAccount<entryPointVersion, LocalAccount>({
         client: getPublicClient(anvilRpc),
         entryPoint: {
             address: entryPointMapping[entryPoint.version],
             version: entryPoint.version as entryPointVersion
+        },
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
+    })
+}
+
+export const get7702SimpleAccountClient = async ({
+    anvilRpc,
+    privateKey
+}: AAParamType<"0.8">): Promise<To7702SimpleSmartAccountReturnType<"0.8">> => {
+    return to7702SimpleSmartAccount({
+        client: getPublicClient(anvilRpc),
+        entryPoint: {
+            address: entryPoint08Address,
+            version: "0.8"
         },
         owner: privateKeyToAccount(privateKey ?? generatePrivateKey())
     })
@@ -528,6 +547,21 @@ export const getCoreSmartAccounts = (): Array<{
         isEip1271Compliant: false
     },
     {
+        name: "Simple + EIP-7702",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await get7702SimpleAccountClient(
+                    conf as AAParamType<"0.8">
+                ),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: true,
+        isEip7702Compliant: true,
+        isEip1271Compliant: false
+    },
+    {
         name: "Kernel 0.2.1",
         getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
             getBundlerClient({
@@ -766,7 +800,7 @@ export const getCoreSmartAccounts = (): Array<{
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
-        isEip7702Compliant: false,
+        isEip7702Compliant: true,
         isEip1271Compliant: false
     },
     {
