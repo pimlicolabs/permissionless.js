@@ -6,6 +6,13 @@ import {
 } from "./simple/toSimpleSmartAccount.js"
 
 import {
+    type To7702SimpleSmartAccountImplementation,
+    type To7702SimpleSmartAccountParameters,
+    type To7702SimpleSmartAccountReturnType,
+    to7702SimpleSmartAccount
+} from "./simple/to7702SimpleSmartAccount.js"
+
+import {
     type LightAccountVersion,
     type LightSmartAccountImplementation,
     type ToLightSmartAccountParameters,
@@ -83,6 +90,10 @@ export {
     type SimpleSmartAccountImplementation,
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount,
+    type To7702SimpleSmartAccountParameters,
+    type To7702SimpleSmartAccountImplementation,
+    type To7702SimpleSmartAccountReturnType,
+    to7702SimpleSmartAccount,
     type LightAccountVersion,
     type ToLightSmartAccountParameters,
     type LightSmartAccountImplementation,
