@@ -3,9 +3,8 @@ import Fastify from "fastify"
 import { defineInstance } from "prool"
 import { http, createPublicClient } from "viem"
 import { createBundlerClient } from "viem/account-abstraction"
-import { foundry } from "viem/chains"
 import { deployErc20Token } from "./helpers/erc20-utils.js"
-import { getAnvilWalletClient } from "./helpers/utils.js"
+import { getAnvilWalletClient, getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import { deployPaymasters } from "./singletonPaymasters.js"
 
@@ -23,16 +22,16 @@ export const paymaster = defineInstance(
             port: _port,
             name: "mock-paymaster",
             start: async ({ port = _port }) => {
-                const walletClient = getAnvilWalletClient({
+                const walletClient = await getAnvilWalletClient({
                     anvilRpc,
                     addressIndex: 1
                 })
                 const publicClient = createPublicClient({
                     transport: http(anvilRpc),
-                    chain: foundry
+                    chain: await getChain(anvilRpc)
                 })
                 const bundler = createBundlerClient({
-                    chain: foundry,
+                    chain: await getChain(anvilRpc),
                     transport: http(altoRpc)
                 })
 
