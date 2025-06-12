@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.2.48
+
+### Patch Changes
+
+- 56fdf93fca1a7e173c1f34352a93bdc102f0563c: Added authorisation support for installModule and installModules
+- 52a3de159521bb98585cad16697fdd871e83b209: Added to7702SimpleSmartAccount
+- 5494e69866df60ee87424a51d6f99c4e76eaa7d6: Added to7702KernelSmartAccount
+
 ## 0.2.47
 
 ### Patch Changes
