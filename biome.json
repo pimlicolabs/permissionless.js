@@ -12,7 +12,8 @@
             "_esm",
             "_types",
             "bun.lockb",
-            "temp.ts"
+            "temp.ts",
+            "packages/permissionless/trace-output"
         ]
     },
     "organizeImports": {

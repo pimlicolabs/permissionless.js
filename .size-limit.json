@@ -2,12 +2,186 @@
     {
         "name": "permissionless (esm)",
         "path": "./packages/permissionless/_esm/index.js",
-        "limit": "60 kB",
+        "limit": "63 kB",
         "import": "*"
     },
     {
         "name": "permissionless (cjs)",
         "path": "./packages/permissionless/_cjs/index.js",
-        "limit": "280 kB"
+        "limit": "324 kB"
+    },
+    {
+        "name": "Pimlico Client",
+        "path": "./packages/permissionless/_esm/clients/pimlico.js",
+        "limit": "26 kB",
+        "import": "{ createPimlicoClient }"
+    },
+    {
+        "name": "Smart Account Client",
+        "path": "./packages/permissionless/_esm/clients/createSmartAccountClient.js",
+        "limit": "27 kB",
+        "import": "{ createSmartAccountClient }"
+    },
+    {
+        "name": "Simple Account",
+        "path": "./packages/permissionless/_esm/accounts/simple/toSimpleSmartAccount.js",
+        "limit": "71 kB",
+        "import": "{ toSimpleSmartAccount }"
+    },
+    {
+        "name": "Simple Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/simple-with-pimlico.js",
+        "limit": "79 kB",
+        "import": "*"
+    },
+    {
+        "name": "Simple Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/simple-with-client.js",
+        "limit": "80 kB",
+        "import": "*"
+    },
+    {
+        "name": "Light Account",
+        "path": "./packages/permissionless/_esm/accounts/light/toLightSmartAccount.js",
+        "limit": "69 kB",
+        "import": "{ toLightSmartAccount }"
+    },
+    {
+        "name": "Light Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/light-with-pimlico.js",
+        "limit": "77 kB",
+        "import": "*"
+    },
+    {
+        "name": "Light Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/light-with-client.js",
+        "limit": "78 kB",
+        "import": "*"
+    },
+    {
+        "name": "Safe Account",
+        "path": "./packages/permissionless/_esm/accounts/safe/toSafeSmartAccount.js",
+        "limit": "73 kB",
+        "import": "{ toSafeSmartAccount }"
+    },
+    {
+        "name": "Safe Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/safe-with-pimlico.js",
+        "limit": "81 kB",
+        "import": "*"
+    },
+    {
+        "name": "Safe Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/safe-with-client.js",
+        "limit": "82 kB",
+        "import": "*"
+    },
+    {
+        "name": "Kernel Account",
+        "path": "./packages/permissionless/_esm/accounts/kernel/toKernelSmartAccount.js",
+        "limit": "96 kB",
+        "import": "{ toKernelSmartAccount }"
+    },
+    {
+        "name": "Kernel Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/kernel-with-pimlico.js",
+        "limit": "104 kB",
+        "import": "*"
+    },
+    {
+        "name": "Kernel Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/kernel-with-client.js",
+        "limit": "105 kB",
+        "import": "*"
+    },
+    {
+        "name": "Biconomy Account",
+        "path": "./packages/permissionless/_esm/accounts/biconomy/toBiconomySmartAccount.js",
+        "limit": "70 kB",
+        "import": "{ toBiconomySmartAccount }"
+    },
+    {
+        "name": "Biconomy Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/biconomy-with-pimlico.js",
+        "limit": "78 kB",
+        "import": "*"
+    },
+    {
+        "name": "Biconomy Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/biconomy-with-client.js",
+        "limit": "79 kB",
+        "import": "*"
+    },
+    {
+        "name": "Trust Account",
+        "path": "./packages/permissionless/_esm/accounts/trust/toTrustSmartAccount.js",
+        "limit": "69 kB",
+        "import": "{ toTrustSmartAccount }"
+    },
+    {
+        "name": "Trust Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/trust-with-pimlico.js",
+        "limit": "77 kB",
+        "import": "*"
+    },
+    {
+        "name": "Trust Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/trust-with-client.js",
+        "limit": "78 kB",
+        "import": "*"
+    },
+    {
+        "name": "Etherspot Account",
+        "path": "./packages/permissionless/_esm/accounts/etherspot/toEtherspotSmartAccount.js",
+        "limit": "70 kB",
+        "import": "{ toEtherspotSmartAccount }"
+    },
+    {
+        "name": "Etherspot Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/etherspot-with-pimlico.js",
+        "limit": "78 kB",
+        "import": "*"
+    },
+    {
+        "name": "Etherspot Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/etherspot-with-client.js",
+        "limit": "79 kB",
+        "import": "*"
+    },
+    {
+        "name": "Nexus Account",
+        "path": "./packages/permissionless/_esm/accounts/nexus/toNexusSmartAccount.js",
+        "limit": "69 kB",
+        "import": "{ toNexusSmartAccount }"
+    },
+    {
+        "name": "Nexus Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/nexus-with-pimlico.js",
+        "limit": "77 kB",
+        "import": "*"
+    },
+    {
+        "name": "Nexus Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/nexus-with-client.js",
+        "limit": "78 kB",
+        "import": "*"
+    },
+    {
+        "name": "Thirdweb Account",
+        "path": "./packages/permissionless/_esm/accounts/thirdweb/toThirdwebSmartAccount.js",
+        "limit": "68 kB",
+        "import": "{ toThirdwebSmartAccount }"
+    },
+    {
+        "name": "Thirdweb Account + Pimlico",
+        "path": "./packages/permissionless/size-tests/thirdweb-with-pimlico.js",
+        "limit": "76 kB",
+        "import": "*"
+    },
+    {
+        "name": "Thirdweb Account + Client + Pimlico",
+        "path": "./packages/permissionless/size-tests/thirdweb-with-client.js",
+        "limit": "77 kB",
+        "import": "*"
     }
 ]
