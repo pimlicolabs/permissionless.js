@@ -18,5 +18,6 @@ export {
     type SafeVersion,
     type ToSafeSmartAccountParameters,
     type ToSafeSmartAccountReturnType,
-    SafeSmartAccount
+    SafeSmartAccount,
+    toSafeSmartAccount
 }
