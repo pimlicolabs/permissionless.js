@@ -1,3 +1,2 @@
-export { toThirdwebSmartAccount } from "../_esm/accounts/thirdweb/toThirdwebSmartAccount.js"
-export { createSmartAccountClient } from "../_esm/clients/createSmartAccountClient.js"
-export { createPimlicoClient } from "../_esm/clients/pimlico.js"
+export { toThirdwebSmartAccount } from "../_esm/accounts/thirdweb/index.js"
+export { createSmartAccountClient } from "../_esm/clients/index.js"

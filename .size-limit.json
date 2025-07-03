@@ -24,7 +24,7 @@
     },
     {
         "name": "Simple Account",
-        "path": "./packages/permissionless/_esm/accounts/simple/toSimpleSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/simple/index.js",
         "limit": "71 kB",
         "import": "{ toSimpleSmartAccount }"
     },
@@ -42,7 +42,7 @@
     },
     {
         "name": "Light Account",
-        "path": "./packages/permissionless/_esm/accounts/light/toLightSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/light/index.js",
         "limit": "69 kB",
         "import": "{ toLightSmartAccount }"
     },
@@ -60,7 +60,7 @@
     },
     {
         "name": "Safe Account",
-        "path": "./packages/permissionless/_esm/accounts/safe/toSafeSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/safe/index.js",
         "limit": "73 kB",
         "import": "{ toSafeSmartAccount }"
     },
@@ -78,7 +78,7 @@
     },
     {
         "name": "Kernel Account",
-        "path": "./packages/permissionless/_esm/accounts/kernel/toKernelSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/kernel/index.js",
         "limit": "96 kB",
         "import": "{ toKernelSmartAccount }"
     },
@@ -96,7 +96,7 @@
     },
     {
         "name": "Biconomy Account",
-        "path": "./packages/permissionless/_esm/accounts/biconomy/toBiconomySmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/biconomy/index.js",
         "limit": "70 kB",
         "import": "{ toBiconomySmartAccount }"
     },
@@ -114,7 +114,7 @@
     },
     {
         "name": "Trust Account",
-        "path": "./packages/permissionless/_esm/accounts/trust/toTrustSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/trust/index.js",
         "limit": "69 kB",
         "import": "{ toTrustSmartAccount }"
     },
@@ -132,7 +132,7 @@
     },
     {
         "name": "Etherspot Account",
-        "path": "./packages/permissionless/_esm/accounts/etherspot/toEtherspotSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/etherspot/index.js",
         "limit": "70 kB",
         "import": "{ toEtherspotSmartAccount }"
     },
@@ -150,7 +150,7 @@
     },
     {
         "name": "Nexus Account",
-        "path": "./packages/permissionless/_esm/accounts/nexus/toNexusSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/nexus/index.js",
         "limit": "69 kB",
         "import": "{ toNexusSmartAccount }"
     },
@@ -168,7 +168,7 @@
     },
     {
         "name": "Thirdweb Account",
-        "path": "./packages/permissionless/_esm/accounts/thirdweb/toThirdwebSmartAccount.js",
+        "path": "./packages/permissionless/_esm/accounts/thirdweb/index.js",
         "limit": "68 kB",
         "import": "{ toThirdwebSmartAccount }"
     },
