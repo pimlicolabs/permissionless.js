@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.49
+
+### Patch Changes
+
+- be0db9bf8da4fdd3fd993626991121381d21e9ce: Removed fixed ox version as optional dependency
+
 ## 0.2.48
 
 ### Patch Changes
