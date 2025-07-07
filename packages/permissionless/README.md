@@ -71,7 +71,7 @@ const account = toSimpleSmartAccount<entryPointVersion>({
 // Create the required clients.
 const bundlerClient = createSmartAccountClient({
   account,
-  paymaster: 
+  paymaster, 
   chain: sepolia,
   bundlerTransport: http(
     `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`,
