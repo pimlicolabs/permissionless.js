@@ -12,7 +12,7 @@ import {
 import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
-import { getTokenQuotes } from "./getTokenQuotes"
+import { getTokenQuotes } from "./getTokenQuotes.js"
 
 /**
  * @costInToken represents the max amount of token that will be charged for this user operation in token decimals
