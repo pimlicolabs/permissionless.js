@@ -30,6 +30,7 @@ export type EstimateErc20PaymasterCostParameters<
 > = {
     entryPoint: { version: entryPointVersion; address: Address }
     userOperation: UserOperation<entryPointVersion>
+    token: Address
 } & GetChainParameter<TChain, TChainOverride>
 
 /**
@@ -64,37 +65,7 @@ export const estimateErc20PaymasterCost = async <
         throw new ChainNotFoundError()
     }
 
-    const { entryPoint, userOperation } = args
-
-    const paymasterData = (() => {
-        if ("paymasterAndData" in userOperation) {
-            return userOperation.paymasterAndData
-        }
-
-        if ("paymasterData" in userOperation) {
-            return userOperation.paymasterData
-        }
-
-        return undefined
-    })()
-
-    if (!paymasterData || paymasterData === "0x") {
-        throw new Error("Paymaster data not found in the user operation.")
-    }
-
-    const token: Address = (() => {
-        try {
-            if (entryPoint.version === "0.6") {
-                return getAddress(slice(paymasterData, 34, 54))
-            }
-
-            return getAddress(slice(paymasterData, 46, 66))
-        } catch {
-            throw new Error(
-                "Invalid paymaster data, cannot find token address."
-            )
-        }
-    })()
+    const { entryPoint, userOperation, token } = args
 
     const quotes = await getAction(
         client,
