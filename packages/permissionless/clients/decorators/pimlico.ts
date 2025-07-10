@@ -11,6 +11,11 @@ import {
     validateSponsorshipPolicies
 } from "../../actions/pimlico.js"
 import {
+    type EstimateErc20PaymasterCostParameters,
+    type EstimateErc20PaymasterCostReturnType,
+    estimateErc20PaymasterCost
+} from "../../actions/pimlico/estimateErc20PaymasterCost.js"
+import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
 } from "../../actions/pimlico/getUserOperationGasPrice.js"
@@ -124,6 +129,18 @@ export type PimlicoActions<
             >
         >
     ) => Promise<Prettify<GetTokenQuotesReturnType>>
+    estimateErc20PaymasterCost: <
+        TChainOverride extends Chain | undefined = Chain | undefined
+    >(
+        args: Omit<
+            EstimateErc20PaymasterCostParameters<
+                entryPointVersion,
+                TChain,
+                TChainOverride
+            >,
+            "entryPoint"
+        >
+    ) => Promise<Prettify<EstimateErc20PaymasterCostReturnType>>
 }
 
 export const pimlicoActions =
@@ -162,5 +179,11 @@ export const pimlicoActions =
                 ...args,
                 chain: args.chain,
                 entryPointAddress: entryPoint.address
+            }),
+        estimateErc20PaymasterCost: async (args) =>
+            estimateErc20PaymasterCost(client, {
+                ...args,
+                entryPoint,
+                chain: args.chain
             })
     })
