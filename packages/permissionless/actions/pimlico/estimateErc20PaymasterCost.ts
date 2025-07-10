@@ -19,7 +19,7 @@ import { getTokenQuotes } from "./getTokenQuotes.js"
  */
 export type EstimateErc20PaymasterCostReturnType = {
     costInToken: bigint
-    costInUsd: number
+    costInUsd: bigint
 }
 
 export type EstimateErc20PaymasterCostParameters<
@@ -97,6 +97,6 @@ export const estimateErc20PaymasterCost = async <
 
     return {
         costInToken,
-        costInUsd: Number(costInUsd) / 10 ** 6
+        costInUsd
     }
 }
