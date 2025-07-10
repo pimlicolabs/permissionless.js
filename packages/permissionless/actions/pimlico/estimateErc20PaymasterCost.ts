@@ -20,7 +20,7 @@ import { getTokenQuotes } from "./getTokenQuotes.js"
  */
 export type EstimateErc20PaymasterCostReturnType = {
     costInToken: bigint
-    costInUsd: bigint
+    costInUsd: number
 }
 
 export type EstimateErc20PaymasterCostParameters<
@@ -38,7 +38,6 @@ export type EstimateErc20PaymasterCostParameters<
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/EstimateErc20PaymasterCost
  *
  * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
- * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
  * @returns quotes, see {@link EstimateErc20PaymasterCostReturnType}
  *
  */
@@ -149,6 +148,6 @@ export const estimateErc20PaymasterCost = async <
 
     return {
         costInToken,
-        costInUsd
+        costInUsd: Number(costInUsd) / 10 ** 6
     }
 }
