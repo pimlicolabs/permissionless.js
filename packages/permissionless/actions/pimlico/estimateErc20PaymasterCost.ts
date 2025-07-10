@@ -5,9 +5,7 @@ import {
     ChainNotFoundError,
     type Client,
     type GetChainParameter,
-    type Transport,
-    getAddress,
-    slice
+    type Transport
 } from "viem"
 import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
