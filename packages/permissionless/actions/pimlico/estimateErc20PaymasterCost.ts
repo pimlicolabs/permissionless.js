@@ -10,6 +10,7 @@ import {
 import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import { getRequiredPrefund } from "../../utils/getRequiredPrefund"
 import { getTokenQuotes } from "./getTokenQuotes.js"
 
 /**
@@ -75,35 +76,14 @@ export const estimateErc20PaymasterCost = async <
         chain
     })
 
-    const postOpGas: bigint = quotes[0].postOpGas
-    const exchangeRate: bigint = quotes[0].exchangeRate
-    const exchangeRateNativeToUsd: bigint = quotes[0].exchangeRateNativeToUsd
+    const postOpGas = quotes[0].postOpGas
+    const exchangeRate = quotes[0].exchangeRate
+    const exchangeRateNativeToUsd = quotes[0].exchangeRateNativeToUsd
 
-    const userOperationMaxGas = (() => {
-        const paymasterVerificationGasLimit =
-            "paymasterVerificationGasLimit" in userOperation
-                ? (userOperation.paymasterVerificationGasLimit ?? 0n)
-                : 0n
-
-        const paymasterPostOpGasLimit =
-            "paymasterPostOpGasLimit" in userOperation
-                ? (userOperation.paymasterPostOpGasLimit ?? 0n)
-                : 0n
-
-        const { preVerificationGas, verificationGasLimit, callGasLimit } =
-            userOperation
-
-        return (
-            BigInt(preVerificationGas) +
-            BigInt(verificationGasLimit) +
-            BigInt(callGasLimit) +
-            paymasterVerificationGasLimit +
-            paymasterPostOpGasLimit
-        )
-    })()
-
-    const userOperationMaxCost =
-        userOperationMaxGas * userOperation.maxFeePerGas
+    const userOperationMaxCost = getRequiredPrefund({
+        userOperation,
+        entryPointVersion: entryPoint.version
+    })
 
     // represents the userOperation's max cost in denomination of wei
     const maxCostInWei =
