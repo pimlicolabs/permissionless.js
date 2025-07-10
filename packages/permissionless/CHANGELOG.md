@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.50
+
+### Patch Changes
+
+- ba0e2bd161d5ee4bbd975a28f9f36ff520aca8f7: Added estimateErc20PaymasterCost
+
 ## 0.2.49
 
 ### Patch Changes
