@@ -10,7 +10,7 @@ import {
 import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
 import { getAction } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
-import { getRequiredPrefund } from "../../utils/getRequiredPrefund"
+import { getRequiredPrefund } from "../../utils/getRequiredPrefund.js"
 import { getTokenQuotes } from "./getTokenQuotes.js"
 
 /**
