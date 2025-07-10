@@ -22,3 +22,4 @@ temp.ts
 .env.production.local
 .envrc
 .vscode
+*trace-output*
