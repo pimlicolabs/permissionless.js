@@ -1638,7 +1638,7 @@ export async function toSafeSmartAccount<
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
 
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch use SafeSmartAccount.signUserOperation from `permissionless/accounts/safe`"
                 )
