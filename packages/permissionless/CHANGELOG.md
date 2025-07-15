@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.51
+
+### Patch Changes
+
+- 1f3c2d2ff753e91ff11d587bb1758b5d65fea8f9: Fixed multi-sig safe when threshold is not same as owners
+
 ## 0.2.50
 
 ### Patch Changes
