@@ -69,11 +69,12 @@ const handlePmSponsor = async ({
 }) => {
     const is06 = entryPoint === entryPoint06Address
 
-    let op = {
+    let sponsoredUserOp = {
         ...userOperation,
         ...getDummyPaymasterData({ is06, paymaster, paymasterMode })
     } as UserOperation
 
+    // User provided gasLimits
     const callGasLimit = userOperation.callGasLimit
     const verificationGasLimit = userOperation.verificationGasLimit
     const preVerificationGas = userOperation.preVerificationGas
@@ -81,22 +82,25 @@ const handlePmSponsor = async ({
     if (estimateGas) {
         try {
             const gasEstimates = await bundler.estimateUserOperationGas({
-                ...op,
+                ...sponsoredUserOp,
                 entryPointAddress: entryPoint
             })
 
-            op = {
-                ...op,
+            sponsoredUserOp = {
+                ...sponsoredUserOp,
                 ...gasEstimates
             } as UserOperation
 
-            op.callGasLimit = maxBigInt(op.callGasLimit, callGasLimit)
-            op.preVerificationGas = maxBigInt(
-                op.preVerificationGas,
+            sponsoredUserOp.callGasLimit = maxBigInt(
+                gasEstimates.callGasLimit,
+                callGasLimit
+            )
+            sponsoredUserOp.preVerificationGas = maxBigInt(
+                gasEstimates.preVerificationGas,
                 preVerificationGas
             )
-            op.verificationGasLimit = maxBigInt(
-                op.verificationGasLimit,
+            sponsoredUserOp.verificationGasLimit = maxBigInt(
+                gasEstimates.verificationGasLimit,
                 verificationGasLimit
             )
         } catch (e: unknown) {
@@ -116,17 +120,19 @@ const handlePmSponsor = async ({
     }
 
     const result = {
-        preVerificationGas: toHex(op.preVerificationGas),
-        callGasLimit: toHex(op.callGasLimit),
+        preVerificationGas: toHex(sponsoredUserOp.preVerificationGas),
+        callGasLimit: toHex(sponsoredUserOp.callGasLimit),
         paymasterVerificationGasLimit: toHex(
-            op.paymasterVerificationGasLimit || 0
+            sponsoredUserOp.paymasterVerificationGasLimit || 0
         ),
-        paymasterPostOpGasLimit: toHex(op.paymasterPostOpGasLimit || 0),
-        verificationGasLimit: toHex(op.verificationGasLimit || 0),
+        paymasterPostOpGasLimit: toHex(
+            sponsoredUserOp.paymasterPostOpGasLimit || 0
+        ),
+        verificationGasLimit: toHex(sponsoredUserOp.verificationGasLimit || 0),
         ...(await getSignedPaymasterData({
             publicClient,
             signer: paymasterSigner,
-            userOp: userOperation,
+            userOp: sponsoredUserOp,
             paymaster,
             paymasterMode
         }))
@@ -275,6 +281,15 @@ const handleMethod = async ({
                 }
             }
         ]
+    }
+
+    if (parsedBody.method === "pimlico_getUserOperationGasPrice") {
+        return await bundler.request({
+            // @ts-ignore
+            method: "pimlico_getUserOperationGasPrice",
+            // @ts-ignore
+            params: []
+        })
     }
 
     if (parsedBody.method === "pimlico_getTokenQuotes") {
