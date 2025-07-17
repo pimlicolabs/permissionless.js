@@ -1,4 +1,10 @@
 import { isHash, zeroAddress } from "viem"
+import {
+    type UserOperation,
+    entryPoint06Address,
+    entryPoint07Address,
+    entryPoint08Address
+} from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -7,12 +13,6 @@ import {
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
 import { sponsorUserOperation } from "./sponsorUserOperation"
-import {
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address,
-    UserOperation
-} from "viem/account-abstraction"
 
 describe("sponsorUserOperation", () => {
     testWithRpc("sponsorUserOperation_V06", async ({ rpc }) => {
