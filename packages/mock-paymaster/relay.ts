@@ -283,6 +283,15 @@ const handleMethod = async ({
         ]
     }
 
+    if (parsedBody.method === "pimlico_getUserOperationGasPrice") {
+        return await bundler.request({
+            // @ts-ignore
+            method: "pimlico_getUserOperationGasPrice",
+            // @ts-ignore
+            params: []
+        })
+    }
+
     if (parsedBody.method === "pimlico_getTokenQuotes") {
         const params = pimlicoGetTokenQuotesSchema.safeParse(parsedBody.params)
 
