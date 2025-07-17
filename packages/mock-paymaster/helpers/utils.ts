@@ -25,7 +25,7 @@ export const getChain = async (rpcUrl: string): Promise<Chain> => {
     })
 
     const chainId = await tempClient.getChainId()
-    
+
     return defineChain({
         id: chainId,
         name: `Chain ${chainId}`,
@@ -66,13 +66,11 @@ export const getPublicClient = async (
 export const getAnvilWalletClient = async ({
     addressIndex,
     anvilRpc
-}: { addressIndex: number; anvilRpc: string }): Promise<WalletClient<
-    Transport,
-    Chain,
-    Account
->> => {
+}: { addressIndex: number; anvilRpc: string }): Promise<
+    WalletClient<Transport, Chain, Account>
+> => {
     const chain = await getChain(anvilRpc)
-    
+
     return createWalletClient({
         account: mnemonicToAccount(
             "test test test test test test test test test test test junk",
