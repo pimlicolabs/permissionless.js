@@ -24,10 +24,50 @@
             "import": "./_esm/accounts/index.js",
             "default": "./_cjs/accounts/index.js"
         },
+        "./accounts/biconomy": {
+            "types": "./_types/accounts/biconomy/index.d.ts",
+            "import": "./_esm/accounts/biconomy/index.js",
+            "default": "./_cjs/accounts/biconomy/index.js"
+        },
+        "./accounts/etherspot": {
+            "types": "./_types/accounts/etherspot/index.d.ts",
+            "import": "./_esm/accounts/etherspot/index.js",
+            "default": "./_cjs/accounts/etherspot/index.js"
+        },
+        "./accounts/kernel": {
+            "types": "./_types/accounts/kernel/index.d.ts",
+            "import": "./_esm/accounts/kernel/index.js",
+            "default": "./_cjs/accounts/kernel/index.js"
+        },
+        "./accounts/light": {
+            "types": "./_types/accounts/light/index.d.ts",
+            "import": "./_esm/accounts/light/index.js",
+            "default": "./_cjs/accounts/light/index.js"
+        },
+        "./accounts/nexus": {
+            "types": "./_types/accounts/nexus/index.d.ts",
+            "import": "./_esm/accounts/nexus/index.js",
+            "default": "./_cjs/accounts/nexus/index.js"
+        },
         "./accounts/safe": {
             "types": "./_types/accounts/safe/index.d.ts",
             "import": "./_esm/accounts/safe/index.js",
             "default": "./_cjs/accounts/safe/index.js"
+        },
+        "./accounts/simple": {
+            "types": "./_types/accounts/simple/index.d.ts",
+            "import": "./_esm/accounts/simple/index.js",
+            "default": "./_cjs/accounts/simple/index.js"
+        },
+        "./accounts/thirdweb": {
+            "types": "./_types/accounts/thirdweb/index.d.ts",
+            "import": "./_esm/accounts/thirdweb/index.js",
+            "default": "./_cjs/accounts/thirdweb/index.js"
+        },
+        "./accounts/trust": {
+            "types": "./_types/accounts/trust/index.d.ts",
+            "import": "./_esm/accounts/trust/index.js",
+            "default": "./_cjs/accounts/trust/index.js"
         },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
