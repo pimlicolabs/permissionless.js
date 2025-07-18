@@ -32,7 +32,7 @@ export type GetTokenQuotesReturnType = {
 /**
  * Returns all related fields to calculate the potential cost of a userOperation in ERC-20 tokens.
  *
- * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getTokenQuotes
+ * - Docs: https://docs.pimlico.io/references/paymaster/erc20-paymaster/endpoints/pimlico_getTokenQuotes
  *
  * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
