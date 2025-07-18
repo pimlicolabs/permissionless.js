@@ -11,14 +11,15 @@ import { deployPaymasters } from "./singletonPaymasters.js"
 export const paymaster = defineInstance(
     ({
         anvilRpc,
+        altoRpc,
         port: _port,
-        altoRpc
-    }: { anvilRpc: string; port: number; altoRpc: string }) => {
+        host: _host = "localhost"
+    }: { anvilRpc: string; port: number; altoRpc: string; host?: string }) => {
         const app = Fastify({})
 
         return {
             _internal: {},
-            host: "localhost",
+            host: _host,
             port: _port,
             name: "mock-paymaster",
             start: async ({ port = _port }) => {
@@ -55,7 +56,7 @@ export const paymaster = defineInstance(
                     return reply.code(200).send({ message: "pong" })
                 })
 
-                await app.listen({ host: "localhost", port })
+                await app.listen({ host: _host, port })
             },
             stop: async () => {
                 app.close()
