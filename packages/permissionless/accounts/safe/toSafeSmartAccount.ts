@@ -1544,7 +1544,7 @@ export async function toSafeSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch, currently not supported"
                 )
@@ -1591,7 +1591,7 @@ export async function toSafeSmartAccount<
                 : signatureBytes
         },
         async signTypedData(typedData) {
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch, currently not supported"
                 )
