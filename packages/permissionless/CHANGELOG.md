@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.52
+
+### Patch Changes
+
+- 0d82154a74d4592da9fb014d56567f9ff884fc81: Fixed owners length check for safe multisig
+
 ## 0.2.51
 
 ### Patch Changes
