@@ -776,7 +776,7 @@ export const getCoreSmartAccounts = (): Array<{
         isEip1271Compliant: true
     },
     {
-        name: "Kernel 7579 0.3.3 + EIP-7702",
+        name: "Kernel 0.3.3 + EIP-7702",
         getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
             getBundlerClient({
                 account: await getKernelEcdsaClient({
@@ -786,17 +786,6 @@ export const getCoreSmartAccounts = (): Array<{
                 }),
                 ...conf
             }),
-        //getErc7579SmartAccountClient: async (
-        //    conf: AAParamType<EntryPointVersion>
-        //) =>
-        //    getSmartAccountClient({
-        //        account: await getKernelEcdsaClient({
-        //            ...(conf as AAParamType<"0.6" | "0.7">),
-        //            version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
-        //            eip7702: true
-        //        }),
-        //        ...conf
-        //    }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
