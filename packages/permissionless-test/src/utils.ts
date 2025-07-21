@@ -786,17 +786,17 @@ export const getCoreSmartAccounts = (): Array<{
                 }),
                 ...conf
             }),
-        getErc7579SmartAccountClient: async (
-            conf: AAParamType<EntryPointVersion>
-        ) =>
-            getSmartAccountClient({
-                account: await getKernelEcdsaClient({
-                    ...(conf as AAParamType<"0.6" | "0.7">),
-                    version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
-                    eip7702: true
-                }),
-                ...conf
-            }),
+        //getErc7579SmartAccountClient: async (
+        //    conf: AAParamType<EntryPointVersion>
+        //) =>
+        //    getSmartAccountClient({
+        //        account: await getKernelEcdsaClient({
+        //            ...(conf as AAParamType<"0.6" | "0.7">),
+        //            version: "0.3.3" as KernelVersion<"0.6" | "0.7">,
+        //            eip7702: true
+        //        }),
+        //        ...conf
+        //    }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
