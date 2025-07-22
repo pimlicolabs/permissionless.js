@@ -772,7 +772,7 @@ export const getCoreSmartAccounts = (): Array<{
             }),
         supportsEntryPointV06: false,
         supportsEntryPointV07: true,
-        supportsEntryPointV08: true,
+        supportsEntryPointV08: false,
         isEip1271Compliant: true
     },
     {
