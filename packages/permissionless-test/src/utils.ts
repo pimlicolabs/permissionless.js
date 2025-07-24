@@ -790,7 +790,7 @@ export const getCoreSmartAccounts = (): Array<{
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
         isEip7702Compliant: true,
-        isEip1271Compliant: false
+        isEip1271Compliant: true
     },
     {
         name: "Biconomy",
