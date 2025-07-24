@@ -723,6 +723,12 @@ export async function toKernelSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            if (eip7702) {
+                throw new Error(
+                    "Kernel 0.3.3 with EIP-7702 isn't 1271 compliant"
+                )
+            }
+
             const signature = await signMessage({
                 owner,
                 message,
@@ -741,6 +747,12 @@ export async function toKernelSmartAccount<
             ])
         },
         async signTypedData(typedData) {
+            if (eip7702) {
+                throw new Error(
+                    "Kernel 0.3.3 with EIP-7702 isn't 1271 compliant"
+                )
+            }
+
             const signature = await signTypedData({
                 owner: owner,
                 chainId: await getMemoizedChainId(),
