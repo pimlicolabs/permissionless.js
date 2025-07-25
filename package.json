@@ -16,7 +16,7 @@
         "@changesets/cli": "^2.26.2",
         "@permissionless/wagmi": "workspace:packages/wagmi",
         "@pimlico/mock-paymaster": "workspace:packages/mock-paymaster",
-        "@pimlico/alto": "0.0.0-main.20250527T165035",
+        "@pimlico/alto": "^0.0.19",
         "@size-limit/esbuild-why": "^9.0.0",
         "@size-limit/preset-small-lib": "^9.0.0",
         "@tanstack/react-query": "5.45.1",
