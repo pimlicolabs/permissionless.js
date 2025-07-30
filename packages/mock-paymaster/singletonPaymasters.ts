@@ -240,13 +240,19 @@ export const getSignedPaymasterData = async ({
 }
 
 export const deployPaymasters = async ({
-    walletClient,
-    publicClient
+    anvilRpc,
+    paymasterSigner
 }: {
-    walletClient: WalletClient<Transport, Chain, Account>
-    publicClient: PublicClient<Transport, Chain>
+    anvilRpc: string
+    paymasterSigner: Address
 }) => {
-    const owner = walletClient.account.address
+    const { getPaymasterUtilityWallet } = await import(
+        "./helpers/erc20-utils.js"
+    )
+    const { getPublicClient } = await import("./helpers/utils.js")
+
+    const walletClient = await getPaymasterUtilityWallet(anvilRpc)
+    const publicClient = await getPublicClient(anvilRpc)
 
     let nonce = await publicClient.getTransactionCount({
         address: walletClient.account.address
@@ -257,7 +263,7 @@ export const deployPaymasters = async ({
         to: constants.deterministicDeployer,
         data: concat([
             constants.create2Salt,
-            getSingletonPaymaster06InitCode(walletClient.account.address)
+            getSingletonPaymaster06InitCode(paymasterSigner)
         ]),
         nonce: nonce++
     })
@@ -267,7 +273,7 @@ export const deployPaymasters = async ({
         to: constants.deterministicDeployer,
         data: concat([
             constants.create2Salt,
-            getSingletonPaymaster07InitCode(walletClient.account.address)
+            getSingletonPaymaster07InitCode(paymasterSigner)
         ]),
         nonce: nonce++
     })
@@ -277,7 +283,7 @@ export const deployPaymasters = async ({
         to: constants.deterministicDeployer,
         data: concat([
             constants.create2Salt,
-            getSingletonPaymaster08InitCode(walletClient.account.address)
+            getSingletonPaymaster08InitCode(paymasterSigner)
         ]),
         nonce: nonce++
     })
@@ -285,17 +291,17 @@ export const deployPaymasters = async ({
     // Initialize contract instances.
     const [singletonPaymaster06, singletonPaymaster07, singletonPaymaster08] = [
         getContract({
-            address: getSingletonPaymaster06Address(owner),
+            address: getSingletonPaymaster06Address(paymasterSigner),
             abi: singletonPaymaster06Abi,
             client: walletClient
         }),
         getContract({
-            address: getSingletonPaymaster07Address(owner),
+            address: getSingletonPaymaster07Address(paymasterSigner),
             abi: singletonPaymaster07Abi,
             client: walletClient
         }),
         getContract({
-            address: getSingletonPaymaster08Address(owner),
+            address: getSingletonPaymaster08Address(paymasterSigner),
             abi: singletonPaymaster08Abi,
             client: walletClient
         })

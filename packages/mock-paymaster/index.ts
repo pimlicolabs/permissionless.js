@@ -1,16 +1,16 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
-import { http, createPublicClient } from "viem"
-import { createBundlerClient } from "viem/account-abstraction"
+import { http, createWalletClient } from "viem"
 import {
     deployErc20Token,
     erc20Address,
     sudoMintTokens
 } from "./helpers/erc20-utils.js"
-import { getAnvilWalletClient, getChain } from "./helpers/utils.js"
+import { getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import { deployPaymasters } from "./singletonPaymasters.js"
+import { privateKeyToAccount } from "viem/accounts"
 
 export const paymaster = defineInstance(
     ({
@@ -27,22 +27,19 @@ export const paymaster = defineInstance(
             port: _port,
             name: "mock-paymaster",
             start: async ({ port = _port }) => {
-                const chain = await getChain(anvilRpc)
-                const walletClient = await getAnvilWalletClient({
-                    anvilRpc,
-                    addressIndex: 10
-                })
-                const publicClient = createPublicClient({
-                    transport: http(anvilRpc),
-                    chain
-                })
-                const bundler = createBundlerClient({
-                    chain,
-                    transport: http(altoRpc)
+                const paymasterSigner = createWalletClient({
+                    chain: await getChain(anvilRpc),
+                    account: privateKeyToAccount(
+                        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                    ),
+                    transport: http(anvilRpc)
                 })
 
-                await deployPaymasters({ walletClient, publicClient })
-                await deployErc20Token(walletClient, publicClient)
+                await deployPaymasters({
+                    anvilRpc,
+                    paymasterSigner: paymasterSigner.account.address
+                })
+                await deployErc20Token(anvilRpc)
 
                 app.register(cors, {
                     origin: "*",
@@ -50,9 +47,9 @@ export const paymaster = defineInstance(
                 })
 
                 const rpcHandler = createRpcHandler({
-                    bundler,
-                    publicClient,
-                    paymasterSigner: walletClient
+                    altoRpc,
+                    anvilRpc,
+                    paymasterSigner
                 })
                 app.post("/", {}, rpcHandler)
 
