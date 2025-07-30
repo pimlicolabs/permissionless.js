@@ -3,7 +3,11 @@ import Fastify from "fastify"
 import { defineInstance } from "prool"
 import { http, createPublicClient } from "viem"
 import { createBundlerClient } from "viem/account-abstraction"
-import { deployErc20Token } from "./helpers/erc20-utils.js"
+import {
+    deployErc20Token,
+    erc20Address,
+    sudoMintTokens
+} from "./helpers/erc20-utils.js"
 import { getAnvilWalletClient, getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import { deployPaymasters } from "./singletonPaymasters.js"
@@ -64,3 +68,5 @@ export const paymaster = defineInstance(
         }
     }
 )
+
+export { erc20Address, sudoMintTokens }
