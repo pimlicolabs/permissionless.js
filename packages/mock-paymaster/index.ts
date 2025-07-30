@@ -30,7 +30,7 @@ export const paymaster = defineInstance(
                 const paymasterSigner = createWalletClient({
                     chain: await getChain(anvilRpc),
                     account: privateKeyToAccount(
-                        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
                     ),
                     transport: http(anvilRpc)
                 })
