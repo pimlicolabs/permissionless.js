@@ -1,4 +1,5 @@
 import {
+    http,
     type Account,
     type Address,
     type Chain,
@@ -6,16 +7,15 @@ import {
     type Transport,
     type WalletClient,
     concat,
+    createTestClient,
+    createWalletClient,
     encodeFunctionData,
     getCreate2Address,
     hexToBigInt,
     pad,
     parseAbi,
-    toHex,
-    createTestClient,
-    http,
     parseEther,
-    createWalletClient
+    toHex
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { getChain, getPublicClient } from "./utils.js"
@@ -63,10 +63,10 @@ export const getPaymasterUtilityWallet = async (anvilRpc: string) => {
 
 export const deployErc20Token = async (anvilRpc: string) => {
     const publicClient = await getPublicClient(anvilRpc)
-    
+
     if ((await publicClient.getCode({ address: erc20Address })) === undefined) {
         const walletClient = await getPaymasterUtilityWallet(anvilRpc)
-        
+
         await walletClient.sendTransaction({
             to: "0x4e59b44847b379578588920ca78fbf26c0b4956c",
             data: concat([create2Salt, erc20Bytecode])

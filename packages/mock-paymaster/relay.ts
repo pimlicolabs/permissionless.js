@@ -1,6 +1,7 @@
 import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
+    http,
     type Account,
     type Address,
     BaseError,
@@ -10,7 +11,6 @@ import {
     type Transport,
     type WalletClient,
     getAddress,
-    http,
     toHex
 } from "viem"
 import {

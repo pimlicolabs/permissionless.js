@@ -2,6 +2,7 @@ import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
 import { http, createWalletClient } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import {
     deployErc20Token,
     erc20Address,
@@ -10,7 +11,6 @@ import {
 import { getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import { deployPaymasters } from "./singletonPaymasters.js"
-import { privateKeyToAccount } from "viem/accounts"
 
 export const paymaster = defineInstance(
     ({
