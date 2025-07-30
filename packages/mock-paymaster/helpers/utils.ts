@@ -1,16 +1,12 @@
 import {
     http,
-    type Account,
     type Address,
     type Chain,
     type PublicClient,
     type Transport,
-    type WalletClient,
     createPublicClient,
-    createWalletClient,
     defineChain
 } from "viem"
-import { mnemonicToAccount } from "viem/accounts"
 import { erc20Address } from "./erc20-utils.js"
 import { RpcError, ValidationErrors } from "./schema.js"
 
@@ -60,26 +56,6 @@ export const getPublicClient = async (
         chain,
         transport: transport,
         pollingInterval: 100
-    })
-}
-
-export const getAnvilWalletClient = async ({
-    addressIndex,
-    anvilRpc
-}: { addressIndex: number; anvilRpc: string }): Promise<
-    WalletClient<Transport, Chain, Account>
-> => {
-    const chain = await getChain(anvilRpc)
-
-    return createWalletClient({
-        account: mnemonicToAccount(
-            "test test test test test test test test test test test junk",
-            {
-                addressIndex
-            }
-        ),
-        chain,
-        transport: http(anvilRpc)
     })
 }
 

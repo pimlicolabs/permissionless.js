@@ -1,6 +1,7 @@
 import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
+    http,
     type Account,
     type Address,
     BaseError,
@@ -15,6 +16,7 @@ import {
 import {
     type BundlerClient,
     type UserOperation,
+    createBundlerClient,
     entryPoint06Address,
     entryPoint07Address,
     entryPoint08Address
@@ -40,6 +42,8 @@ import {
 } from "./helpers/schema.js"
 import {
     type PaymasterMode,
+    getChain,
+    getPublicClient,
     isTokenSupported,
     maxBigInt
 } from "./helpers/utils.js"
@@ -158,9 +162,9 @@ const handleMethod = async ({
     parsedBody,
     paymasterSigner,
     publicClient,
-    bundler
+    bundlerClient
 }: {
-    bundler: BundlerClient
+    bundlerClient: BundlerClient
     paymasterSigner: WalletClient<Transport, Chain, Account>
     publicClient: PublicClient
     parsedBody: JsonRpcSchema
@@ -196,7 +200,7 @@ const handleMethod = async ({
             entryPoint,
             userOperation,
             paymasterMode: { mode: "verifying" },
-            bundler,
+            bundler: bundlerClient,
             paymaster: epToPaymaster[entryPoint],
             publicClient,
             paymasterSigner,
@@ -284,7 +288,7 @@ const handleMethod = async ({
     }
 
     if (parsedBody.method === "pimlico_getUserOperationGasPrice") {
-        return await bundler.request({
+        return await bundlerClient.request({
             // @ts-ignore
             method: "pimlico_getUserOperationGasPrice",
             // @ts-ignore
@@ -340,15 +344,21 @@ const handleMethod = async ({
 }
 
 export const createRpcHandler = ({
-    bundler,
-    publicClient,
+    altoRpc,
+    anvilRpc,
     paymasterSigner
 }: {
-    bundler: BundlerClient
-    publicClient: PublicClient
+    altoRpc: string
+    anvilRpc: string
     paymasterSigner: WalletClient<Transport, Chain, Account>
 }) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
+        const publicClient = await getPublicClient(anvilRpc)
+        const bundlerClient = createBundlerClient({
+            chain: await getChain(anvilRpc),
+            transport: http(altoRpc)
+        })
+
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
         if (!parsedBody.success) {
@@ -360,7 +370,7 @@ export const createRpcHandler = ({
 
         try {
             const result = await handleMethod({
-                bundler,
+                bundlerClient,
                 paymasterSigner,
                 parsedBody: parsedBody.data,
                 publicClient
