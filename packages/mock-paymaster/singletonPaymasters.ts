@@ -31,7 +31,7 @@ import {
     singletonPaymaster08Abi
 } from "./helpers/abi.js"
 import { getPaymasterUtilityWallet } from "./helpers/erc20-utils.js"
-import { getPublicClient, type PaymasterMode } from "./helpers/utils.js"
+import { type PaymasterMode, getPublicClient } from "./helpers/utils.js"
 
 export const getDummyPaymasterData = ({
     is06,
