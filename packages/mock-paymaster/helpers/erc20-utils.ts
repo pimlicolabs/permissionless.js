@@ -30,8 +30,9 @@ const create2Salt =
 export const getPaymasterUtilityWallet = async (
     anvilRpc: string
 ): Promise<WalletClient<Transport, Chain, Account>> => {
-    const privateKey = pad("0x123456789", { size: 32 })
-    const account = privateKeyToAccount(privateKey)
+    const account = privateKeyToAccount(
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    )
 
     // Check if account has balance
     const publicClient = await getPublicClient(anvilRpc)
