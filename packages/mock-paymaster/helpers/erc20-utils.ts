@@ -10,7 +10,11 @@ import {
     pad,
     parseAbi,
     parseEther,
-    toHex
+    toHex,
+    type Account,
+    type Chain,
+    type Transport,
+    type WalletClient
 } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { getChain, getPublicClient } from "./utils.js"
@@ -23,8 +27,9 @@ const erc20Bytecode = concat([
 const create2Salt =
     "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-export const getPaymasterUtilityWallet = async (anvilRpc: string) => {
-    // Use the private key "123456789..."
+export const getPaymasterUtilityWallet = async (
+    anvilRpc: string
+): Promise<WalletClient<Transport, Chain, Account>> => {
     const privateKey = pad("0x123456789", { size: 32 })
     const account = privateKeyToAccount(privateKey)
 

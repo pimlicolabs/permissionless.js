@@ -31,6 +31,7 @@ import {
     singletonPaymaster08Abi
 } from "./helpers/abi.js"
 import type { PaymasterMode } from "./helpers/utils.js"
+import { getPaymasterUtilityWallet } from "./helpers/erc20-utils.js"
 
 export const getDummyPaymasterData = ({
     is06,
@@ -246,9 +247,6 @@ export const deployPaymasters = async ({
     anvilRpc: string
     paymasterSigner: Address
 }) => {
-    const { getPaymasterUtilityWallet } = await import(
-        "./helpers/erc20-utils.js"
-    )
     const { getPublicClient } = await import("./helpers/utils.js")
 
     const walletClient = await getPaymasterUtilityWallet(anvilRpc)
