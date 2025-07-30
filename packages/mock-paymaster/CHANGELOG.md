@@ -1,5 +1,11 @@
 # @pimlico/mock-paymaster
 
+## 0.0.5
+
+### Patch Changes
+
+- a13670ca63d8be655c8ffe35c5cadf325d8ddc2f: Export erc20Address and sudoMintTokens
+
 ## 0.0.4
 
 ### Patch Changes
