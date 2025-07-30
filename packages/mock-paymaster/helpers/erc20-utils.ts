@@ -60,7 +60,7 @@ export const sudoMintTokens = async ({
     anvilRpc: string
 }) => {
     const walletClient = await getAnvilWalletClient({
-        addressIndex: 1,
+        addressIndex: 10,
         anvilRpc
     })
 

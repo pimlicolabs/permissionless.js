@@ -30,7 +30,7 @@ export const paymaster = defineInstance(
                 const chain = await getChain(anvilRpc)
                 const walletClient = await getAnvilWalletClient({
                     anvilRpc,
-                    addressIndex: 1
+                    addressIndex: 10
                 })
                 const publicClient = createPublicClient({
                     transport: http(anvilRpc),
