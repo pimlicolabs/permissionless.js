@@ -1,11 +1,6 @@
 import {
     http,
-    type Account,
     type Address,
-    type Chain,
-    type PublicClient,
-    type Transport,
-    type WalletClient,
     concat,
     createTestClient,
     createWalletClient,
