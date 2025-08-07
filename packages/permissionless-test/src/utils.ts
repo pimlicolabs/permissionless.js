@@ -36,6 +36,7 @@ import {
 } from "../../permissionless/accounts/light/toLightSmartAccount"
 import { toNexusSmartAccount } from "../../permissionless/accounts/nexus/toNexusSmartAccount"
 import {
+    type SafeVersion,
     type ToSafeSmartAccountReturnType,
     toSafeSmartAccount
 } from "../../permissionless/accounts/safe/toSafeSmartAccount"
@@ -392,11 +393,13 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     erc7579,
     privateKey,
     owners,
-    onchainIdentifier
+    onchainIdentifier,
+    version
 }: {
     erc7579?: boolean
     owners?: Account[]
     onchainIdentifier?: Hex
+    version?: SafeVersion
 } & AAParamType<entryPointVersion>): Promise<
     ToSafeSmartAccountReturnType<entryPointVersion>
 > => {
@@ -415,7 +418,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
         owners: owners ?? [
             privateKeyToAccount(privateKey ?? generatePrivateKey())
         ],
-        version: "1.4.1",
+        version: version ?? "1.4.1",
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
             ? "0x7579EE8307284F293B1927136486880611F20002"
@@ -844,6 +847,21 @@ export const getCoreSmartAccounts = (): Array<{
         isEip1271Compliant: true
     },
     {
+        name: "Safe 1.5.0",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0"
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip1271Compliant: true
+    },
+    {
         name: "Safe (with onchain identifier)",
         getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
             getBundlerClient({
@@ -854,6 +872,22 @@ export const getCoreSmartAccounts = (): Array<{
                 ...conf
             }),
         supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe 1.5.0 (with onchain identifier)",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    onchainIdentifier: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
         isEip1271Compliant: true
@@ -873,6 +907,26 @@ export const getCoreSmartAccounts = (): Array<{
                 ...conf
             }),
         supportsEntryPointV06: true,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Safe 1.5.0 multiple owners",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
         isEip1271Compliant: true
@@ -903,6 +957,33 @@ export const getCoreSmartAccounts = (): Array<{
         isEip1271Compliant: true
     },
     {
+        name: "Safe 1.5.0 7579",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    erc7579: true
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async (
+            conf: AAParamType<EntryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    erc7579: true
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip1271Compliant: false
+    },
+    {
         name: "Safe 7579 Multiple Owners",
         getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
             getBundlerClient({
@@ -931,6 +1012,38 @@ export const getCoreSmartAccounts = (): Array<{
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
         isEip1271Compliant: true
+    },
+    {
+        name: "Safe 1.5.0 7579 Multiple Owners",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    erc7579: true,
+                    owners: [
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey()),
+                        privateKeyToAccount(generatePrivateKey())
+                    ]
+                }),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async (
+            conf: AAParamType<EntryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getSafeClient({
+                    ...(conf as AAParamType<"0.6" | "0.7">),
+                    version: "1.5.0",
+                    erc7579: true
+                }),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: true,
+        supportsEntryPointV08: false,
+        isEip1271Compliant: false
     },
     {
         name: "Etherspot",

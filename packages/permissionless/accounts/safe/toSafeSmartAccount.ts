@@ -49,7 +49,7 @@ import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { signUserOperation } from "./signUserOperation.js"
 
-export type SafeVersion = "1.4.1"
+export type SafeVersion = "1.4.1" | "1.5.0"
 
 const multiSendAbi = [
     {
@@ -408,7 +408,15 @@ export const EIP712_SAFE_OPERATION_TYPE_V07 = {
 
 const SAFE_VERSION_TO_ADDRESSES_MAP: {
     [key in SafeVersion]: {
-        [key in "0.6" | "0.7"]: {
+        "0.6"?: {
+            SAFE_MODULE_SETUP_ADDRESS: Address
+            SAFE_4337_MODULE_ADDRESS: Address
+            SAFE_PROXY_FACTORY_ADDRESS: Address
+            SAFE_SINGLETON_ADDRESS: Address
+            MULTI_SEND_ADDRESS: Address
+            MULTI_SEND_CALL_ONLY_ADDRESS: Address
+        }
+        "0.7": {
             SAFE_MODULE_SETUP_ADDRESS: Address
             SAFE_4337_MODULE_ADDRESS: Address
             SAFE_PROXY_FACTORY_ADDRESS: Address
@@ -444,6 +452,21 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
             MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
             MULTI_SEND_CALL_ONLY_ADDRESS:
                 "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+        }
+    },
+    "1.5.0": {
+        "0.7": {
+            SAFE_MODULE_SETUP_ADDRESS:
+                "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47",
+            SAFE_4337_MODULE_ADDRESS:
+                "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226",
+            SAFE_PROXY_FACTORY_ADDRESS:
+                "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+            SAFE_SINGLETON_ADDRESS:
+                "0xFf51A5898e281Db6DfC7855790607438dF2ca44b",
+            MULTI_SEND_ADDRESS: "0x218543288004CD07832472D464648173c77D7eB7",
+            MULTI_SEND_CALL_ONLY_ADDRESS:
+                "0xA83c336B20401Af773B6219BA5027174338D1836"
         }
     }
 }
@@ -888,32 +911,31 @@ export const getDefaultAddresses = (
         multiSendCallOnlyAddress?: Address
     }
 ) => {
+    const versionAddresses =
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+
+    if (!versionAddresses) {
+        throw new Error(
+            `Safe version ${safeVersion} does not support EntryPoint version ${entryPointVersion}`
+        )
+    }
+
     const safeModuleSetupAddress =
         _safeModuleSetupAddress ??
         _addModuleLibAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_MODULE_SETUP_ADDRESS
+        versionAddresses.SAFE_MODULE_SETUP_ADDRESS
     const safe4337ModuleAddress =
-        _safe4337ModuleAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_4337_MODULE_ADDRESS
+        _safe4337ModuleAddress ?? versionAddresses.SAFE_4337_MODULE_ADDRESS
     const safeProxyFactoryAddress =
-        _safeProxyFactoryAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_PROXY_FACTORY_ADDRESS
+        _safeProxyFactoryAddress ?? versionAddresses.SAFE_PROXY_FACTORY_ADDRESS
     const safeSingletonAddress =
-        _safeSingletonAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_SINGLETON_ADDRESS
+        _safeSingletonAddress ?? versionAddresses.SAFE_SINGLETON_ADDRESS
     const multiSendAddress =
-        _multiSendAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .MULTI_SEND_ADDRESS
+        _multiSendAddress ?? versionAddresses.MULTI_SEND_ADDRESS
 
     const multiSendCallOnlyAddress =
         _multiSendCallOnlyAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .MULTI_SEND_CALL_ONLY_ADDRESS
+        versionAddresses.MULTI_SEND_CALL_ONLY_ADDRESS
 
     return {
         safeModuleSetupAddress,
@@ -1550,6 +1572,10 @@ export async function toSafeSmartAccount<
                 )
             }
 
+            if (erc7579LaunchpadAddress && version === "1.5.0") {
+                throw new Error("Safe 7579 & version 1.5.0 are not compatible")
+            }
+
             const messageHash = hashTypedData({
                 domain: {
                     chainId: await getMemoizedChainId(),
@@ -1595,6 +1621,10 @@ export async function toSafeSmartAccount<
                 throw new Error(
                     "Owners length mismatch, currently not supported"
                 )
+            }
+
+            if (erc7579LaunchpadAddress && version === "1.5.0") {
+                throw new Error("Safe 7579 & version 1.5.0 are not compatible")
             }
 
             const signatures = await Promise.all(
