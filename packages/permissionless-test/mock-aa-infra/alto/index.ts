@@ -58,6 +58,10 @@ import {
     SAFE_7579_REGISTRY_SCHEMA_PROXY_CREATECALL,
     SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
     SAFE_MULTI_SEND_CREATECALL,
+    SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
+    SAFE_ONE_FIVE_PROXY_CONTRACT,
+    SAFE_ONE_FIVE_SEND_ADDRESS,
+    SAFE_ONE_FIVE_SINGLETON_ADDRESS,
     SAFE_PROXY_FACTORY_CREATECALL,
     SAFE_SINGLETON_CREATECALL,
     SAFE_SINGLETON_FACTORY_BYTECODE,
@@ -385,6 +389,30 @@ export const setupContracts = async (rpc: string) => {
             nonce: nonce++
         }),
         walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_PROXY_CONTRACT,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_SINGLETON_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_SEND_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: THIRDWEB_FACTORY_V06_CREATECALL,
             gas: 15_000_000n,
@@ -694,6 +722,10 @@ export const setupContracts = async (rpc: string) => {
         "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb", // Safe V0.6 Module Setup
         "0xa581c4A4DB7175302464fF3C06380BC3270b4037", // Safe V0.6 4337 Module
         "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67", // Safe Proxy Factory
+        "0x14F2982D601c9458F93bd70B218933A6f8165e7b", // Safe 1.5.0 proxy contract
+        "0xFf51A5898e281Db6DfC7855790607438dF2ca44b", // Safe 1.5.0 singleton address
+        "0x218543288004CD07832472D464648173c77D7eB7", // Safe 1.5.0 Send
+        "0xA83c336B20401Af773B6219BA5027174338D1836", // Safe 1.5.0 Multi Send Call Only
         "0x41675C099F32341bf84BFc5382aF534df5C7461a", // Safe Singleton
         "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526", // Safe Multi Send
         "0x9641d764fc13c8B624c04430C7356C1C7C8102e2", // Safe Multi Send Call Only
