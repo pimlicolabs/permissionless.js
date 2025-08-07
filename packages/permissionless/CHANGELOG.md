@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.53
+
+### Patch Changes
+
+- bd19b74e0d6d54e24b37546de05268d5e7b16c45: Added support for safe 1.5.0
+
 ## 0.2.52
 
 ### Patch Changes
