@@ -129,5 +129,5 @@ export async function sendTransaction<
         hash: userOpHash
     })
 
-    return userOperationReceipt?.receipt.transactionHash
+    return userOperationReceipt
 }
