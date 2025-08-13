@@ -25,6 +25,7 @@ import {
     toWebAuthnAccount
 } from "viem/account-abstraction"
 import { baseSepolia } from "viem/chains"
+import { pimlicoApiKey } from "./wagmi"
 
 const chain = baseSepolia
 const pimlicoUrl = `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${pimlicoApiKey}`

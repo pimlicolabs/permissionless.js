@@ -32,6 +32,7 @@ import {
 } from "viem/account-abstraction"
 import { PasskeyServerDemo } from "./PasskeyServerDemo"
 import { PasskeysDemo } from "./PasskeysDemo"
+import { pimlicoApiKey } from "./wagmi"
 
 globalThis.Buffer = Buffer
 
@@ -77,7 +78,7 @@ function Temp() {
             const paymasterClient = createPimlicoClient({
                 chain: publicClient.chain,
                 transport: http(
-                    `https://api.pimlico.io/v2/${publicClient.chain.id}/rpc?apikey=${PIMLICO_API_KEY}`
+                    `https://api.pimlico.io/v2/${publicClient.chain.id}/rpc?apikey=${pimlicoApiKey}`
                 )
             })
 
@@ -86,7 +87,7 @@ function Temp() {
                 chain: publicClient.chain,
                 paymaster: paymasterClient,
                 bundlerTransport: http(
-                    `https://api.pimlico.io/v2/${publicClient.chain.id}/rpc?apikey=${PIMLICO_API_KEY}`
+                    `https://api.pimlico.io/v2/${publicClient.chain.id}/rpc?apikey=${pimlicoApiKey}`
                 ),
                 userOperation: {
                     estimateFeesPerGas: async () =>
@@ -172,21 +173,39 @@ function Temp() {
 function Main() {
     const [path, setPath] = React.useState(window.location.pathname)
 
+    React.useEffect(() => {
+        // Handle initial page load - push current state to history
+        if (window.location.pathname !== "/") {
+            window.history.replaceState(
+                { path: window.location.pathname },
+                "",
+                window.location.pathname
+            )
+        }
+    }, [])
+
     const handleSelection = (
-        component: "app" | "passkey" | "passkeyServer" | "temp"
+        component:
+            | "app"
+            | "passkey"
+            | "passkeyServer"
+            | "temp"
+            | "passkey/kernel"
+            | "passkey/safe"
     ) => {
         const newPath = `/${component}`
-        window.history.pushState({}, "", newPath)
+        window.history.pushState({ path: newPath }, "", newPath)
         setPath(newPath)
     }
 
     const handleBack = () => {
-        window.history.pushState({}, "", "/")
-        setPath("/")
+        window.history.back()
     }
+    console.log({ path })
 
     React.useEffect(() => {
-        const handlePopState = () => {
+        const handlePopState = (event: PopStateEvent) => {
+            console.log("popstate event fired", window.location.pathname)
             setPath(window.location.pathname)
         }
         window.addEventListener("popstate", handlePopState)
@@ -233,7 +252,13 @@ function Main() {
                                     </button>
                                 </div>
                                 {path === "/app" && <App />}
-                                {path === "/passkey" && <PasskeysDemo />}
+                                {(path === "/passkey" ||
+                                    path.startsWith("/passkey/")) && (
+                                    <PasskeysDemo
+                                        path={path}
+                                        handleSelection={handleSelection}
+                                    />
+                                )}
                                 {path === "/passkeyServer" && (
                                     <PasskeyServerDemo />
                                 )}
