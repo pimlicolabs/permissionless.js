@@ -1881,7 +1881,7 @@ export async function toSafeSmartAccount<
                     if (!isWebAuthnAccount(localOwner)) {
                         signer = localOwner.address
                         data = adjustVInSignature(
-                            "eth_sign",
+                            "eth_signTypedData",
                             await localOwner.signTypedData({
                                 domain: {
                                     chainId: await getMemoizedChainId(),
