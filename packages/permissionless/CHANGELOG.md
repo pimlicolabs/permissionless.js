@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.54
+
+### Patch Changes
+
+- 29ac0341359235ce4ad78f167df5fedb87022b9f: Added passkeys support for all Safe versions and entrypoint 0.7 & 0.8
+
 ## 0.2.53
 
 ### Patch Changes
