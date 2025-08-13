@@ -298,7 +298,7 @@ export async function signUserOperation(
                     components: [
                         { type: "address", name: "signer" },
                         { type: "bytes", name: "data" },
-                        { type: "boolean", name: "dynamic" }
+                        { type: "bool", name: "dynamic" }
                     ],
                     name: "signatures",
                     type: "tuple[]"
