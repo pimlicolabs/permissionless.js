@@ -726,6 +726,7 @@ export async function toKernelSmartAccount<
             const signature = await signMessage({
                 owner,
                 message,
+                eip7702,
                 accountAddress: await this.getAddress(),
                 kernelVersion: kernelVersion,
                 chainId: await getMemoizedChainId()
@@ -746,7 +747,8 @@ export async function toKernelSmartAccount<
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
                 accountAddress: await this.getAddress(),
-                kernelVersion: kernelVersion
+                kernelVersion: kernelVersion,
+                eip7702
             })
 
             if (isKernelV2(kernelVersion)) {
@@ -776,6 +778,7 @@ export async function toKernelSmartAccount<
 
             const signature = isWebAuthnAccount(owner)
                 ? await signMessage({
+                      eip7702,
                       owner,
                       message: { raw: hash },
                       chainId,
