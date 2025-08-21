@@ -100,18 +100,18 @@ export async function signMessage({
                 verifyingContract: accountAddress
             }
         })
-    } else {
-        const wrappedMessageHash = wrapMessageHash(messageHash, {
-            kernelVersion: accountVersion,
-            accountAddress,
-            chainId
-            // chainId: client.chain
-            //     ? client.chain.id
-            //     : await client.extend(publicActions).getChainId()
-        })
-
-        return owner.signMessage({
-            message: { raw: wrappedMessageHash }
-        })
     }
+
+    const wrappedMessageHash = wrapMessageHash(messageHash, {
+        kernelVersion: accountVersion,
+        accountAddress,
+        chainId
+        // chainId: client.chain
+        //     ? client.chain.id
+        //     : await client.extend(publicActions).getChainId()
+    })
+
+    return owner.signMessage({
+        message: { raw: wrappedMessageHash }
+    })
 }
