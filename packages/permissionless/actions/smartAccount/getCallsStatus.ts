@@ -11,7 +11,6 @@ import {
 } from "viem/account-abstraction"
 import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
-import { AccountNotFoundError } from "../../errors"
 
 const getStatus = (_status: number) => {
     const [status, statusCode] = (() => {
