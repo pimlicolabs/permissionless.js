@@ -40,7 +40,10 @@ export async function getCallsStatus<
 ): Promise<GetCallsStatusReturnType> {
     const userOperationHash = args.id as `0x${string}`
 
-    const chainId = getAction(client, getChainId, "getChainId")(client)
+    const chainId =
+        client.chain?.id ??
+        client.account?.client.chain?.id ??
+        getAction(client, getChainId, "getChainId")(client)
 
     try {
         const receipt = await getAction(
