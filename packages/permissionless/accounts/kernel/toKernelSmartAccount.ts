@@ -1,4 +1,4 @@
-import { Base64, Hex, PublicKey } from "ox"
+import { getOxExports } from "../../utils/ox.js"
 import type {
     Account,
     Assign,
@@ -245,7 +245,7 @@ const getInitializationData = <entryPointVersion extends EntryPointVersion>({
     entryPoint: {
         version: entryPointVersion
     }
-    validatorData: Hex.Hex
+    validatorData: `0x${string}`
     validatorAddress: Address
 }) => {
     if (entryPointVersion === "0.6") {
@@ -288,6 +288,7 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
     }
 
     if (isWebAuthnAccount(owner)) {
+        const { PublicKey, Hex, Base64 } = await getOxExports()
         const parsedPublicKey = PublicKey.fromHex(owner.publicKey)
         const authenticatorIdHash = keccak256(
             Hex.fromBytes(Base64.toBytes(owner.id))
@@ -342,13 +343,13 @@ const getAccountInitCode = async <entryPointVersion extends EntryPointVersion>({
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
     entryPointVersion: entryPointVersion
-    validatorData: Hex.Hex
+    validatorData: `0x${string}`
     index: bigint
     factoryAddress: Address
     accountLogicAddress: Address
     validatorAddress: Address
     useMetaFactory: boolean
-}): Promise<Hex.Hex> => {
+}): Promise<`0x${string}`> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
         entryPoint: { version: entryPointVersion },
@@ -605,7 +606,7 @@ export async function toKernelSmartAccount<
                 entryPoint.version === "0.6" || _useMetaFactory === false
                     ? factoryAddress
                     : metaFactoryAddress,
-            factoryData: await generateInitCode(_useMetaFactory)
+            factoryData: await generateInitCode(_useMetaFactory) as `0x${string}`
         }
     }
 

@@ -1,4 +1,4 @@
-import { Signature } from "ox"
+import { getOxExports } from "../../utils/ox.js"
 import {
     type Account,
     type Address,
@@ -84,6 +84,7 @@ export const getWebAuthnSignature = async ({
         hash
     })
 
+    const { Signature } = await getOxExports()
     const signature = Signature.fromHex(signatureData)
 
     const match = webauthn.clientDataJSON.match(

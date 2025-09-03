@@ -1,4 +1,4 @@
-import { Signature } from "ox"
+import { getOxExports } from "../../../utils/ox.js"
 import {
     type Hash,
     type LocalAccount,
@@ -51,6 +51,7 @@ export async function signMessage({
         const { signature: signatureData, webauthn } = await owner.sign({
             hash: messageContent as Hash
         })
+        const { Signature } = await getOxExports()
         const signature = Signature.fromHex(signatureData)
 
         // encode signature
