@@ -141,7 +141,7 @@ function KernelSmartAccountDemo() {
         const to = zeroAddress
         const value = "0"
 
-        const hash = await smartAccountClient.sendUserOperation({
+        const hash = await smartAccountClient.sendCalls({
             calls: [
                 {
                     to,
@@ -152,10 +152,9 @@ function KernelSmartAccountDemo() {
         })
         setUserOpHash(hash)
 
-        const { receipt } =
-            await smartAccountClient.waitForUserOperationReceipt({
-                hash
-            })
+        const { receipt } = await smartAccountClient.getCallsStatus({
+            hash
+        })
         setHash(receipt.transactionHash)
     }
 

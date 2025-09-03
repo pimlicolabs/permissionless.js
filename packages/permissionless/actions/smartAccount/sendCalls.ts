@@ -1,4 +1,10 @@
-import type { Chain, Client, Hash, SendCallsParameters, Transport } from "viem"
+import type {
+    Chain,
+    Client,
+    SendCallsParameters,
+    SendCallsReturnType,
+    Transport
+} from "viem"
 import {
     type SendUserOperationParameters,
     type SmartAccount,
@@ -17,7 +23,7 @@ export async function sendCalls<
     args:
         | SendCallsParameters<chain, account, chainOverride, calls>
         | SendUserOperationParameters<account, accountOverride, calls>
-): Promise<Hash> {
+): Promise<SendCallsReturnType> {
     const userOpHash = await getAction(
         client,
         sendUserOperation,
@@ -28,5 +34,5 @@ export async function sendCalls<
         calls
     >)
 
-    return userOpHash
+    return { id: userOpHash }
 }

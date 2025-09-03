@@ -1,4 +1,4 @@
-import { zeroAddress } from "viem"
+import { type Hex, zeroAddress } from "viem"
 import { waitForUserOperationReceipt } from "viem/account-abstraction"
 import { privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
@@ -33,7 +33,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -47,7 +47,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash
+                    hash: userOpHash as Hex
                 })
 
                 expect(receipt).toBeTruthy()
@@ -76,7 +76,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -100,7 +100,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash
+                    hash: userOpHash as Hex
                 })
 
                 expect(receipt).toBeTruthy()
@@ -134,7 +134,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -158,7 +158,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash
+                    hash: userOpHash as Hex
                 })
 
                 expect(receipt).toBeTruthy()
@@ -172,7 +172,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(txReceipt.status).toBe("success")
 
                 // Second transaction after deployment
-                const userOpHash2 = await sendCalls(smartClient, {
+                const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -188,7 +188,7 @@ describe.each(getCoreSmartAccounts())(
                 const receipt2 = await waitForUserOperationReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2
+                        hash: userOpHash2 as Hex
                     }
                 )
 
@@ -224,7 +224,7 @@ describe.each(getCoreSmartAccounts())(
                       })
                     : undefined
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -239,7 +239,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash
+                    hash: userOpHash as Hex
                 })
 
                 expect(receipt).toBeTruthy()
@@ -253,7 +253,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(txReceipt.status).toBe("success")
 
                 // Second transaction after deployment
-                const userOpHash2 = await sendCalls(smartClient, {
+                const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -269,7 +269,7 @@ describe.each(getCoreSmartAccounts())(
                 const receipt2 = await waitForUserOperationReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2
+                        hash: userOpHash2 as Hex
                     }
                 )
 
@@ -292,7 +292,7 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const userOpHash = await sendCalls(smartClient, {
+                    const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
                                 to: zeroAddress,
@@ -307,7 +307,7 @@ describe.each(getCoreSmartAccounts())(
                     const receipt = await waitForUserOperationReceipt(
                         smartClient,
                         {
-                            hash: userOpHash
+                            hash: userOpHash as Hex
                         }
                     )
 
@@ -333,7 +333,7 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 // Second transaction after deployment
-                const userOpHash2 = await sendCalls(smartClient, {
+                const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -348,7 +348,7 @@ describe.each(getCoreSmartAccounts())(
                 const receipt2 = await waitForUserOperationReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2
+                        hash: userOpHash2 as Hex
                     }
                 )
 
@@ -395,7 +395,7 @@ describe.each(getCoreSmartAccounts())(
                           })
                         : undefined
 
-                    const userOpHash = await sendCalls(smartClient, {
+                    const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
                                 to: zeroAddress,
@@ -411,7 +411,7 @@ describe.each(getCoreSmartAccounts())(
                     const receipt = await waitForUserOperationReceipt(
                         smartClient,
                         {
-                            hash: userOpHash
+                            hash: userOpHash as Hex
                         }
                     )
 
@@ -434,7 +434,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash2 = await sendCalls(smartClient, {
+                const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -449,7 +449,7 @@ describe.each(getCoreSmartAccounts())(
                 const receipt2 = await waitForUserOperationReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2
+                        hash: userOpHash2 as Hex
                     }
                 )
 
@@ -496,7 +496,7 @@ describe.each(getCoreSmartAccounts())(
                           })
                         : undefined
 
-                    const userOpHash = await sendCalls(smartClient, {
+                    const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
                                 to: zeroAddress,
@@ -512,7 +512,7 @@ describe.each(getCoreSmartAccounts())(
                     const receipt = await waitForUserOperationReceipt(
                         smartClient,
                         {
-                            hash: userOpHash
+                            hash: userOpHash as Hex
                         }
                     )
 
@@ -535,7 +535,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash2 = await sendCalls(smartClient, {
+                const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -550,7 +550,7 @@ describe.each(getCoreSmartAccounts())(
                 const receipt2 = await waitForUserOperationReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2
+                        hash: userOpHash2 as Hex
                     }
                 )
 
