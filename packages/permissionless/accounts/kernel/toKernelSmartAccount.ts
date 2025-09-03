@@ -723,8 +723,10 @@ export async function toKernelSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            if (eip7702) {
-                throw new Error("Kernel with EIP-7702 isn't 1271 compliant")
+            if ("isDeployed" in this && !(await this.isDeployed()) && eip7702) {
+                throw new Error(
+                    "Kernel with EIP-7702 isn't 1271 compliant before delegation."
+                )
             }
 
             const signature = await signMessage({
@@ -745,8 +747,10 @@ export async function toKernelSmartAccount<
             ])
         },
         async signTypedData(typedData) {
-            if (eip7702) {
-                throw new Error("Kernel with EIP-7702 isn't 1271 compliant")
+            if ("isDeployed" in this && !(await this.isDeployed()) && eip7702) {
+                throw new Error(
+                    "Kernel with EIP-7702 isn't 1271 compliant before delegation."
+                )
             }
 
             const signature = await signTypedData({
