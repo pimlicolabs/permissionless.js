@@ -1,4 +1,5 @@
-import { zeroAddress } from "viem"
+import { type Hex, zeroAddress } from "viem"
+import { waitForUserOperationReceipt } from "viem/account-abstraction"
 import { privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
@@ -33,7 +34,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -47,8 +48,9 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                // Wait for the transaction to be mined
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                await smartClient.waitForUserOperationReceipt({
+                    hash: userOpHash as Hex
+                })
 
                 const status = await getCallsStatus(smartClient, {
                     id: userOpHash
@@ -77,7 +79,7 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -121,7 +123,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -143,8 +145,9 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash).toBeTruthy()
 
-                // Wait for the transaction to be mined
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                await smartClient.waitForUserOperationReceipt({
+                    hash: userOpHash as Hex
+                })
 
                 const status = await getCallsStatus(smartClient, {
                     id: userOpHash
@@ -190,7 +193,7 @@ describe.each(getCoreSmartAccounts())(
                       })
                     : undefined
 
-                const userOpHash = await sendCalls(smartClient, {
+                const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
                             to: zeroAddress,
@@ -203,8 +206,9 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash).toBeTruthy()
 
-                // Wait for the transaction to be mined
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                await smartClient.waitForUserOperationReceipt({
+                    hash: userOpHash as Hex
+                })
 
                 const status = await getCallsStatus(smartClient, {
                     id: userOpHash
