@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.56
+
+### Patch Changes
+
+- 6ba059a8643cd9efba0e0753e316d6919e5412fc: Added 1271 support for kernel 0.3.3 + 7702 post delegation
+
 ## 0.2.55
 
 ### Patch Changes
