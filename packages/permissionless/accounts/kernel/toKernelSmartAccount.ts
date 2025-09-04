@@ -415,7 +415,7 @@ export type ToKernelSmartAccountParameters<
           index?: never
           factoryAddress?: never
           metaFactoryAddress?: never
-          accountLogicAddress?: never
+          accountLogicAddress?: Address
           validatorAddress?: never
           nonceKey?: never
           useMetaFactory?: never
