@@ -1,4 +1,5 @@
 import { zeroAddress } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -6,6 +7,9 @@ import {
     getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { signMessage } from "./signMessage"
+
+const privateKey =
+    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 describe.each(getCoreSmartAccounts())(
     "signMessage $name",
@@ -15,6 +19,7 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV06,
         supportsEntryPointV07,
         supportsEntryPointV08,
+        isEip7702Compliant,
         name
     }) => {
         testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV06)(
@@ -98,10 +103,13 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
                         version: "0.7"
                     },
+                    privateKey, // anvil private key
                     ...rpc
                 })
 
@@ -110,10 +118,27 @@ describe.each(getCoreSmartAccounts())(
                     return
                 }
 
-                if (name.includes("Safe 7579")) {
+                if (
+                    name.includes("Safe 7579") ||
+                    name.includes("Kernel 0.3.3 + EIP-7702")
+                ) {
+                    const publicClient = getPublicClient(anvilRpc)
+
                     // Due to 7579 launchpad, we can't verify the signature before deploying the account.
                     await smartClient.sendTransaction({
-                        calls: [{ to: zeroAddress, value: 0n }]
+                        calls: [{ to: zeroAddress, value: 0n }],
+                        authorization: isEip7702Compliant
+                            ? await privateKeyAccount.signAuthorization({
+                                  address: (smartClient.account as any)
+                                      .implementation,
+                                  chainId: smartClient.chain.id,
+                                  nonce: await publicClient.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              })
+                            : undefined
                     })
                 }
 
