@@ -1,4 +1,4 @@
-import { PublicKey } from "ox"
+import { getOxExports } from "../../utils/ox.js"
 import {
     type Account,
     type Address,
@@ -874,6 +874,7 @@ const getInitializerCode = async ({
         safeWebAuthnSharedSignerAddress &&
         safeP256VerifierAddress
     ) {
+        const { PublicKey } = await getOxExports()
         const parsedPublicKey = PublicKey.fromHex(webAuthnOwner.publicKey)
 
         multiCalls.push({
