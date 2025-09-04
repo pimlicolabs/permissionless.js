@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.2.55
+
+### Patch Changes
+
+- f43c30c360608b198502796bcfd87f12f9107574: Added support for sendCalls & getCallsStatus for smart account client
+
 ## 0.2.54
 
 ### Patch Changes
