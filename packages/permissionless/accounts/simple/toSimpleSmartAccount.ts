@@ -184,13 +184,16 @@ export async function toSimpleSmartAccount<
         owner,
         factoryAddress: _factoryAddress,
         index = BigInt(0),
-        address,
-        nonceKey,
         eip7702 = false,
+        address = eip7702 ? owner.address : undefined,
+        nonceKey,
         accountLogicAddress = "0xe6Cae83BdE06E4c305530e199D7217f42808555B"
     } = parameters
 
-    const localOwner = await toOwner({ owner })
+    const localOwner = await toOwner({
+        owner,
+        address
+    })
 
     const entryPoint = parameters.entryPoint
         ? {
