@@ -4,13 +4,17 @@ import type {
     Client,
     ContractFunctionArgs,
     ContractFunctionName,
+    GetCallsStatusReturnType,
     Hash,
+    SendCallsReturnType,
     SendTransactionParameters,
     Transport,
     TypedData,
     WriteContractParameters
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
+import { getCallsStatus } from "../../actions/smartAccount/getCallsStatus.js"
+import { sendCalls } from "../../actions/smartAccount/sendCalls.js"
 import { sendTransaction } from "../../actions/smartAccount/sendTransaction.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
 import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
@@ -309,6 +313,24 @@ export type SmartAccountActions<
             TChainOverride
         >
     >
+    sendCalls: <
+        TChainOverride extends Chain | undefined = undefined,
+        accountOverride extends SmartAccount | undefined = undefined,
+        calls extends readonly unknown[] = readonly unknown[]
+    >(
+        args: Parameters<
+            typeof sendCalls<
+                TSmartAccount,
+                TChain,
+                accountOverride,
+                TChainOverride,
+                calls
+            >
+        >[1]
+    ) => Promise<SendCallsReturnType>
+    getCallsStatus: (
+        args: Parameters<typeof getCallsStatus<TSmartAccount, TChain>>[1]
+    ) => Promise<GetCallsStatusReturnType>
 }
 
 export function smartAccountActions<
@@ -321,6 +343,8 @@ export function smartAccountActions<
         sendTransaction: (args) => sendTransaction(client, args as any),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
-        writeContract: (args) => writeContract(client, args)
+        writeContract: (args) => writeContract(client, args),
+        sendCalls: (args) => sendCalls(client, args as any),
+        getCallsStatus: (args) => getCallsStatus(client, args)
     }
 }
