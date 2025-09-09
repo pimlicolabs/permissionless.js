@@ -3,7 +3,8 @@ import type {
     Client,
     Hash,
     SendTransactionParameters,
-    Transport
+    Transport,
+    getCode
 } from "viem"
 import {
     type SendUserOperationParameters,
@@ -95,6 +96,21 @@ export async function sendTransaction<
 
         if (!to) throw new Error("Missing to address")
 
+        if ("authorization" in args && args.authorization) {
+            const bytecode = await getCode(client, { address: account.address })
+            
+            if (bytecode) {
+                const bc = bytecode.toLowerCase()
+                // "0x" + "ef0100" + 40 hex (address)
+                if (bc.startsWith("0xef0100") && bc.length >= 48) {
+                    const attachedAddress = "0x" + bc.slice(8, 48) // <-- exact 20 bytes
+                    const target = (args.authorization as any).address?.toLowerCase?.()
+                    if (target && attachedAddress === target) {
+                        delete (args as any).authorization
+                    }
+                }
+            }
+        }
         userOpHash = await getAction(
             client,
             sendUserOperation,
