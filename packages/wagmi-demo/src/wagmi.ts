@@ -5,6 +5,8 @@ import { coinbaseWallet } from "wagmi/connectors"
 // TODO: Replace with your Pimlico API key
 export const pimlicoApiKey = ""
 
+export const pimlicoApiKey = "<YOUR_PIMLICO_API_KEY>"
+
 export const config = createConfig({
     chains: [sepolia],
     connectors: [
