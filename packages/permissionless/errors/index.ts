@@ -1,7 +1,7 @@
 import { BaseError } from "viem"
 
 export class AccountNotFoundError extends BaseError {
-    constructor({ docsPath }: { docsPath?: string | undefined } = {}) {
+    constructor({ docsPath }: { docsPath?: string } = {}) {
         super(
             [
                 "Could not find an Account to execute with this Action.",
