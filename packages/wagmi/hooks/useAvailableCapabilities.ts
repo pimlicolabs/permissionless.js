@@ -3,7 +3,7 @@
 import { useContext, useMemo } from "react"
 import type { WalletCapabilities, WalletSendCallsParameters } from "viem"
 import { useAccount } from "wagmi"
-import { useCapabilities } from "wagmi/experimental"
+import { useCapabilities } from "wagmi"
 import { PermissionlessContext } from "../context.js"
 
 export const useAvailableCapabilities = () => {

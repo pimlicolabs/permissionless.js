@@ -3,7 +3,9 @@ import type {
     Account,
     Assign,
     Chain,
+    JsonRpcAccount,
     OneOf,
+    PrivateKeyAccount,
     Transport,
     WalletClient
 } from "viem"
@@ -30,7 +32,7 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { signMessage as _signMessage, getChainId } from "viem/actions"
+import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
@@ -54,6 +56,8 @@ import { isKernelV2 } from "./utils/isKernelV2.js"
 import { isWebAuthnAccount } from "./utils/isWebAuthnAccount.js"
 import { signMessage } from "./utils/signMessage.js"
 import { signTypedData } from "./utils/signTypedData.js"
+
+type EntryPointVersion = "0.6" | "0.7"
 
 /**
  * The account creation ABI for a kernel smart account (from the KernelFactory)
@@ -90,7 +94,7 @@ const createAccountAbi = [
     }
 ] as const
 
-export type KernelVersion<entryPointVersion extends "0.6" | "0.7"> =
+export type KernelVersion<entryPointVersion extends EntryPointVersion> =
     entryPointVersion extends "0.6"
         ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
         : "0.3.0-beta" | "0.3.1" | "0.3.2" | "0.3.3"
@@ -99,7 +103,7 @@ export type KernelVersion<entryPointVersion extends "0.6" | "0.7"> =
  * Default addresses map for different kernel smart account versions
  */
 export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
-    [key in KernelVersion<"0.6" | "0.7">]: {
+    [key in KernelVersion<EntryPointVersion>]: {
         ECDSA_VALIDATOR: Address
         WEB_AUTHN_VALIDATOR?: Address
         ACCOUNT_LOGIC: Address
@@ -149,8 +153,8 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
     },
     "0.3.3": {
         ECDSA_VALIDATOR: "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57",
-        ACCOUNT_LOGIC: "0xE264dCCc54e4b6906c0D1Fee11D4326c06D33c80",
-        FACTORY_ADDRESS: "0xE30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA",
+        ACCOUNT_LOGIC: "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28",
+        FACTORY_ADDRESS: "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9",
         META_FACTORY_ADDRESS: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5"
     }
 }
@@ -159,10 +163,15 @@ export const KERNEL_VERSION_TO_ADDRESSES_MAP: {
  * Get supported Kernel Smart Account version based on entryPoint
  * @param entryPoint
  */
-const getDefaultKernelVersion = <TEntryPointVersion extends "0.6" | "0.7">(
+const getDefaultKernelVersion = <TEntryPointVersion extends EntryPointVersion>(
     entryPointVersion: TEntryPointVersion,
-    version?: KernelVersion<TEntryPointVersion>
+    version?: KernelVersion<TEntryPointVersion>,
+    eip7702?: boolean
 ): KernelVersion<TEntryPointVersion> => {
+    if (eip7702) {
+        return "0.3.3" as KernelVersion<TEntryPointVersion>
+    }
+
     if (version) {
         return version
     }
@@ -194,7 +203,7 @@ const getDefaultAddresses = ({
     kernelVersion,
     isWebAuthn
 }: Partial<KERNEL_ADDRESSES> & {
-    kernelVersion: KernelVersion<"0.6" | "0.7">
+    kernelVersion: KernelVersion<EntryPointVersion>
     isWebAuthn: boolean
 }): KERNEL_ADDRESSES => {
     const addresses = KERNEL_VERSION_TO_ADDRESSES_MAP[kernelVersion]
@@ -215,9 +224,13 @@ const getDefaultAddresses = ({
 }
 
 export const getEcdsaRootIdentifierForKernelV3 = (
-    validatorAddress: Address
+    validatorAddress: Address,
+    eip7702 = false
 ) => {
-    return concatHex([VALIDATOR_TYPE.VALIDATOR, validatorAddress])
+    return concatHex([
+        eip7702 ? VALIDATOR_TYPE.EIP7702 : VALIDATOR_TYPE.VALIDATOR,
+        eip7702 ? "0x" : validatorAddress
+    ])
 }
 
 /**
@@ -226,7 +239,7 @@ export const getEcdsaRootIdentifierForKernelV3 = (
  * @param owner
  * @param ecdsaValidatorAddress
  */
-const getInitializationData = <entryPointVersion extends "0.6" | "0.7">({
+const getInitializationData = <entryPointVersion extends EntryPointVersion>({
     entryPoint: { version: entryPointVersion },
     kernelVersion,
     validatorData,
@@ -321,7 +334,7 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
  * @param accountLogicAddress
  * @param ecdsaValidatorAddress
  */
-const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
+const getAccountInitCode = async <entryPointVersion extends EntryPointVersion>({
     entryPointVersion,
     kernelVersion,
     validatorData,
@@ -374,40 +387,74 @@ const getAccountInitCode = async <entryPointVersion extends "0.6" | "0.7">({
 }
 
 export type ToKernelSmartAccountParameters<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends EntryPointVersion,
     kernelVersion extends KernelVersion<entryPointVersion>,
     owner extends OneOf<
         | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
         | WebAuthnAccount
-    >
+    >,
+    eip7702 extends boolean = false
 > = {
-    client: Client
-    owners: [owner]
-    entryPoint?: {
-        address: Address
-        version: entryPointVersion
-    }
-    address?: Address
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     version?: kernelVersion
-    index?: bigint
-    factoryAddress?: Address
-    metaFactoryAddress?: Address
-    accountLogicAddress?: Address
-    validatorAddress?: Address
-    nonceKey?: bigint
-    useMetaFactory?: boolean | "optional"
-}
+    eip7702?: eip7702
+} & (eip7702 extends true
+    ? {
+          owner: OneOf<
+              | EthereumProvider
+              | WalletClient<Transport, Chain | undefined, Account>
+              | LocalAccount
+          >
+          entryPoint?: {
+              address: Address
+              version: "0.7"
+          }
+          address?: never
+          index?: never
+          factoryAddress?: never
+          metaFactoryAddress?: never
+          accountLogicAddress?: Address
+          validatorAddress?: never
+          nonceKey?: never
+          useMetaFactory?: never
+      }
+    : {
+          entryPoint?: {
+              address: Address
+              version: entryPointVersion
+          }
+          owners: [owner]
+          address?: Address
+          index?: bigint
+          factoryAddress?: Address
+          metaFactoryAddress?: Address
+          accountLogicAddress?: Address
+          validatorAddress?: Address
+          nonceKey?: bigint
+          useMetaFactory?: boolean | "optional"
+      })
 
 export type KernelSmartAccountImplementation<
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
+    entryPointVersion extends EntryPointVersion = "0.7",
+    eip7702 extends boolean = false
 > = Assign<
     SmartAccountImplementation<
         entryPointVersion extends "0.6"
             ? typeof entryPoint06Abi
             : typeof entryPoint07Abi,
-        entryPointVersion
+        entryPointVersion,
+        eip7702 extends true
+            ? {
+                  implementation: Address
+              }
+            : object,
+        eip7702
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
         //     abi: entryPointVersion extends "0.6" ? typeof BiconomyAbi
@@ -418,8 +465,11 @@ export type KernelSmartAccountImplementation<
 >
 
 export type ToKernelSmartAccountReturnType<
-    entryPointVersion extends "0.6" | "0.7" = "0.7"
-> = SmartAccount<KernelSmartAccountImplementation<entryPointVersion>>
+    entryPointVersion extends EntryPointVersion = "0.7",
+    eip7702 extends boolean = false
+> = eip7702 extends true
+    ? SmartAccount<KernelSmartAccountImplementation<entryPointVersion, true>>
+    : SmartAccount<KernelSmartAccountImplementation<entryPointVersion, false>>
 /**
  * Build a kernel smart account from a private key, that use the ECDSA or passkeys signer behind the scene
  * @param client
@@ -431,56 +481,86 @@ export type ToKernelSmartAccountReturnType<
  * @param validatorAddress
  */
 export async function toKernelSmartAccount<
-    entryPointVersion extends "0.6" | "0.7",
+    entryPointVersion extends EntryPointVersion,
     kernelVersion extends KernelVersion<entryPointVersion>,
     owner extends OneOf<
         | EthereumProvider
         | WalletClient<Transport, Chain | undefined, Account>
         | LocalAccount
         | WebAuthnAccount
-    >
+    >,
+    eip7702 extends boolean = false
 >(
     parameters: ToKernelSmartAccountParameters<
         entryPointVersion,
         kernelVersion,
-        owner
+        owner,
+        eip7702
     >
-): Promise<ToKernelSmartAccountReturnType<entryPointVersion>> {
+): Promise<ToKernelSmartAccountReturnType<entryPointVersion, eip7702>> {
     const {
         client,
         address,
         index = 0n,
-        owners,
         version,
         validatorAddress: _validatorAddress,
         factoryAddress: _factoryAddress,
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
-        useMetaFactory = true
+        useMetaFactory = true,
+        eip7702 = false
     } = parameters
+
+    const owners = (() => {
+        if (eip7702 && "owner" in parameters) {
+            return [parameters.owner]
+        }
+
+        if ("owners" in parameters) {
+            return parameters.owners
+        }
+
+        throw new Error("Invalid parameters")
+    })()
 
     const isWebAuthn = owners[0].type === "webAuthn"
 
-    const owner = isWebAuthn
-        ? (owners[0] as WebAuthnAccount)
-        : await toOwner({
-              owner: owners[0] as OneOf<
-                  | EthereumProvider
-                  | WalletClient<Transport, Chain | undefined, Account>
-                  | LocalAccount
-              >
-          })
+    const owner = await (() => {
+        if (isWebAuthn) {
+            return owners[0] as WebAuthnAccount
+        }
+        return toOwner({
+            owner: owners[0] as OneOf<
+                | EthereumProvider
+                | WalletClient<Transport, Chain | undefined, Account>
+                | LocalAccount
+            >
+        })
+    })()
 
-    const entryPoint = {
-        address: parameters.entryPoint?.address ?? entryPoint07Address,
-        abi:
-            (parameters.entryPoint?.version ?? "0.7") === "0.6"
-                ? entryPoint06Abi
-                : entryPoint07Abi,
-        version: parameters.entryPoint?.version ?? "0.7"
-    } as const
+    const entryPoint = (() => {
+        const address = parameters.entryPoint?.address ?? entryPoint07Address
+        const version = parameters.entryPoint?.version ?? "0.7"
 
-    const kernelVersion = getDefaultKernelVersion(entryPoint.version, version)
+        let abi: typeof entryPoint06Abi | typeof entryPoint07Abi =
+            entryPoint07Abi
+
+        if (version === "0.6") {
+            abi = entryPoint06Abi
+        }
+
+        return {
+            address,
+            abi,
+            version
+        } as const
+    })()
+
+    const kernelVersion = getDefaultKernelVersion(
+        entryPoint.version,
+        version,
+        eip7702
+    )
 
     const {
         accountLogicAddress,
@@ -534,6 +614,18 @@ export async function toKernelSmartAccount<
     }
 
     const { accountAddress, getFactoryArgs } = await (async () => {
+        if (eip7702) {
+            return {
+                accountAddress: (owner as LocalAccount).address,
+                getFactoryArgs: async () => {
+                    return {
+                        factory: undefined,
+                        factoryData: undefined
+                    }
+                }
+            }
+        }
+
         let getFactoryArgs = getFactoryArgsFunc(
             useMetaFactory === "optional" ? true : useMetaFactory
         )
@@ -572,6 +664,17 @@ export async function toKernelSmartAccount<
         client,
         entryPoint,
         getFactoryArgs,
+        extend: eip7702
+            ? {
+                  implementation: accountLogicAddress
+              }
+            : undefined,
+        authorization: eip7702
+            ? {
+                  address: accountLogicAddress,
+                  account: owner as PrivateKeyAccount
+              }
+            : undefined,
         async getAddress() {
             return accountAddress
         },
@@ -624,14 +727,23 @@ export async function toKernelSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
+            if (
+                "isDeployed" in this &&
+                !(await (this as any).isDeployed()) &&
+                eip7702
+            ) {
+                throw new Error(
+                    "Kernel with EIP-7702 isn't 1271 compliant before delegation."
+                )
+            }
+
             const signature = await signMessage({
                 owner,
                 message,
                 accountAddress: await this.getAddress(),
-                kernelVersion:
-                    // TODO: remove this once 0.3.3 is released
-                    kernelVersion === "0.3.3" ? "0.3.2" : kernelVersion,
-                chainId: await getMemoizedChainId()
+                kernelVersion: kernelVersion,
+                chainId: await getMemoizedChainId(),
+                eip7702: eip7702
             })
 
             if (isKernelV2(kernelVersion)) {
@@ -639,19 +751,28 @@ export async function toKernelSmartAccount<
             }
 
             return concatHex([
-                getEcdsaRootIdentifierForKernelV3(validatorAddress),
+                getEcdsaRootIdentifierForKernelV3(validatorAddress, eip7702),
                 signature
             ])
         },
         async signTypedData(typedData) {
+            if (
+                "isDeployed" in this &&
+                !(await (this as any).isDeployed()) &&
+                eip7702
+            ) {
+                throw new Error(
+                    "Kernel with EIP-7702 isn't 1271 compliant before delegation."
+                )
+            }
+
             const signature = await signTypedData({
                 owner: owner,
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
                 accountAddress: await this.getAddress(),
-                kernelVersion:
-                    // TODO: remove this once 0.3.3 is released
-                    kernelVersion === "0.3.3" ? "0.3.2" : kernelVersion
+                kernelVersion: kernelVersion,
+                eip7702
             })
 
             if (isKernelV2(kernelVersion)) {
@@ -659,7 +780,7 @@ export async function toKernelSmartAccount<
             }
 
             return concatHex([
-                getEcdsaRootIdentifierForKernelV3(validatorAddress),
+                getEcdsaRootIdentifierForKernelV3(validatorAddress, eip7702),
                 signature
             ])
         },
@@ -678,13 +799,15 @@ export async function toKernelSmartAccount<
                 entryPointVersion: entryPoint.version,
                 chainId: chainId
             })
+
             const signature = isWebAuthnAccount(owner)
                 ? await signMessage({
                       owner,
                       message: { raw: hash },
                       chainId,
                       accountAddress: await this.getAddress(),
-                      kernelVersion
+                      kernelVersion,
+                      eip7702: false
                   })
                 : await owner.signMessage({
                       message: { raw: hash }
@@ -696,5 +819,5 @@ export async function toKernelSmartAccount<
             }
             return signature
         }
-    }) as Promise<ToKernelSmartAccountReturnType<entryPointVersion>>
+    }) as Promise<ToKernelSmartAccountReturnType<entryPointVersion, eip7702>>
 }

@@ -4,14 +4,14 @@ import {
     useMutation
 } from "@tanstack/react-query"
 import { sendTransaction } from "@wagmi/core"
-import { sendCalls } from "@wagmi/core/experimental"
+import { sendCalls } from "@wagmi/core"
 import type {
     Prettify,
     SendTransactionErrorType,
     WalletCapabilities,
     WalletSendCallsParameters
 } from "viem"
-import type { SendCallsErrorType } from "viem/experimental"
+import type { SendCallsErrorType } from "viem"
 import { type Config, type ResolvedRegister, useConfig } from "wagmi"
 import type {
     SendTransactionVariables,
@@ -27,7 +27,7 @@ const sendTransactionMutationOptions = <config extends Config>(
     } = {}
 ) => {
     return {
-        mutationFn(variables) {
+        async mutationFn(variables) {
             if (parameters.capabilities) {
                 const client = config.getClient({ chainId: variables.chainId })
 
@@ -37,7 +37,7 @@ const sendTransactionMutationOptions = <config extends Config>(
                     : parameters.capabilities?.paymasterService[client.chain.id]
                           ?.url
 
-                return sendCalls(config, {
+                const result = await sendCalls(config, {
                     calls: [variables],
                     capabilities: {
                         ...parameters.capabilities,
@@ -48,9 +48,11 @@ const sendTransactionMutationOptions = <config extends Config>(
                             : undefined
                     }
                 })
+
+                return result.id
             }
 
-            return sendTransaction(config, variables) as Promise<string>
+            return sendTransaction(config, variables)
         },
         mutationKey: ["sendTransaction"]
     } as const satisfies MutationOptions<

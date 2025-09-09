@@ -1,3 +1,4 @@
+import { PublicKey } from "ox"
 import {
     type Account,
     type Address,
@@ -5,6 +6,7 @@ import {
     type Chain,
     type Client,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type SignableMessage,
@@ -34,6 +36,7 @@ import {
     type SmartAccount,
     type SmartAccountImplementation,
     type UserOperation,
+    type WebAuthnAccount,
     entryPoint06Abi,
     entryPoint07Abi,
     entryPoint07Address,
@@ -46,9 +49,13 @@ import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
-import { signUserOperation } from "./signUserOperation.js"
+import {
+    concatSignatures,
+    getWebAuthnSignature,
+    signUserOperation
+} from "./signUserOperation.js"
 
-export type SafeVersion = "1.4.1"
+export type SafeVersion = "1.4.1" | "1.5.0"
 
 const multiSendAbi = [
     {
@@ -179,6 +186,39 @@ const enableModulesAbi = [
             }
         ],
         name: "enableModules",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+    }
+] as const
+
+const safeWebAuthnSharedSignerAbi = [
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: "uint256",
+                        name: "x",
+                        type: "uint256"
+                    },
+                    {
+                        internalType: "uint256",
+                        name: "y",
+                        type: "uint256"
+                    },
+                    {
+                        internalType: "P256.Verifiers",
+                        name: "verifiers",
+                        type: "uint176"
+                    }
+                ],
+                internalType: "struct SafeWebAuthnSharedSigner.Signer",
+                name: "signer",
+                type: "tuple"
+            }
+        ],
+        name: "configure",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function"
@@ -407,13 +447,25 @@ export const EIP712_SAFE_OPERATION_TYPE_V07 = {
 
 const SAFE_VERSION_TO_ADDRESSES_MAP: {
     [key in SafeVersion]: {
-        [key in "0.6" | "0.7"]: {
+        "0.6"?: {
             SAFE_MODULE_SETUP_ADDRESS: Address
             SAFE_4337_MODULE_ADDRESS: Address
             SAFE_PROXY_FACTORY_ADDRESS: Address
             SAFE_SINGLETON_ADDRESS: Address
             MULTI_SEND_ADDRESS: Address
             MULTI_SEND_CALL_ONLY_ADDRESS: Address
+            WEB_AUTHN_SHARED_SIGNER_ADDRESS?: never
+            SAFE_P256_VERIFIER_ADDRESS?: never
+        }
+        "0.7": {
+            SAFE_MODULE_SETUP_ADDRESS: Address
+            SAFE_4337_MODULE_ADDRESS: Address
+            SAFE_PROXY_FACTORY_ADDRESS: Address
+            SAFE_SINGLETON_ADDRESS: Address
+            MULTI_SEND_ADDRESS: Address
+            MULTI_SEND_CALL_ONLY_ADDRESS: Address
+            WEB_AUTHN_SHARED_SIGNER_ADDRESS: Address
+            SAFE_P256_VERIFIER_ADDRESS: Address
         }
     }
 } = {
@@ -442,7 +494,30 @@ const SAFE_VERSION_TO_ADDRESSES_MAP: {
                 "0x41675C099F32341bf84BFc5382aF534df5C7461a",
             MULTI_SEND_ADDRESS: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
             MULTI_SEND_CALL_ONLY_ADDRESS:
-                "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+                "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+            WEB_AUTHN_SHARED_SIGNER_ADDRESS:
+                "0x94a4F6affBd8975951142c3999aEAB7ecee555c2",
+            SAFE_P256_VERIFIER_ADDRESS:
+                "0xA86e0054C51E4894D88762a017ECc5E5235f5DBA"
+        }
+    },
+    "1.5.0": {
+        "0.7": {
+            SAFE_MODULE_SETUP_ADDRESS:
+                "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47",
+            SAFE_4337_MODULE_ADDRESS:
+                "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226",
+            SAFE_PROXY_FACTORY_ADDRESS:
+                "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+            SAFE_SINGLETON_ADDRESS:
+                "0xFf51A5898e281Db6DfC7855790607438dF2ca44b",
+            MULTI_SEND_ADDRESS: "0x218543288004CD07832472D464648173c77D7eB7",
+            MULTI_SEND_CALL_ONLY_ADDRESS:
+                "0xA83c336B20401Af773B6219BA5027174338D1836",
+            WEB_AUTHN_SHARED_SIGNER_ADDRESS:
+                "0x94a4F6affBd8975951142c3999aEAB7ecee555c2",
+            SAFE_P256_VERIFIER_ADDRESS:
+                "0xA86e0054C51E4894D88762a017ECc5E5235f5DBA"
         }
     }
 }
@@ -535,6 +610,7 @@ const get7579LaunchPadInitData = ({
     safe4337ModuleAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
+    safeWebAuthnSharedSignerAddress,
     owners,
     validators,
     executors,
@@ -547,7 +623,8 @@ const get7579LaunchPadInitData = ({
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     erc7579LaunchpadAddress: Address
-    owners: Address[]
+    safeWebAuthnSharedSignerAddress?: Address
+    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
     executors: {
         address: Address
         context: Address
@@ -559,9 +636,24 @@ const get7579LaunchPadInitData = ({
     threshold: bigint
     attestersThreshold: number
 }) => {
+    const ownerAddresses = owners.map((owner) => {
+        if ("type" in owner && owner.type === "webAuthn") {
+            if (!safeWebAuthnSharedSignerAddress) {
+                throw new Error("safeWebAuthnSharedSignerAddress not defined")
+            }
+            return safeWebAuthnSharedSignerAddress
+        }
+
+        if ("address" in owner && owner.address) {
+            return owner.address
+        }
+
+        throw new Error("Incorrect owner found")
+    })
+
     const initData = {
         singleton: safeSingletonAddress,
-        owners: owners,
+        owners: ownerAddresses,
         threshold: threshold,
         setupTo: erc7579LaunchpadAddress,
         setupData: encodeFunctionData({
@@ -594,11 +686,19 @@ const get7579LaunchPadInitData = ({
     return initData
 }
 
+export const isWebAuthnAccount = (
+    owner: RegularOwner | WebAuthnAccount
+): owner is WebAuthnAccount => {
+    return "type" in owner && owner.type === "webAuthn"
+}
+
 const getInitializerCode = async ({
     owners,
     threshold,
     safeModuleSetupAddress,
     safe4337ModuleAddress,
+    safeWebAuthnSharedSignerAddress,
+    safeP256VerifierAddress,
     multiSendAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
@@ -614,11 +714,13 @@ const getInitializerCode = async ({
     payment = BigInt(0),
     paymentReceiver = zeroAddress
 }: {
-    owners: Address[]
+    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
     threshold: bigint
     safeSingletonAddress: Address
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
+    safeWebAuthnSharedSignerAddress?: Address
+    safeP256VerifierAddress?: Address
     multiSendAddress: Address
     erc7579LaunchpadAddress?: Address
     setupTransactions?: {
@@ -644,6 +746,7 @@ const getInitializerCode = async ({
         const initData = get7579LaunchPadInitData({
             safe4337ModuleAddress,
             safeSingletonAddress,
+            safeWebAuthnSharedSignerAddress,
             erc7579LaunchpadAddress,
             owners,
             validators,
@@ -728,7 +831,32 @@ const getInitializerCode = async ({
         })
     }
 
-    const multiSendCallData = encodeMultiSend([
+    const webAuthnOwner = owners.reduce<WebAuthnAccount | undefined>(
+        (acc, owner) => {
+            if (isWebAuthnAccount(owner)) {
+                return owner
+            }
+            return acc
+        },
+        undefined
+    )
+
+    const ownerAddresses = owners.map((owner) => {
+        if (isWebAuthnAccount(owner)) {
+            if (!safeWebAuthnSharedSignerAddress) {
+                throw new Error("safeWebAuthnSharedSignerAddress not defined")
+            }
+            return safeWebAuthnSharedSignerAddress
+        }
+
+        if ("address" in owner && owner.address) {
+            return owner.address
+        }
+
+        throw new Error("Incorrect owner found")
+    })
+
+    const multiCalls = [
         {
             to: safeModuleSetupAddress,
             data: encodeFunctionData({
@@ -737,17 +865,50 @@ const getInitializerCode = async ({
                 args: [[safe4337ModuleAddress, ...safeModules]]
             }),
             value: BigInt(0),
-            operation: 1
-        },
-        ...setupTransactions.map((tx) => ({ ...tx, operation: 0 as 0 | 1 }))
-    ])
+            operation: 1 as 0 | 1
+        }
+    ]
+
+    if (
+        webAuthnOwner &&
+        safeWebAuthnSharedSignerAddress &&
+        safeP256VerifierAddress
+    ) {
+        const parsedPublicKey = PublicKey.fromHex(webAuthnOwner.publicKey)
+
+        multiCalls.push({
+            to: safeWebAuthnSharedSignerAddress,
+            data: encodeFunctionData({
+                abi: safeWebAuthnSharedSignerAbi,
+                functionName: "configure",
+                args: [
+                    {
+                        x: parsedPublicKey.x,
+                        y: parsedPublicKey.y,
+                        verifiers: BigInt(safeP256VerifierAddress)
+                    }
+                ]
+            }),
+            value: BigInt(0),
+            operation: 1 as 0 | 1
+        })
+    }
+
+    for (const tx of setupTransactions) {
+        multiCalls.push({
+            ...tx,
+            operation: 0 as 0 | 1
+        })
+    }
+
+    const multiSendCallData = encodeMultiSend(multiCalls)
 
     return encodeFunctionData({
         abi: setupAbi,
         functionName: "setup",
         args: [
-            owners,
-            BigInt(1),
+            ownerAddresses,
+            threshold,
             multiSendAddress,
             multiSendCallData,
             safe4337ModuleAddress,
@@ -791,6 +952,8 @@ const getAccountInitCode = async ({
     safe4337ModuleAddress,
     safeSingletonAddress,
     erc7579LaunchpadAddress,
+    safeWebAuthnSharedSignerAddress,
+    safeP256VerifierAddress,
     multiSendAddress,
     paymentToken,
     payment,
@@ -805,12 +968,14 @@ const getAccountInitCode = async ({
     attesters = [],
     attestersThreshold = 0
 }: {
-    owners: Address[]
+    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
     threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeSingletonAddress: Address
     multiSendAddress: Address
+    safeWebAuthnSharedSignerAddress?: Address
+    safeP256VerifierAddress?: Address
     erc7579LaunchpadAddress?: Address
     saltNonce?: bigint
     setupTransactions?: {
@@ -836,6 +1001,8 @@ const getAccountInitCode = async ({
         owners,
         threshold,
         safeModuleSetupAddress,
+        safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress,
         safe4337ModuleAddress,
         multiSendAddress,
         setupTransactions,
@@ -876,7 +1043,9 @@ export const getDefaultAddresses = (
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
         multiSendAddress: _multiSendAddress,
-        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
+        safeWebAuthnSharedSignerAddress: _safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress: _safeP256VerifierAddress
     }: {
         addModuleLibAddress?: Address
         safeModuleSetupAddress?: Address
@@ -885,34 +1054,41 @@ export const getDefaultAddresses = (
         safeSingletonAddress?: Address
         multiSendAddress?: Address
         multiSendCallOnlyAddress?: Address
+        safeWebAuthnSharedSignerAddress?: Address
+        safeP256VerifierAddress?: Address
     }
 ) => {
+    const versionAddresses =
+        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
+
+    if (!versionAddresses) {
+        throw new Error(
+            `Safe version ${safeVersion} does not support EntryPoint version ${entryPointVersion}`
+        )
+    }
+
     const safeModuleSetupAddress =
         _safeModuleSetupAddress ??
         _addModuleLibAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_MODULE_SETUP_ADDRESS
+        versionAddresses.SAFE_MODULE_SETUP_ADDRESS
     const safe4337ModuleAddress =
-        _safe4337ModuleAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_4337_MODULE_ADDRESS
+        _safe4337ModuleAddress ?? versionAddresses.SAFE_4337_MODULE_ADDRESS
     const safeProxyFactoryAddress =
-        _safeProxyFactoryAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_PROXY_FACTORY_ADDRESS
+        _safeProxyFactoryAddress ?? versionAddresses.SAFE_PROXY_FACTORY_ADDRESS
     const safeSingletonAddress =
-        _safeSingletonAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .SAFE_SINGLETON_ADDRESS
+        _safeSingletonAddress ?? versionAddresses.SAFE_SINGLETON_ADDRESS
     const multiSendAddress =
-        _multiSendAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .MULTI_SEND_ADDRESS
+        _multiSendAddress ?? versionAddresses.MULTI_SEND_ADDRESS
 
     const multiSendCallOnlyAddress =
         _multiSendCallOnlyAddress ??
-        SAFE_VERSION_TO_ADDRESSES_MAP[safeVersion][entryPointVersion]
-            .MULTI_SEND_CALL_ONLY_ADDRESS
+        versionAddresses.MULTI_SEND_CALL_ONLY_ADDRESS
+
+    const safeWebAuthnSharedSignerAddress =
+        _safeWebAuthnSharedSignerAddress ??
+        versionAddresses.WEB_AUTHN_SHARED_SIGNER_ADDRESS
+    const safeP256VerifierAddress =
+        _safeP256VerifierAddress ?? versionAddresses.SAFE_P256_VERIFIER_ADDRESS
 
     return {
         safeModuleSetupAddress,
@@ -920,7 +1096,9 @@ export const getDefaultAddresses = (
         safeProxyFactoryAddress,
         safeSingletonAddress,
         multiSendAddress,
-        multiSendCallOnlyAddress
+        multiSendCallOnlyAddress,
+        safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress
     }
 }
 
@@ -950,16 +1128,39 @@ type GetErc7579Params<TErc7579 extends Address | undefined> =
               attestersThreshold?: number
           }
 
+type RegularOwner =
+    | Account
+    | WalletClient<Transport, Chain | undefined, Account>
+    | EthereumProvider
+
+type ValidateAtMostOneWebAuthn<
+    T extends readonly unknown[],
+    SeenWebAuthn extends boolean = false
+> = T extends readonly []
+    ? true
+    : T extends readonly [infer H, ...infer Rest]
+      ? H extends WebAuthnAccount
+          ? SeenWebAuthn extends true
+              ? false
+              : ValidateAtMostOneWebAuthn<Rest, true>
+          : H extends RegularOwner
+            ? ValidateAtMostOneWebAuthn<Rest, SeenWebAuthn>
+            : false
+      : true
+
+type OwnersArray<T extends readonly (RegularOwner | WebAuthnAccount)[]> =
+    ValidateAtMostOneWebAuthn<T> extends true ? T : never
+
 export type ToSafeSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
     TErc7579 extends Address | undefined
 > = {
-    client: Client
-    owners: (
-        | Account
-        | WalletClient<Transport, Chain | undefined, Account>
-        | EthereumProvider
-    )[]
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
+    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
     threshold?: bigint
     version: SafeVersion
     entryPoint?: {
@@ -970,6 +1171,8 @@ export type ToSafeSmartAccountParameters<
     erc7579LaunchpadAddress?: TErc7579
     safeProxyFactoryAddress?: Address
     safeSingletonAddress?: Address
+    safeWebAuthnSharedSignerAddress?: Address
+    safeP256VerifierAddress?: Address
     address?: Address
     saltNonce?: bigint
     validUntil?: number
@@ -1012,6 +1215,8 @@ const getAccountAddress = async ({
     safeProxyFactoryAddress,
     safeSingletonAddress,
     multiSendAddress,
+    safeWebAuthnSharedSignerAddress,
+    safeP256VerifierAddress,
     erc7579LaunchpadAddress,
     paymentToken,
     payment,
@@ -1027,12 +1232,14 @@ const getAccountAddress = async ({
     attestersThreshold = 0
 }: {
     client: Client
-    owners: Address[]
+    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
     threshold: bigint
     safeModuleSetupAddress: Address
     safe4337ModuleAddress: Address
     safeProxyFactoryAddress: Address
     safeSingletonAddress: Address
+    safeWebAuthnSharedSignerAddress?: Address
+    safeP256VerifierAddress?: Address
     multiSendAddress: Address
     setupTransactions: {
         to: Address
@@ -1066,6 +1273,8 @@ const getAccountAddress = async ({
         threshold,
         safeModuleSetupAddress,
         safe4337ModuleAddress,
+        safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress,
         multiSendAddress,
         setupTransactions,
         safeSingletonAddress,
@@ -1189,17 +1398,25 @@ export async function toSafeSmartAccount<
                     return true
                 }
 
+                if (isWebAuthnAccount(owner)) {
+                    return true
+                }
+
                 return false
             })
-            .map((owner) =>
-                toOwner({
+            .map((owner) => {
+                if (isWebAuthnAccount(owner)) {
+                    return owner
+                }
+
+                return toOwner({
                     owner: owner as OneOf<
                         | LocalAccount
                         | EthereumProvider
                         | WalletClient<Transport, Chain | undefined, Account>
                     >
                 })
-            )
+            })
     )
 
     const entryPoint = {
@@ -1250,14 +1467,19 @@ export async function toSafeSmartAccount<
         safeProxyFactoryAddress,
         safeSingletonAddress,
         multiSendAddress,
-        multiSendCallOnlyAddress
+        multiSendCallOnlyAddress,
+        safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress
     } = getDefaultAddresses(version, entryPoint.version, {
         safeModuleSetupAddress: _safeModuleSetupAddress,
         safe4337ModuleAddress: _safe4337ModuleAddress,
         safeProxyFactoryAddress: _safeProxyFactoryAddress,
         safeSingletonAddress: _safeSingletonAddress,
         multiSendAddress: _multiSendAddress,
-        multiSendCallOnlyAddress: _multiSendCallOnlyAddress
+        multiSendCallOnlyAddress: _multiSendCallOnlyAddress,
+        safeWebAuthnSharedSignerAddress:
+            parameters.safeWebAuthnSharedSignerAddress,
+        safeP256VerifierAddress: parameters.safeP256VerifierAddress
     })
 
     let accountAddress: Address | undefined = address
@@ -1276,11 +1498,13 @@ export async function toSafeSmartAccount<
         return {
             factory: safeProxyFactoryAddress,
             factoryData: await getAccountInitCode({
-                owners: owners.map((owner) => owner.address),
+                owners,
                 threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeSingletonAddress,
+                safeWebAuthnSharedSignerAddress,
+                safeP256VerifierAddress,
                 multiSendAddress,
                 erc7579LaunchpadAddress,
                 saltNonce,
@@ -1309,12 +1533,14 @@ export async function toSafeSmartAccount<
             // Get the sender address based on the init code
             accountAddress = await getAccountAddress({
                 client,
-                owners: owners.map((owner) => owner.address),
+                owners,
                 threshold,
                 safeModuleSetupAddress,
                 safe4337ModuleAddress,
                 safeProxyFactoryAddress,
                 safeSingletonAddress,
+                safeWebAuthnSharedSignerAddress,
+                safeP256VerifierAddress,
                 multiSendAddress,
                 erc7579LaunchpadAddress,
                 saltNonce,
@@ -1347,7 +1573,8 @@ export async function toSafeSmartAccount<
                         safe4337ModuleAddress,
                         safeSingletonAddress,
                         erc7579LaunchpadAddress,
-                        owners: owners.map((owner) => owner.address),
+                        safeWebAuthnSharedSignerAddress,
+                        owners,
                         threshold,
                         validators,
                         executors,
@@ -1521,28 +1748,61 @@ export async function toSafeSmartAccount<
             })
         },
         async getStubSignature() {
+            const signatures = owners.map((owner) => {
+                let signer = safeWebAuthnSharedSignerAddress
+                let dynamic = true
+                let data: Hex =
+                    "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+
+                if (!isWebAuthnAccount(owner)) {
+                    signer = owner.address
+                    dynamic = false
+                } else {
+                    data = encodeAbiParameters(
+                        [
+                            { name: "authenticatorData", type: "bytes" },
+                            { name: "clientDataJSON", type: "string" },
+                            { name: "signature", type: "uint256[2]" }
+                        ],
+                        [
+                            "0x49960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97631d00000000",
+                            '"origin":"http://somelargdomainheresothatwehaveenoughbytes.com","crossOrigin":false',
+                            [
+                                44941127272049826721201904734628716258498742255959991581049806490182030242267n,
+                                9910254599581058084911561569808925251374718953855182016200087235935345969636n
+                            ]
+                        ]
+                    )
+                }
+
+                if (!signer) {
+                    throw new Error("No signer found")
+                }
+
+                return {
+                    signer,
+                    data,
+                    dynamic
+                }
+            })
+
             return encodePacked(
                 ["uint48", "uint48", "bytes"],
-                [
-                    0,
-                    0,
-                    `0x${owners
-                        .map(
-                            (_) =>
-                                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-                        )
-                        .join("")}`
-                ]
+                [0, 0, concatSignatures(signatures)]
             )
         },
         async sign({ hash }) {
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch, currently not supported"
                 )
+            }
+
+            if (erc7579LaunchpadAddress && version === "1.5.0") {
+                throw new Error("Safe 7579 & version 1.5.0 are not compatible")
             }
 
             const messageHash = hashTypedData({
@@ -1560,45 +1820,88 @@ export async function toSafeSmartAccount<
             })
 
             const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => ({
-                    signer: localOwner.address,
-                    data: adjustVInSignature(
-                        "eth_sign",
-                        await localOwner.signMessage({
-                            message: {
-                                raw: toBytes(messageHash)
-                            }
+                localOwners.map(async (localOwner) => {
+                    let signer = safeWebAuthnSharedSignerAddress
+                    let data: Hex
+                    let dynamic = true
+
+                    if (!isWebAuthnAccount(localOwner)) {
+                        signer = localOwner.address
+                        data = adjustVInSignature(
+                            "eth_sign",
+                            await localOwner.signMessage({
+                                message: {
+                                    raw: toBytes(messageHash)
+                                }
+                            })
+                        )
+                        dynamic = false
+                    } else {
+                        data = await getWebAuthnSignature({
+                            owner: localOwner,
+                            hash: messageHash
                         })
-                    )
-                }))
+                    }
+
+                    if (!signer) {
+                        throw new Error("no signer found")
+                    }
+
+                    return {
+                        signer,
+                        dynamic,
+                        data
+                    }
+                })
             )
 
-            signatures.sort((left, right) =>
-                left.signer
-                    .toLowerCase()
-                    .localeCompare(right.signer.toLowerCase())
-            )
-
-            const signatureBytes = concat(signatures.map((sig) => sig.data))
+            const signatureBytes = concatSignatures(signatures)
 
             return erc7579LaunchpadAddress
                 ? concat([zeroAddress, signatureBytes])
                 : signatureBytes
         },
         async signTypedData(typedData) {
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch, currently not supported"
                 )
             }
 
-            const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => ({
-                    signer: localOwner.address,
-                    data: adjustVInSignature(
-                        "eth_signTypedData",
+            if (erc7579LaunchpadAddress && version === "1.5.0") {
+                throw new Error("Safe 7579 & version 1.5.0 are not compatible")
+            }
 
-                        await localOwner.signTypedData({
+            const signatures = await Promise.all(
+                localOwners.map(async (localOwner) => {
+                    let signer = safeWebAuthnSharedSignerAddress
+                    let data: Hex
+                    let dynamic = true
+
+                    if (!isWebAuthnAccount(localOwner)) {
+                        signer = localOwner.address
+                        data = adjustVInSignature(
+                            "eth_signTypedData",
+                            await localOwner.signTypedData({
+                                domain: {
+                                    chainId: await getMemoizedChainId(),
+                                    verifyingContract: await this.getAddress()
+                                },
+                                types: {
+                                    SafeMessage: [
+                                        { name: "message", type: "bytes" }
+                                    ]
+                                },
+                                primaryType: "SafeMessage",
+                                message: {
+                                    message:
+                                        generateSafeMessageMessage(typedData)
+                                }
+                            })
+                        )
+                        dynamic = false
+                    } else {
+                        const messageHash = hashTypedData({
                             domain: {
                                 chainId: await getMemoizedChainId(),
                                 verifyingContract: await this.getAddress()
@@ -1613,17 +1916,26 @@ export async function toSafeSmartAccount<
                                 message: generateSafeMessageMessage(typedData)
                             }
                         })
-                    )
-                }))
+
+                        data = await getWebAuthnSignature({
+                            owner: localOwner,
+                            hash: messageHash
+                        })
+                    }
+
+                    if (!signer) {
+                        throw new Error("no signer found")
+                    }
+
+                    return {
+                        signer,
+                        dynamic,
+                        data
+                    }
+                })
             )
 
-            signatures.sort((left, right) =>
-                left.signer
-                    .toLowerCase()
-                    .localeCompare(right.signer.toLowerCase())
-            )
-
-            const signatureBytes = concat(signatures.map((sig) => sig.data))
+            const signatureBytes = concatSignatures(signatures)
 
             return erc7579LaunchpadAddress
                 ? concat([zeroAddress, signatureBytes])
@@ -1633,7 +1945,7 @@ export async function toSafeSmartAccount<
             const { chainId = await getMemoizedChainId(), ...userOperation } =
                 parameters
 
-            if (localOwners.length !== owners.length) {
+            if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch use SafeSmartAccount.signUserOperation from `permissionless/accounts/safe`"
                 )
@@ -1647,16 +1959,13 @@ export async function toSafeSmartAccount<
                     version,
                     entryPoint,
                     owners: localOwners,
-                    account: owner as OneOf<
-                        | EthereumProvider
-                        | WalletClient<Transport, Chain | undefined, Account>
-                        | LocalAccount
-                    >,
-                    chainId: await getMemoizedChainId(),
+                    account: owner,
+                    chainId,
                     signatures,
                     validAfter,
                     validUntil,
-                    safe4337ModuleAddress
+                    safe4337ModuleAddress,
+                    safeWebAuthnSharedSignerAddress
                 })
             }
 

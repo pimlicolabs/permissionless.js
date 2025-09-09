@@ -1,74 +1,63 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
-import { http, createPublicClient } from "viem"
-import { createBundlerClient } from "viem/account-abstraction"
-import { foundry } from "viem/chains"
-import { deployErc20Token } from "./helpers/erc20-utils.js"
-import { getAnvilWalletClient } from "./helpers/utils.js"
-import { createRpcHandler } from "./relay.js"
+import { http, createWalletClient } from "viem"
+import { privateKeyToAccount } from "viem/accounts"
 import {
-    SingletonPaymasterV06,
-    SingletonPaymasterV07
-} from "./singletonPaymasters.js"
+    deployErc20Token,
+    erc20Address,
+    sudoMintTokens
+} from "./helpers/erc20-utils.js"
+import { getChain } from "./helpers/utils.js"
+import { createRpcHandler } from "./relay.js"
+import { deployPaymasters } from "./singletonPaymasters.js"
 
 export const paymaster = defineInstance(
     ({
         anvilRpc,
+        altoRpc,
         port: _port,
-        altoRpc
-    }: { anvilRpc: string; port: number; altoRpc: string }) => {
+        host: _host = "localhost"
+    }: { anvilRpc: string; port: number; altoRpc: string; host?: string }) => {
         const app = Fastify({})
 
         return {
             _internal: {},
-            host: "localhost",
+            host: _host,
             port: _port,
             name: "mock-paymaster",
             start: async ({ port = _port }) => {
-                const walletClient = getAnvilWalletClient({
+                const paymasterSigner = createWalletClient({
+                    chain: await getChain(anvilRpc),
+                    account: privateKeyToAccount(
+                        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                    ),
+                    transport: http(anvilRpc)
+                })
+
+                await deployPaymasters({
                     anvilRpc,
-                    addressIndex: 1
+                    paymasterSigner: paymasterSigner.account.address
                 })
-                const publicClient = createPublicClient({
-                    transport: http(anvilRpc),
-                    chain: foundry
-                })
-                const bundler = createBundlerClient({
-                    chain: foundry,
-                    transport: http(altoRpc)
-                })
-
-                const singletonPaymasterV07 = new SingletonPaymasterV07(
-                    walletClient,
-                    anvilRpc
-                )
-                const singletonPaymasterV06 = new SingletonPaymasterV06(
-                    walletClient,
-                    anvilRpc
-                )
-
-                await singletonPaymasterV06.setup()
-                await singletonPaymasterV07.setup()
-                await deployErc20Token(walletClient, publicClient)
+                await deployErc20Token(anvilRpc)
 
                 app.register(cors, {
                     origin: "*",
                     methods: ["POST", "GET", "OPTIONS"]
                 })
 
-                const rpcHandler = createRpcHandler(
-                    bundler,
-                    singletonPaymasterV07,
-                    singletonPaymasterV06
-                )
+                const rpcHandler = createRpcHandler({
+                    altoRpc,
+                    anvilRpc,
+                    paymasterSigner
+                })
                 app.post("/", {}, rpcHandler)
 
                 app.get("/ping", async (_request, reply) => {
                     return reply.code(200).send({ message: "pong" })
                 })
 
-                await app.listen({ host: "localhost", port })
+                await app.listen({ host: _host, port })
             },
             stop: async () => {
                 app.close()
@@ -76,3 +65,5 @@ export const paymaster = defineInstance(
         }
     }
 )
+
+export { erc20Address, sudoMintTokens }

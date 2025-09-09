@@ -1,17 +1,13 @@
 import {
     http,
-    type Account,
     type Address,
     type Chain,
     type PublicClient,
     type Transport,
-    type WalletClient,
     createPublicClient,
-    createWalletClient
+    defineChain
 } from "viem"
-import { mnemonicToAccount } from "viem/accounts"
-import { foundry } from "viem/chains"
-import { ERC20_ADDRESS } from "./erc20-utils.js"
+import { erc20Address } from "./erc20-utils.js"
 import { RpcError, ValidationErrors } from "./schema.js"
 
 /// Returns the bigger of two BigInts.
@@ -19,9 +15,32 @@ export const maxBigInt = (a: bigint, b: bigint) => {
     return a > b ? a : b
 }
 
-export const getPublicClient = (
+export const getChain = async (rpcUrl: string): Promise<Chain> => {
+    const tempClient = createPublicClient({
+        transport: http(rpcUrl)
+    })
+
+    const chainId = await tempClient.getChainId()
+
+    return defineChain({
+        id: chainId,
+        name: `Chain ${chainId}`,
+        nativeCurrency: {
+            name: "ETH",
+            symbol: "ETH",
+            decimals: 18
+        },
+        rpcUrls: {
+            default: {
+                http: [rpcUrl]
+            }
+        }
+    })
+}
+
+export const getPublicClient = async (
     anvilRpc: string
-): PublicClient<Transport, Chain> => {
+): Promise<PublicClient<Transport, Chain>> => {
     const transport = http(anvilRpc, {
         // onFetchRequest: async (req) => {
         //     console.log(await req.json(), "request")
@@ -31,35 +50,17 @@ export const getPublicClient = (
         //}
     })
 
+    const chain = await getChain(anvilRpc)
+
     return createPublicClient({
-        chain: foundry,
+        chain,
         transport: transport,
         pollingInterval: 100
     })
 }
 
-export const getAnvilWalletClient = ({
-    addressIndex,
-    anvilRpc
-}: { addressIndex: number; anvilRpc: string }): WalletClient<
-    Transport,
-    Chain,
-    Account
-> => {
-    return createWalletClient({
-        account: mnemonicToAccount(
-            "test test test test test test test test test test test junk",
-            {
-                addressIndex
-            }
-        ),
-        chain: foundry,
-        transport: http(anvilRpc)
-    })
-}
-
 export const isTokenSupported = async (token: Address) => {
-    if (token !== ERC20_ADDRESS) {
+    if (token !== erc20Address) {
         throw new RpcError(
             "Token is not supported",
             ValidationErrors.InvalidFields

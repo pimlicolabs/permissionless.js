@@ -12,6 +12,7 @@ import {
     type Address,
     type Client,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
     concat,
     concatHex,
@@ -90,7 +91,11 @@ const BICONOMY_ADDRESSES: {
 }
 
 export type ToNexusSmartAccountParameters = Prettify<{
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owners: [
         OneOf<
             | EthereumProvider

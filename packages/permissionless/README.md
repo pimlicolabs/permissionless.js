@@ -71,7 +71,7 @@ const account = toSimpleSmartAccount<entryPointVersion>({
 // Create the required clients.
 const bundlerClient = createSmartAccountClient({
   account,
-  paymaster: 
+  paymaster, 
   chain: sepolia,
   bundlerTransport: http(
     `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`,
@@ -97,7 +97,7 @@ bun run build
 
 ## License
 
-Distributed under an MIT License. See [LICENSE](./LICENSE) for more information.
+Distributed under an MIT License. See [LICENSE](../../LICENSE) for more information.
 
 ## Contact
 

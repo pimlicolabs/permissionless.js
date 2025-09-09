@@ -1,5 +1,92 @@
 # permissionless
 
+## 0.2.57
+
+### Patch Changes
+
+- e11c977481d98749a97526c063839cf014d69bf8: Added ability to overwrite accountLogicAddress for eip7702 kernel smart account
+- d2a7a3ed0c09a85a52dd74919dbae32f70c60fd2: Updated ox dependency
+
+## 0.2.56
+
+### Patch Changes
+
+- 6ba059a8643cd9efba0e0753e316d6919e5412fc: Added 1271 support for kernel 0.3.3 + 7702 post delegation
+
+## 0.2.55
+
+### Patch Changes
+
+- f43c30c360608b198502796bcfd87f12f9107574: Added support for sendCalls & getCallsStatus for smart account client
+
+## 0.2.54
+
+### Patch Changes
+
+- 29ac0341359235ce4ad78f167df5fedb87022b9f: Added passkeys support for all Safe versions and entrypoint 0.7 & 0.8
+
+## 0.2.53
+
+### Patch Changes
+
+- bd19b74e0d6d54e24b37546de05268d5e7b16c45: Added support for safe 1.5.0
+
+## 0.2.52
+
+### Patch Changes
+
+- 0d82154a74d4592da9fb014d56567f9ff884fc81: Fixed owners length check for safe multisig
+
+## 0.2.51
+
+### Patch Changes
+
+- 1f3c2d2ff753e91ff11d587bb1758b5d65fea8f9: Fixed multi-sig safe when threshold is not same as owners
+
+## 0.2.50
+
+### Patch Changes
+
+- ba0e2bd161d5ee4bbd975a28f9f36ff520aca8f7: Added estimateErc20PaymasterCost
+
+## 0.2.49
+
+### Patch Changes
+
+- be0db9bf8da4fdd3fd993626991121381d21e9ce: Removed fixed ox version as optional dependency
+
+## 0.2.48
+
+### Patch Changes
+
+- 56fdf93fca1a7e173c1f34352a93bdc102f0563c: Added authorisation support for installModule and installModules
+- 52a3de159521bb98585cad16697fdd871e83b209: Added to7702SimpleSmartAccount
+- 5494e69866df60ee87424a51d6f99c4e76eaa7d6: Added to7702KernelSmartAccount
+
+## 0.2.47
+
+### Patch Changes
+
+- ad6fc0eadc2c7ebb93b097ced501922947b71984: Fixed threshold for safe
+
+## 0.2.46
+
+### Patch Changes
+
+- bdf11dfb49a872d9a89580b7f8607fbcfcc5a238: Added SimpleAccount 0.8
+
+## 0.2.45
+
+### Patch Changes
+
+- 28c248502253929c5542876f5f8bf21f1c4c1e69: Forward all args to sendUserOperation action
+
+## 0.2.44
+
+### Patch Changes
+
+- 576a63439dd2b72e21edf480be7fd4458e08c4ba: Added validForSeconds field to pm_sponsorUserOperation, removed deprecated label on pm_sponsorUserOperation
+
 ## 0.2.43
 
 ### Patch Changes

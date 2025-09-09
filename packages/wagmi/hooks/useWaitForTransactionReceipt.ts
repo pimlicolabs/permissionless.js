@@ -211,7 +211,7 @@ export async function waitForCallsStatus<
                     try {
                         // If we already have a valid receipt, let's check if we have enough
                         // confirmations. If we do, then we can resolve.
-                        if (receipt && receipt.status !== "PENDING") {
+                        if (receipt && receipt.status !== "pending") {
                             if (
                                 confirmations > 1 &&
                                 (!receipt.receipts?.[0]?.blockNumber ||
@@ -257,7 +257,7 @@ export async function waitForCallsStatus<
                             "getCallsStatus"
                         )({ id })
 
-                        if (receipt.status === "PENDING") {
+                        if (receipt.status === "pending") {
                             return
                         }
 

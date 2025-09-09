@@ -1,6 +1,7 @@
-import type { Address, Hex, PublicClient } from "viem"
+import type { Hex } from "viem"
+import type { EntryPointVersion } from "viem/account-abstraction"
 
-export type AAParamType<entryPointVersion extends "0.6" | "0.7"> = {
+export type AAParamType<entryPointVersion extends EntryPointVersion> = {
     entryPoint: {
         version: entryPointVersion
     }

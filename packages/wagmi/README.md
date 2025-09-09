@@ -1,5 +1,5 @@
 <h1 className='vocs_HomePage_title'>@permissionless/wagmi</h1>
-  Enable gas sponsorship and transaction batching for your app with just a couple lines of cod.
+  Enable gas sponsorship and transaction batching for your app with just a couple lines of code.
 <br />
 <br />
 permissionless/wagmi is a TypeScript library built on top of permissionless.js

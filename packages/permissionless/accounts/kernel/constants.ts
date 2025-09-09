@@ -5,7 +5,8 @@ export const ROOT_MODE_KERNEL_V2 = "0x00000000"
 export const VALIDATOR_TYPE = {
     ROOT: "0x00",
     VALIDATOR: "0x01",
-    PERMISSION: "0x02"
+    PERMISSION: "0x02",
+    EIP7702: "0x00"
 } as const
 export enum VALIDATOR_MODE {
     DEFAULT = "0x00",

@@ -1,4 +1,5 @@
 import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
+import type { EntryPointVersion } from "viem/account-abstraction"
 import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
@@ -9,6 +10,11 @@ import {
     sendCompressedUserOperation,
     validateSponsorshipPolicies
 } from "../../actions/pimlico.js"
+import {
+    type EstimateErc20PaymasterCostParameters,
+    type EstimateErc20PaymasterCostReturnType,
+    estimateErc20PaymasterCost
+} from "../../actions/pimlico/estimateErc20PaymasterCost.js"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
@@ -26,7 +32,7 @@ import {
 
 export type PimlicoActions<
     TChain extends Chain | undefined,
-    entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"
+    entryPointVersion extends EntryPointVersion = EntryPointVersion
 > = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
@@ -102,9 +108,6 @@ export type PimlicoActions<
             Omit<SendCompressedUserOperationParameters, "entryPointAddress">
         >
     ) => Promise<Hash>
-    /**
-     * @deprecated Use `getPaymasterData` instead
-     */
     sponsorUserOperation: (
         args: Omit<
             PimlicoSponsorUserOperationParameters<entryPointVersion>,
@@ -126,10 +129,22 @@ export type PimlicoActions<
             >
         >
     ) => Promise<Prettify<GetTokenQuotesReturnType>>
+    estimateErc20PaymasterCost: <
+        TChainOverride extends Chain | undefined = Chain | undefined
+    >(
+        args: Omit<
+            EstimateErc20PaymasterCostParameters<
+                entryPointVersion,
+                TChain,
+                TChainOverride
+            >,
+            "entryPoint"
+        >
+    ) => Promise<Prettify<EstimateErc20PaymasterCostReturnType>>
 }
 
 export const pimlicoActions =
-    <entryPointVersion extends "0.6" | "0.7">({
+    <entryPointVersion extends EntryPointVersion>({
         entryPoint
     }: {
         entryPoint: { address: Address; version: entryPointVersion }
@@ -164,5 +179,11 @@ export const pimlicoActions =
                 ...args,
                 chain: args.chain,
                 entryPointAddress: entryPoint.address
+            }),
+        estimateErc20PaymasterCost: async (args) =>
+            estimateErc20PaymasterCost(client, {
+                ...args,
+                entryPoint,
+                chain: args.chain
             })
     })

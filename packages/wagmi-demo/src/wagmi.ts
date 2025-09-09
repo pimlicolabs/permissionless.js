@@ -3,7 +3,7 @@ import { http, createConfig } from "wagmi"
 import { coinbaseWallet } from "wagmi/connectors"
 
 // TODO: Replace with your Pimlico API key
-// @ts-ignore
+export const pimlicoApiKey = ""
 
 export const config = createConfig({
     chains: [sepolia],

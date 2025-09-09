@@ -2,6 +2,7 @@ import type {
     Account,
     Assign,
     Chain,
+    JsonRpcAccount,
     OneOf,
     Prettify,
     Transport,
@@ -92,7 +93,11 @@ const getAccountInitCode = async ({
 }
 
 export type ToBiconomySmartAccountParameters = Prettify<{
-    client: Client
+    client: Client<
+        Transport,
+        Chain | undefined,
+        JsonRpcAccount | LocalAccount | undefined
+    >
     owners: [
         OneOf<
             | EthereumProvider

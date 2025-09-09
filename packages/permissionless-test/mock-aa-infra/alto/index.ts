@@ -16,9 +16,9 @@ import {
     BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
     BICONOMY_FACTORY_CREATECALL,
     BICONOMY_SINGLETON_FACTORY_BYTECODE,
-    ENTRY_POINT_SIMULATIONS_CREATECALL,
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
+    ENTRY_POINT_V08_CREATECALL,
     ERC_7579_TEST_MODULE_CREATECALL,
     ETHERSPOT_BOOTSTRAP_CREATECALL,
     ETHERSPOT_IMPLEMENTATION,
@@ -58,6 +58,10 @@ import {
     SAFE_7579_REGISTRY_SCHEMA_PROXY_CREATECALL,
     SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
     SAFE_MULTI_SEND_CREATECALL,
+    SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
+    SAFE_ONE_FIVE_PROXY_CONTRACT,
+    SAFE_ONE_FIVE_SEND_ADDRESS,
+    SAFE_ONE_FIVE_SINGLETON_ADDRESS,
     SAFE_PROXY_FACTORY_CREATECALL,
     SAFE_SINGLETON_CREATECALL,
     SAFE_SINGLETON_FACTORY_BYTECODE,
@@ -67,6 +71,8 @@ import {
     SAFE_V07_MODULE_SETUP_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
     SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+    SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
+    SIMPLE_ACCOUNT_IMPLEMENTATION_V08_CREATECALL,
     THIRDWEB_FACTORY_V06_CREATECALL,
     THIRDWEB_FACTORY_V07_CREATECALL,
     TRUST_ACCOUNT_FACET_CREATE_CALL,
@@ -82,8 +88,6 @@ const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
 const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
-export const ENTRY_POINT_SIMULATIONS_ADDRESS =
-    "0xe1b9bcD4DbfAE61585691bdB9A100fbaAF6C8dB0"
 
 const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
     for (const address of addresses) {
@@ -128,6 +132,24 @@ export const setupContracts = async (rpc: string) => {
     await Promise.all([
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
+            data: ENTRY_POINT_V08_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
+            data: SIMPLE_ACCOUNT_IMPLEMENTATION_V08_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: DETERMINISTIC_DEPLOYER,
             data: ENTRY_POINT_V07_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
@@ -135,12 +157,6 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: DETERMINISTIC_DEPLOYER,
             data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ENTRY_POINT_SIMULATIONS_CREATECALL,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -369,6 +385,30 @@ export const setupContracts = async (rpc: string) => {
         walletClient.sendTransaction({
             to: SAFE_SINGLETON_FACTORY,
             data: SAFE_7579_REGISTRY_RESOLVER_PROXY_CREATECALL,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_PROXY_CONTRACT,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_SINGLETON_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_SEND_ADDRESS,
+            gas: 15_000_000n,
+            nonce: nonce++
+        }),
+        walletClient.sendTransaction({
+            to: SAFE_SINGLETON_FACTORY,
+            data: SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
             gas: 15_000_000n,
             nonce: nonce++
         }),
@@ -629,6 +669,13 @@ export const setupContracts = async (rpc: string) => {
         data: "0x6e7dbabb000000000000000000000000E30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA0000000000000000000000000000000000000000000000000000000000000001"
     })
 
+    // register 0x2577507b78c2008Ff367261CB6285d44ba5eF2E9
+    await sendTransaction(walletClient, {
+        account: kernelFactoryOwner,
+        to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
+        data: "0x6e7dbabb0000000000000000000000002577507b78c2008Ff367261CB6285d44ba5eF2E90000000000000000000000000000000000000000000000000000000000000001"
+    })
+
     await sendTransaction(walletClient, {
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
@@ -663,24 +710,30 @@ export const setupContracts = async (rpc: string) => {
 
     await verifyDeployed(client, [
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
+        "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
+        "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
+        "0xe6Cae83BdE06E4c305530e199D7217f42808555B", // Simple Account V0.8 implementation
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
-        "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint v0.7
-        "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory V0.7
-        // ENTRY_POINT_SIMULATIONS_ADDRESS, // EntryPoint Simulations (Needed for v0.7)
+        "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint 0.7
+        "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985", // Simple Account Factory 0.7
         "0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47", // Safe V0.7 Module Setup
         "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226", // Safe V0.7 4337 Module
         "0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb", // Safe V0.6 Module Setup
         "0xa581c4A4DB7175302464fF3C06380BC3270b4037", // Safe V0.6 4337 Module
         "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67", // Safe Proxy Factory
+        "0x14F2982D601c9458F93bd70B218933A6f8165e7b", // Safe 1.5.0 proxy contract
+        "0xFf51A5898e281Db6DfC7855790607438dF2ca44b", // Safe 1.5.0 singleton address
+        "0x218543288004CD07832472D464648173c77D7eB7", // Safe 1.5.0 Send
+        "0xA83c336B20401Af773B6219BA5027174338D1836", // Safe 1.5.0 Multi Send Call Only
         "0x41675C099F32341bf84BFc5382aF534df5C7461a", // Safe Singleton
         "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526", // Safe Multi Send
         "0x9641d764fc13c8B624c04430C7356C1C7C8102e2", // Safe Multi Send Call Only
         "0x7579EE8307284F293B1927136486880611F20002", // Safe 7579 module
         "0x7579011aB74c46090561ea277Ba79D510c6C00ff", // Safe 7579 launchpad
         "0x000000000069E2a187AEFFb852bF3cCdC95151B2", // Safe 7579 Registry
-        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint V0.6
-        "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory V0.6
+        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint 0.6
+        "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory 0.6
         "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e", // Biconomy ECDSA Ownership Registry Module
         "0x0000002512019Dafb59528B82CB92D3c5D2423ac", // Biconomy Account Logic V0.2
         "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5", // Biconomy Factory Address
@@ -701,8 +754,8 @@ export const setupContracts = async (rpc: string) => {
         "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd", // Kernel v0.3.1 WebAuthn Validator
         "0xD830D15D3dc0C269F3dBAa0F3e8626d33CFdaBe1", // Kernel v0.3.2 Account Logic
         "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe", // Kernel v0.3.2 Factory
-        "0xE264dCCc54e4b6906c0D1Fee11D4326c06D33c80", // Kernel v0.3.3 Account Logic
-        "0xE30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA", // Kernel v0.3.3 Factory
+        "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28", // Kernel v0.3.3 Account Logic
+        "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9", // Kernel v0.3.3 Factory
         "0x00004EC70002a32400f8ae005A26081065620D20", // LightAccountFactory v1.1.0
         "0xae8c656ad28F2B59a196AB61815C16A0AE1c3cba", // LightAccount v1.1.0 implementation
         "0x0000000000400CdFef5E2714E63d8040b700BC24", // LightAccountFactory v2.0.0

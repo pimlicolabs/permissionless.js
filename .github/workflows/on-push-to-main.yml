@@ -17,7 +17,7 @@ jobs:
   changesets:
     name: Changesets
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Clone repository
@@ -42,7 +42,7 @@ jobs:
     name: Release
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - name: Clone repository

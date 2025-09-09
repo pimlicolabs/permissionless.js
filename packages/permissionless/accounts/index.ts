@@ -6,6 +6,13 @@ import {
 } from "./simple/toSimpleSmartAccount.js"
 
 import {
+    type To7702SimpleSmartAccountImplementation,
+    type To7702SimpleSmartAccountParameters,
+    type To7702SimpleSmartAccountReturnType,
+    to7702SimpleSmartAccount
+} from "./simple/to7702SimpleSmartAccount.js"
+
+import {
     type LightAccountVersion,
     type LightSmartAccountImplementation,
     type ToLightSmartAccountParameters,
@@ -43,6 +50,13 @@ import {
 } from "./kernel/toEcdsaKernelSmartAccount.js"
 
 import {
+    type To7702KernelSmartAccountImplementation,
+    type To7702KernelSmartAccountParameters,
+    type To7702KernelSmartAccountReturnType,
+    to7702KernelSmartAccount
+} from "./kernel/to7702KernelSmartAccount.js"
+
+import {
     type KernelSmartAccountImplementation,
     type KernelVersion,
     type ToKernelSmartAccountParameters,
@@ -76,6 +90,10 @@ export {
     type SimpleSmartAccountImplementation,
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount,
+    type To7702SimpleSmartAccountParameters,
+    type To7702SimpleSmartAccountImplementation,
+    type To7702SimpleSmartAccountReturnType,
+    to7702SimpleSmartAccount,
     type LightAccountVersion,
     type ToLightSmartAccountParameters,
     type LightSmartAccountImplementation,
@@ -114,5 +132,9 @@ export {
     type ToEtherspotSmartAccountParameters,
     type EtherspotSmartAccountImplementation,
     type ToEtherspotSmartAccountReturnType,
-    toEtherspotSmartAccount
+    toEtherspotSmartAccount,
+    type To7702KernelSmartAccountParameters,
+    type To7702KernelSmartAccountImplementation,
+    type To7702KernelSmartAccountReturnType,
+    to7702KernelSmartAccount
 }

@@ -67,4 +67,31 @@ describe("getAccountNonce", () => {
 
         expect(nonce).toBe(0n)
     })
+    testWithRpc("getAccountNonce_V08", async ({ rpc }) => {
+        const { anvilRpc } = rpc
+
+        const client = createPublicClient({
+            transport: http(anvilRpc)
+        })
+
+        const simpleAccountClient = getBundlerClient({
+            account: await getSimpleAccountClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.8"
+                }
+            }),
+            entryPoint: {
+                version: "0.8"
+            },
+            ...rpc
+        })
+
+        const nonce = await getAccountNonce(client, {
+            entryPointAddress: entryPoint07Address,
+            address: simpleAccountClient.account.address
+        })
+
+        expect(nonce).toBe(0n)
+    })
 })

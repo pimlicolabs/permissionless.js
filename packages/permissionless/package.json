@@ -1,6 +1,6 @@
 {
     "name": "permissionless",
-    "version": "0.2.43",
+    "version": "0.2.57",
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless",
     "repository": "github:pimlicolabs/permissionless.js",
@@ -92,6 +92,6 @@
     },
     "peerDependencies": {
         "viem": "^2.23.2",
-        "ox": "0.6.7"
+        "ox": "^0.8.0"
     }
 }

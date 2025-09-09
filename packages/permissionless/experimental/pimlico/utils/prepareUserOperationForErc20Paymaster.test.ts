@@ -1,23 +1,28 @@
 import { http, parseEther, zeroAddress } from "viem"
 import {
     entryPoint06Address,
-    entryPoint07Address
+    entryPoint07Address,
+    entryPoint08Address
 } from "viem/account-abstraction"
+import { privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import {
-    ERC20_ADDRESS,
+    erc20Address,
     sudoMintTokens,
     tokenBalanceOf
-} from "../../../../mock-paymaster/helpers/erc20-utils.ts"
-import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc.ts"
+} from "../../../../mock-paymaster/helpers/erc20-utils"
+import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../../permissionless-test/src/utils"
-import { createSmartAccountClient } from "../../../clients/createSmartAccountClient.ts"
-import { createPimlicoClient } from "../../../clients/pimlico.ts"
-import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster.ts"
+import { createSmartAccountClient } from "../../../clients/createSmartAccountClient"
+import { createPimlicoClient } from "../../../clients/pimlico"
+import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster"
+
+const privateKey =
+    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 describe.each(getCoreSmartAccounts())(
     "prepareUserOperationForErc20Paymaster $name",
@@ -25,9 +30,11 @@ describe.each(getCoreSmartAccounts())(
         getSmartAccountClient,
         supportsEntryPointV06,
         supportsEntryPointV07,
+        supportsEntryPointV08,
+        isEip7702Compliant,
         name
     }) => {
-        testWithRpc.skipIf(!supportsEntryPointV06)(
+        testWithRpc.skipIf(!supportsEntryPointV06 || name === "Kernel 0.2.1")(
             "prepareUserOperationForErc20Paymaster_v06",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
@@ -37,6 +44,7 @@ describe.each(getCoreSmartAccounts())(
                         entryPoint: {
                             version: "0.6"
                         },
+                        privateKey,
                         ...rpc
                     })
                 ).account
@@ -84,7 +92,7 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
                     }
                 })
 
@@ -96,21 +104,17 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt).toBeTruthy()
                 expect(receipt).toBeTruthy()
 
-                if (name !== "Kernel 0.2.1") {
-                    expect(receipt.success).toBeTruthy()
-                    const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
-                        smartAccountClient.account.address,
-                        rpc.anvilRpc
-                    )
-                    const FINAL_ETH_BALANCE = await publicClient.getBalance({
-                        address: smartAccountClient.account.address
-                    })
+                expect(receipt.success).toBeTruthy()
+                const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+                const FINAL_ETH_BALANCE = await publicClient.getBalance({
+                    address: smartAccountClient.account.address
+                })
 
-                    expect(FINAL_TOKEN_BALANCE).toBeLessThan(
-                        INITIAL_TOKEN_BALANCE
-                    ) // Token balance should be deducted
-                    expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
-                }
+                expect(FINAL_TOKEN_BALANCE).toBeLessThan(INITIAL_TOKEN_BALANCE) // Token balance should be deducted
+                expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
             }
         )
 
@@ -119,11 +123,14 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
                 const account = (
                     await getSmartAccountClient({
                         entryPoint: {
                             version: "0.7"
                         },
+                        privateKey,
                         ...rpc
                     })
                 ).account
@@ -162,6 +169,17 @@ describe.each(getCoreSmartAccounts())(
                     anvilRpc
                 })
 
+                const authorization = isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartAccountClient.account as any)
+                              .implementation,
+                          chainId: smartAccountClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartAccountClient.account.address
+                          })
+                      })
+                    : undefined
+
                 const opHash = await smartAccountClient.sendUserOperation({
                     calls: [
                         {
@@ -171,8 +189,107 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
+                        token: erc20Address
+                    },
+                    authorization
+                })
+
+                const receipt =
+                    await smartAccountClient.waitForUserOperationReceipt({
+                        hash: opHash
+                    })
+
+                expect(receipt).toBeTruthy()
+                expect(receipt).toBeTruthy()
+                expect(receipt.success).toBeTruthy()
+
+                const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+                const FINAL_ETH_BALANCE = await publicClient.getBalance({
+                    address: smartAccountClient.account.address
+                })
+
+                expect(FINAL_TOKEN_BALANCE).toBeLessThan(INITIAL_TOKEN_BALANCE) // Token balance should be deducted
+                expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
+            }
+        )
+
+        testWithRpc.skipIf(!supportsEntryPointV08)(
+            "prepareUserOperationForErc20Paymaster_v08",
+            async ({ rpc }) => {
+                const { anvilRpc } = rpc
+
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
+                const account = (
+                    await getSmartAccountClient({
+                        entryPoint: {
+                            version: "0.8"
+                        },
+                        privateKey,
+                        ...rpc
+                    })
+                ).account
+
+                const publicClient = getPublicClient(anvilRpc)
+
+                const pimlicoClient = createPimlicoClient({
+                    transport: http(rpc.paymasterRpc),
+                    entryPoint: {
+                        address: entryPoint08Address,
+                        version: "0.8"
                     }
+                })
+
+                const smartAccountClient = createSmartAccountClient({
+                    // @ts-ignore
+                    client: getPublicClient(anvilRpc),
+                    account,
+                    paymaster: pimlicoClient,
+                    chain: foundry,
+                    userOperation: {
+                        prepareUserOperation:
+                            prepareUserOperationForErc20Paymaster(pimlicoClient)
+                    },
+                    bundlerTransport: http(rpc.altoRpc)
+                })
+
+                const INITIAL_TOKEN_BALANCE = parseEther("100")
+                const INTIAL_ETH_BALANCE = await publicClient.getBalance({
+                    address: smartAccountClient.account.address
+                })
+
+                sudoMintTokens({
+                    amount: INITIAL_TOKEN_BALANCE,
+                    to: smartAccountClient.account.address,
+                    anvilRpc
+                })
+
+                const authorization = isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartAccountClient.account as any)
+                              .implementation,
+                          chainId: smartAccountClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartAccountClient.account.address
+                          })
+                      })
+                    : undefined
+
+                const opHash = await smartAccountClient.sendUserOperation({
+                    calls: [
+                        {
+                            to: zeroAddress,
+                            data: "0x",
+                            value: 0n
+                        }
+                    ],
+                    paymasterContext: {
+                        token: erc20Address
+                    },
+                    authorization
                 })
 
                 const receipt =
@@ -202,11 +319,14 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
+                const privateKeyAccount = privateKeyToAccount(privateKey)
+
                 const account = (
                     await getSmartAccountClient({
                         entryPoint: {
                             version: "0.7"
                         },
+                        privateKey,
                         ...rpc
                     })
                 ).account
@@ -250,6 +370,17 @@ describe.each(getCoreSmartAccounts())(
                     anvilRpc
                 })
 
+                const authorization = isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartAccountClient.account as any)
+                              .implementation,
+                          chainId: smartAccountClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartAccountClient.account.address
+                          })
+                      })
+                    : undefined
+
                 const opHash = await smartAccountClient.sendUserOperation({
                     calls: [
                         {
@@ -259,8 +390,9 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
-                    }
+                        token: erc20Address
+                    },
+                    authorization
                 })
 
                 const receipt =
@@ -285,103 +417,19 @@ describe.each(getCoreSmartAccounts())(
             }
         )
 
-        testWithRpc.skipIf(!supportsEntryPointV06)(
-            "prepareUserOperationForErc20Paymaster_v06",
+        testWithRpc.skipIf(!supportsEntryPointV08)(
+            "prepareUserOperationForErc20Paymaster_v08 (balanceOverride enabled)",
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
+
+                const privateKeyAccount = privateKeyToAccount(privateKey)
 
                 const account = (
                     await getSmartAccountClient({
                         entryPoint: {
-                            version: "0.6"
+                            version: "0.8"
                         },
-                        ...rpc
-                    })
-                ).account
-
-                const pimlicoClient = createPimlicoClient({
-                    transport: http(rpc.paymasterRpc),
-                    entryPoint: {
-                        address: entryPoint06Address,
-                        version: "0.6"
-                    }
-                })
-
-                const publicClient = getPublicClient(anvilRpc)
-
-                const smartAccountClient = createSmartAccountClient({
-                    // @ts-ignore
-                    client: getPublicClient(anvilRpc),
-                    account,
-                    paymaster: pimlicoClient,
-                    chain: foundry,
-                    userOperation: {
-                        prepareUserOperation:
-                            prepareUserOperationForErc20Paymaster(pimlicoClient)
-                    },
-                    bundlerTransport: http(rpc.altoRpc)
-                })
-
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
-                const INTIAL_ETH_BALANCE = await publicClient.getBalance({
-                    address: smartAccountClient.account.address
-                })
-
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
-                    to: smartAccountClient.account.address,
-                    anvilRpc
-                })
-
-                const opHash = await smartAccountClient.sendUserOperation({
-                    callData: await smartAccountClient.account.encodeCalls([
-                        {
-                            to: zeroAddress,
-                            data: "0x",
-                            value: 0n
-                        }
-                    ]),
-                    paymasterContext: {
-                        token: ERC20_ADDRESS
-                    }
-                })
-
-                const receipt =
-                    await smartAccountClient.waitForUserOperationReceipt({
-                        hash: opHash
-                    })
-
-                expect(receipt).toBeTruthy()
-                expect(receipt).toBeTruthy()
-
-                if (name !== "Kernel 0.2.1") {
-                    expect(receipt.success).toBeTruthy()
-                    const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
-                        smartAccountClient.account.address,
-                        rpc.anvilRpc
-                    )
-                    const FINAL_ETH_BALANCE = await publicClient.getBalance({
-                        address: smartAccountClient.account.address
-                    })
-
-                    expect(FINAL_TOKEN_BALANCE).toBeLessThan(
-                        INITIAL_TOKEN_BALANCE
-                    ) // Token balance should be deducted
-                    expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
-                }
-            }
-        )
-
-        testWithRpc.skipIf(!supportsEntryPointV07)(
-            "prepareUserOperationForErc20Paymaster_v07",
-            async ({ rpc }) => {
-                const { anvilRpc } = rpc
-
-                const account = (
-                    await getSmartAccountClient({
-                        entryPoint: {
-                            version: "0.7"
-                        },
+                        privateKey,
                         ...rpc
                     })
                 ).account
@@ -391,91 +439,8 @@ describe.each(getCoreSmartAccounts())(
                 const pimlicoClient = createPimlicoClient({
                     transport: http(rpc.paymasterRpc),
                     entryPoint: {
-                        address: entryPoint07Address,
-                        version: "0.7"
-                    }
-                })
-
-                const smartAccountClient = createSmartAccountClient({
-                    // @ts-ignore
-                    client: getPublicClient(anvilRpc),
-                    account,
-                    paymaster: pimlicoClient,
-                    chain: foundry,
-                    userOperation: {
-                        prepareUserOperation:
-                            prepareUserOperationForErc20Paymaster(pimlicoClient)
-                    },
-                    bundlerTransport: http(rpc.altoRpc)
-                })
-
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
-                const INTIAL_ETH_BALANCE = await publicClient.getBalance({
-                    address: smartAccountClient.account.address
-                })
-
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
-                    to: smartAccountClient.account.address,
-                    anvilRpc
-                })
-
-                const opHash = await smartAccountClient.sendUserOperation({
-                    callData: await smartAccountClient.account.encodeCalls([
-                        {
-                            to: zeroAddress,
-                            data: "0x",
-                            value: 0n
-                        }
-                    ]),
-                    paymasterContext: {
-                        token: ERC20_ADDRESS
-                    }
-                })
-
-                const receipt =
-                    await smartAccountClient.waitForUserOperationReceipt({
-                        hash: opHash
-                    })
-
-                expect(receipt).toBeTruthy()
-                expect(receipt).toBeTruthy()
-                expect(receipt.success).toBeTruthy()
-
-                const FINAL_TOKEN_BALANCE = await tokenBalanceOf(
-                    smartAccountClient.account.address,
-                    rpc.anvilRpc
-                )
-                const FINAL_ETH_BALANCE = await publicClient.getBalance({
-                    address: smartAccountClient.account.address
-                })
-
-                expect(FINAL_TOKEN_BALANCE).toBeLessThan(INITIAL_TOKEN_BALANCE) // Token balance should be deducted
-                expect(FINAL_ETH_BALANCE).toEqual(INTIAL_ETH_BALANCE) // There should be no ETH balance change
-            }
-        )
-
-        testWithRpc.skipIf(!supportsEntryPointV07)(
-            "prepareUserOperationForErc20Paymaster_v07 (balanceOverride enabled)",
-            async ({ rpc }) => {
-                const { anvilRpc } = rpc
-
-                const account = (
-                    await getSmartAccountClient({
-                        entryPoint: {
-                            version: "0.7"
-                        },
-                        ...rpc
-                    })
-                ).account
-
-                const publicClient = getPublicClient(anvilRpc)
-
-                const pimlicoClient = createPimlicoClient({
-                    transport: http(rpc.paymasterRpc),
-                    entryPoint: {
-                        address: entryPoint07Address,
-                        version: "0.7"
+                        address: entryPoint08Address,
+                        version: "0.8"
                     }
                 })
 
@@ -508,17 +473,29 @@ describe.each(getCoreSmartAccounts())(
                     anvilRpc
                 })
 
+                const authorization = isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartAccountClient.account as any)
+                              .implementation,
+                          chainId: smartAccountClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartAccountClient.account.address
+                          })
+                      })
+                    : undefined
+
                 const opHash = await smartAccountClient.sendUserOperation({
-                    callData: await smartAccountClient.account.encodeCalls([
+                    calls: [
                         {
                             to: zeroAddress,
                             data: "0x",
                             value: 0n
                         }
-                    ]),
+                    ],
                     paymasterContext: {
-                        token: ERC20_ADDRESS
-                    }
+                        token: erc20Address
+                    },
+                    authorization
                 })
 
                 const receipt =
