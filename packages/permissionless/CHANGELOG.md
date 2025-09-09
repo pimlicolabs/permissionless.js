@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.2.57
+
+### Patch Changes
+
+- e11c977481d98749a97526c063839cf014d69bf8: Added ability to overwrite accountLogicAddress for eip7702 kernel smart account
+- d2a7a3ed0c09a85a52dd74919dbae32f70c60fd2: Updated ox dependency
+
 ## 0.2.56
 
 ### Patch Changes
