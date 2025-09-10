@@ -1,4 +1,4 @@
-import { WebAuthnP256 } from "ox"
+import { getOxExports } from "permissionless/utils/ox.js"
 import {
     type SmartAccountClient,
     createSmartAccountClient
@@ -154,6 +154,7 @@ export function PasskeyServerDemo() {
     const loginCredential = async () => {
         const credentials = await passkeyServerClient.startAuthentication()
 
+        const { WebAuthnP256 } = await getOxExports()
         const response = await WebAuthnP256.sign(credentials)
 
         const verifiedCredential =
