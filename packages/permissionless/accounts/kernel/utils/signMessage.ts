@@ -20,11 +20,13 @@ export async function signMessage({
     owner,
     accountAddress,
     kernelVersion: accountVersion,
-    chainId
+    chainId,
+    eip7702
 }: {
     chainId: number
     message: SignableMessage
     owner: LocalAccount | WebAuthnAccount
+    eip7702: boolean
 } & WrapMessageHashParams): Promise<SignMessageReturnType> {
     if (isWebAuthnAccount(owner)) {
         let messageContent: string
@@ -74,6 +76,22 @@ export async function signMessage({
             ]
         )
         return encodedSignature
+    }
+
+    if (eip7702) {
+        return owner.signTypedData({
+            message: { hash: hashMessage(message) },
+            primaryType: "Kernel",
+            types: {
+                Kernel: [{ name: "hash", type: "bytes32" }]
+            },
+            domain: {
+                name: "Kernel",
+                version: accountVersion,
+                chainId: chainId,
+                verifyingContract: accountAddress
+            }
+        })
     }
 
     if (accountVersion === "0.2.1" || accountVersion === "0.2.2") {

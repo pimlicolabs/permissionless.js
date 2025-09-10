@@ -1,5 +1,24 @@
 # permissionless
 
+## 0.2.57
+
+### Patch Changes
+
+- e11c977481d98749a97526c063839cf014d69bf8: Added ability to overwrite accountLogicAddress for eip7702 kernel smart account
+- d2a7a3ed0c09a85a52dd74919dbae32f70c60fd2: Updated ox dependency
+
+## 0.2.56
+
+### Patch Changes
+
+- 6ba059a8643cd9efba0e0753e316d6919e5412fc: Added 1271 support for kernel 0.3.3 + 7702 post delegation
+
+## 0.2.55
+
+### Patch Changes
+
+- f43c30c360608b198502796bcfd87f12f9107574: Added support for sendCalls & getCallsStatus for smart account client
+
 ## 0.2.54
 
 ### Patch Changes

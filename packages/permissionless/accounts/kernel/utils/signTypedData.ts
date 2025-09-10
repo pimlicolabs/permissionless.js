@@ -18,6 +18,7 @@ export async function signTypedData(
     parameters: TypedDataDefinition &
         WrapMessageHashParams & {
             owner: LocalAccount | WebAuthnAccount
+            eip7702: boolean
         }
 ): Promise<SignTypedDataReturnType> {
     const {
@@ -25,6 +26,7 @@ export async function signTypedData(
         accountAddress,
         kernelVersion: accountVersion,
         chainId,
+        eip7702,
         ...typedData
     } = parameters
 
@@ -56,6 +58,22 @@ export async function signTypedData(
 
     const typedHash = hashTypedData({ message, primaryType, types, domain })
 
+    if (eip7702 && !isWebAuthnAccount(owner)) {
+        return owner.signTypedData({
+            message: { hash: typedHash },
+            primaryType: "Kernel",
+            types: {
+                Kernel: [{ name: "hash", type: "bytes32" }]
+            },
+            domain: {
+                name: "Kernel",
+                version: accountVersion,
+                chainId: chainId,
+                verifyingContract: accountAddress
+            }
+        })
+    }
+
     const wrappedMessageHash = wrapMessageHash(typedHash, {
         kernelVersion: accountVersion,
         accountAddress,
@@ -68,7 +86,8 @@ export async function signTypedData(
             owner,
             accountAddress,
             kernelVersion: accountVersion,
-            chainId
+            chainId,
+            eip7702: false
         })
     }
 

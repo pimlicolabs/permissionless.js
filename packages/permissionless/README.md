@@ -115,7 +115,7 @@ bun run build
 
 ## License
 
-Distributed under an MIT License. See [LICENSE](./LICENSE) for more information.
+Distributed under an MIT License. See [LICENSE](../../LICENSE) for more information.
 
 ## Contact
 

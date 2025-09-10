@@ -118,7 +118,10 @@ function KernelSmartAccountDemo() {
                             (await pimlicoClient.getUserOperationGasPrice())
                                 .fast
                     },
-                    bundlerTransport: http(pimlicoUrl) // Use any bundler url
+                    bundlerTransport: http(pimlicoUrl, {
+                        onFetchRequest: async (r) =>
+                            console.log(await r.clone().json())
+                    }) // Use any bundler url
                 })
             )
         })
@@ -141,7 +144,7 @@ function KernelSmartAccountDemo() {
         const to = zeroAddress
         const value = "0"
 
-        const hash = await smartAccountClient.sendUserOperation({
+        const { id: hash } = await smartAccountClient.sendCalls({
             calls: [
                 {
                     to,
@@ -150,13 +153,12 @@ function KernelSmartAccountDemo() {
             ],
             paymaster: true
         })
-        setUserOpHash(hash)
+        setUserOpHash(hash as Hex)
 
-        const { receipt } =
-            await smartAccountClient.waitForUserOperationReceipt({
-                hash
-            })
-        setHash(receipt.transactionHash)
+        const receipt = await smartAccountClient.getCallsStatus({
+            id: hash
+        })
+        setHash(receipt.receipts?.[0].transactionHash)
     }
 
     const signMessage = async () => {
