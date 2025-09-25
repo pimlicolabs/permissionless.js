@@ -155,9 +155,15 @@ function KernelSmartAccountDemo() {
         })
         setUserOpHash(hash as Hex)
 
-        const receipt = await smartAccountClient.getCallsStatus({
+        let receipt = await smartAccountClient.getCallsStatus({
             id: hash
         })
+        while (receipt.status === "pending") {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            receipt = await smartAccountClient.getCallsStatus({
+                id: hash
+            })
+        }
         setHash(receipt.receipts?.[0].transactionHash)
     }
 

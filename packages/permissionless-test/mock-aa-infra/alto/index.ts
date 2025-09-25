@@ -751,7 +751,7 @@ export const setupContracts = async (rpc: string) => {
         "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57", // Kernel v0.3.1 ECDSA Validator
         "0xBAC849bB641841b44E965fB01A4Bf5F074f84b4D", // Kernel v0.3.1 Account Logic
         "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419", // Kernel v0.3.1 Factory
-        "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd", // Kernel v0.3.1 WebAuthn Validator
+        "0x7ab16Ff354AcB328452F1D445b3Ddee9a91e9e69", // Kernel v0.3.1 WebAuthn Validator
         "0xD830D15D3dc0C269F3dBAa0F3e8626d33CFdaBe1", // Kernel v0.3.2 Account Logic
         "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe", // Kernel v0.3.2 Factory
         "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28", // Kernel v0.3.3 Account Logic
