@@ -15,6 +15,7 @@ import {
     type LocalAccount,
     type TypedDataDefinition,
     concatHex,
+    decodeFunctionData,
     encodeAbiParameters,
     encodeFunctionData,
     keccak256,
@@ -32,10 +33,13 @@ import {
     getUserOperationHash,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId } from "viem/actions"
+import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { encode7579Calls } from "../../utils/encode7579Calls.js"
+import { encodeInstallModule } from "../../utils/encodeInstallModule.js"
+import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { KernelInitAbi } from "./abi/KernelAccountAbi.js"
 import {
@@ -58,6 +62,29 @@ import { signMessage } from "./utils/signMessage.js"
 import { signTypedData } from "./utils/signTypedData.js"
 
 type EntryPointVersion = "0.6" | "0.7"
+
+const migrationHelperAbi = [
+    {
+        type: "function",
+        name: "migrateWithCall",
+        inputs: [
+            {
+                name: "validators",
+                type: "address[]",
+                internalType: "contract IValidator[]"
+            },
+            {
+                name: "permissionIds",
+                type: "bytes4[]",
+                internalType: "bytes4[]"
+            },
+            { name: "execMode", type: "bytes32", internalType: "ExecMode" },
+            { name: "execData", type: "bytes", internalType: "bytes" }
+        ],
+        outputs: [],
+        stateMutability: "nonpayable"
+    }
+]
 
 /**
  * The account creation ABI for a kernel smart account (from the KernelFactory)
@@ -98,6 +125,9 @@ export type KernelVersion<entryPointVersion extends EntryPointVersion> =
     entryPointVersion extends "0.6"
         ? "0.2.1" | "0.2.2" | "0.2.3" | "0.2.4"
         : "0.3.0-beta" | "0.3.1" | "0.3.2" | "0.3.3"
+
+export const MIGRATION_HELPER_ADDRESS =
+    "0x03EB97959433D55748839D27C93330Cb85F31A93"
 
 /**
  * Default addresses map for different kernel smart account versions
@@ -660,6 +690,41 @@ export async function toKernelSmartAccount<
         return { accountAddress, getFactoryArgs }
     })()
 
+    const getKernelAccountPatchedStatus = async () => {
+        const rootValidator = await getAction(
+            client,
+            readContract,
+            "readContract"
+        )({
+            address: accountAddress,
+            abi: [
+                {
+                    type: "function",
+                    name: "rootValidator",
+                    inputs: [],
+                    outputs: [
+                        {
+                            name: "",
+                            type: "bytes21",
+                            internalType: "ValidationId"
+                        }
+                    ],
+                    stateMutability: "view"
+                }
+            ],
+            functionName: "rootValidator",
+            args: []
+        })
+
+        const patchedRootValidator =
+            "0x017ab16ff354acb328452f1d445b3ddee9a91e9e69"
+
+        return rootValidator.toLowerCase() === patchedRootValidator
+    }
+
+    let isKernelAccountPatched =
+        validatorAddress !== "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd"
+
     return toSmartAccount({
         client,
         entryPoint,
@@ -679,6 +744,102 @@ export async function toKernelSmartAccount<
             return accountAddress
         },
         async encodeCalls(calls) {
+            if (!isKernelAccountPatched) {
+                const isDeployed =
+                    "isDeployed" in this && (await (this as any).isDeployed())
+                isKernelAccountPatched =
+                    isDeployed && (await getKernelAccountPatchedStatus())
+            }
+            if (!isKernelAccountPatched) {
+                const [installFallbackCall] = encodeInstallModule({
+                    account: this as any,
+                    modules: [
+                        {
+                            type: "fallback",
+                            address: MIGRATION_HELPER_ADDRESS,
+                            context:
+                                "0x36f541c10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001FF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000"
+                        }
+                    ]
+                })
+
+                const [uninstallFallbackCall] = encodeUninstallModule({
+                    account: this as any,
+                    modules: [
+                        {
+                            type: "fallback",
+                            address: MIGRATION_HELPER_ADDRESS,
+                            context: "0x36f541c1"
+                        }
+                    ]
+                })
+
+                const executeCallData = encodeCallData({
+                    calls,
+                    kernelVersion
+                })
+
+                const { args } = decodeFunctionData({
+                    abi: [
+                        {
+                            type: "function",
+                            name: "execute",
+                            inputs: [
+                                {
+                                    name: "execMode",
+                                    type: "bytes32",
+                                    internalType: "ExecMode"
+                                },
+                                {
+                                    name: "executionCalldata",
+                                    type: "bytes",
+                                    internalType: "bytes"
+                                }
+                            ],
+                            outputs: [],
+                            stateMutability: "payable"
+                        }
+                    ],
+                    data: executeCallData
+                })
+
+                const migrationCallData = encodeFunctionData({
+                    abi: migrationHelperAbi,
+                    functionName: "migrateWithCall",
+                    args: [[], [], ...args] as readonly any[]
+                })
+
+                if (kernelVersion !== "0.3.0-beta") {
+                    return encode7579Calls({
+                        mode: {
+                            type: "delegatecall",
+                            revertOnError: false,
+                            selector: "0x",
+                            context: "0x"
+                        },
+                        callData: [
+                            {
+                                to: MIGRATION_HELPER_ADDRESS,
+                                data: migrationCallData,
+                                value: 0n
+                            }
+                        ]
+                    })
+                }
+
+                return encodeCallData({
+                    calls: [
+                        installFallbackCall,
+                        {
+                            to: accountAddress,
+                            data: migrationCallData,
+                            value: 0n
+                        },
+                        uninstallFallbackCall
+                    ],
+                    kernelVersion
+                })
+            }
             return encodeCallData({ calls, kernelVersion })
         },
         async decodeCalls(callData) {

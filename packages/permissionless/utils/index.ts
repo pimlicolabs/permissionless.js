@@ -14,6 +14,10 @@ import {
     type EncodeInstallModuleParameters,
     encodeInstallModule
 } from "./encodeInstallModule.js"
+import {
+    type EncodeUninstallModuleParameters,
+    encodeUninstallModule
+} from "./encodeUninstallModule.js"
 import { getPackedUserOperation } from "./getPackedUserOperation.js"
 
 import {
@@ -48,6 +52,8 @@ export {
     decodeNonce,
     type EncodeInstallModuleParameters,
     encodeInstallModule,
+    type EncodeUninstallModuleParameters,
+    encodeUninstallModule,
     type EncodeCallDataParams,
     encode7579Calls,
     decode7579Calls,
