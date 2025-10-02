@@ -103,6 +103,7 @@ function KernelSmartAccountDemo() {
             client: publicClient,
             version: "0.3.1",
             owners: [toWebAuthnAccount({ credential })],
+            index: 17n,
             entryPoint: {
                 address: entryPoint07Address,
                 version: "0.7"
