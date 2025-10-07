@@ -1,5 +1,4 @@
-import { Base64 } from "ox"
-import type { WebAuthnP256 } from "ox"
+import { getOxExports } from "../../utils/ox.js"
 import {
     type Account,
     type Chain,
@@ -9,7 +8,10 @@ import {
 } from "viem"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
-export type StartAuthenticationReturnType = WebAuthnP256.sign.Options & {
+export type StartAuthenticationReturnType = {
+    challenge: string
+    rpId: string
+    userVerification?: string
     uuid: string
 }
 
@@ -27,7 +29,7 @@ export const startAuthentication = async (
     })
 
     return {
-        challenge: toHex(Base64.toBytes(response.challenge)),
+        challenge: toHex((await getOxExports()).Base64.toBytes(response.challenge)),
         rpId: response.rpId,
         userVerification: response.userVerification,
         uuid: response.uuid
