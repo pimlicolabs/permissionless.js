@@ -240,6 +240,12 @@ export async function toSimpleSmartAccount<
             return {
                 accountAddress: localOwner.address,
                 getFactoryArgs: async () => {
+                    if (entryPoint.version === "0.8") {
+                        return {
+                            factory: "0x7702" as Hex,
+                            factoryData: undefined
+                        }
+                    }
                     return {
                         factory: undefined,
                         factoryData: undefined
