@@ -5,8 +5,7 @@ import {
     type SmartAccount,
     sendUserOperation
 } from "viem/account-abstraction"
-import { getAction } from "viem/utils"
-import { parseAccount } from "viem/utils"
+import { getAction, parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
 import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
 import type { ModuleType } from "./supportsModule.js"
