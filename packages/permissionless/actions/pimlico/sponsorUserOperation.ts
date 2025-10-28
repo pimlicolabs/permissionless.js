@@ -89,12 +89,12 @@ export const sponsorUserOperation = async <
         args
 
     const finalPaymasterContext =
-        sponsorshipPolicyId !== undefined
-            ? {
+        sponsorshipPolicyId === undefined
+            ? paymasterContext
+            : {
                   ...(paymasterContext ?? {}),
                   sponsorshipPolicyId
               }
-            : paymasterContext
 
     const response = await client.request({
         method: "pm_sponsorUserOperation",

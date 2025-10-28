@@ -14,7 +14,7 @@ import { getSenderAddress } from "./getSenderAddress"
 
 describe("getSenderAddress", () => {
     testWithRpc("getSenderAddress_V06", async ({ rpc }) => {
-        const { anvilRpc, altoRpc } = rpc
+        const { anvilRpc } = rpc
 
         const client = createPublicClient({
             transport: http(anvilRpc)
@@ -37,7 +37,7 @@ describe("getSenderAddress", () => {
             await simpleAccountClient.account.getFactoryArgs()
 
         if (!factory || !factoryData) {
-            throw Error("Init code not found")
+            throw new Error("Init code not found")
         }
 
         const address = await getSenderAddress(client, {
@@ -48,7 +48,7 @@ describe("getSenderAddress", () => {
         expect(address).toBe(simpleAccountClient.account.address)
     })
     testWithRpc("getSenderAddress_V06_error", async ({ rpc }) => {
-        const { anvilRpc, altoRpc } = rpc
+        const { anvilRpc } = rpc
 
         const client = createPublicClient({
             transport: http(anvilRpc)
@@ -71,7 +71,7 @@ describe("getSenderAddress", () => {
             await simpleAccountClient.account.getFactoryArgs()
 
         if (!factory || !factoryData) {
-            throw Error("Init code not found")
+            throw new Error("Init code not found")
         }
 
         await expect(async () =>
@@ -82,7 +82,7 @@ describe("getSenderAddress", () => {
         ).rejects.toThrowError()
     })
     testWithRpc("getSenderAddress_V07", async ({ rpc }) => {
-        const { anvilRpc, altoRpc } = rpc
+        const { anvilRpc } = rpc
 
         const client = createPublicClient({
             transport: http(anvilRpc)
@@ -117,7 +117,7 @@ describe("getSenderAddress", () => {
         expect(address).toBe(simpleAccountClient.account.address)
     })
     testWithRpc("getSenderAddress_V08", async ({ rpc }) => {
-        const { anvilRpc, altoRpc } = rpc
+        const { anvilRpc } = rpc
 
         const client = createPublicClient({
             transport: http(anvilRpc)

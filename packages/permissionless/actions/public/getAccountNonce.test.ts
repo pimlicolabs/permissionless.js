@@ -3,7 +3,6 @@ import {
     entryPoint06Address,
     entryPoint07Address
 } from "viem/account-abstraction"
-import { generatePrivateKey } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {

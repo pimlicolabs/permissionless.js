@@ -19,15 +19,15 @@ const validateAuthenticatorSelection = (
     if (!authenticatorSelection) return false
 
     const validAttachments = ["platform", "cross-platform"]
-    const validKeyOptions = ["required", "preferred", "discouraged"]
+    const validKeyOptions = new Set(["required", "preferred", "discouraged"])
 
     return (
         validAttachments.includes(
             authenticatorSelection.authenticatorAttachment
         ) &&
         typeof authenticatorSelection.requireResidentKey === "boolean" &&
-        validKeyOptions.includes(authenticatorSelection.residentKey) &&
-        validKeyOptions.includes(authenticatorSelection.userVerification)
+        validKeyOptions.has(authenticatorSelection.residentKey) &&
+        validKeyOptions.has(authenticatorSelection.userVerification)
     )
 }
 

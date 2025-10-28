@@ -1,5 +1,4 @@
 import { isHash, zeroAddress } from "viem"
-import { entryPoint06Address } from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
