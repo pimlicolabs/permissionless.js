@@ -3,10 +3,10 @@ import {
     type MutationOptions,
     useMutation
 } from "@tanstack/react-query"
-import { sendTransaction, sendCalls } from "@wagmi/core"
+import { sendCalls, sendTransaction } from "@wagmi/core"
 import type {
-    SendCallsErrorType,
     Prettify,
+    SendCallsErrorType,
     SendTransactionErrorType,
     WalletCapabilities,
     WalletSendCallsParameters
