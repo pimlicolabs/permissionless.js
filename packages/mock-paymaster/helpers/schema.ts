@@ -53,7 +53,7 @@ export const hexNumberSchema = z
             })
         }
     })
-    .transform((val) => BigInt(val))
+    .transform(BigInt)
 
 export const hexDataSchema = z
     .string()
@@ -63,21 +63,21 @@ export const hexDataSchema = z
 const signedAuthorizationSchema = z.union([
     z.object({
         contractAddress: addressSchema,
-        chainId: hexNumberSchema.transform((val) => Number(val)),
-        nonce: hexNumberSchema.transform((val) => Number(val)),
+        chainId: hexNumberSchema.transform(Number),
+        nonce: hexNumberSchema.transform(Number),
         r: hexDataSchema.transform((val) => val as Hex),
         s: hexDataSchema.transform((val) => val as Hex),
         v: hexNumberSchema.optional(),
-        yParity: hexNumberSchema.transform((val) => Number(val))
+        yParity: hexNumberSchema.transform(Number)
     }),
     z.object({
         address: addressSchema,
-        chainId: hexNumberSchema.transform((val) => Number(val)),
-        nonce: hexNumberSchema.transform((val) => Number(val)),
+        chainId: hexNumberSchema.transform(Number),
+        nonce: hexNumberSchema.transform(Number),
         r: hexDataSchema.transform((val) => val as Hex),
         s: hexDataSchema.transform((val) => val as Hex),
         v: hexNumberSchema.optional(),
-        yParity: hexNumberSchema.transform((val) => Number(val))
+        yParity: hexNumberSchema.transform(Number)
     })
 ])
 

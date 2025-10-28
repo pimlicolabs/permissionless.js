@@ -8,7 +8,6 @@ import {
     hashMessage
 } from "viem"
 import type { WebAuthnAccount } from "viem/account-abstraction"
-import { signMessage as _signMessage } from "viem/actions"
 import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
 import {
     type WrapMessageHashParams,

@@ -195,23 +195,27 @@ export async function toSimpleSmartAccount<
         address
     })
 
-    const entryPoint = parameters.entryPoint
-        ? {
-              address: parameters.entryPoint.address,
-              abi: getEntryPointAbi(parameters.entryPoint.version),
-              version: parameters.entryPoint.version
-          }
-        : eip7702
-          ? ({
+    const entryPoint = (() => {
+        if (parameters.entryPoint) {
+            return {
+                address: parameters.entryPoint.address,
+                abi: getEntryPointAbi(parameters.entryPoint.version),
+                version: parameters.entryPoint.version
+            }
+        }
+        if (eip7702) {
+            return {
                 address: entryPoint08Address,
                 abi: getEntryPointAbi("0.8"),
                 version: "0.8"
-            } as const)
-          : ({
-                address: entryPoint07Address,
-                abi: getEntryPointAbi("0.7"),
-                version: "0.7"
-            } as const)
+            } as const
+        }
+        return {
+            address: entryPoint07Address,
+            abi: getEntryPointAbi("0.7"),
+            version: "0.7"
+        } as const
+    })()
 
     const factoryAddress = getFactoryAddress(
         entryPoint.version,
@@ -401,7 +405,7 @@ export async function toSimpleSmartAccount<
                 }
 
                 return calls
-            } catch (_) {
+            } catch {
                 const decodedSingle = decodeFunctionData({
                     abi: executeSingleAbi,
                     data: callData

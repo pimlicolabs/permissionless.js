@@ -46,7 +46,7 @@ export const decodeCallData = async (callData: `0x${string}`) => {
         }
 
         return calls
-    } catch (_) {}
+    } catch {}
 
     const decodedSingle = decodeFunctionData({
         abi: [
