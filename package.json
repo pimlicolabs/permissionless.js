@@ -22,7 +22,7 @@
         "@tanstack/react-query": "5.45.1",
         "@types/react": "^18.3.1",
         "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.2.1",
+        "@vitejs/plugin-react": "^5.1.0",
         "@vitest/coverage-v8": "^2.1.5",
         "@wagmi/cli": "latest",
         "async-mutex": "^0.5.0",
