@@ -1,11 +1,12 @@
 import {
+    type Address,
     type Hex,
     concatHex,
+    domainSeparator,
     encodeAbiParameters,
     keccak256,
     stringToHex
 } from "viem"
-import { type Address, domainSeparator } from "viem"
 
 export type WrapMessageHashParams = {
     accountAddress: Address

@@ -1,6 +1,5 @@
 import { zeroAddress } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {

@@ -1,6 +1,5 @@
 import { resolve } from "node:path"
-import { defineInstance } from "prool"
-import { toArgs } from "prool"
+import { defineInstance, toArgs } from "prool"
 import { execa } from "prool/processes"
 
 export type AltoParameters = {
@@ -266,8 +265,6 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
                         : require.resolve("@pimlico/alto")
                 return ["node", resolve(libPath, "../cli/alto.js")]
             })()
-
-            const command = `${binary} ${toArgs({ port, ...args })}`
 
             await process.start(
                 ($) => $`${binary} ${toArgs({ port, ...args })}`,

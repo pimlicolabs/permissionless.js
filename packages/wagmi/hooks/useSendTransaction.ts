@@ -3,15 +3,14 @@ import {
     type MutationOptions,
     useMutation
 } from "@tanstack/react-query"
-import { sendTransaction } from "@wagmi/core"
-import { sendCalls } from "@wagmi/core"
+import { sendCalls, sendTransaction } from "@wagmi/core"
 import type {
     Prettify,
+    SendCallsErrorType,
     SendTransactionErrorType,
     WalletCapabilities,
     WalletSendCallsParameters
 } from "viem"
-import type { SendCallsErrorType } from "viem"
 import { type Config, type ResolvedRegister, useConfig } from "wagmi"
 import type {
     SendTransactionVariables,

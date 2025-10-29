@@ -15,8 +15,7 @@ import type {
     SmartAccount
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
-import { getAction } from "viem/utils"
-import { parseAccount } from "viem/utils"
+import { getAction, parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
 
 export type CallType = "call" | "delegatecall" | "batchcall"

@@ -186,8 +186,6 @@ describe("signUserOperation", () => {
     })
 
     testWithRpc("signUserOperation_V07 7579", async ({ rpc }) => {
-        const { anvilRpc } = rpc
-
         const owners = [
             privateKeyToAccount(generatePrivateKey()),
             privateKeyToAccount(generatePrivateKey()),
