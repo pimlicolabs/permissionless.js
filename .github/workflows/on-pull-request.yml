@@ -11,7 +11,6 @@ jobs:
   verify:
     name: Verify
     uses: ./.github/workflows/verify.yml
-    secrets: inherit
 
   docker-e2e:
     name: E2E-Coverage
