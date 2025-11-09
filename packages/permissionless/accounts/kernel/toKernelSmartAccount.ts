@@ -432,6 +432,7 @@ export type ToKernelSmartAccountParameters<
     >
     version?: kernelVersion
     eip7702?: eip7702
+    strictValidation?: boolean
 } & (eip7702 extends true
     ? {
           owner: OneOf<
@@ -480,8 +481,11 @@ export type KernelSmartAccountImplementation<
         eip7702 extends true
             ? {
                   implementation: Address
+                  strictValidation?: boolean
               }
-            : object,
+            : {
+                  strictValidation?: boolean
+              },
         eip7702
         // {
         //     // entryPoint === ENTRYPOINT_ADDRESS_V06 ? "0.2.2" : "0.3.0-beta"
@@ -536,7 +540,8 @@ export async function toKernelSmartAccount<
         metaFactoryAddress: _metaFactoryAddress,
         accountLogicAddress: _accountLogicAddress,
         useMetaFactory = true,
-        eip7702 = false
+        eip7702 = false,
+        strictValidation = false
     } = parameters
 
     const owners = (() => {
@@ -729,9 +734,12 @@ export async function toKernelSmartAccount<
         getFactoryArgs,
         extend: eip7702
             ? {
-                  implementation: accountLogicAddress
+                  implementation: accountLogicAddress,
+                  strictValidation
               }
-            : undefined,
+            : {
+                  strictValidation
+              },
         authorization: eip7702
             ? {
                   address: accountLogicAddress,
