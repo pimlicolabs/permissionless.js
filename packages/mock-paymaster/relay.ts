@@ -175,7 +175,7 @@ const handleMethod = async ({
         getSingletonPaymaster08Address(paymasterSigner.account.address)
     ]
 
-    const epToPaymaster: Record<`0x${string}`, `0x${string}`> = {
+    const epToPaymaster: Record<Address, Address> = {
         [entryPoint06Address]: paymaster06,
         [entryPoint07Address]: paymaster07,
         [entryPoint08Address]: paymaster08
@@ -330,10 +330,11 @@ const handleMethod = async ({
 
     // If boosted userOp, forward to bundler's boost_sendUserOperation method.
     if (parsedBody.method === "eth_sendUserOperation") {
-        const userOp = parsedBody.params[0] as UserOperation
+        const userOp = parsedBody.params[0] as any
 
         const isBoosted =
-            userOp.maxFeePerGas === 0n && userOp.maxPriorityFeePerGas === 0n
+            userOp.maxFeePerGas === "0x0" &&
+            userOp.maxPriorityFeePerGas === "0x0"
 
         if (isBoosted) {
             return await bundlerClient.request({
