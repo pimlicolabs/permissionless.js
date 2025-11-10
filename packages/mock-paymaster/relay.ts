@@ -287,15 +287,6 @@ const handleMethod = async ({
         ]
     }
 
-    if (parsedBody.method === "pimlico_getUserOperationGasPrice") {
-        return await bundlerClient.request({
-            // @ts-ignore
-            method: "pimlico_getUserOperationGasPrice",
-            // @ts-ignore
-            params: []
-        })
-    }
-
     if (parsedBody.method === "pimlico_getTokenQuotes") {
         const params = pimlicoGetTokenQuotesSchema.safeParse(parsedBody.params)
 
@@ -337,10 +328,30 @@ const handleMethod = async ({
         }
     }
 
-    throw new RpcError(
-        `Attempted to call an unknown method ${parsedBody.method}`,
-        ValidationErrors.InvalidFields
-    )
+    // If boosted userOp, forward to bundler's boost_sendUserOperation method.
+    if (parsedBody.method === "eth_sendUserOperation") {
+        const userOp = parsedBody.params[0] as UserOperation
+
+        const isBoosted =
+            userOp.maxFeePerGas === 0n && userOp.maxPriorityFeePerGas === 0n
+
+        if (isBoosted) {
+            return await bundlerClient.request({
+                // @ts-ignore
+                method: "boost_sendUserOperation",
+                // @ts-ignore
+                params: parsedBody.params
+            })
+        }
+    }
+
+    // Forward all other requests to the bundler
+    return await bundlerClient.request({
+        // @ts-ignore
+        method: parsedBody.method,
+        // @ts-ignore
+        params: parsedBody.params ?? []
+    })
 }
 
 export const createRpcHandler = ({
