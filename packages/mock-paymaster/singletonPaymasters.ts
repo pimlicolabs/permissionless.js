@@ -9,29 +9,18 @@ import {
     concat,
     encodePacked,
     getContract,
-    parseEther,
     toBytes
 } from "viem"
 import {
     type UserOperation,
     toPackedUserOperation
 } from "viem/account-abstraction"
-import {
-    constants,
-    getSingletonPaymaster06Address,
-    getSingletonPaymaster06InitCode,
-    getSingletonPaymaster07Address,
-    getSingletonPaymaster07InitCode,
-    getSingletonPaymaster08Address,
-    getSingletonPaymaster08InitCode
-} from "./constants.js"
+import { constants } from "./constants.js"
 import {
     singletonPaymaster06Abi,
-    singletonPaymaster07Abi,
-    singletonPaymaster08Abi
+    singletonPaymaster07Abi
 } from "./helpers/abi.js"
-import { getPaymasterUtilityWallet } from "./helpers/erc20-utils.js"
-import { type PaymasterMode, getPublicClient } from "./helpers/utils.js"
+import { type PaymasterMode } from "./helpers/utils.js"
 
 export const getDummyPaymasterData = ({
     is06,
@@ -240,82 +229,3 @@ export const getSignedPaymasterData = async ({
     }
 }
 
-export const deployPaymasters = async ({
-    anvilRpc,
-    paymasterSigner
-}: {
-    anvilRpc: string
-    paymasterSigner: Address
-}) => {
-    const walletClient = await getPaymasterUtilityWallet(anvilRpc)
-    const publicClient = await getPublicClient(anvilRpc)
-
-    let nonce = await publicClient.getTransactionCount({
-        address: walletClient.account.address
-    })
-
-    // Deploy singleton paymaster 06.
-    await walletClient.sendTransaction({
-        to: constants.deterministicDeployer,
-        data: concat([
-            constants.create2Salt,
-            getSingletonPaymaster06InitCode(paymasterSigner)
-        ]),
-        nonce: nonce++
-    })
-
-    // Deploy singleton paymaster 07.
-    await walletClient.sendTransaction({
-        to: constants.deterministicDeployer,
-        data: concat([
-            constants.create2Salt,
-            getSingletonPaymaster07InitCode(paymasterSigner)
-        ]),
-        nonce: nonce++
-    })
-
-    // Deploy singleton paymaster 08.
-    await walletClient.sendTransaction({
-        to: constants.deterministicDeployer,
-        data: concat([
-            constants.create2Salt,
-            getSingletonPaymaster08InitCode(paymasterSigner)
-        ]),
-        nonce: nonce++
-    })
-
-    // Initialize contract instances.
-    const [singletonPaymaster06, singletonPaymaster07, singletonPaymaster08] = [
-        getContract({
-            address: getSingletonPaymaster06Address(paymasterSigner),
-            abi: singletonPaymaster06Abi,
-            client: walletClient
-        }),
-        getContract({
-            address: getSingletonPaymaster07Address(paymasterSigner),
-            abi: singletonPaymaster07Abi,
-            client: walletClient
-        }),
-        getContract({
-            address: getSingletonPaymaster08Address(paymasterSigner),
-            abi: singletonPaymaster08Abi,
-            client: walletClient
-        })
-    ]
-
-    // Fund the paymasters.
-    await singletonPaymaster06.write.deposit({
-        value: parseEther("50"),
-        nonce: nonce++
-    })
-
-    await singletonPaymaster07.write.deposit({
-        value: parseEther("50"),
-        nonce: nonce++
-    })
-
-    await singletonPaymaster08.write.deposit({
-        value: parseEther("50"),
-        nonce: nonce++
-    })
-}
