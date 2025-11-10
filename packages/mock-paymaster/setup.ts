@@ -14,9 +14,9 @@ import {
     singletonPaymaster08Abi
 } from "./helpers/abi.js"
 import {
+    create2Salt,
     erc20Address,
     erc20Bytecode,
-    create2Salt,
     getPaymasterUtilityWallet
 } from "./helpers/erc20-utils.js"
 import { getPublicClient } from "./helpers/utils.js"

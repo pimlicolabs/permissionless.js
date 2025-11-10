@@ -20,7 +20,7 @@ import {
     singletonPaymaster06Abi,
     singletonPaymaster07Abi
 } from "./helpers/abi.js"
-import { type PaymasterMode } from "./helpers/utils.js"
+import type { PaymasterMode } from "./helpers/utils.js"
 
 export const getDummyPaymasterData = ({
     is06,
@@ -228,4 +228,3 @@ export const getSignedPaymasterData = async ({
         paymasterData
     }
 }
-
