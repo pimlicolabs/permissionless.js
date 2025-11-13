@@ -1,5 +1,13 @@
 # permissionless
 
+## 0.3.1
+
+### Patch Changes
+
+- fff92fbeab73d9377ed34540646f35b879c83dd0: Dynamically loads ox, thank to @Bvvvp009
+- cfb4a6bb4f477e6baa442d6424028381839f01fa: Updated etherspot factory
+- b5b578f10031d9a4e20c3c1c4ae4b8565e1e8a3a: Fixed prepareUserOperationForERC20Paymaster for USDT on mainnet by only appending 0 allowance if paymaster has insuficcient allowance
+
 ## 0.3.0
 
 ### Minor Changes
