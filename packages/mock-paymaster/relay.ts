@@ -13,7 +13,6 @@ import {
     getAddress,
     toHex
 } from "viem"
-import type { Hex } from "viem"
 import {
     type BundlerClient,
     type UserOperation,
