@@ -266,16 +266,16 @@ export const prepareUserOperationForErc20Paymaster =
                     args: [paymasterERC20Address, maxCostInToken],
                     to: paymasterContext.token
                 })
-            }
 
-            // For USDT on mainnet, add zero approval at the beginning
-            if (token === MAINNET_USDT_ADDRESS) {
-                finalCalls.unshift({
-                    abi: erc20Abi,
-                    functionName: "approve",
-                    args: [paymasterERC20Address, 0n],
-                    to: MAINNET_USDT_ADDRESS
-                })
+                // For USDT on mainnet, add zero approval at the beginning
+                if (token === MAINNET_USDT_ADDRESS) {
+                    finalCalls.unshift({
+                        abi: erc20Abi,
+                        functionName: "approve",
+                        args: [paymasterERC20Address, 0n],
+                        to: MAINNET_USDT_ADDRESS
+                    })
+                }
             }
 
             userOperation.callData = await account.encodeCalls(
