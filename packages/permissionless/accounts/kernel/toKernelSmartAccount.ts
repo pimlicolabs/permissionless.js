@@ -1,8 +1,8 @@
-import { getOxExports } from "../../utils/ox.js"
 import type {
     Account,
     Assign,
     Chain,
+    Hex,
     JsonRpcAccount,
     OneOf,
     PrivateKeyAccount,
@@ -36,6 +36,7 @@ import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { getOxExports } from "../../utils/ox.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { KernelInitAbi } from "./abi/KernelAccountAbi.js"
 import {
@@ -249,7 +250,7 @@ const getInitializationData = <entryPointVersion extends EntryPointVersion>({
     entryPoint: {
         version: entryPointVersion
     }
-    validatorData: `0x${string}`
+    validatorData: Hex
     validatorAddress: Address
 }) => {
     if (entryPointVersion === "0.6") {
@@ -347,13 +348,13 @@ const getAccountInitCode = async <entryPointVersion extends EntryPointVersion>({
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
     entryPointVersion: entryPointVersion
-    validatorData: `0x${string}`
+    validatorData: Hex
     index: bigint
     factoryAddress: Address
     accountLogicAddress: Address
     validatorAddress: Address
     useMetaFactory: boolean
-}): Promise<`0x${string}`> => {
+}): Promise<Hex> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
         entryPoint: { version: entryPointVersion },
@@ -610,7 +611,7 @@ export async function toKernelSmartAccount<
                 entryPoint.version === "0.6" || _useMetaFactory === false
                     ? factoryAddress
                     : metaFactoryAddress,
-            factoryData: await generateInitCode(_useMetaFactory) as `0x${string}`
+            factoryData: (await generateInitCode(_useMetaFactory)) as Hex
         }
     }
 

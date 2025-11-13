@@ -1,4 +1,3 @@
-import { getOxExports } from "permissionless/utils/ox.js"
 import {
     type SmartAccountClient,
     createSmartAccountClient
@@ -9,6 +8,7 @@ import {
 } from "permissionless/accounts"
 import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { getOxExports } from "permissionless/utils/ox.js"
 import * as React from "react"
 import {
     http,
@@ -173,7 +173,7 @@ export function PasskeyServerDemo() {
         if (!smartAccountClient) return
 
         const formData = new FormData(event.currentTarget)
-        const to = formData.get("to") as `0x${string}`
+        const to = formData.get("to") as Hex
         const value = formData.get("value") as string
 
         const hash = await smartAccountClient.sendUserOperation({

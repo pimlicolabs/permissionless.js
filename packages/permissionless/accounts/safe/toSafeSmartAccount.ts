@@ -1,4 +1,3 @@
-import { getOxExports } from "../../utils/ox.js"
 import {
     type Account,
     type Address,
@@ -48,6 +47,7 @@ import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
+import { getOxExports } from "../../utils/ox.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import {
     concatSignatures,
@@ -594,8 +594,8 @@ const encodeMultiSend = (
         value: bigint
         operation: 0 | 1
     }[]
-): `0x${string}` => {
-    const data: `0x${string}` = `0x${txs
+): Hex => {
+    const data: Hex = `0x${txs
         .map((tx) => encodeInternalTransaction(tx))
         .join("")}`
 

@@ -1,7 +1,7 @@
-import { getOxExports } from "../../utils/ox.js"
 import type { Account, Chain, Client, Hex, Transport } from "viem"
 import type { CreateWebAuthnCredentialReturnType } from "viem/account-abstraction"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import { getOxExports } from "../../utils/ox.js"
 
 export type VerifyRegistrationParameters = {
     credential: CreateWebAuthnCredentialReturnType

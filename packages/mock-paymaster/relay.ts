@@ -13,6 +13,7 @@ import {
     getAddress,
     toHex
 } from "viem"
+import type { Hex } from "viem"
 import {
     type BundlerClient,
     type UserOperation,
@@ -175,7 +176,7 @@ const handleMethod = async ({
         getSingletonPaymaster08Address(paymasterSigner.account.address)
     ]
 
-    const epToPaymaster: Record<`0x${string}`, `0x${string}`> = {
+    const epToPaymaster: Record<Hex, Hex> = {
         [entryPoint06Address]: paymaster06,
         [entryPoint07Address]: paymaster07,
         [entryPoint08Address]: paymaster08

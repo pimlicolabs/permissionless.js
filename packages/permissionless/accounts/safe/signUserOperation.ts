@@ -1,4 +1,3 @@
-import { getOxExports } from "../../utils/ox.js"
 import {
     type Account,
     type Address,
@@ -17,6 +16,7 @@ import {
 } from "viem"
 import type { UserOperation, WebAuthnAccount } from "viem/account-abstraction"
 import { toOwner } from "../../utils/index.js"
+import { getOxExports } from "../../utils/ox.js"
 import type { EthereumProvider } from "../../utils/toOwner.js"
 import {
     EIP712_SAFE_OPERATION_TYPE_V06,

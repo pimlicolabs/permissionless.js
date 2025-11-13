@@ -1,6 +1,6 @@
 import { type Address, type Hex, decodeFunctionData } from "viem"
 
-export const decodeCallData = async (callData: `0x${string}`) => {
+export const decodeCallData = async (callData: Hex) => {
     try {
         const decodedBatch = decodeFunctionData({
             abi: [

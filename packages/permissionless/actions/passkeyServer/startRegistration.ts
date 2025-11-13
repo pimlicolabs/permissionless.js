@@ -1,7 +1,7 @@
-import { getOxExports } from "../../utils/ox.js"
 import type { Account, Chain, Client, Transport } from "viem"
 import type { CreateWebAuthnCredentialParameters } from "viem/account-abstraction"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import { getOxExports } from "../../utils/ox.js"
 
 const validateAttestation = (attestation: unknown): boolean => {
     return (

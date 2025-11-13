@@ -21,7 +21,7 @@ export async function getOxModule() {
             "The 'ox' package is required for WebAuthn functionality. Please install it: npm install ox"
         )
     }
-    
+
     try {
         return await oxModule.importPromise
     } catch (error) {

@@ -1,4 +1,4 @@
-import { type Address, encodeFunctionData, zeroAddress } from "viem"
+import { type Address, type Hex, encodeFunctionData, zeroAddress } from "viem"
 import {
     EtherspotBootstrapAbi,
     EtherspotOnInstallAbi
@@ -29,7 +29,7 @@ const _makeBootstrapConfig = (module: string, data: string) => {
     config.data = encodeFunctionData({
         abi: EtherspotOnInstallAbi,
         functionName: "onInstall",
-        args: [data as `0x${string}`]
+        args: [data as Hex]
     })
 
     return config
@@ -38,13 +38,13 @@ const _makeBootstrapConfig = (module: string, data: string) => {
 const makeBootstrapConfig = (module: string, data: string) => {
     const config: {
         module: string
-        data: `0x${string}`
+        data: Hex
     }[] = []
 
     const data1 = encodeFunctionData({
         abi: EtherspotOnInstallAbi,
         functionName: "onInstall",
-        args: [data as `0x${string}`]
+        args: [data as Hex]
     })
 
     const newConfig = {
