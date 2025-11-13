@@ -1,4 +1,4 @@
-import type { Address } from "viem"
+import type { Address, Hex } from "viem"
 import { encodeFunctionData } from "viem"
 
 /**
@@ -9,7 +9,7 @@ export const getFactoryData = async ({
     index,
     secp256k1VerificationFacetAddress
 }: {
-    bytes: `0x${string}`
+    bytes: Hex
     index: bigint
     secp256k1VerificationFacetAddress: Address
 }) => {

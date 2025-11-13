@@ -50,6 +50,24 @@ bun install viem permissionless
 yarn add viem permissionless
 ```
 
+### Optional Dependencies
+
+For WebAuthn functionality (passkeys), you'll also need to install the `ox` package:
+
+```bash
+npm install ox
+```
+
+```bash
+bun install ox
+```
+
+```bash
+yarn add ox
+```
+
+**Note**: The `ox` package is optional and only required if you plan to use WebAuthn/passkey features. The library will throw a helpful error message if you try to use WebAuthn functionality without installing `ox`.
+
 ## Quick Start
 
 ```typescript

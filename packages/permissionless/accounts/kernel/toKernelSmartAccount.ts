@@ -1,10 +1,10 @@
-import { Base64, Hex, PublicKey } from "ox"
 import {
     type Account,
     type Address,
     type Assign,
     type Chain,
     type Client,
+    type Hex,
     type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
@@ -38,6 +38,7 @@ import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { encodeInstallModule } from "../../utils/encodeInstallModule.js"
 import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
+import { getOxExports } from "../../utils/ox.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { KernelInitAbi } from "./abi/KernelAccountAbi.js"
 import {
@@ -277,7 +278,7 @@ const getInitializationData = <entryPointVersion extends EntryPointVersion>({
     entryPoint: {
         version: entryPointVersion
     }
-    validatorData: Hex.Hex
+    validatorData: Hex
     validatorAddress: Address
 }) => {
     if (entryPointVersion === "0.6") {
@@ -320,6 +321,7 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
     }
 
     if (isWebAuthnAccount(owner)) {
+        const { PublicKey, Hex, Base64 } = await getOxExports()
         const parsedPublicKey = PublicKey.fromHex(owner.publicKey)
         const authenticatorIdHash = keccak256(
             Hex.fromBytes(Base64.toBytes(owner.id))
@@ -374,13 +376,13 @@ const getAccountInitCode = async <entryPointVersion extends EntryPointVersion>({
 }: {
     kernelVersion: KernelVersion<entryPointVersion>
     entryPointVersion: entryPointVersion
-    validatorData: Hex.Hex
+    validatorData: Hex
     index: bigint
     factoryAddress: Address
     accountLogicAddress: Address
     validatorAddress: Address
     useMetaFactory: boolean
-}): Promise<Hex.Hex> => {
+}): Promise<Hex> => {
     // Build the account initialization data
     const initializationData = getInitializationData({
         entryPoint: { version: entryPointVersion },
@@ -637,7 +639,7 @@ export async function toKernelSmartAccount<
                 entryPoint.version === "0.6" || _useMetaFactory === false
                     ? factoryAddress
                     : metaFactoryAddress,
-            factoryData: await generateInitCode(_useMetaFactory)
+            factoryData: (await generateInitCode(_useMetaFactory)) as Hex
         }
     }
 
