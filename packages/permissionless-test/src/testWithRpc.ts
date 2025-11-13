@@ -117,7 +117,7 @@ export const testWithRpc = test.extend<{
             paymasterRpc
         })
 
-        await Promise.all([...instances.map((instance) => instance.stop())])
+        await Promise.all(instances.map((instance) => instance.stop()))
         ports = ports.filter(
             (port) =>
                 port !== altoPort ||

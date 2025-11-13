@@ -15,8 +15,7 @@ import type {
     SmartAccount
 } from "viem/account-abstraction"
 import { call, readContract } from "viem/actions"
-import { getAction } from "viem/utils"
-import { parseAccount } from "viem/utils"
+import { getAction, parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
 
 export type CallType = "call" | "delegatecall" | "batchcall"
@@ -33,7 +32,7 @@ export type SupportsExecutionModeParameters<
     callType extends CallType = CallType
 > = GetSmartAccountParameter<TSmartAccount> & ExecutionMode<callType>
 
-function parseCallType(callType: CallType) {
+export function getCallType(callType: CallType) {
     switch (callType) {
         case "call":
             return "0x00"
@@ -53,7 +52,7 @@ export function encodeExecutionMode<callType extends CallType>({
     return encodePacked(
         ["bytes1", "bytes1", "bytes4", "bytes4", "bytes22"],
         [
-            toHex(toBytes(parseCallType(type), { size: 1 })),
+            toHex(toBytes(getCallType(type), { size: 1 })),
             toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
             toHex(toBytes("0x0", { size: 4 })),
             toHex(toBytes(selector ?? "0x", { size: 4 })),

@@ -1,18 +1,16 @@
-import type {
-    Account,
-    Assign,
-    Chain,
-    JsonRpcAccount,
-    OneOf,
-    Prettify,
-    Transport,
-    WalletClient
-} from "viem"
 import {
+    type Account,
     type Address,
+    type Assign,
+    type Chain,
     type Client,
     type Hex,
+    type JsonRpcAccount,
     type LocalAccount,
+    type OneOf,
+    type Prettify,
+    type Transport,
+    type WalletClient,
     decodeFunctionData,
     encodeAbiParameters,
     encodeFunctionData,

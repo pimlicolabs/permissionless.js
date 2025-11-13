@@ -202,20 +202,26 @@ export const getPimlicoClient = <entryPointVersion extends EntryPointVersion>({
 }: {
     entryPointVersion: entryPointVersion
     altoRpc: string
-}) =>
-    createPimlicoClient({
+}) => {
+    const address = (() => {
+        if (entryPointVersion === "0.6") {
+            return entryPoint06Address
+        }
+        if (entryPointVersion === "0.7") {
+            return entryPoint07Address
+        }
+        return entryPoint08Address
+    })()
+
+    return createPimlicoClient({
         chain: foundry,
         entryPoint: {
-            address:
-                entryPointVersion === "0.6"
-                    ? entryPoint06Address
-                    : entryPointVersion === "0.7"
-                      ? entryPoint07Address
-                      : entryPoint08Address,
+            address,
             version: entryPointVersion
         },
         transport: http(altoRpc)
     })
+}
 
 export const getPublicClient = (anvilRpc: string) => {
     const transport = http(anvilRpc, {

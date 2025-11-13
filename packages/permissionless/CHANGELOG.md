@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.0
+
+### Minor Changes
+
+- e4379d769ceb1fc83747f8dd5c6d7d8dc28f4c99: fix: upgraded kernel validator to patch vulnerabile in previous version (was unsafe to use)
+
 ## 0.2.57
 
 ### Patch Changes

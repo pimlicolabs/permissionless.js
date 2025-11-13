@@ -1,5 +1,4 @@
 import { type Hex, zeroAddress } from "viem"
-import { waitForUserOperationReceipt } from "viem/account-abstraction"
 import { privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
@@ -45,8 +44,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 expect(userOpHash).toBeTruthy()
-
-                const publicClient = getPublicClient(anvilRpc)
 
                 await smartClient.waitForUserOperationReceipt({
                     hash: userOpHash as Hex

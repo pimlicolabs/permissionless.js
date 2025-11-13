@@ -3,14 +3,9 @@ import Fastify from "fastify"
 import { defineInstance } from "prool"
 import { http, createWalletClient } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import {
-    deployErc20Token,
-    erc20Address,
-    sudoMintTokens
-} from "./helpers/erc20-utils.js"
 import { getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
-import { deployPaymasters } from "./singletonPaymasters.js"
+import { setup } from "./setup.js"
 
 export const paymaster = defineInstance(
     ({
@@ -35,11 +30,10 @@ export const paymaster = defineInstance(
                     transport: http(anvilRpc)
                 })
 
-                await deployPaymasters({
+                await setup({
                     anvilRpc,
                     paymasterSigner: paymasterSigner.account.address
                 })
-                await deployErc20Token(anvilRpc)
 
                 app.register(cors, {
                     origin: "*",
@@ -66,4 +60,4 @@ export const paymaster = defineInstance(
     }
 )
 
-export { erc20Address, sudoMintTokens }
+export { erc20Address, sudoMintTokens } from "./helpers/erc20-utils.js"

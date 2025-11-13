@@ -46,7 +46,7 @@ export const decodeCallData = async (callData: Hex) => {
         }
 
         return calls
-    } catch (_) {}
+    } catch {}
 
     const decodedSingle = decodeFunctionData({
         abi: [

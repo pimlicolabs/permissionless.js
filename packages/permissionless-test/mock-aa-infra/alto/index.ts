@@ -751,7 +751,7 @@ export const setupContracts = async (rpc: string) => {
         "0x845ADb2C711129d4f3966735eD98a9F09fC4cE57", // Kernel v0.3.1 ECDSA Validator
         "0xBAC849bB641841b44E965fB01A4Bf5F074f84b4D", // Kernel v0.3.1 Account Logic
         "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419", // Kernel v0.3.1 Factory
-        "0xbA45a2BFb8De3D24cA9D7F1B551E14dFF5d690Fd", // Kernel v0.3.1 WebAuthn Validator
+        "0x7ab16Ff354AcB328452F1D445b3Ddee9a91e9e69", // Kernel v0.3.1 WebAuthn Validator
         "0xD830D15D3dc0C269F3dBAa0F3e8626d33CFdaBe1", // Kernel v0.3.2 Account Logic
         "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe", // Kernel v0.3.2 Factory
         "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28", // Kernel v0.3.3 Account Logic
@@ -767,10 +767,10 @@ export const setupContracts = async (rpc: string) => {
         "0x3143E1C0Af0Cdc153423863923Cf4e3818e34Daa", // Trust TokenReceiverFacet
         "0xCe36b85d12D81cd619C745c7717f3396E184Ac7C", // Trust DiamondLoupeFacet
         "0x2e7f1dAe1F3799d20f5c31bEFdc7A620f664728D", // Trust DefaultFallbackHandler
-        "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // Etherspot Factory
-        "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066", // Etherspot Bootstrap
-        "0x7aCEE15c9FFc1e8f287C26E0f4C8244A0729F557", // Etherspot Multiple Owner ECDSA Validator
-        "0x202A5598bDba2cE62bFfA13EcccB04969719Fad9", // Etherspot implementation
+        "0x2A40091f044e48DEB5C0FCbc442E443F3341B451", // Etherspot Factory
+        "0x0D5154d7751b6e2fDaa06F0cC9B400549394C8AA", // Etherspot Bootstrap
+        "0x0740Ed7c11b9da33d9C80Bd76b826e4E90CC1906", // Etherspot Multiple Owner ECDSA Validator
+        "0x339eAB59e54fE25125AceC3225254a0cBD305A7b", // Etherspot implementation
         "0x4Fd8d57b94966982B62e9588C27B4171B55E8354", // ERC7579 Test Module
         "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00", // Thirdweb factory 0.6
         "0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb", // Thirdweb factory 0.7

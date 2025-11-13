@@ -1,5 +1,11 @@
 # @pimlico/mock-paymaster
 
+## 0.0.6
+
+### Patch Changes
+
+- e9b6b788aaed05236cab85ff79f2d1ddc0c81dd4: Added boost_sendUserOperation support and forward unknown requests to bundler
+
 ## 0.0.5
 
 ### Patch Changes

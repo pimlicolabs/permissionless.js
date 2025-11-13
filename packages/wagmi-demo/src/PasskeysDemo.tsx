@@ -103,6 +103,7 @@ function KernelSmartAccountDemo() {
             client: publicClient,
             version: "0.3.1",
             owners: [toWebAuthnAccount({ credential })],
+            index: 17n,
             entryPoint: {
                 address: entryPoint07Address,
                 version: "0.7"
@@ -155,9 +156,15 @@ function KernelSmartAccountDemo() {
         })
         setUserOpHash(hash as Hex)
 
-        const receipt = await smartAccountClient.getCallsStatus({
+        let receipt = await smartAccountClient.getCallsStatus({
             id: hash
         })
+        while (receipt.status === "pending") {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            receipt = await smartAccountClient.getCallsStatus({
+                id: hash
+            })
+        }
         setHash(receipt.receipts?.[0].transactionHash)
     }
 

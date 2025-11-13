@@ -34,7 +34,7 @@ export const verifyRegistration = async (
     if (typeof response.getPublicKeyAlgorithm === "function") {
         try {
             responsePublicKeyAlgorithm = response.getPublicKeyAlgorithm()
-        } catch (error) {
+        } catch {
             throw new Error("getPublicKeyAlgorithm() is not supported")
         }
     }
@@ -45,7 +45,7 @@ export const verifyRegistration = async (
             responseAuthenticatorData = Base64.fromBytes(
                 new Uint8Array(response.getAuthenticatorData())
             )
-        } catch (error) {
+        } catch {
             throw new Error("getAuthenticatorData() is not supported")
         }
     }

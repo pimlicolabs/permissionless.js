@@ -366,7 +366,7 @@ export async function toLightSmartAccount<
                 }
 
                 throw new Error("Invalid function name")
-            } catch (_) {
+            } catch {
                 const decoded = decodeFunctionData({
                     abi: [
                         {

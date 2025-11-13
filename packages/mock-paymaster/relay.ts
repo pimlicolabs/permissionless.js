@@ -176,7 +176,7 @@ const handleMethod = async ({
         getSingletonPaymaster08Address(paymasterSigner.account.address)
     ]
 
-    const epToPaymaster: Record<Hex, Hex> = {
+    const epToPaymaster: Record<Address, Address> = {
         [entryPoint06Address]: paymaster06,
         [entryPoint07Address]: paymaster07,
         [entryPoint08Address]: paymaster08
@@ -288,15 +288,6 @@ const handleMethod = async ({
         ]
     }
 
-    if (parsedBody.method === "pimlico_getUserOperationGasPrice") {
-        return await bundlerClient.request({
-            // @ts-ignore
-            method: "pimlico_getUserOperationGasPrice",
-            // @ts-ignore
-            params: []
-        })
-    }
-
     if (parsedBody.method === "pimlico_getTokenQuotes") {
         const params = pimlicoGetTokenQuotesSchema.safeParse(parsedBody.params)
 
@@ -338,10 +329,31 @@ const handleMethod = async ({
         }
     }
 
-    throw new RpcError(
-        `Attempted to call an unknown method ${parsedBody.method}`,
-        ValidationErrors.InvalidFields
-    )
+    // If boosted userOp, forward to bundler's boost_sendUserOperation method.
+    if (parsedBody.method === "eth_sendUserOperation") {
+        const userOp = parsedBody.params[0] as any
+
+        const isBoosted =
+            userOp.maxFeePerGas === "0x0" &&
+            userOp.maxPriorityFeePerGas === "0x0"
+
+        if (isBoosted) {
+            return await bundlerClient.request({
+                // @ts-ignore
+                method: "boost_sendUserOperation",
+                // @ts-ignore
+                params: parsedBody.params
+            })
+        }
+    }
+
+    // Forward all other requests to the bundler
+    return await bundlerClient.request({
+        // @ts-ignore
+        method: parsedBody.method,
+        // @ts-ignore
+        params: parsedBody.params ?? []
+    })
 }
 
 export const createRpcHandler = ({

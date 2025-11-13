@@ -1674,11 +1674,11 @@ export async function toSafeSmartAccount<
                 })
 
                 return decode7579Calls(decoded.args[0].callData).callData
-            } catch (_) {}
+            } catch {}
 
             try {
                 return decode7579Calls(callData).callData
-            } catch (_) {}
+            } catch {}
 
             const decoded = decodeFunctionData({
                 abi: executeUserOpWithErrorStringAbi,
@@ -1755,10 +1755,7 @@ export async function toSafeSmartAccount<
                 let data: Hex =
                     "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
 
-                if (!isWebAuthnAccount(owner)) {
-                    signer = owner.address
-                    dynamic = false
-                } else {
+                if (isWebAuthnAccount(owner)) {
                     data = encodeAbiParameters(
                         [
                             { name: "authenticatorData", type: "bytes" },
@@ -1774,6 +1771,9 @@ export async function toSafeSmartAccount<
                             ]
                         ]
                     )
+                } else {
+                    signer = owner.address
+                    dynamic = false
                 }
 
                 if (!signer) {
@@ -1826,7 +1826,12 @@ export async function toSafeSmartAccount<
                     let data: Hex
                     let dynamic = true
 
-                    if (!isWebAuthnAccount(localOwner)) {
+                    if (isWebAuthnAccount(localOwner)) {
+                        data = await getWebAuthnSignature({
+                            owner: localOwner,
+                            hash: messageHash
+                        })
+                    } else {
                         signer = localOwner.address
                         data = adjustVInSignature(
                             "eth_sign",
@@ -1837,11 +1842,6 @@ export async function toSafeSmartAccount<
                             })
                         )
                         dynamic = false
-                    } else {
-                        data = await getWebAuthnSignature({
-                            owner: localOwner,
-                            hash: messageHash
-                        })
                     }
 
                     if (!signer) {
@@ -1879,7 +1879,28 @@ export async function toSafeSmartAccount<
                     let data: Hex
                     let dynamic = true
 
-                    if (!isWebAuthnAccount(localOwner)) {
+                    if (isWebAuthnAccount(localOwner)) {
+                        const messageHash = hashTypedData({
+                            domain: {
+                                chainId: await getMemoizedChainId(),
+                                verifyingContract: await this.getAddress()
+                            },
+                            types: {
+                                SafeMessage: [
+                                    { name: "message", type: "bytes" }
+                                ]
+                            },
+                            primaryType: "SafeMessage",
+                            message: {
+                                message: generateSafeMessageMessage(typedData)
+                            }
+                        })
+
+                        data = await getWebAuthnSignature({
+                            owner: localOwner,
+                            hash: messageHash
+                        })
+                    } else {
                         signer = localOwner.address
                         data = adjustVInSignature(
                             "eth_signTypedData",
@@ -1901,27 +1922,6 @@ export async function toSafeSmartAccount<
                             })
                         )
                         dynamic = false
-                    } else {
-                        const messageHash = hashTypedData({
-                            domain: {
-                                chainId: await getMemoizedChainId(),
-                                verifyingContract: await this.getAddress()
-                            },
-                            types: {
-                                SafeMessage: [
-                                    { name: "message", type: "bytes" }
-                                ]
-                            },
-                            primaryType: "SafeMessage",
-                            message: {
-                                message: generateSafeMessageMessage(typedData)
-                            }
-                        })
-
-                        data = await getWebAuthnSignature({
-                            owner: localOwner,
-                            hash: messageHash
-                        })
                     }
 
                     if (!signer) {
