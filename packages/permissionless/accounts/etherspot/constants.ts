@@ -21,7 +21,7 @@ export type NetworkAddresses = {
 }
 
 export const DEFAULT_CONTRACT_ADDRESS: NetworkAddresses = {
-    metaFactoryAddress: "0x93FB56A4a0B7160fbf8903d251Cc7A3fb9bA0933", // modularEtherspotWalletFactory
-    bootstrapAddress: "0x1baCB2F1ef4fD02f02e32cCF70888D9Caeb5f066",
-    validatorAddress: "0x7aCEE15c9FFc1e8f287C26E0f4C8244A0729F557" // multipleOwnerECDSAValidator
+    metaFactoryAddress: "0x2A40091f044e48DEB5C0FCbc442E443F3341B451", // modularEtherspotWalletFactory
+    bootstrapAddress: "0x0D5154d7751b6e2fDaa06F0cC9B400549394C8AA",
+    validatorAddress: "0x0740Ed7c11b9da33d9C80Bd76b826e4E90CC1906" // multipleOwnerECDSAValidator
 }
