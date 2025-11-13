@@ -1,7 +1,7 @@
-import { Base64 } from "ox"
 import type { Account, Chain, Client, Hex, Transport } from "viem"
 import type { CreateWebAuthnCredentialReturnType } from "viem/account-abstraction"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import { getOxExports } from "../../utils/ox.js"
 
 export type VerifyRegistrationParameters = {
     credential: CreateWebAuthnCredentialReturnType
@@ -25,6 +25,7 @@ export const verifyRegistration = async (
     args: VerifyRegistrationParameters
 ): Promise<VerifyRegistrationReturnType> => {
     const { credential, context } = args
+    const { Base64 } = await getOxExports()
 
     const response = credential.raw
         .response as unknown as AuthenticatorAttestationResponse

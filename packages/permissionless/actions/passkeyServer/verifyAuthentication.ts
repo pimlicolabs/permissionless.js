@@ -1,9 +1,22 @@
-import { Base64, type WebAuthnP256 } from "ox"
 // import { Base64 } from "ox"
 import type { Account, Chain, Client, Hex, Transport } from "viem"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import { getOxExports } from "../../utils/ox.js"
 
-export type VerifyAuthenticationParameters = WebAuthnP256.sign.ReturnType & {
+export type VerifyAuthenticationParameters = {
+    raw: {
+        id: string
+        rawId: ArrayBuffer
+        authenticatorAttachment: string
+        response: {
+            authenticatorData?: ArrayBuffer
+            signature?: ArrayBuffer
+            userHandle?: ArrayBuffer
+            clientDataJSON: ArrayBuffer
+        }
+        getClientExtensionResults: () => Record<string, unknown>
+        type: string
+    }
     uuid: string
 }
 
@@ -24,6 +37,7 @@ export const verifyAuthentication = async (
     args: VerifyAuthenticationParameters
 ): Promise<VerifyAuthenticationReturnType> => {
     const { raw, uuid } = args
+    const { Base64 } = await getOxExports()
 
     let responseAuthenticatorData: string
 

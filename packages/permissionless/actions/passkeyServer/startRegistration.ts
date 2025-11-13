@@ -1,7 +1,7 @@
-import { Base64 } from "ox"
 import type { Account, Chain, Client, Transport } from "viem"
 import type { CreateWebAuthnCredentialParameters } from "viem/account-abstraction"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import { getOxExports } from "../../utils/ox.js"
 
 const validateAttestation = (attestation: unknown): boolean => {
     return (
@@ -104,6 +104,7 @@ export const startRegistration = async (
         throw new Error("Invalid response format from passkey server")
     }
 
+    const { Base64 } = await getOxExports()
     const credentialOptions: StartRegistrationReturnType = {
         attestation: response.attestation,
         authenticatorSelection: response.authenticatorSelection,

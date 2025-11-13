@@ -1,6 +1,7 @@
 import { resolve } from "node:path"
 import { defineInstance, toArgs } from "prool"
 import { execa } from "prool/processes"
+import type { Hex } from "viem"
 
 export type AltoParameters = {
     /**
@@ -18,7 +19,7 @@ export type AltoParameters = {
     /**
      * Address of the `BundleBulker` contract.
      */
-    bundleBulkerAddress?: `0x${string}` | undefined
+    bundleBulkerAddress?: Hex | undefined
     /**
      * Set if the bundler bundle user operations automatically or only when calling `debug_bundler_sendBundleNow`.
      * @default "auto"
@@ -53,15 +54,15 @@ export type AltoParameters = {
     /**
      * EntryPoint contract addresses.
      */
-    entrypoints: readonly `0x${string}`[]
+    entrypoints: readonly Hex[]
     /**
      * Address of the EntryPoint simulations contract.
      */
-    entrypointSimulationContract?: `0x${string}` | undefined
+    entrypointSimulationContract?: Hex | undefined
     /**
      * Private keys of the executor accounts.
      */
-    executorPrivateKeys?: readonly `0x${string}`[]
+    executorPrivateKeys?: readonly Hex[]
     /**
      * Interval to refill the signer balance (seconds).
      * @default 1200
@@ -183,7 +184,7 @@ export type AltoParameters = {
     /**
      * Address of the `PerOpInflator` contract.
      */
-    perOpInflatorAddress?: `0x${string}` | undefined
+    perOpInflatorAddress?: Hex | undefined
     /**
      * Polling interval for querying for new blocks (ms).
      * @default 1000

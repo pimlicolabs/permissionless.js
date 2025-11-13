@@ -3,6 +3,7 @@ import type {
     Client,
     GetCallsStatusParameters,
     GetCallsStatusReturnType,
+    Hex,
     Transport
 } from "viem"
 import {
@@ -38,7 +39,7 @@ export async function getCallsStatus<
     client: Client<Transport, chain, account>,
     args: GetCallsStatusParameters
 ): Promise<GetCallsStatusReturnType> {
-    const userOperationHash = args.id as `0x${string}`
+    const userOperationHash = args.id as Hex
 
     const chainId =
         client.chain?.id ??
@@ -51,7 +52,7 @@ export async function getCallsStatus<
             getUserOperationReceipt,
             "getUserOperationReceipt"
         )({
-            hash: args.id as `0x${string}`
+            hash: args.id as Hex
         })
 
         const userOpStatus = receipt.success
