@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.2
+
+### Patch Changes
+
+- e6511a743c5b50536c099301123fc6ea33097f53: Fix release
+
 ## 0.3.1
 
 ### Patch Changes
