@@ -20,7 +20,10 @@ import {
     encodePacked,
     getAddress,
     getContractAddress,
+    getTypesForEIP712Domain,
+    hashDomain,
     hashMessage,
+    hashStruct,
     hashTypedData,
     hexToBigInt,
     keccak256,
@@ -29,6 +32,7 @@ import {
     slice,
     toBytes,
     toHex,
+    validateTypedData,
     zeroAddress
 } from "viem"
 import {
@@ -41,7 +45,7 @@ import {
     entryPoint07Address,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, readContract } from "viem/actions"
+import { getChainId, getCode, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { decode7579Calls } from "../../utils/decode7579Calls.js"
@@ -558,9 +562,42 @@ const generateSafeMessageMessage = <
         return hashMessage(signableMessage)
     }
 
-    return hashTypedData(
-        message as TypedDataDefinition<TTypedData, TPrimaryType>
-    )
+    // For typed data, return the preimage that produces the EIP-712 hash
+    // so SafeMessage hashing (keccak(message)) matches the typed data hash
+    // instead of double-hashing it.
+    const typedData = message as TypedDataDefinition<TTypedData, TPrimaryType>
+    const types = {
+        EIP712Domain: getTypesForEIP712Domain({
+            domain: typedData.domain ?? {}
+        }),
+        ...typedData.types
+    }
+
+    validateTypedData({
+        domain: typedData.domain,
+        message: typedData.message,
+        primaryType: typedData.primaryType,
+        types
+    })
+
+    const domainHash = hashDomain({
+        domain: typedData.domain ?? {},
+        types
+    })
+    const structHash =
+        typedData.primaryType === "EIP712Domain"
+            ? undefined
+            : hashStruct({
+                  data: typedData.message,
+                  primaryType: typedData.primaryType,
+                  types
+              })
+
+    return concat([
+        "0x1901",
+        domainHash,
+        ...(structHash ? [structHash] : [])
+    ] as Hex[])
 }
 
 const encodeInternalTransaction = (tx: {
@@ -1420,6 +1457,28 @@ export async function toSafeSmartAccount<
             })
     )
 
+    // Detect which owners are contracts (for EIP-1271 signature encoding)
+    const contractOwnerAddresses = new Set<Address>()
+    await Promise.all(
+        owners.map(async (owner) => {
+            if (!isWebAuthnAccount(owner)) {
+                const ownerAddress = owner.address
+                const code = await getAction(
+                    client,
+                    getCode,
+                    "getCode"
+                )({ address: ownerAddress })
+                if (code && code !== "0x") {
+                    contractOwnerAddresses.add(getAddress(ownerAddress))
+                }
+            }
+        })
+    )
+
+    const isContractOwner = (address: Address): boolean => {
+        return contractOwnerAddresses.has(getAddress(address))
+    }
+
     const entryPoint = {
         address: parameters.entryPoint?.address ?? entryPoint07Address,
         abi:
@@ -1773,7 +1832,7 @@ export async function toSafeSmartAccount<
                     )
                 } else {
                     signer = owner.address
-                    dynamic = false
+                    dynamic = isContractOwner(owner.address)
                 }
 
                 if (!signer) {
@@ -1833,15 +1892,21 @@ export async function toSafeSmartAccount<
                         })
                     } else {
                         signer = localOwner.address
-                        data = adjustVInSignature(
-                            "eth_sign",
-                            await localOwner.signMessage({
-                                message: {
-                                    raw: toBytes(messageHash)
-                                }
-                            })
-                        )
-                        dynamic = false
+                        const rawSignature = await localOwner.signMessage({
+                            message: {
+                                raw: toBytes(messageHash)
+                            }
+                        })
+
+                        if (isContractOwner(localOwner.address)) {
+                            // Contract owner: use dynamic signature, no V adjustment
+                            dynamic = true
+                            data = rawSignature
+                        } else {
+                            // EOA owner: use static signature with V adjustment
+                            dynamic = false
+                            data = adjustVInSignature("eth_sign", rawSignature)
+                        }
                     }
 
                     if (!signer) {
@@ -1863,6 +1928,8 @@ export async function toSafeSmartAccount<
                 : signatureBytes
         },
         async signTypedData(typedData) {
+            const myAddress = await this.getAddress()
+
             if (localOwners.length < Number(threshold)) {
                 throw new Error(
                     "Owners length mismatch, currently not supported"
@@ -1902,26 +1969,45 @@ export async function toSafeSmartAccount<
                         })
                     } else {
                         signer = localOwner.address
-                        data = adjustVInSignature(
-                            "eth_signTypedData",
-                            await localOwner.signTypedData({
-                                domain: {
-                                    chainId: await getMemoizedChainId(),
-                                    verifyingContract: await this.getAddress()
-                                },
-                                types: {
-                                    SafeMessage: [
-                                        { name: "message", type: "bytes" }
-                                    ]
-                                },
-                                primaryType: "SafeMessage",
-                                message: {
-                                    message:
-                                        generateSafeMessageMessage(typedData)
-                                }
-                            })
-                        )
-                        dynamic = false
+                        const safeMessageContent =
+                            generateSafeMessageMessage(typedData)
+                        const safeAddress = await this.getAddress()
+                        const currentChainId = await getMemoizedChainId()
+
+                        // Compute the hash that will be signed for debugging
+                        const safeMessageTypedData = {
+                            domain: {
+                                chainId: currentChainId,
+                                verifyingContract: safeAddress
+                            },
+                            types: {
+                                SafeMessage: [
+                                    { name: "message", type: "bytes" }
+                                ]
+                            },
+                            primaryType: "SafeMessage" as const,
+                            message: {
+                                message: safeMessageContent
+                            }
+                        }
+                        const safeMessageHash =
+                            hashTypedData(safeMessageTypedData)
+
+                        const rawSignature =
+                            await localOwner.signTypedData(safeMessageTypedData)
+
+                        if (isContractOwner(localOwner.address)) {
+                            // Contract owner: use dynamic signature, no V adjustment
+                            dynamic = true
+                            data = rawSignature
+                        } else {
+                            // EOA owner: use static signature with V adjustment
+                            dynamic = false
+                            data = adjustVInSignature(
+                                "eth_signTypedData",
+                                rawSignature
+                            )
+                        }
                     }
 
                     if (!signer) {
@@ -1966,7 +2052,8 @@ export async function toSafeSmartAccount<
                     validAfter,
                     validUntil,
                     safe4337ModuleAddress,
-                    safeWebAuthnSharedSignerAddress
+                    safeWebAuthnSharedSignerAddress,
+                    contractOwnerAddresses
                 })
             }
 
