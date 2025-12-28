@@ -278,21 +278,6 @@ export async function signUserOperation(
             })
         }
 
-        const safeOpHash = hashTypedData({
-            domain: {
-                chainId,
-                verifyingContract: safe4337ModuleAddress
-            },
-            types:
-                entryPoint.version === "0.6"
-                    ? EIP712_SAFE_OPERATION_TYPE_V06
-                    : EIP712_SAFE_OPERATION_TYPE_V07,
-            primaryType: "SafeOp",
-            message: message
-        })
-
-        // For contract owners, we should sign the safeOpHash directly via signMessage
-        // because when isValidSignature is called, the contract wraps the hash in SafeMessage
         const sig = await localOwner.signTypedData({
             domain: {
                 chainId,

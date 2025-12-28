@@ -1969,16 +1969,10 @@ export async function toSafeSmartAccount<
                         })
                     } else {
                         signer = localOwner.address
-                        const safeMessageContent =
-                            generateSafeMessageMessage(typedData)
-                        const safeAddress = await this.getAddress()
-                        const currentChainId = await getMemoizedChainId()
-
-                        // Compute the hash that will be signed for debugging
-                        const safeMessageTypedData = {
+                        const rawSignature = await localOwner.signTypedData({
                             domain: {
-                                chainId: currentChainId,
-                                verifyingContract: safeAddress
+                                chainId: await getMemoizedChainId(),
+                                verifyingContract: await this.getAddress()
                             },
                             types: {
                                 SafeMessage: [
@@ -1987,21 +1981,14 @@ export async function toSafeSmartAccount<
                             },
                             primaryType: "SafeMessage" as const,
                             message: {
-                                message: safeMessageContent
+                                message: generateSafeMessageMessage(typedData)
                             }
-                        }
-                        const safeMessageHash =
-                            hashTypedData(safeMessageTypedData)
-
-                        const rawSignature =
-                            await localOwner.signTypedData(safeMessageTypedData)
+                        })
 
                         if (isContractOwner(localOwner.address)) {
-                            // Contract owner: use dynamic signature, no V adjustment
                             dynamic = true
                             data = rawSignature
                         } else {
-                            // EOA owner: use static signature with V adjustment
                             dynamic = false
                             data = adjustVInSignature(
                                 "eth_signTypedData",
