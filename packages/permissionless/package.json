@@ -13,79 +13,95 @@
     "description": "A utility library for working with ERC-4337",
     "keywords": ["ethereum", "erc-4337", "eip-4337", "paymaster", "bundler"],
     "license": "MIT",
+    "react-native": "./_esm/index.js",
     "exports": {
         ".": {
             "types": "./_types/index.d.ts",
+            "react-native": "./_esm/index.js",
             "import": "./_esm/index.js",
             "default": "./_cjs/index.js"
         },
         "./accounts": {
             "types": "./_types/accounts/index.d.ts",
+            "react-native": "./_esm/accounts/index.js",
             "import": "./_esm/accounts/index.js",
             "default": "./_cjs/accounts/index.js"
         },
         "./accounts/safe": {
             "types": "./_types/accounts/safe/index.d.ts",
+            "react-native": "./_esm/accounts/safe/index.js",
             "import": "./_esm/accounts/safe/index.js",
             "default": "./_cjs/accounts/safe/index.js"
         },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
+            "react-native": "./_esm/actions/index.js",
             "import": "./_esm/actions/index.js",
             "default": "./_cjs/actions/index.js"
         },
         "./actions/erc7579": {
             "types": "./_types/actions/erc7579.d.ts",
+            "react-native": "./_esm/actions/erc7579.js",
             "import": "./_esm/actions/erc7579.js",
             "default": "./_cjs/actions/erc7579.js"
         },
         "./actions/pimlico": {
             "types": "./_types/actions/pimlico.d.ts",
+            "react-native": "./_esm/actions/pimlico.js",
             "import": "./_esm/actions/pimlico.js",
             "default": "./_cjs/actions/pimlico.js"
         },
         "./actions/passkeyServer": {
             "types": "./_types/actions/passkeyServer.d.ts",
+            "react-native": "./_esm/actions/passkeyServer.js",
             "import": "./_esm/actions/passkeyServer.js",
             "default": "./_cjs/actions/passkeyServer.js"
         },
         "./actions/etherspot": {
             "types": "./_types/actions/etherspot.d.ts",
+            "react-native": "./_esm/actions/etherspot.js",
             "import": "./_esm/actions/etherspot.js",
             "default": "./_cjs/actions/etherspot.js"
         },
         "./actions/smartAccount": {
             "types": "./_types/actions/smartAccount.d.ts",
+            "react-native": "./_esm/actions/smartAccount.js",
             "import": "./_esm/actions/smartAccount.js",
             "default": "./_cjs/actions/smartAccount.js"
         },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
+            "react-native": "./_esm/clients/index.js",
             "import": "./_esm/clients/index.js",
             "default": "./_cjs/clients/index.js"
         },
         "./clients/pimlico": {
             "types": "./_types/clients/pimlico.d.ts",
+            "react-native": "./_esm/clients/pimlico.js",
             "import": "./_esm/clients/pimlico.js",
             "default": "./_cjs/clients/pimlico.js"
         },
         "./clients/passkeyServer": {
             "types": "./_types/clients/passkeyServer.d.ts",
+            "react-native": "./_esm/clients/passkeyServer.js",
             "import": "./_esm/clients/passkeyServer.js",
             "default": "./_cjs/clients/passkeyServer.js"
         },
         "./utils": {
             "types": "./_types/utils/index.d.ts",
+            "react-native": "./_esm/utils/index.js",
             "import": "./_esm/utils/index.js",
             "default": "./_cjs/utils/index.js"
         },
         "./errors": {
             "types": "./_types/errors/index.d.ts",
+            "react-native": "./_esm/errors/index.js",
             "import": "./_esm/errors/index.js",
             "default": "./_cjs/errors/index.js"
         },
         "./experimental/pimlico": {
             "types": "./_types/experimental/pimlico/index.d.ts",
+            "react-native": "./_esm/experimental/pimlico/index.js",
             "import": "./_esm/experimental/pimlico/index.js",
             "default": "./_cjs/experimental/pimlico/index.js"
         }
