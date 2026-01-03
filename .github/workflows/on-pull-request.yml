@@ -29,7 +29,7 @@ jobs:
           node-version: "v22.2.0"
 
       - name: Build
-        run: bun run build:tsgo
+        run: bun run build
       - name: Create .env file
         run: |
           echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
