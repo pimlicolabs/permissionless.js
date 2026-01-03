@@ -50,7 +50,7 @@
     "keywords": [],
     "license": "MIT",
     "scripts": {
-        "build": "bun run build:permissionless && bun run build:wagmi && bun run build:mock-paymaster",
+        "build:tsc": "bun run build:permissionless && bun run build:wagmi && bun run build:mock-paymaster",
         "build:permissionless": "bun run clean:permissionless && bun run build:permissionless:cjs && bun run build:permissionless:esm && bun run build:permissionless:types",
         "build:mock-paymaster": "bun run clean:mock-paymaster && bun run build:mock-paymaster:cjs && bun run build:mock-paymaster:esm && bun run build:mock-paymaster:types",
         "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:esm && bun run build:wagmi:types",
@@ -64,7 +64,7 @@
         "build:mock-paymaster:esm": "tsc --project ./tsconfig/tsconfig.mock-paymaster.esm.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/mock-paymaster/_esm/package.json",
         "build:mock-paymaster:types": "tsc --project ./tsconfig/tsconfig.mock-paymaster.types.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.types.json",
 
-        "build:tsgo": "bun run build:permissionless:tsgo & bun run build:wagmi:tsgo & bun run build:mock-paymaster:tsgo & wait",
+        "build": "bun run build:permissionless:tsgo & bun run build:wagmi:tsgo & bun run build:mock-paymaster:tsgo & wait",
         "build:permissionless:tsgo": "bun run clean:permissionless && (bun run build:permissionless:cjs:tsgo & bun run build:permissionless:esm:tsgo & bun run build:permissionless:types:tsgo & wait)",
         "build:mock-paymaster:tsgo": "bun run clean:mock-paymaster && (bun run build:mock-paymaster:cjs:tsgo & bun run build:mock-paymaster:esm:tsgo & bun run build:mock-paymaster:types:tsgo & wait)",
         "build:wagmi:tsgo": "bun run clean:wagmi && (bun run build:wagmi:esm:tsgo & bun run build:wagmi:types:tsgo & wait)",
