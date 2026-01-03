@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/install-dependencies
 
       - name: Build
-        run: bun run build
+        run: bun run build:tsgo
 
   types:
     if: false
