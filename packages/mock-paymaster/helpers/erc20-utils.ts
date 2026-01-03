@@ -27,9 +27,9 @@ export const erc20Bytecode = concat([
 export const create2Salt =
     "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-export const getPaymasterUtilityWallet = async (
+export const getPaymasterUtilityWallet: (
     anvilRpc: string
-): Promise<WalletClient<Transport, Chain, Account>> => {
+) => Promise<WalletClient<Transport, Chain, Account>> = async (anvilRpc) => {
     const account = privateKeyToAccount(
         "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     )
