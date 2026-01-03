@@ -355,15 +355,19 @@ const handleMethod = async ({
     })
 }
 
-export const createRpcHandler = ({
-    altoRpc,
-    anvilRpc,
-    paymasterSigner
-}: {
+export const createRpcHandler: (params: {
     altoRpc: string
     anvilRpc: string
     paymasterSigner: WalletClient<Transport, Chain, Account>
-}) => {
+}) => (
+    request: FastifyRequest,
+    _reply: FastifyReply
+) => Promise<{
+    jsonrpc: string
+    id: number
+    result?: unknown
+    error?: { message: string; data: unknown; code: number }
+}> = ({ altoRpc, anvilRpc, paymasterSigner }) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
         const publicClient = await getPublicClient(anvilRpc)
         const bundlerClient = createBundlerClient({

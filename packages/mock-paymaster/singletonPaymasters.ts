@@ -98,19 +98,15 @@ export const getDummyPaymasterData = ({
     }
 }
 
-export const getSignedPaymasterData = async ({
-    publicClient,
-    signer,
-    userOp,
-    paymaster,
-    paymasterMode
-}: {
+export const getSignedPaymasterData: (params: {
     publicClient: PublicClient
     signer: WalletClient<Transport, Chain, Account>
     userOp: UserOperation
     paymaster: Address
     paymasterMode: PaymasterMode
-}) => {
+}) => Promise<
+    { paymasterAndData: Hex } | { paymaster: Address; paymasterData: Hex }
+> = async ({ publicClient, signer, userOp, paymaster, paymasterMode }) => {
     let paymasterData: Hex
 
     const validAfter = 0

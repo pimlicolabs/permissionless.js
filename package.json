@@ -43,16 +43,18 @@
         "vite": "^5.4.10",
         "vitest": "^2.1.5",
         "wagmi": "^2.15.1",
-        "@wagmi/core": "2.17.1"
+        "@wagmi/core": "2.17.1",
+        "@typescript/native-preview": "^7.0.0-dev.20260103.1"
     },
     "description": "",
     "keywords": [],
     "license": "MIT",
     "scripts": {
-        "build": "bun run build:permissionless && bun run build:wagmi && bun run build:mock-paymaster",
+        "build:tsc": "bun run build:permissionless && bun run build:wagmi && bun run build:mock-paymaster",
         "build:permissionless": "bun run clean:permissionless && bun run build:permissionless:cjs && bun run build:permissionless:esm && bun run build:permissionless:types",
         "build:mock-paymaster": "bun run clean:mock-paymaster && bun run build:mock-paymaster:cjs && bun run build:mock-paymaster:esm && bun run build:mock-paymaster:types",
         "build:wagmi": "bun run clean:wagmi && bun run build:wagmi:esm && bun run build:wagmi:types",
+
         "build:permissionless:cjs": "tsc --project ./tsconfig/tsconfig.permissionless.cjs.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
         "build:permissionless:esm": "tsc --project ./tsconfig/tsconfig.permissionless.esm.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
         "build:permissionless:types": "tsc --project ./tsconfig/tsconfig.permissionless.types.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.types.json",
@@ -61,10 +63,26 @@
         "build:mock-paymaster:cjs": "tsc --project ./tsconfig/tsconfig.mock-paymaster.cjs.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/mock-paymaster/_cjs/package.json",
         "build:mock-paymaster:esm": "tsc --project ./tsconfig/tsconfig.mock-paymaster.esm.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/mock-paymaster/_esm/package.json",
         "build:mock-paymaster:types": "tsc --project ./tsconfig/tsconfig.mock-paymaster.types.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.types.json",
+
+        "build": "bun run build:permissionless:tsgo & bun run build:wagmi:tsgo & bun run build:mock-paymaster:tsgo & wait",
+        "build:permissionless:tsgo": "bun run clean:permissionless && (bun run build:permissionless:cjs:tsgo & bun run build:permissionless:esm:tsgo & bun run build:permissionless:types:tsgo & wait)",
+        "build:mock-paymaster:tsgo": "bun run clean:mock-paymaster && (bun run build:mock-paymaster:cjs:tsgo & bun run build:mock-paymaster:esm:tsgo & bun run build:mock-paymaster:types:tsgo & wait)",
+        "build:wagmi:tsgo": "bun run clean:wagmi && (bun run build:wagmi:esm:tsgo & bun run build:wagmi:types:tsgo & wait)",
+
+        "build:permissionless:cjs:tsgo": "tsgo --project ./tsconfig/tsconfig.permissionless.cjs.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/permissionless/_cjs/package.json",
+        "build:permissionless:esm:tsgo": "tsgo --project ./tsconfig/tsconfig.permissionless.esm.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/permissionless/_esm/package.json",
+        "build:permissionless:types:tsgo": "tsgo --project ./tsconfig/tsconfig.permissionless.types.json && tsc-alias -p ./tsconfig/tsconfig.permissionless.types.json",
+        "build:wagmi:types:tsgo": "tsgo --project ./tsconfig/tsconfig.wagmi.types.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.types.json",
+        "build:wagmi:esm:tsgo": "tsgo --project ./tsconfig/tsconfig.wagmi.esm.json && tsc-alias -p ./tsconfig/tsconfig.wagmi.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/wagmi/_esm/package.json",
+        "build:mock-paymaster:cjs:tsgo": "tsgo --project ./tsconfig/tsconfig.mock-paymaster.cjs.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.cjs.json && printf '{\"type\":\"commonjs\"}' > ./packages/mock-paymaster/_cjs/package.json",
+        "build:mock-paymaster:esm:tsgo": "tsgo --project ./tsconfig/tsconfig.mock-paymaster.esm.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.esm.json && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./packages/mock-paymaster/_esm/package.json",
+        "build:mock-paymaster:types:tsgo": "tsgo --project ./tsconfig/tsconfig.mock-paymaster.types.json && tsc-alias -p ./tsconfig/tsconfig.mock-paymaster.types.json",
+
         "clean": "bun run clean:permissionless && bun run clean:wagmi && bun run clean:mock-paymaster",
         "clean:permissionless": "rimraf ./packages/permissionless/_esm ./packages/permissionless/_cjs ./packages/permissionless/_types",
         "clean:wagmi": "rimraf ./packages/wagmi/_esm ./packages/wagmi/_cjs ./packages/wagmi/_types",
         "clean:mock-paymaster": "rimraf ./packages/mock-paymaster/_esm ./packages/mock-paymaster/_cjs ./packages/mock-paymaster/_types",
+
         "changeset": "changeset",
         "changeset:release": "bun run build && changeset publish",
         "changeset:version": "changeset version && bun install --lockfile-only",

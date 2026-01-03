@@ -9,7 +9,8 @@
         "../packages/permissionless/**/setupTests.ts",
         "../packages/permissionless/**/*.test.ts",
         "../packages/permissionless/**/*.test-d.ts",
-        "../packages/permissionless/**/*.bench.ts"
+        "../packages/permissionless/**/*.bench.ts",
+        "../packages/permissionless/vitest.config.ts"
     ],
     "compilerOptions": {
         "sourceMap": true,
