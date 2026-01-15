@@ -38,7 +38,7 @@ export const getPaymasterUtilityWallet = async (
     const publicClient = await getPublicClient(anvilRpc)
     const balance = await publicClient.getBalance({ address: account.address })
 
-    // If too little balance, set it to 1000 ETH
+    // Ensure paymaster deployer has enough balance
     if (balance < parseEther("1000")) {
         // Create test client for setting balance
         const testClient = createTestClient({
