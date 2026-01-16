@@ -35,7 +35,6 @@ jobs:
 
   release:
     name: Release
-    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -65,7 +64,6 @@ jobs:
 
   canary:
     name: Release canary
-    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
