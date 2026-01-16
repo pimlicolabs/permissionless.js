@@ -1,5 +1,11 @@
 # @pimlico/mock-paymaster
 
+## 0.0.7
+
+### Patch Changes
+
+- 00a63fa8a0f749a8e0fa4dd7b437ab071c857dce: Updated balance check during mock paymaster deployment
+
 ## 0.0.6
 
 ### Patch Changes
