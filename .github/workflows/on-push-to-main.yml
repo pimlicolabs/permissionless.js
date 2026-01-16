@@ -9,10 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify
-    uses: ./.github/workflows/verify.yml
-
   changesets:
     name: Changesets
     runs-on: ubuntu-latest
