@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       id-token: write
-      contents: read
+      contents: write
 
     steps:
       - name: Clone repository
