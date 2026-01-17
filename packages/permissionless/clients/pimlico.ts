@@ -87,14 +87,7 @@ export function createPimlicoClient<
         account,
         rpcSchema
     >
-): PimlicoClient<
-    entryPointVersion,
-    transport,
-    chain,
-    account,
-    client,
-    rpcSchema
->
+): PimlicoClient<entryPointVersion, transport, chain, client, rpcSchema>
 
 export function createPimlicoClient(
     parameters: PimlicoClientConfig
