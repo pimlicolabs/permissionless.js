@@ -107,7 +107,11 @@ export type SmartAccountClientConfig<
               /** Prepare User Operation configuration. */
               prepareUserOperation?:
                   | ((
-                        client: Client,
+                        client: Client<
+                            Transport,
+                            Chain | undefined,
+                            SmartAccount | undefined
+                        >,
                         parameters: PrepareUserOperationParameters
                     ) => Promise<PrepareUserOperationReturnType>)
                   | undefined
