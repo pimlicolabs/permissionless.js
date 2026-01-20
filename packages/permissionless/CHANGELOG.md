@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.3
+
+### Patch Changes
+
+- 4c3b9e596ba0e0adddf9068ceb5269b870781f0d: Replace typeof with proper types for createSmartAccountClient's prepareUserOperation
+
 ## 0.3.2
 
 ### Patch Changes
