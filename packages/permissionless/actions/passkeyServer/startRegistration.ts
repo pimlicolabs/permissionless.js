@@ -78,7 +78,7 @@ export type StartRegistrationParameters = {
 }
 export type StartRegistrationReturnType = CreateWebAuthnCredentialParameters
 
-export const startRegistration = async (
+export const startRegistration: (
     client: Client<
         Transport,
         Chain | undefined,
@@ -86,7 +86,7 @@ export const startRegistration = async (
         PasskeyServerRpcSchema
     >,
     args?: StartRegistrationParameters
-): Promise<StartRegistrationReturnType> => {
+) => Promise<StartRegistrationReturnType> = async (client, args) => {
     const response = await client.request({
         method: "pks_startRegistration",
         params: [args?.context]
