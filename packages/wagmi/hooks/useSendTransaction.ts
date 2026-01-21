@@ -134,12 +134,17 @@ export type UseSendTransactionParameters<
     }
 >
 
-export const useSendTransaction = <
+export const useSendTransaction: <
+    config extends Config = ResolvedRegister["config"],
+    context = unknown
+>(
+    parameters?: UseSendTransactionParameters<config, context>
+) => UseSendTransactionReturnType<config, context> = <
     config extends Config = ResolvedRegister["config"],
     context = unknown
 >(
     parameters: UseSendTransactionParameters<config, context> = {}
-): UseSendTransactionReturnType<config, context> => {
+) => {
     const { mutation } = parameters
     const { capabilities } = useAvailableCapabilities()
 
