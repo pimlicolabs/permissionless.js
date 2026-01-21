@@ -14,10 +14,10 @@ import {
     type BundlerClientConfig,
     type PaymasterActions,
     type PrepareUserOperationParameters,
+    type PrepareUserOperationReturnType,
     type SmartAccount,
     type UserOperationRequest,
-    bundlerActions,
-    type prepareUserOperation as viemPrepareUserOperation
+    bundlerActions
 } from "viem/account-abstraction"
 import {
     type SmartAccountActions,
@@ -105,7 +105,16 @@ export type SmartAccountClientConfig<
                     }) => Promise<EstimateFeesPerGasReturnType<"eip1559">>)
                   | undefined
               /** Prepare User Operation configuration. */
-              prepareUserOperation?: typeof viemPrepareUserOperation | undefined
+              prepareUserOperation?:
+                  | ((
+                        client: Client<
+                            Transport,
+                            Chain | undefined,
+                            SmartAccount | undefined
+                        >,
+                        parameters: PrepareUserOperationParameters
+                    ) => Promise<PrepareUserOperationReturnType>)
+                  | undefined
           }
         | undefined
 }

@@ -9,10 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify
-    uses: ./.github/workflows/verify.yml
-
   changesets:
     name: Changesets
     runs-on: ubuntu-latest
@@ -39,9 +35,11 @@ jobs:
 
   release:
     name: Release
-    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: write
 
     steps:
       - name: Clone repository
@@ -50,10 +48,68 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
+      - name: Setup .npmrc file
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Publish to NPM
         uses: changesets/action@v1
         with:
           publish: bun run changeset:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_ORG_PERMISSIONLESS_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+  canary:
+    name: Release canary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Setup .npmrc file
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Set permissionless version
+        run: |
+          jq --arg prop "workspaces" 'del(.[$prop])' package.json > package.tmp.json && rm package.json && cp package.tmp.json package.json && rm package.tmp.json
+          cd packages/permissionless
+          npm --no-git-tag-version version 0.0.0
+          npm --no-git-tag-version version $(npm pkg get version | sed 's/"//g')-$(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//').$(date +'%Y%m%dT%H%M%S')
+
+      - name: Set permissionless/wagmi version
+        run: |
+          cd packages/wagmi
+          npm --no-git-tag-version version 0.0.0
+          npm --no-git-tag-version version $(npm pkg get version | sed 's/"//g')-$(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//').$(date +'%Y%m%dT%H%M%S')
+
+      - name: Set mock-paymaster version
+        run: |
+          cd packages/mock-paymaster
+          npm --no-git-tag-version version 0.0.0
+          npm --no-git-tag-version version $(npm pkg get version | sed 's/"//g')-$(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//').$(date +'%Y%m%dT%H%M%S')
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish permissionless to npm
+        run: cd packages/permissionless && npm publish --provenance --tag $(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//')
+
+      - name: Publish permissionless/wagmi to npm
+        run: cd packages/wagmi && npm publish --provenance --tag $(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//')
+
+      - name: Publish mock-paymaster to npm
+        run: cd packages/mock-paymaster && npm publish --provenance --tag $(git branch --show-current | tr -cs '[:alnum:]-' '-' | tr '[:upper:]' '[:lower:]' | sed 's/-$//')
