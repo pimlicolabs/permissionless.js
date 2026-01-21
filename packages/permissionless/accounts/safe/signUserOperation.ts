@@ -12,6 +12,7 @@ import {
     decodeAbiParameters,
     encodeAbiParameters,
     encodePacked,
+    getAddress,
     hashTypedData
 } from "viem"
 import type { UserOperation, WebAuthnAccount } from "viem/account-abstraction"
@@ -131,6 +132,7 @@ export async function signUserOperation(
         validUntil?: number
         safe4337ModuleAddress?: Address
         safeWebAuthnSharedSignerAddress?: Address
+        contractOwnerAddresses?: Set<Address>
     }
 ) {
     const {
@@ -143,6 +145,7 @@ export async function signUserOperation(
         owners,
         signatures: existingSignatures,
         account,
+        contractOwnerAddresses,
         ...userOperation
     } = parameters
 
@@ -250,45 +253,52 @@ export async function signUserOperation(
         }
     }
 
+    const isContractSigner =
+        contractOwnerAddresses?.has(getAddress(signer)) === true
+    const isDynamic = isWebAuthnAccount(localOwner) || isContractSigner
+
+    const signatureData = await (async () => {
+        if (isWebAuthnAccount(localOwner)) {
+            const safeHash = hashTypedData({
+                domain: {
+                    chainId,
+                    verifyingContract: safe4337ModuleAddress
+                },
+                types:
+                    entryPoint.version === "0.6"
+                        ? EIP712_SAFE_OPERATION_TYPE_V06
+                        : EIP712_SAFE_OPERATION_TYPE_V07,
+                primaryType: "SafeOp",
+                message: message
+            })
+
+            return getWebAuthnSignature({
+                owner: localOwner,
+                hash: safeHash
+            })
+        }
+
+        const sig = await localOwner.signTypedData({
+            domain: {
+                chainId,
+                verifyingContract: safe4337ModuleAddress
+            },
+            types:
+                entryPoint.version === "0.6"
+                    ? EIP712_SAFE_OPERATION_TYPE_V06
+                    : EIP712_SAFE_OPERATION_TYPE_V07,
+            primaryType: "SafeOp",
+            message: message
+        })
+        return sig
+    })()
+
     const signatures: { signer: Address; data: Hex; dynamic: boolean }[] = [
         ...unPackedSignatures,
         {
             signer,
-            dynamic: isWebAuthnAccount(localOwner),
-            data: await (async () => {
-                if (isWebAuthnAccount(localOwner)) {
-                    const safeHash = hashTypedData({
-                        domain: {
-                            chainId,
-                            verifyingContract: safe4337ModuleAddress
-                        },
-                        types:
-                            entryPoint.version === "0.6"
-                                ? EIP712_SAFE_OPERATION_TYPE_V06
-                                : EIP712_SAFE_OPERATION_TYPE_V07,
-                        primaryType: "SafeOp",
-                        message: message
-                    })
-
-                    return getWebAuthnSignature({
-                        owner: localOwner,
-                        hash: safeHash
-                    })
-                }
-
-                return localOwner.signTypedData({
-                    domain: {
-                        chainId,
-                        verifyingContract: safe4337ModuleAddress
-                    },
-                    types:
-                        entryPoint.version === "0.6"
-                            ? EIP712_SAFE_OPERATION_TYPE_V06
-                            : EIP712_SAFE_OPERATION_TYPE_V07,
-                    primaryType: "SafeOp",
-                    message: message
-                })
-            })()
+            dynamic: isDynamic,
+            data: signatureData
         }
     ]
 
