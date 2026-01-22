@@ -69,7 +69,7 @@ export async function signMessage({
             [
                 webauthn.authenticatorData,
                 webauthn.clientDataJSON,
-                BigInt(webauthn.typeIndex),
+                BigInt(webauthn.typeIndex ?? 0),
                 BigInt(signature.r),
                 BigInt(signature.s),
                 false // TODO: check if it is a RIP 7212 supported network
