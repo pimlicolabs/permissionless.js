@@ -704,6 +704,7 @@ const getInitializerCode = async ({
     erc7579LaunchpadAddress,
     setupTransactions = [],
     safeModules = [],
+    useMultiSendForSetup = true,
     validators = [],
     executors = [],
     fallbacks = [],
@@ -729,6 +730,7 @@ const getInitializerCode = async ({
         value: bigint
     }[]
     safeModules?: Address[]
+    useMultiSendForSetup?: boolean
     validators?: { address: Address; context: Address }[]
     executors?: {
         address: Address
@@ -902,6 +904,23 @@ const getInitializerCode = async ({
         })
     }
 
+    if (!useMultiSendForSetup && multiCalls.length === 1) {
+        return encodeFunctionData({
+            abi: setupAbi,
+            functionName: "setup",
+            args: [
+                ownerAddresses,
+                threshold,
+                multiCalls[0].to,
+                multiCalls[0].data,
+                safe4337ModuleAddress,
+                paymentToken,
+                payment,
+                paymentReceiver
+            ]
+        })
+    }
+
     const multiSendCallData = encodeMultiSend(multiCalls)
 
     return encodeFunctionData({
@@ -962,6 +981,7 @@ const getAccountInitCode = async ({
     saltNonce = BigInt(0),
     setupTransactions = [],
     safeModules = [],
+    useMultiSendForSetup = true,
     validators = [],
     executors = [],
     fallbacks = [],
@@ -985,6 +1005,7 @@ const getAccountInitCode = async ({
         value: bigint
     }[]
     safeModules?: Address[]
+    useMultiSendForSetup?: boolean
     validators?: { address: Address; context: Address }[]
     executors?: {
         address: Address
@@ -1009,6 +1030,7 @@ const getAccountInitCode = async ({
         setupTransactions,
         safeSingletonAddress,
         safeModules,
+        useMultiSendForSetup,
         erc7579LaunchpadAddress,
         validators,
         executors,
@@ -1183,6 +1205,15 @@ export type ToSafeSmartAccountParameters<
     payment?: bigint
     paymentReceiver?: Address
     onchainIdentifier?: Hex
+    /**
+     * When true (default), the Safe setup always routes through MultiSend,
+     * even for a single setup transaction. When false, a single setup
+     * transaction (e.g. just enableModules) is called directly without
+     * MultiSend wrapping. This produces a different counterfactual address
+     * and is compatible with Safe Protocol Kit / relay-kit address derivation.
+     * @default true
+     */
+    useMultiSendForSetup?: boolean
 } & GetErc7579Params<TErc7579>
 
 function isErc7579Args<entryPointVersion extends "0.6" | "0.7" = "0.7">(
@@ -1224,6 +1255,7 @@ const getAccountAddress = async ({
     paymentReceiver,
     setupTransactions = [],
     safeModules = [],
+    useMultiSendForSetup = true,
     saltNonce = BigInt(0),
     validators = [],
     executors = [],
@@ -1251,6 +1283,7 @@ const getAccountAddress = async ({
     payment?: bigint
     paymentReceiver?: Address
     safeModules?: Address[]
+    useMultiSendForSetup?: boolean
     saltNonce?: bigint
     erc7579LaunchpadAddress?: Address
     validators?: { address: Address; context: Address }[]
@@ -1280,6 +1313,7 @@ const getAccountAddress = async ({
         setupTransactions,
         safeSingletonAddress,
         safeModules,
+        useMultiSendForSetup,
         erc7579LaunchpadAddress,
         validators,
         executors,
@@ -1364,7 +1398,8 @@ export async function toSafeSmartAccount<
         paymentToken,
         payment,
         paymentReceiver,
-        onchainIdentifier
+        onchainIdentifier,
+        useMultiSendForSetup = true
     } = parameters
 
     const owners = await Promise.all(
@@ -1511,6 +1546,7 @@ export async function toSafeSmartAccount<
                 saltNonce,
                 setupTransactions,
                 safeModules,
+                useMultiSendForSetup,
                 validators,
                 executors,
                 fallbacks,
@@ -1547,6 +1583,7 @@ export async function toSafeSmartAccount<
                 saltNonce,
                 setupTransactions,
                 safeModules,
+                useMultiSendForSetup,
                 validators,
                 executors,
                 fallbacks,
