@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.4
+
+### Patch Changes
+
+- 51d5125801d324ced55df016bf6ca554f4e5ec1d: Updated viem to ^2.44.4 and ox to ^0.11.3
+
 ## 0.3.3
 
 ### Patch Changes
