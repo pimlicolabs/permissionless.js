@@ -113,7 +113,11 @@ const userOperationSchemaPaymasterV7 = z
     .object({
         sender: addressSchema,
         nonce: hexNumberSchema,
-        factory: addressSchema.optional().transform((val) => val ?? undefined),
+        factory: z
+            .union([addressSchema, z.literal("0x7702")])
+            .nullable()
+            .optional()
+            .transform((val) => val ?? null),
         factoryData: hexDataSchema
             .optional()
             .transform((val) => val ?? undefined),
@@ -208,7 +212,8 @@ const eip7677UserOperationSchemaV7 = z
     .object({
         sender: addressSchema,
         nonce: hexNumberSchema,
-        factory: addressSchema
+        factory: z
+            .union([addressSchema, z.literal("0x7702")])
             .nullable()
             .optional()
             .transform((val) => val ?? null),
