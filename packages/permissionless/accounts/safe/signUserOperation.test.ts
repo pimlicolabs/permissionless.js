@@ -272,4 +272,96 @@ describe("signUserOperation", () => {
         expect(receipt).toBeTruthy()
         expect(receipt.success).toBeTruthy()
     })
+
+    testWithRpc("signUserOperation_V07 with Safe as owner", async ({ rpc }) => {
+        // Create the first Safe (owner Safe) with an EOA signer
+        const ownerEOA = privateKeyToAccount(generatePrivateKey())
+
+        const ownerSafeAccount = await getSafeClient({
+            ...rpc,
+            entryPoint: {
+                version: "0.7"
+            },
+            owners: [ownerEOA]
+        })
+
+        const ownerSafeClient = getBundlerClient({
+            account: ownerSafeAccount,
+            entryPoint: {
+                version: "0.7"
+            },
+            ...rpc
+        })
+
+        // Deploy the owner Safe first by sending a transaction
+        const deployHash = await ownerSafeClient.sendUserOperation({
+            calls: [
+                {
+                    to: ownerSafeAccount.address,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
+        })
+
+        await ownerSafeClient.waitForUserOperationReceipt({
+            hash: deployHash
+        })
+
+        // Verify owner Safe is deployed
+        const isDeployed = await ownerSafeAccount.isDeployed()
+        expect(isDeployed).toBe(true)
+
+        // Create a LocalAccount-like object from the owner Safe
+        // This wraps the Safe's signing methods in a LocalAccount interface
+        const ownerSafeAsLocalAccount = toAccount({
+            address: ownerSafeAccount.address,
+            async signMessage({ message }) {
+                return ownerSafeAccount.signMessage({ message })
+            },
+            async signTypedData(typedData) {
+                return ownerSafeAccount.signTypedData(typedData)
+            },
+            async signTransaction() {
+                throw new Error("signTransaction not supported for Safe owner")
+            }
+        })
+
+        // Create a second Safe with the owner Safe as the owner
+        const childSafeAccount = await getSafeClient({
+            ...rpc,
+            entryPoint: {
+                version: "0.7"
+            },
+            owners: [ownerSafeAsLocalAccount]
+        })
+
+        const childSafeClient = getBundlerClient({
+            account: childSafeAccount,
+            entryPoint: {
+                version: "0.7"
+            },
+            ...rpc
+        })
+
+        // Send a user operation from the child Safe (signed by the owner Safe)
+        const userOpHash = await childSafeClient.sendUserOperation({
+            calls: [
+                {
+                    to: childSafeAccount.address,
+                    data: "0x",
+                    value: 0n
+                }
+            ]
+        })
+
+        expect(userOpHash).toBeTruthy()
+
+        const receipt = await childSafeClient.waitForUserOperationReceipt({
+            hash: userOpHash
+        })
+
+        expect(receipt).toBeTruthy()
+        expect(receipt.success).toBeTruthy()
+    })
 })
