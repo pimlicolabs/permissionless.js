@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.5
+
+### Patch Changes
+
+- 642846f099d7ee793e7edfb4e6d1e9b6f688272a: Added useMultiSendForSetup to skip multi-send call during setup
+
 ## 0.3.4
 
 ### Patch Changes
