@@ -4,37 +4,55 @@ This directory documents how the `permissionless.js` test suite works end-to-end
 
 ## The short version
 
-Every test in this repository runs against **its own dedicated ERC-4337 stack**:
+Tests in this repository run against a **shared ERC-4337 stack per Vitest worker**:
 
-1. A fresh **Anvil** node (L1 EVM).
-2. A fresh **Alto** bundler (`@pimlico/alto`) pointed at that Anvil.
-3. A fresh **mock paymaster** (Fastify server) pointed at both Anvil and Alto.
+1. One **Anvil** node (L1 EVM) per worker.
+2. One **Alto** bundler (`@pimlico/alto`) pointed at that Anvil.
+3. One **mock paymaster** (Fastify server) pointed at both Anvil and Alto.
 
-These three processes are spawned on dynamically-allocated ports, all core smart-account contracts (EntryPoints v0.6/v0.7/v0.8, SimpleAccount, Safe, Kernel, LightAccount, Biconomy, Trust, Nexus, Etherspot, Thirdweb, ERC-7579 modules, …) are deployed via a deterministic deployer, and then the test body receives `{ anvilRpc, altoRpc, paymasterRpc }` to wire up viem clients. After the test returns, all three processes are stopped and their ports released.
+These three processes are spawned **once per worker** on dynamically-allocated ports when the first test in that worker runs. All core smart-account contracts (EntryPoints v0.6/v0.7/v0.8, SimpleAccount, Safe, Kernel, LightAccount, Biconomy, Trust, Nexus, Etherspot, Thirdweb, ERC-7579 modules, …) are deployed via a deterministic deployer, and paymaster deposits are topped up with 1000 ETH per EntryPoint. Each test receives `{ anvilRpc, altoRpc, paymasterRpc }` to wire up viem clients.
 
-This guarantees complete state isolation: no test can see state produced by another, and tests within the same file run serially but files run in parallel.
+Between tests, the shared infrastructure is reset:
+- Alto's mempool and reputation are cleared via `debug_bundler_clearState`.
+- The base fee is reset to 1 gwei to prevent EIP-1559 inflation from accumulated mined blocks.
 
-## Per-test lifecycle
+Each test uses a **fresh private key** (`generatePrivateKey()`) so counterfactual smart-account addresses differ per test, providing account-level isolation without restarting processes.
+
+When the worker exits, all three processes are stopped.
+
+## Per-worker lifecycle
 
 ```
-┌─────────────────────────── one test ──────────────────────────────┐
-│                                                                   │
-│  1. allocate 3 ports via get-port (alto, paymaster, anvil)        │
-│  2. start anvil on anvilPort (chainId=foundry, hardfork=Prague)   │
-│  3. setupContracts(anvilRpc)                                      │
-│       └─ ~80 txns to the deterministic deployer +                 │
-│          a few setCode / impersonateAccount calls                 │
-│  4. start alto on altoPort (entrypoints: [0.6, 0.7, 0.8])         │
-│  5. start mock-paymaster on paymasterPort                         │
-│                                                                   │
-│  6. ── test body runs ──                                          │
-│     receives: { anvilRpc, altoRpc, paymasterRpc }                 │
-│     builds: public client, wallet client, bundler client,         │
-│             pimlico client, smart account(s), etc.                │
-│                                                                   │
-│  7. stop all 3 instances (Promise.all)                            │
-│  8. release ports                                                 │
-└───────────────────────────────────────────────────────────────────┘
+┌──────────────── worker startup (once) ────────────────────────┐
+│                                                                │
+│  1. allocate 3 ports via get-port (anvil, alto, paymaster)     │
+│  2. start anvil on anvilPort (chainId=foundry, hardfork=Prague)│
+│  3. setupContracts(anvilRpc)                                   │
+│       └─ ~80 txns to the deterministic deployer +              │
+│          a few setCode / impersonateAccount calls              │
+│  4. start alto on altoPort (entrypoints: [0.6, 0.7, 0.8],     │
+│       enableDebugEndpoints: true)                              │
+│  5. start mock-paymaster on paymasterPort                      │
+│  6. top up paymaster deposits (1000 ETH per EntryPoint)        │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+┌──────────────── per test ─────────────────────────────────────┐
+│                                                                │
+│  1. clear alto mempool + reputation (debug_bundler_clearState) │
+│  2. reset base fee to 1 gwei + mine a block                   │
+│  3. ── test body runs ──                                       │
+│     receives: { anvilRpc, altoRpc, paymasterRpc }              │
+│     builds: public client, wallet client, bundler client,      │
+│             pimlico client, smart account(s), etc.             │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+┌──────────────── worker shutdown ──────────────────────────────┐
+│                                                                │
+│  process.on("beforeExit") → stop alto, paymaster, anvil        │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ## What to read
@@ -44,7 +62,7 @@ Read these in order if you're new. Each document is self-contained; cross-links 
 | #   | Doc                                                   | What's in it                                                                          |
 | --- | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | 01  | [01-architecture.md](./01-architecture.md)            | `bun run test` command chain, `vitest.config.ts`, file layout, test discovery.        |
-| 02  | [02-lifecycle.md](./02-lifecycle.md)                  | The `testWithRpc` fixture: ports, setup, teardown, state isolation guarantees.        |
+| 02  | [02-lifecycle.md](./02-lifecycle.md)                  | The `testWithRpc` fixture: shared rig, per-test reset, state isolation guarantees.    |
 | 03  | [03-infrastructure.md](./03-infrastructure.md)        | Anvil, Alto, and the mock paymaster — how each process is spawned and configured.     |
 | 04  | [04-contracts.md](./04-contracts.md)                  | `setupContracts`, the deterministic deployer, the full contract catalog, how to add a new one. |
 | 05  | [05-clients-accounts.md](./05-clients-accounts.md)    | Every viem/Pimlico/smart-account helper in `packages/permissionless-test/src/utils.ts`. |
@@ -67,7 +85,7 @@ Everything test-related lives in three packages:
 
 - `packages/permissionless/vitest.config.ts` — the Vitest config that `bun run test` points at.
 - `packages/permissionless-test/` — shared fixtures, client helpers, and the mock bundler infra. **Not published; test-only.**
-  - `src/testWithRpc.ts` — the `test.extend(...)` fixture that spins up the stack.
+  - `src/testWithRpc.ts` — the `test.extend(...)` fixture with shared per-worker rig, `createAutoBundleTransport`, and per-test reset logic.
   - `src/utils.ts` — every `get*Client`/`get*AccountClient` helper tests reach for.
   - `src/types.ts` — `AAParamType`.
   - `mock-aa-infra/alto/index.ts` — `setupContracts()` that deploys everything.
