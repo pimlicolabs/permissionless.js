@@ -58,19 +58,19 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        let userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
-                hash: opHash
-            }
-        )
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
         // Poll until alto's internal status catches up
-        for (let i = 0; i < 20 && userOperationStatus.status !== "included"; i++) {
-            await new Promise(r => setTimeout(r, 100))
-            userOperationStatus = await getUserOperationStatus(
-                bundlerClient,
-                { hash: opHash }
-            )
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
+                hash: opHash
+            })
         }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
@@ -129,19 +129,19 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        let userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
-                hash: opHash
-            }
-        )
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
         // Poll until alto's internal status catches up
-        for (let i = 0; i < 20 && userOperationStatus.status !== "included"; i++) {
-            await new Promise(r => setTimeout(r, 100))
-            userOperationStatus = await getUserOperationStatus(
-                bundlerClient,
-                { hash: opHash }
-            )
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
+                hash: opHash
+            })
         }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
@@ -199,19 +199,19 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        let userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
-                hash: opHash
-            }
-        )
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
         // Poll until alto's internal status catches up
-        for (let i = 0; i < 20 && userOperationStatus.status !== "included"; i++) {
-            await new Promise(r => setTimeout(r, 100))
-            userOperationStatus = await getUserOperationStatus(
-                bundlerClient,
-                { hash: opHash }
-            )
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
+                hash: opHash
+            })
         }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()

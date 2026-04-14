@@ -8,7 +8,6 @@ import {
     createPublicClient,
     createWalletClient
 } from "viem"
-import { createAutoBundleTransport } from "./testWithRpc"
 import {
     type EntryPointVersion,
     type SmartAccount,
@@ -55,6 +54,7 @@ import {
     createSmartAccountClient
 } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
+import { createAutoBundleTransport } from "./testWithRpc"
 import type { AAParamType } from "./types"
 
 export const PAYMASTER_RPC = "http://localhost:3000"

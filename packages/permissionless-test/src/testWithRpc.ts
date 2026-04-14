@@ -16,13 +16,13 @@ import {
 import { privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { test } from "vitest"
-import { setupContracts } from "../mock-aa-infra/alto"
-import { alto } from "../mock-aa-infra/alto/instance"
 import {
     getSingletonPaymaster06Address,
     getSingletonPaymaster07Address,
     getSingletonPaymaster08Address
 } from "../../mock-paymaster/constants"
+import { setupContracts } from "../mock-aa-infra/alto"
+import { alto } from "../mock-aa-infra/alto/instance"
 
 const anvilPrivateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -158,18 +158,21 @@ async function getSharedRig(): Promise<SharedRig> {
         const paymasterAddresses = [
             {
                 entryPoint: entryPoint06Address,
-                paymaster:
-                    getSingletonPaymaster06Address(paymasterSignerAddress)
+                paymaster: getSingletonPaymaster06Address(
+                    paymasterSignerAddress
+                )
             },
             {
                 entryPoint: entryPoint07Address,
-                paymaster:
-                    getSingletonPaymaster07Address(paymasterSignerAddress)
+                paymaster: getSingletonPaymaster07Address(
+                    paymasterSignerAddress
+                )
             },
             {
                 entryPoint: entryPoint08Address,
-                paymaster:
-                    getSingletonPaymaster08Address(paymasterSignerAddress)
+                paymaster: getSingletonPaymaster08Address(
+                    paymasterSignerAddress
+                )
             }
         ]
         for (const { entryPoint, paymaster: pm } of paymasterAddresses) {
