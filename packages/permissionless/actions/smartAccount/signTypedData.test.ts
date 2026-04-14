@@ -1,5 +1,5 @@
 import { getAddress, zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -7,9 +7,6 @@ import {
     getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { signTypedData } from "./signTypedData"
-
-const privateKey =
-    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 const typedData = {
     domain: {
@@ -56,6 +53,7 @@ describe.each(getCoreSmartAccounts())(
         isEip7702Compliant,
         name
     }) => {
+        const privateKey = generatePrivateKey()
         testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV06)(
             "not isEip1271Compliant_v06",
             async ({ rpc }) => {

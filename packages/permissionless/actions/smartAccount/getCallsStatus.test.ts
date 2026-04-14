@@ -1,5 +1,5 @@
 import { type Hex, zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -8,9 +8,6 @@ import {
 } from "../../../permissionless-test/src/utils"
 import { getCallsStatus } from "./getCallsStatus"
 import { sendCalls } from "./sendCalls"
-
-const privateKey =
-    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 describe.each(getCoreSmartAccounts())(
     "getCallsStatus $name",
@@ -21,6 +18,7 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV08,
         isEip7702Compliant
     }) => {
+        const privateKey = generatePrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "getCallsStatus_v06",
             async ({ rpc }) => {

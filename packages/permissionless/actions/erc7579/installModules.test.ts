@@ -1,5 +1,5 @@
 import { encodeAbiParameters, encodePacked, isHash, zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -19,8 +19,7 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey =
-                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+                const privateKey = generatePrivateKey()
 
                 const privateKeyAccount = privateKeyToAccount(privateKey)
 
@@ -124,8 +123,7 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey =
-                    "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"
+                const privateKey = generatePrivateKey()
 
                 const privateKeyAccount = privateKeyToAccount(privateKey)
 
