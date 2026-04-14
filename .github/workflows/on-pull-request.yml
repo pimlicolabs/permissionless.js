@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/install-dependencies
 
       - name: Build
-        run: bun run build
+        run: bun run build:ci
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -84,6 +84,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
+          path: packages
 
       - name: Create .env file
         run: |
