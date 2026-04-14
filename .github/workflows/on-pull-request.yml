@@ -96,4 +96,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           package_manager: bun
-          build_script: build:size
