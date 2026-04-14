@@ -29,7 +29,6 @@ jobs:
 
   build:
     name: Build
-    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
