@@ -8,9 +8,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify
-    uses: ./.github/workflows/verify.yml
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Lint code
+        run: bun format && bun lint:fix
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          commit_message: 'chore: format'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Build
+        run: bun run build
 
   docker-e2e:
     name: E2E-Coverage
@@ -19,17 +53,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
+        with:
+          install-foundry: 'true'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "v22.2.0"
 
-      - name: Build
-        run: bun run build
       - name: Create .env file
         run: |
           echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
@@ -38,7 +72,7 @@ jobs:
         run: bun run test:ci
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -49,7 +83,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
@@ -59,3 +93,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           package_manager: bun
+          build_script: build:size

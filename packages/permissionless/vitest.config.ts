@@ -3,6 +3,14 @@ import { loadEnv } from "vite"
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            "@pimlico/mock-paymaster": join(
+                __dirname,
+                "../mock-paymaster/index.ts"
+            )
+        }
+    },
     test: {
         coverage: {
             all: true,

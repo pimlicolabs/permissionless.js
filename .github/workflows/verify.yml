@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
@@ -19,7 +19,7 @@ jobs:
       - name: Lint code
         run: bun format && bun lint:fix
       
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -29,13 +29,12 @@ jobs:
 
   build:
     name: Build
-    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
@@ -55,7 +54,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
@@ -86,7 +85,7 @@ jobs:
         total-shards: [3]
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
@@ -109,6 +108,6 @@ jobs:
           VITE_NETWORK_TRANSPORT_MODE: ${{ matrix.transport-mode }}
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
