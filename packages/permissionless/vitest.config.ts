@@ -15,7 +15,17 @@ export default defineConfig({
                 "**/permissionless-test/**",
                 "**/_cjs/**",
                 "**/_esm/**",
-                "**/_types/**"
+                "**/_types/**",
+                "**/permissionless/types/**",
+                "**/permissionless/vitest.config.ts",
+                "**/permissionless/index.ts",
+                "**/permissionless/clients/index.ts",
+                "**/permissionless/actions/index.ts",
+                "**/permissionless/actions/etherspot.ts",
+                "**/permissionless/actions/passkeyServer.ts",
+                "**/permissionless/actions/smartAccount.ts",
+                "**/permissionless/experimental/pimlico/index.ts",
+                "**/permissionless/accounts/safe/index.ts"
             ]
         },
         sequence: {
