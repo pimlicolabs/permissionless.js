@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/install-dependencies
 
       - name: Build
-        run: bun run build:ci
+        run: bun run build
 
   docker-e2e:
     name: E2E-Coverage
