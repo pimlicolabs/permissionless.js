@@ -1,23 +1,33 @@
 import { paymaster } from "@pimlico/mock-paymaster"
 import getPort from "get-port"
 import { anvil } from "prool/instances"
-import { custom, createTestClient, http } from "viem"
+import {
+    http,
+    createTestClient,
+    createWalletClient,
+    custom,
+    parseEther
+} from "viem"
 import {
     entryPoint06Address,
     entryPoint07Address,
     entryPoint08Address
 } from "viem/account-abstraction"
+import { privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { test } from "vitest"
 import { setupContracts } from "../mock-aa-infra/alto"
 import { alto } from "../mock-aa-infra/alto/instance"
+import {
+    getSingletonPaymaster06Address,
+    getSingletonPaymaster07Address,
+    getSingletonPaymaster08Address
+} from "../../mock-paymaster/constants"
 
 const anvilPrivateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
-const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as
-    | string
-    | undefined
+const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as string | undefined
 
 /**
  * Creates a bundler transport that automatically calls
@@ -127,6 +137,51 @@ async function getSharedRig(): Promise<SharedRig> {
 
         await paymasterInstance.start()
 
+        // Top up paymaster deposits so they don't run out across many tests
+        const paymasterSignerAddress = privateKeyToAccount(
+            "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        ).address
+        const walletClient = createWalletClient({
+            chain: foundry,
+            account: privateKeyToAccount(anvilPrivateKey),
+            transport: http(anvilRpc)
+        })
+        const depositToAbi = [
+            {
+                name: "depositTo",
+                type: "function",
+                inputs: [{ type: "address", name: "account" }],
+                outputs: [],
+                stateMutability: "payable"
+            }
+        ] as const
+        const paymasterAddresses = [
+            {
+                entryPoint: entryPoint06Address,
+                paymaster:
+                    getSingletonPaymaster06Address(paymasterSignerAddress)
+            },
+            {
+                entryPoint: entryPoint07Address,
+                paymaster:
+                    getSingletonPaymaster07Address(paymasterSignerAddress)
+            },
+            {
+                entryPoint: entryPoint08Address,
+                paymaster:
+                    getSingletonPaymaster08Address(paymasterSignerAddress)
+            }
+        ]
+        for (const { entryPoint, paymaster: pm } of paymasterAddresses) {
+            await walletClient.writeContract({
+                address: entryPoint,
+                abi: depositToAbi,
+                functionName: "depositTo",
+                args: [pm],
+                value: parseEther("1000")
+            })
+        }
+
         return {
             anvilRpc,
             altoRpc,
@@ -177,6 +232,19 @@ export const testWithRpc = test.extend<{
 
         // Clear alto's mempool + reputation between tests
         await clearAltoState(rig.altoRpc)
+
+        // Reset base fee to prevent inflation from accumulated mined blocks.
+        // Without this, base fee grows with each non-empty block across tests,
+        // causing "AA31 paymaster deposit too low" errors.
+        const testClient = createTestClient({
+            mode: "anvil",
+            chain: foundry,
+            transport: http(rig.anvilRpc)
+        })
+        await testClient.setNextBlockBaseFeePerGas({
+            baseFeePerGas: 1000000000n
+        })
+        await testClient.mine({ blocks: 1 })
 
         await use({
             anvilRpc: rig.anvilRpc,
