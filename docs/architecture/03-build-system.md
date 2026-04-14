@@ -8,7 +8,7 @@ The permissionless monorepo uses TypeScript compilation (no bundler) to produce 
 |------|---------|---------|
 | TypeScript | ^5.2.2 | Type checking and compilation |
 | tsgo | @typescript/native-preview ^7.0.0 | Fast native TypeScript compiler (used for default builds) |
-| tsc-alias | ^1.8.8 | Resolves path aliases in compiled output |
+| tsc-alias | ^1.8.8 | Resolves full paths in ESM and types output (adds `.js` extensions) |
 | Biome | ^1.0.0 | Linter and formatter (replaces ESLint/Prettier) |
 | Vitest | ^2.1.5 | Test runner with coverage-v8 |
 | Changesets | ^2.26.2 | Version management and changelog generation |
@@ -30,39 +30,67 @@ packages/permissionless/
 ### Build Commands
 
 ```bash
-# Default build (uses tsgo for speed, all packages in parallel)
+# Default build (cleans then runs build:ci)
 bun run build
 
-# Standard tsc build (all packages)
+# CI build (all 8 tsgo compilations sequentially, no clean step)
+# Runs sequentially because CI runners have limited vCPUs (2 on GitHub Actions)
+bun run build:ci
+
+# Size-only build (only permissionless CJS + ESM for size-limit checks)
+bun run build:size
+
+# Standard tsc build (all packages, sequential)
 bun run build:tsc
 
-# Individual package builds
+# Individual package builds (using tsc)
 bun run build:permissionless      # CJS + ESM + types
 bun run build:wagmi               # ESM + types (no CJS)
 bun run build:mock-paymaster      # CJS + ESM + types
 
+# Individual package builds (using tsgo, parallel within package)
+bun run build:permissionless:tsgo
+bun run build:wagmi:tsgo
+bun run build:mock-paymaster:tsgo
+
 # Clean generated output
 bun run clean
 ```
+
+### Build Scripts Architecture
+
+The `build` script delegates to `build:ci` after cleaning:
+
+```
+build = clean + build:ci
+```
+
+`build:ci` runs all 8 tsgo compilations **sequentially** in a single command chain:
+1. permissionless CJS → permissionless ESM (+ tsc-alias) → permissionless types (+ tsc-alias)
+2. wagmi ESM (+ tsc-alias) → wagmi types (+ tsc-alias)
+3. mock-paymaster CJS → mock-paymaster ESM (+ tsc-alias) → mock-paymaster types (+ tsc-alias)
+
+Sequential execution is intentional: GitHub Actions runners have only 2 vCPUs, so running 8 parallel CPU-bound tsgo processes causes cache thrashing and is slower than sequential.
+
+The per-package `:tsgo` scripts still use parallel execution (via bash `&` + `wait`) for local development on machines with more cores.
 
 ### Per-Format Build Steps
 
 Each format follows the same pattern:
 
 1. **Compile** with tsc (or tsgo) using format-specific tsconfig
-2. **Resolve aliases** with tsc-alias
+2. **Resolve paths** with tsc-alias (ESM and types only — adds `.js` extensions for Node ESM compatibility; CJS doesn't need this since `require()` resolves without extensions)
 3. **Inject package.json** into output directory to mark the module type
 
-Example for CJS:
+Example for CJS (no tsc-alias needed):
 ```bash
-tsc --project ./tsconfig/tsconfig.permissionless.cjs.json \
-  && tsc-alias -p ./tsconfig/tsconfig.permissionless.cjs.json \
+tsgo --project ./tsconfig/tsconfig.permissionless.cjs.json \
   && printf '{"type":"commonjs"}' > ./packages/permissionless/_cjs/package.json
 ```
 
-Example for ESM:
+Example for ESM (tsc-alias adds .js extensions):
 ```bash
-tsc --project ./tsconfig/tsconfig.permissionless.esm.json \
+tsgo --project ./tsconfig/tsconfig.permissionless.esm.json \
   && tsc-alias -p ./tsconfig/tsconfig.permissionless.esm.json \
   && printf '{"type":"module","sideEffects":false}' > ./packages/permissionless/_esm/package.json
 ```
@@ -99,6 +127,33 @@ The CJS build adds:
 - `module: "commonjs"`, `moduleResolution: "Node"` -- CommonJS output
 - `removeComments: true` -- Strips comments to reduce bundle size
 - `verbatimModuleSyntax: false` -- Required for CJS compatibility (can't use `import type` syntax in CJS output)
+
+## CI/CD
+
+### PR Workflow
+
+All four jobs run **in parallel** with no dependencies:
+
+```
+┌────────┐  ┌────────┐  ┌──────────────┐  ┌──────┐
+│  Lint  │  │ Build  │  │ E2E-Coverage │  │ Size │
+└────────┘  └────────┘  └──────────────┘  └──────┘
+```
+
+- **Lint** — formats and lints code, auto-commits fixes
+- **Build** — runs `build:ci` to verify compilation
+- **E2E-Coverage** — runs tests with coverage (no build needed — vitest resolves workspace packages from source via aliases)
+- **Size** — runs `size-limit-action` to compare bundle sizes against base branch
+
+### Dependency Caching
+
+The `install-dependencies` composite action caches Bun's global install cache (`~/.bun/install/cache`) keyed on `bun.lock`. On cache hit, `bun install` is near-instant.
+
+Foundry is only installed when `install-foundry: 'true'` is passed (E2E job only).
+
+### Main Branch Workflow
+
+Three parallel jobs: **Changesets** (version PRs), **Release** (npm publish), **Canary** (branch-tagged canary releases).
 
 ## Package Exports
 
@@ -167,10 +222,12 @@ Configuration (`.changeset/config.json`):
 
 | Entry | Format | Limit |
 |-------|--------|-------|
-| `permissionless` | ESM | 60 kB |
+| `permissionless` | ESM | 250 kB |
 | `permissionless` | CJS | 500 kB |
 
-Checked via `bun run size-limit` (typically run in CI).
+The `build:size` script builds only the permissionless CJS + ESM targets needed for size checking (skips wagmi, mock-paymaster, and types).
+
+Checked via `bun run size-limit` locally, or via `size-limit-action` in CI.
 
 ## Testing
 
@@ -182,7 +239,9 @@ bun run test:ci             # CI mode with coverage
 bun run test:ci-no-coverage # CI mode without coverage
 ```
 
-Configuration is in `packages/permissionless/vitest.config.ts`. Tests are colocated with source files as `*.test.ts`. See [Testing Infrastructure](../testing/01-architecture.md) for the full test setup documentation.
+Configuration is in `packages/permissionless/vitest.config.ts`. The vitest config includes a resolve alias for `@pimlico/mock-paymaster` that points to the source TypeScript file, allowing tests to run without building the package first.
+
+Tests are colocated with source files as `*.test.ts`. See [Testing Infrastructure](../testing/01-architecture.md) for the full test setup documentation.
 
 ## Adding a New Export Subpath
 
