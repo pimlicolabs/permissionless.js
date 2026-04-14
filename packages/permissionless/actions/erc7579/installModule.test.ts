@@ -104,14 +104,14 @@ describe.each(getCoreSmartAccounts())(
             }
         )
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "installModule",
+            "installModule post deployment",
             async ({ rpc }) => {
                 if (!getErc7579SmartAccountClient) {
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
                 const privateKey =
-                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+                    "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 
                 const privateKeyAccount = privateKeyToAccount(privateKey)
 

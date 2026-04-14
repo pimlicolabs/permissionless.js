@@ -1,6 +1,7 @@
 import { paymaster } from "@pimlico/mock-paymaster"
 import getPort from "get-port"
 import { anvil } from "prool/instances"
+import { custom, createTestClient, http } from "viem"
 import {
     entryPoint06Address,
     entryPoint07Address,
@@ -11,6 +12,183 @@ import { test } from "vitest"
 import { setupContracts } from "../mock-aa-infra/alto"
 import { alto } from "../mock-aa-infra/alto/instance"
 
+const anvilPrivateKey =
+    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as
+    | string
+    | undefined
+
+/**
+ * Creates a bundler transport that automatically calls
+ * debug_bundler_sendBundleNow + mines a block after every eth_sendUserOperation.
+ * This makes bundling deterministic and near-instant.
+ */
+function createAutoBundleTransport(altoRpc: string, anvilRpc: string) {
+    const baseTransport = http(altoRpc)
+
+    return custom({
+        async request({ method, params }) {
+            const transport = baseTransport({ chain: foundry })
+            const result = await transport.request({ method, params } as any)
+
+            // After a user op is submitted, immediately bundle + mine
+            if (method === "eth_sendUserOperation") {
+                await fetch(altoRpc, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        jsonrpc: "2.0",
+                        method: "debug_bundler_sendBundleNow",
+                        params: [],
+                        id: 1
+                    })
+                })
+                // Mine a block so the bundle tx is included
+                const testClient = createTestClient({
+                    mode: "anvil",
+                    chain: foundry,
+                    transport: http(anvilRpc)
+                })
+                await testClient.mine({ blocks: 1 })
+            }
+
+            return result
+        }
+    })
+}
+
+// Shared anvil + alto + paymaster per worker.
+// Each test uses a fresh smart account (unique private key), so on-chain state
+// from previous tests doesn't interfere. We just clear alto's mempool between tests.
+type SharedRig = {
+    anvilRpc: string
+    altoRpc: string
+    paymasterRpc: string
+    anvilInstance: Awaited<ReturnType<typeof anvil>>
+    altoInstance: Awaited<ReturnType<typeof alto>>
+    paymasterInstance: Awaited<ReturnType<typeof paymaster>>
+}
+
+let sharedRigPromise: Promise<SharedRig> | null = null
+
+async function getSharedRig(): Promise<SharedRig> {
+    if (sharedRigPromise) return sharedRigPromise
+    sharedRigPromise = (async () => {
+        const anvilPort = await getPort()
+        const altoPort = await getPort({ exclude: [anvilPort] })
+        const paymasterPort = await getPort({
+            exclude: [anvilPort, altoPort]
+        })
+        const anvilRpc = `http://localhost:${anvilPort}`
+        const altoRpc = `http://localhost:${altoPort}`
+        const paymasterRpc = `http://localhost:${paymasterPort}`
+
+        const anvilInstance = forkUrl
+            ? anvil({
+                  chainId: foundry.id,
+                  port: anvilPort,
+                  hardfork: "Prague",
+                  forkUrl
+              })
+            : anvil({
+                  chainId: foundry.id,
+                  hardfork: "Prague",
+                  port: anvilPort
+              })
+
+        await anvilInstance.start()
+
+        if (!forkUrl) {
+            await setupContracts(anvilRpc)
+        }
+
+        const altoInstance = alto({
+            entrypoints: [
+                entryPoint06Address,
+                entryPoint07Address,
+                entryPoint08Address
+            ],
+            rpcUrl: anvilRpc,
+            executorPrivateKeys: [anvilPrivateKey],
+            safeMode: false,
+            port: altoPort,
+            utilityPrivateKey: anvilPrivateKey,
+            enableDebugEndpoints: true
+        })
+
+        await altoInstance.start()
+
+        const paymasterInstance = paymaster({
+            anvilRpc,
+            port: paymasterPort,
+            altoRpc
+        })
+
+        await paymasterInstance.start()
+
+        return {
+            anvilRpc,
+            altoRpc,
+            paymasterRpc,
+            anvilInstance,
+            altoInstance,
+            paymasterInstance
+        }
+    })()
+    return sharedRigPromise
+}
+
+async function clearAltoState(altoRpc: string): Promise<void> {
+    await fetch(altoRpc, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "debug_bundler_clearState",
+            params: [],
+            id: 1
+        })
+    })
+}
+
+// Clean up shared rig when the worker process exits
+process.on("beforeExit", async () => {
+    if (!sharedRigPromise) return
+    const rig = await sharedRigPromise
+    await Promise.all([
+        rig.altoInstance.stop(),
+        rig.paymasterInstance.stop(),
+        rig.anvilInstance.stop()
+    ])
+    sharedRigPromise = null
+})
+
+export const testWithRpc = test.extend<{
+    rpc: {
+        anvilRpc: string
+        altoRpc: string
+        paymasterRpc: string
+    }
+}>({
+    // biome-ignore lint/correctness/noEmptyPattern: Needed in vitest :/
+    rpc: async ({}, use) => {
+        const rig = await getSharedRig()
+
+        // Clear alto's mempool + reputation between tests
+        await clearAltoState(rig.altoRpc)
+
+        await use({
+            anvilRpc: rig.anvilRpc,
+            altoRpc: rig.altoRpc,
+            paymasterRpc: rig.paymasterRpc
+        })
+    }
+})
+
+export { createAutoBundleTransport }
+
+// Keep getInstances export for backwards compatibility (standalone trio, used in docs references)
 export const getInstances = async ({
     anvilPort,
     altoPort,
@@ -18,13 +196,6 @@ export const getInstances = async ({
 }: { anvilPort: number; altoPort: number; paymasterPort: number }) => {
     const anvilRpc = `http://localhost:${anvilPort}`
     const altoRpc = `http://localhost:${altoPort}`
-
-    const anvilPrivateKey =
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-
-    const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as
-        | string
-        | undefined
 
     const anvilInstance = forkUrl
         ? anvil({
@@ -52,13 +223,6 @@ export const getInstances = async ({
         utilityPrivateKey: anvilPrivateKey
     })
 
-    // altoInstance.on("stderr", (data) => {
-    //     console.error(data.toString())
-    // })
-    // altoInstance.on("stdout", (data) => {
-    //     console.log(data.toString())
-    // })
-
     const paymasterInstance = paymaster({
         anvilRpc,
         port: paymasterPort,
@@ -76,53 +240,3 @@ export const getInstances = async ({
 
     return [anvilInstance, altoInstance, paymasterInstance]
 }
-
-let ports: number[] = []
-
-export const testWithRpc = test.extend<{
-    rpc: {
-        anvilRpc: string
-        altoRpc: string
-        paymasterRpc: string
-    }
-}>({
-    // biome-ignore lint/correctness/noEmptyPattern: Needed in vitest :/
-    rpc: async ({}, use) => {
-        const altoPort = await getPort({
-            exclude: ports
-        })
-        ports.push(altoPort)
-        const paymasterPort = await getPort({
-            exclude: ports
-        })
-        ports.push(paymasterPort)
-        const anvilPort = await getPort({
-            exclude: ports
-        })
-        ports.push(anvilPort)
-
-        const anvilRpc = `http://localhost:${anvilPort}`
-        const altoRpc = `http://localhost:${altoPort}`
-        const paymasterRpc = `http://localhost:${paymasterPort}`
-
-        const instances = await getInstances({
-            anvilPort,
-            altoPort,
-            paymasterPort
-        })
-
-        await use({
-            anvilRpc,
-            altoRpc,
-            paymasterRpc
-        })
-
-        await Promise.all(instances.map((instance) => instance.stop()))
-        ports = ports.filter(
-            (port) =>
-                port !== altoPort ||
-                port !== anvilPort ||
-                port !== paymasterPort
-        )
-    }
-})
