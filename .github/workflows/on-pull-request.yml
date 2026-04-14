@@ -46,24 +46,8 @@ jobs:
       - name: Build
         run: bun run build:ci
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            packages/permissionless/_cjs
-            packages/permissionless/_esm
-            packages/permissionless/_types
-            packages/wagmi/_esm
-            packages/wagmi/_types
-            packages/mock-paymaster/_cjs
-            packages/mock-paymaster/_esm
-            packages/mock-paymaster/_types
-          retention-days: 1
-
   docker-e2e:
     name: E2E-Coverage
-    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -79,12 +63,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "v22.2.0"
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: packages
 
       - name: Create .env file
         run: |
