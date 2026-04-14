@@ -44,7 +44,7 @@ describe("verifyRegistration", () => {
     test("handles credential without getPublicKeyAlgorithm", async () => {
         const cred = createMockCredential()
         // @ts-ignore
-        delete cred.raw.response.getPublicKeyAlgorithm
+        cred.raw.response.getPublicKeyAlgorithm = undefined
 
         const mockClient = {
             request: async () => ({
@@ -66,7 +66,7 @@ describe("verifyRegistration", () => {
     test("handles credential without getAuthenticatorData", async () => {
         const cred = createMockCredential()
         // @ts-ignore
-        delete cred.raw.response.getAuthenticatorData
+        cred.raw.response.getAuthenticatorData = undefined
 
         const mockClient = {
             request: async () => ({
@@ -88,7 +88,7 @@ describe("verifyRegistration", () => {
     test("handles credential without getTransports", async () => {
         const cred = createMockCredential()
         // @ts-ignore
-        delete cred.raw.response.getTransports
+        cred.raw.response.getTransports = undefined
 
         const mockClient = {
             request: async () => ({

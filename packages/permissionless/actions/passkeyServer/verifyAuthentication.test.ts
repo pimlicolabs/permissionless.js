@@ -40,7 +40,7 @@ describe("verifyAuthentication", () => {
     test("throws when authenticatorData is missing", async () => {
         const raw = createMockRaw()
         // @ts-ignore - intentionally removing authenticatorData
-        delete raw.response.authenticatorData
+        raw.response.authenticatorData = undefined
 
         const mockClient = {
             request: async () => ({})
@@ -57,7 +57,7 @@ describe("verifyAuthentication", () => {
     test("throws when signature is missing", async () => {
         const raw = createMockRaw()
         // @ts-ignore
-        delete raw.response.signature
+        raw.response.signature = undefined
 
         const mockClient = {
             request: async () => ({})
@@ -128,7 +128,7 @@ describe("verifyAuthentication", () => {
     test("handles optional userHandle", async () => {
         const raw = createMockRaw()
         // @ts-ignore
-        delete raw.response.userHandle
+        raw.response.userHandle = undefined
 
         const mockClient = {
             request: async () => ({
