@@ -38,9 +38,14 @@ describe("verifyAuthentication", () => {
     })
 
     test("throws when authenticatorData is missing", async () => {
-        const raw = createMockRaw()
-        // @ts-ignore - intentionally removing authenticatorData
-        raw.response.authenticatorData = undefined
+        const raw = {
+            ...createMockRaw(),
+            response: {
+                signature: new Uint8Array([40, 50, 60]).buffer,
+                userHandle: new Uint8Array([70, 80, 90]).buffer,
+                clientDataJSON: new Uint8Array([100, 110, 120]).buffer
+            }
+        }
 
         const mockClient = {
             request: async () => ({})
@@ -55,9 +60,14 @@ describe("verifyAuthentication", () => {
     })
 
     test("throws when signature is missing", async () => {
-        const raw = createMockRaw()
-        // @ts-ignore
-        raw.response.signature = undefined
+        const raw = {
+            ...createMockRaw(),
+            response: {
+                authenticatorData: new Uint8Array([10, 20, 30]).buffer,
+                userHandle: new Uint8Array([70, 80, 90]).buffer,
+                clientDataJSON: new Uint8Array([100, 110, 120]).buffer
+            }
+        }
 
         const mockClient = {
             request: async () => ({})
@@ -126,9 +136,14 @@ describe("verifyAuthentication", () => {
     })
 
     test("handles optional userHandle", async () => {
-        const raw = createMockRaw()
-        // @ts-ignore
-        raw.response.userHandle = undefined
+        const raw = {
+            ...createMockRaw(),
+            response: {
+                authenticatorData: new Uint8Array([10, 20, 30]).buffer,
+                signature: new Uint8Array([40, 50, 60]).buffer,
+                clientDataJSON: new Uint8Array([100, 110, 120]).buffer
+            }
+        }
 
         const mockClient = {
             request: async () => ({
