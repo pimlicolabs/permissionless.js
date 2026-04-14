@@ -58,12 +58,20 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        const userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
+        // Poll until alto's internal status catches up
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
                 hash: opHash
-            }
-        )
+            })
+        }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
         expect(userOperationStatus.status).toBe("included")
@@ -121,12 +129,20 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        const userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
+        // Poll until alto's internal status catches up
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
                 hash: opHash
-            }
-        )
+            })
+        }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
         expect(userOperationStatus.status).toBe("included")
@@ -134,7 +150,7 @@ describe("getUserOperationStatus", () => {
             userOperationReceipt?.receipt.transactionHash
         )
     })
-    testWithRpc("getUserOperationStatus_V07", async ({ rpc }) => {
+    testWithRpc("getUserOperationStatus_V08", async ({ rpc }) => {
         const { altoRpc } = rpc
 
         const bundlerClient = getPimlicoClient({
@@ -183,12 +199,20 @@ describe("getUserOperationStatus", () => {
         expect(receipt?.receipt.transactionHash).toBe(
             userOperationReceipt?.receipt.transactionHash
         )
-        const userOperationStatus = await getUserOperationStatus(
-            bundlerClient,
-            {
+        let userOperationStatus = await getUserOperationStatus(bundlerClient, {
+            hash: opHash
+        })
+        // Poll until alto's internal status catches up
+        for (
+            let i = 0;
+            i < 20 && userOperationStatus.status !== "included";
+            i++
+        ) {
+            await new Promise((r) => setTimeout(r, 100))
+            userOperationStatus = await getUserOperationStatus(bundlerClient, {
                 hash: opHash
-            }
-        )
+            })
+        }
         expect(userOperationStatus).not.toBeNull()
         expect(userOperationStatus).not.toBeUndefined()
         expect(userOperationStatus.status).toBe("included")

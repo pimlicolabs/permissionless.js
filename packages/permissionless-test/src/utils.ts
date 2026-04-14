@@ -54,6 +54,7 @@ import {
     createSmartAccountClient
 } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
+import { createAutoBundleTransport } from "./testWithRpc"
 import type { AAParamType } from "./types"
 
 export const PAYMASTER_RPC = "http://localhost:3000"
@@ -159,7 +160,8 @@ export const getBundlerClient = <account extends SmartAccount | undefined>({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
-        bundlerTransport: http(altoRpc),
+        pollingInterval: 100,
+        bundlerTransport: createAutoBundleTransport(altoRpc, anvilRpc),
         userOperation: {
             estimateFeesPerGas: async () => {
                 return (await pimlicoBundler.getUserOperationGasPrice()).fast
@@ -192,7 +194,8 @@ export const getSmartAccountClient = <
         chain: foundry,
         account,
         paymaster,
-        bundlerTransport: http(altoRpc)
+        pollingInterval: 100,
+        bundlerTransport: createAutoBundleTransport(altoRpc, anvilRpc)
     })
 }
 
@@ -219,7 +222,8 @@ export const getPimlicoClient = <entryPointVersion extends EntryPointVersion>({
             address,
             version: entryPointVersion
         },
-        transport: http(altoRpc)
+        transport: http(altoRpc),
+        pollingInterval: 100
     })
 }
 

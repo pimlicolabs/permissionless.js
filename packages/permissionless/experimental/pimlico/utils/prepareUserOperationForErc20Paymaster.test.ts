@@ -4,7 +4,7 @@ import {
     entryPoint07Address,
     entryPoint08Address
 } from "viem/account-abstraction"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { foundry } from "viem/chains"
 import { describe, expect } from "vitest"
 import {
@@ -12,7 +12,10 @@ import {
     sudoMintTokens,
     tokenBalanceOf
 } from "../../../../mock-paymaster/helpers/erc20-utils"
-import { testWithRpc } from "../../../../permissionless-test/src/testWithRpc"
+import {
+    createAutoBundleTransport,
+    testWithRpc
+} from "../../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
@@ -20,9 +23,6 @@ import {
 import { createSmartAccountClient } from "../../../clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../../clients/pimlico"
 import { prepareUserOperationForErc20Paymaster } from "./prepareUserOperationForErc20Paymaster"
-
-const privateKey =
-    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 describe.each(getCoreSmartAccounts())(
     "prepareUserOperationForErc20Paymaster $name",
@@ -34,6 +34,7 @@ describe.each(getCoreSmartAccounts())(
         isEip7702Compliant,
         name
     }) => {
+        const privateKey = generatePrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06 || name === "Kernel 0.2.1")(
             "prepareUserOperationForErc20Paymaster_v06",
             async ({ rpc }) => {
@@ -69,19 +70,29 @@ describe.each(getCoreSmartAccounts())(
                         prepareUserOperation:
                             prepareUserOperationForErc20Paymaster(pimlicoClient)
                     },
-                    bundlerTransport: http(rpc.altoRpc)
+                    bundlerTransport: createAutoBundleTransport(
+                        rpc.altoRpc,
+                        rpc.anvilRpc
+                    )
                 })
 
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
                 const INTIAL_ETH_BALANCE = await publicClient.getBalance({
                     address: smartAccountClient.account.address
                 })
 
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
+                const PRE_MINT_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+
+                await sudoMintTokens({
+                    amount: parseEther("100"),
                     to: smartAccountClient.account.address,
                     anvilRpc
                 })
+
+                const INITIAL_TOKEN_BALANCE =
+                    PRE_MINT_TOKEN_BALANCE + parseEther("100")
 
                 const opHash = await smartAccountClient.sendUserOperation({
                     calls: [
@@ -155,19 +166,29 @@ describe.each(getCoreSmartAccounts())(
                         prepareUserOperation:
                             prepareUserOperationForErc20Paymaster(pimlicoClient)
                     },
-                    bundlerTransport: http(rpc.altoRpc)
+                    bundlerTransport: createAutoBundleTransport(
+                        rpc.altoRpc,
+                        rpc.anvilRpc
+                    )
                 })
 
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
                 const INTIAL_ETH_BALANCE = await publicClient.getBalance({
                     address: smartAccountClient.account.address
                 })
 
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
+                const PRE_MINT_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+
+                await sudoMintTokens({
+                    amount: parseEther("100"),
                     to: smartAccountClient.account.address,
                     anvilRpc
                 })
+
+                const INITIAL_TOKEN_BALANCE =
+                    PRE_MINT_TOKEN_BALANCE + parseEther("100")
 
                 const authorization = isEip7702Compliant
                     ? await privateKeyAccount.signAuthorization({
@@ -253,19 +274,29 @@ describe.each(getCoreSmartAccounts())(
                         prepareUserOperation:
                             prepareUserOperationForErc20Paymaster(pimlicoClient)
                     },
-                    bundlerTransport: http(rpc.altoRpc)
+                    bundlerTransport: createAutoBundleTransport(
+                        rpc.altoRpc,
+                        rpc.anvilRpc
+                    )
                 })
 
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
                 const INTIAL_ETH_BALANCE = await publicClient.getBalance({
                     address: smartAccountClient.account.address
                 })
 
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
+                const PRE_MINT_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+
+                await sudoMintTokens({
+                    amount: parseEther("100"),
                     to: smartAccountClient.account.address,
                     anvilRpc
                 })
+
+                const INITIAL_TOKEN_BALANCE =
+                    PRE_MINT_TOKEN_BALANCE + parseEther("100")
 
                 const authorization = isEip7702Compliant
                     ? await privateKeyAccount.signAuthorization({
@@ -356,19 +387,29 @@ describe.each(getCoreSmartAccounts())(
                                 }
                             )
                     },
-                    bundlerTransport: http(rpc.altoRpc)
+                    bundlerTransport: createAutoBundleTransport(
+                        rpc.altoRpc,
+                        rpc.anvilRpc
+                    )
                 })
 
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
                 const INTIAL_ETH_BALANCE = await publicClient.getBalance({
                     address: smartAccountClient.account.address
                 })
 
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
+                const PRE_MINT_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+
+                await sudoMintTokens({
+                    amount: parseEther("100"),
                     to: smartAccountClient.account.address,
                     anvilRpc
                 })
+
+                const INITIAL_TOKEN_BALANCE =
+                    PRE_MINT_TOKEN_BALANCE + parseEther("100")
 
                 const authorization = isEip7702Compliant
                     ? await privateKeyAccount.signAuthorization({
@@ -459,19 +500,29 @@ describe.each(getCoreSmartAccounts())(
                                 }
                             )
                     },
-                    bundlerTransport: http(rpc.altoRpc)
+                    bundlerTransport: createAutoBundleTransport(
+                        rpc.altoRpc,
+                        rpc.anvilRpc
+                    )
                 })
 
-                const INITIAL_TOKEN_BALANCE = parseEther("100")
                 const INTIAL_ETH_BALANCE = await publicClient.getBalance({
                     address: smartAccountClient.account.address
                 })
 
-                sudoMintTokens({
-                    amount: INITIAL_TOKEN_BALANCE,
+                const PRE_MINT_TOKEN_BALANCE = await tokenBalanceOf(
+                    smartAccountClient.account.address,
+                    rpc.anvilRpc
+                )
+
+                await sudoMintTokens({
+                    amount: parseEther("100"),
                     to: smartAccountClient.account.address,
                     anvilRpc
                 })
+
+                const INITIAL_TOKEN_BALANCE =
+                    PRE_MINT_TOKEN_BALANCE + parseEther("100")
 
                 const authorization = isEip7702Compliant
                     ? await privateKeyAccount.signAuthorization({

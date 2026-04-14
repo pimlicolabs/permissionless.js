@@ -1,5 +1,5 @@
 import { zeroAddress } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -7,9 +7,6 @@ import {
     getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { sendTransaction } from "./sendTransaction"
-
-const privateKey =
-    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
 
 describe.each(getCoreSmartAccounts())(
     "sendTransaction $name",
@@ -20,6 +17,7 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV08,
         isEip7702Compliant
     }) => {
+        const privateKey = generatePrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "sendTransaction_v06",
             async ({ rpc }) => {

@@ -18,7 +18,7 @@ From `package.json:92–94`:
 | `bun run test:ci-no-coverage` | Quick full CI-style run locally | one-shot | none                       | `--pool=forks`  |
 | `bun run test:ci`        | What CI runs          | one-shot            | lcov only                   | `--pool=forks`  |
 
-Why `--pool=forks`? The default Vitest pool uses worker **threads**; `forks` uses worker **processes**. Because each test spawns multiple child processes (Anvil, Alto, Fastify) and relies on `prool` signal handling, process-pool isolation is safer and more reliable, at the cost of slightly higher memory usage.
+Why `--pool=forks`? The default Vitest pool uses worker **threads**; `forks` uses worker **processes**. Because each worker spawns multiple child processes (Anvil, Alto, Fastify) shared across tests and relies on `prool` signal handling, process-pool isolation is safer and more reliable, at the cost of slightly higher memory usage.
 
 The `CI=true &&` prefix in the CI scripts sets the environment variable so `vitest.config.ts:10` picks the lcov-only reporter:
 
@@ -67,7 +67,7 @@ Loaded by Vitest via `loadEnv("test", process.cwd())` (`vitest.config.ts:29`), w
 
 | Variable                 | Read where                                   | Effect                                                                                   |
 | ------------------------ | -------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `VITE_FORK_RPC_URL`      | `testWithRpc.ts:25`                          | If set, Anvil boots as a fork of this URL and `setupContracts` is **skipped**.           |
+| `VITE_FORK_RPC_URL`      | `testWithRpc.ts`                             | If set, Anvil boots as a fork of this URL and `setupContracts` is **skipped**.           |
 | `CI`                     | `vitest.config.ts:10`                        | Switches coverage reporter to `lcov` only.                                               |
 
 Other `VITE_*` vars (`VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_NETWORK_TRANSPORT_MODE`, `VITE_BATCH_MULTICALL`, `VITE_ANVIL_FORK_URL`) appear in `verify.yml` but are only consumed by the disabled sharded job. They have no effect in the active `testWithRpc` fixture.
@@ -89,14 +89,15 @@ bun run test
 
 Behaviour changes:
 
-- Anvil is started with `forkUrl` set (`testWithRpc.ts:29`).
-- `setupContracts(anvilRpc)` is **not called** (`testWithRpc.ts:70`). The fork is expected to already contain EntryPoints + factories at their canonical deterministic addresses.
+- Anvil is started with `forkUrl` set in the shared rig.
+- `setupContracts(anvilRpc)` is **not called**. The fork is expected to already contain EntryPoints + factories at their canonical deterministic addresses.
 - Alto and the mock paymaster still start normally.
+- Paymaster deposits are still topped up (1000 ETH per EntryPoint).
 
 Caveats:
 
-- The fork is recreated per-test, so every test issues a fresh set of forked reads. Use a reliable/high-rate archive node or expect throttling.
-- If the forked chain's `chainId ≠ foundry.id (31337)`, `eth_chainId` will differ and viem clients configured with `chain: foundry` may misbehave. The test fixture explicitly sets `chainId: foundry.id` on the Anvil instance to paper over this for most cases.
+- The fork is created once per worker and shared across all tests in that worker. Tests share the forked chain state.
+- If the forked chain's `chainId ≠ foundry.id (31337)`, `eth_chainId` will differ and viem clients configured with `chain: foundry` may misbehave. The shared rig explicitly sets `chainId: foundry.id` on the Anvil instance to paper over this for most cases.
 - Smart account addresses computed counterfactually from factory addresses only match reality if the factories on the forked chain match the deterministic-deployer addresses used locally.
 
 ## Running subsets
@@ -123,11 +124,11 @@ Vitest's interactive keyboard controls in watch mode (`p` for file filter, `t` f
 
 ### "Server listening at" never appears → `hookTimeout` error
 
-Alto is failing to start silently. The `prool` wrapper listens for the literal string `"Server listening at"` on Alto's stdout (`mock-aa-infra/alto/instance.ts:278`) and does not inspect stderr. If Alto crashes on boot, the hook hangs until the 45s `hookTimeout` fires.
+Alto is failing to start silently. The `prool` wrapper listens for the literal string `"Server listening at"` on Alto's stdout (`mock-aa-infra/alto/instance.ts:278`) and does not inspect stderr. If Alto crashes on boot, the hook hangs until the 45s `hookTimeout` fires. This only affects the **first test** in a worker (subsequent tests reuse the already-running Alto).
 
 **Fix:**
 
-1. Uncomment the stderr hooks in `testWithRpc.ts:55–60` temporarily:
+1. Uncomment the stderr hooks temporarily:
    ```ts
    altoInstance.on("stderr", (data) => console.error(data.toString()))
    altoInstance.on("stdout", (data) => console.log(data.toString()))
@@ -144,21 +145,42 @@ Common causes:
 - The creation-call bytes were regenerated with a different salt, changing the deterministic address.
 - A dependent contract's batch is missing from `verifyDeployed`'s manifest.
 
-### Tests hang on teardown
+### "AA31 paymaster deposit too low"
 
-If `.stop()` on one of the instances hangs, the per-test hook times out. Usually caused by a zombie child process from a prior run. Find and kill it:
+This error means the paymaster doesn't have enough ETH deposited in the EntryPoint to cover the gas costs of a user operation.
+
+Common causes:
+- **Base fee inflation:** If the base fee reset is missing or broken, gas costs spiral after many mined blocks. Check that `testClient.setNextBlockBaseFeePerGas` runs before each test in the `testWithRpc` fixture.
+- **Insufficient deposit top-up:** The shared rig deposits 1000 ETH per EntryPoint at startup. If you're adding many new tests that consume paymaster deposits, you may need to increase this amount in `getSharedRig()`.
+- **Wrong paymaster address:** The deposit must go to the correct paymaster contract address (computed via `getSingletonPaymaster0{6,7,8}Address` from `packages/mock-paymaster/constants.ts`).
+
+### Cross-test state contamination
+
+If a test fails with unexpected on-chain state (e.g. "AA13 initCode failed" because an account is already deployed, or EIP-7702 delegation errors):
+
+- **Check for hardcoded private keys.** Tests must use `generatePrivateKey()` to create unique keys. A hardcoded key shared across tests means the same counterfactual address is reused, and one test's deployment/delegation persists into the next.
+- **Check key placement.** The `generatePrivateKey()` call should be inside the `describe.each` callback (per account type), not at module level (shared across all account types). EIP-7702 delegation from one account type (e.g. Kernel 0.3.3+EIP-7702) can contaminate another (e.g. Nexus) if they share the same owner key.
+
+### Tests hang or timeout on first test only
+
+The first test in each worker pays the cold-start cost of `getSharedRig()` (anvil boot + contract deployment + alto + paymaster + deposit top-up). This typically takes 10–20s. If it exceeds the 45s `hookTimeout`, the test fails.
+
+**Fix:** Check if `setupContracts` is stalling (usually a contract deployment failure). See the "Server listening at" troubleshooting above.
+
+### Orphaned processes after test run
+
+After a run, check for orphaned processes:
 
 ```bash
 pgrep -f "alto"   # alto Node process
 pgrep -f "anvil"  # anvil
-pgrep -f "node.*mock-paymaster"  # mock paymaster
 ```
 
-Then `kill -9 <pid>` and retry.
+The shared rig registers a `process.on("beforeExit")` handler to stop all instances. If the worker is killed abruptly (e.g. `kill -9`), this handler may not run. Kill orphaned processes manually with `kill -9 <pid>`.
 
 ### `EADDRINUSE: address already in use`
 
-`get-port` normally prevents this, but if a background process (e.g. a local dev server) grabs the same port between the `getPort()` call and the service actually listening, you'll see this. Re-run; the probability of collision on the retry is negligible.
+`get-port` normally prevents this, but if a background process (e.g. a local dev server) grabs the same port between the `getPort()` call and the service actually listening, you'll see this. Re-run; the probability of collision on the retry is negligible. With the shared-rig model, ports are allocated once per worker (not per test), so collisions are even rarer.
 
 ### Fork mode: tests that used to pass now fail
 
