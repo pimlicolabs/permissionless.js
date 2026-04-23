@@ -8,6 +8,8 @@ import type {
 import {
     type SendUserOperationParameters,
     type SmartAccount,
+    estimateUserOperationGas,
+    prepareUserOperation,
     sendUserOperation,
     waitForUserOperationReceipt
 } from "viem/account-abstraction"
@@ -95,24 +97,69 @@ export async function sendTransaction<
 
         if (!to) throw new Error("Missing to address")
 
-        userOpHash = await getAction(
-            client,
-            sendUserOperation,
-            "sendUserOperation"
-        )({
-            ...args,
-            calls: [
-                {
-                    to,
-                    value: value || BigInt(0),
-                    data: data || "0x"
-                }
-            ],
-            account,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
-            nonce: nonce ? BigInt(nonce) : undefined
-        })
+        const calls = [
+            {
+                to,
+                value: value || BigInt(0),
+                data: data || "0x"
+            }
+        ]
+
+        // Check if account has strictValidation enabled
+        if ("strictValidation" in account && account.strictValidation) {
+            // For strict validation: prepare UserOp, sign it, then estimate gas with real signature
+            let userOperation = await getAction(
+                client,
+                prepareUserOperation,
+                "prepareUserOperation"
+            )({
+                account,
+                calls,
+                maxFeePerGas,
+                maxPriorityFeePerGas,
+                nonce: nonce ? BigInt(nonce) : undefined
+            })
+
+            // Sign the UserOperation before gas estimation
+            const signature = await account.signUserOperation(userOperation)
+            userOperation = { ...userOperation, signature }
+
+            // Estimate gas with the real signature
+            const gasEstimates = await getAction(
+                client,
+                estimateUserOperationGas,
+                "estimateUserOperationGas"
+            )({
+                userOperation
+            })
+
+            // Send the signed UserOperation with accurate gas estimates
+            userOpHash = await getAction(
+                client,
+                sendUserOperation,
+                "sendUserOperation"
+            )({
+                ...args,
+                calls,
+                account,
+                ...gasEstimates,
+                signature
+            })
+        } else {
+            // Default flow: use viem's standard sendUserOperation
+            userOpHash = await getAction(
+                client,
+                sendUserOperation,
+                "sendUserOperation"
+            )({
+                ...args,
+                calls,
+                account,
+                maxFeePerGas,
+                maxPriorityFeePerGas,
+                nonce: nonce ? BigInt(nonce) : undefined
+            })
+        }
     } else {
         userOpHash = await getAction(
             client,
