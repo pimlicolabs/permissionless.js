@@ -119,21 +119,9 @@ export type SmartAccountClientConfig<
         | undefined
 }
 
-export function createSmartAccountClient<
-    transport extends Transport,
-    chain extends Chain | undefined = undefined,
-    account extends SmartAccount | undefined = undefined,
-    client extends Client | undefined = undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
->(
-    parameters: SmartAccountClientConfig<
-        transport,
-        chain,
-        account,
-        client,
-        rpcSchema
-    >
-): SmartAccountClient<transport, chain, account, client, rpcSchema>
+export function createSmartAccountClient(
+    parameters: SmartAccountClientConfig
+): SmartAccountClient
 
 export function createSmartAccountClient(
     parameters: SmartAccountClientConfig
