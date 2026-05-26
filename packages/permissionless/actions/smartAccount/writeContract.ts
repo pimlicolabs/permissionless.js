@@ -58,7 +58,7 @@ export async function writeContract<
         sendTransaction<TAccount, undefined, undefined>,
         "sendTransaction"
     )({
-        data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
+        data: `${data}${dataSuffix ? dataSuffix.replace(/^0x/, "") : ""}`,
         to: address,
         ...request
     } as unknown as SendTransactionParameters<
