@@ -23,7 +23,9 @@ export default defineConfig({
                 "**/permissionless-test/**",
                 "**/_cjs/**",
                 "**/_esm/**",
-                "**/_types/**"
+                "**/_types/**",
+                "**/permissionless/accounts/index.ts",
+                "**/permissionless/accounts/*/index.ts"
             ]
         },
         sequence: {

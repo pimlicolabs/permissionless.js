@@ -1,6 +1,7 @@
 import {
     type Address,
     type Hex,
+    type Prettify,
     concatHex,
     domainSeparator,
     encodeAbiParameters,
@@ -11,15 +12,17 @@ import type { KernelVersion } from "../toKernelSmartAccount.js"
 import { isKernelV2 } from "./isKernelV2.js"
 
 export type WrapMessageHashParams = {
-    kernelVersion: KernelVersion<"0.6" | "0.7">
-    accountAddress: Address
+    version: KernelVersion<"0.6" | "0.7">
+    address: Address
     chainId: number
 }
 
-export const wrapMessageHash = (
-    messageHash: Hex,
-    { accountAddress, kernelVersion, chainId }: WrapMessageHashParams
-) => {
+export const wrapMessageHash = ({
+    hash,
+    address: accountAddress,
+    version: kernelVersion,
+    chainId
+}: Prettify<{ hash: Hex } & WrapMessageHashParams>) => {
     const _domainSeparator = domainSeparator({
         domain: {
             name: "Kernel",
@@ -29,11 +32,11 @@ export const wrapMessageHash = (
         }
     })
     const wrappedMessageHash = isKernelV2(kernelVersion)
-        ? messageHash
+        ? hash
         : keccak256(
               encodeAbiParameters(
                   [{ type: "bytes32" }, { type: "bytes32" }],
-                  [keccak256(stringToHex("Kernel(bytes32 hash)")), messageHash]
+                  [keccak256(stringToHex("Kernel(bytes32 hash)")), hash]
               )
           )
 

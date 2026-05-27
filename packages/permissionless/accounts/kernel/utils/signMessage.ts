@@ -1,6 +1,7 @@
 import {
     type Hash,
     type LocalAccount,
+    type Prettify,
     type SignMessageReturnType,
     type SignableMessage,
     encodeAbiParameters,
@@ -18,23 +19,25 @@ import {
 export async function signMessage({
     message,
     owner,
-    accountAddress,
-    kernelVersion: accountVersion,
+    address: accountAddress,
+    version: accountVersion,
     chainId,
-    eip7702
-}: {
-    chainId: number
-    message: SignableMessage
-    owner: LocalAccount | WebAuthnAccount
-    eip7702: boolean
-} & WrapMessageHashParams): Promise<SignMessageReturnType> {
+    eip7702 = false
+}: Prettify<
+    {
+        message: SignableMessage
+        owner: LocalAccount | WebAuthnAccount
+        eip7702?: boolean
+    } & WrapMessageHashParams
+>): Promise<SignMessageReturnType> {
     if (isWebAuthnAccount(owner)) {
         let messageContent: string
         if (typeof message === "string") {
             // message is a string
-            messageContent = wrapMessageHash(hashMessage(message), {
-                kernelVersion: accountVersion,
-                accountAddress,
+            messageContent = wrapMessageHash({
+                hash: hashMessage(message),
+                version: accountVersion,
+                address: accountAddress,
                 chainId
                 // chainId: client.chain
                 //     ? client.chain.id
@@ -100,9 +103,10 @@ export async function signMessage({
         })
     }
 
-    const wrappedMessageHash = wrapMessageHash(hashMessage(message), {
-        kernelVersion: accountVersion,
-        accountAddress,
+    const wrappedMessageHash = wrapMessageHash({
+        hash: hashMessage(message),
+        version: accountVersion,
+        address: accountAddress,
         chainId
         // chainId: client.chain
         //     ? client.chain.id

@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.3.6
+
+### Patch Changes
+
+- a02d2b09d4e201c54815ed38bbb7160ac2896125: Added namespace exports for each smart account and exposed Kernel's ERC-1271 helpers.
+
 ## 0.3.5
 
 ### Patch Changes

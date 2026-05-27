@@ -901,8 +901,8 @@ export async function toKernelSmartAccount<
             const signature = await signMessage({
                 owner,
                 message,
-                accountAddress: await this.getAddress(),
-                kernelVersion: kernelVersion,
+                address: await this.getAddress(),
+                version: kernelVersion,
                 chainId: await getMemoizedChainId(),
                 eip7702: eip7702
             })
@@ -931,8 +931,8 @@ export async function toKernelSmartAccount<
                 owner: owner,
                 chainId: await getMemoizedChainId(),
                 ...(typedData as TypedDataDefinition),
-                accountAddress: await this.getAddress(),
-                kernelVersion: kernelVersion,
+                address: await this.getAddress(),
+                version: kernelVersion,
                 eip7702
             })
 
@@ -966,8 +966,8 @@ export async function toKernelSmartAccount<
                       owner,
                       message: { raw: hash },
                       chainId,
-                      accountAddress: await this.getAddress(),
-                      kernelVersion,
+                      address: await this.getAddress(),
+                      version: kernelVersion,
                       eip7702: false
                   })
                 : await owner.signMessage({

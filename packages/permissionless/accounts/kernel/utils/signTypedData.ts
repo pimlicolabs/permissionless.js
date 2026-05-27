@@ -1,5 +1,6 @@
 import {
     type LocalAccount,
+    type Prettify,
     type SignTypedDataReturnType,
     type TypedDataDefinition,
     getTypesForEIP712Domain,
@@ -15,18 +16,19 @@ import {
 } from "./wrapMessageHash.js"
 
 export async function signTypedData(
-    parameters: TypedDataDefinition &
+    parameters: Prettify<
         WrapMessageHashParams & {
             owner: LocalAccount | WebAuthnAccount
-            eip7702: boolean
-        }
+            eip7702?: boolean
+        } & TypedDataDefinition
+    >
 ): Promise<SignTypedDataReturnType> {
     const {
         owner,
-        accountAddress,
-        kernelVersion: accountVersion,
+        address: accountAddress,
+        version: accountVersion,
         chainId,
-        eip7702,
+        eip7702 = false,
         ...typedData
     } = parameters
 
@@ -74,9 +76,10 @@ export async function signTypedData(
         })
     }
 
-    const wrappedMessageHash = wrapMessageHash(typedHash, {
-        kernelVersion: accountVersion,
-        accountAddress,
+    const wrappedMessageHash = wrapMessageHash({
+        hash: typedHash,
+        version: accountVersion,
+        address: accountAddress,
         chainId: chainId
     })
 
@@ -84,8 +87,8 @@ export async function signTypedData(
         return signMessage({
             message: { raw: wrappedMessageHash },
             owner,
-            accountAddress,
-            kernelVersion: accountVersion,
+            address: accountAddress,
+            version: accountVersion,
             chainId,
             eip7702: false
         })
