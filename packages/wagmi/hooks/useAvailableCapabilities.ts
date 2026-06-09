@@ -1,9 +1,8 @@
 "use client"
 
 import { useContext, useMemo } from "react"
-import type { WalletCapabilities, WalletSendCallsParameters } from "viem"
-import { useAccount } from "wagmi"
-import { useCapabilities } from "wagmi"
+import type { Capabilities, WalletSendCallsParameters } from "viem"
+import { useCapabilities, useConnection } from "wagmi"
 import { PermissionlessContext } from "../context.js"
 
 export const useAvailableCapabilities = () => {
@@ -11,7 +10,7 @@ export const useAvailableCapabilities = () => {
         PermissionlessContext
     )
 
-    const account = useAccount()
+    const account = useConnection()
 
     const { data: availableCapabilities } = useCapabilities({
         account: account.address
@@ -22,7 +21,7 @@ export const useAvailableCapabilities = () => {
         const capabilitiesForChain = availableCapabilities[account.chainId]
         if (capabilitiesConfigured === undefined) return undefined
 
-        let capabilities: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"] =
+        let capabilities: WalletSendCallsParameters<Capabilities>[number]["capabilities"] =
             undefined
 
         for (const capabilityConfigured in capabilitiesConfigured) {

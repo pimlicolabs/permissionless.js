@@ -1,14 +1,14 @@
 import { createContext, createElement } from "react"
-import type { WalletCapabilities, WalletSendCallsParameters } from "viem"
+import type { Capabilities, WalletSendCallsParameters } from "viem"
 
 export const PermissionlessContext = createContext<{
-    capabilities: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
+    capabilities: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
 }>({
     capabilities: {}
 })
 
 export type PermissionlessProviderProps = {
-    capabilities: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
+    capabilities: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
 }
 
 export const PermissionlessProvider = (

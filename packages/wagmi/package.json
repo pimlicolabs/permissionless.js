@@ -21,6 +21,6 @@
         }
     },
     "peerDependencies": {
-        "wagmi": "^2.15.1"
+        "wagmi": "^3.0.0"
     }
 }

@@ -5,10 +5,11 @@ import {
 } from "@tanstack/react-query"
 import { sendCalls, sendTransaction } from "@wagmi/core"
 import type {
+    Call,
+    Capabilities,
     Prettify,
     SendCallsErrorType,
     SendTransactionErrorType,
-    WalletCapabilities,
     WalletSendCallsParameters
 } from "viem"
 import { type Config, type ResolvedRegister, useConfig } from "wagmi"
@@ -22,7 +23,7 @@ import { useAvailableCapabilities } from "./useAvailableCapabilities.js"
 const sendTransactionMutationOptions = <config extends Config>(
     config: config,
     parameters: {
-        capabilities?: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
+        capabilities?: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
     } = {}
 ) => {
     return {
@@ -37,7 +38,9 @@ const sendTransactionMutationOptions = <config extends Config>(
                           ?.url
 
                 const result = await sendCalls(config, {
-                    calls: [variables],
+                    // cast needed: wagmi's generic config makes `variables`' fields unreadable in this scope.
+                    // TODO: `to` may be undefined (optional) yet sendCalls requires it — validate before use.
+                    calls: [variables as Pick<Call, "to" | "data" | "value">],
                     capabilities: {
                         ...parameters.capabilities,
                         paymasterService: paymasterServiceUrl
@@ -104,7 +107,9 @@ export type UseSendTransactionReturnType<
         SendTransactionData,
         SendTransactionErrorType | SendCallsErrorType,
         SendTransactionVariables<config, config["chains"][number]["id"]>,
-        context
+        context,
+        SendTransactionMutate<config, context>,
+        SendTransactionMutateAsync<config, context>
     > & {
         sendTransaction: SendTransactionMutate<config, context>
         sendTransactionAsync: SendTransactionMutateAsync<config, context>
@@ -155,15 +160,15 @@ export const useSendTransaction: <
         capabilities
     })
 
-    const { mutate, mutateAsync, ...result } = useMutation({
+    const result = useMutation({
         ...mutation,
         ...mutationOptions
     })
 
-    type Return = UseSendTransactionReturnType<config, context>
     return {
         ...result,
-        sendTransaction: mutate as Return["sendTransaction"],
-        sendTransactionAsync: mutateAsync as Return["sendTransactionAsync"]
+        // should we deprecate `sendTransaction` in favor of `mutate`?
+        sendTransaction: result.mutate,
+        sendTransactionAsync: result.mutateAsync
     }
 }
