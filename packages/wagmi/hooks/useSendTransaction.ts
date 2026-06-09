@@ -167,7 +167,6 @@ export const useSendTransaction: <
 
     return {
         ...result,
-        // should we deprecate `sendTransaction` in favor of `mutate`?
         sendTransaction: result.mutate,
         sendTransactionAsync: result.mutateAsync
     }
