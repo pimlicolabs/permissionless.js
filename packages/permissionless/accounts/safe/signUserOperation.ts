@@ -131,6 +131,10 @@ export async function signUserOperation(
         >
         chainId: number
         signatures?: Hex
+        // Mark the `account` signature as a Safe contract signature (ERC-1271
+        // owner): its bytes become the dynamic part and `concatSignatures`
+        // builds the static part. WebAuthn owners are always dynamic.
+        dynamic?: boolean
         validAfter?: number
         validUntil?: number
         safe4337ModuleAddress?: Address
@@ -147,6 +151,7 @@ export async function signUserOperation(
         owners,
         signatures: existingSignatures,
         account,
+        dynamic = false,
         ...userOperation
     } = parameters
 
@@ -258,7 +263,7 @@ export async function signUserOperation(
         ...unPackedSignatures,
         {
             signer,
-            dynamic: isWebAuthnAccount(localOwner),
+            dynamic: dynamic || isWebAuthnAccount(localOwner),
             data: await (async () => {
                 if (isWebAuthnAccount(localOwner)) {
                     const safeHash = hashTypedData({
