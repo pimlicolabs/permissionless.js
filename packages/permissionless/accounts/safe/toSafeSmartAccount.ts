@@ -1158,23 +1158,42 @@ type RegularOwner =
     | WalletClient<Transport, Chain | undefined, Account>
     | EthereumProvider
 
+type SafeOwner = RegularOwner | WebAuthnAccount
+
+type ConfiguredSafeOwner = {
+    owner: SafeOwner
+    dynamic?: boolean
+}
+
+type SafeOwnerInput = SafeOwner | ConfiguredSafeOwner
+
 type ValidateAtMostOneWebAuthn<
     T extends readonly unknown[],
     SeenWebAuthn extends boolean = false
 > = T extends readonly []
     ? true
     : T extends readonly [infer H, ...infer Rest]
-      ? H extends WebAuthnAccount
-          ? SeenWebAuthn extends true
-              ? false
-              : ValidateAtMostOneWebAuthn<Rest, true>
-          : H extends RegularOwner
-            ? ValidateAtMostOneWebAuthn<Rest, SeenWebAuthn>
-            : false
+      ? H extends ConfiguredSafeOwner
+          ? H["owner"] extends WebAuthnAccount
+              ? SeenWebAuthn extends true
+                  ? false
+                  : ValidateAtMostOneWebAuthn<Rest, true>
+              : ValidateAtMostOneWebAuthn<Rest, SeenWebAuthn>
+          : H extends WebAuthnAccount
+            ? SeenWebAuthn extends true
+                ? false
+                : ValidateAtMostOneWebAuthn<Rest, true>
+            : H extends RegularOwner
+              ? ValidateAtMostOneWebAuthn<Rest, SeenWebAuthn>
+              : false
       : true
 
-type OwnersArray<T extends readonly (RegularOwner | WebAuthnAccount)[]> =
+type OwnersArray<T extends readonly SafeOwnerInput[]> =
     ValidateAtMostOneWebAuthn<T> extends true ? T : never
+
+const isConfiguredSafeOwner = (
+    owner: SafeOwnerInput
+): owner is ConfiguredSafeOwner => "owner" in owner
 
 export type ToSafeSmartAccountParameters<
     entryPointVersion extends "0.6" | "0.7",
@@ -1185,7 +1204,7 @@ export type ToSafeSmartAccountParameters<
         Chain | undefined,
         JsonRpcAccount | LocalAccount | undefined
     >
-    owners: OwnersArray<readonly (RegularOwner | WebAuthnAccount)[]>
+    owners: OwnersArray<readonly SafeOwnerInput[]>
     threshold?: bigint
     version: SafeVersion
     entryPoint?: {
@@ -1404,8 +1423,12 @@ export async function toSafeSmartAccount<
         useMultiSendForSetup = true
     } = parameters
 
+    const configuredOwners = _owners.map((owner) =>
+        isConfiguredSafeOwner(owner) ? owner : { owner, dynamic: false }
+    )
+
     const owners = await Promise.all(
-        _owners.map(async (owner) => {
+        configuredOwners.map(async ({ owner }) => {
             if ("account" in owner) {
                 return owner.account
             }
@@ -1421,8 +1444,8 @@ export async function toSafeSmartAccount<
     )
 
     const localOwners = await Promise.all(
-        _owners
-            .filter((owner) => {
+        configuredOwners
+            .filter(({ owner }) => {
                 if ("type" in owner && owner.type === "local") {
                     return true
                 }
@@ -1436,25 +1459,24 @@ export async function toSafeSmartAccount<
                     return true
                 }
 
-                if (isWebAuthnAccount(owner)) {
-                    return true
-                }
-
-                return false
+                return isWebAuthnAccount(owner)
             })
-            .map((owner) => {
-                if (isWebAuthnAccount(owner)) {
-                    return owner
-                }
-
-                return toOwner({
-                    owner: owner as OneOf<
-                        | LocalAccount
-                        | EthereumProvider
-                        | WalletClient<Transport, Chain | undefined, Account>
-                    >
-                })
-            })
+            .map(async ({ owner, dynamic }) => ({
+                owner: isWebAuthnAccount(owner)
+                    ? owner
+                    : await toOwner({
+                          owner: owner as OneOf<
+                              | LocalAccount
+                              | EthereumProvider
+                              | WalletClient<
+                                    Transport,
+                                    Chain | undefined,
+                                    Account
+                                >
+                          >
+                      }),
+                dynamic
+            }))
     )
 
     const entryPoint = {
@@ -1788,13 +1810,14 @@ export async function toSafeSmartAccount<
             })
         },
         async getStubSignature() {
-            const signatures = owners.map((owner) => {
+            const signatures = owners.map((owner, index) => {
                 let signer = safeWebAuthnSharedSignerAddress
-                let dynamic = true
+                let dynamic = configuredOwners[index]?.dynamic ?? false
                 let data: Hex =
                     "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
 
                 if (isWebAuthnAccount(owner)) {
+                    dynamic = true
                     data = encodeAbiParameters(
                         [
                             { name: "authenticatorData", type: "bytes" },
@@ -1812,7 +1835,6 @@ export async function toSafeSmartAccount<
                     )
                 } else {
                     signer = owner.address
-                    dynamic = false
                 }
 
                 if (!signer) {
@@ -1860,27 +1882,27 @@ export async function toSafeSmartAccount<
             })
 
             const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => {
+                localOwners.map(async ({ owner, dynamic: isDynamicOwner }) => {
                     let signer = safeWebAuthnSharedSignerAddress
                     let data: Hex
-                    let dynamic = true
+                    let dynamic = isDynamicOwner
 
-                    if (isWebAuthnAccount(localOwner)) {
+                    if (isWebAuthnAccount(owner)) {
                         data = await getWebAuthnSignature({
-                            owner: localOwner,
+                            owner,
                             hash: messageHash
                         })
+                        dynamic = true
                     } else {
-                        signer = localOwner.address
+                        signer = owner.address
                         data = adjustVInSignature(
                             "eth_sign",
-                            await localOwner.signMessage({
+                            await owner.signMessage({
                                 message: {
                                     raw: toBytes(messageHash)
                                 }
                             })
                         )
-                        dynamic = false
                     }
 
                     if (!signer) {
@@ -1913,12 +1935,12 @@ export async function toSafeSmartAccount<
             }
 
             const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => {
+                localOwners.map(async ({ owner, dynamic: isDynamicOwner }) => {
                     let signer = safeWebAuthnSharedSignerAddress
                     let data: Hex
-                    let dynamic = true
+                    let dynamic = isDynamicOwner
 
-                    if (isWebAuthnAccount(localOwner)) {
+                    if (isWebAuthnAccount(owner)) {
                         const messageHash = hashTypedData({
                             domain: {
                                 chainId: await getMemoizedChainId(),
@@ -1936,14 +1958,15 @@ export async function toSafeSmartAccount<
                         })
 
                         data = await getWebAuthnSignature({
-                            owner: localOwner,
+                            owner,
                             hash: messageHash
                         })
+                        dynamic = true
                     } else {
-                        signer = localOwner.address
+                        signer = owner.address
                         data = adjustVInSignature(
                             "eth_signTypedData",
-                            await localOwner.signTypedData({
+                            await owner.signTypedData({
                                 domain: {
                                     chainId: await getMemoizedChainId(),
                                     verifyingContract: await this.getAddress()
@@ -1960,7 +1983,6 @@ export async function toSafeSmartAccount<
                                 }
                             })
                         )
-                        dynamic = false
                     }
 
                     if (!signer) {
@@ -1993,13 +2015,14 @@ export async function toSafeSmartAccount<
 
             let signatures: Hex | undefined = undefined
 
-            for (const owner of localOwners) {
+            for (const { owner, dynamic } of localOwners) {
                 signatures = await signUserOperation({
                     ...userOperation,
                     version,
                     entryPoint,
-                    owners: localOwners,
+                    owners: localOwners.map(({ owner }) => owner),
                     account: owner,
+                    dynamic,
                     chainId,
                     signatures,
                     validAfter,
