@@ -1,5 +1,12 @@
 # permissionless
 
+## 0.4.1
+
+### Patch Changes
+
+- afd272ca1b2489bc026451c19a2975ec2132850a: Fix case-sensitive address comparison in thirdweb signTypedData self-verifying contract check
+- 2a6c577e867c2847f66bfda806b28aa0bd9b9cb9: Replace bigint exponentiation with BigInt(1e18) in estimateErc20PaymasterCost for Turbopack compatibility
+
 ## 0.4.0
 
 ### Minor Changes
