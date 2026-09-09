@@ -275,7 +275,11 @@ export async function from<
         ? "0.3.3"
         : (parameters.version ??
           (entryPoint.version === "0.6" ? "0.2.2" : "0.3.0-beta"))
-    if (!(versions[entryPoint.version] as readonly string[]).includes(version))
+    if (
+        !(
+            versions[entryPoint.version] as readonly string[] | undefined
+        )?.includes(version)
+    )
         throw new KernelUnsupportedVersionError({
             version,
             entryPointVersion: entryPoint.version
