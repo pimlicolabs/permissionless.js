@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../../_types/actions/etherspot/index.d.ts",
-    "module": "../../_esm/actions/etherspot/index.js",
-    "main": "../../_cjs/actions/etherspot/index.js"
+    "main": "../../_esm/actions/etherspot/index.js"
 }

@@ -4,7 +4,7 @@
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless",
     "repository": "github:pimlicolabs/permissionless.js",
-    "main": "./_cjs/index.js",
+    "main": "./_esm/index.js",
     "module": "./_esm/index.js",
     "types": "./_types/index.d.ts",
     "typings": "./_types/index.d.ts",
@@ -22,8 +22,7 @@
     "exports": {
         ".": {
             "types": "./_types/index.d.ts",
-            "import": "./_esm/index.js",
-            "default": "./_cjs/index.js"
+            "default": "./_esm/index.js"
         }
     },
     "peerDependencies": {

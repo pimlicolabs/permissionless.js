@@ -1,5 +1,5 @@
 {
-    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    // This file is used to compile for esm (see package.json build scripts). It should exclude all test files.
     "extends": "./tsconfig.wagmi.json",
     "compilerOptions": {
         "module": "ESNext",

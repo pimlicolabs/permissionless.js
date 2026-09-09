@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../../_types/accounts/biconomy/index.d.ts",
-    "module": "../../_esm/accounts/biconomy/index.js",
-    "main": "../../_cjs/accounts/biconomy/index.js"
+    "main": "../../_esm/accounts/biconomy/index.js"
 }

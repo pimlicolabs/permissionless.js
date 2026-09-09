@@ -4,7 +4,7 @@
     "author": "Pimlico",
     "homepage": "https://docs.pimlico.io/permissionless",
     "repository": "github:pimlicolabs/permissionless.js",
-    "main": "./_cjs/index.js",
+    "main": "./_esm/index.js",
     "module": "./_esm/index.js",
     "types": "./_types/index.d.ts",
     "typings": "./_types/index.d.ts",
@@ -33,118 +33,165 @@
     "exports": {
         ".": {
             "types": "./_types/index.d.ts",
-            "import": "./_esm/index.js",
-            "default": "./_cjs/index.js"
+            "default": "./_esm/index.js"
         },
         "./accounts": {
             "types": "./_types/accounts/index.d.ts",
-            "import": "./_esm/accounts/index.js",
-            "default": "./_cjs/accounts/index.js"
+            "default": "./_esm/accounts/index.js"
         },
         "./accounts/biconomy": {
             "types": "./_types/accounts/biconomy/index.d.ts",
-            "import": "./_esm/accounts/biconomy/index.js",
-            "default": "./_cjs/accounts/biconomy/index.js"
+            "default": "./_esm/accounts/biconomy/index.js"
         },
         "./accounts/etherspot": {
             "types": "./_types/accounts/etherspot/index.d.ts",
-            "import": "./_esm/accounts/etherspot/index.js",
-            "default": "./_cjs/accounts/etherspot/index.js"
+            "default": "./_esm/accounts/etherspot/index.js"
         },
         "./accounts/kernel": {
             "types": "./_types/accounts/kernel/index.d.ts",
-            "import": "./_esm/accounts/kernel/index.js",
-            "default": "./_cjs/accounts/kernel/index.js"
+            "default": "./_esm/accounts/kernel/index.js"
         },
         "./accounts/light": {
             "types": "./_types/accounts/light/index.d.ts",
-            "import": "./_esm/accounts/light/index.js",
-            "default": "./_cjs/accounts/light/index.js"
+            "default": "./_esm/accounts/light/index.js"
         },
         "./accounts/nexus": {
             "types": "./_types/accounts/nexus/index.d.ts",
-            "import": "./_esm/accounts/nexus/index.js",
-            "default": "./_cjs/accounts/nexus/index.js"
+            "default": "./_esm/accounts/nexus/index.js"
         },
         "./accounts/safe": {
             "types": "./_types/accounts/safe/index.d.ts",
-            "import": "./_esm/accounts/safe/index.js",
-            "default": "./_cjs/accounts/safe/index.js"
+            "default": "./_esm/accounts/safe/index.js"
         },
         "./accounts/simple": {
             "types": "./_types/accounts/simple/index.d.ts",
-            "import": "./_esm/accounts/simple/index.js",
-            "default": "./_cjs/accounts/simple/index.js"
+            "default": "./_esm/accounts/simple/index.js"
         },
         "./accounts/thirdweb": {
             "types": "./_types/accounts/thirdweb/index.d.ts",
-            "import": "./_esm/accounts/thirdweb/index.js",
-            "default": "./_cjs/accounts/thirdweb/index.js"
+            "default": "./_esm/accounts/thirdweb/index.js"
         },
         "./accounts/trust": {
             "types": "./_types/accounts/trust/index.d.ts",
-            "import": "./_esm/accounts/trust/index.js",
-            "default": "./_cjs/accounts/trust/index.js"
+            "default": "./_esm/accounts/trust/index.js"
         },
         "./actions": {
             "types": "./_types/actions/index.d.ts",
-            "import": "./_esm/actions/index.js",
-            "default": "./_cjs/actions/index.js"
+            "default": "./_esm/actions/index.js"
         },
         "./actions/erc7579": {
             "types": "./_types/actions/erc7579/index.d.ts",
-            "import": "./_esm/actions/erc7579/index.js",
-            "default": "./_cjs/actions/erc7579/index.js"
+            "default": "./_esm/actions/erc7579/index.js"
         },
         "./actions/pimlico": {
             "types": "./_types/actions/pimlico/index.d.ts",
-            "import": "./_esm/actions/pimlico/index.js",
-            "default": "./_cjs/actions/pimlico/index.js"
+            "default": "./_esm/actions/pimlico/index.js"
         },
         "./actions/passkeyServer": {
             "types": "./_types/actions/passkeyServer/index.d.ts",
-            "import": "./_esm/actions/passkeyServer/index.js",
-            "default": "./_cjs/actions/passkeyServer/index.js"
+            "default": "./_esm/actions/passkeyServer/index.js"
         },
         "./actions/etherspot": {
             "types": "./_types/actions/etherspot/index.d.ts",
-            "import": "./_esm/actions/etherspot/index.js",
-            "default": "./_cjs/actions/etherspot/index.js"
+            "default": "./_esm/actions/etherspot/index.js"
         },
         "./actions/smartAccount": {
             "types": "./_types/actions/smartAccount/index.d.ts",
-            "import": "./_esm/actions/smartAccount/index.js",
-            "default": "./_cjs/actions/smartAccount/index.js"
+            "default": "./_esm/actions/smartAccount/index.js"
         },
         "./clients": {
             "types": "./_types/clients/index.d.ts",
-            "import": "./_esm/clients/index.js",
-            "default": "./_cjs/clients/index.js"
+            "default": "./_esm/clients/index.js"
         },
         "./clients/pimlico": {
             "types": "./_types/clients/pimlico/index.d.ts",
-            "import": "./_esm/clients/pimlico/index.js",
-            "default": "./_cjs/clients/pimlico/index.js"
+            "default": "./_esm/clients/pimlico/index.js"
         },
         "./clients/passkeyServer": {
             "types": "./_types/clients/passkeyServer/index.d.ts",
-            "import": "./_esm/clients/passkeyServer/index.js",
-            "default": "./_cjs/clients/passkeyServer/index.js"
+            "default": "./_esm/clients/passkeyServer/index.js"
         },
         "./utils": {
             "types": "./_types/utils/index.d.ts",
-            "import": "./_esm/utils/index.js",
-            "default": "./_cjs/utils/index.js"
+            "default": "./_esm/utils/index.js"
         },
         "./errors": {
             "types": "./_types/errors/index.d.ts",
-            "import": "./_esm/errors/index.js",
-            "default": "./_cjs/errors/index.js"
+            "default": "./_esm/errors/index.js"
         },
         "./experimental/pimlico": {
             "types": "./_types/experimental/pimlico/index.d.ts",
-            "import": "./_esm/experimental/pimlico/index.js",
-            "default": "./_cjs/experimental/pimlico/index.js"
+            "default": "./_esm/experimental/pimlico/index.js"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "accounts": [
+                "./_types/accounts/index.d.ts"
+            ],
+            "accounts/biconomy": [
+                "./_types/accounts/biconomy/index.d.ts"
+            ],
+            "accounts/etherspot": [
+                "./_types/accounts/etherspot/index.d.ts"
+            ],
+            "accounts/kernel": [
+                "./_types/accounts/kernel/index.d.ts"
+            ],
+            "accounts/light": [
+                "./_types/accounts/light/index.d.ts"
+            ],
+            "accounts/nexus": [
+                "./_types/accounts/nexus/index.d.ts"
+            ],
+            "accounts/safe": [
+                "./_types/accounts/safe/index.d.ts"
+            ],
+            "accounts/simple": [
+                "./_types/accounts/simple/index.d.ts"
+            ],
+            "accounts/thirdweb": [
+                "./_types/accounts/thirdweb/index.d.ts"
+            ],
+            "accounts/trust": [
+                "./_types/accounts/trust/index.d.ts"
+            ],
+            "actions": [
+                "./_types/actions/index.d.ts"
+            ],
+            "actions/erc7579": [
+                "./_types/actions/erc7579/index.d.ts"
+            ],
+            "actions/pimlico": [
+                "./_types/actions/pimlico/index.d.ts"
+            ],
+            "actions/passkeyServer": [
+                "./_types/actions/passkeyServer/index.d.ts"
+            ],
+            "actions/etherspot": [
+                "./_types/actions/etherspot/index.d.ts"
+            ],
+            "actions/smartAccount": [
+                "./_types/actions/smartAccount/index.d.ts"
+            ],
+            "clients": [
+                "./_types/clients/index.d.ts"
+            ],
+            "clients/pimlico": [
+                "./_types/clients/pimlico/index.d.ts"
+            ],
+            "clients/passkeyServer": [
+                "./_types/clients/passkeyServer/index.d.ts"
+            ],
+            "utils": [
+                "./_types/utils/index.d.ts"
+            ],
+            "errors": [
+                "./_types/errors/index.d.ts"
+            ],
+            "experimental/pimlico": [
+                "./_types/experimental/pimlico/index.d.ts"
+            ]
         }
     },
     "peerDependencies": {

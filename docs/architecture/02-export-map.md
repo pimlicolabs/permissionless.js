@@ -1,6 +1,6 @@
 # Export Map
 
-This document is the complete inventory of every subpath export in the `permissionless` package. Each entry maps to a conditional export in `package.json` serving TypeScript declarations (`_types/`), ES modules (`_esm/`), and CommonJS (`_cjs/`).
+This document is the complete inventory of every subpath export in the `permissionless` package. Each entry maps to a conditional export in `package.json` serving TypeScript declarations (`_types/`) and ES modules (`_esm/`); the package is ESM-only.
 
 ## Subpath Summary
 
@@ -335,11 +335,11 @@ Every subpath follows this pattern in `package.json`:
 ```json
 "./subpath": {
     "types": "./_types/subpath/index.d.ts",
-    "import": "./_esm/subpath/index.js",
-    "default": "./_cjs/subpath/index.js"
+    "default": "./_esm/subpath/index.js"
 }
 ```
 
 - **`types`** -- TypeScript resolves `.d.ts` files from `_types/`
-- **`import`** -- ESM environments (`import` statement, bundlers) use `_esm/`
-- **`default`** -- CommonJS `require()` uses `_cjs/`
+- **`default`** -- every other condition (`import`, bundlers, Node `require(esm)`) uses `_esm/`
+
+`typesVersions["*"]` mirrors each subpath to its `.d.ts` for `moduleResolution: node10` consumers, which ignore `exports`.

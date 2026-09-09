@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../_types/utils/index.d.ts",
-    "module": "../_esm/utils/index.js",
-    "main": "../_cjs/utils/index.js"
+    "main": "../_esm/utils/index.js"
 }

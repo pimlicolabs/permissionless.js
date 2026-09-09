@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../../_types/accounts/thirdweb/index.d.ts",
-    "module": "../../_esm/accounts/thirdweb/index.js",
-    "main": "../../_cjs/accounts/thirdweb/index.js"
+    "main": "../../_esm/accounts/thirdweb/index.js"
 }

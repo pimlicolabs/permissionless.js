@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../../_types/actions/pimlico/index.d.ts",
-    "module": "../../_esm/actions/pimlico/index.js",
-    "main": "../../_cjs/actions/pimlico/index.js"
+    "main": "../../_esm/actions/pimlico/index.js"
 }

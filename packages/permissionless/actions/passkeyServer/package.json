@@ -1,6 +1,5 @@
 {
     "type": "module",
     "types": "../../_types/actions/passkeyServer/index.d.ts",
-    "module": "../../_esm/actions/passkeyServer/index.js",
-    "main": "../../_cjs/actions/passkeyServer/index.js"
+    "main": "../../_esm/actions/passkeyServer/index.js"
 }
