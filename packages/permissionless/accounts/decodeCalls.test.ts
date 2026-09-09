@@ -1,9 +1,4 @@
-import {
-    decodeFunctionData,
-    encodeFunctionData,
-    erc20Abi,
-    zeroAddress
-} from "viem"
+import { AbiFunction, Abis, Address } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../permissionless-test/src/utils"
@@ -24,7 +19,7 @@ describe.each(getCoreSmartAccounts())(
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -38,7 +33,7 @@ describe.each(getCoreSmartAccounts())(
                         await smartClient.account.decodeCalls(callData)
 
                     expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n }
+                        { to: Address.zero, data: "0x", value: 0n }
                     ])
                 } catch (e) {
                     if (
@@ -63,15 +58,14 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
+                    const erc20TransactionData = AbiFunction.encodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        [Address.zero, 1000000000000000000n]
+                    )
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
@@ -86,19 +80,19 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(decoded).toEqual([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
                     ])
 
-                    const decodeErc20TransactionData = decodeFunctionData({
-                        abi: erc20Abi,
-                        data: erc20TransactionData
-                    })
+                    const decodeErc20TransactionData = AbiFunction.decodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        erc20TransactionData
+                    )
 
-                    expect(decodeErc20TransactionData.args).toEqual([
-                        zeroAddress,
+                    expect(decodeErc20TransactionData).toEqual([
+                        Address.zero,
                         1000000000000000000n
                     ])
                 } catch (e) {
@@ -124,20 +118,19 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
+                    const erc20TransactionData = AbiFunction.encodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        [Address.zero, 1000000000000000000n]
+                    )
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         },
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 10n
                         }
@@ -151,21 +144,21 @@ describe.each(getCoreSmartAccounts())(
                         await smartClient.account.decodeCalls(callData)
 
                     expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n },
+                        { to: Address.zero, data: "0x", value: 0n },
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: name === "Simple" ? 0n : 10n
                         }
                     ])
 
-                    const decodeErc20TransactionData = decodeFunctionData({
-                        abi: erc20Abi,
-                        data: erc20TransactionData
-                    })
+                    const decodeErc20TransactionData = AbiFunction.decodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        erc20TransactionData
+                    )
 
-                    expect(decodeErc20TransactionData.args).toEqual([
-                        zeroAddress,
+                    expect(decodeErc20TransactionData).toEqual([
+                        Address.zero,
                         1000000000000000000n
                     ])
                 } catch (e) {
@@ -193,7 +186,7 @@ describe.each(getCoreSmartAccounts())(
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -207,7 +200,7 @@ describe.each(getCoreSmartAccounts())(
                         await smartClient.account.decodeCalls(callData)
 
                     expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n }
+                        { to: Address.zero, data: "0x", value: 0n }
                     ])
                 } catch (e) {
                     if (
@@ -232,15 +225,14 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
+                    const erc20TransactionData = AbiFunction.encodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        [Address.zero, 1000000000000000000n]
+                    )
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
@@ -255,19 +247,19 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(decoded).toEqual([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
                     ])
 
-                    const decodeErc20TransactionData = decodeFunctionData({
-                        abi: erc20Abi,
-                        data: erc20TransactionData
-                    })
+                    const decodeErc20TransactionData = AbiFunction.decodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        erc20TransactionData
+                    )
 
-                    expect(decodeErc20TransactionData.args).toEqual([
-                        zeroAddress,
+                    expect(decodeErc20TransactionData).toEqual([
+                        Address.zero,
                         1000000000000000000n
                     ])
                 } catch (e) {
@@ -291,20 +283,19 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const erc20TransactionData = encodeFunctionData({
-                    abi: erc20Abi,
-                    functionName: "transfer",
-                    args: [zeroAddress, 1000000000000000000n]
-                })
+                const erc20TransactionData = AbiFunction.encodeData(
+                    AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                    [Address.zero, 1000000000000000000n]
+                )
 
                 const callData = await smartClient.account.encodeCalls([
                     {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: "0x",
                         value: 0n
                     },
                     {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: erc20TransactionData,
                         value: 10n
                     }
@@ -317,17 +308,17 @@ describe.each(getCoreSmartAccounts())(
                 const decoded = await smartClient.account.decodeCalls(callData)
 
                 expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
-                    { to: zeroAddress, data: erc20TransactionData, value: 10n }
+                    { to: Address.zero, data: "0x", value: 0n },
+                    { to: Address.zero, data: erc20TransactionData, value: 10n }
                 ])
 
-                const decodeErc20TransactionData = decodeFunctionData({
-                    abi: erc20Abi,
-                    data: erc20TransactionData
-                })
+                const decodeErc20TransactionData = AbiFunction.decodeData(
+                    AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                    erc20TransactionData
+                )
 
-                expect(decodeErc20TransactionData.args).toEqual([
-                    zeroAddress,
+                expect(decodeErc20TransactionData).toEqual([
+                    Address.zero,
                     1000000000000000000n
                 ])
             } catch (e) {
@@ -354,7 +345,7 @@ describe.each(getCoreSmartAccounts())(
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -368,7 +359,7 @@ describe.each(getCoreSmartAccounts())(
                         await smartClient.account.decodeCalls(callData)
 
                     expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n }
+                        { to: Address.zero, data: "0x", value: 0n }
                     ])
                 } catch (e) {
                     if (
@@ -393,15 +384,14 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
+                    const erc20TransactionData = AbiFunction.encodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        [Address.zero, 1000000000000000000n]
+                    )
 
                     const callData = await smartClient.account.encodeCalls([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
@@ -416,19 +406,19 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(decoded).toEqual([
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: erc20TransactionData,
                             value: 0n
                         }
                     ])
 
-                    const decodeErc20TransactionData = decodeFunctionData({
-                        abi: erc20Abi,
-                        data: erc20TransactionData
-                    })
+                    const decodeErc20TransactionData = AbiFunction.decodeData(
+                        AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                        erc20TransactionData
+                    )
 
-                    expect(decodeErc20TransactionData.args).toEqual([
-                        zeroAddress,
+                    expect(decodeErc20TransactionData).toEqual([
+                        Address.zero,
                         1000000000000000000n
                     ])
                 } catch (e) {
@@ -452,20 +442,19 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const erc20TransactionData = encodeFunctionData({
-                    abi: erc20Abi,
-                    functionName: "transfer",
-                    args: [zeroAddress, 1000000000000000000n]
-                })
+                const erc20TransactionData = AbiFunction.encodeData(
+                    AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                    [Address.zero, 1000000000000000000n]
+                )
 
                 const callData = await smartClient.account.encodeCalls([
                     {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: "0x",
                         value: 0n
                     },
                     {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: erc20TransactionData,
                         value: 10n
                     }
@@ -478,17 +467,17 @@ describe.each(getCoreSmartAccounts())(
                 const decoded = await smartClient.account.decodeCalls(callData)
 
                 expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
-                    { to: zeroAddress, data: erc20TransactionData, value: 10n }
+                    { to: Address.zero, data: "0x", value: 0n },
+                    { to: Address.zero, data: erc20TransactionData, value: 10n }
                 ])
 
-                const decodeErc20TransactionData = decodeFunctionData({
-                    abi: erc20Abi,
-                    data: erc20TransactionData
-                })
+                const decodeErc20TransactionData = AbiFunction.decodeData(
+                    AbiFunction.fromAbi(Abis.erc20, "transfer"),
+                    erc20TransactionData
+                )
 
-                expect(decodeErc20TransactionData.args).toEqual([
-                    zeroAddress,
+                expect(decodeErc20TransactionData).toEqual([
+                    Address.zero,
                     1000000000000000000n
                 ])
             } catch (e) {

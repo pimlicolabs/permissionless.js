@@ -1,10 +1,10 @@
-import { isHash, zeroAddress } from "viem"
+import { Address } from "viem/utils"
 import { describe, expect } from "vitest"
+import { getSimpleClient } from "../../../permissionless-test/src/accounts/simple"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
-    getPimlicoClient,
-    getSimpleAccountClient
+    getPimlicoClient
 } from "../../../permissionless-test/src/utils"
 import { getUserOperationStatus } from "./getUserOperationStatus"
 
@@ -18,7 +18,7 @@ describe("getUserOperationStatus", () => {
         })
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.6"
@@ -30,20 +30,20 @@ describe("getUserOperationStatus", () => {
             ...rpc
         })
 
-        const opHash = await simpleAccountClient.sendUserOperation({
+        const opHash = await simpleAccountClient.userOperation.send({
             calls: [
                 {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 }
             ]
         })
 
-        expect(isHash(opHash)).toBe(true)
+        expect(opHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
         const userOperationReceipt =
-            await bundlerClient.waitForUserOperationReceipt({
+            await bundlerClient.userOperation.waitForReceipt({
                 hash: opHash,
                 timeout: 100000
             })
@@ -51,7 +51,7 @@ describe("getUserOperationStatus", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClient.getUserOperationReceipt({
+        const receipt = await bundlerClient.userOperation.getReceipt({
             hash: opHash
         })
 
@@ -89,7 +89,7 @@ describe("getUserOperationStatus", () => {
         })
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.7"
@@ -101,20 +101,20 @@ describe("getUserOperationStatus", () => {
             ...rpc
         })
 
-        const opHash = await simpleAccountClient.sendUserOperation({
+        const opHash = await simpleAccountClient.userOperation.send({
             calls: [
                 {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 }
             ]
         })
 
-        expect(isHash(opHash)).toBe(true)
+        expect(opHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
         const userOperationReceipt =
-            await bundlerClient.waitForUserOperationReceipt({
+            await bundlerClient.userOperation.waitForReceipt({
                 hash: opHash,
                 timeout: 100000
             })
@@ -122,7 +122,7 @@ describe("getUserOperationStatus", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClient.getUserOperationReceipt({
+        const receipt = await bundlerClient.userOperation.getReceipt({
             hash: opHash
         })
 
@@ -159,7 +159,7 @@ describe("getUserOperationStatus", () => {
         })
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.8"
@@ -171,20 +171,20 @@ describe("getUserOperationStatus", () => {
             ...rpc
         })
 
-        const opHash = await simpleAccountClient.sendUserOperation({
+        const opHash = await simpleAccountClient.userOperation.send({
             calls: [
                 {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 }
             ]
         })
 
-        expect(isHash(opHash)).toBe(true)
+        expect(opHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
         const userOperationReceipt =
-            await bundlerClient.waitForUserOperationReceipt({
+            await bundlerClient.userOperation.waitForReceipt({
                 hash: opHash,
                 timeout: 100000
             })
@@ -192,7 +192,7 @@ describe("getUserOperationStatus", () => {
         expect(userOperationReceipt?.userOpHash).toBe(opHash)
         expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-        const receipt = await bundlerClient.getUserOperationReceipt({
+        const receipt = await bundlerClient.userOperation.getReceipt({
             hash: opHash
         })
 

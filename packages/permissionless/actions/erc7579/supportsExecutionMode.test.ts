@@ -1,4 +1,4 @@
-import { zeroAddress } from "viem"
+import { Address } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
@@ -34,7 +34,7 @@ describe.each(getCoreSmartAccounts())(
 
                 // deploy account
                 await smartClient.sendTransaction({
-                    to: zeroAddress,
+                    to: Address.zero,
                     value: 0n,
                     data: "0x"
                 })
@@ -81,7 +81,7 @@ describe.each(getCoreSmartAccounts())(
 
                 // deploy account
                 await smartClient.sendTransaction({
-                    to: zeroAddress,
+                    to: Address.zero,
                     value: 0n,
                     data: "0x"
                 })

@@ -1,11 +1,5 @@
 import { Account, Client, http, testActions } from "viem"
-import {
-    AbiFunction,
-    type Address,
-    ContractAddress,
-    Hex,
-    Value
-} from "viem/utils"
+import { AbiFunction, Address, ContractAddress, Hex, Value } from "viem/utils"
 import {
     createWalletClient,
     getChain,
@@ -96,8 +90,10 @@ export const sudoMintTokens = async ({
     })
 }
 
-export const erc20Address = ContractAddress.fromCreate2({
-    from: "0x4e59b44847b379578588920ca78fbf26c0b4956c",
-    salt: create2Salt,
-    bytecode: erc20Bytecode
-})
+export const erc20Address = Address.checksum(
+    ContractAddress.fromCreate2({
+        from: "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+        salt: create2Salt,
+        bytecode: erc20Bytecode
+    })
+)

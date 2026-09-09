@@ -1,5 +1,5 @@
-import { getAddress, zeroAddress } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { Account } from "viem"
+import { Address, Secp256k1 } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -13,7 +13,7 @@ const typedData = {
         name: "Ether Mail",
         version: "1",
         chainId: 1,
-        verifyingContract: getAddress(
+        verifyingContract: Address.checksum(
             "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
         )
     },
@@ -53,7 +53,7 @@ describe.each(getCoreSmartAccounts())(
         isEip7702Compliant,
         name
     }) => {
-        const privateKey = generatePrivateKey()
+        const privateKey = Secp256k1.randomPrivateKey()
         testWithRpc.skipIf(isEip1271Compliant || !supportsEntryPointV06)(
             "not isEip1271Compliant_v06",
             async ({ rpc }) => {
@@ -86,7 +86,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const isVerified = await publicClient.verifyTypedData({
+                const isVerified = await publicClient.typedData.verify({
                     ...typedData,
                     address: smartClient.account.address,
                     signature
@@ -117,7 +117,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -144,23 +144,26 @@ describe.each(getCoreSmartAccounts())(
 
                     // Due to 7579 launchpad, we can't verify the signature before deploying the account.
                     await smartClient.sendTransaction({
-                        calls: [{ to: zeroAddress, value: 0n }],
+                        calls: [{ to: Address.zero, value: 0n }],
                         authorization: isEip7702Compliant
-                            ? await privateKeyAccount.signAuthorization({
+                            ? await privateKeyAccount.signAuthorization?.({
                                   address: (smartClient.account as any)
-                                      .implementation,
+                                      .authorization.address,
                                   chainId: smartClient.chain.id,
-                                  nonce: await publicClient.getTransactionCount(
-                                      {
-                                          address: smartClient.account.address
-                                      }
+                                  nonce: BigInt(
+                                      await publicClient.address.getTransactionCount(
+                                          {
+                                              address:
+                                                  smartClient.account.address
+                                          }
+                                      )
                                   )
                               })
                             : undefined
                     })
                 }
 
-                const isVerified = await publicClient.verifyTypedData({
+                const isVerified = await publicClient.typedData.verify({
                     ...typedData,
                     address: smartClient.account.address,
                     signature
@@ -210,10 +213,10 @@ describe.each(getCoreSmartAccounts())(
                 if (name.includes("Safe 7579")) {
                     // Due to 7579 launchpad, we can't verify the signature before deploying the account.
                     await smartClient.sendTransaction({
-                        calls: [{ to: zeroAddress, value: 0n }]
+                        calls: [{ to: Address.zero, value: 0n }]
                     })
                 }
-                const isVerified = await publicClient.verifyTypedData({
+                const isVerified = await publicClient.typedData.verify({
                     ...typedData,
                     address: smartClient.account.address,
                     signature

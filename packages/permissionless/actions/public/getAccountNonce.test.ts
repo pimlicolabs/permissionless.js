@@ -1,13 +1,10 @@
-import { createPublicClient, http } from "viem"
-import {
-    entryPoint06Address,
-    entryPoint07Address
-} from "viem/account-abstraction"
+import { EntryPoint } from "viem/erc4337"
 import { describe, expect } from "vitest"
+import { getSimpleClient } from "../../../permissionless-test/src/accounts/simple"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
-    getSimpleAccountClient
+    getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { getAccountNonce } from "./getAccountNonce"
 
@@ -15,12 +12,10 @@ describe("getAccountNonce", () => {
     testWithRpc("getAccountNonce_V06", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.6"
@@ -33,7 +28,7 @@ describe("getAccountNonce", () => {
         })
 
         const nonce = await getAccountNonce(client, {
-            entryPointAddress: entryPoint06Address,
+            entryPointAddress: EntryPoint.addressV06,
             address: simpleAccountClient.account.address
         })
 
@@ -42,12 +37,10 @@ describe("getAccountNonce", () => {
     testWithRpc("getAccountNonce_V07", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.7"
@@ -60,7 +53,7 @@ describe("getAccountNonce", () => {
         })
 
         const nonce = await getAccountNonce(client, {
-            entryPointAddress: entryPoint07Address,
+            entryPointAddress: EntryPoint.addressV07,
             address: simpleAccountClient.account.address
         })
 
@@ -69,12 +62,10 @@ describe("getAccountNonce", () => {
     testWithRpc("getAccountNonce_V08", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.8"
@@ -87,7 +78,7 @@ describe("getAccountNonce", () => {
         })
 
         const nonce = await getAccountNonce(client, {
-            entryPointAddress: entryPoint07Address,
+            entryPointAddress: EntryPoint.addressV08,
             address: simpleAccountClient.account.address
         })
 

@@ -1,14 +1,11 @@
-import { concatHex, createPublicClient, http } from "viem"
-import {
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address
-} from "viem/account-abstraction"
+import { EntryPoint } from "viem/erc4337"
+import { Hex } from "viem/utils"
 import { describe, expect } from "vitest"
+import { getSimpleClient } from "../../../permissionless-test/src/accounts/simple"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
-    getSimpleAccountClient
+    getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { getSenderAddress } from "./getSenderAddress"
 
@@ -16,12 +13,10 @@ describe("getSenderAddress", () => {
     testWithRpc("getSenderAddress_V06", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.6"
@@ -41,8 +36,8 @@ describe("getSenderAddress", () => {
         }
 
         const address = await getSenderAddress(client, {
-            entryPointAddress: entryPoint06Address,
-            initCode: concatHex([factory, factoryData])
+            entryPointAddress: EntryPoint.addressV06,
+            initCode: Hex.concat(factory, factoryData)
         })
 
         expect(address).toBe(simpleAccountClient.account.address)
@@ -50,12 +45,10 @@ describe("getSenderAddress", () => {
     testWithRpc("getSenderAddress_V06_error", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.6"
@@ -77,19 +70,17 @@ describe("getSenderAddress", () => {
         await expect(async () =>
             getSenderAddress(client, {
                 entryPointAddress: "0x0000000000000000000000000000000000000000",
-                initCode: concatHex([factory, factoryData])
+                initCode: Hex.concat(factory, factoryData)
             })
         ).rejects.toThrowError()
     })
     testWithRpc("getSenderAddress_V07", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.7"
@@ -109,7 +100,7 @@ describe("getSenderAddress", () => {
         }
 
         const address = await getSenderAddress(client, {
-            entryPointAddress: entryPoint07Address,
+            entryPointAddress: EntryPoint.addressV07,
             factory,
             factoryData
         })
@@ -119,12 +110,10 @@ describe("getSenderAddress", () => {
     testWithRpc("getSenderAddress_V08", async ({ rpc }) => {
         const { anvilRpc } = rpc
 
-        const client = createPublicClient({
-            transport: http(anvilRpc)
-        })
+        const client = getPublicClient(anvilRpc)
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.8"
@@ -144,7 +133,7 @@ describe("getSenderAddress", () => {
         }
 
         const address = await getSenderAddress(client, {
-            entryPointAddress: entryPoint08Address,
+            entryPointAddress: EntryPoint.addressV08,
             factory,
             factoryData
         })

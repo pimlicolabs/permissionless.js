@@ -1,14 +1,10 @@
-import {
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address
-} from "viem/account-abstraction"
+import { EntryPoint } from "viem/erc4337"
 import { describe, expect } from "vitest"
+import { getSimpleClient } from "../../../permissionless-test/src/accounts/simple"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
-    getPimlicoClient,
-    getSimpleAccountClient
+    getPimlicoClient
 } from "../../../permissionless-test/src/utils"
 import { validateSponsorshipPolicies } from "./validateSponsorshipPolicies"
 
@@ -17,7 +13,7 @@ describe("validateSponsorshipPolicies", () => {
         const { paymasterRpc } = rpc
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.6"
@@ -29,7 +25,7 @@ describe("validateSponsorshipPolicies", () => {
             ...rpc
         })
 
-        const userOperation = await simpleAccountClient.prepareUserOperation({
+        const userOperation = await simpleAccountClient.userOperation.prepare({
             calls: [
                 {
                     to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
@@ -47,7 +43,7 @@ describe("validateSponsorshipPolicies", () => {
         const policies = await validateSponsorshipPolicies(
             pimlicoPaymasterClient,
             {
-                entryPointAddress: entryPoint06Address,
+                entryPointAddress: EntryPoint.addressV06,
                 userOperation: userOperation,
                 sponsorshipPolicyIds: ["sp_crazy_kangaroo"]
             }
@@ -63,7 +59,7 @@ describe("validateSponsorshipPolicies", () => {
         const { paymasterRpc } = rpc
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.7"
@@ -75,7 +71,7 @@ describe("validateSponsorshipPolicies", () => {
             ...rpc
         })
 
-        const userOperation = await simpleAccountClient.prepareUserOperation({
+        const userOperation = await simpleAccountClient.userOperation.prepare({
             calls: [
                 {
                     to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
@@ -93,7 +89,7 @@ describe("validateSponsorshipPolicies", () => {
         const policies = await validateSponsorshipPolicies(
             pimlicoPaymasterClient,
             {
-                entryPointAddress: entryPoint07Address,
+                entryPointAddress: EntryPoint.addressV07,
                 userOperation: userOperation,
                 sponsorshipPolicyIds: ["sp_crazy_kangaroo"]
             }
@@ -109,7 +105,7 @@ describe("validateSponsorshipPolicies", () => {
         const { paymasterRpc } = rpc
 
         const simpleAccountClient = getBundlerClient({
-            account: await getSimpleAccountClient({
+            account: await getSimpleClient({
                 ...rpc,
                 entryPoint: {
                     version: "0.8"
@@ -121,7 +117,7 @@ describe("validateSponsorshipPolicies", () => {
             ...rpc
         })
 
-        const userOperation = await simpleAccountClient.prepareUserOperation({
+        const userOperation = await simpleAccountClient.userOperation.prepare({
             calls: [
                 {
                     to: "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
@@ -139,7 +135,7 @@ describe("validateSponsorshipPolicies", () => {
         const policies = await validateSponsorshipPolicies(
             pimlicoPaymasterClient,
             {
-                entryPointAddress: entryPoint08Address,
+                entryPointAddress: EntryPoint.addressV08,
                 userOperation: userOperation,
                 sponsorshipPolicyIds: ["sp_crazy_kangaroo"]
             }

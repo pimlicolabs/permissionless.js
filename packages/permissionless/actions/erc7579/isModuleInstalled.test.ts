@@ -1,4 +1,4 @@
-import { encodeAbiParameters, encodePacked, zeroAddress } from "viem"
+import { AbiParameters, Address } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
@@ -27,7 +27,7 @@ describe.each(getCoreSmartAccounts())(
                     erc7579Actions()
                 )
 
-                const moduleData = encodePacked(
+                const moduleData = AbiParameters.encodePacked(
                     ["address"],
                     [smartClient.account.address]
                 )
@@ -37,11 +37,11 @@ describe.each(getCoreSmartAccounts())(
                     type: "executor",
                     address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     context: name.startsWith("Kernel 7579")
-                        ? encodePacked(
+                        ? AbiParameters.encodePacked(
                               ["address", "bytes"],
                               [
-                                  zeroAddress,
-                                  encodeAbiParameters(
+                                  Address.zero,
+                                  AbiParameters.encode(
                                       [{ type: "bytes" }, { type: "bytes" }],
                                       [moduleData, "0x"]
                                   )
@@ -50,7 +50,7 @@ describe.each(getCoreSmartAccounts())(
                         : moduleData
                 })
 
-                await smartClient.waitForUserOperationReceipt({
+                await smartClient.userOperation.waitForReceipt({
                     hash: opHash,
                     timeout: 100000
                 })
