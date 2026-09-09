@@ -207,7 +207,9 @@ describe("ThirdwebSmartAccount", () => {
             owner: randomOwner()
         })
 
-        const single = [{ to: zeroAddress, value: 1n, data: "0xdeadbeef" }]
+        const single = [
+            { to: zeroAddress, value: 1n, data: "0xdeadbeef" }
+        ] as const
         expect(
             await account.decodeCalls(await account.encodeCalls(single))
         ).toEqual(single)

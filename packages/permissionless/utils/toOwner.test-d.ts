@@ -1,10 +1,10 @@
+import { Owner } from "permissionless"
 import type { Account, Chain, Client, custom } from "viem"
 import type { Address, Hex, Provider } from "viem/utils"
 import { describe, expectTypeOf, test } from "vitest"
-import * as Owner from "./owner.js"
-import type { EthereumProvider } from "./toOwner.js"
 
 type OwnerParameter = Parameters<typeof Owner.from>[0]["owner"]
+type EthereumProvider = Exclude<OwnerParameter, { type: string }>
 
 // Emitter bases the SDKs inherit from, abridged to the listener API.
 
@@ -693,6 +693,22 @@ describe("Owner.from accepts every real embedded-wallet provider (22/22)", () =>
 
     test("@dynamic-labs/ethereum@5.7.0 IEthereum", () => {
         expectTypeOf<DynamicIEthereum>().toExtend<OwnerParameter>()
+    })
+})
+
+describe("Owner", () => {
+    test("namespace names", () => {
+        expectTypeOf<keyof typeof Owner>().toEqualTypeOf<"from">()
+        expectTypeOf(Owner.from).parameter(0).toEqualTypeOf<{
+            owner: OwnerParameter
+            address?: Address.Address
+        }>()
+        expectTypeOf<EthereumProvider>().toEqualTypeOf<{
+            request(args: {
+                method: string
+                params?: unknown
+            }): Promise<unknown>
+        }>()
     })
 })
 

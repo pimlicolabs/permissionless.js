@@ -1,10 +1,6 @@
 {
-    // Type tests (vitest typecheck, TS 5.9 via typescript5): the *.test-d.ts files and whatever they import.
-    "extends": "./tsconfig.base.json",
-    "include": ["../packages/permissionless/**/*.test-d.ts"],
-    "compilerOptions": {
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "noEmit": true
-    }
+    // Type tests only (vitest typecheck): vitest copies this file verbatim, so `include` must name the
+    // *.test-d.ts files itself.
+    "extends": "./tsconfig.permissionless.test.json",
+    "include": ["../packages/permissionless/**/*.test-d.ts"]
 }

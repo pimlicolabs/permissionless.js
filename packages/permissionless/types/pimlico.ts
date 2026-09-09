@@ -70,6 +70,16 @@ type SponsorUserOperationRpcParameter<
                 | "paymasterPostOpGasLimit"
             >
           : never)
+    | (entryPointVersion extends "0.9"
+          ? PartialBy<
+                UserOperation.UserOperation<"0.9", boolean, Hex.Hex, Hex.Hex>,
+                | "callGasLimit"
+                | "preVerificationGas"
+                | "verificationGasLimit"
+                | "paymasterVerificationGasLimit"
+                | "paymasterPostOpGasLimit"
+            >
+          : never)
 >
 
 type SponsorUserOperationRpcReturnType<

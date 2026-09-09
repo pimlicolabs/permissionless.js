@@ -1,4 +1,4 @@
-import { Actions, type Chain, type Client, Errors } from "viem"
+import { Actions, type Client, Errors } from "viem"
 import {
     type BundlerClient,
     Actions as Erc4337Actions,
@@ -53,35 +53,10 @@ export const prepareUserOperation =
             balanceSlot: _balanceSlot
         }: PrepareUserOperationParameters = {}
     ) =>
-    async <
-        account extends SmartAccount.SmartAccount | undefined,
-        const calls extends readonly unknown[],
-        const request extends Erc4337Actions.userOperation.prepare.Options<
-            account,
-            accountOverride,
-            calls
-        >,
-        accountOverride extends
-            | SmartAccount.SmartAccount
-            | undefined = undefined
-    >(
-        client: BundlerClient.Client<Chain.Chain | undefined, account>,
-        parameters_: Erc4337Actions.userOperation.prepare.Options<
-            account,
-            accountOverride,
-            calls
-        > &
-            request
-    ): Promise<
-        Erc4337Actions.userOperation.prepare.ReturnType<
-            account,
-            accountOverride,
-            calls,
-            request
-        >
-    > => {
-        const parameters =
-            parameters_ as Erc4337Actions.userOperation.prepare.Options
+    async (
+        client: BundlerClient.Client,
+        parameters: Erc4337Actions.userOperation.prepare.Options
+    ): Promise<Erc4337Actions.userOperation.prepare.ReturnType> => {
         const account_ = client.account
 
         if (!account_) throw new Error("Account not found")
@@ -378,24 +353,14 @@ export const prepareUserOperation =
             return {
                 ...userOperation,
                 ...paymasterData
-            } as unknown as Erc4337Actions.userOperation.prepare.ReturnType<
-                account,
-                accountOverride,
-                calls,
-                request
-            >
+            } as unknown as Erc4337Actions.userOperation.prepare.ReturnType
         }
 
-        return (await getAction(
+        return getAction(
             client,
             Erc4337Actions.userOperation.prepare,
             "userOperation.prepare"
         )(
             parameters
-        )) as unknown as Erc4337Actions.userOperation.prepare.ReturnType<
-            account,
-            accountOverride,
-            calls,
-            request
-        >
+        ) as Promise<Erc4337Actions.userOperation.prepare.ReturnType>
     }

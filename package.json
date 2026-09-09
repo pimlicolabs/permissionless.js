@@ -67,6 +67,7 @@
         "test:ci-no-coverage": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --pool=forks",
         "test:ci": "CI=true && vitest -c ./packages/permissionless/vitest.config.ts --coverage --pool=forks",
         "test:types": "vitest run --typecheck.only -c ./packages/permissionless/vitest.config.ts",
+        "typecheck": "tsc -p ./tsconfig/tsconfig.permissionless.test.json",
         "wagmi-demo": "bun run --cwd packages/wagmi-demo dev"
     },
     "simple-git-hooks": {

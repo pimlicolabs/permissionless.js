@@ -7,7 +7,7 @@ The permissionless monorepo uses TypeScript compilation (no bundler) to produce 
 | Tool | Version | Purpose |
 |------|---------|---------|
 | TypeScript | 7.0.2 (exact) | Native compiler; `tsc` builds every output |
-| typescript5 | npm:typescript@5.9.3 | JS-API compiler for tooling that needs one (vitest typecheck, consumer checks) |
+| typescript5 | npm:typescript@5.9.3 | JS-based TypeScript 5.9 kept for local consumer checks; CI installs its own 5.9.3 / 6.0.3 for the matrix legs and vitest's typecheck drives the TS 7 binary |
 | Biome | 2.5.12 | Linter and formatter (replaces ESLint/Prettier) |
 | Vitest | ^2.1.5 | Test runner with coverage-v8 |
 | Changesets | ^2.26.2 | Version management and changelog generation |
@@ -89,7 +89,7 @@ All five jobs run **in parallel** with no dependencies:
 
 - **Lint** — formats and lints code, auto-commits fixes
 - **Build** — runs `bun run build` to verify compilation
-- **Package types** — packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and node10 consumers on TypeScript 5.9.3 (see the fixture README); `publint --strict` and `attw --pack --profile esm-only` gate the manifest
+- **Package types** — a TypeScript `{5.9.3, 6.0.3, 7.0.2}` matrix: packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and (≤ 6) node10 consumers, runs the `*.test-d.ts` suite against the emitted `.d.ts`, and emits declarations for a module of inferred permissionless values (the TS2742/TS2883 probe; the extended-client half is a known failure kept `continue-on-error` until the `./_types/*` decision); `publint --strict` and `attw --pack --profile esm-only` gate the manifest on the 7.0.2 leg (see the fixture README)
 - **E2E-Coverage** — runs tests with coverage (no build needed — vitest resolves workspace packages from source via aliases)
 - **Size** — runs `size-limit-action` to compare bundle sizes against base branch
 

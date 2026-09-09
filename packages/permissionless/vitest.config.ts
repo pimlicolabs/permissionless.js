@@ -72,10 +72,12 @@ export default defineConfig({
             join(__dirname, "./**/*.test.ts"),
             join(__dirname, "../permissionless-test/src/fixtures/**/*.test.ts")
         ],
-        // *.test-d.ts run through TS 5.9 (typescript5): TS 7 has no JS API for vitest to drive.
+        // *.test-d.ts import the package by its entrypoints, so the whole source is
+        // in the program: the repo compiler (TS 7) checks it in ~40s where TS 5.9
+        // takes ~260s. CI reruns them on 5.9.3 / 6.0.3 via --typecheck.checker.
         typecheck: {
             enabled: true,
-            checker: join(__dirname, "../../node_modules/typescript5/bin/tsc"),
+            checker: join(__dirname, "../../node_modules/typescript/bin/tsc"),
             tsconfig: join(
                 __dirname,
                 "../../tsconfig/tsconfig.permissionless.test-d.json"
