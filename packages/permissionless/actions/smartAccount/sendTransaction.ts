@@ -5,7 +5,8 @@ import {
     type SmartAccount
 } from "viem/erc4337"
 import type { Hex } from "viem/utils"
-import { AccountNotFoundError } from "../../errors/index.js"
+import { AccountNotFoundError } from "../../errors/account.js"
+import { TransactionToRequiredError } from "../../errors/smartAccount.js"
 import type { GetSmartAccountParameter } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 
@@ -106,7 +107,7 @@ export async function sendTransaction<
 
         const account = account_ as SmartAccount.SmartAccount
 
-        if (!to) throw new Error("Missing to address")
+        if (!to) throw new TransactionToRequiredError()
 
         userOpHash = await getAction(
             client,

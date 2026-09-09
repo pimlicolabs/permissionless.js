@@ -12,10 +12,8 @@ import {
     getBundlerClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import {
-    LightSmartAccountEmptyCallsError,
-    LightSmartAccountUnsupportedVersionError
-} from "../../errors/light"
+import { EmptyCallsError } from "../../errors/account"
+import { LightSmartAccountUnsupportedVersionError } from "../../errors/light"
 import * as LightSmartAccount from "./index"
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
@@ -120,9 +118,7 @@ describe("LightSmartAccount.from", () => {
             { to: zeroAddress, value: 1n, data: "0xdeadbeef" },
             { to: zeroAddress, value: 0n, data: "0x" }
         ])
-        expect(() => account.encodeCalls([])).toThrow(
-            LightSmartAccountEmptyCallsError
-        )
+        expect(() => account.encodeCalls([])).toThrow(EmptyCallsError)
     })
 
     for (const entryPoint of ["0.6", "0.7"] as const) {

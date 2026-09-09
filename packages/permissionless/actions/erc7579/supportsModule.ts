@@ -1,7 +1,8 @@
 import { Actions, type Chain, ContractError } from "viem"
 import type { BundlerClient, SmartAccount } from "viem/erc4337"
 import { AbiFunction, type Address } from "viem/utils"
-import { AccountNotFoundError } from "../../errors/index.js"
+import { AccountNotFoundError } from "../../errors/account.js"
+import { Erc7579InvalidModuleTypeError } from "../../errors/erc7579.js"
 import type { GetSmartAccountParameter } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 
@@ -24,7 +25,7 @@ export function parseModuleTypeId(type: ModuleType): bigint {
         case "hook":
             return BigInt(4)
         default:
-            throw new Error("Invalid module type")
+            throw new Erc7579InvalidModuleTypeError({ type })
     }
 }
 
@@ -94,7 +95,9 @@ export async function supportsModule<
             })
 
             if (!result?.data) {
-                throw new Error("accountId result is empty")
+                throw new ContractError.ContractFunctionZeroDataError({
+                    functionName: "supportsModule"
+                })
             }
 
             return AbiFunction.decodeResult(abi, "supportsModule", result.data)

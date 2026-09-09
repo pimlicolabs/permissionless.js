@@ -16,8 +16,8 @@ import {
     getBundlerClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
+import { EmptyCallsError } from "../../errors/account"
 import {
-    KernelEmptyCallsError,
     KernelNonceKeyTooLargeError,
     KernelNotDelegatedError,
     KernelUnsupportedVersionError
@@ -263,7 +263,7 @@ describe("KernelSmartAccount.from", () => {
                 ])
                 if (version === "0.2.2")
                     expect(() => account.encodeCalls([])).toThrow(
-                        KernelEmptyCallsError
+                        EmptyCallsError
                     )
             }
         )

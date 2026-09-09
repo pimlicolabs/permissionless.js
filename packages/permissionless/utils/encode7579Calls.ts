@@ -4,6 +4,8 @@ import {
     type ExecutionMode,
     encodeExecutionMode
 } from "../actions/erc7579/supportsExecutionMode.js"
+import { EmptyCallsError } from "../errors/account.js"
+import { Erc7579InvalidExecutionModeError } from "../errors/erc7579.js"
 
 export type EncodeCallDataParams<callType extends CallType> = {
     mode: ExecutionMode<callType>
@@ -40,9 +42,10 @@ export function encode7579Calls<callType extends CallType>({
     callData
 }: EncodeCallDataParams<callType>): Hex.Hex {
     if (callData.length > 1 && mode?.type !== "batchcall") {
-        throw new Error(
-            `mode ${JSON.stringify(mode)} does not supported for batchcall calldata`
-        )
+        throw new Erc7579InvalidExecutionModeError({
+            type: mode?.type,
+            calls: callData.length
+        })
     }
 
     if (callData.length > 1) {
@@ -84,9 +87,7 @@ export function encode7579Calls<callType extends CallType>({
 
     const call = callData.length === 0 ? undefined : callData[0]
 
-    if (!call) {
-        throw new Error("No calls to encode")
-    }
+    if (!call) throw new EmptyCallsError()
 
     return AbiFunction.encodeData(executeAbi, "execute", [
         encodeExecutionMode(mode),

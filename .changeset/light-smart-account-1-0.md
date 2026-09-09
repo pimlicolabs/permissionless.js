@@ -27,5 +27,5 @@ const account = await LightSmartAccount.from({ // [!code ++]
 - `version` is optional; it defaults to the version the EntryPoint supports (`2.0.0` for 0.7, `1.1.0` for 0.6). Passing the other version throws `LightSmartAccountUnsupportedVersionError`.
 - Nonce keys resolve as per-call `key`, then the constructor `nonceKey`, then `0n` (0.x let the constructor value win).
 - Types moved into the namespace: `ToLightSmartAccountParameters` → `LightSmartAccount.Parameters`, `ToLightSmartAccountReturnType` → `LightSmartAccount.ReturnType`, `LightSmartAccountImplementation` → `LightSmartAccount.Implementation`, `LightAccountVersion` → `LightSmartAccount.Version`.
-- `encodeCalls([])` throws `LightSmartAccountEmptyCallsError` instead of a plain `Error`.
+- `encodeCalls([])` throws the shared `EmptyCallsError` instead of a plain `Error`.
 - Counterfactual addresses are unchanged for every explicit `entryPoint` + `version` pair.

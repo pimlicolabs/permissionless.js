@@ -21,5 +21,5 @@ permissionless heavily re-exports and extends types from `viem` and `viem/accoun
 
 ## Sections
 
-- [Errors](./errors.md) -- `AccountNotFoundError`, `InvalidEntryPointError`
+- [Errors](./errors.md) -- every named error class, grouped by module
 - [RPC Schemas](./rpc-schemas.md) -- `PimlicoRpcSchema`, `EtherspotBundlerRpcSchema`, `PasskeyServerRpcSchema`

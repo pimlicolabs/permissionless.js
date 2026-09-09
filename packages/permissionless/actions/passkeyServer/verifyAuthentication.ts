@@ -1,5 +1,9 @@
 import type { Client, Transport } from "viem"
 import type { Hex } from "viem/utils"
+import {
+    InvalidPasskeyCredentialError,
+    InvalidPasskeyServerResponseError
+} from "../../errors/passkeyServer.js"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 import * as Base64 from "../../utils/base64.js"
 
@@ -45,7 +49,7 @@ export const verifyAuthentication = async (
             }
         )
     } else {
-        throw new Error("authenticatorData not found in the signature")
+        throw new InvalidPasskeyCredentialError({ field: "authenticatorData" })
     }
 
     let signature: string
@@ -58,7 +62,7 @@ export const verifyAuthentication = async (
             }
         )
     } else {
-        throw new Error("signature not found in the signature")
+        throw new InvalidPasskeyCredentialError({ field: "signature" })
     }
 
     let userHandle: string | undefined
@@ -115,19 +119,16 @@ export const verifyAuthentication = async (
     const publicKey = serverResponse?.publicKey
     const userName = serverResponse?.userName
 
-    if (typeof id !== "string") {
-        throw new Error("Invalid passkey id returned from server")
-    }
-
-    if (typeof publicKey !== "string" || !publicKey.startsWith("0x")) {
-        throw new Error(
-            "Invalid public key returned from server - must be hex string starting with 0x"
-        )
-    }
-
-    if (typeof userName !== "string") {
-        throw new Error("Invalid user name returned from server")
-    }
+    const invalid = (reason: string) =>
+        new InvalidPasskeyServerResponseError({
+            method: "pks_verifyAuthentication",
+            reason
+        })
+    if (typeof id !== "string") throw invalid("`id` must be a string.")
+    if (typeof publicKey !== "string" || !publicKey.startsWith("0x"))
+        throw invalid("`publicKey` must be a 0x-prefixed hex string.")
+    if (typeof userName !== "string")
+        throw invalid("`userName` must be a string.")
 
     return {
         success,

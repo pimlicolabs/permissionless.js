@@ -1,5 +1,5 @@
 import { AbiFunction, type Address, type Hex } from "viem/utils"
-import { KernelEmptyCallsError } from "../../../errors/kernel.js"
+import { EmptyCallsError } from "../../../errors/account.js"
 import { encode7579Calls } from "../../../utils/encode7579Calls.js"
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi.js"
 import { isKernelV2, type Version } from "../version.js"
@@ -34,7 +34,7 @@ export const encodeCallData = ({
             }))
         ])
     const [call] = calls
-    if (!call) throw new KernelEmptyCallsError()
+    if (!call) throw new EmptyCallsError()
     return AbiFunction.encodeData(KernelExecuteAbi, "execute", [
         call.to,
         call.value ?? 0n,

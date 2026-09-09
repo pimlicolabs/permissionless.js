@@ -43,7 +43,7 @@ async function TrustSmartAccount.from(
 
 ## Errors
 
-- `TrustEmptyCallsError` -- `encodeCalls([])`
+- `EmptyCallsError` -- `encodeCalls([])`
 - `TrustInvalidCallDataError` -- `decodeCalls` on data that is neither `execute` nor `executeBatch`
 
 ## Example

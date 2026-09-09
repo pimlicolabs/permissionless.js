@@ -1,7 +1,6 @@
 import { type Account, Actions, type Chain, type Client } from "viem"
 import { type EntryPoint, SmartAccount, UserOperation } from "viem/erc4337"
 import { Abi, AbiFunction, AbiParameters, type Address, Hex } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { EtherspotNonceKeyOverflowError } from "../../errors/etherspot.js"
 import type { Assign, OneOf } from "../../types/utils.js"
@@ -13,6 +12,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 const bootstrapAbi = /*#__PURE__*/ Abi.from([
     "function initMSA((address module, bytes data)[] validators, (address module, bytes data)[] executors, (address module, bytes data) hook, (address module, bytes data)[] fallbacks)",
@@ -140,15 +140,9 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
     const signMessage: Implementation["signMessage"] = async ({ message }) =>
         withValidator(await owner.signMessage({ message }))
 
-    return SmartAccount.from({
+    const account = await SmartAccount.from({
         client,
         entryPoint,
-        nonceKeyManager: {
-            consume: async () => Number(nonceKey),
-            get: async () => Number(nonceKey),
-            increment() {},
-            reset() {}
-        },
         decodeCalls: (data) => decode7579Calls(data).callData,
         encodeCalls: (calls) =>
             encode7579Calls({
@@ -162,13 +156,6 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
             }),
         getAddress,
         getFactoryArgs: () => ({ factory: metaFactoryAddress, factoryData }),
-        async getNonce(args) {
-            return getAccountNonce(client, {
-                address: await getAddress(),
-                entryPointAddress: entryPoint.address,
-                key: encodeNonceKey(args?.key ?? nonceKey)
-            })
-        },
         getStubSignature: () => stubSignature,
         sign: ({ hash }) => signMessage({ message: hash }),
         signMessage,
@@ -189,5 +176,9 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
             )
             return owner.signMessage({ message: { raw: hash } })
         }
-    }) as Promise<ReturnType>
+    })
+    return withNonceKey(account, {
+        nonceKey,
+        encodeKey: encodeNonceKey
+    }) as ReturnType
 }

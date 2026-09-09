@@ -1,5 +1,9 @@
 import type { Client, Transport } from "viem"
 import type { Hex, WebAuthn } from "viem/utils"
+import {
+    InvalidPasskeyServerResponseError,
+    PasskeyAttestationUnsupportedError
+} from "../../errors/passkeyServer.js"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 import * as Base64 from "../../utils/base64.js"
 
@@ -30,8 +34,11 @@ export const verifyRegistration = async (
     if (typeof response.getPublicKeyAlgorithm === "function") {
         try {
             responsePublicKeyAlgorithm = response.getPublicKeyAlgorithm()
-        } catch {
-            throw new Error("getPublicKeyAlgorithm() is not supported")
+        } catch (cause) {
+            throw new PasskeyAttestationUnsupportedError({
+                method: "getPublicKeyAlgorithm",
+                cause: cause as Error
+            })
         }
     }
 
@@ -41,8 +48,11 @@ export const verifyRegistration = async (
             responseAuthenticatorData = Base64.fromBytes(
                 new Uint8Array(response.getAuthenticatorData())
             )
-        } catch {
-            throw new Error("getAuthenticatorData() is not supported")
+        } catch (cause) {
+            throw new PasskeyAttestationUnsupportedError({
+                method: "getAuthenticatorData",
+                cause: cause as Error
+            })
         }
     }
 
@@ -105,19 +115,16 @@ export const verifyRegistration = async (
     const publicKey = serverResponse?.publicKey
     const userName = serverResponse?.userName
 
-    if (typeof id !== "string") {
-        throw new Error("Invalid passkey id returned from server")
-    }
-
-    if (typeof publicKey !== "string" || !publicKey.startsWith("0x")) {
-        throw new Error(
-            "Invalid public key returned from server - must be hex string starting with 0x"
-        )
-    }
-
-    if (typeof userName !== "string") {
-        throw new Error("Invalid user name returned from server")
-    }
+    const invalid = (reason: string) =>
+        new InvalidPasskeyServerResponseError({
+            method: "pks_verifyRegistration",
+            reason
+        })
+    if (typeof id !== "string") throw invalid("`id` must be a string.")
+    if (typeof publicKey !== "string" || !publicKey.startsWith("0x"))
+        throw invalid("`publicKey` must be a 0x-prefixed hex string.")
+    if (typeof userName !== "string")
+        throw invalid("`userName` must be a string.")
 
     return {
         success,

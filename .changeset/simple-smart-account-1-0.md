@@ -23,4 +23,4 @@ const account = await SimpleSmartAccount.from({ // [!code ++]
 - Nonce key precedence is now `args.key ?? nonceKey ?? 0n`: a per-call key passed to `account.getNonce({ key })` wins over the constructor `nonceKey`. 0.x preferred the constructor value.
 - `to7702SimpleSmartAccount` and its types are removed. EIP-7702 mode is `eip7702: true` on `SimpleSmartAccount.from`; the account address is the owner EOA and `implementation` (was `accountLogicAddress`) selects the delegate.
 - Types: `ToSimpleSmartAccountParameters` → `SimpleSmartAccount.Parameters`, `ToSimpleSmartAccountReturnType` → `SimpleSmartAccount.ReturnType`, `SimpleSmartAccountImplementation` → `SimpleSmartAccount.Implementation`. `To7702SimpleSmartAccount*` types are removed.
-- Throw sites are named errors: `SimpleAccountErc1271UnsupportedError`, `SimpleAccountEmptyCallsError`, `SimpleAccountFactoryAddressRequiredError`.
+- Throw sites are named errors: `SimpleAccountErc1271UnsupportedError`, `SimpleAccountFactoryAddressRequiredError`, and the shared `EmptyCallsError`.

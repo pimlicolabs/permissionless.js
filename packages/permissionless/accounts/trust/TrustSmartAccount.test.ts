@@ -7,10 +7,8 @@ import {
     getBundlerClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import {
-    TrustEmptyCallsError,
-    TrustInvalidCallDataError
-} from "../../errors/trust.js"
+import { EmptyCallsError } from "../../errors/account.js"
+import { TrustInvalidCallDataError } from "../../errors/trust.js"
 import { encodeNonce } from "../../utils/encodeNonce.js"
 import * as TrustSmartAccount from "./index.js"
 
@@ -64,7 +62,7 @@ describe("TrustSmartAccount", () => {
         expect(
             await account.decodeCalls?.(await account.encodeCalls(calls))
         ).toEqual(calls)
-        expect(() => account.encodeCalls([])).toThrow(TrustEmptyCallsError)
+        expect(() => account.encodeCalls([])).toThrow(EmptyCallsError)
         expect(() => account.decodeCalls?.("0xdeadbeef")).toThrow(
             TrustInvalidCallDataError
         )

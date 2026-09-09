@@ -47,14 +47,6 @@ export class KernelNotDelegatedError extends Errors.BaseError {
     }
 }
 
-export class KernelEmptyCallsError extends Errors.BaseError {
-    override name = "KernelEmptyCallsError"
-
-    constructor() {
-        super("No calls to encode.")
-    }
-}
-
 export class KernelDecodeCallsError extends Errors.BaseError {
     override name = "KernelDecodeCallsError"
 

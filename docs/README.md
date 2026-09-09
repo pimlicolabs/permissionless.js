@@ -116,7 +116,7 @@ const txHash = await smartAccountClient.sendTransaction({
 ### Types & Errors
 
 - [Types & Errors Overview](./types-and-errors/README.md)
-- [Errors](./types-and-errors/errors.md) -- `AccountNotFoundError`, `InvalidEntryPointError`
+- [Errors](./types-and-errors/errors.md) -- every named error class, grouped by module
 - [RPC Schemas](./types-and-errors/rpc-schemas.md) -- `PimlicoRpcSchema`, `EtherspotBundlerRpcSchema`
 
 ### Experimental

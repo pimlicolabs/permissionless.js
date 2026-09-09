@@ -1,5 +1,6 @@
 import type { Client, Transport } from "viem"
 import type { WebAuthn } from "viem/utils"
+import { InvalidPasskeyServerResponseError } from "../../errors/passkeyServer.js"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 import * as Base64 from "../../utils/base64.js"
 
@@ -100,7 +101,10 @@ export const startRegistration: (
         !validateRp(response.rp) ||
         !validateUser(response.user)
     ) {
-        throw new Error("Invalid response format from passkey server")
+        throw new InvalidPasskeyServerResponseError({
+            method: "pks_startRegistration",
+            reason: "Malformed credential creation options."
+        })
     }
 
     const credentialOptions: StartRegistrationReturnType = {

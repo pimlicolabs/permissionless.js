@@ -9,14 +9,6 @@ export class SimpleAccountErc1271UnsupportedError extends Errors.BaseError {
     }
 }
 
-export class SimpleAccountEmptyCallsError extends Errors.BaseError {
-    override name = "SimpleAccountEmptyCallsError"
-
-    constructor() {
-        super("No calls to encode")
-    }
-}
-
 export class SimpleAccountFactoryAddressRequiredError extends Errors.BaseError {
     override name = "SimpleAccountFactoryAddressRequiredError"
 

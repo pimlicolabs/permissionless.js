@@ -1,6 +1,7 @@
 import { Chain, type Client } from "viem"
 import type { EntryPoint, UserOperation } from "viem/erc4337"
 import type { Address } from "viem/utils"
+import { TokenQuoteNotFoundError } from "../../errors/erc20Paymaster.js"
 import type { GetChainParameter } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 import { getRequiredPrefund } from "../../utils/getRequiredPrefund.js"
@@ -60,9 +61,7 @@ export const estimateCost = async <
 
     const quote = quotes[0]
 
-    if (quote === undefined) {
-        throw new Error(`No token quote found for ${token}`)
-    }
+    if (quote === undefined) throw new TokenQuoteNotFoundError({ token })
 
     const postOpGas = quote.postOpGas
     const exchangeRate = quote.exchangeRate

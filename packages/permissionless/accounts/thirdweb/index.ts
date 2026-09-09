@@ -8,8 +8,7 @@ import {
     PersonalMessage,
     TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-import { ThirdwebNoCallsError } from "../../errors/thirdweb.js"
+import { EmptyCallsError } from "../../errors/account.js"
 import type { Assign, OneOf } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 import {
@@ -19,6 +18,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 const abi = Abi.from([
     "function execute(address dest, uint256 value, bytes func)",
@@ -158,7 +158,7 @@ export async function from<entryPointVersion extends EntryPointVersion = "0.7">(
         },
         encodeCalls(calls) {
             const call = calls[0]
-            if (!call) throw new ThirdwebNoCallsError()
+            if (!call) throw new EmptyCallsError()
             if (calls.length === 1)
                 return AbiFunction.encodeData(execute, [
                     call.to,
@@ -240,12 +240,7 @@ export async function from<entryPointVersion extends EntryPointVersion = "0.7">(
         }
     })
 
-    return Object.assign(account, {
-        getNonce: (args?: SmartAccount.getNonce.Options) =>
-            getAccountNonce(client, {
-                address: account.address,
-                entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey ?? 0n
-            })
+    return withNonceKey(account, {
+        nonceKey
     }) as unknown as ReturnType<entryPointVersion>
 }

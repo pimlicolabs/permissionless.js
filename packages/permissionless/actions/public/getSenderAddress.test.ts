@@ -1,12 +1,17 @@
 import { EntryPoint } from "viem/erc4337"
 import { Hex } from "viem/utils"
-import { describe, expect } from "vitest"
+import { describe, expect, test } from "vitest"
 import { getSimpleClient } from "../../../permissionless-test/src/accounts/simple"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getBundlerClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
+import {
+    InitCodeRequiredError,
+    InvalidEntryPointError,
+    SenderAddressNotFoundError
+} from "../../errors/entryPoint"
 import { getSenderAddress } from "./getSenderAddress"
 
 describe("getSenderAddress", () => {
@@ -72,7 +77,7 @@ describe("getSenderAddress", () => {
                 entryPointAddress: "0x0000000000000000000000000000000000000000",
                 initCode: Hex.concat(factory, factoryData)
             })
-        ).rejects.toThrowError()
+        ).rejects.toThrow(InvalidEntryPointError)
     })
     testWithRpc("getSenderAddress_V07", async ({ rpc }) => {
         const { anvilRpc } = rpc
@@ -139,5 +144,28 @@ describe("getSenderAddress", () => {
         })
 
         expect(address).toBe(simpleAccountClient.account.address)
+    })
+})
+
+describe("getSenderAddress errors", () => {
+    test("rejects with InitCodeRequiredError without init code", async () => {
+        await expect(
+            getSenderAddress(
+                {} as any,
+                {
+                    entryPointAddress: EntryPoint.addressV07
+                } as any
+            )
+        ).rejects.toThrow(InitCodeRequiredError)
+    })
+
+    test("rejects with SenderAddressNotFoundError on an empty result", async () => {
+        const client = { request: async () => "0x", call: async () => ({}) }
+        await expect(
+            getSenderAddress(client as any, {
+                entryPointAddress: EntryPoint.addressV07,
+                initCode: "0x"
+            })
+        ).rejects.toThrow(SenderAddressNotFoundError)
     })
 })
