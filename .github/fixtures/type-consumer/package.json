@@ -1,6 +1,7 @@
 {
     "name": "type-consumer-fixture",
     "private": true,
+    "type": "module",
     "description": "Type-checks the packed permissionless tarball the way consumers do (issue #522). The tarball is installed at CI time by the package-types workflow job.",
     "devDependencies": {
         "typescript": "5.9.3",
