@@ -63,7 +63,7 @@ jobs:
           node-version: "22"
 
       - name: Build permissionless
-        run: bun run build:permissionless:tsgo
+        run: bun run build:permissionless
 
       - name: Pack tarball into fixture
         working-directory: packages/permissionless
@@ -83,10 +83,13 @@ jobs:
         working-directory: .github/fixtures/type-consumer
         run: npx tsc -p tsconfig.bundler.json
 
-      - name: Lint package publishing metadata (advisory)
+      - name: Lint package publishing metadata
         working-directory: packages/permissionless
-        continue-on-error: true
         run: npx --yes publint --strict
+
+      - name: Check published types resolve (ESM-only profile)
+        working-directory: packages/permissionless
+        run: npx --yes @arethetypeswrong/cli --pack . --profile esm-only
 
   docker-e2e:
     name: E2E-Coverage
