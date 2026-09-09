@@ -28,5 +28,8 @@
     },
     "peerDependencies": {
         "wagmi": "^2.15.1"
+    },
+    "devDependencies": {
+        "viem": "2.44.4"
     }
 }
