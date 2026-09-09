@@ -7,6 +7,9 @@ export const SafeSmartAccount = {
 }
 
 export type {
+    DynamicOwner,
+    RegularOwner,
+    SafeOwner,
     SafeSmartAccountImplementation,
     SafeVersion,
     ToSafeSmartAccountParameters,

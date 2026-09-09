@@ -130,13 +130,34 @@ export async function signUserOperation(
             address: Address
             version: "0.6" | "0.7"
         }
-        owners: (Account | WebAuthnAccount)[]
-        account: OneOf<
-            | EthereumProvider
-            | WalletClient<Transport, Chain | undefined, Account>
-            | LocalAccount
+        owners: (
+            | Account
             | WebAuthnAccount
-        >
+            | { owner: Account; dynamic?: boolean }
+        )[]
+        account:
+            | OneOf<
+                  | EthereumProvider
+                  | WalletClient<Transport, Chain | undefined, Account>
+                  | LocalAccount
+                  | WebAuthnAccount
+              >
+            | {
+                  owner: OneOf<
+                      | EthereumProvider
+                      | WalletClient<Transport, Chain | undefined, Account>
+                      | LocalAccount
+                      | WebAuthnAccount
+                  >
+                  /**
+                   * When true, the signature is encoded as a dynamic part of
+                   * the Safe signature bytes (contract signature format,
+                   * signature type 0x00), verified through EIP-1271 on the
+                   * owner address.
+                   * @default false
+                   */
+                  dynamic?: boolean
+              }
         chainId: number
         signatures?: Hex
         validAfter?: number
@@ -154,9 +175,13 @@ export async function signUserOperation(
         version,
         owners,
         signatures: existingSignatures,
-        account,
+        account: _account,
         ...userOperation
     } = parameters
+
+    const account = "owner" in _account ? _account.owner : _account
+    const isDynamicOwner =
+        "owner" in _account ? (_account.dynamic ?? false) : false
 
     const { safe4337ModuleAddress } = getDefaultAddresses(
         version,
@@ -266,7 +291,7 @@ export async function signUserOperation(
         ...unPackedSignatures,
         {
             signer,
-            dynamic: isWebAuthnAccount(localOwner),
+            dynamic: isWebAuthnAccount(localOwner) || isDynamicOwner,
             data: await (async () => {
                 if (isWebAuthnAccount(localOwner)) {
                     const safeHash = hashTypedData({
