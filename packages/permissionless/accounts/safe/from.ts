@@ -25,7 +25,7 @@ import {
     SafeNoCallsError,
     SafeWebAuthnSharedSignerAddressMissingError
 } from "../../errors/safe.js"
-import type { Assign, OneOf } from "../../types/utils.js"
+import type { Assign, ExactPartial, OneOf } from "../../types/utils.js"
 import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { getAction } from "../../utils/getAction.js"
@@ -1228,6 +1228,12 @@ export async function from<
         }
     }
 
+    const verificationGasFloor =
+        80_000n +
+        15_000n * threshold +
+        (erc7579LaunchpadAddress ? 50_000n : 0n) +
+        (owners.some(isWebAuthnAccount) ? 400_000n : 0n)
+
     const wrapSignature = (signature: Hex.Hex) =>
         erc7579LaunchpadAddress
             ? Hex.concat(Address.zero, signature)
@@ -1299,6 +1305,25 @@ export async function from<
             })
         }),
         getAddress,
+        userOperation: {
+            estimateGas(userOperation) {
+                const {
+                    factory,
+                    initCode,
+                    verificationGasLimit = 0n
+                } = userOperation as ExactPartial<
+                    UserOperation.UserOperation<EntryPointVersion>
+                >
+                if (threshold <= 1n || factory || (initCode ?? "0x") !== "0x")
+                    return undefined
+                return {
+                    verificationGasLimit:
+                        verificationGasLimit > verificationGasFloor
+                            ? verificationGasLimit
+                            : verificationGasFloor
+                }
+            }
+        },
         async encodeCalls(calls) {
             const hasMultipleCalls = calls.length > 1
 

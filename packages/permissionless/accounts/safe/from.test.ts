@@ -137,6 +137,50 @@ describe("SafeSmartAccount.from", () => {
         }
     )
 
+    for (const entryPointVersion of ["0.6", "0.7"] as const) {
+        testWithRpc(
+            `a deployed 3-of-3 Safe on EntryPoint ${entryPointVersion} keeps a verificationGasLimit floor (bundlers estimate against the stub signature, which Safe rejects after one owner)`,
+            async ({ rpc }) => {
+                const client = getPublicClient(rpc.anvilRpc)
+                const account = await SafeSmartAccount.from({
+                    client,
+                    owners: [
+                        Account.random(),
+                        Account.random(),
+                        Account.random()
+                    ],
+                    entryPoint: entryPointVersion
+                })
+                const smartAccountClient = getBundlerClient({
+                    account,
+                    entryPoint: { version: entryPointVersion },
+                    ...rpc
+                })
+                const calls = [approve(1n)]
+
+                const deployed =
+                    await smartAccountClient.userOperation.waitForReceipt({
+                        hash: await smartAccountClient.userOperation.send({
+                            calls
+                        })
+                    })
+                expect(deployed.success).toBe(true)
+
+                const second = await smartAccountClient.userOperation.prepare({
+                    calls
+                })
+                expect(second.verificationGasLimit).toBe(125_000n)
+                const receipt =
+                    await smartAccountClient.userOperation.waitForReceipt({
+                        hash: await smartAccountClient.userOperation.send({
+                            calls
+                        })
+                    })
+                expect(receipt.success).toBe(true)
+            }
+        )
+    }
+
     testWithRpc(
         "throws SafeEntryPointVersionUnsupportedError for Safe 1.5.0 on EntryPoint 0.6",
         async ({ rpc }) => {
