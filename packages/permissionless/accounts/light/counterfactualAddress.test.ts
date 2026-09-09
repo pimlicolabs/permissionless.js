@@ -10,13 +10,13 @@ import {
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { toLightSmartAccount } from "./toLightSmartAccount"
+import * as LightSmartAccount from "./index"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["light"]
 ) =>
-    toLightSmartAccount({
+    LightSmartAccount.from({
         client,
         entryPoint: toEntryPoint(params.entryPoint),
         version: params.version,
@@ -24,7 +24,7 @@ const buildAccount = (
         index: BigInt(params.index)
     })
 
-describe("toLightSmartAccount counterfactual addresses (0.x oracle)", () => {
+describe("LightSmartAccount.from counterfactual addresses (0.x oracle)", () => {
     for (const entry of loadCounterfactualAddressFixture("light")) {
         testWithRpc(describeParams(entry.params), async ({ rpc }) => {
             await expectCounterfactualAddress(
