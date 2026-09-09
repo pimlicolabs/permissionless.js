@@ -10,10 +10,6 @@ import {
     type SmartAccountClient
 } from "permissionless"
 import {
-    type ToSimpleSmartAccountReturnType,
-    toSimpleSmartAccount
-} from "permissionless/accounts"
-import {
     createPasskeyServerClient,
     type PasskeyServerClient
 } from "permissionless/clients/passkeyServer"
@@ -21,15 +17,10 @@ import {
     createPimlicoClient,
     type PimlicoClient
 } from "permissionless/clients/pimlico"
-import {
-    type createClient,
-    createPublicClient,
-    http,
-    type Transport
-} from "viem"
-import { entryPoint07Address } from "viem/account-abstraction"
-import { privateKeyToAccount } from "viem/accounts"
+import { type Client, http, type Transport } from "viem"
 import { sepolia } from "viem/chains"
+import { EntryPoint, type SmartAccount } from "viem/erc4337"
+import type { RpcSchema } from "viem/utils"
 
 type Equal<X, Y> =
     (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
@@ -37,23 +28,23 @@ type Equal<X, Y> =
         : false
 type Expect<T extends true> = T
 
-const publicClient = createPublicClient({
-    chain: sepolia,
-    transport: http("https://rpc.invalid")
-})
-
 const pimlicoClient = createPimlicoClient({
     transport: http("https://bundler.invalid"),
-    entryPoint: { address: entryPoint07Address, version: "0.7" }
+    entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
 })
 
-export async function makeClient() {
-    const account = await toSimpleSmartAccount({
-        client: publicClient,
-        owner: privateKeyToAccount(`0x${"11".repeat(32)}` as `0x${string}`),
-        entryPoint: { address: entryPoint07Address, version: "0.7" }
-    })
+// A precisely typed account stands in for the permissionless account
+// constructors until the account port tickets land.
+type Account = SmartAccount.SmartAccount<
+    SmartAccount.Implementation<
+        typeof EntryPoint.abiV07,
+        "0.7",
+        { label: "test" }
+    >
+>
+declare const account: Account
 
+export function makeClient() {
     return createSmartAccountClient({
         account,
         chain: sepolia,
@@ -66,33 +57,32 @@ export async function makeClient() {
     })
 }
 
-type PreciseClient = Awaited<ReturnType<typeof makeClient>>
+type PreciseClient = ReturnType<typeof makeClient>
 declare const precise: PreciseClient
 
 // The #500 hot path: precise instantiation → bare alias.
 export const bare: SmartAccountClient = precise
 
 // Return-type precision is unchanged — everything PR #511 would have widened.
-export type AccountIsExact = Expect<
-    Equal<PreciseClient["account"], ToSimpleSmartAccountReturnType<"0.7">>
->
+export type AccountIsExact = Expect<Equal<PreciseClient["account"], Account>>
 export type ChainIsExact = Expect<Equal<PreciseClient["chain"], typeof sepolia>>
 export type ClientSlotIsExact = Expect<
     Equal<PreciseClient["client"], undefined>
 >
 
-// A custom rpcSchema must still assign to the bare alias. Its type argument
-// differs from the bare default (`undefined`), so the variance fast path
-// cannot decide this pairwise — it must fall back to the structural check.
-// This line breaks loudly if `rpcSchema` ever gets a variance annotation (or
-// a future TypeScript starts measuring it) in a way that hard-rejects first.
-type CustomRpcSchema = [
-    { Method: "custom_method"; Parameters: [value: string]; ReturnType: string }
-]
+// A custom schema must still assign to the bare alias. viem 3's Bundler
+// Client shape is not structurally assignable across differing schema
+// arguments (its `extend(...).userOperation` is invariant in `account`), so
+// the alias annotates `rpcSchema` as `out` with the widest default
+// (`RpcSchema.Generic`) and this assignment rides the variance fast path.
+type CustomRpcSchema = RpcSchema.From<{
+    Request: { method: "custom_method"; params: [value: string] }
+    ReturnType: string
+}>
 declare const withCustomSchema: SmartAccountClient<
-    Transport,
+    Transport.Transport,
     typeof sepolia,
-    ToSimpleSmartAccountReturnType<"0.7">,
+    Account,
     undefined,
     CustomRpcSchema
 >
@@ -115,5 +105,5 @@ export const barePasskeyFromCustomSchema: PasskeyServerClient =
 
 // The precise client still satisfies structural consumers that were never
 // spelled as the alias (no aliasSymbol on either side → structural path).
-declare const plainViemClient: ReturnType<typeof createClient>
+declare const plainViemClient: ReturnType<typeof Client.create>
 export const clientSlotAccepts: SmartAccountClient["client"] = plainViemClient

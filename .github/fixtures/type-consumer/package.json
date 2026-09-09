@@ -3,8 +3,7 @@
     "private": true,
     "description": "Type-checks the packed permissionless tarball the way consumers do (issue #522). The tarball is installed at CI time by the package-types workflow job.",
     "devDependencies": {
-        "ox": "0.11.3",
         "typescript": "5.9.3",
-        "viem": "2.51.3"
+        "viem": "3.0.0-next.10"
     }
 }

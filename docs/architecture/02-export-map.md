@@ -7,8 +7,7 @@ This document is the complete inventory of every subpath export in the `permissi
 | Subpath | Entry File | Description |
 |---------|-----------|-------------|
 | `.` | `index.ts` | Utils + errors + clients |
-| `./accounts` | `accounts/index.ts` | 12 smart account factories |
-| `./accounts/safe` | `accounts/safe/index.ts` | Safe-specific helpers |
+| `./accounts` | `accounts/index.ts` | Smart account factories (empty until the account port tickets land) |
 | `./actions` | `actions/index.ts` | Public actions |
 | `./actions/erc7579` | `actions/erc7579.ts` | ERC-7579 module management |
 | `./actions/pimlico` | `actions/pimlico.ts` | Pimlico bundler/paymaster |
@@ -27,7 +26,7 @@ This document is the complete inventory of every subpath export in the `permissi
 ## `permissionless` (root)
 
 ```typescript
-import { createSmartAccountClient, deepHexlify, AccountNotFoundError } from "permissionless"
+import { createSmartAccountClient, toOwner, AccountNotFoundError } from "permissionless"
 ```
 
 Re-exports everything from `utils/index.ts`, `errors/index.ts`, and `clients/index.ts`.
@@ -38,23 +37,16 @@ Re-exports everything from `utils/index.ts`, `errors/index.ts`, and `clients/ind
 |--------|------|--------|
 | `createSmartAccountClient` | function | `clients/createSmartAccountClient.ts` |
 | `smartAccountActions` | decorator | `clients/decorators/smartAccount.ts` |
-| `deepHexlify` | function | `utils/deepHexlify.ts` |
-| `transactionReceiptStatus` | constant | `utils/deepHexlify.ts` |
-| `getAddressFromInitCodeOrPaymasterAndData` | function | `utils/getAddressFromInitCodeOrPaymasterAndData.ts` |
 | `getRequiredPrefund` | function | `utils/getRequiredPrefund.ts` |
-| `isSmartAccountDeployed` | function | `utils/isSmartAccountDeployed.ts` |
 | `toOwner` | function | `utils/toOwner.ts` |
 | `decodeNonce` | function | `utils/decodeNonce.ts` |
 | `encodeNonce` | function | `utils/encodeNonce.ts` |
 | `encodeInstallModule` | function | `utils/encodeInstallModule.ts` |
 | `encodeUninstallModule` | function | `utils/encodeUninstallModule.ts` |
-| `getPackedUserOperation` | function | `utils/getPackedUserOperation.ts` |
 | `encode7579Calls` | function | `utils/encode7579Calls.ts` |
 | `decode7579Calls` | function | `utils/decode7579Calls.ts` |
 | `erc20AllowanceOverride` | function | `utils/erc20AllowanceOverride.ts` |
 | `erc20BalanceOverride` | function | `utils/erc20BalanceOverride.ts` |
-| `getOxExports` | function | `utils/ox.ts` |
-| `hasOxModule` | function | `utils/ox.ts` |
 | `AccountNotFoundError` | class | `errors/index.ts` |
 
 ### Types
@@ -77,50 +69,10 @@ Re-exports everything from `utils/index.ts`, `errors/index.ts`, and `clients/ind
 ## `permissionless/accounts`
 
 ```typescript
-import { toSimpleSmartAccount, toSafeSmartAccount } from "permissionless/accounts"
+import {} from "permissionless/accounts"
 ```
 
-### Functions
-
-| Symbol | Description |
-|--------|-------------|
-| `toSimpleSmartAccount` | Create a Simple smart account (EntryPoint 0.6/0.7/0.8) |
-| `to7702SimpleSmartAccount` | Create a Simple smart account with EIP-7702 |
-| `toLightSmartAccount` | Create a Light Account |
-| `toSafeSmartAccount` | Create a Safe smart account |
-| `toKernelSmartAccount` | Create a Kernel smart account |
-| `toEcdsaKernelSmartAccount` | Create a Kernel account with ECDSA validator |
-| `to7702KernelSmartAccount` | Create a Kernel account with EIP-7702 |
-| `toBiconomySmartAccount` | Create a Biconomy smart account |
-| `toTrustSmartAccount` | Create a Trust wallet smart account |
-| `toEtherspotSmartAccount` | Create an Etherspot smart account |
-| `toNexusSmartAccount` | Create a Nexus modular smart account |
-| `toThirdwebSmartAccount` | Create a Thirdweb smart account |
-
-### Types (per account)
-
-Each account exports three types following the pattern:
-- `To<Name>SmartAccountParameters` -- factory input
-- `To<Name>SmartAccountReturnType` -- factory output
-- `<Name>SmartAccountImplementation` -- implementation type
-
-Plus version-specific types: `SafeVersion`, `LightAccountVersion`, `KernelVersion`.
-
----
-
-## `permissionless/accounts/safe`
-
-```typescript
-import { SafeSmartAccount } from "permissionless/accounts/safe"
-```
-
-| Symbol | Kind | Description |
-|--------|------|-------------|
-| `SafeSmartAccount` | object | Contains `toSafeSmartAccount` and `signUserOperation` |
-| `SafeSmartAccountImplementation` | type | Implementation type |
-| `SafeVersion` | type | `"1.4.1" \| "1.5.0"` |
-| `ToSafeSmartAccountParameters` | type | Factory parameters |
-| `ToSafeSmartAccountReturnType` | type | Factory return type |
+Empty on the viem 3 integration branch: the eight account directories (`etherspot`, `kernel`, `light`, `nexus`, `safe`, `simple`, `thirdweb`, `trust`) still hold 0.x code and are excluded from the build in `tsconfig/tsconfig.permissionless.json`. Each account port ticket re-includes its directory, re-exports it here, and restores its `./accounts/<name>` subpath in `package.json` (`exports` + `typesVersions`). `biconomy` is deleted for good.
 
 ---
 
@@ -183,7 +135,6 @@ import { pimlicoActions, sponsorUserOperation } from "permissionless/actions/pim
 | `getTokenQuotes` | function | Get ERC-20 paymaster token quotes |
 | `getUserOperationGasPrice` | function | Get gas price recommendations |
 | `getUserOperationStatus` | function | Check UserOp status |
-| `sendCompressedUserOperation` | function | Send compressed UserOp (deprecated) |
 | `sponsorUserOperation` | function | Sponsor a UserOp via Pimlico |
 | `validateSponsorshipPolicies` | function | Validate sponsorship policies |
 | `PimlicoActions` | type | Actions object type |
@@ -192,7 +143,6 @@ import { pimlicoActions, sponsorUserOperation } from "permissionless/actions/pim
 | `GetUserOperationGasPriceReturnType` | type | Gas price return |
 | `GetUserOperationStatusParameters` | type | Status params |
 | `GetUserOperationStatusReturnType` | type | Status return |
-| `SendCompressedUserOperationParameters` | type | Compressed UserOp params |
 | `PimlicoSponsorUserOperationParameters` | type | Sponsor params |
 | `SponsorUserOperationReturnType` | type | Sponsor return |
 | `ValidateSponsorshipPoliciesParameters` | type | Validation params |
