@@ -43,7 +43,7 @@
     },
     "packages/mock-paymaster": {
       "name": "@pimlico/mock-paymaster",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@fastify/cors": "^8.5.0",
         "fastify": "^4.28.1",
@@ -57,7 +57,7 @@
     },
     "packages/permissionless": {
       "name": "permissionless",
-      "version": "0.3.5",
+      "version": "0.4.1",
       "peerDependencies": {
         "ox": "^0.11.3",
         "viem": "^2.44.4",
@@ -68,7 +68,7 @@
     },
     "packages/wagmi": {
       "name": "@permissionless/wagmi",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "peerDependencies": {
         "wagmi": "^2.15.1",
       },
