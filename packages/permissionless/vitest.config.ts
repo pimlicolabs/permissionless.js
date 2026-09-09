@@ -35,7 +35,10 @@ export default defineConfig({
         environment: "node",
         testTimeout: 60_000,
         hookTimeout: 45_000,
-        include: [join(__dirname, "./**/*.test.ts")],
+        include: [
+            join(__dirname, "./**/*.test.ts"),
+            join(__dirname, "../permissionless-test/src/fixtures/**/*.test.ts")
+        ],
         env: loadEnv("test", process.cwd())
     }
 })
