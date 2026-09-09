@@ -77,7 +77,7 @@ export async function accountId<TSmartAccount extends SmartAccount | undefined>(
                 })
             })
 
-            if (!result || !result.data) {
+            if (!result?.data) {
                 throw new Error("accountId result is empty")
             }
 

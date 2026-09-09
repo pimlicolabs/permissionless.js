@@ -22,8 +22,6 @@ describe.each(getCoreSmartAccounts())(
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "getCallsStatus_v06",
             async ({ rpc }) => {
-                const { anvilRpc } = rpc
-
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
                         version: "0.6"

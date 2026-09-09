@@ -266,6 +266,8 @@ const paymasterContextSchema = z.union([
     z.null()
 ])
 
+export type PaymasterContext = z.infer<typeof paymasterContextSchema>
+
 export const pmGetPaymasterData = z
     .union([
         z.tuple([

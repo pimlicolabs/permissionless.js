@@ -1,5 +1,6 @@
 import type { MaybePromise } from "viem"
 
+// biome-ignore lint/suspicious/noExplicitAny: generic callback registry (mirrors viem observe)
 type Callback = ((...args: any[]) => any) | undefined
 type Callbacks = Record<string, Callback>
 
@@ -17,7 +18,7 @@ export const cleanupCache = /*#__PURE__*/ new Map<string, () => void>()
 
 type EmitFunction<callbacks extends Callbacks> = (
     emit: callbacks
-    // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
+    // biome-ignore lint/suspicious/noConfusingVoidType: cleanup callback may return void
 ) => MaybePromise<void | (() => void)>
 
 let callbackCount = 0
@@ -40,7 +41,7 @@ export function observe<callbacks extends Callbacks>(
         const listeners = getListeners()
         listenersCache.set(
             observerId,
-            listeners.filter((cb: any) => cb.id !== callbackId)
+            listeners.filter((cb) => cb.id !== callbackId)
         )
     }
 

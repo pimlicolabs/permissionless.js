@@ -104,7 +104,7 @@ export async function supportsModule<
                 })
             })
 
-            if (!result || !result.data) {
+            if (!result?.data) {
                 throw new Error("accountId result is empty")
             }
 

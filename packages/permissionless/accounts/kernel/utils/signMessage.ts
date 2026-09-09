@@ -8,7 +8,6 @@ import {
     type SignMessageReturnType
 } from "viem"
 import type { WebAuthnAccount } from "viem/account-abstraction"
-import { signMessage as _signMessage } from "viem/actions"
 import { getOxExports } from "../../../utils/ox.js"
 import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
 import {

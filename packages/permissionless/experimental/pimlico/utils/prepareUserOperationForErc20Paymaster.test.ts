@@ -61,7 +61,6 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-expect-error
                     client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
@@ -157,7 +156,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-expect-error
                     client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
@@ -265,7 +263,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-expect-error
                     client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
@@ -373,7 +370,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-expect-error
                     client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,
@@ -486,7 +482,6 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const smartAccountClient = createSmartAccountClient({
-                    // @ts-expect-error
                     client: getPublicClient(anvilRpc),
                     account,
                     paymaster: pimlicoClient,

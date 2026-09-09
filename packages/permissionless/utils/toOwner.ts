@@ -16,8 +16,8 @@ import { signTypedData } from "viem/actions"
 import { getAction } from "viem/utils"
 
 export type EthereumProvider = OneOf<
-    { request(...args: any): Promise<any> } | EIP1193Provider
->
+    // biome-ignore lint/suspicious/noExplicitAny: matches viem custom(); narrowed by the 1.0 EthereumProvider any-drop
+    { request(...args: any): Promise<any> } | EIP1193Provider>
 
 export async function toOwner<provider extends EthereumProvider>({
     owner,
@@ -74,11 +74,13 @@ export async function toOwner<provider extends EthereumProvider>({
             return walletClient.signMessage({ message })
         },
         async signTypedData(typedData) {
-            return getAction(
+            const action = getAction(
                 walletClient,
                 signTypedData,
                 "signTypedData"
-            )(typedData as any)
+            )
+            // biome-ignore lint/suspicious/noExplicitAny: TypedDataDefinition does not convert to SignTypedDataParameters
+            return action(typedData as any)
         },
         async signTransaction(_) {
             throw new Error(

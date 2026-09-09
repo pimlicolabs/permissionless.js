@@ -33,6 +33,7 @@ import {
     InternalBundlerError,
     type JsonRpcSchema,
     jsonRpcSchema,
+    type PaymasterContext,
     pimlicoGetTokenQuotesSchema,
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
@@ -341,7 +342,10 @@ const handleMethod = async ({
 
     // If boosted userOp, forward to bundler's boost_sendUserOperation method.
     if (parsedBody.method === "eth_sendUserOperation") {
-        const userOp = parsedBody.params[0] as any
+        const userOp = parsedBody.params[0] as {
+            maxFeePerGas?: string
+            maxPriorityFeePerGas?: string
+        }
 
         const isBoosted =
             userOp.maxFeePerGas === "0x0" &&
@@ -411,14 +415,12 @@ export const createRpcHandler: (params: {
         } catch (err: unknown) {
             console.log(`JSON.stringify(err): ${util.inspect(err)}`)
 
-            const error = {
-                // biome-ignore lint/suspicious/noExplicitAny:
-                message: (err as any).message,
-                // biome-ignore lint/suspicious/noExplicitAny:
-                data: (err as any).data,
-                // biome-ignore lint/suspicious/noExplicitAny:
-                code: (err as any).code ?? -32603
+            const { message, data, code } = err as {
+                message: string
+                data?: unknown
+                code?: number
             }
+            const error = { message, data, code: code ?? -32603 }
 
             return {
                 jsonrpc: "2.0",
@@ -429,7 +431,7 @@ export const createRpcHandler: (params: {
     }
 }
 
-const getPaymasterMode = (data: any): PaymasterMode => {
+const getPaymasterMode = (data: PaymasterContext): PaymasterMode => {
     if (data !== null && "token" in data) {
         isTokenSupported(data.token)
         return { mode: "erc20", token: data.token }

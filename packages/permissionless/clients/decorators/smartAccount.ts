@@ -340,10 +340,12 @@ export function smartAccountActions<
     client: Client<Transport, TChain, TSmartAccount>
 ): SmartAccountActions<TChain, TSmartAccount> {
     return {
+        // biome-ignore lint/suspicious/noExplicitAny: calls generic widens to readonly unknown[] at the action
         sendTransaction: (args) => sendTransaction(client, args as any),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
         writeContract: (args) => writeContract(client, args),
+        // biome-ignore lint/suspicious/noExplicitAny: calls generic widens to readonly unknown[] at the action
         sendCalls: (args) => sendCalls(client, args as any),
         getCallsStatus: (args) => getCallsStatus(client, args)
     }

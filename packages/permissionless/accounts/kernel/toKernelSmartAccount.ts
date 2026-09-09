@@ -746,13 +746,14 @@ export async function toKernelSmartAccount<
         async encodeCalls(calls) {
             if (!isKernelAccountPatched) {
                 const isDeployed =
-                    "isDeployed" in this && (await (this as any).isDeployed())
+                    "isDeployed" in this &&
+                    (await (this as unknown as SmartAccount).isDeployed())
                 isKernelAccountPatched =
                     isDeployed && (await getKernelAccountPatchedStatus())
             }
             if (!isKernelAccountPatched) {
                 const [installFallbackCall] = encodeInstallModule({
-                    account: this as any,
+                    account: this as unknown as SmartAccount,
                     modules: [
                         {
                             type: "fallback",
@@ -764,7 +765,7 @@ export async function toKernelSmartAccount<
                 })
 
                 const [uninstallFallbackCall] = encodeUninstallModule({
-                    account: this as any,
+                    account: this as unknown as SmartAccount,
                     modules: [
                         {
                             type: "fallback",
@@ -813,7 +814,7 @@ export async function toKernelSmartAccount<
                 const migrationCallData = encodeFunctionData({
                     abi: migrationHelperAbi,
                     functionName: "migrateWithCall",
-                    args: [[], [], ...args] as readonly any[]
+                    args: [[], [], ...args] as readonly unknown[]
                 })
 
                 if (kernelVersion !== "0.3.0-beta") {
@@ -897,7 +898,7 @@ export async function toKernelSmartAccount<
         async signMessage({ message }) {
             if (
                 "isDeployed" in this &&
-                !(await (this as any).isDeployed()) &&
+                !(await (this as unknown as SmartAccount).isDeployed()) &&
                 eip7702
             ) {
                 throw new Error(
@@ -926,7 +927,7 @@ export async function toKernelSmartAccount<
         async signTypedData(typedData) {
             if (
                 "isDeployed" in this &&
-                !(await (this as any).isDeployed()) &&
+                !(await (this as unknown as SmartAccount).isDeployed()) &&
                 eip7702
             ) {
                 throw new Error(

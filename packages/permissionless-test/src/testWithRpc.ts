@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { paymaster } from "@pimlico/mock-paymaster"
 import getPort from "get-port"
 import { anvil } from "prool/instances"
@@ -27,7 +28,7 @@ import { alto } from "../mock-aa-infra/alto/instance"
 const anvilPrivateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
-const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as string | undefined
+const forkUrl = import.meta.env.VITE_FORK_RPC_URL as string | undefined
 
 /**
  * Creates a bundler transport that automatically calls
@@ -40,7 +41,7 @@ function createAutoBundleTransport(altoRpc: string, anvilRpc: string) {
     return custom({
         async request({ method, params }) {
             const transport = baseTransport({ chain: foundry })
-            const result = await transport.request({ method, params } as any)
+            const result = await transport.request({ method, params })
 
             // After a user op is submitted, immediately bundle + mine
             if (method === "eth_sendUserOperation") {

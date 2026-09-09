@@ -1,5 +1,6 @@
 import { PermissionlessProvider } from "@permissionless/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+// biome-ignore lint/style/useNodejsImportProtocol: browser polyfill package, not the node builtin
 import { Buffer } from "buffer"
 import React, { useEffect } from "react"
 import ReactDOM from "react-dom/client"
@@ -204,7 +205,7 @@ function Main() {
     console.log({ path })
 
     React.useEffect(() => {
-        const handlePopState = (event: PopStateEvent) => {
+        const handlePopState = () => {
             console.log("popstate event fired", window.location.pathname)
             setPath(window.location.pathname)
         }

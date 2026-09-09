@@ -13,21 +13,22 @@ const validateAttestation = (attestation: unknown): boolean => {
 }
 
 const validateAuthenticatorSelection = (
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    authenticatorSelection: any
+    authenticatorSelection: unknown
 ): boolean => {
-    if (!authenticatorSelection) return false
+    if (!authenticatorSelection || typeof authenticatorSelection !== "object")
+        return false
 
+    const selection = authenticatorSelection as Record<string, unknown>
     const validAttachments = ["platform", "cross-platform"]
     const validKeyOptions = new Set(["required", "preferred", "discouraged"])
 
     return (
         validAttachments.includes(
-            authenticatorSelection.authenticatorAttachment
+            selection.authenticatorAttachment as string
         ) &&
-        typeof authenticatorSelection.requireResidentKey === "boolean" &&
-        validKeyOptions.has(authenticatorSelection.residentKey) &&
-        validKeyOptions.has(authenticatorSelection.userVerification)
+        typeof selection.requireResidentKey === "boolean" &&
+        validKeyOptions.has(selection.residentKey as string) &&
+        validKeyOptions.has(selection.userVerification as string)
     )
 }
 
@@ -58,18 +59,19 @@ const validateExtensions = (extensions: unknown): boolean => {
     return true
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const validateRp = (rp: any): boolean => {
-    return !!rp && typeof rp.id === "string" && typeof rp.name === "string"
+const validateRp = (rp: unknown): boolean => {
+    if (!rp || typeof rp !== "object") return false
+    const { id, name } = rp as Record<string, unknown>
+    return typeof id === "string" && typeof name === "string"
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const validateUser = (user: any): boolean => {
+const validateUser = (user: unknown): boolean => {
+    if (!user || typeof user !== "object") return false
+    const { id, name, displayName } = user as Record<string, unknown>
     return (
-        !!user &&
-        typeof user.id === "string" &&
-        typeof user.name === "string" &&
-        typeof user.displayName === "string"
+        typeof id === "string" &&
+        typeof name === "string" &&
+        typeof displayName === "string"
     )
 }
 

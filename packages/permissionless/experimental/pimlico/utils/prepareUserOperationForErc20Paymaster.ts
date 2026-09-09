@@ -312,7 +312,9 @@ export const prepareUserOperationForErc20Paymaster =
                 // If `paymaster: true`, we will assume the Bundler Client supports Paymaster Actions.
                 if (paymaster === true)
                     return {
-                        getPaymasterData: (parameters: any) =>
+                        getPaymasterData: (
+                            parameters: GetPaymasterDataParameters
+                        ) =>
                             getAction(
                                 bundlerClient,
                                 getPaymasterData_,

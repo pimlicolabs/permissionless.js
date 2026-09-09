@@ -272,7 +272,7 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
                 {
                     ...options,
                     // Resolve when the process is listening via a "Server listening at" message.
-                    resolver({ process, reject, resolve }) {
+                    resolver({ process, resolve }) {
                         process.stdout.on("data", (data) => {
                             const message = data.toString()
                             if (message.includes("Server listening at"))
