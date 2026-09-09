@@ -1,11 +1,11 @@
 import {
-    http,
     type Address,
     type Chain,
-    type PublicClient,
-    type Transport,
     createPublicClient,
-    defineChain
+    defineChain,
+    http,
+    type PublicClient,
+    type Transport
 } from "viem"
 import { erc20Address } from "./erc20-utils.js"
 import { RpcError, ValidationErrors } from "./schema.js"

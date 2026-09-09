@@ -3,12 +3,12 @@ import {
     type Chain,
     type Client,
     ContractFunctionExecutionError,
-    type Hex,
-    type OneOf,
-    type Transport,
     decodeFunctionResult,
     encodeFunctionData,
-    getAddress
+    getAddress,
+    type Hex,
+    type OneOf,
+    type Transport
 } from "viem"
 import type {
     GetSmartAccountParameter,

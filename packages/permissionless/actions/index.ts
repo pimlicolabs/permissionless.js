@@ -1,9 +1,9 @@
 export {
-    type GetSenderAddressParams,
-    InvalidEntryPointError,
-    getSenderAddress
-} from "./public/getSenderAddress.js"
-export {
     type GetAccountNonceParams,
     getAccountNonce
 } from "./public/getAccountNonce.js"
+export {
+    type GetSenderAddressParams,
+    getSenderAddress,
+    InvalidEntryPointError
+} from "./public/getSenderAddress.js"

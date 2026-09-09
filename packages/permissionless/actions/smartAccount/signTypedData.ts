@@ -1,13 +1,13 @@
 import {
     type Chain,
     type Client,
+    getTypesForEIP712Domain,
     type SignTypedDataParameters,
     type SignTypedDataReturnType,
     type Transport,
     type TypedData,
     type TypedDataDefinition,
     type TypedDataDomain,
-    getTypesForEIP712Domain,
     validateTypedData
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"

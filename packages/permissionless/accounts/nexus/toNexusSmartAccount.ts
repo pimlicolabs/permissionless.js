@@ -4,14 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type Hex,
-    type JsonRpcAccount,
-    type LocalAccount,
-    type OneOf,
-    type Prettify,
-    type Transport,
-    type TypedDataDefinition,
-    type WalletClient,
     concat,
     concatHex,
     domainSeparator,
@@ -19,19 +11,27 @@ import {
     encodeFunctionData,
     encodePacked,
     getTypesForEIP712Domain,
+    type Hex,
     hashMessage,
     hashTypedData,
+    type JsonRpcAccount,
     keccak256,
+    type LocalAccount,
+    type OneOf,
+    type Prettify,
     stringToHex,
+    type Transport,
+    type TypedDataDefinition,
     toHex,
-    validateTypedData
+    validateTypedData,
+    type WalletClient
 } from "viem"
 import {
-    type SmartAccount,
-    type SmartAccountImplementation,
     entryPoint07Abi,
     entryPoint07Address,
     getUserOperationHash,
+    type SmartAccount,
+    type SmartAccountImplementation,
     toSmartAccount
 } from "viem/account-abstraction"
 import { getChainId, readContract } from "viem/actions"

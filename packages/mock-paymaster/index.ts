@@ -1,7 +1,7 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
-import { http, createWalletClient } from "viem"
+import { createWalletClient, http } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
@@ -13,7 +13,12 @@ export const paymaster = defineInstance(
         altoRpc,
         port: _port,
         host: _host = "localhost"
-    }: { anvilRpc: string; port: number; altoRpc: string; host?: string }) => {
+    }: {
+        anvilRpc: string
+        port: number
+        altoRpc: string
+        host?: string
+    }) => {
         const app = Fastify({})
 
         return {

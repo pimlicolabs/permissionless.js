@@ -1,34 +1,34 @@
-import { Buffer } from "buffer"
 import { PermissionlessProvider } from "@permissionless/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Buffer } from "buffer"
 import React, { useEffect } from "react"
 import ReactDOM from "react-dom/client"
 import {
-    WagmiProvider,
     useAccount,
     useConnect,
     useDisconnect,
-    useWalletClient
+    useWalletClient,
+    WagmiProvider
 } from "wagmi"
 
 import App from "./App.tsx"
 import { capabilities, config } from "./wagmi.ts"
 
 import "./index.css"
-import { http, type Transport, getClient } from "@wagmi/core"
+import { getClient, http, type Transport } from "@wagmi/core"
 import {
     type SafeSmartAccountImplementation,
     toSafeSmartAccount
 } from "permissionless/accounts"
 import {
-    type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    type SmartAccountClient
 } from "permissionless/clients"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { type Chain, zeroAddress } from "viem"
 import {
-    type SmartAccount,
-    entryPoint07Address
+    entryPoint07Address,
+    type SmartAccount
 } from "viem/account-abstraction"
 import { PasskeyServerDemo } from "./PasskeyServerDemo"
 import { PasskeysDemo } from "./PasskeysDemo"

@@ -6,36 +6,35 @@
 // assignments fail if the variance restructure ever rejects something the old
 // structural check accepted.
 import {
-    type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    type SmartAccountClient
 } from "permissionless"
 import {
     type ToSimpleSmartAccountReturnType,
     toSimpleSmartAccount
 } from "permissionless/accounts"
 import {
-    type PasskeyServerClient,
-    createPasskeyServerClient
+    createPasskeyServerClient,
+    type PasskeyServerClient
 } from "permissionless/clients/passkeyServer"
 import {
-    type PimlicoClient,
-    createPimlicoClient
+    createPimlicoClient,
+    type PimlicoClient
 } from "permissionless/clients/pimlico"
 import {
-    http,
-    type Transport,
     type createClient,
-    createPublicClient
+    createPublicClient,
+    http,
+    type Transport
 } from "viem"
 import { entryPoint07Address } from "viem/account-abstraction"
 import { privateKeyToAccount } from "viem/accounts"
 import { sepolia } from "viem/chains"
 
-type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
-    ? 1
-    : 2
-    ? true
-    : false
+type Equal<X, Y> =
+    (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+        ? true
+        : false
 type Expect<T extends true> = T
 
 const publicClient = createPublicClient({

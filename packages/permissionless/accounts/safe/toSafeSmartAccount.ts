@@ -4,15 +4,6 @@ import {
     type Assign,
     type Chain,
     type Client,
-    type Hex,
-    type JsonRpcAccount,
-    type LocalAccount,
-    type OneOf,
-    type SignableMessage,
-    type Transport,
-    type TypedData,
-    type TypedDataDefinition,
-    type WalletClient,
     concat,
     decodeFunctionData,
     encodeAbiParameters,
@@ -20,26 +11,35 @@ import {
     encodePacked,
     getAddress,
     getContractAddress,
+    type Hex,
     hashMessage,
     hashTypedData,
     hexToBigInt,
+    type JsonRpcAccount,
     keccak256,
+    type LocalAccount,
+    type OneOf,
     pad,
+    type SignableMessage,
     size,
     slice,
+    type Transport,
+    type TypedData,
+    type TypedDataDefinition,
     toBytes,
     toHex,
+    type WalletClient,
     zeroAddress
 } from "viem"
 import {
-    type SmartAccount,
-    type SmartAccountImplementation,
-    type UserOperation,
-    type WebAuthnAccount,
     entryPoint06Abi,
     entryPoint07Abi,
     entryPoint07Address,
-    toSmartAccount
+    type SmartAccount,
+    type SmartAccountImplementation,
+    toSmartAccount,
+    type UserOperation,
+    type WebAuthnAccount
 } from "viem/account-abstraction"
 import { getChainId, readContract } from "viem/actions"
 import { getAction } from "viem/utils"
@@ -1465,10 +1465,10 @@ export async function toSafeSmartAccount<
         version: parameters.entryPoint?.version ?? "0.7"
     } as const
 
-    let _safeModuleSetupAddress: Address | undefined = undefined
-    let _multiSendAddress: Address | undefined = undefined
-    let _multiSendCallOnlyAddress: Address | undefined = undefined
-    let safeModules: Address[] | undefined = undefined
+    let _safeModuleSetupAddress: Address | undefined
+    let _multiSendAddress: Address | undefined
+    let _multiSendCallOnlyAddress: Address | undefined
+    let safeModules: Address[] | undefined
     let setupTransactions: {
         to: Address
         data: Hex
@@ -1990,7 +1990,7 @@ export async function toSafeSmartAccount<
                 )
             }
 
-            let signatures: Hex | undefined = undefined
+            let signatures: Hex | undefined
 
             for (const owner of localOwners) {
                 signatures = await signUserOperation({

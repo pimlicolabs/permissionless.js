@@ -1,20 +1,20 @@
 import {
-    http,
     type Account,
     type Chain,
-    type Hex,
-    type LocalAccount,
-    type Transport,
     createPublicClient,
-    createWalletClient
+    createWalletClient,
+    type Hex,
+    http,
+    type LocalAccount,
+    type Transport
 } from "viem"
 import {
-    type EntryPointVersion,
-    type SmartAccount,
     createPaymasterClient,
+    type EntryPointVersion,
     entryPoint06Address,
     entryPoint07Address,
-    entryPoint08Address
+    entryPoint08Address,
+    type SmartAccount
 } from "viem/account-abstraction"
 import {
     generatePrivateKey,
@@ -50,8 +50,8 @@ import {
 } from "../../permissionless/accounts/simple/toSimpleSmartAccount"
 import { toTrustSmartAccount } from "../../permissionless/accounts/trust/toTrustSmartAccount"
 import {
-    type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    type SmartAccountClient
 } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
 import { createAutoBundleTransport } from "./testWithRpc"
@@ -62,7 +62,10 @@ export const PAYMASTER_RPC = "http://localhost:3000"
 export const ensureBundlerIsReady = async ({
     altoRpc,
     anvilRpc
-}: { altoRpc: string; anvilRpc: string }) => {
+}: {
+    altoRpc: string
+    anvilRpc: string
+}) => {
     const bundlerClient = getBundlerClient({
         altoRpc: altoRpc,
         anvilRpc,
@@ -100,7 +103,10 @@ export const ensurePaymasterIsReady = async () => {
 export const getAnvilWalletClient = ({
     addressIndex,
     anvilRpc
-}: { addressIndex: number; anvilRpc: string }) => {
+}: {
+    addressIndex: number
+    anvilRpc: string
+}) => {
     return createWalletClient({
         account: mnemonicToAccount(
             "test test test test test test test test test test test junk",

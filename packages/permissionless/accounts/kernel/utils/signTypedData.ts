@@ -1,10 +1,10 @@
 import {
+    getTypesForEIP712Domain,
+    hashTypedData,
     type LocalAccount,
     type Prettify,
     type SignTypedDataReturnType,
     type TypedDataDefinition,
-    getTypesForEIP712Domain,
-    hashTypedData,
     validateTypedData
 } from "viem"
 import type { WebAuthnAccount } from "viem/account-abstraction"

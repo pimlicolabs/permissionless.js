@@ -2,18 +2,18 @@ import {
     type Account,
     type Address,
     type Chain,
-    type Hex,
-    type PublicClient,
-    type Transport,
-    type WalletClient,
     concat,
     encodePacked,
     getContract,
-    toBytes
+    type Hex,
+    type PublicClient,
+    type Transport,
+    toBytes,
+    type WalletClient
 } from "viem"
 import {
-    type UserOperation,
-    toPackedUserOperation
+    toPackedUserOperation,
+    type UserOperation
 } from "viem/account-abstraction"
 import { constants } from "./constants.js"
 import {
@@ -26,9 +26,11 @@ export const getDummyPaymasterData = ({
     is06,
     paymaster,
     paymasterMode
-}: { is06: boolean; paymaster: Address; paymasterMode: PaymasterMode }):
-    | { paymaster: Address; paymasterData: Hex }
-    | { paymasterAndData: Hex } => {
+}: {
+    is06: boolean
+    paymaster: Address
+    paymasterMode: PaymasterMode
+}): { paymaster: Address; paymasterData: Hex } | { paymasterAndData: Hex } => {
     let encodedDummyData: Hex
 
     const validUntil = 0

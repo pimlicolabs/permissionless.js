@@ -1,4 +1,4 @@
-import { type Address, type Hex, encodeFunctionData } from "viem"
+import { type Address, encodeFunctionData, type Hex } from "viem"
 
 export const encodeCallData = async (
     calls: readonly {

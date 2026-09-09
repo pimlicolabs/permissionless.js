@@ -2,8 +2,7 @@
 
 import { useContext, useMemo } from "react"
 import type { WalletCapabilities, WalletSendCallsParameters } from "viem"
-import { useAccount } from "wagmi"
-import { useCapabilities } from "wagmi"
+import { useAccount, useCapabilities } from "wagmi"
 import { PermissionlessContext } from "../context.js"
 
 export const useAvailableCapabilities = () => {
@@ -23,8 +22,7 @@ export const useAvailableCapabilities = () => {
         if (capabilitiesForChain === undefined) return undefined
         if (capabilitiesConfigured === undefined) return undefined
 
-        let capabilities: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"] =
-            undefined
+        let capabilities: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
 
         for (const capabilityConfigured in capabilitiesConfigured) {
             if (capabilitiesForChain[capabilityConfigured]?.supported) {

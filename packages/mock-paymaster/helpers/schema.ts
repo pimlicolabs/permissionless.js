@@ -1,4 +1,4 @@
-import { type Hex, getAddress } from "viem"
+import { getAddress, type Hex } from "viem"
 import { z, type infer as zodInfer } from "zod"
 
 export enum ValidationErrors {

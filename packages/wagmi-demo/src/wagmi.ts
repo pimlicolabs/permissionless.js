@@ -1,5 +1,5 @@
 import { sepolia } from "viem/chains"
-import { http, createConfig } from "wagmi"
+import { createConfig, http } from "wagmi"
 import { coinbaseWallet } from "wagmi/connectors"
 
 // TODO: Replace with your Pimlico API key

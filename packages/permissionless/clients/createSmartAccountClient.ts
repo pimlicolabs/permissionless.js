@@ -3,21 +3,21 @@ import {
     type Chain,
     type Client,
     type ClientConfig,
+    createClient,
     type EstimateFeesPerGasReturnType,
     type Prettify,
     type RpcSchema,
-    type Transport,
-    createClient
+    type Transport
 } from "viem"
 import {
     type BundlerActions,
     type BundlerClientConfig,
+    bundlerActions,
     type PaymasterActions,
     type PrepareUserOperationParameters,
     type PrepareUserOperationReturnType,
     type SmartAccount,
-    type UserOperationRequest,
-    bundlerActions
+    type UserOperationRequest
 } from "viem/account-abstraction"
 import {
     type SmartAccountActions,

@@ -15,19 +15,19 @@ export const KernelSmartAccount = {
 }
 
 export type {
-    KernelSmartAccountImplementation,
-    KernelVersion,
-    ToKernelSmartAccountParameters,
-    ToKernelSmartAccountReturnType
-} from "./toKernelSmartAccount.js"
+    To7702KernelSmartAccountImplementation,
+    To7702KernelSmartAccountParameters,
+    To7702KernelSmartAccountReturnType
+} from "./to7702KernelSmartAccount.js"
 export type {
     EcdsaKernelSmartAccountImplementation,
     ToEcdsaKernelSmartAccountParameters,
     ToEcdsaKernelSmartAccountReturnType
 } from "./toEcdsaKernelSmartAccount.js"
 export type {
-    To7702KernelSmartAccountImplementation,
-    To7702KernelSmartAccountParameters,
-    To7702KernelSmartAccountReturnType
-} from "./to7702KernelSmartAccount.js"
+    KernelSmartAccountImplementation,
+    KernelVersion,
+    ToKernelSmartAccountParameters,
+    ToKernelSmartAccountReturnType
+} from "./toKernelSmartAccount.js"
 export type { WrapMessageHashParams } from "./utils/wrapMessageHash.js"

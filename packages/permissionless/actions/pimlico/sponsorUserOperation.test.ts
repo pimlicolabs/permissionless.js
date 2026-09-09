@@ -1,9 +1,9 @@
 import { isHash, zeroAddress } from "viem"
 import {
-    type UserOperation,
     entryPoint06Address,
     entryPoint07Address,
-    entryPoint08Address
+    entryPoint08Address,
+    type UserOperation
 } from "viem/account-abstraction"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"

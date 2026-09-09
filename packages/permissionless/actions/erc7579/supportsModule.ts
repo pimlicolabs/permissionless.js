@@ -2,9 +2,9 @@ import {
     type Chain,
     type Client,
     ContractFunctionExecutionError,
-    type Transport,
     decodeFunctionResult,
-    encodeFunctionData
+    encodeFunctionData,
+    type Transport
 } from "viem"
 import type {
     GetSmartAccountParameter,

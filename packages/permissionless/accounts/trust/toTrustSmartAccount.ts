@@ -5,27 +5,26 @@ import {
     type Chain,
     type Client,
     type Hex,
+    hashMessage,
+    hashTypedData,
     type JsonRpcAccount,
     type LocalAccount,
     type OneOf,
     type Transport,
-    type WalletClient,
-    hashMessage,
-    hashTypedData
+    type WalletClient
 } from "viem"
-import { getChainId, signMessage } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-
 import {
-    type SmartAccount,
-    type SmartAccountImplementation,
-    type UserOperation,
     entryPoint06Abi,
     entryPoint06Address,
     getUserOperationHash,
-    toSmartAccount
+    type SmartAccount,
+    type SmartAccountImplementation,
+    toSmartAccount,
+    type UserOperation
 } from "viem/account-abstraction"
+import { getChainId, signMessage } from "viem/actions"
 import { getAction } from "viem/utils"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { decodeCallData } from "./utils/decodeCallData.js"

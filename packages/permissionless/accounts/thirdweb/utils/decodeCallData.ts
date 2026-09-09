@@ -1,4 +1,4 @@
-import { type Address, type Hex, decodeFunctionData } from "viem"
+import { type Address, decodeFunctionData, type Hex } from "viem"
 
 export const decodeCallData = async (callData: Hex) => {
     try {

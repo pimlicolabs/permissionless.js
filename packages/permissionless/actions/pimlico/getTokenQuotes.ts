@@ -5,9 +5,9 @@ import {
     ChainNotFoundError,
     type Client,
     type GetChainParameter,
-    type Transport,
     hexToBigInt,
-    numberToHex
+    numberToHex,
+    type Transport
 } from "viem"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 

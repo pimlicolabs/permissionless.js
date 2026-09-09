@@ -1,13 +1,13 @@
 import {
     type Address,
-    type LocalAccount,
-    type SignTypedDataReturnType,
-    type TypedDataDefinition,
-    type TypedDataDomain,
     encodeAbiParameters,
     getTypesForEIP712Domain,
     hashTypedData,
     isAddressEqual,
+    type LocalAccount,
+    type SignTypedDataReturnType,
+    type TypedDataDefinition,
+    type TypedDataDomain,
     validateTypedData
 } from "viem"
 

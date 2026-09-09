@@ -1,6 +1,6 @@
 import {
-    type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    type SmartAccountClient
 } from "permissionless"
 import {
     type ToKernelSmartAccountReturnType,
@@ -11,19 +11,19 @@ import {
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import * as React from "react"
 import {
-    http,
     type Chain,
-    type Hex,
-    type Transport,
     createPublicClient,
     getAddress,
+    type Hex,
+    http,
     parseEther,
+    type Transport,
     zeroAddress
 } from "viem"
 import {
-    type P256Credential,
     createWebAuthnCredential,
     entryPoint07Address,
+    type P256Credential,
     toWebAuthnAccount
 } from "viem/account-abstraction"
 import { baseSepolia } from "viem/chains"

@@ -5,11 +5,11 @@ import {
     type ContractFunctionArgs,
     type ContractFunctionName,
     type EncodeFunctionDataParameters,
+    encodeFunctionData,
     type Hash,
     type SendTransactionParameters,
     type Transport,
-    type WriteContractParameters,
-    encodeFunctionData
+    type WriteContractParameters
 } from "viem"
 import type { SmartAccount } from "viem/account-abstraction"
 import { getAction } from "viem/utils"

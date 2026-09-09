@@ -1,9 +1,9 @@
-import { type Address, type Hex, encodeFunctionData } from "viem"
+import { type Address, encodeFunctionData, type Hex } from "viem"
 import {
     type EntryPointVersion,
-    type UserOperation,
     entryPoint06Abi,
-    toPackedUserOperation
+    toPackedUserOperation,
+    type UserOperation
 } from "viem/account-abstraction"
 
 function getPimlicoEstimationCallData06({

@@ -1,4 +1,4 @@
-import { type Address, type Hex, encodeFunctionData } from "viem"
+import { type Address, encodeFunctionData, type Hex } from "viem"
 import { encode7579Calls } from "../../../utils/encode7579Calls.js"
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi.js"
 import type { KernelVersion } from "../toKernelSmartAccount.js"

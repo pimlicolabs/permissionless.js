@@ -4,12 +4,12 @@ export {
 } from "./context.js"
 
 export {
-    useSendTransaction,
     type UseSendTransactionParameters,
-    type UseSendTransactionReturnType
+    type UseSendTransactionReturnType,
+    useSendTransaction
 } from "./hooks/useSendTransaction.js"
 export {
-    useWaitForTransactionReceipt,
     type UseWaitForTransactionReceiptParameters,
-    type UseWaitForTransactionReceiptReturnType
+    type UseWaitForTransactionReceiptReturnType,
+    useWaitForTransactionReceipt
 } from "./hooks/useWaitForTransactionReceipt.js"

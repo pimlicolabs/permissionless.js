@@ -2,13 +2,13 @@ import {
     type Account,
     type Address,
     type Chain,
+    createWalletClient,
+    custom,
     type EIP1193Provider,
     type LocalAccount,
     type OneOf,
     type Transport,
-    type WalletClient,
-    createWalletClient,
-    custom
+    type WalletClient
 } from "viem"
 import { toAccount } from "viem/accounts"
 
@@ -36,7 +36,7 @@ export async function toOwner<provider extends EthereumProvider>({
 
     let walletClient:
         | WalletClient<Transport, Chain | undefined, Account>
-        | undefined = undefined
+        | undefined
 
     if ("request" in owner) {
         if (!address) {

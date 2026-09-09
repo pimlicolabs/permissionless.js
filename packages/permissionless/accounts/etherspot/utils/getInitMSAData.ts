@@ -1,4 +1,4 @@
-import { type Address, type Hex, encodeFunctionData, zeroAddress } from "viem"
+import { type Address, encodeFunctionData, type Hex, zeroAddress } from "viem"
 import {
     EtherspotBootstrapAbi,
     EtherspotOnInstallAbi

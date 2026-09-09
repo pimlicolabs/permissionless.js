@@ -1,11 +1,11 @@
 import {
     type Address,
-    type Hex,
-    type Prettify,
     concatHex,
     domainSeparator,
     encodeAbiParameters,
+    type Hex,
     keccak256,
+    type Prettify,
     stringToHex
 } from "viem"
 import type { KernelVersion } from "../toKernelSmartAccount.js"

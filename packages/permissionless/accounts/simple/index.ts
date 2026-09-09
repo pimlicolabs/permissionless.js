@@ -7,12 +7,12 @@ export const SimpleSmartAccount = {
 }
 
 export type {
-    SimpleSmartAccountImplementation,
-    ToSimpleSmartAccountParameters,
-    ToSimpleSmartAccountReturnType
-} from "./toSimpleSmartAccount.js"
-export type {
     To7702SimpleSmartAccountImplementation,
     To7702SimpleSmartAccountParameters,
     To7702SimpleSmartAccountReturnType
 } from "./to7702SimpleSmartAccount.js"
+export type {
+    SimpleSmartAccountImplementation,
+    ToSimpleSmartAccountParameters,
+    ToSimpleSmartAccountReturnType
+} from "./toSimpleSmartAccount.js"

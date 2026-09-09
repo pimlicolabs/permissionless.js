@@ -30,7 +30,7 @@ export const verifyRegistration = async (
     const response = credential.raw
         .response as unknown as AuthenticatorAttestationResponse
 
-    let responsePublicKeyAlgorithm: number | undefined = undefined
+    let responsePublicKeyAlgorithm: number | undefined
     if (typeof response.getPublicKeyAlgorithm === "function") {
         try {
             responsePublicKeyAlgorithm = response.getPublicKeyAlgorithm()

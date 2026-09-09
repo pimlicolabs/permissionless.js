@@ -1,11 +1,11 @@
 import {
+    encodeAbiParameters,
     type Hash,
+    hashMessage,
     type LocalAccount,
     type Prettify,
-    type SignMessageReturnType,
     type SignableMessage,
-    encodeAbiParameters,
-    hashMessage
+    type SignMessageReturnType
 } from "viem"
 import type { WebAuthnAccount } from "viem/account-abstraction"
 import { signMessage as _signMessage } from "viem/actions"

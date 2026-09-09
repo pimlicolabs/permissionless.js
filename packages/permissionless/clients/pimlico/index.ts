@@ -11,12 +11,12 @@ import type {
 import { createClient } from "viem"
 import {
     type BundlerActions,
-    type EntryPointVersion,
-    type PaymasterActions,
-    type SmartAccount,
     bundlerActions,
+    type EntryPointVersion,
     entryPoint07Address,
-    paymasterActions
+    type PaymasterActions,
+    paymasterActions,
+    type SmartAccount
 } from "viem/account-abstraction"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import { type PimlicoActions, pimlicoActions } from "../decorators/pimlico.js"

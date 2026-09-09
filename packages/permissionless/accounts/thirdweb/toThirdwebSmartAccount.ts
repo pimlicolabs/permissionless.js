@@ -11,20 +11,19 @@ import type {
     TypedDataDefinition,
     WalletClient
 } from "viem"
-import { getChainId } from "viem/actions"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
-
 import {
-    type SmartAccount,
-    type SmartAccountImplementation,
-    type UserOperation,
     entryPoint06Abi,
     entryPoint07Abi,
     entryPoint07Address,
     getUserOperationHash,
-    toSmartAccount
+    type SmartAccount,
+    type SmartAccountImplementation,
+    toSmartAccount,
+    type UserOperation
 } from "viem/account-abstraction"
+import { getChainId } from "viem/actions"
 import { getAction, toHex } from "viem/utils"
+import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { decodeCallData } from "./utils/decodeCallData.js"
 import { encodeCallData } from "./utils/encodeCallData.js"

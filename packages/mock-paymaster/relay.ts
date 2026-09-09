@@ -1,25 +1,25 @@
 import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
 import {
-    http,
     type Account,
     type Address,
     BaseError,
     type Chain,
+    getAddress,
+    http,
     type PublicClient,
     type RpcRequestError,
     type Transport,
-    type WalletClient,
-    getAddress,
-    toHex
+    toHex,
+    type WalletClient
 } from "viem"
 import {
     type BundlerClient,
-    type UserOperation,
     createBundlerClient,
     entryPoint06Address,
     entryPoint07Address,
-    entryPoint08Address
+    entryPoint08Address,
+    type UserOperation
 } from "viem/account-abstraction"
 import { fromZodError } from "zod-validation-error"
 import {
@@ -32,20 +32,20 @@ import { erc20Address } from "./helpers/erc20-utils.js"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
-    RpcError,
-    ValidationErrors,
     jsonRpcSchema,
     pimlicoGetTokenQuotesSchema,
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
-    pmSponsorUserOperationParamsSchema
+    pmSponsorUserOperationParamsSchema,
+    RpcError,
+    ValidationErrors
 } from "./helpers/schema.js"
 import {
-    type PaymasterMode,
     getChain,
     getPublicClient,
     isTokenSupported,
-    maxBigInt
+    maxBigInt,
+    type PaymasterMode
 } from "./helpers/utils.js"
 import {
     getDummyPaymasterData,
@@ -349,9 +349,9 @@ const handleMethod = async ({
 
         if (isBoosted) {
             return await bundlerClient.request({
-                // @ts-ignore
+                // @ts-expect-error
                 method: "boost_sendUserOperation",
-                // @ts-ignore
+                // @ts-expect-error
                 params: parsedBody.params
             })
         }
@@ -359,9 +359,9 @@ const handleMethod = async ({
 
     // Forward all other requests to the bundler
     return await bundlerClient.request({
-        // @ts-ignore
+        // @ts-expect-error
         method: parsedBody.method,
-        // @ts-ignore
+        // @ts-expect-error
         params: parsedBody.params ?? []
     })
 }

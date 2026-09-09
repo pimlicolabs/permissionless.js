@@ -1,9 +1,9 @@
 import {
     type Address,
+    hashMessage,
     type LocalAccount,
-    type SignMessageReturnType,
     type SignableMessage,
-    hashMessage
+    type SignMessageReturnType
 } from "viem"
 
 export async function signMessage({

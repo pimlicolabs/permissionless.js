@@ -1,9 +1,9 @@
 import {
     type Address,
-    type Hex,
     concatHex,
     domainSeparator,
     encodeAbiParameters,
+    type Hex,
     keccak256,
     stringToHex
 } from "viem"

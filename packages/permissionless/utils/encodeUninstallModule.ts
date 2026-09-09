@@ -1,9 +1,9 @@
 import {
     type Address,
-    type Hex,
-    type OneOf,
     encodeFunctionData,
-    getAddress
+    getAddress,
+    type Hex,
+    type OneOf
 } from "viem"
 import type {
     GetSmartAccountParameter,

@@ -2,17 +2,17 @@ import {
     type Account,
     type Address,
     type Chain,
-    type Hex,
-    type LocalAccount,
-    type OneOf,
-    type Transport,
-    type UnionPartialBy,
-    type WalletClient,
     concatHex,
     decodeAbiParameters,
     encodeAbiParameters,
     encodePacked,
-    hashTypedData
+    type Hex,
+    hashTypedData,
+    type LocalAccount,
+    type OneOf,
+    type Transport,
+    type UnionPartialBy,
+    type WalletClient
 } from "viem"
 import type { UserOperation, WebAuthnAccount } from "viem/account-abstraction"
 import { toOwner } from "../../utils/index.js"
@@ -21,10 +21,10 @@ import type { EthereumProvider } from "../../utils/toOwner.js"
 import {
     EIP712_SAFE_OPERATION_TYPE_V06,
     EIP712_SAFE_OPERATION_TYPE_V07,
-    type SafeVersion,
     getDefaultAddresses,
     getPaymasterAndData,
-    isWebAuthnAccount
+    isWebAuthnAccount,
+    type SafeVersion
 } from "./toSafeSmartAccount.js"
 
 export const concatSignatures = (

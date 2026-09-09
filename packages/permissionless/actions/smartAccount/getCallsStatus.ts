@@ -7,8 +7,8 @@ import type {
     Transport
 } from "viem"
 import {
-    type SmartAccount,
-    getUserOperationReceipt
+    getUserOperationReceipt,
+    type SmartAccount
 } from "viem/account-abstraction"
 import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"

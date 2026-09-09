@@ -1,10 +1,10 @@
 import {
-    http,
     type Address,
-    type PublicClient,
     createPublicClient,
     createTestClient,
     createWalletClient,
+    http,
+    type PublicClient,
     parseEther
 } from "viem"
 import { mnemonicToAccount } from "viem/accounts"

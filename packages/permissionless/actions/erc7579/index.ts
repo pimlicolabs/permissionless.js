@@ -13,16 +13,16 @@ import {
     type IsModuleInstalledParameters,
     isModuleInstalled
 } from "./isModuleInstalled.js"
+import type { CallType, ExecutionMode } from "./supportsExecutionMode.js"
 import {
     type SupportsExecutionModeParameters,
     supportsExecutionMode
 } from "./supportsExecutionMode.js"
-import type { CallType, ExecutionMode } from "./supportsExecutionMode.js"
+import type { ModuleType } from "./supportsModule.js"
 import {
     type SupportsModuleParameters,
     supportsModule
 } from "./supportsModule.js"
-import type { ModuleType } from "./supportsModule.js"
 import {
     type UninstallModuleParameters,
     uninstallModule
@@ -60,12 +60,12 @@ export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
 }
 
 export type {
-    InstallModuleParameters,
-    IsModuleInstalledParameters,
     CallType,
     ExecutionMode,
-    SupportsExecutionModeParameters,
+    InstallModuleParameters,
+    IsModuleInstalledParameters,
     ModuleType,
+    SupportsExecutionModeParameters,
     SupportsModuleParameters,
     UninstallModuleParameters
 }
