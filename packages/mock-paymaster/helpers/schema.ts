@@ -1,4 +1,4 @@
-import { getAddress, type Hex } from "viem"
+import { Address, type Hex } from "viem/utils"
 import { z, type infer as zodInfer } from "zod"
 
 export enum ValidationErrors {
@@ -34,7 +34,7 @@ const addressPattern = /^0x[0-9,a-f,A-F]{40}$/
 export const addressSchema = z
     .string()
     .regex(addressPattern, { message: "not a valid hex address" })
-    .transform((val) => getAddress(val))
+    .transform((val) => Address.checksum(val))
 
 export const hexNumberSchema = z
     .string()
@@ -58,15 +58,15 @@ export const hexNumberSchema = z
 export const hexDataSchema = z
     .string()
     .regex(hexDataPattern, { message: "not valid hex data" })
-    .transform((val) => val.toLowerCase() as Hex)
+    .transform((val) => val.toLowerCase() as Hex.Hex)
 
 const signedAuthorizationSchema = z.union([
     z.object({
         contractAddress: addressSchema,
         chainId: hexNumberSchema.transform(Number),
         nonce: hexNumberSchema.transform(Number),
-        r: hexDataSchema.transform((val) => val as Hex),
-        s: hexDataSchema.transform((val) => val as Hex),
+        r: hexDataSchema.transform((val) => val as Hex.Hex),
+        s: hexDataSchema.transform((val) => val as Hex.Hex),
         v: hexNumberSchema.optional(),
         yParity: hexNumberSchema.transform(Number)
     }),
@@ -74,8 +74,8 @@ const signedAuthorizationSchema = z.union([
         address: addressSchema,
         chainId: hexNumberSchema.transform(Number),
         nonce: hexNumberSchema.transform(Number),
-        r: hexDataSchema.transform((val) => val as Hex),
-        s: hexDataSchema.transform((val) => val as Hex),
+        r: hexDataSchema.transform((val) => val as Hex.Hex),
+        s: hexDataSchema.transform((val) => val as Hex.Hex),
         v: hexNumberSchema.optional(),
         yParity: hexNumberSchema.transform(Number)
     })
@@ -189,13 +189,13 @@ const eip7677UserOperationSchemaV6 = z
             .nullable()
             .optional()
             .transform((_) => {
-                return "0x" as Hex
+                return "0x" as Hex.Hex
             }),
         signature: hexDataSchema
             .nullable()
             .optional()
             .transform((_) => {
-                return "0x" as Hex
+                return "0x" as Hex.Hex
             }),
         eip7702Auth: signedAuthorizationSchema.optional().nullable()
     })

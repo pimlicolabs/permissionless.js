@@ -1,13 +1,8 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
-import { type Address, type Hex, concat, getAddress, keccak256 } from "viem"
-import {
-    type SmartAccount,
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address
-} from "viem/account-abstraction"
-import { mnemonicToAccount } from "viem/accounts"
+import { Account } from "viem"
+import { EntryPoint, type SmartAccount } from "viem/erc4337"
+import { Address, Hash, Hex } from "viem/utils"
 import { expect } from "vitest"
 
 export type AnvilKey = `anvil${number}`
@@ -32,11 +27,15 @@ export type CounterfactualAddressParams = {
         saltNonce: string
         threshold?: string
         useMultiSendForSetup?: boolean
-        setupTransactions?: { to: Address; data: Hex; value: string }[]
+        setupTransactions?: {
+            to: Address.Address
+            data: Hex.Hex
+            value: string
+        }[]
         erc7579?: {
-            safe4337ModuleAddress: Address
-            erc7579LaunchpadAddress: Address
-            attesters: Address[]
+            safe4337ModuleAddress: Address.Address
+            erc7579LaunchpadAddress: Address.Address
+            attesters: Address.Address[]
             attestersThreshold: number
         }
     }
@@ -66,7 +65,7 @@ export type CounterfactualAddressParams = {
         version: "1.0.0"
         owners: [AnvilKey]
         index: string
-        attesters?: Address[]
+        attesters?: Address.Address[]
         threshold?: number
     }
     light: {
@@ -92,10 +91,10 @@ export type CounterfactualAddressEntry<
 > = {
     account: account
     params: CounterfactualAddressParams[account]
-    address: Address
-    factory: Address | null
-    factoryDataHash: Hex | null
-    initCodeHash: Hex | null
+    address: Address.Address
+    factory: Address.Address | null
+    factoryDataHash: Hex.Hex | null
+    initCodeHash: Hex.Hex | null
 }
 
 export const counterfactualAddressFixturePath = fileURLToPath(
@@ -103,15 +102,15 @@ export const counterfactualAddressFixturePath = fileURLToPath(
 )
 
 export const anvilAccount = (key: AnvilKey) =>
-    mnemonicToAccount(
+    Account.fromMnemonic(
         "test test test test test test test test test test test junk",
         { addressIndex: Number(key.slice("anvil".length)) }
     )
 
 const entryPointAddresses = {
-    "0.6": entryPoint06Address,
-    "0.7": entryPoint07Address,
-    "0.8": entryPoint08Address
+    "0.6": EntryPoint.addressV06,
+    "0.7": EntryPoint.addressV07,
+    "0.8": EntryPoint.addressV08
 } as const
 
 export const toEntryPoint = <version extends "0.6" | "0.7" | "0.8">(
@@ -140,21 +139,23 @@ export const describeParams = (params: object) =>
         )
         .join(" ")
 
-export const snapshotCounterfactualAddress = async (account: SmartAccount) => {
+export const snapshotCounterfactualAddress = async (
+    account: SmartAccount.SmartAccount
+) => {
     const { factory, factoryData } = await account.getFactoryArgs()
     return {
-        address: getAddress(account.address),
-        factory: factory ? getAddress(factory) : null,
-        factoryDataHash: factoryData ? keccak256(factoryData) : null,
+        address: Address.checksum(account.address),
+        factory: factory ? Address.checksum(factory) : null,
+        factoryDataHash: factoryData ? Hash.keccak256(factoryData) : null,
         initCodeHash:
             factory && factoryData
-                ? keccak256(concat([factory, factoryData]))
+                ? Hash.keccak256(Hex.concat(factory, factoryData))
                 : null
     }
 }
 
 export const expectCounterfactualAddress = async (
-    account: SmartAccount,
+    account: SmartAccount.SmartAccount,
     {
         address,
         factory,

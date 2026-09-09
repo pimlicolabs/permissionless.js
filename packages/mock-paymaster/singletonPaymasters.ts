@@ -1,26 +1,16 @@
-import {
-    type Account,
-    type Address,
-    type Chain,
-    concat,
-    encodePacked,
-    getContract,
-    type Hex,
-    type PublicClient,
-    type Transport,
-    toBytes,
-    type WalletClient
-} from "viem"
-import {
-    toPackedUserOperation,
-    type UserOperation
-} from "viem/account-abstraction"
+import { Contract } from "viem"
+import { UserOperation } from "viem/erc4337"
+import { AbiParameters, type Address, Hex } from "viem/utils"
 import { constants } from "./constants.js"
 import {
     singletonPaymaster06Abi,
     singletonPaymaster07Abi
 } from "./helpers/abi.js"
-import type { PaymasterMode } from "./helpers/utils.js"
+import type {
+    PaymasterMode,
+    PublicClient,
+    WalletClient
+} from "./helpers/utils.js"
 
 export const getDummyPaymasterData = ({
     is06,
@@ -28,10 +18,12 @@ export const getDummyPaymasterData = ({
     paymasterMode
 }: {
     is06: boolean
-    paymaster: Address
+    paymaster: Address.Address
     paymasterMode: PaymasterMode
-}): { paymaster: Address; paymasterData: Hex } | { paymasterAndData: Hex } => {
-    let encodedDummyData: Hex
+}):
+    | { paymaster: Address.Address; paymasterData: Hex.Hex }
+    | { paymasterAndData: Hex.Hex } => {
+    let encodedDummyData: Hex.Hex
 
     const validUntil = 0
     const validAfter = 0
@@ -42,7 +34,7 @@ export const getDummyPaymasterData = ({
     const modeAndAllowBundlers = (mode << 1) | (allowAllBundlers ? 1 : 0)
 
     if (paymasterMode.mode === "verifying") {
-        encodedDummyData = encodePacked(
+        encodedDummyData = AbiParameters.encodePacked(
             [
                 "uint8", // mode and allowAllBundler
                 "uint48", // validUntil
@@ -57,7 +49,7 @@ export const getDummyPaymasterData = ({
             ]
         )
     } else {
-        encodedDummyData = encodePacked(
+        encodedDummyData = AbiParameters.encodePacked(
             [
                 "uint8", // combined byte (mode and allowAllBundlers)
                 "uint8", // constantFeePresent and recipientPresent and preFundPresent (1 byte) - 0000{preFundPresent bit}{recipientPresent bit}{constantFeePresent bit}
@@ -82,7 +74,7 @@ export const getDummyPaymasterData = ({
             ]
         )
 
-        encodedDummyData = encodePacked(
+        encodedDummyData = AbiParameters.encodePacked(
             ["bytes", "bytes"],
             [encodedDummyData, constants.dummySignature]
         )
@@ -90,7 +82,7 @@ export const getDummyPaymasterData = ({
 
     if (is06) {
         return {
-            paymasterAndData: concat([paymaster, encodedDummyData])
+            paymasterAndData: Hex.concat(paymaster, encodedDummyData)
         }
     }
 
@@ -102,14 +94,15 @@ export const getDummyPaymasterData = ({
 
 export const getSignedPaymasterData: (params: {
     publicClient: PublicClient
-    signer: WalletClient<Transport, Chain, Account>
-    userOp: UserOperation
-    paymaster: Address
+    signer: WalletClient
+    userOp: UserOperation.UserOperation
+    paymaster: Address.Address
     paymasterMode: PaymasterMode
 }) => Promise<
-    { paymasterAndData: Hex } | { paymaster: Address; paymasterData: Hex }
+    | { paymasterAndData: Hex.Hex }
+    | { paymaster: Address.Address; paymasterData: Hex.Hex }
 > = async ({ publicClient, signer, userOp, paymaster, paymasterMode }) => {
-    let paymasterData: Hex
+    let paymasterData: Hex.Hex
 
     const validAfter = 0
     const validUntil = Math.floor(Date.now() / 1000) + constants.validForSeconds
@@ -119,7 +112,7 @@ export const getSignedPaymasterData: (params: {
     const modeAndAllowBundlers = (mode << 1) | (allowAllBundlers ? 1 : 0)
 
     if (paymasterMode.mode === "verifying") {
-        paymasterData = encodePacked(
+        paymasterData = AbiParameters.encodePacked(
             [
                 "uint8", // mode and allowAllBundler
                 "uint48", // validUntil
@@ -139,7 +132,7 @@ export const getSignedPaymasterData: (params: {
             ((recipientPresent ? 1 : 0) << 1) |
             (constantFeePresent ? 1 : 0)
 
-        paymasterData = encodePacked(
+        paymasterData = AbiParameters.encodePacked(
             [
                 "uint8", // combined byte (mode and allowAllBundlers)
                 "uint8", // constantFeePresent and recipientPresent and preFundPresent (1 byte) - 0000{preFundPresent bit}{recipientPresent bit}{constantFeePresent bit}
@@ -166,7 +159,7 @@ export const getSignedPaymasterData: (params: {
     }
 
     if ("initCode" in userOp && "paymasterAndData" in userOp) {
-        const singletonPaymaster = getContract({
+        const singletonPaymaster = Contract.from({
             address: paymaster,
             abi: singletonPaymaster06Abi,
             client: publicClient
@@ -184,22 +177,22 @@ export const getSignedPaymasterData: (params: {
                 preVerificationGas: userOp.preVerificationGas,
                 maxFeePerGas: userOp.maxFeePerGas,
                 maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
-                paymasterAndData: concat([paymaster, paymasterData]),
-                signature: userOp.signature
+                paymasterAndData: Hex.concat(paymaster, paymasterData),
+                signature: userOp.signature ?? "0x"
             }
         ])
 
         const sig = await signer.signMessage({
-            message: { raw: toBytes(hash) }
+            message: { raw: hash }
         })
 
         return {
-            paymasterAndData: concat([paymaster, paymasterData, sig])
+            paymasterAndData: Hex.concat(paymaster, paymasterData, sig)
         }
     }
 
     // userOperation is v07
-    const singletonPaymaster = getContract({
+    const singletonPaymaster = Contract.from({
         address: paymaster,
         abi: singletonPaymaster07Abi,
         client: publicClient
@@ -208,18 +201,21 @@ export const getSignedPaymasterData: (params: {
     const hash = await singletonPaymaster.read.getHash([
         mode,
         // paymaster signs over paymasterData so we add paymaster + paymasterData
-        toPackedUserOperation({
+        UserOperation.toPacked({
             ...userOp,
             paymaster,
             paymasterData
-        } as UserOperation)
+        } as UserOperation.UserOperation<"0.7", true>)
     ])
 
     const sig = await signer.signMessage({
-        message: { raw: toBytes(hash) }
+        message: { raw: hash }
     })
 
-    paymasterData = encodePacked(["bytes", "bytes"], [paymasterData, sig])
+    paymasterData = AbiParameters.encodePacked(
+        ["bytes", "bytes"],
+        [paymasterData, sig]
+    )
 
     return {
         paymaster,

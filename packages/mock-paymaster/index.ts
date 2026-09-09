@@ -1,9 +1,8 @@
 import cors from "@fastify/cors"
 import Fastify from "fastify"
 import { defineInstance } from "prool"
-import { createWalletClient, http } from "viem"
-import { privateKeyToAccount } from "viem/accounts"
-import { getChain } from "./helpers/utils.js"
+import { Account, http } from "viem"
+import { createWalletClient, getChain } from "./helpers/utils.js"
 import { createRpcHandler } from "./relay.js"
 import { setup } from "./setup.js"
 
@@ -29,7 +28,7 @@ export const paymaster = defineInstance(
             start: async ({ port = _port }) => {
                 const paymasterSigner = createWalletClient({
                     chain: await getChain(anvilRpc),
-                    account: privateKeyToAccount(
+                    account: Account.fromPrivateKey(
                         "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
                     ),
                     transport: http(anvilRpc)
