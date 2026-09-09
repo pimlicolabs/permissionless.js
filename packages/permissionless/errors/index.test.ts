@@ -27,7 +27,6 @@ const table: [new (...args: any[]) => Errors.BaseError, unknown[]][] = [
         errors.KernelNonceKeyTooLargeError,
         [{ nonceKey: 65536n, version: "0.3.1" }]
     ],
-    [errors.KernelNotDelegatedError, []],
     [errors.KernelDecodeCallsError, [{ functionName: "foo" }]],
     [errors.InvalidKernelAccountError, [{ address, cause }]],
     [
