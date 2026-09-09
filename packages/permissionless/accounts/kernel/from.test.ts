@@ -143,6 +143,13 @@ describe("KernelSmartAccount.from", () => {
                     eip7702: true
                 })
             ).rejects.toBeInstanceOf(KernelUnsupportedVersionError)
+            await expect(
+                KernelSmartAccount.from({
+                    client,
+                    entryPoint: "0.8" as never,
+                    owner: Account.random()
+                })
+            ).rejects.toBeInstanceOf(KernelUnsupportedVersionError)
         }
     )
 
