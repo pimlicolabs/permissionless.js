@@ -1,0 +1,16 @@
+{
+    // Node's ESM resolution (the fixture is "type": "module"), strictest
+    // consumer flags, skipLibCheck off — the exports map must route to _types.
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "node16",
+        "moduleResolution": "node16",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "skipLibCheck": false,
+        "noEmit": true,
+        "types": []
+    },
+    "files": ["consumer.ts", "issue-500.ts"]
+}

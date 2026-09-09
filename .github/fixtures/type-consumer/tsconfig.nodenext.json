@@ -1,0 +1,15 @@
+{
+    // Same as node16 on the current Node semantics (require(esm) allowed).
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "skipLibCheck": false,
+        "noEmit": true,
+        "types": []
+    },
+    "files": ["consumer.ts", "issue-500.ts"]
+}

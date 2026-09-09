@@ -50,6 +50,22 @@ bun install viem permissionless
 yarn add viem permissionless
 ```
 
+## viem compatibility
+
+permissionless follows viem: the supported range is the `viem` peer range in
+[`package.json`](./package.json), `^3.0.0` at GA, floored at the stable release
+GA was validated against. The floor rises only when a change needs an upstream
+fix, never to chase viem releases. During the `1.0.0-next.N` prereleases the
+peer is `^3.0.0-next.M`, the viem prerelease each was validated against.
+
+Every PR runs the suite against the locked viem version. A nightly canary runs
+it against `viem@latest` and `viem@next` and files an issue labelled
+[`viem-canary`](https://github.com/pimlicolabs/permissionless.js/issues?q=label%3Aviem-canary)
+when either breaks. Every changelog entry states the exact viem version it was
+validated against. No compatibility matrix beyond that is published.
+
+Node.js 20 or later and TypeScript 5.9 or later.
+
 ## Quick Start
 
 ```typescript

@@ -89,7 +89,7 @@ All five jobs run **in parallel** with no dependencies:
 
 - **Lint** — formats and lints code, auto-commits fixes
 - **Build** — runs `bun run build` to verify compilation
-- **Package types** — packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as node10 and bundler consumers on TypeScript 5.9.3; `publint --strict` and `attw --pack --profile esm-only` gate the manifest
+- **Package types** — packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and node10 consumers on TypeScript 5.9.3 (see the fixture README); `publint --strict` and `attw --pack --profile esm-only` gate the manifest
 - **E2E-Coverage** — runs tests with coverage (no build needed — vitest resolves workspace packages from source via aliases)
 - **Size** — runs `size-limit-action` to compare bundle sizes against base branch
 
@@ -102,6 +102,11 @@ Foundry is only installed when `install-foundry: 'true'` is passed (E2E job only
 ### Main Branch Workflow
 
 Three parallel jobs: **Changesets** (version PRs), **Release** (npm publish), **Canary** (branch-tagged canary releases).
+The Canary job is guarded with `if: github.ref == 'refs/heads/main'`, so a `workflow_dispatch` from another branch never publishes a branch-named dist-tag.
+
+### viem Canary Workflow
+
+`viem-canary.yml` runs nightly (and on `workflow_dispatch`) with a `latest` / `next` matrix: it resolves the tag, skips the leg when the version is outside the package's viem peer range, otherwise `bun add -d viem@<version>` at the root, `bun run build`, `test:ci-no-coverage` (foundry + `VITE_FORK_RPC_URL`), and `test:types` once that script exists. Failing steps continue, then the last step files or updates one issue titled `viem canary: <tag> failing` (label `viem-canary`) and closes it when the leg is green again. Schedules only fire from the default branch.
 
 ## Package Exports
 

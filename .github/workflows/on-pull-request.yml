@@ -47,7 +47,7 @@ jobs:
         run: bun run build
 
   package-types:
-    name: Package types (node10 + bundler consumers)
+    name: Package types (node10 + node16 + nodenext + bundler consumers)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -78,6 +78,14 @@ jobs:
       - name: Type-check as a node10 consumer
         working-directory: .github/fixtures/type-consumer
         run: npx tsc -p tsconfig.node10.json
+
+      - name: Type-check as a node16 consumer
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.node16.json
+
+      - name: Type-check as a nodenext consumer
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.nodenext.json
 
       - name: Type-check as a bundler consumer
         working-directory: .github/fixtures/type-consumer
