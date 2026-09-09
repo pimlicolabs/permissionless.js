@@ -71,7 +71,7 @@ Reads the deployed Kernel version from the account's `eip712Domain()`. Returns `
 - **ERC-7579:** Full support in v0.3.x (validators, executors, fallbacks, hooks)
 - **ERC-1271:** Full support for `signMessage` and `signTypedData`
 - **WebAuthn:** Supported via WebAuthnAccount owner type
-- **EIP-7702:** `eip7702: true` uses Kernel 0.3.3 as the delegate; you sign and pass the authorization yourself. Signing messages before delegation throws `KernelNotDelegatedError`.
+- **EIP-7702:** `eip7702: true` uses Kernel 0.3.3 as the delegate; you sign and pass the authorization yourself. Signatures made before delegation verify once the EOA is delegated.
 
 ## Example
 

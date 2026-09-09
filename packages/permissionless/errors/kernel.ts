@@ -37,16 +37,6 @@ export class KernelNonceKeyTooLargeError extends Errors.BaseError {
     }
 }
 
-export class KernelNotDelegatedError extends Errors.BaseError {
-    override name = "KernelNotDelegatedError"
-
-    constructor() {
-        super(
-            "Kernel with EIP-7702 isn't ERC-1271 compliant before delegation."
-        )
-    }
-}
-
 export class KernelEmptyCallsError extends Errors.BaseError {
     override name = "KernelEmptyCallsError"
 

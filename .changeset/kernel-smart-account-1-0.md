@@ -29,5 +29,5 @@ const account = await KernelSmartAccount.from({ // [!code ++]
 - Nonce keys resolve as per-call `key`, then the constructor `nonceKey`, then `0n` (0.x ignored per-call keys). Kernel v3 still packs the key into its 2-byte user-key field and throws `KernelNonceKeyTooLargeError` above `maxUint16`.
 - New `KernelSmartAccount.getVersion(client, { address })` reads the deployed Kernel version on-chain; it returns `null` when there is no code at the address and throws `InvalidKernelAccountError` when the contract is not a Kernel.
 - Types moved into the namespace: `ToKernelSmartAccountParameters` → `KernelSmartAccount.Parameters`, `ToKernelSmartAccountReturnType` → `KernelSmartAccount.ReturnType`, `KernelSmartAccountImplementation` → `KernelSmartAccount.Implementation`, `KernelVersion` → `KernelSmartAccount.Version`. `KernelSmartAccount.wrapMessageHash`, `.signMessage` and `.signTypedData` stay on the namespace.
-- Named errors replace plain `Error`s: `KernelValidatorAddressRequiredError`, `KernelNotDelegatedError`, `KernelEmptyCallsError`, `KernelDecodeCallsError`.
+- Named errors replace plain `Error`s: `KernelValidatorAddressRequiredError`, `KernelEmptyCallsError`, `KernelDecodeCallsError`.
 - Counterfactual addresses are unchanged for every explicit `entryPoint` + `version` + `useMetaFactory` combination and for the defaults.
