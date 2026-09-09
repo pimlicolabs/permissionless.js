@@ -1,11 +1,2 @@
-import { toTrustSmartAccount } from "./toTrustSmartAccount.js"
-
-export const TrustSmartAccount = {
-    toTrustSmartAccount
-}
-
-export type {
-    ToTrustSmartAccountParameters,
-    ToTrustSmartAccountReturnType,
-    TrustSmartAccountImplementation
-} from "./toTrustSmartAccount.js"
+// ticket 16 ports this account: this file becomes the `TrustSmartAccount` namespace module
+export {}

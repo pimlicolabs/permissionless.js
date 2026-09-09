@@ -15,6 +15,14 @@ import {
     type SmartAccountClient
 } from "../../permissionless/clients/createSmartAccountClient"
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
+import { etherspotSmartAccounts } from "./accounts/etherspot.js"
+import { kernelSmartAccounts } from "./accounts/kernel.js"
+import { lightSmartAccounts } from "./accounts/light.js"
+import { nexusSmartAccounts } from "./accounts/nexus.js"
+import { safeSmartAccounts } from "./accounts/safe.js"
+import { simpleSmartAccounts } from "./accounts/simple.js"
+import { thirdwebSmartAccounts } from "./accounts/thirdweb.js"
+import { trustSmartAccounts } from "./accounts/trust.js"
 import { createAutoBundleTransport } from "./testWithRpc"
 import type { AAParamType } from "./types"
 
@@ -227,5 +235,14 @@ export type CoreSmartAccount = {
     >
 }
 
-// Each account port ticket (10-17) registers its client factory here.
-export const getCoreSmartAccounts = (): CoreSmartAccount[] => []
+// Each account port ticket (10-17) fills its own file under ./accounts/.
+export const getCoreSmartAccounts = (): CoreSmartAccount[] => [
+    ...etherspotSmartAccounts,
+    ...kernelSmartAccounts,
+    ...lightSmartAccounts,
+    ...nexusSmartAccounts,
+    ...safeSmartAccounts,
+    ...simpleSmartAccounts,
+    ...thirdwebSmartAccounts,
+    ...trustSmartAccounts
+]

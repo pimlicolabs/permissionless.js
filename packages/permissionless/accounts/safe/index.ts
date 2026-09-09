@@ -1,14 +1,2 @@
-import { signUserOperation } from "./signUserOperation.js"
-import { toSafeSmartAccount } from "./toSafeSmartAccount.js"
-
-export const SafeSmartAccount = {
-    toSafeSmartAccount,
-    signUserOperation
-}
-
-export type {
-    SafeSmartAccountImplementation,
-    SafeVersion,
-    ToSafeSmartAccountParameters,
-    ToSafeSmartAccountReturnType
-} from "./toSafeSmartAccount.js"
+// ticket 11 ports this account: this file becomes the `SafeSmartAccount` namespace module
+export {}

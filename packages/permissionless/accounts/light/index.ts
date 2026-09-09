@@ -1,12 +1,2 @@
-import { toLightSmartAccount } from "./toLightSmartAccount.js"
-
-export const LightSmartAccount = {
-    toLightSmartAccount
-}
-
-export type {
-    LightAccountVersion,
-    LightSmartAccountImplementation,
-    ToLightSmartAccountParameters,
-    ToLightSmartAccountReturnType
-} from "./toLightSmartAccount.js"
+// ticket 14 ports this account: this file becomes the `LightSmartAccount` namespace module
+export {}

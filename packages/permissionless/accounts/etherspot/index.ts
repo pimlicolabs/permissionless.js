@@ -1,11 +1,2 @@
-import { toEtherspotSmartAccount } from "./toEtherspotSmartAccount.js"
-
-export const EtherspotSmartAccount = {
-    toEtherspotSmartAccount
-}
-
-export type {
-    EtherspotSmartAccountImplementation,
-    ToEtherspotSmartAccountParameters,
-    ToEtherspotSmartAccountReturnType
-} from "./toEtherspotSmartAccount.js"
+// ticket 17 ports this account: this file becomes the `EtherspotSmartAccount` namespace module
+export {}

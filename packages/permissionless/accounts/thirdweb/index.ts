@@ -1,11 +1,2 @@
-import { toThirdwebSmartAccount } from "./toThirdwebSmartAccount.js"
-
-export const ThirdwebSmartAccount = {
-    toThirdwebSmartAccount
-}
-
-export type {
-    ThirdwebSmartAccountImplementation,
-    ToThirdwebSmartAccountParameters,
-    ToThirdwebSmartAccountReturnType
-} from "./toThirdwebSmartAccount.js"
+// ticket 15 ports this account: this file becomes the `ThirdwebSmartAccount` namespace module
+export {}

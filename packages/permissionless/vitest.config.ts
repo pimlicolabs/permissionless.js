@@ -1,6 +1,17 @@
+import { existsSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import { loadEnv } from "vite"
 import { defineConfig } from "vitest/config"
+
+// Accounts still carrying an UNPORTED.md marker (viem 3 port in flight) are kept out of the run.
+const accountsDir = join(__dirname, "accounts")
+const unportedAccounts = readdirSync(accountsDir, { withFileTypes: true })
+    .filter(
+        (d) =>
+            d.isDirectory() &&
+            existsSync(join(accountsDir, d.name, "UNPORTED.md"))
+    )
+    .map((d) => `**/accounts/${d.name}/**`)
 
 export default defineConfig({
     resolve: {
@@ -44,7 +55,8 @@ export default defineConfig({
         // permissionless-test's getCoreSmartAccounts / getSimpleAccountClient.
         exclude: [
             "**/node_modules/**",
-            "**/accounts/**",
+            ...unportedAccounts,
+            "**/accounts/*.test.ts",
             "**/actions/erc7579/*.test.ts",
             "**/actions/smartAccount/*.test.ts",
             "**/actions/public/*.test.ts",
