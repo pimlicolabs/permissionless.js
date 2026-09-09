@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest"
-import { decodeNonce, encodeNonce } from "./index"
+import * as Nonce from "./nonce"
 
-describe("decodeNonce", () => {
+describe("Nonce.decode", () => {
     test("should encode key and sequence correctly", async () => {
         const key = 123456789012345678901234n
         const sequence = 9876543210n
 
-        const result = encodeNonce({ key, sequence })
+        const result = Nonce.encode({ key, sequence })
 
-        const decodedNonce = decodeNonce(result)
+        const decodedNonce = Nonce.decode(result)
 
         expect(decodedNonce.key).toBe(key)
         expect(decodedNonce.sequence).toBe(sequence)
@@ -18,9 +18,9 @@ describe("decodeNonce", () => {
         const key = BigInt(0)
         const sequence = BigInt(0)
 
-        const result = encodeNonce({ key, sequence })
+        const result = Nonce.encode({ key, sequence })
 
-        const decodedNonce = decodeNonce(result)
+        const decodedNonce = Nonce.decode(result)
 
         expect(decodedNonce.key).toBe(key)
         expect(decodedNonce.sequence).toBe(sequence)
@@ -30,9 +30,9 @@ describe("decodeNonce", () => {
         const key = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFF")
         const sequence = BigInt("0xFFFFFFFF")
 
-        const result = encodeNonce({ key, sequence })
+        const result = Nonce.encode({ key, sequence })
 
-        const decodedNonce = decodeNonce(result)
+        const decodedNonce = Nonce.decode(result)
 
         expect(decodedNonce.key).toBe(key)
         expect(decodedNonce.sequence).toBe(sequence)

@@ -1,12 +1,12 @@
 import { Hex } from "viem/utils"
 import { describe, expect, test } from "vitest"
 import {
-    type Erc20AllowanceOverrideParameters,
-    erc20AllowanceOverride
-} from "./erc20AllowanceOverride"
+    type AllowanceOverrideParameters,
+    allowanceOverride
+} from "./allowanceOverride"
 
 const slotOf = (
-    result: ReturnType<typeof erc20AllowanceOverride>,
+    result: ReturnType<typeof allowanceOverride>,
     token: `0x${string}`
 ) => {
     const slots = Object.keys(result[token]?.stateDiff ?? {})
@@ -15,7 +15,7 @@ const slotOf = (
     return slots[0] as `0x${string}`
 }
 
-describe("erc20AllowanceOverride", () => {
+describe("allowanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
         const params = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
@@ -25,7 +25,7 @@ describe("erc20AllowanceOverride", () => {
             amount: BigInt(100)
         } as const
 
-        const result = erc20AllowanceOverride(params)
+        const result = allowanceOverride(params)
 
         expect(result).toEqual({
             [params.token]: {
@@ -39,14 +39,14 @@ describe("erc20AllowanceOverride", () => {
     })
 
     test("should use the default amount when none is provided", () => {
-        const params: Erc20AllowanceOverrideParameters = {
+        const params: AllowanceOverrideParameters = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
             owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             spender: "0xDDdDddDdDdddDDddDDddDDDDdDdDDdDDdDDDDDDd",
             slot: BigInt(1)
         }
 
-        const result = erc20AllowanceOverride(params)
+        const result = allowanceOverride(params)
 
         const expectedDefaultAmount = BigInt(
             "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"

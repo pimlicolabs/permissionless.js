@@ -1,22 +1,12 @@
-// Guards for issue #500: createSmartAccountClient's precise return type must
-// stay assignable to the bare SmartAccountClient alias cheaply (variance fast
-// path) WITHOUT the fix widening the return type. The Equal assertions fail if
+// Guards for issue #500: SmartAccountClient.create's precise return type must
+// stay assignable to the bare SmartAccountClient.Client alias cheaply (variance
+// fast path) WITHOUT the fix widening the return type. The Equal assertions fail if
 // the return type ever collapses to the loose defaults (or any) — which is
 // what the rejected fix in PR #511 would have done — and the bare-alias
 // assignments fail if the variance restructure ever rejects something the old
 // structural check accepted.
-import {
-    createSmartAccountClient,
-    type SmartAccountClient
-} from "permissionless"
-import {
-    createPasskeyServerClient,
-    type PasskeyServerClient
-} from "permissionless/clients/passkeyServer"
-import {
-    createPimlicoClient,
-    type PimlicoClient
-} from "permissionless/clients/pimlico"
+import { SmartAccountClient } from "permissionless"
+import { PasskeyServerClient, PimlicoClient } from "permissionless/pimlico"
 import { type Client, http, type Transport } from "viem"
 import { sepolia } from "viem/chains"
 import { EntryPoint, type SmartAccount } from "viem/erc4337"
@@ -28,7 +18,7 @@ type Equal<X, Y> =
         : false
 type Expect<T extends true> = T
 
-const pimlicoClient = createPimlicoClient({
+const pimlicoClient = PimlicoClient.create({
     transport: http("https://bundler.invalid"),
     entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
 })
@@ -45,7 +35,7 @@ type Account = SmartAccount.SmartAccount<
 declare const account: Account
 
 export function makeClient() {
-    return createSmartAccountClient({
+    return SmartAccountClient.create({
         account,
         chain: sepolia,
         bundlerTransport: http("https://bundler.invalid"),
@@ -61,7 +51,7 @@ type PreciseClient = ReturnType<typeof makeClient>
 declare const precise: PreciseClient
 
 // The #500 hot path: precise instantiation → bare alias.
-export const bare: SmartAccountClient = precise
+export const bare: SmartAccountClient.Client = precise
 
 // Return-type precision is unchanged — everything PR #511 would have widened.
 export type AccountIsExact = Expect<Equal<PreciseClient["account"], Account>>
@@ -79,31 +69,32 @@ type CustomRpcSchema = RpcSchema.From<{
     Request: { method: "custom_method"; params: [value: string] }
     ReturnType: string
 }>
-declare const withCustomSchema: SmartAccountClient<
+declare const withCustomSchema: SmartAccountClient.Client<
     Transport.Transport,
     typeof sepolia,
     Account,
     undefined,
     CustomRpcSchema
 >
-export const bareFromCustomSchema: SmartAccountClient = withCustomSchema
+export const bareFromCustomSchema: SmartAccountClient.Client = withCustomSchema
 
 // Same guarantees for PimlicoClient (fixed alongside, identical pathology).
-export const barePimlico: PimlicoClient = pimlicoClient
+export const barePimlico: PimlicoClient.Client = pimlicoClient
 export type PimlicoChainIsExact = Expect<
     Equal<(typeof pimlicoClient)["chain"], undefined>
 >
 
 // Same guarantees for PasskeyServerClient (same inline-mapped restructure).
-const passkeyClient = createPasskeyServerClient({
+const passkeyClient = PasskeyServerClient.create({
     transport: http("https://passkeys.invalid")
 })
-export const barePasskey: PasskeyServerClient = passkeyClient
-declare const passkeyWithCustomSchema: PasskeyServerClient<CustomRpcSchema>
-export const barePasskeyFromCustomSchema: PasskeyServerClient =
+export const barePasskey: PasskeyServerClient.Client = passkeyClient
+declare const passkeyWithCustomSchema: PasskeyServerClient.Client<CustomRpcSchema>
+export const barePasskeyFromCustomSchema: PasskeyServerClient.Client =
     passkeyWithCustomSchema
 
 // The precise client still satisfies structural consumers that were never
 // spelled as the alias (no aliasSymbol on either side → structural path).
 declare const plainViemClient: ReturnType<typeof Client.create>
-export const clientSlotAccepts: SmartAccountClient["client"] = plainViemClient
+export const clientSlotAccepts: SmartAccountClient.Client["client"] =
+    plainViemClient

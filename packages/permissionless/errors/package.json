@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../_types/errors/index.d.ts",
-    "main": "../_esm/errors/index.js"
-}

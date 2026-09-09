@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/actions/pimlico/index.d.ts",
-    "main": "../../_esm/actions/pimlico/index.js"
-}

@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/accounts/thirdweb/index.d.ts",
-    "main": "../../_esm/accounts/thirdweb/index.js"
-}

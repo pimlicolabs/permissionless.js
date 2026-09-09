@@ -2,10 +2,15 @@ import type { Chain, Client } from "viem"
 import type { EntryPoint } from "viem/erc4337"
 import type { Address } from "viem/utils"
 import {
-    type EstimateErc20PaymasterCostParameters,
-    type EstimateErc20PaymasterCostReturnType,
-    estimateErc20PaymasterCost
-} from "../../actions/pimlico/estimateErc20PaymasterCost.js"
+    type EstimateCostParameters,
+    type EstimateCostReturnType,
+    estimateCost
+} from "../../actions/erc20Paymaster/estimateCost.js"
+import {
+    type GetTokenQuotesParameters,
+    type GetTokenQuotesReturnType,
+    getTokenQuotes
+} from "../../actions/erc20Paymaster/getTokenQuotes.js"
 import {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
@@ -16,18 +21,15 @@ import {
     getUserOperationStatus
 } from "../../actions/pimlico/getUserOperationStatus.js"
 import {
-    type GetTokenQuotesParameters,
-    type GetTokenQuotesReturnType,
-    getTokenQuotes,
-    type ValidateSponsorshipPolicies,
-    type ValidateSponsorshipPoliciesParameters,
-    validateSponsorshipPolicies
-} from "../../actions/pimlico/index.js"
-import {
-    type PimlicoSponsorUserOperationParameters,
+    type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
+import {
+    type ValidateSponsorshipPolicies,
+    type ValidateSponsorshipPoliciesParameters,
+    validateSponsorshipPolicies
+} from "../../actions/pimlico/validateSponsorshipPolicies.js"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import type { Prettify } from "../../types/utils.js"
 
@@ -82,7 +84,7 @@ export type PimlicoActions<
     ) => Promise<Prettify<GetUserOperationStatusReturnType>>
     sponsorUserOperation: (
         args: Omit<
-            PimlicoSponsorUserOperationParameters<entryPointVersion>,
+            SponsorUserOperationParameters<entryPointVersion>,
             "entryPoint"
         >
     ) => Promise<Prettify<SponsorUserOperationReturnType<entryPointVersion>>>
@@ -105,14 +107,10 @@ export type PimlicoActions<
         TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
     >(
         args: Omit<
-            EstimateErc20PaymasterCostParameters<
-                entryPointVersion,
-                TChain,
-                TChainOverride
-            >,
+            EstimateCostParameters<entryPointVersion, TChain, TChainOverride>,
             "entryPoint"
         >
-    ) => Promise<Prettify<EstimateErc20PaymasterCostReturnType>>
+    ) => Promise<Prettify<EstimateCostReturnType>>
 }
 
 export const pimlicoActions =
@@ -145,7 +143,7 @@ export const pimlicoActions =
                 entryPointAddress: entryPoint.address
             }),
         estimateErc20PaymasterCost: async (args) =>
-            estimateErc20PaymasterCost(client, {
+            estimateCost(client, {
                 ...args,
                 entryPoint,
                 chain: args.chain

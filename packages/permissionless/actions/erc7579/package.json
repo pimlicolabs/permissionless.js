@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/actions/erc7579/index.d.ts",
-    "main": "../../_esm/actions/erc7579/index.js"
-}

@@ -1,7 +1,7 @@
 import type { Client, Transport } from "viem"
 import type { EtherspotBundlerRpcSchema } from "../../types/etherspot.js"
 
-export type GetGasPriceResponseReturnType = {
+export type GetUserOperationGasPriceReturnType = {
     maxFeePerGas: bigint
     maxPriorityFeePerGas: bigint
 }
@@ -14,7 +14,7 @@ export type GetGasPriceResponseReturnType = {
  */
 export const getUserOperationGasPrice = async (
     client: Pick<Client.Client, "request">
-): Promise<GetGasPriceResponseReturnType> => {
+): Promise<GetUserOperationGasPriceReturnType> => {
     const request =
         client.request as Transport.RequestFn<EtherspotBundlerRpcSchema>
     const gasPrice = await request({

@@ -6,7 +6,7 @@ import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import { erc7579Actions } from "../erc7579"
+import { erc7579Actions } from "../../clients/decorators/erc7579"
 import { uninstallModule } from "./uninstallModule"
 
 describe.each(getCoreSmartAccounts())(

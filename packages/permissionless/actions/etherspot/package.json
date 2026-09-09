@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/actions/etherspot/index.d.ts",
-    "main": "../../_esm/actions/etherspot/index.js"
-}

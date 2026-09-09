@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/accounts/safe/index.d.ts",
-    "main": "../../_esm/accounts/safe/index.js"
-}

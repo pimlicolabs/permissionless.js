@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/actions/smartAccount/index.d.ts",
-    "main": "../../_esm/actions/smartAccount/index.js"
-}

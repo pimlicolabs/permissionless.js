@@ -14,9 +14,9 @@ import {
     Solidity,
     type StateOverrides
 } from "viem/utils"
-import { getTokenQuotes } from "../../../actions/pimlico/index.js"
-import { erc20BalanceOverride } from "../../../utils/erc20BalanceOverride.js"
-import { getAction } from "../../../utils/getAction.js"
+import { getAction } from "../../utils/getAction.js"
+import { balanceOverride as erc20BalanceOverride } from "./balanceOverride.js"
+import { getTokenQuotes } from "./getTokenQuotes.js"
 
 const MAINNET_USDT_ADDRESS = Address.checksum(
     "0xdAC17F958D2ee523a2206206994597C13D831ec7"
@@ -40,16 +40,18 @@ const resolvePaymasterActions = (
     ) as PaymasterActions
 }
 
-export const prepareUserOperationForErc20Paymaster =
+export type PrepareUserOperationParameters = {
+    balanceOverride?: boolean
+    balanceSlot?: bigint
+}
+
+export const prepareUserOperation =
     (
         pimlicoClient: Pick<Client.Client, "chain" | "request">,
         {
             balanceOverride = false,
             balanceSlot: _balanceSlot
-        }: {
-            balanceOverride?: boolean
-            balanceSlot?: bigint
-        } = {}
+        }: PrepareUserOperationParameters = {}
     ) =>
     async <
         account extends SmartAccount.SmartAccount | undefined,

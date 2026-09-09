@@ -1,4 +1,4 @@
-import type { Chain, Client, Transport } from "viem"
+import type { Chain, Transport, Client as viem_Client } from "viem"
 import {
     type AccountAbstractionActions,
     BundlerClient,
@@ -12,21 +12,25 @@ import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import type { Prettify } from "../../types/utils.js"
 import { type PimlicoActions, pimlicoActions } from "../decorators/pimlico.js"
 
+export type { PimlicoRpcSchema as Schema } from "../../types/pimlico.js"
+
 type ResolvedChain<
     chain extends Chain.Chain | undefined,
-    client extends Client.Client | undefined
+    client extends viem_Client.Client | undefined
 > = chain extends Chain.Chain
     ? chain
-    : client extends Client.Client<infer chain extends Chain.Chain | undefined>
+    : client extends viem_Client.Client<
+            infer chain extends Chain.Chain | undefined
+        >
       ? chain
       : undefined
 
-type PimlicoClientInner<
+type ClientInner<
     entryPointVersion extends EntryPoint.Version,
     transport extends Transport.Transport,
     chain extends Chain.Chain | undefined,
     account extends SmartAccount.SmartAccount | undefined,
-    client extends Client.Client | undefined,
+    client extends viem_Client.Client | undefined,
     rpcSchema extends RpcSchema.Generic | undefined
 > = Omit<
     BundlerClient.Client<
@@ -45,7 +49,7 @@ type PimlicoClientInner<
 
 // Variance annotations referred from viem:
 // https://github.com/wevm/viem/blob/main/src/actions/public/simulateContract.ts#L129
-export type PimlicoClient<
+export type Client<
     /** @ts-expect-error cast variance */
     out entryPointVersion extends EntryPoint.Version = EntryPoint.Version,
     out transport extends Transport.Transport = Transport.Transport,
@@ -55,17 +59,19 @@ export type PimlicoClient<
     out account extends SmartAccount.SmartAccount | undefined =
         | SmartAccount.SmartAccount
         | undefined,
-    out client extends Client.Client | undefined = Client.Client | undefined,
+    out client extends viem_Client.Client | undefined =
+        | viem_Client.Client
+        | undefined,
     rpcSchema extends RpcSchema.Generic | undefined = undefined
 > = {
-    [key in keyof PimlicoClientInner<
+    [key in keyof ClientInner<
         entryPointVersion,
         transport,
         chain,
         account,
         client,
         rpcSchema
-    >]: PimlicoClientInner<
+    >]: ClientInner<
         entryPointVersion,
         transport,
         chain,
@@ -75,7 +81,7 @@ export type PimlicoClient<
     >[key]
 }
 
-export type PimlicoClientConfig<
+export type Config<
     entryPointVersion extends EntryPoint.Version = EntryPoint.Version,
     transport extends Transport.Transport = Transport.Transport,
     chain extends Chain.Chain | undefined = Chain.Chain | undefined,
@@ -108,35 +114,20 @@ export type PimlicoClientConfig<
     }
 }
 
-export function createPimlicoClient<
+export function create<
     entryPointVersion extends EntryPoint.Version = "0.7",
     transport extends Transport.Transport = Transport.Transport,
     chain extends Chain.Chain | undefined = undefined,
     account extends SmartAccount.SmartAccount | undefined =
         | SmartAccount.SmartAccount
         | undefined,
-    client extends Client.Client | undefined = undefined,
+    client extends viem_Client.Client | undefined = undefined,
     rpcSchema extends RpcSchema.Generic | undefined = undefined
 >(
-    parameters: PimlicoClientConfig<
-        entryPointVersion,
-        transport,
-        chain,
-        account,
-        rpcSchema
-    >
-): PimlicoClient<
-    entryPointVersion,
-    transport,
-    chain,
-    account,
-    client,
-    rpcSchema
->
+    parameters: Config<entryPointVersion, transport, chain, account, rpcSchema>
+): Client<entryPointVersion, transport, chain, account, client, rpcSchema>
 
-export function createPimlicoClient(
-    parameters: PimlicoClientConfig
-): PimlicoClient {
+export function create(parameters: Config): Client {
     const {
         key = "public",
         name = "Pimlico Bundler Client",
@@ -159,5 +150,5 @@ export function createPimlicoClient(
                 version: entryPoint?.version ?? "0.7"
             }
         })
-    ) as unknown as PimlicoClient
+    ) as unknown as Client
 }

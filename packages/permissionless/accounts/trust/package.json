@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/accounts/trust/index.d.ts",
-    "main": "../../_esm/accounts/trust/index.js"
-}
