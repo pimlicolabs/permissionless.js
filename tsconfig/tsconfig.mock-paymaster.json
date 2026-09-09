@@ -5,6 +5,8 @@
         "../packages/mock-paymaster"
     ],
     "exclude": [
+        "../packages/mock-paymaster/_esm",
+        "../packages/mock-paymaster/_types",
         "../packages/mock-paymaster/**/setupTests.ts",
         "../packages/mock-paymaster/**/*.test.ts",
         "../packages/mock-paymaster/**/*.test-d.ts",
