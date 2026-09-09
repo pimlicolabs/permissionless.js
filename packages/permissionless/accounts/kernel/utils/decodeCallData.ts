@@ -1,43 +1,28 @@
-import { decodeFunctionData, type Hex } from "viem"
+import { AbiFunction, type Hex } from "viem/utils"
+import { KernelDecodeCallsError } from "../../../errors/kernel.js"
 import { decode7579Calls } from "../../../utils/decode7579Calls.js"
 import { KernelExecuteAbi } from "../abi/KernelAccountAbi.js"
-import type { KernelVersion } from "../toKernelSmartAccount.js"
-import { isKernelV2 } from "./isKernelV2.js"
+import { isKernelV2, type Version } from "../version.js"
+
+const execute = AbiFunction.fromAbi(KernelExecuteAbi, "execute")
+const executeBatch = AbiFunction.fromAbi(KernelExecuteAbi, "executeBatch")
 
 export const decodeCallData = ({
-    kernelVersion,
+    version,
     callData
 }: {
-    callData: Hex
-    kernelVersion: KernelVersion<"0.6" | "0.7">
+    callData: Hex.Hex
+    version: Version
 }) => {
-    if (isKernelV2(kernelVersion)) {
-        const decoded = decodeFunctionData({
-            abi: KernelExecuteAbi,
-            data: callData
-        })
-
-        if (decoded.functionName === "executeBatch") {
-            return decoded.args[0].map((tx) => ({
-                to: tx.to,
-                value: tx.value,
-                data: tx.data
-            }))
-        }
-
-        if (decoded.functionName === "execute") {
-            const [to, value, data] = decoded.args
-            return [
-                {
-                    to,
-                    value,
-                    data
-                }
-            ]
-        }
-
-        throw new Error("Invalid function name")
+    if (!isKernelV2(version)) return decode7579Calls(callData).callData
+    const { name } = AbiFunction.fromAbi(KernelExecuteAbi, callData)
+    if (name === "executeBatch") {
+        const [calls] = AbiFunction.decodeData(executeBatch, callData)
+        return calls.map(({ to, value, data }) => ({ to, value, data }))
     }
-
-    return decode7579Calls(callData).callData
+    if (name === "execute") {
+        const [to, value, data] = AbiFunction.decodeData(execute, callData)
+        return [{ to, value, data }]
+    }
+    throw new KernelDecodeCallsError({ functionName: name })
 }

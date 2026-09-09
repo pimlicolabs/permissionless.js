@@ -1,118 +1,111 @@
+import type { Account } from "viem"
+import type { WebAuthnAccount } from "viem/erc4337"
 import {
-    encodeAbiParameters,
-    type Hash,
-    hashMessage,
-    type LocalAccount,
-    type Prettify,
-    type SignableMessage,
-    type SignMessageReturnType
-} from "viem"
-import type { WebAuthnAccount } from "viem/account-abstraction"
-import { getOxExports } from "../../../utils/ox.js"
-import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
-import {
-    type WrapMessageHashParams,
-    wrapMessageHash
-} from "./wrapMessageHash.js"
+    AbiParameters,
+    type Address,
+    Hex,
+    PersonalMessage,
+    Signature
+} from "viem/utils"
+import type { Version } from "../version.js"
+import { wrapMessageHash } from "./wrapMessageHash.js"
+
+export type SignMessageParameters = {
+    message: Account.SignableMessage
+    owner: Account.Local | WebAuthnAccount.Account
+    address: Address.Address
+    version: Version
+    chainId: number
+    eip7702?: boolean | undefined
+}
+
+export const webAuthnSignatureParameters = [
+    { name: "authenticatorData", type: "bytes" },
+    { name: "clientDataJSON", type: "string" },
+    { name: "responseTypeLocation", type: "uint256" },
+    { name: "r", type: "uint256" },
+    { name: "s", type: "uint256" },
+    { name: "usePrecompiled", type: "bool" }
+] as const
+
+export const hashMessage = (message: Account.SignableMessage) =>
+    PersonalMessage.getSignPayload(
+        typeof message === "string" ? Hex.fromString(message) : message.raw
+    )
+
+export const toKernelTypedData = ({
+    hash,
+    address,
+    version,
+    chainId
+}: {
+    hash: Hex.Hex
+    address: Address.Address
+    version: Version
+    chainId: number
+}) =>
+    ({
+        domain: {
+            name: "Kernel",
+            version,
+            chainId,
+            verifyingContract: address
+        },
+        types: { Kernel: [{ name: "hash", type: "bytes32" }] },
+        primaryType: "Kernel",
+        message: { hash }
+    }) as const
 
 export async function signMessage({
     message,
     owner,
-    address: accountAddress,
-    version: accountVersion,
+    address,
+    version,
     chainId,
     eip7702 = false
-}: Prettify<
-    {
-        message: SignableMessage
-        owner: LocalAccount | WebAuthnAccount
-        eip7702?: boolean
-    } & WrapMessageHashParams
->): Promise<SignMessageReturnType> {
-    if (isWebAuthnAccount(owner)) {
-        let messageContent: string
-        if (typeof message === "string") {
-            // message is a string
-            messageContent = wrapMessageHash({
+}: SignMessageParameters): Promise<Hex.Hex> {
+    if (owner.type === "webAuthn") {
+        const hash =
+            typeof message === "string"
+                ? wrapMessageHash({
+                      hash: hashMessage(message),
+                      address,
+                      version,
+                      chainId
+                  })
+                : message.raw instanceof Uint8Array
+                  ? Hex.fromBytes(message.raw)
+                  : message.raw
+        const { signature, webauthn } = await owner.sign({ hash })
+        const { r, s } = Signature.fromHex(signature)
+        return AbiParameters.encode(webAuthnSignatureParameters, [
+            webauthn.authenticatorData,
+            webauthn.clientDataJSON,
+            BigInt(webauthn.typeIndex ?? 0),
+            Hex.toBigInt(r),
+            Hex.toBigInt(s),
+            false
+        ])
+    }
+    if (eip7702)
+        return owner.signTypedData(
+            toKernelTypedData({
                 hash: hashMessage(message),
-                version: accountVersion,
-                address: accountAddress,
+                address,
+                version,
                 chainId
-                // chainId: client.chain
-                //     ? client.chain.id
-                //     : await client.extend(publicActions).getChainId()
             })
-        } else if ("raw" in message && typeof message.raw === "string") {
-            // message.raw is a Hex string
-            messageContent = message.raw
-        } else if ("raw" in message && message.raw instanceof Uint8Array) {
-            // message.raw is a ByteArray
-            messageContent = message.raw.toString()
-        } else {
-            throw new Error("Unsupported message format")
-        }
-
-        const { signature: signatureData, webauthn } = await owner.sign({
-            hash: messageContent as Hash
-        })
-        const { Signature } = await getOxExports()
-        const signature = Signature.fromHex(signatureData)
-
-        // encode signature
-        const encodedSignature = encodeAbiParameters(
-            [
-                { name: "authenticatorData", type: "bytes" },
-                { name: "clientDataJSON", type: "string" },
-                { name: "responseTypeLocation", type: "uint256" },
-                { name: "r", type: "uint256" },
-                { name: "s", type: "uint256" },
-                { name: "usePrecompiled", type: "bool" }
-            ],
-            [
-                webauthn.authenticatorData,
-                webauthn.clientDataJSON,
-                BigInt(webauthn.typeIndex ?? 0),
-                BigInt(signature.r),
-                BigInt(signature.s),
-                false // TODO: check if it is a RIP 7212 supported network
-            ]
         )
-        return encodedSignature
-    }
-
-    if (eip7702) {
-        return owner.signTypedData({
-            message: { hash: hashMessage(message) },
-            primaryType: "Kernel",
-            types: {
-                Kernel: [{ name: "hash", type: "bytes32" }]
-            },
-            domain: {
-                name: "Kernel",
-                version: accountVersion,
-                chainId: chainId,
-                verifyingContract: accountAddress
-            }
-        })
-    }
-
-    if (accountVersion === "0.2.1" || accountVersion === "0.2.2") {
-        return owner.signMessage({
-            message
-        })
-    }
-
-    const wrappedMessageHash = wrapMessageHash({
-        hash: hashMessage(message),
-        version: accountVersion,
-        address: accountAddress,
-        chainId
-        // chainId: client.chain
-        //     ? client.chain.id
-        //     : await client.extend(publicActions).getChainId()
-    })
-
+    if (version === "0.2.1" || version === "0.2.2")
+        return owner.signMessage({ message })
     return owner.signMessage({
-        message: { raw: wrappedMessageHash }
+        message: {
+            raw: wrapMessageHash({
+                hash: hashMessage(message),
+                address,
+                version,
+                chainId
+            })
+        }
     })
 }
