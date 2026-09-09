@@ -72,6 +72,16 @@ export default defineConfig({
             join(__dirname, "./**/*.test.ts"),
             join(__dirname, "../permissionless-test/src/fixtures/**/*.test.ts")
         ],
+        // *.test-d.ts run through TS 5.9 (typescript5): TS 7 has no JS API for vitest to drive.
+        typecheck: {
+            enabled: true,
+            checker: join(__dirname, "../../node_modules/typescript5/bin/tsc"),
+            tsconfig: join(
+                __dirname,
+                "../../tsconfig/tsconfig.permissionless.test-d.json"
+            ),
+            include: [join(__dirname, "./**/*.test-d.ts")]
+        },
         // Pending the account port tickets (10-17): the account dirs still hold
         // 0.x code, and these action tests need at least one ported account in
         // permissionless-test's getCoreSmartAccounts / getSimpleAccountClient.
