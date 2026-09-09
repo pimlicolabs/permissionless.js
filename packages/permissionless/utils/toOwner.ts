@@ -1,19 +1,19 @@
 import { Account, Actions, type Chain, Client, custom } from "viem"
-import type { Address, Provider } from "viem/utils"
-import type { OneOf } from "../types/utils.js"
+import type { Address, TypedData } from "viem/utils"
 import { getAction } from "./getAction.js"
 
-export type EthereumProvider = OneOf<
-    // biome-ignore lint/suspicious/noExplicitAny: matches viem custom(); narrowed by the 1.0 EthereumProvider any-drop
-    { request(...args: any): Promise<any> } | Provider.Provider>
+// Method syntax is load-bearing (bivariant params), see toOwner.test-d.ts
+export type EthereumProvider = {
+    request(args: { method: string; params?: unknown }): Promise<unknown>
+}
 
 type WalletClient = Client.Client<Chain.Chain | undefined, Account.Account>
 
-export async function toOwner<provider extends EthereumProvider>({
+export async function toOwner({
     owner,
     address
 }: {
-    owner: OneOf<provider | WalletClient | Account.Local>
+    owner: EthereumProvider | WalletClient | Account.Local
     address?: Address.Address
 }): Promise<Account.Local> {
     if ("type" in owner && owner.type === "local") {
@@ -23,15 +23,16 @@ export async function toOwner<provider extends EthereumProvider>({
     let walletClient: WalletClient | undefined
 
     if ("request" in owner) {
+        const provider = owner as EthereumProvider
         if (!address) {
             try {
-                ;[address] = await (owner as EthereumProvider).request({
+                ;[address] = (await provider.request({
                     method: "eth_requestAccounts"
-                })
+                })) as Address.Address[]
             } catch {
-                ;[address] = await (owner as EthereumProvider).request({
+                ;[address] = (await provider.request({
                     method: "eth_accounts"
-                })
+                })) as Address.Address[]
             }
         }
         if (!address) {
@@ -40,7 +41,7 @@ export async function toOwner<provider extends EthereumProvider>({
         }
         walletClient = Client.create({
             account: address,
-            transport: custom(owner as EthereumProvider)
+            transport: custom(provider)
         })
     }
 
@@ -63,13 +64,11 @@ export async function toOwner<provider extends EthereumProvider>({
             )({ message })
         },
         async signTypedData(typedData) {
-            const action = getAction(
+            return getAction(
                 client,
                 Actions.typedData.sign,
                 "typedData.sign"
-            )
-            // biome-ignore lint/suspicious/noExplicitAny: TypedData.Definition does not convert to Actions.typedData.sign.Options
-            return action(typedData as any)
+            )(typedData as TypedData.encode.Value)
         },
         async signTransaction() {
             throw new Error(

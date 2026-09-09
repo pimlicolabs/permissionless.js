@@ -72,6 +72,16 @@ export default defineConfig({
             join(__dirname, "./**/*.test.ts"),
             join(__dirname, "../permissionless-test/src/fixtures/**/*.test.ts")
         ],
+        // *.test-d.ts run through TS 5.9 (typescript5): TS 7 has no JS API for vitest to drive.
+        typecheck: {
+            enabled: true,
+            checker: join(__dirname, "../../node_modules/typescript5/bin/tsc"),
+            tsconfig: join(
+                __dirname,
+                "../../tsconfig/tsconfig.permissionless.test-d.json"
+            ),
+            include: [join(__dirname, "./**/*.test-d.ts")]
+        },
         exclude: ["**/node_modules/**", ...unportedAccounts],
         env: loadEnv("test", process.cwd())
     }

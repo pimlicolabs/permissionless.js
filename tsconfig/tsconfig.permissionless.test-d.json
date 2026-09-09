@@ -1,0 +1,10 @@
+{
+    // Type tests (vitest typecheck, TS 5.9 via typescript5): the *.test-d.ts files and whatever they import.
+    "extends": "./tsconfig.base.json",
+    "include": ["../packages/permissionless/**/*.test-d.ts"],
+    "compilerOptions": {
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "noEmit": true
+    }
+}
