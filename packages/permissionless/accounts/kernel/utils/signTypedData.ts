@@ -1,100 +1,42 @@
-import {
-    getTypesForEIP712Domain,
-    hashTypedData,
-    type LocalAccount,
-    type Prettify,
-    type SignTypedDataReturnType,
-    type TypedDataDefinition,
-    validateTypedData
-} from "viem"
-import type { WebAuthnAccount } from "viem/account-abstraction"
-import { isWebAuthnAccount } from "./isWebAuthnAccount.js"
-import { signMessage } from "./signMessage.js"
-import {
-    type WrapMessageHashParams,
-    wrapMessageHash
-} from "./wrapMessageHash.js"
+import type { Account } from "viem"
+import type { WebAuthnAccount } from "viem/erc4337"
+import { type Address, type Hex, TypedData } from "viem/utils"
+import type { Version } from "../version.js"
+import { signMessage, toKernelTypedData } from "./signMessage.js"
+import { wrapMessageHash } from "./wrapMessageHash.js"
 
-export async function signTypedData(
-    parameters: Prettify<
-        WrapMessageHashParams & {
-            owner: LocalAccount | WebAuthnAccount
-            eip7702?: boolean
-        } & TypedDataDefinition
-    >
-): Promise<SignTypedDataReturnType> {
-    const {
-        owner,
-        address: accountAddress,
-        version: accountVersion,
-        chainId,
-        eip7702 = false,
-        ...typedData
-    } = parameters
+export type SignTypedDataParameters = {
+    typedData: TypedData.Definition
+    owner: Account.Local | WebAuthnAccount.Account
+    address: Address.Address
+    version: Version
+    chainId: number
+    eip7702?: boolean | undefined
+}
 
-    if (
-        (accountVersion === "0.2.1" || accountVersion === "0.2.2") &&
-        !isWebAuthnAccount(owner)
-    ) {
-        return owner.signTypedData({
-            ...typedData
-        })
-    }
-
-    const { message, primaryType, types: _types, domain } = typedData
-    const types = {
-        EIP712Domain: getTypesForEIP712Domain({
-            domain: domain
-        }),
-        ..._types
-    }
-
-    // Need to do a runtime validation check on addresses, byte ranges, integer ranges, etc
-    // as we can't statically check this with TypeScript.
-    validateTypedData({
-        domain,
-        message,
-        primaryType,
-        types
-    })
-
-    const typedHash = hashTypedData({ message, primaryType, types, domain })
-
-    if (eip7702 && !isWebAuthnAccount(owner)) {
-        return owner.signTypedData({
-            message: { hash: typedHash },
-            primaryType: "Kernel",
-            types: {
-                Kernel: [{ name: "hash", type: "bytes32" }]
-            },
-            domain: {
-                name: "Kernel",
-                version: accountVersion,
-                chainId: chainId,
-                verifyingContract: accountAddress
-            }
-        })
-    }
-
-    const wrappedMessageHash = wrapMessageHash({
-        hash: typedHash,
-        version: accountVersion,
-        address: accountAddress,
-        chainId: chainId
-    })
-
-    if (isWebAuthnAccount(owner)) {
+export async function signTypedData({
+    typedData,
+    owner,
+    address,
+    version,
+    chainId,
+    eip7702 = false
+}: SignTypedDataParameters): Promise<Hex.Hex> {
+    if ((version === "0.2.1" || version === "0.2.2") && owner.type === "local")
+        return owner.signTypedData(typedData)
+    const hash = TypedData.getSignPayload(typedData)
+    if (eip7702 && owner.type === "local")
+        return owner.signTypedData(
+            toKernelTypedData({ hash, address, version, chainId })
+        )
+    const wrapped = wrapMessageHash({ hash, address, version, chainId })
+    if (owner.type === "webAuthn")
         return signMessage({
-            message: { raw: wrappedMessageHash },
+            message: { raw: wrapped },
             owner,
-            address: accountAddress,
-            version: accountVersion,
-            chainId,
-            eip7702: false
+            address,
+            version,
+            chainId
         })
-    }
-
-    return owner.signMessage({
-        message: { raw: wrappedMessageHash }
-    })
+    return owner.signMessage({ message: { raw: wrapped } })
 }

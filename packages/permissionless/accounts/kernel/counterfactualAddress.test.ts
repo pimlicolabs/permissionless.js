@@ -1,4 +1,4 @@
-import type { Client, LocalAccount } from "viem"
+import type { Client } from "viem"
 import { describe } from "vitest"
 import {
     anvilAccount,
@@ -10,49 +10,40 @@ import {
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { to7702KernelSmartAccount } from "./to7702KernelSmartAccount"
-import { toEcdsaKernelSmartAccount } from "./toEcdsaKernelSmartAccount"
-import { toKernelSmartAccount } from "./toKernelSmartAccount"
+import * as KernelSmartAccount from "./index"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["kernel"]
 ) => {
-    if (params.via === "to7702KernelSmartAccount") {
-        return to7702KernelSmartAccount({
+    if (params.via === "to7702KernelSmartAccount")
+        return KernelSmartAccount.from({
             client,
             entryPoint: toEntryPoint(params.entryPoint),
-            owner: anvilAccount(params.owner)
+            owner: anvilAccount(params.owner),
+            eip7702: true
         })
-    }
-    const owners: [LocalAccount] = [anvilAccount(params.owners[0])]
+    const owner = anvilAccount(params.owners[0])
     const index = BigInt(params.index)
-    if (params.entryPoint === "0.6") {
-        const parameters = {
+    if (params.entryPoint === "0.6")
+        return KernelSmartAccount.from({
             client,
             entryPoint: toEntryPoint(params.entryPoint),
             version: params.version,
-            owners,
+            owner,
             index
-        }
-        return params.via === "toEcdsaKernelSmartAccount"
-            ? toEcdsaKernelSmartAccount(parameters)
-            : toKernelSmartAccount(parameters)
-    }
-    const parameters = {
+        })
+    return KernelSmartAccount.from({
         client,
         entryPoint: toEntryPoint(params.entryPoint),
         version: params.version,
-        owners,
+        owner,
         index,
         useMetaFactory: params.useMetaFactory
-    }
-    return params.via === "toEcdsaKernelSmartAccount"
-        ? toEcdsaKernelSmartAccount(parameters)
-        : toKernelSmartAccount(parameters)
+    })
 }
 
-describe("toKernelSmartAccount counterfactual addresses (0.x oracle)", () => {
+describe("KernelSmartAccount counterfactual addresses (0.x oracle)", () => {
     for (const entry of loadCounterfactualAddressFixture("kernel")) {
         testWithRpc(describeParams(entry.params), async ({ rpc }) => {
             await expectCounterfactualAddress(
