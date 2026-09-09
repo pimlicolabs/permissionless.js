@@ -1,0 +1,1225 @@
+[
+    {
+        "account": "etherspot",
+        "params": {
+            "entryPoint": "0.7",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0x45bE352DBaf852B771865d659E230ce95567aC85",
+        "factory": "0x2A40091f044e48DEB5C0FCbc442E443F3341B451",
+        "factoryDataHash": "0x8822ea9f08285d2f78acfb7fba455e4d0aec91dc6c23c1fb4cf4aecaf20bb4ce",
+        "initCodeHash": "0x1721d3b3485eece4e572c44ed9dca526a41c4525c2a52a4f5e850cfa7ead24bf"
+    },
+    {
+        "account": "etherspot",
+        "params": {
+            "entryPoint": "0.7",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0x051bB044cCE63eB86311cc5a3A57ee69A212e1A1",
+        "factory": "0x2A40091f044e48DEB5C0FCbc442E443F3341B451",
+        "factoryDataHash": "0x1c255c1a4a8ac9039455ebdac084baa723fa7dec69665da7ceab487e8729af21",
+        "initCodeHash": "0xebfdd9ff39c619294b596cd138489fee4577fd009d351562d026fe71403ab814"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "to7702KernelSmartAccount",
+            "entryPoint": "0.7",
+            "owner": "anvil0"
+        },
+        "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "factory": null,
+        "factoryDataHash": null,
+        "initCodeHash": null
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.1",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x1265d06336a3dd2392dc52bf9eb5e2709252eb2d3f63e39b0d098a9163575469",
+        "initCodeHash": "0x7b50ec688fcb8363c179830bff079dc103d7b822ce6f9369166c83b6d4c18dd8"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.1",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xab09dda2de99c4ef6401c535cbf440453b8a821aad4dfcfed9e008b66654c049",
+        "initCodeHash": "0xfc8933321d90be56c67e6a7c399e42f30666ec9538f1dc8f87747b263b31bd90"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.2",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x85e6e694ff654d629e69b50b2001d767994613c7d5f0d5b3662ca75c12311c5e",
+        "initCodeHash": "0xe9489d6243dd6bf06d371a67ac66274cc11bbf504dd09bdcd40bebb250ee49f9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.2",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xde993d5bd8cce606671a4306bfe6f3cb0b9e2577c109d6f2e3bd786bce25a90b",
+        "initCodeHash": "0x2f2ba1ca571c14ef15c401a5229497ec915b4f25106d1dd060050f877fad8cc9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.3",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xf9569213cf122fe45448bdcde8fb7bc20754b64c3739ca965240d70c29814ff8",
+        "initCodeHash": "0x86843f20276fd1bf182f59892ea09a333ca2b8e4c6ceaab218d8d15538610225"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.3",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xdd4a030e1648ba7c8515b95fd7972e251d707a9724ffbcd49ec756c9ad9fad62",
+        "initCodeHash": "0x0c42fd84ed39d63314ceb4b7496a807e5583a5e83d2d368603502f850cfb91bb"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.4",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x7125913a6881cecc8bd6a3768fc57be4c37ac8b243043025cb8afca7d7bc56a7",
+        "initCodeHash": "0x75009e016eb6d5501d6d9e29319d0352e8c5082f468f628625bf196a8748d5f4"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.4",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xfd0f0dfed771d52dfbb1958b9cb3ac17585796e24dc89d434c1394d002065e21",
+        "initCodeHash": "0x0dcf5d488d3df8097af3b8b9d6660682284ac8c35d4ef18aa63c6f144ce71516"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xB62d42e87adDc4Cf2fAf7841EFE94A4b0ce1202B",
+        "factory": "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
+        "factoryDataHash": "0x232b0084409247bb08384e326be33194d00a537a27db8ddc2f78bdde9c412f20",
+        "initCodeHash": "0x8cacbd1fe8861d86f6120edf21d95015436dcd9d026d5d10075999e73475a529"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xB62d42e87adDc4Cf2fAf7841EFE94A4b0ce1202B",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x2f065e1caaa0a2861550099280ef7a5a63bced07805ef0c8f2728499dbf32819",
+        "initCodeHash": "0x45a64eab20f4aa78a73779ba4fda4f5c7fc5f9fda6341ae3c5f3873d40a380b8"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x38D92Da62BC8AE3c4546330A6FfA86d52609dc5D",
+        "factory": "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
+        "factoryDataHash": "0xb248a11a5dfaf6c5c0d5b5272834d220a37d5e730291c200c54ee95c4c13dd50",
+        "initCodeHash": "0x9912ad8cdc7ee243c06d589e77f3a753abfd244dcc4faba9d295ac4cf44d001d"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x38D92Da62BC8AE3c4546330A6FfA86d52609dc5D",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x8162ca98b2f40b22d6c5bdebaad79f9012bf4a6c935f78f2faa38b4c8ee3e1e5",
+        "initCodeHash": "0xd6808e0336ffb1a2ab0b7e9639e22b6aed405fe0ee9f94aefc7884eb7aa6f150"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xB3729F7e1Ab0B4a50E7De5599Ecc321B8775d30d",
+        "factory": "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0x13fcf8483d455daf3cec00860bb4ab2f11e9e629851ca53516162df77f64acbe"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xB3729F7e1Ab0B4a50E7De5599Ecc321B8775d30d",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x372f05deb447ab703e6f733ed1e5f89df0ca5062ee3f59b2a4da5f5c0c574b25",
+        "initCodeHash": "0x98b0fb07ce5d2b95f6de59ae3c59835018fd9f610b2ccfe59ff1a39b85576009"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x01a94a8366D0d3cb7aC39b9d078882e9a5cc0a77",
+        "factory": "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0x0221e295188b8dbc4f80ebfc8c665e07a8c3bc71bac832c8b0318dda29cfe6f5"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x01a94a8366D0d3cb7aC39b9d078882e9a5cc0a77",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x6816844534ac27e9b6f93d14f2149c24ef055c5a021e03c1b32b904a75eb77d3",
+        "initCodeHash": "0x7865f253599be368db1c433587a82015648b03b9123431b465787dfa02e72ca2"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xDA3e042335c74953F4F282B748Bb8aA8585fac68",
+        "factory": "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0x6433093f5c3ad3e958d948ecd73d448b3bafd88021ff534191762ccd7f20b43d"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xDA3e042335c74953F4F282B748Bb8aA8585fac68",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x187b10fb508736a84ef959b58c8b307a0fc62c815c7456ba52b9909b392de49c",
+        "initCodeHash": "0xbdde836e6ed0eb4a324df9eb9fc942c361bfd1761180566d4309d791ad7b59a0"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x80b9118c553595a936aA0aE33dA2E75986e2622b",
+        "factory": "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0xfcdc1f4a6b3af8fd9a9b4b6dd2b126e6fb2bc785597306d67771a4a28c1ed036"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x80b9118c553595a936aA0aE33dA2E75986e2622b",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x0e9777ce02fdf507581ed79e08abeb9efe8b29a91b6829da288d581021650866",
+        "initCodeHash": "0x5af676b5921aaaf3becd892f416a9905295dde9bafbb6cfebda2ea224c626ee9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xCfC4C807Ed404ae1a65fbe0EdaA09EF002E75838",
+        "factory": "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0xfd224a30c1b6eb42ad17b396b354fe99f6e1843b8fb339ce538000b915f8c52e"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xCfC4C807Ed404ae1a65fbe0EdaA09EF002E75838",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x4d86ff01afdfe04a2dd95e9bed8d2a1bf267a3960de437d58367af5c4cc2c092",
+        "initCodeHash": "0x91184eca076b2ad2cff42a28aa7eff3c708de22ea9f7640cfb3eef995324ba67"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x26260b593292B5452f66B7257675743F10767526",
+        "factory": "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0x527884d6d279aa1489e6bc77963d9aaf00f5bf519e48393ce5a420d356869ffa"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toEcdsaKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x26260b593292B5452f66B7257675743F10767526",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x0133bb0cc972882ac8aa1b3a13d085f225d5e49e1c2b51c29a86c9f6d3c3db7b",
+        "initCodeHash": "0xbf96c7042a4239c6d8f1496deb83c293f9dab958b8e26e03cc03d527dc1f1175"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.1",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x1265d06336a3dd2392dc52bf9eb5e2709252eb2d3f63e39b0d098a9163575469",
+        "initCodeHash": "0x7b50ec688fcb8363c179830bff079dc103d7b822ce6f9369166c83b6d4c18dd8"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.1",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xab09dda2de99c4ef6401c535cbf440453b8a821aad4dfcfed9e008b66654c049",
+        "initCodeHash": "0xfc8933321d90be56c67e6a7c399e42f30666ec9538f1dc8f87747b263b31bd90"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.2",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x85e6e694ff654d629e69b50b2001d767994613c7d5f0d5b3662ca75c12311c5e",
+        "initCodeHash": "0xe9489d6243dd6bf06d371a67ac66274cc11bbf504dd09bdcd40bebb250ee49f9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.2",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xde993d5bd8cce606671a4306bfe6f3cb0b9e2577c109d6f2e3bd786bce25a90b",
+        "initCodeHash": "0x2f2ba1ca571c14ef15c401a5229497ec915b4f25106d1dd060050f877fad8cc9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.3",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xf9569213cf122fe45448bdcde8fb7bc20754b64c3739ca965240d70c29814ff8",
+        "initCodeHash": "0x86843f20276fd1bf182f59892ea09a333ca2b8e4c6ceaab218d8d15538610225"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.3",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xdd4a030e1648ba7c8515b95fd7972e251d707a9724ffbcd49ec756c9ad9fad62",
+        "initCodeHash": "0x0c42fd84ed39d63314ceb4b7496a807e5583a5e83d2d368603502f850cfb91bb"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.4",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xB2358b064F5eA10543Cf8034C8576b2E6Bfd3Be3",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0x7125913a6881cecc8bd6a3768fc57be4c37ac8b243043025cb8afca7d7bc56a7",
+        "initCodeHash": "0x75009e016eb6d5501d6d9e29319d0352e8c5082f468f628625bf196a8748d5f4"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.6",
+            "version": "0.2.4",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0xdC8caa0be1B9Fd36c2795e90103c2Faa6f6F9725",
+        "factory": "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3",
+        "factoryDataHash": "0xfd0f0dfed771d52dfbb1958b9cb3ac17585796e24dc89d434c1394d002065e21",
+        "initCodeHash": "0x0dcf5d488d3df8097af3b8b9d6660682284ac8c35d4ef18aa63c6f144ce71516"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xB62d42e87adDc4Cf2fAf7841EFE94A4b0ce1202B",
+        "factory": "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
+        "factoryDataHash": "0x232b0084409247bb08384e326be33194d00a537a27db8ddc2f78bdde9c412f20",
+        "initCodeHash": "0x8cacbd1fe8861d86f6120edf21d95015436dcd9d026d5d10075999e73475a529"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xB62d42e87adDc4Cf2fAf7841EFE94A4b0ce1202B",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x2f065e1caaa0a2861550099280ef7a5a63bced07805ef0c8f2728499dbf32819",
+        "initCodeHash": "0x45a64eab20f4aa78a73779ba4fda4f5c7fc5f9fda6341ae3c5f3873d40a380b8"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x38D92Da62BC8AE3c4546330A6FfA86d52609dc5D",
+        "factory": "0x6723b44Abeec4E71eBE3232BD5B455805baDD22f",
+        "factoryDataHash": "0xb248a11a5dfaf6c5c0d5b5272834d220a37d5e730291c200c54ee95c4c13dd50",
+        "initCodeHash": "0x9912ad8cdc7ee243c06d589e77f3a753abfd244dcc4faba9d295ac4cf44d001d"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.0-beta",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x38D92Da62BC8AE3c4546330A6FfA86d52609dc5D",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x8162ca98b2f40b22d6c5bdebaad79f9012bf4a6c935f78f2faa38b4c8ee3e1e5",
+        "initCodeHash": "0xd6808e0336ffb1a2ab0b7e9639e22b6aed405fe0ee9f94aefc7884eb7aa6f150"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xB3729F7e1Ab0B4a50E7De5599Ecc321B8775d30d",
+        "factory": "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0x13fcf8483d455daf3cec00860bb4ab2f11e9e629851ca53516162df77f64acbe"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xB3729F7e1Ab0B4a50E7De5599Ecc321B8775d30d",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x372f05deb447ab703e6f733ed1e5f89df0ca5062ee3f59b2a4da5f5c0c574b25",
+        "initCodeHash": "0x98b0fb07ce5d2b95f6de59ae3c59835018fd9f610b2ccfe59ff1a39b85576009"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x01a94a8366D0d3cb7aC39b9d078882e9a5cc0a77",
+        "factory": "0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0x0221e295188b8dbc4f80ebfc8c665e07a8c3bc71bac832c8b0318dda29cfe6f5"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.1",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x01a94a8366D0d3cb7aC39b9d078882e9a5cc0a77",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x6816844534ac27e9b6f93d14f2149c24ef055c5a021e03c1b32b904a75eb77d3",
+        "initCodeHash": "0x7865f253599be368db1c433587a82015648b03b9123431b465787dfa02e72ca2"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xDA3e042335c74953F4F282B748Bb8aA8585fac68",
+        "factory": "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0x6433093f5c3ad3e958d948ecd73d448b3bafd88021ff534191762ccd7f20b43d"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xDA3e042335c74953F4F282B748Bb8aA8585fac68",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x187b10fb508736a84ef959b58c8b307a0fc62c815c7456ba52b9909b392de49c",
+        "initCodeHash": "0xbdde836e6ed0eb4a324df9eb9fc942c361bfd1761180566d4309d791ad7b59a0"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x80b9118c553595a936aA0aE33dA2E75986e2622b",
+        "factory": "0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0xfcdc1f4a6b3af8fd9a9b4b6dd2b126e6fb2bc785597306d67771a4a28c1ed036"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.2",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x80b9118c553595a936aA0aE33dA2E75986e2622b",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x0e9777ce02fdf507581ed79e08abeb9efe8b29a91b6829da288d581021650866",
+        "initCodeHash": "0x5af676b5921aaaf3becd892f416a9905295dde9bafbb6cfebda2ea224c626ee9"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": false
+        },
+        "address": "0xCfC4C807Ed404ae1a65fbe0EdaA09EF002E75838",
+        "factory": "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9",
+        "factoryDataHash": "0x7a4146735195617b4f7ed6efbb16516e2b9c935db08c063ff0ded8ab67e4f6e7",
+        "initCodeHash": "0xfd224a30c1b6eb42ad17b396b354fe99f6e1843b8fb339ce538000b915f8c52e"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "0",
+            "useMetaFactory": true
+        },
+        "address": "0xCfC4C807Ed404ae1a65fbe0EdaA09EF002E75838",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x4d86ff01afdfe04a2dd95e9bed8d2a1bf267a3960de437d58367af5c4cc2c092",
+        "initCodeHash": "0x91184eca076b2ad2cff42a28aa7eff3c708de22ea9f7640cfb3eef995324ba67"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": false
+        },
+        "address": "0x26260b593292B5452f66B7257675743F10767526",
+        "factory": "0x2577507b78c2008Ff367261CB6285d44ba5eF2E9",
+        "factoryDataHash": "0x34e79f3db3b0faa88fc07d065c6bbf909043f4597e46bc3de9af6a3d02124c35",
+        "initCodeHash": "0x527884d6d279aa1489e6bc77963d9aaf00f5bf519e48393ce5a420d356869ffa"
+    },
+    {
+        "account": "kernel",
+        "params": {
+            "via": "toKernelSmartAccount",
+            "entryPoint": "0.7",
+            "version": "0.3.3",
+            "owners": ["anvil0"],
+            "index": "1",
+            "useMetaFactory": true
+        },
+        "address": "0x26260b593292B5452f66B7257675743F10767526",
+        "factory": "0xd703aaE79538628d27099B8c4f621bE4CCd142d5",
+        "factoryDataHash": "0x0133bb0cc972882ac8aa1b3a13d085f225d5e49e1c2b51c29a86c9f6d3c3db7b",
+        "initCodeHash": "0xbf96c7042a4239c6d8f1496deb83c293f9dab958b8e26e03cc03d527dc1f1175"
+    },
+    {
+        "account": "light",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.1.0",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0x9EfDfCB56390eDd8b2eAE6daBC148CED3491AAf6",
+        "factory": "0x00004EC70002a32400f8ae005A26081065620D20",
+        "factoryDataHash": "0x865bf4c50a1cd2225b551996190e98720d0f3af51eb80f9bc26e042538428f80",
+        "initCodeHash": "0xc1c97ad1a1ce1a49dda9c91875e41a41e44c730e8d473edd1f32ac893cf850f1"
+    },
+    {
+        "account": "light",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.1.0",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0xBDB872C4FBe1c911980e36a5228914B4B51BF7ec",
+        "factory": "0x00004EC70002a32400f8ae005A26081065620D20",
+        "factoryDataHash": "0x3592b618ce341668b72afb0d0fc6f89c20c45da27413e26047dd58fea153d4bf",
+        "initCodeHash": "0x0460171a50c20b09b6b0632b68b075a14b4e45e08c7eb34ca96a689e58f8a814"
+    },
+    {
+        "account": "light",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "2.0.0",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0x11c50cCe08Ff4ca8294592E282442a3f0A38cFd9",
+        "factory": "0x0000000000400CdFef5E2714E63d8040b700BC24",
+        "factoryDataHash": "0x865bf4c50a1cd2225b551996190e98720d0f3af51eb80f9bc26e042538428f80",
+        "initCodeHash": "0xc274bb3029755f9673ede2c7f887b4686f5e464ea16503524d1e9d4cd12a8a62"
+    },
+    {
+        "account": "light",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "2.0.0",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0xf35aBA8E15C6C28aE0b52894767f771df18E9556",
+        "factory": "0x0000000000400CdFef5E2714E63d8040b700BC24",
+        "factoryDataHash": "0x3592b618ce341668b72afb0d0fc6f89c20c45da27413e26047dd58fea153d4bf",
+        "initCodeHash": "0x90cb7427506b1e6f111f96c159407fc6af3ab57f06096046e5b66f3b1067e751"
+    },
+    {
+        "account": "nexus",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.0.0",
+            "owners": ["anvil0"],
+            "index": "0",
+            "attesters": [
+                "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
+                "0x000000333034E9f539ce08819E12c1b8Cb29084d"
+            ],
+            "threshold": 1
+        },
+        "address": "0xF9Db0ea3eBeC8E359Cc965D9c482b43b84a3c4bF",
+        "factory": "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55",
+        "factoryDataHash": "0xb1e7205c01731b60345d7312d6e4aea79a1c35cd78ee7e4e1bc80d7281b81e99",
+        "initCodeHash": "0xc3b8512ac872bc456d51f9efa99d7f04724d5cefcdaff966bf1ab48054fb4a2f"
+    },
+    {
+        "account": "nexus",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.0.0",
+            "owners": ["anvil0"],
+            "index": "0"
+        },
+        "address": "0xD215AD768B79e7e689c0Ca9A423e0C89e778bB72",
+        "factory": "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55",
+        "factoryDataHash": "0xd422ef8ca37b9d993f06001eb5c07394cfe76830ab7042e04e337982c04c6548",
+        "initCodeHash": "0x52f6035ec41fc94d96e4acd75e1452d125b78e91a3c5ba07bdc0cfc8887b4878"
+    },
+    {
+        "account": "nexus",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.0.0",
+            "owners": ["anvil0"],
+            "index": "1"
+        },
+        "address": "0x0317B2089F7eB174E14Cc8317B4Cd8c2ECe4C572",
+        "factory": "0x00000bb19a3579F4D779215dEf97AFbd0e30DB55",
+        "factoryDataHash": "0x4c15734114fb99dfe504b39819eeef5ddf434881d56386b3605c783649d307cf",
+        "initCodeHash": "0xbf650d55782e792e38d5776a18dcfd1432aae9b8ac4d6fca644f4adfd9aa8c62"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.4.1",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "0"
+        },
+        "address": "0x8DA19d0db4c11f74EC2D04800948b734AEC93eC9",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0xab1bd2429749b8341c05caff25162ebd6ef66110a50abb110f3c77b6931ec5a4",
+        "initCodeHash": "0x255ebf90f46087206c2a9b57377cbb8aa039425a3b19f663e7220dfd9748a55c"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.4.1",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "1"
+        },
+        "address": "0xaf8CBfcE85b8b767f6eA460224F6b2C32508E5F9",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0xdfc6699329b1aeeb27df20bdffb3e0d23386f5847d5b9dd7d3f889597b64234e",
+        "initCodeHash": "0x63106307bc506bd0ea4b098a79403ec4b79e89d640990806e3c1d64d291b57ae"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "0"
+        },
+        "address": "0x38bB600085EC57b6e8D8a4BaFc60DFABc1482427",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x1963041cacbb09ecc079cba990b88f3675f843088f25abca224beda9fb0bd540",
+        "initCodeHash": "0x1fc809ee99e3fac5c6ce2b75daaf245d4a35ca2261df739d6b4b24947fd972ac"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "1"
+        },
+        "address": "0x51179Cff49276016b6066794A54Ce1F4837F2850",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x57ac4b0b9fc6d651b5219b2d1681837694f896bb6cf999b6d32e51441d099308",
+        "initCodeHash": "0xd92ac8cb1e99cd9647e8bf6a645078eec584f699f3472b18578feb8eb740d036"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "0",
+            "threshold": "1"
+        },
+        "address": "0xcAc83e841C3534f65E9d3471B46F6ca08AC4b664",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x44f0ee2963e55d2be4b6d6379f27a72e171779dc9868ba199976817b6d3b8537",
+        "initCodeHash": "0x12b2cf06cc9604f7559d9d8f4ef582b40a4e752f72457d04be4325e0e524d7b3"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "0"
+        },
+        "address": "0xcb59e0913C0A52f9249E0890aD5DF1D8086a4078",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x50e1feffdabb247272956cd71298329bd85d0ddff99dad6c2e7341eaa12215b1",
+        "initCodeHash": "0x3cff46e902a991c7bdfd172f37b7a91f82aa3a3fef960291814c17edcadd635b"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "1"
+        },
+        "address": "0x3687D46649FB2cE475D0d3B17f43185895F95e66",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x0e91d1c2d74a11806320f81ed99e93d3a25063c8a9a38aadd129f107399c50aa",
+        "initCodeHash": "0x93924856179a3aa5ad81804d2a636b676c8ee707d15e7010b0fc97787a6b2931"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "0",
+            "erc7579": {
+                "safe4337ModuleAddress": "0x7579EE8307284F293B1927136486880611F20002",
+                "erc7579LaunchpadAddress": "0x7579011aB74c46090561ea277Ba79D510c6C00ff",
+                "attesters": ["0x000000333034E9f539ce08819E12c1b8Cb29084d"],
+                "attestersThreshold": 1
+            }
+        },
+        "address": "0x7513FBCB20c0659519cFedb807dA645822881495",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x9fd231cab9a1e2b052e38958e29a9690487b43030d75e06a097a594024905454",
+        "initCodeHash": "0x95ec4b1660075fc682ae8a68953b4f5a7c561c9a0b0d16cdf8c1270f2b2a4940"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "0",
+            "setupTransactions": [
+                {
+                    "to": "0x000000000000000000000000000000000000dEaD",
+                    "data": "0xdeadbeef",
+                    "value": "0"
+                }
+            ]
+        },
+        "address": "0xc9142cd25Ba5c436eF1db36c9474672151d21018",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x16c639408bfa0f774ba91604ee9a00b11d4d4cc9f945ac32689bb4e9dcbc798b",
+        "initCodeHash": "0x4cef30dbe34ed9f53a941e083251c71934f83c640b1d8d6ba96a7cf288dd38ef"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "0",
+            "useMultiSendForSetup": false
+        },
+        "address": "0x08eA90D108291a05830B25E8eFaF027979dEb8D1",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x2fea147c744c5418276b5b4fcf7dcd91bfe386bced290419912a3c45deeb79b0",
+        "initCodeHash": "0x8bb1937ebdee4e11ada0d163a2f22e50e9e4be15aff962ac6e35479ae828f36f"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "0"
+        },
+        "address": "0x124Ef647181eda69861b61596802129E3B018765",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0xb26dbab40b8f7a3aed96afdecabb5d6cc83656f0cf001cba42bc1c9bef94cb32",
+        "initCodeHash": "0x619ef85b87c00c7792d5234dc3041a70ea3f928cd26c8ac9fb85567c65f8f230"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.4.1",
+            "owners": ["anvil0"],
+            "saltNonce": "1"
+        },
+        "address": "0xe047f9CcF9a58Ce227FC85723e05cD046E37f9C0",
+        "factory": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        "factoryDataHash": "0x31450378c26ffebbbb85354be5c0a217d20d393f52a9121e9344d26410b01682",
+        "initCodeHash": "0x3e7955479ae85396b64b897068a9b666d69939dc96f2d68f7826775ab88ee7f6"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.0",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "0"
+        },
+        "address": "0xE0e0a1d585111621ef6DA9F75D2DD3aA0F785212",
+        "factory": "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+        "factoryDataHash": "0x2ac5847270b1674c5e236c8691835dd56bccda69b36322314e8700dc5a29b99f",
+        "initCodeHash": "0xbea7e17480f382bc9527d88b103ef412ba2f0719a179c7691d4ba46b19ab4904"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.0",
+            "owners": ["anvil0", "anvil1"],
+            "saltNonce": "1"
+        },
+        "address": "0x1d573C8e88Ebed6c5B6e22A719aDC5889751c7c8",
+        "factory": "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+        "factoryDataHash": "0x4806d6f76bc8d8e4c05a4051d961858ecb0dca9138caa875fc8dd3d96ccb1ae7",
+        "initCodeHash": "0xd73dd87b4fce18d3df82bce45adaca353a0eebbdd488e5726c0ebc6b91b4b477"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.0",
+            "owners": ["anvil0"],
+            "saltNonce": "0"
+        },
+        "address": "0x7bcdD067832F0B8cFcBbDda3C3643cCaC5998E19",
+        "factory": "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+        "factoryDataHash": "0xdb8ad0bba41160d1e232f8115111f51bb33ec2459b14a118744d8c412f71c721",
+        "initCodeHash": "0xd77a4ff65ff4180f51049000fb9a414f0812622dad946ef6cd873c953e98699e"
+    },
+    {
+        "account": "safe",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.0",
+            "owners": ["anvil0"],
+            "saltNonce": "1"
+        },
+        "address": "0xfF90a729266FAB3AaB0F2A6244E266FD4a1e611B",
+        "factory": "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+        "factoryDataHash": "0x241c314d644db416a4eb6e360ace6b51f233c53b373d04b827b9944825b2c9f1",
+        "initCodeHash": "0xbb0a959db07d8a9302fdc5d5a444856aea1b8aea9fb3e5c8cb150faf116aa973"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "to7702SimpleSmartAccount",
+            "entryPoint": "0.8",
+            "owner": "anvil0"
+        },
+        "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "factory": null,
+        "factoryDataHash": null,
+        "initCodeHash": null
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.6",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0x2C6626618678dE393f0A0467E960B34Aaab969Be",
+        "factory": "0x9406Cc6185a346906296840746125a0E44976454",
+        "factoryDataHash": "0x865bf4c50a1cd2225b551996190e98720d0f3af51eb80f9bc26e042538428f80",
+        "initCodeHash": "0xe0423ce9d405677bed07f1462f51668cf5eb6c0949e63bf447ecc4fcd5c14431"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.6",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0x418fe523F35f6B094ffe3e8eD45dB30840a24431",
+        "factory": "0x9406Cc6185a346906296840746125a0E44976454",
+        "factoryDataHash": "0x3592b618ce341668b72afb0d0fc6f89c20c45da27413e26047dd58fea153d4bf",
+        "initCodeHash": "0x84e02ea24fcf26521ba2bd147c993308d5f9b59a5b8aaedd14c45bcae857466b"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.7",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0xa3aBDC7f6334CD3EE466A115f30522377787c024",
+        "factory": "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985",
+        "factoryDataHash": "0x865bf4c50a1cd2225b551996190e98720d0f3af51eb80f9bc26e042538428f80",
+        "initCodeHash": "0xb508c0888ce5756a71d6dd50791186033e95d3592d194ddffa2e8ee43e92af95"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.7",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0x7EB1CB73725f1cD642d2013aCcff8473D0123020",
+        "factory": "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985",
+        "factoryDataHash": "0x3592b618ce341668b72afb0d0fc6f89c20c45da27413e26047dd58fea153d4bf",
+        "initCodeHash": "0x12c5bd8683b05f86ef6206013437f86535e86da2a0a386d64648c45c37577fa0"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.8",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0x5a1A42BCae93d527F432D29c79E32AFC5cC8CB5c",
+        "factory": "0x13E9ed32155810FDbd067D4522C492D6f68E5944",
+        "factoryDataHash": "0x865bf4c50a1cd2225b551996190e98720d0f3af51eb80f9bc26e042538428f80",
+        "initCodeHash": "0xf8a52457067789316902d15c61e8f62d6175c0026e95c5956c0eb4a185edc711"
+    },
+    {
+        "account": "simple",
+        "params": {
+            "via": "toSimpleSmartAccount",
+            "entryPoint": "0.8",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0x8831256199a5db8C8503F4C3997CA0820771f47c",
+        "factory": "0x13E9ed32155810FDbd067D4522C492D6f68E5944",
+        "factoryDataHash": "0x3592b618ce341668b72afb0d0fc6f89c20c45da27413e26047dd58fea153d4bf",
+        "initCodeHash": "0x728c4e434533344e0d97414bfa2a681fbd132b22355c9685bd5b22a8307f7768"
+    },
+    {
+        "account": "thirdweb",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.5.20",
+            "owner": "anvil0",
+            "salt": "1"
+        },
+        "address": "0xDC3EA63530EE7D79fCf608575Cd01be1A5B9eE24",
+        "factory": "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00",
+        "factoryDataHash": "0x2df24f4444642be4f34cff11bc53ce0d88bcec2f5f5763481b52ee3a3f055b0d",
+        "initCodeHash": "0x409335c009eeced6c37aa3abc915c308b5c63d645fb20e781f3fa880f8f0118f"
+    },
+    {
+        "account": "thirdweb",
+        "params": {
+            "entryPoint": "0.6",
+            "version": "1.5.20",
+            "owner": "anvil0"
+        },
+        "address": "0xb6933b920Fe79F399037DDf6C6AC9d624CE6Bd29",
+        "factory": "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00",
+        "factoryDataHash": "0xc22ff007cd5c291c661c92cbc445e7b35037826e70b7431be665ba80239dc6da",
+        "initCodeHash": "0x8f109c06f3964abe839dea359d988731eaf1494719980409293d14d0719f7b29"
+    },
+    {
+        "account": "thirdweb",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.20",
+            "owner": "anvil0",
+            "salt": "1"
+        },
+        "address": "0x590B6d3fE97042b6dcC8DF6afFE94E0A8cE303a2",
+        "factory": "0x4bE0ddfebcA9A5A4a617dee4DeCe99E7c862dceb",
+        "factoryDataHash": "0x2df24f4444642be4f34cff11bc53ce0d88bcec2f5f5763481b52ee3a3f055b0d",
+        "initCodeHash": "0x5e49467fd5052cbe4a6e9613512a6f4069e8eebda85cc1b257670b5b66e27506"
+    },
+    {
+        "account": "thirdweb",
+        "params": {
+            "entryPoint": "0.7",
+            "version": "1.5.20",
+            "owner": "anvil0"
+        },
+        "address": "0xA6d1F7D5b3124b0D14AA7d3355d9Eaf00bCc2e6d",
+        "factory": "0x4bE0ddfebcA9A5A4a617dee4DeCe99E7c862dceb",
+        "factoryDataHash": "0xc22ff007cd5c291c661c92cbc445e7b35037826e70b7431be665ba80239dc6da",
+        "initCodeHash": "0x768a04189ef580c023d70fa214c3d0c3888e27f128fbc3d8f5b115f47c85b1cc"
+    },
+    {
+        "account": "trust",
+        "params": {
+            "entryPoint": "0.6",
+            "owner": "anvil0",
+            "index": "0"
+        },
+        "address": "0xA64A35EFbe85B2B75177aD9B29708dd3C2270fc5",
+        "factory": "0x729c310186a57833f622630a16d13f710b83272a",
+        "factoryDataHash": "0xe1e990d7fcbe844b9093dd55942913fb75c81d33c3ad14bb541f12c3311314e1",
+        "initCodeHash": "0x912bdee254957e1d007dedc2c8c9f00a64e998487c6b42c41300f8d44c1c4c97"
+    },
+    {
+        "account": "trust",
+        "params": {
+            "entryPoint": "0.6",
+            "owner": "anvil0",
+            "index": "1"
+        },
+        "address": "0x2853e8bfc4B2Ed0ec368Df40256745a07a27ED03",
+        "factory": "0x729c310186a57833f622630a16d13f710b83272a",
+        "factoryDataHash": "0x54472b3e03d17d301af1a26720e469c8c7e032cc7a4d19062f240164601161cc",
+        "initCodeHash": "0xdf45f8990b06d5fd89cd9f2a2698361c8cbc5c6946ce6418ae8b5d6b04a63061"
+    }
+]
