@@ -1,4 +1,4 @@
-import type { Account, Chain, Client, Transport } from "viem"
+import type { Client, Transport } from "viem"
 import type { EtherspotBundlerRpcSchema } from "../../types/etherspot.js"
 
 export type GetGasPriceResponseReturnType = {
@@ -13,16 +13,12 @@ export type GetGasPriceResponseReturnType = {
  * @returns maxFeePerGas & maxPriorityFeePerGas
  */
 export const getUserOperationGasPrice = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        EtherspotBundlerRpcSchema
-    >
+    client: Pick<Client.Client, "request">
 ): Promise<GetGasPriceResponseReturnType> => {
-    const gasPrice = await client.request({
-        method: "skandha_getGasPrice",
-        params: []
+    const request =
+        client.request as Transport.RequestFn<EtherspotBundlerRpcSchema>
+    const gasPrice = await request({
+        method: "skandha_getGasPrice"
     })
 
     return {

@@ -1,17 +1,7 @@
-import {
-    type Address,
-    BaseError,
-    type Client,
-    concat,
-    decodeAbiParameters,
-    encodeDeployData,
-    type Hex,
-    type OneOf,
-    type Prettify
-} from "viem"
-
-import { call } from "viem/actions"
-import { getAction } from "viem/utils"
+import { Actions, type Client, Errors } from "viem"
+import { AbiConstructor, AbiParameters, type Address, Hex } from "viem/utils"
+import type { OneOf, Prettify } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 
 // https://github.com/pimlicolabs/contracts/blob/80277d0de609e6b5fb4cedeeb1fb9a023caed59f/src/GetSenderAddressHelper.sol
 const GetSenderAddressHelperByteCode =
@@ -34,30 +24,35 @@ const GetSenderAddressHelperAbi = [
         stateMutability: "payable",
         type: "constructor"
     }
-]
+] as const
 
 export type GetSenderAddressParams = OneOf<
     | {
-          initCode: Hex
-          entryPointAddress: Address
+          initCode: Hex.Hex
+          entryPointAddress: Address.Address
           factory?: never
           factoryData?: never
       }
     | {
-          entryPointAddress: Address
-          factory: Address
-          factoryData: Hex
+          entryPointAddress: Address.Address
+          factory: Address.Address
+          factoryData: Hex.Hex
           initCode?: never
       }
 >
 
-export class InvalidEntryPointError extends BaseError {
+export class InvalidEntryPointError extends Errors.BaseError<
+    Errors.BaseError | undefined
+> {
     override name = "InvalidEntryPointError"
 
     constructor({
         cause,
         entryPointAddress
-    }: { cause?: BaseError; entryPointAddress?: Address } = {}) {
+    }: {
+        cause?: Errors.BaseError
+        entryPointAddress?: Address.Address
+    } = {}) {
         super(
             `The entry point address (\`entryPoint\`${
                 entryPointAddress ? ` = ${entryPointAddress}` : ""
@@ -95,9 +90,9 @@ export class InvalidEntryPointError extends BaseError {
  * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
  */
 export const getSenderAddress = async (
-    client: Client,
+    client: Client.Client,
     args: Prettify<GetSenderAddressParams>
-): Promise<Address> => {
+): Promise<Address.Address> => {
     const { initCode, entryPointAddress, factory, factoryData } = args
 
     if (!initCode && !factory && !factoryData) {
@@ -107,23 +102,25 @@ export const getSenderAddress = async (
     }
 
     const formattedInitCode =
-        initCode || concat([factory as Hex, factoryData as Hex])
+        initCode || Hex.concat(factory as Hex.Hex, factoryData as Hex.Hex)
 
     const { data } = await getAction(
         client,
-        call,
+        Actions.call,
         "call"
     )({
-        data: encodeDeployData({
-            abi: GetSenderAddressHelperAbi,
-            bytecode: GetSenderAddressHelperByteCode,
-            args: [entryPointAddress, formattedInitCode]
-        })
+        data: AbiConstructor.encode(
+            AbiConstructor.fromAbi(GetSenderAddressHelperAbi),
+            {
+                bytecode: GetSenderAddressHelperByteCode,
+                args: [entryPointAddress, formattedInitCode]
+            }
+        )
     })
 
     if (!data) {
         throw new Error("Failed to get sender address")
     }
 
-    return decodeAbiParameters([{ type: "address" }], data)[0]
+    return AbiParameters.decode([{ type: "address" }], data)[0]
 }

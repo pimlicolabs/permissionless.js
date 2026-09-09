@@ -3,7 +3,6 @@ export {
     decode7579Calls
 } from "./decode7579Calls.js"
 export { decodeNonce } from "./decodeNonce.js"
-export { deepHexlify, transactionReceiptStatus } from "./deepHexlify.js"
 export {
     type EncodeCallDataParams,
     encode7579Calls
@@ -25,14 +24,8 @@ export {
     type Erc20BalanceOverrideParameters,
     erc20BalanceOverride
 } from "./erc20BalanceOverride.js"
-export { getAddressFromInitCodeOrPaymasterAndData } from "./getAddressFromInitCodeOrPaymasterAndData.js"
-export { getPackedUserOperation } from "./getPackedUserOperation.js"
 export {
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
 } from "./getRequiredPrefund.js"
-export { isSmartAccountDeployed } from "./isSmartAccountDeployed.js"
-// Export ox utilities
-export { getOxExports, hasOxModule } from "./ox.js"
-export { sortAddresses } from "./sortAddresses.js"
 export { toOwner } from "./toOwner.js"

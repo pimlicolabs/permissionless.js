@@ -1,13 +1,16 @@
-import type {
-    Chain,
-    Client,
-    SignMessageParameters,
-    SignMessageReturnType,
-    Transport
-} from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
-import { parseAccount } from "viem/utils"
+import type { Account, Chain } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import type { Hex } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+
+export type SignMessageParameters<
+    account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
+> = GetSmartAccountParameter<account> & {
+    message: Account.SignableMessage
+}
 
 /**
  * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
@@ -55,19 +58,21 @@ import { AccountNotFoundError } from "../../errors/index.js"
  *   message: 'hello world',
  * })
  */
-export async function signMessage<TAccount extends SmartAccount | undefined>(
-    client: Client<Transport, Chain | undefined, TAccount>,
+export async function signMessage<
+    TAccount extends SmartAccount.SmartAccount | undefined
+>(
+    client: BundlerClient.Client<Chain.Chain | undefined, TAccount>,
     {
         account: account_ = client.account,
         message
     }: SignMessageParameters<TAccount>
-): Promise<SignMessageReturnType> {
+): Promise<Hex.Hex> {
     if (!account_)
         throw new AccountNotFoundError({
             docsPath: "/docs/actions/wallet/signMessage"
         })
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
 
     return account.signMessage({ message })
 }

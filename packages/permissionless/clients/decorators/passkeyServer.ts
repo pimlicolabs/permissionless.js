@@ -1,4 +1,4 @@
-import type { Account, Chain, Client, Transport } from "viem"
+import type { Client } from "viem"
 import {
     type GetCredentialsParameters,
     type GetCredentialsReturnType,
@@ -26,6 +26,7 @@ import {
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
 export type PasskeyServerActions = {
+    "~schema"?: PasskeyServerRpcSchema | undefined
     startRegistration: (
         args: StartRegistrationParameters
     ) => Promise<StartRegistrationReturnType>
@@ -42,12 +43,7 @@ export type PasskeyServerActions = {
 }
 
 export const passkeyServerActions = (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >
+    client: Pick<Client.Client, "request">
 ): PasskeyServerActions => ({
     startRegistration: (args) => startRegistration(client, args),
     verifyRegistration: (args) => verifyRegistration(client, args),

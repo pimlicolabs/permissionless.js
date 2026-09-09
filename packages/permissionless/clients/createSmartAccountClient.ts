@@ -1,70 +1,53 @@
+import type { Chain, Client, Transport } from "viem"
 import {
-    type BundlerRpcSchema,
-    type Chain,
-    type Client,
-    type ClientConfig,
-    createClient,
-    type EstimateFeesPerGasReturnType,
-    type Prettify,
-    type RpcSchema,
-    type Transport
-} from "viem"
-import {
-    type BundlerActions,
-    type BundlerClientConfig,
-    bundlerActions,
-    type PaymasterActions,
-    type PrepareUserOperationParameters,
-    type PrepareUserOperationReturnType,
-    type SmartAccount,
-    type UserOperationRequest
-} from "viem/account-abstraction"
+    type AccountAbstractionActions,
+    BundlerClient,
+    Actions as Erc4337Actions,
+    type SmartAccount
+} from "viem/erc4337"
+import type { RpcSchema } from "viem/utils"
+import type { Paymaster, Prettify } from "../types/utils.js"
 import {
     type SmartAccountActions,
     smartAccountActions
 } from "./decorators/smartAccount.js"
 
-/**
- * TODO:
- *  - Add docs
- *  - Fix typing, 'accounts' is required to signMessage, signTypedData, signTransaction, but not needed here, since account is embedded in the client
- */
+type ResolvedChain<
+    chain extends Chain.Chain | undefined,
+    client extends Client.Client | undefined
+> = chain extends Chain.Chain
+    ? chain
+    : client extends Client.Client<infer chain extends Chain.Chain | undefined>
+      ? chain
+      : undefined
+
 type SmartAccountClientInner<
-    transport extends Transport,
-    chain extends Chain | undefined,
-    account extends SmartAccount | undefined,
-    client extends Client | undefined,
-    rpcSchema extends RpcSchema | undefined
-> = Client<
-    transport,
-    chain extends Chain
-        ? chain
-        : // biome-ignore lint/suspicious/noExplicitAny: We need any to infer the chain type
-          client extends Client<any, infer chain>
-          ? chain
-          : undefined,
+    transport extends Transport.Transport,
+    chain extends Chain.Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined,
+    client extends Client.Client | undefined,
+    rpcSchema extends RpcSchema.Generic
+> = BundlerClient.Client<
+    ResolvedChain<chain, client>,
     account,
-    rpcSchema extends RpcSchema
-        ? [...BundlerRpcSchema, ...rpcSchema]
-        : BundlerRpcSchema,
-    BundlerActions<account> & SmartAccountActions<chain, account>
-> & {
-    client: client
-    paymaster: BundlerClientConfig["paymaster"] | undefined
-    paymasterContext: BundlerClientConfig["paymasterContext"] | undefined
-    userOperation: BundlerClientConfig["userOperation"] | undefined
-}
+    transport,
+    client,
+    rpcSchema,
+    AccountAbstractionActions<account> & SmartAccountActions<chain, account>
+>
 
 // Variance annotations referred from viem:
 // https://github.com/wevm/viem/blob/main/src/actions/public/simulateContract.ts#L129
 export type SmartAccountClient<
-    out transport extends Transport = Transport,
+    out transport extends Transport.Transport = Transport.Transport,
+    out chain extends Chain.Chain | undefined = Chain.Chain | undefined,
     /** @ts-expect-error cast variance */
-    out chain extends Chain | undefined = Chain | undefined,
+    out account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined,
+    out client extends Client.Client | undefined = Client.Client | undefined,
     /** @ts-expect-error cast variance */
-    out account extends SmartAccount | undefined = SmartAccount | undefined,
-    out client extends Client | undefined = Client | undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
+    out rpcSchema extends RpcSchema.Generic = RpcSchema.Generic
 > = {
     [key in keyof SmartAccountClientInner<
         transport,
@@ -81,75 +64,61 @@ export type SmartAccountClient<
     >[key]
 }
 
+export type PrepareUserOperationHook = (
+    client: BundlerClient.Client,
+    parameters: Erc4337Actions.userOperation.prepare.Options
+) => Promise<Erc4337Actions.userOperation.prepare.ReturnType>
+
 export type SmartAccountClientConfig<
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined,
-    account extends SmartAccount | undefined = SmartAccount | undefined,
-    client extends Client | undefined = Client | undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
+    transport extends Transport.Transport = Transport.Transport,
+    chain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined,
+    client extends Client.Client | undefined = Client.Client | undefined,
+    rpcSchema extends RpcSchema.Generic = never
 > = Prettify<
     Pick<
-        ClientConfig<transport, chain, account, rpcSchema>,
+        BundlerClient.create.Options<
+            chain,
+            account,
+            transport,
+            client,
+            rpcSchema
+        >,
         | "account"
         | "cacheTime"
         | "chain"
+        | "client"
         | "key"
         | "name"
+        | "paymasterContext"
         | "pollingInterval"
-        | "rpcSchema"
+        | "schema"
     >
 > & {
     bundlerTransport: transport
-    /** Client that points to an Execution RPC URL. */
-    client?: client | Client | undefined
     /** Paymaster configuration. */
-    paymaster?:
-        | true
-        | {
-              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
-              getPaymasterData?:
-                  | PaymasterActions["getPaymasterData"]
-                  | undefined
-              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
-              getPaymasterStubData?:
-                  | PaymasterActions["getPaymasterStubData"]
-                  | undefined
-          }
-        | undefined
-    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
-    paymasterContext?: unknown
+    paymaster?: Paymaster | undefined
     /** User Operation configuration. */
     userOperation?:
         | {
               /** Prepares fee properties for the User Operation request. */
               estimateFeesPerGas?:
-                  | ((parameters: {
-                        account: account | SmartAccount
-                        bundlerClient: Client
-                        userOperation: UserOperationRequest
-                    }) => Promise<EstimateFeesPerGasReturnType<"eip1559">>)
+                  | BundlerClient.UserOperationConfig<account>["estimateFeesPerGas"]
                   | undefined
               /** Prepare User Operation configuration. */
-              prepareUserOperation?:
-                  | ((
-                        client: Client<
-                            Transport,
-                            Chain | undefined,
-                            SmartAccount | undefined
-                        >,
-                        parameters: PrepareUserOperationParameters
-                    ) => Promise<PrepareUserOperationReturnType>)
-                  | undefined
+              prepareUserOperation?: PrepareUserOperationHook | undefined
           }
         | undefined
 }
 
 export function createSmartAccountClient<
-    transport extends Transport,
-    chain extends Chain | undefined = undefined,
-    account extends SmartAccount | undefined = undefined,
-    client extends Client | undefined = undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
+    transport extends Transport.Transport,
+    chain extends Chain.Chain | undefined = undefined,
+    account extends SmartAccount.SmartAccount | undefined = undefined,
+    client extends Client.Client | undefined = undefined,
+    rpcSchema extends RpcSchema.Generic = never
 >(
     parameters: SmartAccountClientConfig<
         transport,
@@ -164,52 +133,56 @@ export function createSmartAccountClient(
     parameters: SmartAccountClientConfig
 ): SmartAccountClient {
     const {
-        client: client_,
+        bundlerTransport,
         key = "bundler",
         name = "Bundler Client",
         paymaster,
-        paymasterContext,
-        bundlerTransport,
-        userOperation
+        userOperation,
+        ...rest
     } = parameters
 
-    const client = Object.assign(
-        createClient({
-            ...parameters,
-            chain: parameters.chain ?? client_?.chain,
-            transport: bundlerTransport,
-            key,
-            name,
-            type: "bundlerClient" // TODO: is this okay?
-        }),
-        { client: client_, paymaster, paymasterContext, userOperation }
-    )
+    const client = BundlerClient.create({
+        ...rest,
+        key,
+        name,
+        paymaster: paymaster as BundlerClient.Paymaster | undefined,
+        transport: bundlerTransport,
+        userOperation: userOperation?.estimateFeesPerGas
+            ? { estimateFeesPerGas: userOperation.estimateFeesPerGas }
+            : undefined
+    })
 
-    if (parameters.userOperation?.prepareUserOperation) {
-        const customPrepareUserOp =
-            parameters.userOperation.prepareUserOperation
-
-        return client
-            .extend(bundlerActions)
-            .extend((client) => ({
-                prepareUserOperation: (
-                    args: PrepareUserOperationParameters
-                ) => {
-                    return customPrepareUserOp(client, args)
-                }
-            }))
-            .extend(bundlerActions)
-            .extend((client) => ({
-                prepareUserOperation: (
-                    args: PrepareUserOperationParameters
-                ) => {
-                    return customPrepareUserOp(client, args)
-                }
-            }))
-            .extend(smartAccountActions) as SmartAccountClient
+    const prepareUserOperation = userOperation?.prepareUserOperation
+    if (!prepareUserOperation) {
+        return client.extend(
+            smartAccountActions
+        ) as unknown as SmartAccountClient
     }
 
     return client
-        .extend(bundlerActions)
-        .extend(smartAccountActions) as SmartAccountClient
+        .extend((client_) => {
+            const client = client_ as unknown as BundlerClient.Client
+            return {
+                userOperation: {
+                    prepare: (
+                        parameters: Erc4337Actions.userOperation.prepare.Options
+                    ) => prepareUserOperation(client, parameters),
+                    send: async (
+                        parameters: Erc4337Actions.userOperation.send.Options
+                    ) => {
+                        const { signature: _, ...request } =
+                            await prepareUserOperation(
+                                client,
+                                parameters as unknown as Erc4337Actions.userOperation.prepare.Options
+                            )
+                        return Erc4337Actions.userOperation.send(client, {
+                            ...request,
+                            dataSuffix: "0x",
+                            parameters: []
+                        } as unknown as Erc4337Actions.userOperation.send.Options)
+                    }
+                }
+            }
+        })
+        .extend(smartAccountActions) as unknown as SmartAccountClient
 }

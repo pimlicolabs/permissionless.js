@@ -1,28 +1,25 @@
-import type {
-    Abi,
-    Chain,
-    Client,
-    ContractFunctionArgs,
-    ContractFunctionName,
-    GetCallsStatusReturnType,
-    Hash,
-    SendCallsReturnType,
-    SendTransactionParameters,
-    Transport,
-    TypedData,
-    WriteContractParameters
-} from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
+import type { Actions, Chain, Client } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import type { Abi, Hex, TypedData } from "viem/utils"
 import { getCallsStatus } from "../../actions/smartAccount/getCallsStatus.js"
 import { sendCalls } from "../../actions/smartAccount/sendCalls.js"
 import { sendTransaction } from "../../actions/smartAccount/sendTransaction.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
 import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
-import { writeContract } from "../../actions/smartAccount/writeContract.js"
+import {
+    type WriteContractParameters,
+    writeContract
+} from "../../actions/smartAccount/writeContract.js"
+import type {
+    ContractFunctionArgs,
+    ContractFunctionName
+} from "../../types/utils.js"
 
 export type SmartAccountActions<
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TChain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
 > = {
     /**
      * Creates, signs, and sends a new transaction to the network.
@@ -68,8 +65,10 @@ export type SmartAccountActions<
      * })
      */
     sendTransaction: <
-        TChainOverride extends Chain | undefined = undefined,
-        accountOverride extends SmartAccount | undefined = undefined,
+        TChainOverride extends Chain.Chain | undefined = undefined,
+        accountOverride extends
+            | SmartAccount.SmartAccount
+            | undefined = undefined,
         calls extends readonly unknown[] = readonly unknown[]
     >(
         args: Parameters<
@@ -81,7 +80,7 @@ export type SmartAccountActions<
                 calls
             >
         >[1]
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
     /**
      * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
      *
@@ -225,8 +224,8 @@ export type SmartAccountActions<
      * })
      */
     signTypedData: <
-        const TTypedData extends TypedData | { [key: string]: unknown },
-        TPrimaryType extends string
+        const TTypedData extends TypedData.TypedData | Record<string, unknown>,
+        TPrimaryType extends keyof TTypedData | "EIP712Domain"
     >(
         args: Parameters<
             typeof signTypedData<TTypedData, TPrimaryType, TSmartAccount>
@@ -283,7 +282,7 @@ export type SmartAccountActions<
      * const hash = await client.writeContract(request)
      */
     writeContract: <
-        const TAbi extends Abi | readonly unknown[],
+        const TAbi extends Abi.Abi | readonly unknown[],
         TFunctionName extends ContractFunctionName<
             TAbi,
             "nonpayable" | "payable"
@@ -293,7 +292,7 @@ export type SmartAccountActions<
             "nonpayable" | "payable",
             TFunctionName
         > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
-        TChainOverride extends Chain | undefined = undefined
+        TChainOverride extends Chain.Chain | undefined = undefined
     >(
         args: WriteContractParameters<
             TAbi,
@@ -314,8 +313,10 @@ export type SmartAccountActions<
         >
     >
     sendCalls: <
-        TChainOverride extends Chain | undefined = undefined,
-        accountOverride extends SmartAccount | undefined = undefined,
+        TChainOverride extends Chain.Chain | undefined = undefined,
+        accountOverride extends
+            | SmartAccount.SmartAccount
+            | undefined = undefined,
         calls extends readonly unknown[] = readonly unknown[]
     >(
         args: Parameters<
@@ -327,18 +328,24 @@ export type SmartAccountActions<
                 calls
             >
         >[1]
-    ) => Promise<SendCallsReturnType>
+    ) => Promise<Actions.wallet.sendCalls.ReturnType>
     getCallsStatus: (
         args: Parameters<typeof getCallsStatus<TSmartAccount, TChain>>[1]
-    ) => Promise<GetCallsStatusReturnType>
+    ) => Promise<Actions.wallet.getCallsStatus.ReturnType>
 }
 
 export function smartAccountActions<
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TChain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
 >(
-    client: Client<Transport, TChain, TSmartAccount>
+    client_: Pick<Client.Client, "request"> & {
+        account: TSmartAccount
+        chain: TChain
+    }
 ): SmartAccountActions<TChain, TSmartAccount> {
+    const client = client_ as BundlerClient.Client<TChain, TSmartAccount>
     return {
         // biome-ignore lint/suspicious/noExplicitAny: calls generic widens to readonly unknown[] at the action
         sendTransaction: (args) => sendTransaction(client, args as any),

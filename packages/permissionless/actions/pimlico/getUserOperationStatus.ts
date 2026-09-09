@@ -1,11 +1,12 @@
-import type { Account, Chain, Client, Hash, Transport } from "viem"
+import type { Client, Transport } from "viem"
+import type { Hex } from "viem/utils"
 import type {
     PimlicoRpcSchema,
     PimlicoUserOperationStatus
 } from "../../types/pimlico.js"
 
 export type GetUserOperationStatusParameters = {
-    hash: Hash
+    hash: Hex.Hex
 }
 
 export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
@@ -34,15 +35,11 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  */
 export const getUserOperationStatus = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PimlicoRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     { hash }: GetUserOperationStatusParameters
 ): Promise<GetUserOperationStatusReturnType> => {
-    return client.request({
+    const request = client.request as Transport.RequestFn<PimlicoRpcSchema>
+    return request({
         method: "pimlico_getUserOperationStatus",
         params: [hash]
     })

@@ -1,9 +1,19 @@
-import { toHex } from "viem"
+import { Hex } from "viem/utils"
 import { describe, expect, test } from "vitest"
 import {
     type Erc20AllowanceOverrideParameters,
     erc20AllowanceOverride
 } from "./erc20AllowanceOverride"
+
+const slotOf = (
+    result: ReturnType<typeof erc20AllowanceOverride>,
+    token: `0x${string}`
+) => {
+    const slots = Object.keys(result[token]?.stateDiff ?? {})
+    expect(slots).toHaveLength(1)
+    expect(slots[0]).toMatch(/^0x[0-9a-f]{64}$/)
+    return slots[0] as `0x${string}`
+}
 
 describe("erc20AllowanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
@@ -17,17 +27,15 @@ describe("erc20AllowanceOverride", () => {
 
         const result = erc20AllowanceOverride(params)
 
-        expect(result).toEqual([
-            {
-                address: params.token,
-                stateDiff: [
-                    {
-                        slot: expect.any(String), // Slot will be a keccak256 hash
-                        value: toHex(params.amount)
-                    }
-                ]
+        expect(result).toEqual({
+            [params.token]: {
+                stateDiff: {
+                    [slotOf(result, params.token)]: Hex.fromNumber(
+                        params.amount
+                    )
+                }
             }
-        ])
+        })
     })
 
     test("should use the default amount when none is provided", () => {
@@ -44,16 +52,14 @@ describe("erc20AllowanceOverride", () => {
             "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
         )
 
-        expect(result).toEqual([
-            {
-                address: params.token,
-                stateDiff: [
-                    {
-                        slot: expect.any(String), // Slot will be a keccak256 hash
-                        value: toHex(expectedDefaultAmount)
-                    }
-                ]
+        expect(result).toEqual({
+            [params.token]: {
+                stateDiff: {
+                    [slotOf(result, params.token)]: Hex.fromNumber(
+                        expectedDefaultAmount
+                    )
+                }
             }
-        ])
+        })
     })
 })

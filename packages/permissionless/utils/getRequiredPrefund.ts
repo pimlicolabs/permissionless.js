@@ -1,9 +1,9 @@
-import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
+import type { EntryPoint, UserOperation } from "viem/erc4337"
 
 export type GetRequiredPrefundReturnType<
-    entryPointVersion extends EntryPointVersion = "0.7"
+    entryPointVersion extends EntryPoint.Version = "0.7"
 > = {
-    userOperation: UserOperation<entryPointVersion>
+    userOperation: UserOperation.UserOperation<entryPointVersion>
     entryPointVersion: entryPointVersion
 }
 
@@ -22,13 +22,14 @@ export type GetRequiredPrefundReturnType<
  * })
  */
 export const getRequiredPrefund = <
-    entryPointVersion extends EntryPointVersion
+    entryPointVersion extends EntryPoint.Version
 >({
     userOperation,
     entryPointVersion
 }: GetRequiredPrefundReturnType<entryPointVersion>): bigint => {
     if (entryPointVersion === "0.6") {
-        const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
+        const userOperationVersion0_6 =
+            userOperation as UserOperation.UserOperation<"0.6">
         const multiplier =
             (userOperationVersion0_6.paymasterAndData?.length ?? 0) > 2
                 ? BigInt(3)
@@ -43,7 +44,9 @@ export const getRequiredPrefund = <
         )
     }
 
-    const userOperationV07 = userOperation as UserOperation<"0.7" | "0.8">
+    const userOperationV07 = userOperation as UserOperation.UserOperation<
+        "0.7" | "0.8" | "0.9"
+    >
 
     const requiredGas =
         userOperationV07.verificationGasLimit +

@@ -1,27 +1,19 @@
-import {
-    type Account,
-    type Address,
-    type Chain,
-    ChainNotFoundError,
-    type Client,
-    type GetChainParameter,
-    hexToBigInt,
-    numberToHex,
-    type Transport
-} from "viem"
+import { Chain, type Client, type Transport } from "viem"
+import { type Address, Hex } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import type { GetChainParameter } from "../../types/utils.js"
 
 export type GetTokenQuotesParameters<
-    TChain extends Chain | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    TChain extends Chain.Chain | undefined,
+    TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
 > = {
-    tokens: Address[]
-    entryPointAddress: Address
+    tokens: Address.Address[]
+    entryPointAddress: Address.Address
 } & GetChainParameter<TChain, TChainOverride>
 
 export type GetTokenQuotesReturnType = {
-    paymaster: Address
-    token: Address
+    paymaster: Address.Address
+    token: Address.Address
     postOpGas: bigint
     exchangeRate: bigint
     exchangeRateNativeToUsd: bigint
@@ -40,38 +32,38 @@ export type GetTokenQuotesReturnType = {
  *
  */
 export const getTokenQuotes = async <
-    TChain extends Chain | undefined,
-    TTransport extends Transport = Transport,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    TChain extends Chain.Chain | undefined,
+    TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
 >(
-    client: Client<TTransport, TChain, Account | undefined, PimlicoRpcSchema>,
+    client: Pick<Client.Client<TChain>, "chain" | "request">,
     args: GetTokenQuotesParameters<TChain, TChainOverride>
 ): Promise<GetTokenQuotesReturnType> => {
     const chainId = args.chain?.id ?? client.chain?.id
 
     if (!chainId) {
-        throw new ChainNotFoundError()
+        throw new Chain.NotFoundError()
     }
 
-    const res = await client.request({
+    const request = client.request as Transport.RequestFn<PimlicoRpcSchema>
+    const res = await request({
         method: "pimlico_getTokenQuotes",
         params: [
             { tokens: args.tokens },
             args.entryPointAddress,
-            numberToHex(chainId)
+            Hex.fromNumber(chainId)
         ]
     })
 
     return res.quotes.map((quote) => ({
         ...quote,
         balanceSlot: quote.balanceSlot
-            ? hexToBigInt(quote.balanceSlot)
+            ? Hex.toBigInt(quote.balanceSlot)
             : undefined,
         allowanceSlot: quote.allowanceSlot
-            ? hexToBigInt(quote.allowanceSlot)
+            ? Hex.toBigInt(quote.allowanceSlot)
             : undefined,
-        postOpGas: hexToBigInt(quote.postOpGas),
-        exchangeRate: hexToBigInt(quote.exchangeRate),
-        exchangeRateNativeToUsd: hexToBigInt(quote.exchangeRateNativeToUsd)
+        postOpGas: Hex.toBigInt(quote.postOpGas),
+        exchangeRate: Hex.toBigInt(quote.exchangeRate),
+        exchangeRateNativeToUsd: Hex.toBigInt(quote.exchangeRateNativeToUsd)
     }))
 }

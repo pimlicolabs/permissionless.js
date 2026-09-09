@@ -1,7 +1,7 @@
-// import { Base64 } from "ox"
-import type { Account, Chain, Client, Hex, Transport } from "viem"
+import type { Client, Transport } from "viem"
+import type { Hex } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
+import * as Base64 from "../../utils/base64.js"
 
 export type VerifyAuthenticationParameters = {
     raw: {
@@ -23,21 +23,17 @@ export type VerifyAuthenticationParameters = {
 export type VerifyAuthenticationReturnType = {
     success: boolean
     id: string
-    publicKey: Hex
+    publicKey: Hex.Hex
     userName: string
 }
 
 export const verifyAuthentication = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args: VerifyAuthenticationParameters
 ): Promise<VerifyAuthenticationReturnType> => {
     const { raw, uuid } = args
-    const { Base64 } = await getOxExports()
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
 
     let responseAuthenticatorData: string
 
@@ -76,7 +72,7 @@ export const verifyAuthentication = async (
         )
     }
 
-    const serverResponse = await client.request(
+    const serverResponse = await request(
         {
             method: "pks_verifyAuthentication",
             params: [
@@ -136,7 +132,7 @@ export const verifyAuthentication = async (
     return {
         success,
         id,
-        publicKey: publicKey as Hex,
+        publicKey: publicKey as Hex.Hex,
         userName
     }
 }

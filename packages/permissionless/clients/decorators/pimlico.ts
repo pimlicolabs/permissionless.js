@@ -1,5 +1,6 @@
-import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
-import type { EntryPointVersion } from "viem/account-abstraction"
+import type { Chain, Client } from "viem"
+import type { EntryPoint } from "viem/erc4337"
+import type { Address } from "viem/utils"
 import {
     type EstimateErc20PaymasterCostParameters,
     type EstimateErc20PaymasterCostReturnType,
@@ -18,8 +19,6 @@ import {
     type GetTokenQuotesParameters,
     type GetTokenQuotesReturnType,
     getTokenQuotes,
-    type SendCompressedUserOperationParameters,
-    sendCompressedUserOperation,
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,
     validateSponsorshipPolicies
@@ -29,11 +28,14 @@ import {
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "../../actions/pimlico/sponsorUserOperation.js"
+import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import type { Prettify } from "../../types/utils.js"
 
 export type PimlicoActions<
-    TChain extends Chain | undefined,
-    entryPointVersion extends EntryPointVersion = EntryPointVersion
+    TChain extends Chain.Chain | undefined,
+    entryPointVersion extends EntryPoint.Version = EntryPoint.Version
 > = {
+    "~schema"?: PimlicoRpcSchema<entryPointVersion> | undefined
     /**
      * Returns the live gas prices that you can use to send a user operation.
      *
@@ -61,7 +63,7 @@ export type PimlicoActions<
      *
      * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
      *
-     * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
+     * @param hash UserOpHash that you must have received from sendUserOperation.
      * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
      *
      * @example
@@ -78,36 +80,6 @@ export type PimlicoActions<
     getUserOperationStatus: (
         args: Prettify<GetUserOperationStatusParameters>
     ) => Promise<Prettify<GetUserOperationStatusReturnType>>
-    /**
-     * @deprecated pimlico_sendCompressedUserOperation has been deprecated due to EIP-4844 blobs. Please use sendUserOperation instead.
-     * Sends a compressed user operation to the bundler
-     *
-     * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/sendCompressedUserOperation
-     *
-     * @param args {@link SendCompressedUserOperationParameters}.
-     * @returns UserOpHash that you can use to track user operation as {@link Hash}.
-     *
-     * @example
-     * import { createClient } from "viem"
-     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
-     *
-     * const bundlerClient = createClient({
-     *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v1/goerli/rpc?apikey=YOUR_API_KEY_HERE")
-     * }).extend(pimlicoBundlerActions)
-     *
-     * const userOpHash = await bundlerClient.sendCompressedUserOperation({
-     *     compressedUserOperation,
-     *     inflatorAddress,
-     *     entryPoint
-     * })
-     * // Return '0xe9fad2cd67f9ca1d0b7a6513b2a42066784c8df938518da2b51bb8cc9a89ea34'
-     */
-    sendCompressedUserOperation: (
-        args: Prettify<
-            Omit<SendCompressedUserOperationParameters, "entryPointAddress">
-        >
-    ) => Promise<Hash>
     sponsorUserOperation: (
         args: Omit<
             PimlicoSponsorUserOperationParameters<entryPointVersion>,
@@ -120,7 +92,7 @@ export type PimlicoActions<
         >
     ) => Promise<Prettify<ValidateSponsorshipPolicies>[]>
     getTokenQuotes: <
-        TChainOverride extends Chain | undefined = Chain | undefined
+        TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
     >(
         args: Prettify<
             Omit<
@@ -130,7 +102,7 @@ export type PimlicoActions<
         >
     ) => Promise<Prettify<GetTokenQuotesReturnType>>
     estimateErc20PaymasterCost: <
-        TChainOverride extends Chain | undefined = Chain | undefined
+        TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
     >(
         args: Omit<
             EstimateErc20PaymasterCostParameters<
@@ -144,26 +116,18 @@ export type PimlicoActions<
 }
 
 export const pimlicoActions =
-    <entryPointVersion extends EntryPointVersion>({
+    <entryPointVersion extends EntryPoint.Version>({
         entryPoint
     }: {
-        entryPoint: { address: Address; version: entryPointVersion }
+        entryPoint: { address: Address.Address; version: entryPointVersion }
     }) =>
-    <
-        TTransport extends Transport,
-        TChain extends Chain | undefined = Chain | undefined
-    >(
-        client: Client<TTransport, TChain>
+    <TChain extends Chain.Chain | undefined = Chain.Chain | undefined>(
+        client: Pick<Client.Client, "request"> & { chain: TChain }
     ): PimlicoActions<TChain, entryPointVersion> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
         ) => getUserOperationStatus(client, args),
-        sendCompressedUserOperation: async (args) =>
-            sendCompressedUserOperation(client, {
-                ...args,
-                entryPointAddress: entryPoint.address
-            }),
         sponsorUserOperation: async (args) =>
             sponsorUserOperation(client, {
                 ...args,

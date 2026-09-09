@@ -1,7 +1,7 @@
-import type { Account, Chain, Client, Transport } from "viem"
-import type { CreateWebAuthnCredentialParameters } from "viem/account-abstraction"
+import type { Client, Transport } from "viem"
+import type { WebAuthn } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
+import * as Base64 from "../../utils/base64.js"
 
 const validateAttestation = (attestation: unknown): boolean => {
     return (
@@ -78,18 +78,15 @@ const validateUser = (user: unknown): boolean => {
 export type StartRegistrationParameters = {
     context?: Record<string, unknown>
 }
-export type StartRegistrationReturnType = CreateWebAuthnCredentialParameters
+export type StartRegistrationReturnType = WebAuthn.createCredential.Options
 
 export const startRegistration: (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args?: StartRegistrationParameters
 ) => Promise<StartRegistrationReturnType> = async (client, args) => {
-    const response = await client.request({
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
+    const response = await request({
         method: "pks_startRegistration",
         params: [args?.context]
     })
@@ -106,7 +103,6 @@ export const startRegistration: (
         throw new Error("Invalid response format from passkey server")
     }
 
-    const { Base64 } = await getOxExports()
     const credentialOptions: StartRegistrationReturnType = {
         attestation: response.attestation,
         authenticatorSelection: response.authenticatorSelection,

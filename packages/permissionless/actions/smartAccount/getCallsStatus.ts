@@ -1,62 +1,46 @@
-import type {
-    Chain,
-    Client,
-    GetCallsStatusParameters,
-    GetCallsStatusReturnType,
-    Hex,
-    Transport
-} from "viem"
+import { Actions, type Chain } from "viem"
 import {
-    getUserOperationReceipt,
+    type BundlerClient,
+    Actions as Erc4337Actions,
     type SmartAccount
-} from "viem/account-abstraction"
-import { getChainId } from "viem/actions"
-import { getAction } from "viem/utils"
+} from "viem/erc4337"
+import type { Hex } from "viem/utils"
+import { getAction } from "../../utils/getAction.js"
 
-const getStatus = (_status: number) => {
-    const [status, statusCode] = (() => {
-        const statusCode = _status
-        if (statusCode >= 100 && statusCode < 200)
-            return ["pending", statusCode] as const
-        if (statusCode >= 200 && statusCode < 300)
-            return ["success", statusCode] as const
-        if (statusCode >= 300 && statusCode < 700)
-            return ["failure", statusCode] as const
-        // @ts-expect-error: for backwards compatibility
-        if (statusCode === "CONFIRMED") return ["success", 200] as const
-        // @ts-expect-error: for backwards compatibility
-        if (statusCode === "PENDING") return ["pending", 100] as const
-        return [undefined, statusCode]
-    })()
-
-    return [status, statusCode] as const
+const getStatus = (statusCode: number) => {
+    if (statusCode >= 100 && statusCode < 200)
+        return ["pending", statusCode] as const
+    if (statusCode >= 200 && statusCode < 300)
+        return ["success", statusCode] as const
+    if (statusCode >= 300 && statusCode < 700)
+        return ["failure", statusCode] as const
+    return [undefined, statusCode] as const
 }
 
 export async function getCallsStatus<
-    account extends SmartAccount | undefined,
-    chain extends Chain | undefined
+    account extends SmartAccount.SmartAccount | undefined,
+    chain extends Chain.Chain | undefined
 >(
-    client: Client<Transport, chain, account>,
-    args: GetCallsStatusParameters
-): Promise<GetCallsStatusReturnType> {
-    const userOperationHash = args.id as Hex
+    client: BundlerClient.Client<chain, account>,
+    args: Actions.wallet.getCallsStatus.Options
+): Promise<Actions.wallet.getCallsStatus.ReturnType> {
+    const userOperationHash = args.id as Hex.Hex
 
     const chainId =
         client.chain?.id ??
         client.account?.client.chain?.id ??
-        getAction(client, getChainId, "getChainId")(client)
+        getAction(client, Actions.chains.getId, "chains.getId")(undefined)
 
     try {
         const receipt = await getAction(
             client,
-            getUserOperationReceipt,
-            "getUserOperationReceipt"
+            Erc4337Actions.userOperation.getReceipt,
+            "userOperation.getReceipt"
         )({
-            hash: args.id as Hex
+            hash: userOperationHash
         })
 
-        const userOpStatus = receipt.success
-        const [status, statusCode] = getStatus(userOpStatus ? 200 : 500)
+        const [status, statusCode] = getStatus(receipt.success ? 200 : 500)
 
         return {
             id: userOperationHash,
@@ -85,7 +69,8 @@ export async function getCallsStatus<
             chainId: await chainId,
             atomic: true,
             status,
-            statusCode
+            statusCode,
+            receipts: []
         }
     }
 }

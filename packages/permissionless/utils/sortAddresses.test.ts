@@ -1,10 +1,10 @@
-import type { Address } from "viem"
+import type { Address } from "viem/utils"
 import { describe, expect, test } from "vitest"
-import { sortAddresses } from "./index"
+import { sortAddresses } from "./sortAddresses"
 
 describe("sortAddresses", () => {
     test("should sort addresses in ascending byte-wise order", () => {
-        const addresses: Address[] = [
+        const addresses: Address.Address[] = [
             "0xffffffffffffffffffffffffffffffffffffff03",
             "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
             "0xcccccccccccccccccccccccccccccccccccccc04",
@@ -20,7 +20,7 @@ describe("sortAddresses", () => {
     })
 
     test("should ignore case when sorting", () => {
-        const addresses: Address[] = [
+        const addresses: Address.Address[] = [
             "0xAb12000000000000000000000000000000000000",
             "0xaB58000000000000000000000000000000000000",
             "0x9F00000000000000000000000000000000000000"
@@ -34,7 +34,7 @@ describe("sortAddresses", () => {
     })
 
     test("should not mutate the input array", () => {
-        const addresses: Address[] = [
+        const addresses: Address.Address[] = [
             "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02",
             "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01"
         ]
@@ -49,7 +49,7 @@ describe("sortAddresses", () => {
         // Under a Danish/Norwegian ICU collation the "aa" digraph sorts
         // after "z", so localeCompare would order 0xaaaa... last. The
         // byte-wise sort must keep it first regardless of locale.
-        const addresses: Address[] = [
+        const addresses: Address.Address[] = [
             "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02",
             "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
             "0xab12000000000000000000000000000000000000"

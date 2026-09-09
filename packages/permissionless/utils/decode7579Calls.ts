@@ -1,12 +1,4 @@
-import {
-    type Address,
-    decodeAbiParameters,
-    decodeFunctionData,
-    getAddress,
-    type Hex,
-    size,
-    slice
-} from "viem"
+import { AbiFunction, AbiParameters, Address, Hex } from "viem/utils"
 import type {
     CallType,
     ExecutionMode
@@ -15,46 +7,43 @@ import type {
 export type DecodeCallDataReturnType = {
     mode: ExecutionMode<CallType>
     callData: readonly {
-        to: Address
+        to: Address.Address
         value?: bigint | undefined
-        data?: Hex | undefined
+        data?: Hex.Hex | undefined
     }[]
 }
 
-export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
-    const executeAbi = [
-        {
-            type: "function",
-            name: "execute",
-            inputs: [
-                {
-                    name: "execMode",
-                    type: "bytes32",
-                    internalType: "ExecMode"
-                },
-                {
-                    name: "executionCalldata",
-                    type: "bytes",
-                    internalType: "bytes"
-                }
-            ],
-            outputs: [],
-            stateMutability: "payable"
-        }
-    ] as const
+const executeAbi = [
+    {
+        type: "function",
+        name: "execute",
+        inputs: [
+            {
+                name: "execMode",
+                type: "bytes32",
+                internalType: "ExecMode"
+            },
+            {
+                name: "executionCalldata",
+                type: "bytes",
+                internalType: "bytes"
+            }
+        ],
+        outputs: [],
+        stateMutability: "payable"
+    }
+] as const
 
-    const decoded = decodeFunctionData({
-        abi: executeAbi,
-        data: callData
-    })
+export function decode7579Calls(callData: Hex.Hex): DecodeCallDataReturnType {
+    const [mode, executionCalldata] = AbiFunction.decodeData(
+        executeAbi,
+        callData
+    )
 
-    const mode = decoded.args[0]
-    const executionCalldata = decoded.args[1]
-
-    const callType = slice(mode, 0, 1) // First byte
-    const revertOnError = slice(mode, 1, 2) // Second byte
-    const selector = slice(mode, 3, 7) as Hex // bytes 5-8
-    const context = slice(mode, 7) as Hex // bytes 9-32
+    const callType = Hex.slice(mode, 0, 1) // First byte
+    const revertOnError = Hex.slice(mode, 1, 2) // Second byte
+    const selector = Hex.slice(mode, 3, 7) // bytes 5-8
+    const context = Hex.slice(mode, 7) // bytes 9-32
 
     let type: CallType
     switch (BigInt(callType)) {
@@ -79,7 +68,7 @@ export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
     }
 
     if (decodedMode.type === "batchcall") {
-        const [calls] = decodeAbiParameters(
+        const [calls] = AbiParameters.decode(
             [
                 {
                     name: "executionBatch",
@@ -114,11 +103,13 @@ export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
     }
 
     // Single call - calldata is encoded as concatenated (to, value, data)
-    const to = getAddress(slice(executionCalldata, 0, 20)) // 20 bytes address with 0x prefix
-    const value = BigInt(slice(executionCalldata, 20, 52)) // 32 bytes value
+    const to = Address.checksum(Hex.slice(executionCalldata, 0, 20)) // 20 bytes address with 0x prefix
+    const value = BigInt(Hex.slice(executionCalldata, 20, 52)) // 32 bytes value
 
     const data =
-        size(executionCalldata) > 52 ? slice(executionCalldata, 52) : "0x" // Remaining bytes are calldata
+        Hex.size(executionCalldata) > 52
+            ? Hex.slice(executionCalldata, 52)
+            : "0x" // Remaining bytes are calldata
 
     return {
         mode: decodedMode,

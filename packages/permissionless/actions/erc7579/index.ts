@@ -1,8 +1,7 @@
-import type { Chain, Client, Hash, Transport } from "viem"
-import type {
-    GetSmartAccountParameter,
-    SmartAccount
-} from "viem/account-abstraction"
+import type { Chain, Client } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import type { Hex } from "viem/utils"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
 import { accountId } from "./accountId.js"
 import { type InstallModuleParameters, installModule } from "./installModule.js"
 import {
@@ -32,16 +31,18 @@ import {
     uninstallModules
 } from "./uninstallModules.js"
 
-export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
+export type Erc7579Actions<
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
+> = {
     accountId: (
         args?: GetSmartAccountParameter<TSmartAccount>
     ) => Promise<string>
     installModule: (
         args: InstallModuleParameters<TSmartAccount>
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
     installModules: (
         args: InstallModulesParameters<TSmartAccount>
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
     isModuleInstalled: (
         args: IsModuleInstalledParameters<TSmartAccount>
     ) => Promise<boolean>
@@ -53,10 +54,10 @@ export type Erc7579Actions<TSmartAccount extends SmartAccount | undefined> = {
     ) => Promise<boolean>
     uninstallModule: (
         args: UninstallModuleParameters<TSmartAccount>
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
     uninstallModules: (
         args: UninstallModulesParameters<TSmartAccount>
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
 }
 
 export type {
@@ -82,16 +83,23 @@ export {
 }
 
 export function erc7579Actions() {
-    return <TSmartAccount extends SmartAccount | undefined>(
-        client: Client<Transport, Chain | undefined, TSmartAccount>
-    ): Erc7579Actions<TSmartAccount> => ({
-        accountId: (args) => accountId(client, args),
-        installModule: (args) => installModule(client, args),
-        installModules: (args) => installModules(client, args),
-        isModuleInstalled: (args) => isModuleInstalled(client, args),
-        supportsExecutionMode: (args) => supportsExecutionMode(client, args),
-        supportsModule: (args) => supportsModule(client, args),
-        uninstallModule: (args) => uninstallModule(client, args),
-        uninstallModules: (args) => uninstallModules(client, args)
-    })
+    return <TSmartAccount extends SmartAccount.SmartAccount | undefined>(
+        client_: Pick<Client.Client, "request"> & { account: TSmartAccount }
+    ): Erc7579Actions<TSmartAccount> => {
+        const client = client_ as BundlerClient.Client<
+            Chain.Chain | undefined,
+            TSmartAccount
+        >
+        return {
+            accountId: (args) => accountId(client, args),
+            installModule: (args) => installModule(client, args),
+            installModules: (args) => installModules(client, args),
+            isModuleInstalled: (args) => isModuleInstalled(client, args),
+            supportsExecutionMode: (args) =>
+                supportsExecutionMode(client, args),
+            supportsModule: (args) => supportsModule(client, args),
+            uninstallModule: (args) => uninstallModule(client, args),
+            uninstallModules: (args) => uninstallModules(client, args)
+        }
+    }
 }

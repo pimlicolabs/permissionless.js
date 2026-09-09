@@ -1,4 +1,5 @@
-import type { Account, Chain, Client, Hex, Transport } from "viem"
+import type { Client, Transport } from "viem"
+import type { Hex } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
 export type GetCredentialsParameters = {
@@ -7,19 +8,16 @@ export type GetCredentialsParameters = {
 
 export type GetCredentialsReturnType = {
     id: string
-    publicKey: Hex
+    publicKey: Hex.Hex
 }[]
 
 export const getCredentials = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args?: GetCredentialsParameters
 ): Promise<GetCredentialsReturnType> => {
-    const response = await client.request({
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
+    const response = await request({
         method: "pks_getCredentials",
         params: [args?.context]
     })

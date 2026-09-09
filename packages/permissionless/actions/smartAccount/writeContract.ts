@@ -1,24 +1,46 @@
+import type { Chain } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import { type Abi, AbiFunction, type Address, type Hex } from "viem/utils"
+import type {
+    ContractFunctionArgs,
+    ContractFunctionName
+} from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 import {
-    type Abi,
-    type Chain,
-    type Client,
-    type ContractFunctionArgs,
-    type ContractFunctionName,
-    type EncodeFunctionDataParameters,
-    encodeFunctionData,
-    type Hash,
     type SendTransactionParameters,
-    type Transport,
-    type WriteContractParameters
-} from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
-import { getAction } from "viem/utils"
-import { sendTransaction } from "./sendTransaction.js"
+    sendTransaction
+} from "./sendTransaction.js"
+
+export type WriteContractParameters<
+    abi extends Abi.Abi | readonly unknown[] = Abi.Abi,
+    functionName extends ContractFunctionName<
+        abi,
+        "nonpayable" | "payable"
+    > = ContractFunctionName<abi, "nonpayable" | "payable">,
+    args extends ContractFunctionArgs<
+        abi,
+        "nonpayable" | "payable",
+        functionName
+    > = ContractFunctionArgs<abi, "nonpayable" | "payable", functionName>,
+    chain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined,
+    chainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
+> = Omit<
+    SendTransactionParameters<chain, account, chainOverride>,
+    "data" | "to"
+> & {
+    abi: abi
+    address: Address.Address
+    functionName: functionName
+    args?: args | undefined
+}
 
 export async function writeContract<
-    TChain extends Chain | undefined,
-    TAccount extends SmartAccount | undefined,
-    const TAbi extends Abi | readonly unknown[],
+    TChain extends Chain.Chain | undefined,
+    TAccount extends SmartAccount.SmartAccount | undefined,
+    const TAbi extends Abi.Abi | readonly unknown[],
     TFunctionName extends ContractFunctionName<
         TAbi,
         "nonpayable" | "payable"
@@ -28,9 +50,9 @@ export async function writeContract<
         "nonpayable" | "payable",
         TFunctionName
     > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
-    TChainOverride extends Chain | undefined = undefined
+    TChainOverride extends Chain.Chain | undefined = undefined
 >(
-    client: Client<Transport, TChain, TAccount>,
+    client: BundlerClient.Client<TChain, TAccount>,
     {
         abi,
         address,
@@ -46,25 +68,22 @@ export async function writeContract<
         TAccount,
         TChainOverride
     >
-): Promise<Hash> {
-    const data = encodeFunctionData<TAbi, TFunctionName>({
-        abi,
-        args,
-        functionName
-    } as EncodeFunctionDataParameters<TAbi, TFunctionName>)
+): Promise<Hex.Hex> {
+    const data = AbiFunction.encodeData(
+        AbiFunction.fromAbi(abi as Abi.Abi, functionName as string, {
+            args: args as readonly unknown[] | undefined
+        }),
+        args as readonly unknown[] | undefined
+    )
 
     const hash = await getAction(
         client,
-        sendTransaction<TAccount, undefined, undefined>,
+        sendTransaction<TAccount, TChain, undefined, undefined>,
         "sendTransaction"
     )({
         data: `${data}${dataSuffix ? dataSuffix.replace("0x", "") : ""}`,
         to: address,
         ...request
-    } as unknown as SendTransactionParameters<
-        Chain | undefined,
-        TAccount,
-        undefined
-    >)
+    } as unknown as SendTransactionParameters<TChain, TAccount, undefined>)
     return hash
 }

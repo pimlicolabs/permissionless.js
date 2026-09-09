@@ -1,40 +1,48 @@
-import {
-    type Address,
-    type Chain,
-    type Client,
-    type ContractFunctionParameters,
-    encodeFunctionData,
-    erc20Abi,
-    getAddress,
-    type Hex,
-    maxUint256,
-    RpcError,
-    type Transport
-} from "viem"
+import { Actions, type Chain, type Client, Errors } from "viem"
 import {
     type BundlerClient,
-    type GetPaymasterDataParameters,
-    type GetPaymasterDataReturnType,
-    getPaymasterData as getPaymasterData_,
-    type PrepareUserOperationParameters,
-    type PrepareUserOperationRequest,
-    type PrepareUserOperationReturnType,
-    prepareUserOperation,
+    Actions as Erc4337Actions,
     type SmartAccount,
     type UserOperation
-} from "viem/account-abstraction"
-import { getChainId as getChainId_, readContract } from "viem/actions"
-import { getAction, parseAccount } from "viem/utils"
+} from "viem/erc4337"
+import {
+    type Abi,
+    AbiFunction,
+    Abis,
+    Address,
+    type Hex,
+    Solidity,
+    type StateOverrides
+} from "viem/utils"
 import { getTokenQuotes } from "../../../actions/pimlico/index.js"
 import { erc20BalanceOverride } from "../../../utils/erc20BalanceOverride.js"
+import { getAction } from "../../../utils/getAction.js"
 
-const MAINNET_USDT_ADDRESS = getAddress(
+const MAINNET_USDT_ADDRESS = Address.checksum(
     "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 )
 
+type PaymasterActions = {
+    getData?: PaymasterGetData | undefined
+    getStubData?: PaymasterGetData | undefined
+}
+
+type PaymasterGetData = (
+    options: Erc4337Actions.paymaster.getData.Options
+) => Promise<Erc4337Actions.paymaster.getData.ReturnType>
+
+const resolvePaymasterActions = (
+    paymaster: Address.Address | BundlerClient.Paymaster | undefined
+): PaymasterActions | undefined => {
+    if (typeof paymaster !== "object") return undefined
+    return (
+        "paymaster" in paymaster ? paymaster.paymaster : paymaster
+    ) as PaymasterActions
+}
+
 export const prepareUserOperationForErc20Paymaster =
     (
-        pimlicoClient: Client,
+        pimlicoClient: Pick<Client.Client, "chain" | "request">,
         {
             balanceOverride = false,
             balanceSlot: _balanceSlot
@@ -44,32 +52,40 @@ export const prepareUserOperationForErc20Paymaster =
         } = {}
     ) =>
     async <
-        account extends SmartAccount | undefined,
+        account extends SmartAccount.SmartAccount | undefined,
         const calls extends readonly unknown[],
-        const request extends PrepareUserOperationRequest<
+        const request extends Erc4337Actions.userOperation.prepare.Options<
             account,
             accountOverride,
             calls
         >,
-        accountOverride extends SmartAccount | undefined = undefined
+        accountOverride extends
+            | SmartAccount.SmartAccount
+            | undefined = undefined
     >(
-        client: Client<Transport, Chain | undefined, account>,
-        parameters_: PrepareUserOperationParameters<
+        client: BundlerClient.Client<Chain.Chain | undefined, account>,
+        parameters_: Erc4337Actions.userOperation.prepare.Options<
+            account,
+            accountOverride,
+            calls
+        > &
+            request
+    ): Promise<
+        Erc4337Actions.userOperation.prepare.ReturnType<
             account,
             accountOverride,
             calls,
             request
         >
-    ): Promise<
-        PrepareUserOperationReturnType<account, accountOverride, calls, request>
     > => {
-        const parameters = parameters_ as PrepareUserOperationParameters
+        const parameters =
+            parameters_ as Erc4337Actions.userOperation.prepare.Options
         const account_ = client.account
 
         if (!account_) throw new Error("Account not found")
-        const account = parseAccount<SmartAccount>(account_)
+        const account = account_ as SmartAccount.SmartAccount
 
-        const bundlerClient = client as unknown as BundlerClient
+        const bundlerClient = client as BundlerClient.Client
 
         const paymasterContext = parameters.paymasterContext
             ? parameters.paymasterContext
@@ -85,7 +101,7 @@ export const prepareUserOperationForErc20Paymaster =
             // Inject custom approval before calling prepareUserOperation
             ////////////////////////////////////////////////////////////////////////////////
 
-            const token = getAddress(paymasterContext.token)
+            const token = Address.checksum(paymasterContext.token)
 
             let chainId: number | undefined
             async function getChainId(): Promise<number> {
@@ -93,9 +109,9 @@ export const prepareUserOperationForErc20Paymaster =
                 if (client.chain) return client.chain.id
                 const chainId_ = await getAction(
                     client,
-                    getChainId_,
-                    "getChainId"
-                )({})
+                    Actions.chains.getId,
+                    "chains.getId"
+                )(undefined)
                 chainId = chainId_
                 return chainId
             }
@@ -114,10 +130,10 @@ export const prepareUserOperationForErc20Paymaster =
             const quote = quotes[0]
 
             if (quote === undefined) {
-                throw new RpcError(new Error("Quotes not found"), {
-                    shortMessage:
-                        "client didn't return token quotes, check if the token is supported"
-                })
+                throw new Errors.BaseError(
+                    "client didn't return token quotes, check if the token is supported",
+                    { cause: new Error("Quotes not found") }
+                )
             }
 
             const {
@@ -135,9 +151,9 @@ export const prepareUserOperationForErc20Paymaster =
             // Create basic approval call array with max approval
             const callsWithDummyApproval = [
                 {
-                    abi: erc20Abi,
+                    abi: Abis.erc20,
                     functionName: "approve",
-                    args: [paymasterERC20Address, maxUint256], // dummy approval to ensure simulation passes
+                    args: [paymasterERC20Address, Solidity.maxUint256], // dummy approval to ensure simulation passes
                     to: paymasterContext.token
                 },
                 ...(calls ? calls : [])
@@ -146,7 +162,7 @@ export const prepareUserOperationForErc20Paymaster =
             // For USDT on mainnet, add zero approval at the beginning
             if (token === MAINNET_USDT_ADDRESS) {
                 callsWithDummyApproval.unshift({
-                    abi: erc20Abi,
+                    abi: Abis.erc20,
                     functionName: "approve",
                     args: [paymasterERC20Address, 0n],
                     to: MAINNET_USDT_ADDRESS
@@ -172,51 +188,52 @@ export const prepareUserOperationForErc20Paymaster =
                           token,
                           owner: account.address,
                           slot: balanceSlot
-                      })[0]
+                      })[token]
                     : undefined
 
-            parameters.stateOverride =
-                balanceOverride && balanceStateOverride
-                    ? (parameters.stateOverride ?? []).concat([
-                          {
-                              address: token,
-                              stateDiff: [
-                                  ...(balanceStateOverride.stateDiff ?? [])
-                              ]
-                          }
-                      ])
-                    : parameters.stateOverride
+            if (balanceOverride && balanceStateOverride) {
+                const existing = parameters.stateOverride?.[token]
+                parameters.stateOverride = {
+                    ...parameters.stateOverride,
+                    [token]: {
+                        ...existing,
+                        stateDiff: {
+                            ...existing?.stateDiff,
+                            ...balanceStateOverride.stateDiff
+                        }
+                    }
+                } as StateOverrides.StateOverrides
+            }
 
             const userOperation = await getAction(
                 client,
-                prepareUserOperation,
-                "prepareUserOperation"
+                Erc4337Actions.userOperation.prepare,
+                "userOperation.prepare"
             )({
                 ...parameters,
                 paymaster: {
-                    getPaymasterData: (
-                        args: GetPaymasterDataParameters
-                    ): Promise<GetPaymasterDataReturnType> => {
+                    getData: (
+                        args: Erc4337Actions.paymaster.getData.Options
+                    ): Promise<Erc4337Actions.paymaster.getData.ReturnType> => {
                         const paymaster =
                             parameters.paymaster ?? bundlerClient?.paymaster
 
-                        if (typeof paymaster === "object") {
-                            const { getPaymasterStubData } = paymaster
+                        const getStubData =
+                            resolvePaymasterActions(paymaster)?.getStubData
 
-                            if (getPaymasterStubData) {
-                                return getPaymasterStubData(args)
-                            }
+                        if (getStubData) {
+                            return getStubData(args)
                         }
 
                         return getAction(
                             bundlerClient,
-                            getPaymasterData_,
-                            "getPaymasterData"
+                            Erc4337Actions.paymaster.getData,
+                            "paymaster.getData"
                         )(args)
                     }
                 },
                 calls: callsWithDummyApproval
-            } as unknown as PrepareUserOperationParameters)
+            } as unknown as Erc4337Actions.userOperation.prepare.Options)
 
             ////////////////////////////////////////////////////////////////////////////////
             // Call pimlico_getTokenQuotes and calculate the approval amount needed for op
@@ -248,10 +265,10 @@ export const prepareUserOperationForErc20Paymaster =
 
             const allowance = await getAction(
                 publicClient,
-                readContract,
-                "readContract"
+                Actions.contract.read,
+                "contract.read"
             )({
-                abi: erc20Abi,
+                abi: Abis.erc20,
                 functionName: "allowance",
                 args: [account.address, paymasterERC20Address],
                 address: token
@@ -263,7 +280,7 @@ export const prepareUserOperationForErc20Paymaster =
 
             if (!hasSufficientApproval) {
                 finalCalls.unshift({
-                    abi: erc20Abi,
+                    abi: Abis.erc20,
                     functionName: "approve",
                     args: [paymasterERC20Address, maxCostInToken],
                     to: paymasterContext.token
@@ -272,7 +289,7 @@ export const prepareUserOperationForErc20Paymaster =
                 // For USDT on mainnet, add zero approval at the beginning
                 if (token === MAINNET_USDT_ADDRESS) {
                     finalCalls.unshift({
-                        abi: erc20Abi,
+                        abi: Abis.erc20,
                         functionName: "approve",
                         args: [paymasterERC20Address, 0n],
                         to: MAINNET_USDT_ADDRESS
@@ -284,17 +301,29 @@ export const prepareUserOperationForErc20Paymaster =
                 finalCalls.map((call_) => {
                     const call = call_ as
                         | {
-                              to: Address
+                              to: Address.Address
                               value: bigint
-                              data: Hex
+                              data: Hex.Hex
                           }
-                        | (ContractFunctionParameters & {
-                              to: Address
+                        | {
+                              abi: Abi.Abi
+                              functionName: string
+                              args?: readonly unknown[] | undefined
+                              to: Address.Address
                               value: bigint
-                          })
+                          }
                     if ("abi" in call)
                         return {
-                            data: encodeFunctionData(call),
+                            data: AbiFunction.encodeData(
+                                AbiFunction.fromAbi(
+                                    call.abi,
+                                    call.functionName,
+                                    {
+                                        args: call.args
+                                    }
+                                ),
+                                call.args
+                            ),
                             to: call.to,
                             value: call.value
                         }
@@ -308,29 +337,24 @@ export const prepareUserOperationForErc20Paymaster =
             ////////////////////////////////////////////////////////////////////////////////
 
             const paymaster = parameters.paymaster ?? bundlerClient?.paymaster
-            const { getPaymasterData } = (() => {
+            const { getData } = (() => {
                 // If `paymaster: true`, we will assume the Bundler Client supports Paymaster Actions.
                 if (paymaster === true)
                     return {
-                        getPaymasterData: (
-                            parameters: GetPaymasterDataParameters
+                        getData: (
+                            parameters: Erc4337Actions.paymaster.getData.Options
                         ) =>
                             getAction(
                                 bundlerClient,
-                                getPaymasterData_,
-                                "getPaymasterData"
+                                Erc4337Actions.paymaster.getData,
+                                "paymaster.getData"
                             )(parameters)
                     }
 
                 // If Actions are passed to `paymaster` (via Paymaster Client or directly), we will use them.
-                if (
-                    typeof paymaster === "object" &&
-                    paymaster.getPaymasterData
-                ) {
-                    const { getPaymasterData } = paymaster
-                    return {
-                        getPaymasterData
-                    }
+                const getData = resolvePaymasterActions(paymaster)?.getData
+                if (getData) {
+                    return { getData }
                 }
 
                 throw new Error(
@@ -342,17 +366,17 @@ export const prepareUserOperationForErc20Paymaster =
             // Re-calculate Paymaster data fields.
             ////////////////////////////////////////////////////////////////////////////////
 
-            const paymasterData = await getPaymasterData({
+            const paymasterData = await getData({
                 chainId: await getChainId(),
                 entryPointAddress: account.entryPoint.address,
                 context: paymasterContext,
-                ...(userOperation as UserOperation)
+                ...(userOperation as UserOperation.UserOperation)
             })
 
             return {
                 ...userOperation,
                 ...paymasterData
-            } as unknown as PrepareUserOperationReturnType<
+            } as unknown as Erc4337Actions.userOperation.prepare.ReturnType<
                 account,
                 accountOverride,
                 calls,
@@ -362,9 +386,11 @@ export const prepareUserOperationForErc20Paymaster =
 
         return (await getAction(
             client,
-            prepareUserOperation,
-            "prepareUserOperation"
-        )(parameters)) as unknown as PrepareUserOperationReturnType<
+            Erc4337Actions.userOperation.prepare,
+            "userOperation.prepare"
+        )(
+            parameters
+        )) as unknown as Erc4337Actions.userOperation.prepare.ReturnType<
             account,
             accountOverride,
             calls,

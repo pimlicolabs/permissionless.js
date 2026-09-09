@@ -1,6 +1,6 @@
-import { getAddress, isAddress } from "viem"
-import { entryPoint07Address } from "viem/account-abstraction"
-import { foundry } from "viem/chains"
+import { anvil } from "viem/chains"
+import { EntryPoint } from "viem/erc4337"
+import { Address } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPimlicoClient } from "../../../permissionless-test/src/utils"
@@ -13,21 +13,23 @@ describe("getTokenQuotes", () => {
             altoRpc: rpc.paymasterRpc
         })
 
-        const token = getAddress("0xffffffffffffffffffffffffffffffffffffffff")
+        const token = Address.checksum(
+            "0xffffffffffffffffffffffffffffffffffffffff"
+        )
 
         const quotes = await getTokenQuotes(pimlicoBundlerClient, {
             tokens: [token],
-            entryPointAddress: entryPoint07Address,
-            chain: foundry
+            entryPointAddress: EntryPoint.addressV07,
+            chain: anvil
         })
 
         expect(quotes).toBeTruthy()
         expect(Array.isArray(quotes)).toBe(true)
         expect(quotes[0].token).toBeTruthy()
-        expect(isAddress(quotes[0].token))
+        expect(Address.validate(quotes[0].token))
         expect(quotes[0].token).toEqual(token)
         expect(quotes[0].paymaster).toBeTruthy()
-        expect(isAddress(quotes[0].paymaster))
+        expect(Address.validate(quotes[0].paymaster))
         expect(quotes[0].exchangeRate).toBeTruthy()
         expect(quotes[0].exchangeRate).toBeGreaterThan(0n)
         expect(quotes[0].postOpGas).toBeTruthy()
@@ -40,21 +42,23 @@ describe("getTokenQuotes", () => {
             altoRpc: rpc.paymasterRpc
         })
 
-        const token = getAddress("0xffffffffffffffffffffffffffffffffffffffff")
+        const token = Address.checksum(
+            "0xffffffffffffffffffffffffffffffffffffffff"
+        )
 
         const quotes = await getTokenQuotes(pimlicoBundlerClient, {
             tokens: [token],
-            entryPointAddress: entryPoint07Address,
-            chain: foundry
+            entryPointAddress: EntryPoint.addressV07,
+            chain: anvil
         })
 
         expect(quotes).toBeTruthy()
         expect(Array.isArray(quotes)).toBe(true)
         expect(quotes[0].token).toBeTruthy()
-        expect(isAddress(quotes[0].token))
+        expect(Address.validate(quotes[0].token))
         expect(quotes[0].token).toEqual(token)
         expect(quotes[0].paymaster).toBeTruthy()
-        expect(isAddress(quotes[0].paymaster))
+        expect(Address.validate(quotes[0].paymaster))
         expect(quotes[0].exchangeRate).toBeTruthy()
         expect(quotes[0].exchangeRate).toBeGreaterThan(0n)
         expect(quotes[0].postOpGas).toBeTruthy()
@@ -67,21 +71,23 @@ describe("getTokenQuotes", () => {
             altoRpc: rpc.paymasterRpc
         })
 
-        const token = getAddress("0xffffffffffffffffffffffffffffffffffffffff")
+        const token = Address.checksum(
+            "0xffffffffffffffffffffffffffffffffffffffff"
+        )
 
         const quotes = await getTokenQuotes(pimlicoBundlerClient, {
             tokens: [token],
-            entryPointAddress: entryPoint07Address,
-            chain: foundry
+            entryPointAddress: EntryPoint.addressV07,
+            chain: anvil
         })
 
         expect(quotes).toBeTruthy()
         expect(Array.isArray(quotes)).toBe(true)
         expect(quotes[0].token).toBeTruthy()
-        expect(isAddress(quotes[0].token))
+        expect(Address.validate(quotes[0].token))
         expect(quotes[0].token).toEqual(token)
         expect(quotes[0].paymaster).toBeTruthy()
-        expect(isAddress(quotes[0].paymaster))
+        expect(Address.validate(quotes[0].paymaster))
         expect(quotes[0].exchangeRate).toBeTruthy()
         expect(quotes[0].exchangeRate).toBeGreaterThan(0n)
         expect(quotes[0].postOpGas).toBeTruthy()

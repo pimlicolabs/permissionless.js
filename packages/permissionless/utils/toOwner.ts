@@ -1,42 +1,26 @@
-import {
-    type Account,
-    type Address,
-    type Chain,
-    createWalletClient,
-    custom,
-    type EIP1193Provider,
-    type LocalAccount,
-    type OneOf,
-    type Transport,
-    type WalletClient
-} from "viem"
-import { toAccount } from "viem/accounts"
-
-import { signTypedData } from "viem/actions"
-import { getAction } from "viem/utils"
+import { Account, Actions, type Chain, Client, custom } from "viem"
+import type { Address, Provider } from "viem/utils"
+import type { OneOf } from "../types/utils.js"
+import { getAction } from "./getAction.js"
 
 export type EthereumProvider = OneOf<
     // biome-ignore lint/suspicious/noExplicitAny: matches viem custom(); narrowed by the 1.0 EthereumProvider any-drop
-    { request(...args: any): Promise<any> } | EIP1193Provider>
+    { request(...args: any): Promise<any> } | Provider.Provider>
+
+type WalletClient = Client.Client<Chain.Chain | undefined, Account.Account>
 
 export async function toOwner<provider extends EthereumProvider>({
     owner,
     address
 }: {
-    owner: OneOf<
-        | provider
-        | WalletClient<Transport, Chain | undefined, Account>
-        | LocalAccount
-    >
-    address?: Address
-}): Promise<LocalAccount> {
+    owner: OneOf<provider | WalletClient | Account.Local>
+    address?: Address.Address
+}): Promise<Account.Local> {
     if ("type" in owner && owner.type === "local") {
-        return owner as LocalAccount
+        return owner as Account.Local
     }
 
-    let walletClient:
-        | WalletClient<Transport, Chain | undefined, Account>
-        | undefined
+    let walletClient: WalletClient | undefined
 
     if ("request" in owner) {
         if (!address) {
@@ -54,38 +38,45 @@ export async function toOwner<provider extends EthereumProvider>({
             // For TS to be happy
             throw new Error("address is required")
         }
-        walletClient = createWalletClient({
+        walletClient = Client.create({
             account: address,
             transport: custom(owner as EthereumProvider)
         })
     }
 
     if (!walletClient) {
-        walletClient = owner as WalletClient<
-            Transport,
-            Chain | undefined,
-            Account
-        >
+        walletClient = owner as WalletClient
     }
 
-    return toAccount({
-        address: walletClient.account.address,
+    const client = walletClient
+
+    const source: Account.from.Account = {
+        address: client.account.address,
+        sign() {
+            throw new Error("Smart account signer doesn't sign raw hashes")
+        },
         async signMessage({ message }) {
-            return walletClient.signMessage({ message })
+            return getAction(
+                client,
+                Actions.signMessage,
+                "signMessage"
+            )({ message })
         },
         async signTypedData(typedData) {
             const action = getAction(
-                walletClient,
-                signTypedData,
-                "signTypedData"
+                client,
+                Actions.typedData.sign,
+                "typedData.sign"
             )
-            // biome-ignore lint/suspicious/noExplicitAny: TypedDataDefinition does not convert to SignTypedDataParameters
+            // biome-ignore lint/suspicious/noExplicitAny: TypedData.Definition does not convert to Actions.typedData.sign.Options
             return action(typedData as any)
         },
-        async signTransaction(_) {
+        async signTransaction() {
             throw new Error(
                 "Smart account signer doesn't need to sign transactions"
             )
         }
-    })
+    }
+
+    return Account.from(source)
 }

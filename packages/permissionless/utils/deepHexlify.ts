@@ -1,9 +1,4 @@
-import { toHex } from "viem"
-
-export const transactionReceiptStatus = {
-    "0x0": "reverted",
-    "0x1": "success"
-} as const
+import { Hex } from "viem/utils"
 
 // biome-ignore lint/suspicious/noExplicitAny: it's a recursive function, so it's hard to type
 export function deepHexlify(obj: any): any {
@@ -15,11 +10,13 @@ export function deepHexlify(obj: any): any {
     }
 
     if (typeof obj === "bigint") {
-        return toHex(obj)
+        return Hex.fromNumber(obj)
     }
 
     if (obj._isBigNumber != null || typeof obj !== "object") {
-        return toHex(obj).replace(/^0x0/, "0x")
+        return Hex.fromNumber(
+            typeof obj === "number" ? obj : BigInt(obj.toString())
+        ).replace(/^0x0/, "0x")
     }
     if (Array.isArray(obj)) {
         return obj.map((member) => deepHexlify(member))

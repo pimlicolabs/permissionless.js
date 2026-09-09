@@ -1,11 +1,12 @@
-import type { Account, Address, Chain, Client, Transport } from "viem"
-import type { UserOperation } from "viem/account-abstraction"
+import type { Client, Transport } from "viem"
+import type { UserOperation } from "viem/erc4337"
+import type { Address } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 export type ValidateSponsorshipPoliciesParameters = {
-    userOperation: UserOperation
-    entryPointAddress: Address
+    userOperation: UserOperation.UserOperation
+    entryPointAddress: Address.Address
     sponsorshipPolicyIds: string[]
 }
 
@@ -55,15 +56,11 @@ export type ValidateSponsorshipPolicies = {
  * ]
  */
 export const validateSponsorshipPolicies = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PimlicoRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args: ValidateSponsorshipPoliciesParameters
 ): Promise<ValidateSponsorshipPolicies[]> => {
-    return await client.request({
+    const request = client.request as Transport.RequestFn<PimlicoRpcSchema>
+    return await request({
         method: "pm_validateSponsorshipPolicies",
         params: [
             deepHexlify(args.userOperation),

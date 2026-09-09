@@ -1,14 +1,14 @@
 import {
+    AbiParameters,
     type Address,
-    encodeAbiParameters,
-    keccak256,
-    type StateOverride,
-    toHex
-} from "viem"
+    Hash,
+    Hex,
+    type StateOverrides
+} from "viem/utils"
 
 export type Erc20BalanceOverrideParameters = {
-    token: Address
-    owner: Address
+    token: Address.Address
+    owner: Address.Address
     slot: bigint
     balance?: bigint
 }
@@ -20,30 +20,19 @@ export function erc20BalanceOverride({
     balance = BigInt(
         "0x100000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     )
-}: Erc20BalanceOverrideParameters): StateOverride {
-    const smartAccountErc20BalanceSlot = keccak256(
-        encodeAbiParameters(
-            [
-                {
-                    type: "address"
-                },
-                {
-                    type: "uint256"
-                }
-            ],
+}: Erc20BalanceOverrideParameters): StateOverrides.StateOverrides {
+    const smartAccountErc20BalanceSlot = Hash.keccak256(
+        AbiParameters.encode(
+            [{ type: "address" }, { type: "uint256" }],
             [owner, slot]
         )
     )
 
-    return [
-        {
-            address: token,
-            stateDiff: [
-                {
-                    slot: smartAccountErc20BalanceSlot,
-                    value: toHex(balance)
-                }
-            ]
+    return {
+        [token]: {
+            stateDiff: {
+                [smartAccountErc20BalanceSlot]: Hex.fromNumber(balance)
+            }
         }
-    ]
+    }
 }

@@ -1,10 +1,10 @@
-import type { Address, Client } from "viem"
-import { readContract } from "viem/actions"
-import { getAction } from "viem/utils"
+import { Actions, type Client } from "viem"
+import type { Address } from "viem/utils"
+import { getAction } from "../../utils/getAction.js"
 
 export type GetAccountNonceParams = {
-    address: Address
-    entryPointAddress: Address
+    address: Address.Address
+    entryPointAddress: Address.Address
     key?: bigint
 }
 
@@ -35,15 +35,15 @@ export type GetAccountNonceParams = {
  * // Return 0n
  */
 export const getAccountNonce = async (
-    client: Client,
+    client: Client.Client,
     args: GetAccountNonceParams
 ): Promise<bigint> => {
     const { address, entryPointAddress, key = BigInt(0) } = args
 
     return await getAction(
         client,
-        readContract,
-        "readContract"
+        Actions.contract.read,
+        "contract.read"
     )({
         address: entryPointAddress,
         abi: [

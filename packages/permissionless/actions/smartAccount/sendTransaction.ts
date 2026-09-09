@@ -1,18 +1,27 @@
-import type {
-    Chain,
-    Client,
-    Hash,
-    SendTransactionParameters,
-    Transport
-} from "viem"
+import type { Actions, Chain } from "viem"
 import {
-    type SendUserOperationParameters,
-    type SmartAccount,
-    sendUserOperation,
-    waitForUserOperationReceipt
-} from "viem/account-abstraction"
-import { getAction, parseAccount } from "viem/utils"
+    type BundlerClient,
+    Actions as Erc4337Actions,
+    type SmartAccount
+} from "viem/erc4337"
+import type { Hex } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
+
+export type SendTransactionParameters<
+    chain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined,
+    chainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
+> = Omit<
+    Actions.transaction.send.Options<
+        chainOverride extends Chain.Chain ? chainOverride : chain
+    >,
+    "account"
+> &
+    GetSmartAccountParameter<account>
 
 /**
  * Creates, signs, and sends a new transaction to the network.
@@ -61,18 +70,22 @@ import { AccountNotFoundError } from "../../errors/index.js"
  * })
  */
 export async function sendTransaction<
-    account extends SmartAccount | undefined,
-    chain extends Chain | undefined,
-    accountOverride extends SmartAccount | undefined = undefined,
-    chainOverride extends Chain | undefined = Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined,
+    chain extends Chain.Chain | undefined,
+    accountOverride extends SmartAccount.SmartAccount | undefined = undefined,
+    chainOverride extends Chain.Chain | undefined = Chain.Chain | undefined,
     calls extends readonly unknown[] = readonly unknown[]
 >(
-    client: Client<Transport, chain, account>,
+    client: BundlerClient.Client<chain, account>,
     args:
         | SendTransactionParameters<chain, account, chainOverride>
-        | SendUserOperationParameters<account, accountOverride, calls>
-): Promise<Hash> {
-    let userOpHash: Hash
+        | Erc4337Actions.userOperation.send.Options<
+              account,
+              accountOverride,
+              calls
+          >
+): Promise<Hex.Hex> {
+    let userOpHash: Hex.Hex
 
     if ("to" in args) {
         const {
@@ -91,14 +104,14 @@ export async function sendTransaction<
             })
         }
 
-        const account = parseAccount(account_) as SmartAccount
+        const account = account_ as SmartAccount.SmartAccount
 
         if (!to) throw new Error("Missing to address")
 
         userOpHash = await getAction(
             client,
-            sendUserOperation,
-            "sendUserOperation"
+            Erc4337Actions.userOperation.send,
+            "userOperation.send"
         )({
             ...args,
             calls: [
@@ -112,19 +125,27 @@ export async function sendTransaction<
             maxFeePerGas,
             maxPriorityFeePerGas,
             nonce: nonce ? BigInt(nonce) : undefined
-        })
+        } as unknown as Erc4337Actions.userOperation.send.Options<
+            account,
+            accountOverride,
+            calls
+        >)
     } else {
         userOpHash = await getAction(
             client,
-            sendUserOperation,
-            "sendUserOperation"
-        )({ ...args } as SendUserOperationParameters<account, accountOverride>)
+            Erc4337Actions.userOperation.send,
+            "userOperation.send"
+        )({ ...args } as Erc4337Actions.userOperation.send.Options<
+            account,
+            accountOverride,
+            calls
+        >)
     }
 
     const userOperationReceipt = await getAction(
         client,
-        waitForUserOperationReceipt,
-        "waitForUserOperationReceipt"
+        Erc4337Actions.userOperation.waitForReceipt,
+        "userOperation.waitForReceipt"
     )({
         hash: userOpHash
     })

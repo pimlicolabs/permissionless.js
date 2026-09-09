@@ -1,34 +1,44 @@
-import type {
-    Chain,
-    Client,
-    SendCallsParameters,
-    SendCallsReturnType,
-    Transport
-} from "viem"
+import type { Actions, Chain } from "viem"
 import {
-    type SendUserOperationParameters,
-    type SmartAccount,
-    sendUserOperation
-} from "viem/account-abstraction"
-import { getAction } from "viem/utils"
+    type BundlerClient,
+    Actions as Erc4337Actions,
+    type SmartAccount
+} from "viem/erc4337"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
+
+type SendCallsParameters<
+    chain extends Chain.Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined,
+    chainOverride extends Chain.Chain | undefined,
+    calls extends readonly unknown[]
+> = Omit<
+    Actions.wallet.sendCalls.Options<chain, undefined, chainOverride, calls>,
+    "account"
+> &
+    GetSmartAccountParameter<account>
 
 export async function sendCalls<
-    account extends SmartAccount | undefined,
-    chain extends Chain | undefined,
-    accountOverride extends SmartAccount | undefined = undefined,
-    chainOverride extends Chain | undefined = Chain | undefined,
+    account extends SmartAccount.SmartAccount | undefined,
+    chain extends Chain.Chain | undefined,
+    accountOverride extends SmartAccount.SmartAccount | undefined = undefined,
+    chainOverride extends Chain.Chain | undefined = Chain.Chain | undefined,
     calls extends readonly unknown[] = readonly unknown[]
 >(
-    client: Client<Transport, chain, account>,
+    client: BundlerClient.Client<chain, account>,
     args:
         | SendCallsParameters<chain, account, chainOverride, calls>
-        | SendUserOperationParameters<account, accountOverride, calls>
-): Promise<SendCallsReturnType> {
+        | Erc4337Actions.userOperation.send.Options<
+              account,
+              accountOverride,
+              calls
+          >
+): Promise<Actions.wallet.sendCalls.ReturnType> {
     const userOpHash = await getAction(
         client,
-        sendUserOperation,
-        "sendUserOperation"
-    )({ ...args } as SendUserOperationParameters<
+        Erc4337Actions.userOperation.send,
+        "userOperation.send"
+    )({ ...args } as Erc4337Actions.userOperation.send.Options<
         account,
         accountOverride,
         calls

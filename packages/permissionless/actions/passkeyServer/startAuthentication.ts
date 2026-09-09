@@ -1,12 +1,7 @@
-import {
-    type Account,
-    type Chain,
-    type Client,
-    type Transport,
-    toHex
-} from "viem"
+import type { Client, Transport } from "viem"
+import { Hex } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
+import * as Base64 from "../../utils/base64.js"
 
 export type StartAuthenticationReturnType = {
     challenge: string
@@ -16,22 +11,16 @@ export type StartAuthenticationReturnType = {
 }
 
 export const startAuthentication = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >
+    client: Pick<Client.Client, "request">
 ): Promise<StartAuthenticationReturnType> => {
-    const response = await client.request({
-        method: "pks_startAuthentication",
-        params: []
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
+    const response = await request({
+        method: "pks_startAuthentication"
     })
 
     return {
-        challenge: toHex(
-            (await getOxExports()).Base64.toBytes(response.challenge)
-        ),
+        challenge: Hex.fromBytes(Base64.toBytes(response.challenge)),
         rpId: response.rpId,
         userVerification: response.userVerification,
         uuid: response.uuid

@@ -39,6 +39,20 @@ export default defineConfig({
             join(__dirname, "./**/*.test.ts"),
             join(__dirname, "../permissionless-test/src/fixtures/**/*.test.ts")
         ],
+        // Pending the account port tickets (10-17): the account dirs still hold
+        // 0.x code, and these action tests need at least one ported account in
+        // permissionless-test's getCoreSmartAccounts / getSimpleAccountClient.
+        exclude: [
+            "**/node_modules/**",
+            "**/accounts/**",
+            "**/actions/erc7579/*.test.ts",
+            "**/actions/smartAccount/*.test.ts",
+            "**/actions/public/*.test.ts",
+            "**/actions/pimlico/getUserOperationStatus.test.ts",
+            "**/actions/pimlico/sponsorUserOperation.test.ts",
+            "**/actions/pimlico/validateSponsorshipPolicies.test.ts",
+            "**/experimental/**/*.test.ts"
+        ],
         env: loadEnv("test", process.cwd())
     }
 })

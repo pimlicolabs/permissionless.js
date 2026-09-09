@@ -1,31 +1,27 @@
-import type { Account, Chain, Client, Hex, Transport } from "viem"
-import type { CreateWebAuthnCredentialReturnType } from "viem/account-abstraction"
+import type { Client, Transport } from "viem"
+import type { Hex, WebAuthn } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
+import * as Base64 from "../../utils/base64.js"
 
 export type VerifyRegistrationParameters = {
-    credential: CreateWebAuthnCredentialReturnType
+    credential: WebAuthn.P256Credential
     context: unknown
 }
 
 export type VerifyRegistrationReturnType = {
     success: boolean
     id: string
-    publicKey: Hex
+    publicKey: Hex.Hex
     userName: string
 }
 
 export const verifyRegistration = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args: VerifyRegistrationParameters
 ): Promise<VerifyRegistrationReturnType> => {
     const { credential, context } = args
-    const { Base64 } = await getOxExports()
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
 
     const response = credential.raw
         .response as unknown as AuthenticatorAttestationResponse
@@ -50,7 +46,7 @@ export const verifyRegistration = async (
         }
     }
 
-    const serverResponse = await client.request(
+    const serverResponse = await request(
         {
             method: "pks_verifyRegistration",
             params: [
@@ -126,7 +122,7 @@ export const verifyRegistration = async (
     return {
         success,
         id,
-        publicKey: publicKey as Hex,
+        publicKey: publicKey as Hex.Hex,
         userName
     }
 }

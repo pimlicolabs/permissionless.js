@@ -1,15 +1,8 @@
-import {
-    type Account,
-    type Address,
-    type Chain,
-    ChainNotFoundError,
-    type Client,
-    type GetChainParameter,
-    type Transport
-} from "viem"
-import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
-import { getAction } from "viem/utils"
-import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import { Chain, type Client } from "viem"
+import type { EntryPoint, UserOperation } from "viem/erc4337"
+import type { Address } from "viem/utils"
+import type { GetChainParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 import { getRequiredPrefund } from "../../utils/getRequiredPrefund.js"
 import { getTokenQuotes } from "./getTokenQuotes.js"
 
@@ -23,13 +16,13 @@ export type EstimateErc20PaymasterCostReturnType = {
 }
 
 export type EstimateErc20PaymasterCostParameters<
-    entryPointVersion extends EntryPointVersion,
-    TChain extends Chain | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    entryPointVersion extends EntryPoint.Version,
+    TChain extends Chain.Chain | undefined,
+    TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
 > = {
-    entryPoint: { version: entryPointVersion; address: Address }
-    userOperation: UserOperation<entryPointVersion>
-    token: Address
+    entryPoint: { version: entryPointVersion; address: Address.Address }
+    userOperation: UserOperation.UserOperation<entryPointVersion>
+    token: Address.Address
 } & GetChainParameter<TChain, TChainOverride>
 
 /**
@@ -42,16 +35,11 @@ export type EstimateErc20PaymasterCostParameters<
  *
  */
 export const estimateErc20PaymasterCost = async <
-    entryPointVersion extends EntryPointVersion,
-    TChain extends Chain | undefined,
-    TChainOverride extends Chain | undefined = Chain | undefined
+    entryPointVersion extends EntryPoint.Version,
+    TChain extends Chain.Chain | undefined,
+    TChainOverride extends Chain.Chain | undefined = Chain.Chain | undefined
 >(
-    client: Client<
-        Transport,
-        TChain,
-        Account | undefined,
-        PimlicoRpcSchema<entryPointVersion>
-    >,
+    client: Pick<Client.Client<TChain>, "chain" | "request">,
     args: EstimateErc20PaymasterCostParameters<
         entryPointVersion,
         TChain,
@@ -61,7 +49,7 @@ export const estimateErc20PaymasterCost = async <
     const chain = args.chain ?? client.chain
 
     if (!chain) {
-        throw new ChainNotFoundError()
+        throw new Chain.NotFoundError()
     }
 
     const { entryPoint, userOperation, token } = args

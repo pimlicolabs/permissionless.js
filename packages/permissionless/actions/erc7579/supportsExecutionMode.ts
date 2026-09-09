@@ -1,34 +1,27 @@
+import { Actions, type Chain, ContractError } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
 import {
-    type Chain,
-    type Client,
-    ContractFunctionExecutionError,
-    decodeFunctionResult,
-    encodeFunctionData,
-    encodePacked,
-    type Hex,
-    type Transport,
-    toBytes,
-    toHex
-} from "viem"
-import type {
-    GetSmartAccountParameter,
-    SmartAccount
-} from "viem/account-abstraction"
-import { call, readContract } from "viem/actions"
-import { getAction, parseAccount } from "viem/utils"
+    AbiFunction,
+    AbiParameters,
+    type Address,
+    Bytes,
+    Hex
+} from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 
 export type CallType = "call" | "delegatecall" | "batchcall"
 
 export type ExecutionMode<callType extends CallType> = {
     type: callType
     revertOnError?: boolean
-    selector?: Hex
-    context?: Hex
+    selector?: Hex.Hex
+    context?: Hex.Hex
 }
 
 export type SupportsExecutionModeParameters<
-    TSmartAccount extends SmartAccount | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined,
     callType extends CallType = CallType
 > = GetSmartAccountParameter<TSmartAccount> & ExecutionMode<callType>
 
@@ -43,29 +36,51 @@ export function getCallType(callType: CallType) {
     }
 }
 
+const toSizedHex = (value: Hex.Hex, size: number) =>
+    Hex.fromBytes(Bytes.fromHex(value, { size }))
+
 export function encodeExecutionMode<callType extends CallType>({
     type,
     revertOnError,
     selector,
     context
-}: ExecutionMode<callType>): Hex {
-    return encodePacked(
+}: ExecutionMode<callType>): Hex.Hex {
+    return AbiParameters.encodePacked(
         ["bytes1", "bytes1", "bytes4", "bytes4", "bytes22"],
         [
-            toHex(toBytes(getCallType(type), { size: 1 })),
-            toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
-            toHex(toBytes("0x0", { size: 4 })),
-            toHex(toBytes(selector ?? "0x", { size: 4 })),
-            toHex(toBytes(context ?? "0x", { size: 22 }))
+            toSizedHex(getCallType(type), 1),
+            toSizedHex(revertOnError ? "0x01" : "0x00", 1),
+            toSizedHex("0x0", 4),
+            toSizedHex(selector ?? "0x", 4),
+            toSizedHex(context ?? "0x", 22)
         ]
     )
 }
 
+const abi = [
+    {
+        name: "supportsExecutionMode",
+        type: "function",
+        stateMutability: "view",
+        inputs: [
+            {
+                type: "bytes32",
+                name: "encodedMode"
+            }
+        ],
+        outputs: [
+            {
+                type: "bool"
+            }
+        ]
+    }
+] as const
+
 export async function supportsExecutionMode<
-    TSmartAccount extends SmartAccount | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined,
     callType extends CallType = CallType
 >(
-    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    client: BundlerClient.Client<Chain.Chain | undefined, TSmartAccount>,
     args: SupportsExecutionModeParameters<TSmartAccount, callType>
 ): Promise<boolean> {
     const {
@@ -82,7 +97,7 @@ export async function supportsExecutionMode<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
 
     const publicClient = account.client
 
@@ -93,30 +108,11 @@ export async function supportsExecutionMode<
         context
     })
 
-    const abi = [
-        {
-            name: "supportsExecutionMode",
-            type: "function",
-            stateMutability: "view",
-            inputs: [
-                {
-                    type: "bytes32",
-                    name: "encodedMode"
-                }
-            ],
-            outputs: [
-                {
-                    type: "bool"
-                }
-            ]
-        }
-    ] as const
-
     try {
         return await getAction(
             publicClient,
-            readContract,
-            "readContract"
+            Actions.contract.read,
+            "contract.read"
         )({
             abi,
             functionName: "supportsExecutionMode",
@@ -124,33 +120,31 @@ export async function supportsExecutionMode<
             address: account.address
         })
     } catch (error) {
-        if (error instanceof ContractFunctionExecutionError) {
+        if (error instanceof ContractError.ContractFunctionExecutionError) {
             const { factory, factoryData } = await account.getFactoryArgs()
 
             const result = await getAction(
                 publicClient,
-                call,
+                Actions.call,
                 "call"
             )({
-                factory: factory,
+                factory: factory as Address.Address | undefined,
                 factoryData: factoryData,
                 to: account.address,
-                data: encodeFunctionData({
-                    abi,
-                    functionName: "supportsExecutionMode",
-                    args: [encodedMode]
-                })
+                data: AbiFunction.encodeData(abi, "supportsExecutionMode", [
+                    encodedMode
+                ])
             })
 
             if (!result?.data) {
                 throw new Error("accountId result is empty")
             }
 
-            return decodeFunctionResult({
+            return AbiFunction.decodeResult(
                 abi,
-                functionName: "supportsExecutionMode",
-                data: result.data
-            })
+                "supportsExecutionMode",
+                result.data
+            )
         }
 
         throw error

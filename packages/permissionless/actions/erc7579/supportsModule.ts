@@ -1,23 +1,14 @@
-import {
-    type Chain,
-    type Client,
-    ContractFunctionExecutionError,
-    decodeFunctionResult,
-    encodeFunctionData,
-    type Transport
-} from "viem"
-import type {
-    GetSmartAccountParameter,
-    SmartAccount
-} from "viem/account-abstraction"
-import { call, readContract } from "viem/actions"
-import { getAction, parseAccount } from "viem/utils"
+import { Actions, type Chain, ContractError } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import { AbiFunction, type Address } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 
 export type ModuleType = "validator" | "executor" | "fallback" | "hook"
 
 export type SupportsModuleParameters<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
 > = GetSmartAccountParameter<TSmartAccount> & {
     type: ModuleType
 }
@@ -37,10 +28,29 @@ export function parseModuleTypeId(type: ModuleType): bigint {
     }
 }
 
+const abi = [
+    {
+        name: "supportsModule",
+        type: "function",
+        stateMutability: "view",
+        inputs: [
+            {
+                type: "uint256",
+                name: "moduleTypeId"
+            }
+        ],
+        outputs: [
+            {
+                type: "bool"
+            }
+        ]
+    }
+] as const
+
 export async function supportsModule<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
 >(
-    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    client: BundlerClient.Client<Chain.Chain | undefined, TSmartAccount>,
     args: SupportsModuleParameters<TSmartAccount>
 ): Promise<boolean> {
     const { account: account_ = client.account } = args
@@ -51,34 +61,15 @@ export async function supportsModule<
         })
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
 
     const publicClient = account.client
-
-    const abi = [
-        {
-            name: "supportsModule",
-            type: "function",
-            stateMutability: "view",
-            inputs: [
-                {
-                    type: "uint256",
-                    name: "moduleTypeId"
-                }
-            ],
-            outputs: [
-                {
-                    type: "bool"
-                }
-            ]
-        }
-    ] as const
 
     try {
         return await getAction(
             publicClient,
-            readContract,
-            "readContract"
+            Actions.contract.read,
+            "contract.read"
         )({
             abi,
             functionName: "supportsModule",
@@ -86,33 +77,27 @@ export async function supportsModule<
             address: account.address
         })
     } catch (error) {
-        if (error instanceof ContractFunctionExecutionError) {
+        if (error instanceof ContractError.ContractFunctionExecutionError) {
             const { factory, factoryData } = await account.getFactoryArgs()
 
             const result = await getAction(
                 publicClient,
-                call,
+                Actions.call,
                 "call"
             )({
-                factory: factory,
+                factory: factory as Address.Address | undefined,
                 factoryData: factoryData,
                 to: account.address,
-                data: encodeFunctionData({
-                    abi,
-                    functionName: "supportsModule",
-                    args: [parseModuleTypeId(args.type)]
-                })
+                data: AbiFunction.encodeData(abi, "supportsModule", [
+                    parseModuleTypeId(args.type)
+                ])
             })
 
             if (!result?.data) {
                 throw new Error("accountId result is empty")
             }
 
-            return decodeFunctionResult({
-                abi,
-                functionName: "supportsModule",
-                data: result.data
-            })
+            return AbiFunction.decodeResult(abi, "supportsModule", result.data)
         }
 
         throw error

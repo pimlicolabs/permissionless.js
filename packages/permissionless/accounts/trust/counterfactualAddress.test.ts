@@ -1,8 +1,8 @@
 import type { Client } from "viem"
 import { describe } from "vitest"
 import {
-    type CounterfactualAddressParams,
     anvilAccount,
+    type CounterfactualAddressParams,
     describeParams,
     expectCounterfactualAddress,
     loadCounterfactualAddressFixture,

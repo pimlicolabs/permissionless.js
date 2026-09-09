@@ -17,10 +17,6 @@ export {
     getUserOperationStatus
 } from "./getUserOperationStatus.js"
 export {
-    type SendCompressedUserOperationParameters,
-    sendCompressedUserOperation
-} from "./sendCompressedUserOperation.js"
-export {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation

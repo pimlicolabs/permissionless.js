@@ -1,15 +1,15 @@
 import {
+    AbiParameters,
     type Address,
-    encodeAbiParameters,
-    keccak256,
-    type StateOverride,
-    toHex
-} from "viem"
+    Hash,
+    Hex,
+    type StateOverrides
+} from "viem/utils"
 
 export type Erc20AllowanceOverrideParameters = {
-    token: Address
-    owner: Address
-    spender: Address
+    token: Address.Address
+    owner: Address.Address
+    spender: Address.Address
     slot: bigint
     amount?: bigint
 }
@@ -22,29 +22,15 @@ export function erc20AllowanceOverride({
     amount = BigInt(
         "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     )
-}: Erc20AllowanceOverrideParameters): StateOverride {
-    const smartAccountErc20AllowanceSlot = keccak256(
-        encodeAbiParameters(
-            [
-                {
-                    type: "address"
-                },
-                {
-                    type: "bytes32"
-                }
-            ],
+}: Erc20AllowanceOverrideParameters): StateOverrides.StateOverrides {
+    const smartAccountErc20AllowanceSlot = Hash.keccak256(
+        AbiParameters.encode(
+            [{ type: "address" }, { type: "bytes32" }],
             [
                 spender,
-                keccak256(
-                    encodeAbiParameters(
-                        [
-                            {
-                                type: "address"
-                            },
-                            {
-                                type: "uint256"
-                            }
-                        ],
+                Hash.keccak256(
+                    AbiParameters.encode(
+                        [{ type: "address" }, { type: "uint256" }],
                         [owner, BigInt(slot)]
                     )
                 )
@@ -52,15 +38,11 @@ export function erc20AllowanceOverride({
         )
     )
 
-    return [
-        {
-            address: token,
-            stateDiff: [
-                {
-                    slot: smartAccountErc20AllowanceSlot,
-                    value: toHex(amount)
-                }
-            ]
+    return {
+        [token]: {
+            stateDiff: {
+                [smartAccountErc20AllowanceSlot]: Hex.fromNumber(amount)
+            }
         }
-    ]
+    }
 }
