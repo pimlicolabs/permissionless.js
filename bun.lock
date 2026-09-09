@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "devDependencies": {
@@ -57,10 +58,12 @@
       "version": "0.4.1",
       "peerDependencies": {
         "ox": "^0.11.3",
+        "typescript": ">=5.9.0",
         "viem": "^2.44.4",
       },
       "optionalPeers": [
         "ox",
+        "typescript",
       ],
     },
     "packages/wagmi": {
