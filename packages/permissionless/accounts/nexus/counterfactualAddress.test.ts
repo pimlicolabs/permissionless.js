@@ -10,23 +10,23 @@ import {
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { toNexusSmartAccount } from "./toNexusSmartAccount"
+import * as NexusSmartAccount from "./index"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["nexus"]
 ) =>
-    toNexusSmartAccount({
+    NexusSmartAccount.from({
         client,
         entryPoint: toEntryPoint(params.entryPoint),
         version: params.version,
-        owners: [anvilAccount(params.owners[0])],
+        owner: anvilAccount(params.owners[0]),
         index: BigInt(params.index),
         attesters: params.attesters,
         threshold: params.threshold
     })
 
-describe("toNexusSmartAccount counterfactual addresses (0.x oracle)", () => {
+describe("NexusSmartAccount.from counterfactual addresses (0.x oracle)", () => {
     for (const entry of loadCounterfactualAddressFixture("nexus")) {
         testWithRpc(describeParams(entry.params), async ({ rpc }) => {
             await expectCounterfactualAddress(
