@@ -12,7 +12,7 @@ type PaymasterContext = {
     [key: string]: unknown
 }
 
-export type PimlicoSponsorUserOperationParameters<
+export type SponsorUserOperationParameters<
     entryPointVersion extends EntryPoint.Version
 > = {
     userOperation: OneOf<
@@ -71,7 +71,7 @@ export const sponsorUserOperation = async <
     entryPointVersion extends EntryPoint.Version = EntryPoint.Version
 >(
     client: Pick<Client.Client, "request">,
-    args: PimlicoSponsorUserOperationParameters<entryPointVersion>
+    args: SponsorUserOperationParameters<entryPointVersion>
 ): Promise<SponsorUserOperationReturnType<entryPointVersion>> => {
     const { sponsorshipPolicyId, paymasterContext, userOperation, entryPoint } =
         args

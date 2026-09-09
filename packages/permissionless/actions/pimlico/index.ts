@@ -1,12 +1,4 @@
-export {
-    type PimlicoActions,
-    pimlicoActions
-} from "../../clients/decorators/pimlico.js"
-export {
-    type GetTokenQuotesParameters,
-    type GetTokenQuotesReturnType,
-    getTokenQuotes
-} from "./getTokenQuotes.js"
+export type { PimlicoActions as Actions } from "../../clients/decorators/pimlico.js"
 export {
     type GetUserOperationGasPriceReturnType,
     getUserOperationGasPrice
@@ -17,11 +9,10 @@ export {
     getUserOperationStatus
 } from "./getUserOperationStatus.js"
 export {
-    type PimlicoSponsorUserOperationParameters,
+    type SponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
 } from "./sponsorUserOperation.js"
-
 export {
     type ValidateSponsorshipPolicies,
     type ValidateSponsorshipPoliciesParameters,

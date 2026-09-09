@@ -1,4 +1,4 @@
-import { Actions, type Client, Errors } from "viem"
+import { Actions, type Client } from "viem"
 import { AbiConstructor, AbiParameters, type Address, Hex } from "viem/utils"
 import type { OneOf, Prettify } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
@@ -40,29 +40,6 @@ export type GetSenderAddressParams = OneOf<
           initCode?: never
       }
 >
-
-export class InvalidEntryPointError extends Errors.BaseError<
-    Errors.BaseError | undefined
-> {
-    override name = "InvalidEntryPointError"
-
-    constructor({
-        cause,
-        entryPointAddress
-    }: {
-        cause?: Errors.BaseError
-        entryPointAddress?: Address.Address
-    } = {}) {
-        super(
-            `The entry point address (\`entryPoint\`${
-                entryPointAddress ? ` = ${entryPointAddress}` : ""
-            }) is not a valid entry point. getSenderAddress did not revert with a SenderAddressResult error.`,
-            {
-                cause
-            }
-        )
-    }
-}
 
 /**
  * Returns the address of the account that will be deployed with the given init code.

@@ -1,5 +1,0 @@
-{
-    "type": "module",
-    "types": "../_types/clients/index.d.ts",
-    "main": "../_esm/clients/index.js"
-}

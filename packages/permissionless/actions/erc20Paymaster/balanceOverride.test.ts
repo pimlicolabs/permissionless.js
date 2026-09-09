@@ -1,12 +1,12 @@
 import { Hex } from "viem/utils"
 import { describe, expect, test } from "vitest"
 import {
-    type Erc20BalanceOverrideParameters,
-    erc20BalanceOverride
-} from "./erc20BalanceOverride"
+    type BalanceOverrideParameters,
+    balanceOverride
+} from "./balanceOverride"
 
 const slotOf = (
-    result: ReturnType<typeof erc20BalanceOverride>,
+    result: ReturnType<typeof balanceOverride>,
     token: `0x${string}`
 ) => {
     const slots = Object.keys(result[token]?.stateDiff ?? {})
@@ -15,7 +15,7 @@ const slotOf = (
     return slots[0] as `0x${string}`
 }
 
-describe("erc20BalanceOverride", () => {
+describe("balanceOverride", () => {
     test("should return the correct structure for valid inputs", () => {
         const params = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
@@ -24,7 +24,7 @@ describe("erc20BalanceOverride", () => {
             balance: BigInt(1000)
         } as const
 
-        const result = erc20BalanceOverride(params)
+        const result = balanceOverride(params)
 
         expect(result).toEqual({
             [params.token]: {
@@ -38,13 +38,13 @@ describe("erc20BalanceOverride", () => {
     })
 
     test("should use the default balance when none is provided", () => {
-        const params: Erc20BalanceOverrideParameters = {
+        const params: BalanceOverrideParameters = {
             token: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
             owner: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             slot: BigInt(1)
         }
 
-        const result = erc20BalanceOverride(params)
+        const result = balanceOverride(params)
 
         const expectedDefaultBalance = BigInt(
             "0x100000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"

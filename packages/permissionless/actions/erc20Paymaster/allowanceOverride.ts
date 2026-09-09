@@ -6,7 +6,7 @@ import {
     type StateOverrides
 } from "viem/utils"
 
-export type Erc20AllowanceOverrideParameters = {
+export type AllowanceOverrideParameters = {
     token: Address.Address
     owner: Address.Address
     spender: Address.Address
@@ -14,7 +14,7 @@ export type Erc20AllowanceOverrideParameters = {
     amount?: bigint
 }
 
-export function erc20AllowanceOverride({
+export function allowanceOverride({
     token,
     owner,
     spender,
@@ -22,7 +22,7 @@ export function erc20AllowanceOverride({
     amount = BigInt(
         "0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     )
-}: Erc20AllowanceOverrideParameters): StateOverrides.StateOverrides {
+}: AllowanceOverrideParameters): StateOverrides.StateOverrides {
     const smartAccountErc20AllowanceSlot = Hash.keccak256(
         AbiParameters.encode(
             [{ type: "address" }, { type: "bytes32" }],

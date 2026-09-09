@@ -35,99 +35,30 @@
             "types": "./_types/index.d.ts",
             "default": "./_esm/index.js"
         },
-        "./accounts": {
-            "types": "./_types/accounts/index.d.ts",
-            "default": "./_esm/accounts/index.js"
+        "./pimlico": {
+            "types": "./_types/pimlico/index.d.ts",
+            "default": "./_esm/pimlico/index.js"
         },
-        "./actions": {
-            "types": "./_types/actions/index.d.ts",
-            "default": "./_esm/actions/index.js"
+        "./etherspot": {
+            "types": "./_types/etherspot/index.d.ts",
+            "default": "./_esm/etherspot/index.js"
         },
-        "./actions/erc7579": {
-            "types": "./_types/actions/erc7579/index.d.ts",
-            "default": "./_esm/actions/erc7579/index.js"
+        "./experimental": {
+            "types": "./_types/experimental/index.d.ts",
+            "default": "./_esm/experimental/index.js"
         },
-        "./actions/pimlico": {
-            "types": "./_types/actions/pimlico/index.d.ts",
-            "default": "./_esm/actions/pimlico/index.js"
-        },
-        "./actions/passkeyServer": {
-            "types": "./_types/actions/passkeyServer/index.d.ts",
-            "default": "./_esm/actions/passkeyServer/index.js"
-        },
-        "./actions/etherspot": {
-            "types": "./_types/actions/etherspot/index.d.ts",
-            "default": "./_esm/actions/etherspot/index.js"
-        },
-        "./actions/smartAccount": {
-            "types": "./_types/actions/smartAccount/index.d.ts",
-            "default": "./_esm/actions/smartAccount/index.js"
-        },
-        "./clients": {
-            "types": "./_types/clients/index.d.ts",
-            "default": "./_esm/clients/index.js"
-        },
-        "./clients/pimlico": {
-            "types": "./_types/clients/pimlico/index.d.ts",
-            "default": "./_esm/clients/pimlico/index.js"
-        },
-        "./clients/passkeyServer": {
-            "types": "./_types/clients/passkeyServer/index.d.ts",
-            "default": "./_esm/clients/passkeyServer/index.js"
-        },
-        "./utils": {
-            "types": "./_types/utils/index.d.ts",
-            "default": "./_esm/utils/index.js"
-        },
-        "./errors": {
-            "types": "./_types/errors/index.d.ts",
-            "default": "./_esm/errors/index.js"
-        },
-        "./experimental/pimlico": {
-            "types": "./_types/experimental/pimlico/index.d.ts",
-            "default": "./_esm/experimental/pimlico/index.js"
-        }
+        "./package.json": "./package.json"
     },
     "typesVersions": {
         "*": {
-            "accounts": [
-                "./_types/accounts/index.d.ts"
+            "pimlico": [
+                "./_types/pimlico/index.d.ts"
             ],
-            "actions": [
-                "./_types/actions/index.d.ts"
+            "etherspot": [
+                "./_types/etherspot/index.d.ts"
             ],
-            "actions/erc7579": [
-                "./_types/actions/erc7579/index.d.ts"
-            ],
-            "actions/pimlico": [
-                "./_types/actions/pimlico/index.d.ts"
-            ],
-            "actions/passkeyServer": [
-                "./_types/actions/passkeyServer/index.d.ts"
-            ],
-            "actions/etherspot": [
-                "./_types/actions/etherspot/index.d.ts"
-            ],
-            "actions/smartAccount": [
-                "./_types/actions/smartAccount/index.d.ts"
-            ],
-            "clients": [
-                "./_types/clients/index.d.ts"
-            ],
-            "clients/pimlico": [
-                "./_types/clients/pimlico/index.d.ts"
-            ],
-            "clients/passkeyServer": [
-                "./_types/clients/passkeyServer/index.d.ts"
-            ],
-            "utils": [
-                "./_types/utils/index.d.ts"
-            ],
-            "errors": [
-                "./_types/errors/index.d.ts"
-            ],
-            "experimental/pimlico": [
-                "./_types/experimental/pimlico/index.d.ts"
+            "experimental": [
+                "./_types/experimental/index.d.ts"
             ]
         }
     },

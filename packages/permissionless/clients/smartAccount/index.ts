@@ -1,4 +1,4 @@
-import type { Chain, Client, Transport } from "viem"
+import type { Chain, Transport, Client as viem_Client } from "viem"
 import {
     type AccountAbstractionActions,
     BundlerClient,
@@ -6,26 +6,30 @@ import {
     type SmartAccount
 } from "viem/erc4337"
 import type { RpcSchema } from "viem/utils"
-import type { Paymaster, Prettify } from "../types/utils.js"
+import type { Paymaster, Prettify } from "../../types/utils.js"
 import {
     type SmartAccountActions,
     smartAccountActions
-} from "./decorators/smartAccount.js"
+} from "../decorators/smartAccount.js"
+
+export type { SmartAccountActions as Actions } from "../decorators/smartAccount.js"
 
 type ResolvedChain<
     chain extends Chain.Chain | undefined,
-    client extends Client.Client | undefined
+    client extends viem_Client.Client | undefined
 > = chain extends Chain.Chain
     ? chain
-    : client extends Client.Client<infer chain extends Chain.Chain | undefined>
+    : client extends viem_Client.Client<
+            infer chain extends Chain.Chain | undefined
+        >
       ? chain
       : undefined
 
-type SmartAccountClientInner<
+type ClientInner<
     transport extends Transport.Transport,
     chain extends Chain.Chain | undefined,
     account extends SmartAccount.SmartAccount | undefined,
-    client extends Client.Client | undefined,
+    client extends viem_Client.Client | undefined,
     rpcSchema extends RpcSchema.Generic
 > = BundlerClient.Client<
     ResolvedChain<chain, client>,
@@ -38,30 +42,26 @@ type SmartAccountClientInner<
 
 // Variance annotations referred from viem:
 // https://github.com/wevm/viem/blob/main/src/actions/public/simulateContract.ts#L129
-export type SmartAccountClient<
+export type Client<
     out transport extends Transport.Transport = Transport.Transport,
     out chain extends Chain.Chain | undefined = Chain.Chain | undefined,
     /** @ts-expect-error cast variance */
     out account extends SmartAccount.SmartAccount | undefined =
         | SmartAccount.SmartAccount
         | undefined,
-    out client extends Client.Client | undefined = Client.Client | undefined,
+    out client extends viem_Client.Client | undefined =
+        | viem_Client.Client
+        | undefined,
     /** @ts-expect-error cast variance */
     out rpcSchema extends RpcSchema.Generic = RpcSchema.Generic
 > = {
-    [key in keyof SmartAccountClientInner<
+    [key in keyof ClientInner<
         transport,
         chain,
         account,
         client,
         rpcSchema
-    >]: SmartAccountClientInner<
-        transport,
-        chain,
-        account,
-        client,
-        rpcSchema
-    >[key]
+    >]: ClientInner<transport, chain, account, client, rpcSchema>[key]
 }
 
 export type PrepareUserOperationHook = (
@@ -69,13 +69,15 @@ export type PrepareUserOperationHook = (
     parameters: Erc4337Actions.userOperation.prepare.Options
 ) => Promise<Erc4337Actions.userOperation.prepare.ReturnType>
 
-export type SmartAccountClientConfig<
+export type Config<
     transport extends Transport.Transport = Transport.Transport,
     chain extends Chain.Chain | undefined = Chain.Chain | undefined,
     account extends SmartAccount.SmartAccount | undefined =
         | SmartAccount.SmartAccount
         | undefined,
-    client extends Client.Client | undefined = Client.Client | undefined,
+    client extends viem_Client.Client | undefined =
+        | viem_Client.Client
+        | undefined,
     rpcSchema extends RpcSchema.Generic = never
 > = Prettify<
     Pick<
@@ -113,25 +115,17 @@ export type SmartAccountClientConfig<
         | undefined
 }
 
-export function createSmartAccountClient<
+export function create<
     transport extends Transport.Transport,
     chain extends Chain.Chain | undefined = undefined,
     account extends SmartAccount.SmartAccount | undefined = undefined,
-    client extends Client.Client | undefined = undefined,
+    client extends viem_Client.Client | undefined = undefined,
     rpcSchema extends RpcSchema.Generic = never
 >(
-    parameters: SmartAccountClientConfig<
-        transport,
-        chain,
-        account,
-        client,
-        rpcSchema
-    >
-): SmartAccountClient<transport, chain, account, client, rpcSchema>
+    parameters: Config<transport, chain, account, client, rpcSchema>
+): Client<transport, chain, account, client, rpcSchema>
 
-export function createSmartAccountClient(
-    parameters: SmartAccountClientConfig
-): SmartAccountClient {
+export function create(parameters: Config): Client {
     const {
         bundlerTransport,
         key = "bundler",
@@ -154,9 +148,7 @@ export function createSmartAccountClient(
 
     const prepareUserOperation = userOperation?.prepareUserOperation
     if (!prepareUserOperation) {
-        return client.extend(
-            smartAccountActions
-        ) as unknown as SmartAccountClient
+        return client.extend(smartAccountActions) as unknown as Client
     }
 
     return client
@@ -184,5 +176,5 @@ export function createSmartAccountClient(
                 }
             }
         })
-        .extend(smartAccountActions) as unknown as SmartAccountClient
+        .extend(smartAccountActions) as unknown as Client
 }

@@ -14,6 +14,7 @@ export class AccountNotFoundError extends Errors.BaseError {
     }
 }
 
+export * from "./entryPoint.js"
 export * from "./etherspot.js"
 export * from "./kernel.js"
 export * from "./light.js"

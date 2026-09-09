@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { loadEnv } from "vite"
 import { defineConfig } from "vitest/config"
@@ -13,14 +13,36 @@ const unportedAccounts = readdirSync(accountsDir, { withFileTypes: true })
     )
     .map((d) => `**/accounts/${d.name}/**`)
 
+// The smoke test imports the package by its public entrypoints; each maps to
+// the source behind the same package.json exports entry.
+const { exports } = JSON.parse(
+    readFileSync(join(__dirname, "package.json"), "utf8")
+) as { exports: Record<string, string | { default: string }> }
+const entrypoints = Object.entries(exports).flatMap(([subpath, entry]) =>
+    typeof entry === "object"
+        ? [
+              {
+                  find: new RegExp(`^permissionless${subpath.slice(1)}$`),
+                  replacement: join(
+                      __dirname,
+                      entry.default
+                          .replace("./_esm/", "")
+                          .replace(/\.js$/, ".ts")
+                  )
+              }
+          ]
+        : []
+)
+
 export default defineConfig({
     resolve: {
-        alias: {
-            "@pimlico/mock-paymaster": join(
-                __dirname,
-                "../mock-paymaster/index.ts"
-            )
-        }
+        alias: [
+            ...entrypoints,
+            {
+                find: "@pimlico/mock-paymaster",
+                replacement: join(__dirname, "../mock-paymaster/index.ts")
+            }
+        ]
     },
     test: {
         coverage: {
@@ -63,7 +85,7 @@ export default defineConfig({
             "**/actions/pimlico/getUserOperationStatus.test.ts",
             "**/actions/pimlico/sponsorUserOperation.test.ts",
             "**/actions/pimlico/validateSponsorshipPolicies.test.ts",
-            "**/experimental/**/*.test.ts"
+            "**/actions/erc20Paymaster/prepareUserOperation.test.ts"
         ],
         env: loadEnv("test", process.cwd())
     }

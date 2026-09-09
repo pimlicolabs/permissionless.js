@@ -1,4 +1,9 @@
-import { type Account, type Chain, Client, type Transport } from "viem"
+import {
+    type Account,
+    type Chain,
+    type Transport,
+    Client as viem_Client
+} from "viem"
 import type { RpcSchema } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 import type { Prettify } from "../../types/utils.js"
@@ -7,8 +12,10 @@ import {
     passkeyServerActions
 } from "../decorators/passkeyServer.js"
 
-type PasskeyServerClientInner<rpcSchema extends RpcSchema.Generic | undefined> =
-    Client.Client<
+export type { PasskeyServerRpcSchema as Schema } from "../../types/passkeyServer.js"
+
+type ClientInner<rpcSchema extends RpcSchema.Generic | undefined> =
+    viem_Client.Client<
         Chain.Chain | undefined,
         Account.Account | undefined,
         Transport.Transport,
@@ -18,17 +25,17 @@ type PasskeyServerClientInner<rpcSchema extends RpcSchema.Generic | undefined> =
         PasskeyServerActions
     >
 
-export type PasskeyServerClient<
+export type Client<
     rpcSchema extends RpcSchema.Generic | undefined = undefined
 > = {
-    [key in keyof PasskeyServerClientInner<rpcSchema>]: PasskeyServerClientInner<rpcSchema>[key]
+    [key in keyof ClientInner<rpcSchema>]: ClientInner<rpcSchema>[key]
 }
 
-export type PasskeyServerClientConfig<
+export type Config<
     rpcSchema extends RpcSchema.Generic | undefined = undefined
 > = Prettify<
     Pick<
-        Client.create.Options<
+        viem_Client.create.Options<
             Chain.Chain | undefined,
             Account.Account | undefined,
             Transport.Transport,
@@ -46,21 +53,19 @@ export type PasskeyServerClientConfig<
     >
 >
 
-export function createPasskeyServerClient<
+export function create<
     rpcSchema extends RpcSchema.Generic | undefined = undefined
->(
-    parameters: PasskeyServerClientConfig<rpcSchema>
-): PasskeyServerClient<rpcSchema>
+>(parameters: Config<rpcSchema>): Client<rpcSchema>
 
-export function createPasskeyServerClient(
-    parameters: PasskeyServerClientConfig
-): PasskeyServerClient {
+export function create(parameters: Config): Client {
     const { key = "public", name = "Passkey Server Client" } = parameters
 
-    return Client.create({
-        ...parameters,
-        key,
-        name,
-        type: "passkeyServerClient"
-    }).extend(passkeyServerActions) as unknown as PasskeyServerClient
+    return viem_Client
+        .create({
+            ...parameters,
+            key,
+            name,
+            type: "passkeyServerClient"
+        })
+        .extend(passkeyServerActions) as unknown as Client
 }

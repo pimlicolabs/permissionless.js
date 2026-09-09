@@ -10,11 +10,8 @@ import {
 } from "viem"
 import { anvil } from "viem/chains"
 import { EntryPoint, PaymasterClient, type SmartAccount } from "viem/erc4337"
-import {
-    createSmartAccountClient,
-    type SmartAccountClient
-} from "../../permissionless/clients/createSmartAccountClient"
-import { createPimlicoClient } from "../../permissionless/clients/pimlico"
+import * as PimlicoClient from "../../permissionless/clients/pimlico"
+import * as SmartAccountClient from "../../permissionless/clients/smartAccount"
 import { etherspotSmartAccounts } from "./accounts/etherspot.js"
 import { kernelSmartAccounts } from "./accounts/kernel.js"
 import { lightSmartAccounts } from "./accounts/light.js"
@@ -116,11 +113,11 @@ export const getBundlerClient = <
     entryPoint: {
         version: EntryPoint.Version
     }
-}): SmartAccountClient<Transport.Transport, Chain.Chain, account> => {
+}): SmartAccountClient.Client<Transport.Transport, Chain.Chain, account> => {
     const address = entryPointAddress(entryPoint.version)
 
     const paymaster = paymasterRpc
-        ? createPimlicoClient({
+        ? PimlicoClient.create({
               transport: http(paymasterRpc),
               entryPoint: {
                   address,
@@ -129,7 +126,7 @@ export const getBundlerClient = <
           })
         : undefined
 
-    const pimlicoBundler = createPimlicoClient({
+    const pimlicoBundler = PimlicoClient.create({
         transport: http(altoRpc),
         entryPoint: {
             address,
@@ -137,7 +134,7 @@ export const getBundlerClient = <
         }
     })
 
-    return createSmartAccountClient({
+    return SmartAccountClient.create({
         client: getPublicClient(anvilRpc),
         account,
         paymaster,
@@ -170,7 +167,7 @@ export const getSmartAccountClient = <
           })
         : undefined
 
-    return createSmartAccountClient({
+    return SmartAccountClient.create({
         client: getPublicClient(anvilRpc),
         chain: anvil,
         account,
@@ -187,7 +184,7 @@ export const getPimlicoClient = <entryPointVersion extends EntryPoint.Version>({
     entryPointVersion: entryPointVersion
     altoRpc: string
 }) => {
-    return createPimlicoClient({
+    return PimlicoClient.create({
         chain: anvil,
         entryPoint: {
             address: entryPointAddress(entryPointVersion),
@@ -216,7 +213,7 @@ export type CoreSmartAccount = {
     getSmartAccountClient: (
         conf: AAParamType<EntryPoint.Version>
     ) => Promise<
-        SmartAccountClient<
+        SmartAccountClient.Client<
             Transport.Transport,
             Chain.Chain,
             SmartAccount.SmartAccount
@@ -227,7 +224,7 @@ export type CoreSmartAccount = {
     >(
         conf: AAParamType<entryPointVersion>
     ) => Promise<
-        SmartAccountClient<
+        SmartAccountClient.Client<
             Transport.Transport,
             Chain.Chain,
             SmartAccount.SmartAccount
