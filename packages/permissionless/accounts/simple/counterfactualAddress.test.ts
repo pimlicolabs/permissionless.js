@@ -10,21 +10,21 @@ import {
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { to7702SimpleSmartAccount } from "./to7702SimpleSmartAccount"
-import { toSimpleSmartAccount } from "./toSimpleSmartAccount"
+import * as SimpleSmartAccount from "./index.js"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["simple"]
 ) => {
     if (params.via === "to7702SimpleSmartAccount") {
-        return to7702SimpleSmartAccount({
+        return SimpleSmartAccount.from({
             client,
             entryPoint: toEntryPoint(params.entryPoint),
-            owner: anvilAccount(params.owner)
+            owner: anvilAccount(params.owner),
+            eip7702: true
         })
     }
-    return toSimpleSmartAccount({
+    return SimpleSmartAccount.from({
         client,
         entryPoint: toEntryPoint(params.entryPoint),
         owner: anvilAccount(params.owner),
@@ -32,7 +32,7 @@ const buildAccount = (
     })
 }
 
-describe("toSimpleSmartAccount counterfactual addresses (0.x oracle)", () => {
+describe("SimpleSmartAccount counterfactual addresses (0.x oracle)", () => {
     for (const entry of loadCounterfactualAddressFixture("simple")) {
         testWithRpc(describeParams(entry.params), async ({ rpc }) => {
             await expectCounterfactualAddress(
@@ -40,5 +40,30 @@ describe("toSimpleSmartAccount counterfactual addresses (0.x oracle)", () => {
                 entry
             )
         })
+    }
+})
+
+describe("SimpleSmartAccount 1.0 defaults", () => {
+    const explicit08 = loadCounterfactualAddressFixture("simple").filter(
+        ({ params }) =>
+            params.via === "toSimpleSmartAccount" && params.entryPoint === "0.8"
+    )
+
+    for (const entry of explicit08) {
+        if (entry.params.via !== "toSimpleSmartAccount") continue
+        const { owner, index } = entry.params
+        testWithRpc(
+            `default entryPoint is 0.8 (${describeParams({ owner, index })})`,
+            async ({ rpc }) => {
+                await expectCounterfactualAddress(
+                    await SimpleSmartAccount.from({
+                        client: getPublicClient(rpc.anvilRpc),
+                        owner: anvilAccount(owner),
+                        index: BigInt(index)
+                    }),
+                    entry
+                )
+            }
+        )
     }
 })
