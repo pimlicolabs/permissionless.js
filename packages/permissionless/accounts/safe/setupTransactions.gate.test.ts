@@ -404,15 +404,19 @@ describe("safe setupTransactions gate (spec §10)", () => {
     )
 
     testWithRpc(
-        "address-stability pin: safe 1.4.1 / entryPoint 0.7, owner from private key 0x…01, saltNonce 0, no setupTransactions",
+        "address-stability pin: safe 1.4.1 / entryPoint 0.7, owner from private key 0x…01, saltNonce 0, with and without setupTransactions: [approve(erc20Address, 0x…1337, maxUint256)]",
         async ({ rpc }) => {
             const client = getPublicClient(rpc.anvilRpc)
             const owner = privateKeyToAccount(`0x${"1".padStart(64, "0")}`)
-            const account = await build({
-                client,
-                entryPointVersion: "0.7",
-                owner
-            })
+            const [account, legacy] = await Promise.all([
+                build({ client, entryPointVersion: "0.7", owner }),
+                build({
+                    client,
+                    entryPointVersion: "0.7",
+                    owner,
+                    setupTransactions: [setupCall]
+                })
+            ])
             const { factory, factoryData } = await initCodeOf(account)
 
             expect(owner.address).toBe(
@@ -424,6 +428,10 @@ describe("safe setupTransactions gate (spec §10)", () => {
             )
             expect(account.address).toMatchInlineSnapshot(
                 `"0x57E9161676313588c7F373F9Cb17b00f1e65BeF0"`
+            )
+            expect(legacy.address).not.toBe(account.address)
+            expect(legacy.address).toMatchInlineSnapshot(
+                `"0xe06d157D28EBFF7598687baBdd9c207861baC2b5"`
             )
         }
     )
