@@ -44,7 +44,8 @@ jobs:
           range=$(jq -r '.peerDependencies.viem' packages/permissionless/package.json)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "range=$range" >> "$GITHUB_OUTPUT"
-          if npx --yes --package semver@7 -- semver -p -r "$range" "$version" > /dev/null; then
+          npm install --prefix "$RUNNER_TEMP/semver" semver@7 > /dev/null
+          if "$RUNNER_TEMP/semver/node_modules/.bin/semver" -p -r "$range" "$version" > /dev/null; then
             echo "in_range=true" >> "$GITHUB_OUTPUT"
           else
             echo "in_range=false" >> "$GITHUB_OUTPUT"
