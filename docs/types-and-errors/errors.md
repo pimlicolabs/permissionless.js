@@ -67,7 +67,7 @@ try {
 
 ## Accounts
 
-Each account's own failures keep their class from the port (see the account pages): `EtherspotNonceKeyOverflowError`; `KernelUnsupportedVersionError`, `KernelValidatorAddressRequiredError`, `KernelNonceKeyTooLargeError`, `KernelNotDelegatedError`, `KernelDecodeCallsError`, `InvalidKernelAccountError`; `LightSmartAccountUnsupportedVersionError`; `SafeEntryPointVersionUnsupportedError`, `SafeWebAuthnSharedSignerAddressMissingError`, `SafeInvalidOwnerError`, `SafeInsufficientOwnersError`, `SafeErc7579VersionUnsupportedError`, `SafeSenderRequiredError`, `SafeInvalidWebAuthnClientDataError`, `SafeInvalidSignatureError`; `SimpleAccountErc1271UnsupportedError`, `SimpleAccountFactoryAddressRequiredError`; `TrustInvalidCallDataError`. Nexus throws nothing of its own.
+Each account's own failures keep their class from the port (see the account pages): `EtherspotNonceKeyOverflowError`; `KernelUnsupportedVersionError`, `KernelValidatorAddressRequiredError`, `KernelNonceKeyTooLargeError`, `KernelDecodeCallsError`, `InvalidKernelAccountError`; `LightSmartAccountUnsupportedVersionError`; `SafeEntryPointVersionUnsupportedError`, `SafeWebAuthnSharedSignerAddressMissingError`, `SafeInvalidOwnerError`, `SafeInsufficientOwnersError`, `SafeErc7579VersionUnsupportedError`, `SafeSenderRequiredError`, `SafeInvalidWebAuthnClientDataError`, `SafeInvalidSignatureError`; `SimpleAccountErc1271UnsupportedError`, `SimpleAccountFactoryAddressRequiredError`; `TrustInvalidCallDataError`. Nexus throws nothing of its own.
 
 ## Tests
 

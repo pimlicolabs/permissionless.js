@@ -11,14 +11,12 @@ import {
 } from "viem/utils"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import {
-    KernelNotDelegatedError,
     KernelUnsupportedVersionError,
     KernelValidatorAddressRequiredError
 } from "../../errors/kernel.js"
 import type { Assign, OneOf } from "../../types/utils.js"
 import { toBytes } from "../../utils/base64.js"
 import { getAction } from "../../utils/getAction.js"
-import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import {
     type EntryPointAbi,
     type EntryPointParameter,
@@ -380,13 +378,6 @@ export async function from<
         return chainId
     }
 
-    let delegated = !eip7702
-    const assertDelegated = async () => {
-        if (delegated) return
-        delegated = await isSmartAccountDeployed(client, accountAddress)
-        if (!delegated) throw new KernelNotDelegatedError()
-    }
-
     const wrapSignature = (signature: Hex.Hex) =>
         isKernelV2(version)
             ? signature
@@ -395,9 +386,8 @@ export async function from<
                   signature
               )
 
-    const signMessage_ = async (message: Account.SignableMessage) => {
-        await assertDelegated()
-        return wrapSignature(
+    const signMessage_ = async (message: Account.SignableMessage) =>
+        wrapSignature(
             await signMessage({
                 owner,
                 message,
@@ -407,7 +397,6 @@ export async function from<
                 eip7702
             })
         )
-    }
 
     const account = await SmartAccount.from({
         client,
@@ -432,7 +421,6 @@ export async function from<
         sign: ({ hash }) => signMessage_(hash),
         signMessage: ({ message }) => signMessage_(message),
         async signTypedData(typedData) {
-            await assertDelegated()
             return wrapSignature(
                 await signTypedData({
                     owner,

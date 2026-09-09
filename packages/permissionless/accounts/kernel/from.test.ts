@@ -19,7 +19,6 @@ import {
 import { EmptyCallsError } from "../../errors/account"
 import {
     KernelNonceKeyTooLargeError,
-    KernelNotDelegatedError,
     KernelUnsupportedVersionError
 } from "../../errors/kernel"
 import { decodeNonce } from "../../utils/decodeNonce"
@@ -345,9 +344,7 @@ describe("KernelSmartAccount.from", () => {
             })
             const publicClient = getPublicClient(rpc.anvilRpc)
             const message = "slowly and steadily burning the private keys"
-            await expect(
-                account.signMessage({ message })
-            ).rejects.toBeInstanceOf(KernelNotDelegatedError)
+            const signature = await account.signMessage({ message })
             const authorization = await owner.signAuthorization?.({
                 address: kernel033Logic,
                 chainId: anvil.id,
@@ -371,7 +368,7 @@ describe("KernelSmartAccount.from", () => {
                 await publicClient.verifyMessage({
                     address: account.address,
                     message,
-                    signature: await account.signMessage({ message })
+                    signature
                 })
             ).toBe(true)
             expect(
