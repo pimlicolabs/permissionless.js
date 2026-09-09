@@ -10,20 +10,20 @@ import {
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { toEtherspotSmartAccount } from "./toEtherspotSmartAccount"
+import * as EtherspotSmartAccount from "./index"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["etherspot"]
 ) =>
-    toEtherspotSmartAccount({
+    EtherspotSmartAccount.from({
         client,
         entryPoint: toEntryPoint(params.entryPoint),
-        owners: [anvilAccount(params.owners[0])],
+        owner: anvilAccount(params.owners[0]),
         index: BigInt(params.index)
     })
 
-describe("toEtherspotSmartAccount counterfactual addresses (0.x oracle)", () => {
+describe("EtherspotSmartAccount.from counterfactual addresses (0.x oracle)", () => {
     for (const entry of loadCounterfactualAddressFixture("etherspot")) {
         testWithRpc(describeParams(entry.params), async ({ rpc }) => {
             await expectCounterfactualAddress(
