@@ -1,2 +1,11 @@
-// ticket 11 ports this account: this file becomes the `SafeSmartAccount` namespace module
-export {}
+export {
+    from,
+    type Implementation,
+    type Parameters,
+    type ReturnType,
+    type Version
+} from "./from.js"
+export {
+    type SignUserOperationParameters,
+    signUserOperation
+} from "./signUserOperation.js"

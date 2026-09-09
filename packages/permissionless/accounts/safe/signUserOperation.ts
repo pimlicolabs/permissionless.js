@@ -1,35 +1,63 @@
+import type { Account, Chain, Client } from "viem"
+import type { UserOperation, WebAuthnAccount } from "viem/erc4337"
 import {
-    type Account,
+    AbiParameters,
     type Address,
-    type Chain,
-    concatHex,
-    decodeAbiParameters,
-    encodeAbiParameters,
-    encodePacked,
-    type Hex,
-    hashTypedData,
-    type LocalAccount,
-    type OneOf,
-    type Transport,
-    type UnionPartialBy,
-    type WalletClient
-} from "viem"
-import type { UserOperation, WebAuthnAccount } from "viem/account-abstraction"
-import { toOwner } from "../../utils/index.js"
-import { getOxExports } from "../../utils/ox.js"
-import type { EthereumProvider } from "../../utils/toOwner.js"
+    Hex,
+    Signature,
+    TypedData
+} from "viem/utils"
+import {
+    SafeInvalidWebAuthnClientDataError,
+    SafeSenderRequiredError,
+    SafeWebAuthnSharedSignerAddressMissingError
+} from "../../errors/safe.js"
+import type { OneOf } from "../../types/utils.js"
+import {
+    type EntryPointParameter,
+    toEntryPoint
+} from "../../utils/toEntryPoint.js"
+import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import {
     EIP712_SAFE_OPERATION_TYPE_V06,
     EIP712_SAFE_OPERATION_TYPE_V07,
+    type EntryPointVersion,
     getDefaultAddresses,
     getPaymasterAndData,
     isWebAuthnAccount,
-    type SafeVersion
-} from "./toSafeSmartAccount.js"
+    type Version
+} from "./from.js"
 
-export const concatSignatures = (
-    signatures: { signer: Address; data: Hex; dynamic: boolean }[]
-) => {
+type OwnerSignature = {
+    signer: Address.Address
+    data: Hex.Hex
+    dynamic: boolean
+}
+
+const signaturesAbi = [
+    {
+        components: [
+            { type: "address", name: "signer" },
+            { type: "bytes", name: "data" },
+            { type: "bool", name: "dynamic" }
+        ],
+        name: "signatures",
+        type: "tuple[]"
+    }
+] as const
+
+const legacySignaturesAbi = [
+    {
+        components: [
+            { type: "address", name: "signer" },
+            { type: "bytes", name: "data" }
+        ],
+        name: "signatures",
+        type: "tuple[]"
+    }
+] as const
+
+export const concatSignatures = (signatures: OwnerSignature[]) => {
     signatures.sort((left, right) => {
         const leftSigner = left.signer.toLowerCase()
         const rightSigner = right.signer.toLowerCase()
@@ -48,16 +76,6 @@ export const concatSignatures = (
 
     for (const sig of signatures) {
         if (sig.dynamic) {
-            /*
-                A contract signature has a static part of 65 bytes and the dynamic part that needs to be appended
-                at the end of signature bytes.
-                The signature format is
-                Signature type == 0
-                Constant part: 65 bytes
-                {32-bytes signature verifier}{32-bytes dynamic data position}{1-byte signature type}
-                Dynamic part (solidity bytes): 32 bytes + signature data length
-                {32-bytes signature length}{bytes signature data}
-            */
             const dynamicPartPosition = (
                 signatures.length * SIGNATURE_LENGTH_BYTES +
                 dynamicBytes.length / 2
@@ -78,38 +96,31 @@ export const concatSignatures = (
 
     signatureBytes += dynamicBytes
 
-    return signatureBytes as Hex
+    return signatureBytes as Hex.Hex
 }
 
 export const getWebAuthnSignature = async ({
     owner,
     hash
 }: {
-    owner: WebAuthnAccount
-    hash: Hex
+    owner: WebAuthnAccount.Account
+    hash: Hex.Hex
 }) => {
-    const { signature: signatureData, webauthn } = await owner.sign({
-        hash
-    })
+    const { signature: signatureData, webauthn } = await owner.sign({ hash })
 
-    const { Signature } = await getOxExports()
     const signature = Signature.fromHex(signatureData)
 
     const match = webauthn.clientDataJSON.match(
         /^\{"type":"webauthn.get","challenge":"[A-Za-z0-9\-_]{43}",(.*)\}$/
     )
 
-    if (!match) {
-        throw new Error("challenge not found in client data JSON")
-    }
-
-    const [, fields] = match
+    const fields = match?.[1]
 
     if (fields === undefined) {
-        throw new Error("challenge not found in client data JSON")
+        throw new SafeInvalidWebAuthnClientDataError()
     }
 
-    return encodeAbiParameters(
+    return AbiParameters.encode(
         [
             { name: "authenticatorData", type: "bytes" },
             { name: "clientDataJSON", type: "string" },
@@ -118,210 +129,159 @@ export const getWebAuthnSignature = async ({
         [
             webauthn.authenticatorData,
             fields,
-            [BigInt(signature.r), BigInt(signature.s)]
+            [Hex.toBigInt(signature.r), Hex.toBigInt(signature.s)]
         ]
     )
 }
 
-export async function signUserOperation(
-    parameters: UnionPartialBy<UserOperation, "sender"> & {
-        version: SafeVersion
-        entryPoint: {
-            address: Address
-            version: "0.6" | "0.7"
-        }
-        owners: (Account | WebAuthnAccount)[]
+type WalletClient = Client.Client<Chain.Chain | undefined, Account.Account>
+
+export type SignUserOperationParameters = Omit<
+    UserOperation.UserOperation<"0.7">,
+    "sender"
+> &
+    Pick<
+        UserOperation.UserOperation<"0.6">,
+        "initCode" | "paymasterAndData"
+    > & {
+        sender?: Address.Address | undefined
+        version?: Version | undefined
+        entryPoint?: EntryPointParameter<EntryPointVersion> | undefined
+        owners: readonly (Account.Account | WebAuthnAccount.Account)[]
         account: OneOf<
             | EthereumProvider
-            | WalletClient<Transport, Chain | undefined, Account>
-            | LocalAccount
-            | WebAuthnAccount
+            | WalletClient
+            | Account.Local
+            | WebAuthnAccount.Account
         >
         chainId: number
-        signatures?: Hex
-        validAfter?: number
-        validUntil?: number
-        safe4337ModuleAddress?: Address
-        safeWebAuthnSharedSignerAddress?: Address
+        signatures?: Hex.Hex | undefined
+        validAfter?: number | undefined
+        validUntil?: number | undefined
+        safe4337ModuleAddress?: Address.Address | undefined
+        safeWebAuthnSharedSignerAddress?: Address.Address | undefined
     }
-) {
+
+export async function signUserOperation(
+    parameters: SignUserOperationParameters
+): Promise<Hex.Hex> {
     const {
         chainId,
-        entryPoint,
+        entryPoint: _entryPoint = "0.7",
+        version = "1.4.1",
         validAfter = 0,
         validUntil = 0,
         safe4337ModuleAddress: _safe4337ModuleAddress,
-        version,
+        safeWebAuthnSharedSignerAddress: _safeWebAuthnSharedSignerAddress,
         owners,
         signatures: existingSignatures,
         account,
         ...userOperation
     } = parameters
 
-    const { safe4337ModuleAddress } = getDefaultAddresses(
-        version,
-        entryPoint.version,
-        {
-            safe4337ModuleAddress: _safe4337ModuleAddress
-        }
-    )
+    const entryPoint = toEntryPoint(_entryPoint)
 
-    const message = {
-        safe: userOperation.sender,
-        callData: userOperation.callData,
-        nonce: userOperation.nonce,
-        initCode: userOperation.initCode ?? "0x",
-        maxFeePerGas: userOperation.maxFeePerGas,
-        maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
-        preVerificationGas: userOperation.preVerificationGas,
-        verificationGasLimit: userOperation.verificationGasLimit,
-        callGasLimit: userOperation.callGasLimit,
-        paymasterAndData: userOperation.paymasterAndData ?? "0x",
-        validAfter: validAfter,
-        validUntil: validUntil,
-        entryPoint: entryPoint.address
-    }
-
-    if ("initCode" in userOperation) {
-        message.paymasterAndData = userOperation.paymasterAndData ?? "0x"
-    }
-
-    if ("factory" in userOperation) {
-        if (userOperation.factory && userOperation.factoryData) {
-            message.initCode = concatHex([
-                userOperation.factory,
-                userOperation.factoryData
-            ])
-        }
-        if (!userOperation.sender) {
-            throw new Error("Sender is required")
-        }
-        message.paymasterAndData = getPaymasterAndData({
-            ...userOperation,
-            sender: userOperation.sender
+    const { safe4337ModuleAddress, safeWebAuthnSharedSignerAddress } =
+        getDefaultAddresses(version, entryPoint.version, {
+            safe4337ModuleAddress: _safe4337ModuleAddress,
+            safeWebAuthnSharedSignerAddress: _safeWebAuthnSharedSignerAddress
         })
+
+    if (!userOperation.sender) {
+        throw new SafeSenderRequiredError()
+    }
+
+    const typedData: TypedData.Definition = {
+        domain: {
+            chainId,
+            verifyingContract: safe4337ModuleAddress
+        },
+        types:
+            entryPoint.version === "0.6"
+                ? EIP712_SAFE_OPERATION_TYPE_V06
+                : EIP712_SAFE_OPERATION_TYPE_V07,
+        primaryType: "SafeOp",
+        message: {
+            safe: userOperation.sender,
+            callData: userOperation.callData,
+            nonce: userOperation.nonce,
+            initCode:
+                userOperation.initCode ??
+                (userOperation.factory && userOperation.factoryData
+                    ? Hex.concat(
+                          userOperation.factory,
+                          userOperation.factoryData
+                      )
+                    : "0x"),
+            maxFeePerGas: userOperation.maxFeePerGas,
+            maxPriorityFeePerGas: userOperation.maxPriorityFeePerGas,
+            preVerificationGas: userOperation.preVerificationGas,
+            verificationGasLimit: userOperation.verificationGasLimit,
+            callGasLimit: userOperation.callGasLimit,
+            paymasterAndData:
+                userOperation.paymasterAndData ??
+                getPaymasterAndData(userOperation),
+            validAfter,
+            validUntil,
+            entryPoint: entryPoint.address
+        }
     }
 
     const localOwner = isWebAuthnAccount(account)
         ? account
         : await toOwner({
-              owner: account
+              owner: account as OneOf<
+                  EthereumProvider | WalletClient | Account.Local
+              >
           })
 
     const signer = isWebAuthnAccount(localOwner)
-        ? parameters.safeWebAuthnSharedSignerAddress
+        ? safeWebAuthnSharedSignerAddress
         : localOwner.address
 
     if (!signer) {
-        throw new Error("no signer found")
+        throw new SafeWebAuthnSharedSignerAddressMissingError()
     }
 
-    let unPackedSignatures: readonly {
-        signer: Address
-        data: Hex
-        dynamic: boolean
-    }[] = []
+    let unpackedSignatures: readonly OwnerSignature[] = []
 
     if (existingSignatures) {
         try {
-            const decoded = decodeAbiParameters(
-                [
-                    {
-                        components: [
-                            { type: "address", name: "signer" },
-                            { type: "bytes", name: "data" },
-                            { type: "bool", name: "dynamic" }
-                        ],
-                        name: "signatures",
-                        type: "tuple[]"
-                    }
-                ],
+            ;[unpackedSignatures] = AbiParameters.decode(
+                signaturesAbi,
                 existingSignatures
             )
-
-            unPackedSignatures = decoded[0]
         } catch {
-            const decoded = decodeAbiParameters(
-                [
-                    {
-                        components: [
-                            { type: "address", name: "signer" },
-                            { type: "bytes", name: "data" }
-                        ],
-                        name: "signatures",
-                        type: "tuple[]"
-                    }
-                ],
+            const [decoded] = AbiParameters.decode(
+                legacySignaturesAbi,
                 existingSignatures
             )
-
-            unPackedSignatures = decoded[0].map((sig) => ({
+            unpackedSignatures = decoded.map((sig) => ({
                 ...sig,
                 dynamic: false
             }))
         }
     }
 
-    const signatures: { signer: Address; data: Hex; dynamic: boolean }[] = [
-        ...unPackedSignatures,
+    const signatures: OwnerSignature[] = [
+        ...unpackedSignatures,
         {
             signer,
             dynamic: isWebAuthnAccount(localOwner),
-            data: await (async () => {
-                if (isWebAuthnAccount(localOwner)) {
-                    const safeHash = hashTypedData({
-                        domain: {
-                            chainId,
-                            verifyingContract: safe4337ModuleAddress
-                        },
-                        types:
-                            entryPoint.version === "0.6"
-                                ? EIP712_SAFE_OPERATION_TYPE_V06
-                                : EIP712_SAFE_OPERATION_TYPE_V07,
-                        primaryType: "SafeOp",
-                        message: message
-                    })
-
-                    return getWebAuthnSignature({
-                        owner: localOwner,
-                        hash: safeHash
-                    })
-                }
-
-                return localOwner.signTypedData({
-                    domain: {
-                        chainId,
-                        verifyingContract: safe4337ModuleAddress
-                    },
-                    types:
-                        entryPoint.version === "0.6"
-                            ? EIP712_SAFE_OPERATION_TYPE_V06
-                            : EIP712_SAFE_OPERATION_TYPE_V07,
-                    primaryType: "SafeOp",
-                    message: message
-                })
-            })()
+            data: isWebAuthnAccount(localOwner)
+                ? await getWebAuthnSignature({
+                      owner: localOwner,
+                      hash: TypedData.getSignPayload(typedData)
+                  })
+                : await localOwner.signTypedData(typedData)
         }
     ]
 
     if (signatures.length !== owners.length) {
-        return encodeAbiParameters(
-            [
-                {
-                    components: [
-                        { type: "address", name: "signer" },
-                        { type: "bytes", name: "data" },
-                        { type: "bool", name: "dynamic" }
-                    ],
-                    name: "signatures",
-                    type: "tuple[]"
-                }
-            ],
-            [signatures]
-        )
+        return AbiParameters.encode(signaturesAbi, [signatures])
     }
 
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["uint48", "uint48", "bytes"],
         [validAfter, validUntil, concatSignatures(signatures)]
     )
