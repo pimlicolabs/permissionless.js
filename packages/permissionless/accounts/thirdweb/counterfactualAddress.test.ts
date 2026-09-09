@@ -5,20 +5,19 @@ import {
     type CounterfactualAddressParams,
     describeParams,
     expectCounterfactualAddress,
-    loadCounterfactualAddressFixture,
-    toEntryPoint
+    loadCounterfactualAddressFixture
 } from "../../../permissionless-test/src/fixtures/counterfactualAddresses"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { toThirdwebSmartAccount } from "./toThirdwebSmartAccount"
+import * as ThirdwebSmartAccount from "./index.js"
 
 const buildAccount = (
-    client: Client,
+    client: Client.Client,
     params: CounterfactualAddressParams["thirdweb"]
 ) =>
-    toThirdwebSmartAccount({
+    ThirdwebSmartAccount.from({
         client,
-        entryPoint: toEntryPoint(params.entryPoint),
+        entryPoint: params.entryPoint,
         version: params.version,
         owner: anvilAccount(params.owner),
         salt: params.salt
