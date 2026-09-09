@@ -1,5 +1,6 @@
 import type { Client, Transport } from "viem"
 import type { Hex } from "viem/utils"
+import { InvalidPasskeyServerResponseError } from "../../errors/passkeyServer.js"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
 
 export type GetCredentialsParameters = {
@@ -22,23 +23,20 @@ export const getCredentials = async (
         params: [args?.context]
     })
 
-    if (!Array.isArray(response)) {
-        throw new Error("Invalid response from server - expected array")
-    }
-
+    const invalid = (reason: string) =>
+        new InvalidPasskeyServerResponseError({
+            method: "pks_getCredentials",
+            reason
+        })
+    if (!Array.isArray(response)) throw invalid("Expected an array.")
     for (const passkey of response) {
-        if (typeof passkey?.id !== "string") {
-            throw new Error("Invalid passkey id returned from server")
-        }
-
+        if (typeof passkey?.id !== "string")
+            throw invalid("`id` must be a string.")
         if (
             typeof passkey?.publicKey !== "string" ||
             !passkey.publicKey.startsWith("0x")
-        ) {
-            throw new Error(
-                "Invalid public key returned from server - must be hex string starting with 0x"
-            )
-        }
+        )
+            throw invalid("`publicKey` must be a 0x-prefixed hex string.")
     }
 
     return response

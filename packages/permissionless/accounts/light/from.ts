@@ -8,12 +8,9 @@ import {
     PersonalMessage,
     TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import {
-    LightSmartAccountEmptyCallsError,
-    LightSmartAccountUnsupportedVersionError
-} from "../../errors/light.js"
+import { EmptyCallsError } from "../../errors/account.js"
+import { LightSmartAccountUnsupportedVersionError } from "../../errors/light.js"
 import type { Assign, OneOf } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 import {
@@ -22,6 +19,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 export type Version<entryPointVersion extends "0.6" | "0.7" = "0.6" | "0.7"> =
     entryPointVersion extends "0.6" ? "1.1.0" : "2.0.0"
@@ -168,7 +166,7 @@ export async function from<entryPointVersion extends "0.6" | "0.7" = "0.7">(
         entryPoint,
         encodeCalls(calls) {
             const [call] = calls
-            if (!call) throw new LightSmartAccountEmptyCallsError()
+            if (!call) throw new EmptyCallsError()
             if (calls.length === 1)
                 return AbiFunction.encodeData(execute, [
                     call.to,
@@ -233,13 +231,5 @@ export async function from<entryPointVersion extends "0.6" | "0.7" = "0.7">(
         }
     })
 
-    return {
-        ...account,
-        getNonce: (options?: SmartAccount.getNonce.Options) =>
-            getAccountNonce(client, {
-                address: account.address,
-                entryPointAddress: entryPoint.address,
-                key: options?.key ?? nonceKey ?? 0n
-            })
-    } as ReturnType<entryPointVersion>
+    return withNonceKey(account, { nonceKey }) as ReturnType<entryPointVersion>
 }

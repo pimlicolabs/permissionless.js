@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest"
+import { EmptyCallsError } from "../errors/account"
+import { Erc7579InvalidExecutionModeError } from "../errors/erc7579"
 import { encode7579Calls } from "./encode7579Calls"
 
 describe("encode7579Calls", () => {
@@ -64,6 +66,12 @@ describe("encode7579Calls", () => {
                     }
                 ]
             })
-        }).toThrowError("batchcall calldata")
+        }).toThrow(Erc7579InvalidExecutionModeError)
+    })
+
+    test("throws EmptyCallsError for no calls", () => {
+        expect(() =>
+            encode7579Calls({ mode: { type: "call" }, callData: [] })
+        ).toThrow(EmptyCallsError)
     })
 })

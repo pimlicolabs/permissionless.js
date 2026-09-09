@@ -1,11 +1,13 @@
 import { Account } from "viem"
 import { Address, Secp256k1 } from "viem/utils"
-import { describe, expect } from "vitest"
+import { describe, expect, test } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
+import { AccountNotFoundError } from "../../errors/account"
+import { TransactionToRequiredError } from "../../errors/smartAccount"
 import { sendTransaction } from "./sendTransaction"
 
 describe.each(getCoreSmartAccounts())(
@@ -427,3 +429,19 @@ describe.each(getCoreSmartAccounts())(
         )
     }
 )
+
+describe("sendTransaction errors", () => {
+    const to = "0x0000000000000000000000000000000000000001"
+
+    test("rejects with AccountNotFoundError without an account", async () => {
+        await expect(
+            sendTransaction({ account: undefined } as any, { to } as any)
+        ).rejects.toThrow(AccountNotFoundError)
+    })
+
+    test("rejects with TransactionToRequiredError without `to`", async () => {
+        await expect(
+            sendTransaction({ account: {} } as any, { to: undefined } as any)
+        ).rejects.toThrow(TransactionToRequiredError)
+    })
+})

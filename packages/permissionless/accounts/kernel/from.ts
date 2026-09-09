@@ -9,7 +9,6 @@ import {
     PublicKey,
     type TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import {
     KernelNotDelegatedError,
@@ -26,6 +25,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 import { KernelInitAbi } from "./abi/KernelAccountAbi.js"
 import {
     KernelV3_1AccountAbi,
@@ -475,17 +475,9 @@ export async function from<
         }
     })
 
-    return {
-        ...account,
-        getNonce: async (options?: SmartAccount.getNonce.Options) =>
-            getAccountNonce(client, {
-                address: accountAddress,
-                entryPointAddress: entryPoint.address,
-                key: getNonceKeyWithEncoding(
-                    version,
-                    validatorAddress,
-                    options?.key ?? nonceKey
-                )
-            })
-    } as unknown as ReturnType<entryPointVersion, eip7702>
+    return withNonceKey(account, {
+        nonceKey,
+        encodeKey: (key) =>
+            getNonceKeyWithEncoding(version, validatorAddress, key)
+    }) as unknown as ReturnType<entryPointVersion, eip7702>
 }

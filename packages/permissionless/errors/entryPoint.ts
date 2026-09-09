@@ -23,3 +23,21 @@ export class InvalidEntryPointError extends Errors.BaseError<
         )
     }
 }
+
+export class InitCodeRequiredError extends Errors.BaseError {
+    override name = "InitCodeRequiredError"
+
+    constructor() {
+        super("Either `initCode` or `factory` and `factoryData` is required.")
+    }
+}
+
+export class SenderAddressNotFoundError extends Errors.BaseError {
+    override name = "SenderAddressNotFoundError"
+
+    constructor({ entryPointAddress }: { entryPointAddress: Address.Address }) {
+        super(
+            `getSenderAddress on EntryPoint ${entryPointAddress} returned no data.`
+        )
+    }
+}

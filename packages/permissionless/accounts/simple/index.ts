@@ -1,10 +1,9 @@
 import { type Account, Actions, type Chain, type Client } from "viem"
 import { type EntryPoint, SmartAccount, UserOperation } from "viem/erc4337"
 import { AbiFunction, type Address, type Hex } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
+import { EmptyCallsError } from "../../errors/account.js"
 import {
-    SimpleAccountEmptyCallsError,
     SimpleAccountErc1271UnsupportedError,
     SimpleAccountFactoryAddressRequiredError
 } from "../../errors/simple.js"
@@ -16,6 +15,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 const factoryAddresses: { [version in EntryPoint.Version]?: Address.Address } =
     {
@@ -174,7 +174,7 @@ export async function from<
             factoryArgs ?? { factory: undefined, factoryData: undefined },
         encodeCalls(calls) {
             const call = calls[0]
-            if (!call) throw new SimpleAccountEmptyCallsError()
+            if (!call) throw new EmptyCallsError()
             if (calls.length === 1)
                 return AbiFunction.encodeData(execute, [
                     call.to,
@@ -279,14 +279,7 @@ export async function from<
         }
     })
 
-    return Object.assign(account, {
-        getNonce: ({
-            key = nonceKey ?? 0n
-        }: SmartAccount.getNonce.Options = {}) =>
-            getAccountNonce(client, {
-                address,
-                entryPointAddress: entryPoint.address,
-                key
-            })
+    return withNonceKey(account, {
+        nonceKey
     }) as unknown as ReturnType<entryPointVersion, eip7702>
 }

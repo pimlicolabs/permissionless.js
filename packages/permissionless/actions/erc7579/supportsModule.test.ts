@@ -1,7 +1,12 @@
-import { describe, expect } from "vitest"
+import { describe, expect, test } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../../permissionless-test/src/utils"
-import { supportsModule } from "./supportsModule"
+import { Erc7579InvalidModuleTypeError } from "../../errors/erc7579"
+import {
+    type ModuleType,
+    parseModuleTypeId,
+    supportsModule
+} from "./supportsModule"
 
 describe.each(getCoreSmartAccounts())(
     "supportsModule $name",
@@ -33,3 +38,19 @@ describe.each(getCoreSmartAccounts())(
         )
     }
 )
+
+describe("parseModuleTypeId", () => {
+    test("maps the four ERC-7579 module types", () => {
+        expect(
+            (["validator", "executor", "fallback", "hook"] as const).map(
+                parseModuleTypeId
+            )
+        ).toEqual([1n, 2n, 3n, 4n])
+    })
+
+    test("throws Erc7579InvalidModuleTypeError otherwise", () => {
+        expect(() => parseModuleTypeId("bogus" as ModuleType)).toThrow(
+            Erc7579InvalidModuleTypeError
+        )
+    })
+})

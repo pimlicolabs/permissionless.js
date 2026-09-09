@@ -3,6 +3,7 @@ import type {
     CallType,
     ExecutionMode
 } from "../actions/erc7579/supportsExecutionMode.js"
+import { Erc7579InvalidCallTypeError } from "../errors/erc7579.js"
 
 export type DecodeCallDataReturnType = {
     mode: ExecutionMode<CallType>
@@ -57,7 +58,7 @@ export function decode7579Calls(callData: Hex.Hex): DecodeCallDataReturnType {
             type = "delegatecall"
             break
         default:
-            throw new Error("Invalid call type")
+            throw new Erc7579InvalidCallTypeError({ callType })
     }
 
     const decodedMode: ExecutionMode<CallType> = {

@@ -1,5 +1,10 @@
-import { Actions, type Client } from "viem"
+import { Actions, type Client, type Errors, RpcError } from "viem"
 import { AbiConstructor, AbiParameters, type Address, Hex } from "viem/utils"
+import {
+    InitCodeRequiredError,
+    InvalidEntryPointError,
+    SenderAddressNotFoundError
+} from "../../errors/entryPoint.js"
 import type { OneOf, Prettify } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 
@@ -72,11 +77,7 @@ export const getSenderAddress = async (
 ): Promise<Address.Address> => {
     const { initCode, entryPointAddress, factory, factoryData } = args
 
-    if (!initCode && !factory && !factoryData) {
-        throw new Error(
-            "Either `initCode` or `factory` and `factoryData` must be provided"
-        )
-    }
+    if (!initCode && !factory && !factoryData) throw new InitCodeRequiredError()
 
     const formattedInitCode =
         initCode || Hex.concat(factory as Hex.Hex, factoryData as Hex.Hex)
@@ -93,11 +94,19 @@ export const getSenderAddress = async (
                 args: [entryPointAddress, formattedInitCode]
             }
         )
+    }).catch((error: Errors.BaseError) => {
+        const reverted = error.walk?.(
+            (cause) => cause instanceof RpcError.ExecutionRevertedError
+        ) as RpcError.ExecutionRevertedError | null | undefined
+        if (reverted?.details?.includes("getSenderAddress"))
+            throw new InvalidEntryPointError({
+                cause: error,
+                entryPointAddress
+            })
+        throw error
     })
 
-    if (!data) {
-        throw new Error("Failed to get sender address")
-    }
+    if (!data) throw new SenderAddressNotFoundError({ entryPointAddress })
 
     return AbiParameters.decode([{ type: "address" }], data)[0]
 }

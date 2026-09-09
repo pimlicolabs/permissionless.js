@@ -20,11 +20,3 @@ export class LightSmartAccountUnsupportedVersionError extends Errors.BaseError {
         )
     }
 }
-
-export class LightSmartAccountEmptyCallsError extends Errors.BaseError {
-    override name = "LightSmartAccountEmptyCallsError"
-
-    constructor() {
-        super("No calls to encode.")
-    }
-}

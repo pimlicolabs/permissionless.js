@@ -1,4 +1,4 @@
-import { Actions, type Chain, type Client, Errors } from "viem"
+import { Actions, type Chain, type Client } from "viem"
 import {
     type BundlerClient,
     Actions as Erc4337Actions,
@@ -14,6 +14,12 @@ import {
     Solidity,
     type StateOverrides
 } from "viem/utils"
+import { AccountNotFoundError } from "../../errors/account.js"
+import {
+    BalanceSlotRequiredError,
+    Erc20PaymasterRequiredError,
+    TokenQuoteNotFoundError
+} from "../../errors/erc20Paymaster.js"
 import { getAction } from "../../utils/getAction.js"
 import { balanceOverride as erc20BalanceOverride } from "./balanceOverride.js"
 import { getTokenQuotes } from "./getTokenQuotes.js"
@@ -84,7 +90,7 @@ export const prepareUserOperation =
             parameters_ as Erc4337Actions.userOperation.prepare.Options
         const account_ = client.account
 
-        if (!account_) throw new Error("Account not found")
+        if (!account_) throw new AccountNotFoundError()
         const account = account_ as SmartAccount.SmartAccount
 
         const bundlerClient = client as BundlerClient.Client
@@ -131,12 +137,8 @@ export const prepareUserOperation =
 
             const quote = quotes[0]
 
-            if (quote === undefined) {
-                throw new Errors.BaseError(
-                    "client didn't return token quotes, check if the token is supported",
-                    { cause: new Error("Quotes not found") }
-                )
-            }
+            if (quote === undefined)
+                throw new TokenQuoteNotFoundError({ token })
 
             const {
                 postOpGas,
@@ -178,11 +180,8 @@ export const prepareUserOperation =
             const balanceSlot = _balanceSlot ?? quote.balanceSlot
             const hasBalanceSlot = balanceSlot !== undefined
 
-            if (!hasBalanceSlot && balanceOverride) {
-                throw new Error(
-                    `balanceOverride is not supported for token ${token}, provide custom slot for balance & allowance overrides`
-                )
-            }
+            if (!hasBalanceSlot && balanceOverride)
+                throw new BalanceSlotRequiredError({ token })
 
             const balanceStateOverride =
                 balanceOverride && hasBalanceSlot
@@ -359,9 +358,7 @@ export const prepareUserOperation =
                     return { getData }
                 }
 
-                throw new Error(
-                    "Expected paymaster: cannot sponsor ERC-20 without paymaster"
-                )
+                throw new Erc20PaymasterRequiredError()
             })()
 
             ////////////////////////////////////////////////////////////////////////////////

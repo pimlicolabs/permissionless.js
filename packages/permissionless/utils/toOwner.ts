@@ -1,5 +1,9 @@
 import { Account, Actions, type Chain, Client, custom } from "viem"
 import type { Address, TypedData } from "viem/utils"
+import {
+    OwnerAddressRequiredError,
+    OwnerSignUnsupportedError
+} from "../errors/owner.js"
 import { getAction } from "./getAction.js"
 
 // Method syntax is load-bearing (bivariant params), see toOwner.test-d.ts
@@ -35,10 +39,7 @@ export async function toOwner({
                 })) as Address.Address[]
             }
         }
-        if (!address) {
-            // For TS to be happy
-            throw new Error("address is required")
-        }
+        if (!address) throw new OwnerAddressRequiredError()
         walletClient = Client.create({
             account: address,
             transport: custom(provider)
@@ -54,7 +55,7 @@ export async function toOwner({
     const source: Account.from.Account = {
         address: client.account.address,
         sign() {
-            throw new Error("Smart account signer doesn't sign raw hashes")
+            throw new OwnerSignUnsupportedError()
         },
         async signMessage({ message }) {
             return getAction(
@@ -69,11 +70,6 @@ export async function toOwner({
                 Actions.typedData.sign,
                 "typedData.sign"
             )(typedData as TypedData.encode.Value)
-        },
-        async signTransaction() {
-            throw new Error(
-                "Smart account signer doesn't need to sign transactions"
-            )
         }
     }
 

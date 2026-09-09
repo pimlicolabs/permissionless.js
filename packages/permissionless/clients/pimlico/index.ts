@@ -143,12 +143,15 @@ export function create(parameters: Config): Client {
             Erc4337Actions.paymaster.getStubData(client, options)
     }
 
-    return Object.assign(client, { paymaster }).extend(
-        pimlicoActions({
-            entryPoint: {
-                address: entryPoint?.address ?? EntryPoint.addressV07,
-                version: entryPoint?.version ?? "0.7"
-            }
-        })
+    return Object.assign(
+        client.extend(
+            pimlicoActions({
+                entryPoint: {
+                    address: entryPoint?.address ?? EntryPoint.addressV07,
+                    version: entryPoint?.version ?? "0.7"
+                }
+            })
+        ),
+        { paymaster }
     ) as unknown as Client
 }

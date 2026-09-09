@@ -137,7 +137,9 @@ export async function supportsExecutionMode<
             })
 
             if (!result?.data) {
-                throw new Error("accountId result is empty")
+                throw new ContractError.ContractFunctionZeroDataError({
+                    functionName: "supportsExecutionMode"
+                })
             }
 
             return AbiFunction.decodeResult(

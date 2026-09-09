@@ -98,7 +98,9 @@ export async function isModuleInstalled<
             })
 
             if (!result?.data) {
-                throw new Error("accountId result is empty")
+                throw new ContractError.ContractFunctionZeroDataError({
+                    functionName: "isModuleInstalled"
+                })
             }
 
             return AbiFunction.decodeResult(

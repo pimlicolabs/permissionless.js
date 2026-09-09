@@ -36,14 +36,6 @@ export class SafeInvalidOwnerError extends Errors.BaseError {
     }
 }
 
-export class SafeNoCallsError extends Errors.BaseError {
-    override name = "SafeNoCallsError"
-
-    constructor() {
-        super("No calls to encode.")
-    }
-}
-
 export class SafeInsufficientOwnersError extends Errors.BaseError {
     override name = "SafeInsufficientOwnersError"
 

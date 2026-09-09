@@ -15,14 +15,13 @@ import {
     PublicKey,
     TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
+import { EmptyCallsError } from "../../errors/account.js"
 import {
     SafeEntryPointVersionUnsupportedError,
     SafeErc7579VersionUnsupportedError,
     SafeInsufficientOwnersError,
     SafeInvalidOwnerError,
     SafeInvalidSignatureError,
-    SafeNoCallsError,
     SafeWebAuthnSharedSignerAddressMissingError
 } from "../../errors/safe.js"
 import type { Assign, ExactPartial, OneOf } from "../../types/utils.js"
@@ -37,6 +36,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 import {
     concatSignatures,
     getWebAuthnSignature,
@@ -1287,13 +1287,6 @@ export async function from<
         return wrapSignature(concatSignatures(signatures))
     }
 
-    const getNonce = async (options?: { key?: bigint | undefined }) =>
-        getAccountNonce(client, {
-            address: await getAddress(),
-            entryPointAddress: entryPoint.address,
-            key: options?.key ?? nonceKey ?? 0n
-        })
-
     const account = await SmartAccount.from({
         client,
         entryPoint,
@@ -1378,7 +1371,7 @@ export async function from<
             } else {
                 const call = calls[0]
                 if (!call) {
-                    throw new SafeNoCallsError()
+                    throw new EmptyCallsError()
                 }
                 to = call.to
                 data = call.data ?? "0x"
@@ -1585,5 +1578,7 @@ export async function from<
         }
     })
 
-    return { ...account, getNonce } as unknown as ReturnType<entryPointVersion>
+    return withNonceKey(account, {
+        nonceKey
+    }) as unknown as ReturnType<entryPointVersion>
 }

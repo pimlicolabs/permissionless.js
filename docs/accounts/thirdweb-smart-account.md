@@ -56,7 +56,7 @@ Defaults are frozen for the 1.x line: omitting `entryPoint` or `version` derives
 
 ## Errors
 
-- `ThirdwebNoCallsError` -- `encodeCalls([])`
+- `EmptyCallsError` -- `encodeCalls([])`
 
 ## Example
 

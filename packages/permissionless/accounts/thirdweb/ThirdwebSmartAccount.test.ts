@@ -7,7 +7,7 @@ import {
     getPublicClient,
     getSmartAccountClient
 } from "../../../permissionless-test/src/utils"
-import { ThirdwebNoCallsError } from "../../errors/thirdweb.js"
+import { EmptyCallsError } from "../../errors/account.js"
 import * as ThirdwebSmartAccount from "./index.js"
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
@@ -220,6 +220,6 @@ describe("ThirdwebSmartAccount", () => {
             await account.decodeCalls(await account.encodeCalls(batch))
         ).toEqual(batch)
 
-        expect(() => account.encodeCalls([])).toThrow(ThirdwebNoCallsError)
+        expect(() => account.encodeCalls([])).toThrow(EmptyCallsError)
     })
 })

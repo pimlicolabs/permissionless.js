@@ -68,7 +68,9 @@ export async function accountId<
             })
 
             if (!result?.data) {
-                throw new Error("accountId result is empty")
+                throw new ContractError.ContractFunctionZeroDataError({
+                    functionName: "accountId"
+                })
             }
 
             return AbiFunction.decodeResult(abi, "accountId", result.data)

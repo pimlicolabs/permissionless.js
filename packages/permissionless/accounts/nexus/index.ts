@@ -1,10 +1,4 @@
-import {
-    type Account,
-    Actions,
-    type Chain,
-    type Client,
-    type NonceManager
-} from "viem"
+import { type Account, Actions, type Chain, type Client } from "viem"
 import { type EntryPoint, SmartAccount, UserOperation } from "viem/erc4337"
 import {
     Abi,
@@ -16,7 +10,6 @@ import {
     PersonalMessage,
     TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import type { Assign, OneOf } from "../../types/utils.js"
 import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
@@ -27,6 +20,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 const factoryAbi = Abi.from([
     "function createAccount(address eoaOwner, uint256 index, address[] attesters, uint8 threshold) returns (address)",
@@ -148,38 +142,15 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
         )
     }
 
-    const defaultNonceKey = Number(nonceKey % nonceKeyModulus)
-    const nonceKeyManager: NonceManager.NonceManager = {
-        consume: async () => defaultNonceKey,
-        get: async () => defaultNonceKey,
-        increment() {},
-        reset() {}
-    }
-
     const implementation: Implementation = {
         client,
         entryPoint,
-        nonceKeyManager,
         getAddress,
         getFactoryArgs() {
             return {
                 factory: factoryAddress,
                 factoryData: AbiFunction.encodeData(createAccount, factoryArgs)
             }
-        },
-        async getNonce(args) {
-            const key = Hex.concat(
-                Hex.fromNumber((args?.key ?? nonceKey) % nonceKeyModulus, {
-                    size: 3
-                }),
-                "0x00",
-                validatorAddress
-            )
-            return getAccountNonce(client, {
-                address: await getAddress(),
-                entryPointAddress: entryPoint.address,
-                key: Hex.toBigInt(key)
-            })
         },
         encodeCalls(calls) {
             return encode7579Calls({
@@ -232,5 +203,15 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
         }
     }
 
-    return SmartAccount.from(implementation)
+    return withNonceKey(await SmartAccount.from(implementation), {
+        nonceKey,
+        encodeKey: (key) =>
+            Hex.toBigInt(
+                Hex.concat(
+                    Hex.fromNumber(key % nonceKeyModulus, { size: 3 }),
+                    "0x00",
+                    validatorAddress
+                )
+            )
+    })
 }

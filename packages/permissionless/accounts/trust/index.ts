@@ -8,12 +8,9 @@ import {
     PersonalMessage,
     TypedData
 } from "viem/utils"
-import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
-import {
-    TrustEmptyCallsError,
-    TrustInvalidCallDataError
-} from "../../errors/trust.js"
+import { EmptyCallsError } from "../../errors/account.js"
+import { TrustInvalidCallDataError } from "../../errors/trust.js"
 import type { Assign, OneOf } from "../../types/utils.js"
 import { getAction } from "../../utils/getAction.js"
 import { getUserOperationHash06 } from "../../utils/getUserOperationHash06.js"
@@ -22,6 +19,7 @@ import {
     toEntryPoint
 } from "../../utils/toEntryPoint.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { withNonceKey } from "../../utils/withNonceKey.js"
 
 const abi = Abi.from([
     "function execute(address dest, uint256 value, bytes func)",
@@ -137,7 +135,7 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
                     calls.map((call) => call.data ?? "0x")
                 ])
             const call = calls[0]
-            if (!call) throw new TrustEmptyCallsError()
+            if (!call) throw new EmptyCallsError()
             return AbiFunction.encodeData(execute, [
                 call.to,
                 call.value ?? 0n,
@@ -194,12 +192,5 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
         }
     })
 
-    return Object.assign(account, {
-        getNonce: (args?: { key?: bigint | undefined }) =>
-            getAccountNonce(client, {
-                address: account.address,
-                entryPointAddress: entryPoint.address,
-                key: args?.key ?? nonceKey ?? 0n
-            })
-    }) as ReturnType
+    return withNonceKey(account, { nonceKey }) as ReturnType
 }
