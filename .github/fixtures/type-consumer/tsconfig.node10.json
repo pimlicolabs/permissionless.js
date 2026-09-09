@@ -1,9 +1,9 @@
 {
     // Legacy node10 resolution ignores the exports map for subpaths, so it
-    // only finds .d.ts declarations through the per-directory proxy
-    // package.json files. Raw .ts sources leaking into the program error out
-    // even with skipLibCheck enabled, which isolates the signal to exactly
-    // the regression this fixture guards against (issue #522).
+    // only finds .d.ts declarations through the typesVersions map. Raw .ts
+    // sources leaking into the program error out even with skipLibCheck
+    // enabled, which isolates the signal to exactly the regression this
+    // fixture guards against (issue #522).
     "compilerOptions": {
         "target": "ES2021",
         "module": "commonjs",
