@@ -7,7 +7,6 @@ The permissionless monorepo uses TypeScript compilation (no bundler) to produce 
 | Tool | Version | Purpose |
 |------|---------|---------|
 | TypeScript | 7.0.2 (exact) | Native compiler; `tsc` builds every output |
-| typescript5 | npm:typescript@5.9.3 | JS-based TypeScript 5.9 kept for local consumer checks; CI installs its own 5.9.3 / 6.0.3 for the matrix legs and vitest's typecheck drives the TS 7 binary |
 | Biome | 2.5.12 | Linter and formatter (replaces ESLint/Prettier) |
 | Vitest | ^2.1.5 | Test runner with coverage-v8 |
 | Changesets | ^2.26.2 | Version management and changelog generation |
