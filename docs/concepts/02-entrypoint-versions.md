@@ -1,13 +1,13 @@
 # EntryPoint Versions
 
-The ERC-4337 EntryPoint contract has evolved through three major versions. permissionless supports all three, with version 0.7 as the default.
+The ERC-4337 EntryPoint contract has four versions. permissionless supports all of them; which one an account defaults to depends on the account.
 
 ## Version Comparison
 
 ### UserOperation Fields
 
-| Field | 0.6 | 0.7 | 0.8 |
-|-------|-----|-----|-----|
+| Field | 0.6 | 0.7 | 0.8 / 0.9 |
+|-------|-----|-----|-----------|
 | `sender` | Address | Address | Address |
 | `nonce` | uint256 | uint256 | uint256 |
 | `initCode` | bytes (factory + factoryData combined) | -- | -- |
@@ -25,101 +25,108 @@ The ERC-4337 EntryPoint contract has evolved through three major versions. permi
 | `paymasterPostOpGasLimit` | -- | uint128 | uint128 |
 | `paymasterData` | -- | bytes | bytes |
 | `signature` | bytes | bytes | bytes |
-| `authorization` | -- | -- | bytes (EIP-7702) |
+| `authorization` | -- | -- | EIP-7702 authorization |
 
-**Key change from 0.6 to 0.7:** The combined `initCode` (factory+data) and `paymasterAndData` (paymaster+data) fields were split into separate typed fields, improving type safety and gas accounting.
+**0.6 to 0.7:** the combined `initCode` and `paymasterAndData` fields were split into typed fields.
 
-**Key change from 0.7 to 0.8:** Added the `authorization` field for EIP-7702 EOA delegation, and switched to EIP-712 typed data signing.
+**0.7 to 0.8:** the `authorization` field for EIP-7702 delegation and EIP-712 typed-data signing of the UserOperation. viem types 0.9 with the same shape as 0.8 (`UserOperation.UserOperation<"0.8" | "0.9">`).
 
 ### Signing Method
 
 | Version | Method | Details |
 |---------|--------|---------|
-| 0.6 | Hash-based | `keccak256(abi.encode(userOpHash, entryPoint, chainId))` |
-| 0.7 | Hash-based | `keccak256(abi.encode(userOpHash, entryPoint, chainId))` |
-| 0.8 | EIP-712 typed data | Uses `getUserOperationTypedData` from viem for structured signing |
+| 0.6 | Hash-based | `keccak256(abi.encode(userOpHash, entryPoint, chainId))`, `UserOperation.hash` |
+| 0.7 | Hash-based | same |
+| 0.8, 0.9 | EIP-712 typed data | `UserOperation.toTypedData` (viem) |
 
 ### Batch Execution ABI
 
-Different account implementations use different batch execution ABIs depending on EntryPoint version:
-
-**Simple Account:**
+Account implementations use different batch ABIs per EntryPoint version. SimpleAccount:
 - 0.6: `executeBatch(address[] dest, bytes[] func)`
 - 0.7: `executeBatch(address[] dest, uint256[] value, bytes[] func)`
-- 0.8: `executeBatch((address target, uint256 value, bytes data)[] calls)`
+- 0.8, 0.9: `executeBatch((address target, uint256 value, bytes data)[] calls)`
 
 ### Gas Model
 
-| Field | 0.6 | 0.7 / 0.8 |
-|-------|-----|-----------|
+| Field | 0.6 | 0.7+ |
+|-------|-----|------|
 | `callGasLimit` | uint256 | uint128 |
 | `verificationGasLimit` | uint256 | uint128 |
 | `preVerificationGas` | uint256 | uint256 |
 | `maxFeePerGas` | uint256 | uint128 |
 | `maxPriorityFeePerGas` | uint256 | uint128 |
-| Paymaster verification gas | Included in `paymasterAndData` | Separate `paymasterVerificationGasLimit` |
-| Paymaster post-op gas | Included in `paymasterAndData` | Separate `paymasterPostOpGasLimit` |
+| Paymaster verification gas | Inside `paymasterAndData` | `paymasterVerificationGasLimit` |
+| Paymaster post-op gas | Inside `paymasterAndData` | `paymasterPostOpGasLimit` |
 
-The `getRequiredPrefund()` utility computes the minimum deposit needed, using version-specific formulas:
+`getRequiredPrefund` computes the minimum deposit with the version-specific formula:
 
-- **0.6:** `(callGasLimit + verificationGasLimit * 3 + preVerificationGas) * maxFeePerGas`
-- **0.7/0.8:** `(callGasLimit + verificationGasLimit + paymasterVerificationGasLimit + paymasterPostOpGasLimit + preVerificationGas) * maxFeePerGas`
+- **0.6:** `(callGasLimit + verificationGasLimit * m + preVerificationGas) * maxFeePerGas`, `m = 3` with a paymaster and `1` without
+- **0.7+:** `(callGasLimit + verificationGasLimit + paymasterVerificationGasLimit + paymasterPostOpGasLimit + preVerificationGas) * maxFeePerGas`
 
 ### EntryPoint Addresses
 
-| Version | Address |
-|---------|---------|
-| 0.6 | `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789` |
-| 0.7 | `entryPoint07Address` from viem (`0x0000000071727De22E5E9d8BAf0edAc6f37da032`) |
-| 0.8 | `entryPoint08Address` from viem |
+viem exports the canonical addresses and ABIs from `viem/erc4337`:
+
+| Version | Address | viem constants |
+|---------|---------|----------------|
+| 0.6 | `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789` | `EntryPoint.addressV06`, `EntryPoint.abiV06` |
+| 0.7 | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` | `EntryPoint.addressV07`, `EntryPoint.abiV07` |
+| 0.8 | `EntryPoint.addressV08` | `EntryPoint.addressV08`, `EntryPoint.abiV08` |
+| 0.9 | `EntryPoint.addressV09` | `EntryPoint.addressV09`, `EntryPoint.abiV09` |
 
 ## Default Version
 
-When `entryPoint` is not specified:
-- **Smart account factories** default to EntryPoint 0.7
-- **`createPimlicoClient`** defaults to EntryPoint 0.7 (`entryPoint07Address`)
-- **EIP-7702 accounts** require EntryPoint 0.8 (always)
+When `entryPoint` is omitted:
+
+- **Simple** defaults to 0.8
+- **Safe, Kernel, Light, Thirdweb, Nexus, Etherspot** default to 0.7
+- **Trust** is 0.6 only
+- **`PimlicoClient.create`** defaults to 0.7
+- **EIP-7702 mode:** Simple on 0.8 (or 0.9), Kernel on 0.7
+
+The defaults are frozen for the 1.x line: omitting `entryPoint` derives the same address as passing the default explicitly.
 
 ## Version Selection
 
-To use a specific EntryPoint version, pass the `entryPoint` parameter:
+`entryPoint` takes the version shorthand or an explicit `{ address, version }` (for a custom deployment):
 
 ```typescript
-import { entryPoint07Address } from "viem/account-abstraction"
+import { EntryPoint } from "viem/erc4337"
+import { SimpleSmartAccount } from "permissionless"
+import { PimlicoClient } from "permissionless/pimlico"
 
-// Smart account with EntryPoint 0.7 (default)
-const account = await toSimpleSmartAccount({
+// Shorthand: canonical address for the version
+const account = await SimpleSmartAccount.from({
     client: publicClient,
     owner,
-    entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-    },
+    entryPoint: "0.7"
 })
 
-// Pimlico client with specific EntryPoint
-const pimlicoClient = createPimlicoClient({
+// Explicit address
+const account2 = await SimpleSmartAccount.from({
+    client: publicClient,
+    owner,
+    entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
+})
+
+// Pimlico client (object form only)
+const pimlicoClient = PimlicoClient.create({
     transport: http(pimlicoUrl),
-    entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-    },
+    entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
 })
 ```
 
 ## Account Support Matrix
 
-| Account | 0.6 | 0.7 | 0.8 |
-|---------|-----|-----|-----|
-| Simple | Yes | Yes | Yes |
-| Simple (7702) | -- | -- | Yes |
-| Safe | Yes (v1.4.1) | Yes (v1.5.0) | -- |
-| Kernel | Yes | Yes | -- |
-| ECDSA Kernel | Yes | Yes | -- |
-| Kernel (7702) | -- | -- | Yes |
-| Light | Yes (v1.1.0) | Yes (v2.0.0) | -- |
-| Biconomy | -- | Yes | -- |
-| Trust | -- | Yes | -- |
-| Etherspot | -- | Yes | -- |
-| Nexus | -- | Yes | -- |
-| Thirdweb | -- | Yes | -- |
+| Account | 0.6 | 0.7 | 0.8 | 0.9 |
+|---------|-----|-----|-----|-----|
+| Simple | Yes | Yes | Yes (default) | Yes (`factoryAddress` required) |
+| Simple (EIP-7702) | -- | -- | Yes | Yes |
+| Safe | Yes (1.4.1) | Yes (1.4.1, 1.5.0) | -- | -- |
+| Kernel | Yes (0.2.x) | Yes (0.3.x) | -- | -- |
+| Kernel (EIP-7702) | -- | Yes (0.3.3) | -- | -- |
+| Light | Yes (1.1.0) | Yes (2.0.0) | -- | -- |
+| Trust | Yes | -- | -- | -- |
+| Etherspot | -- | Yes | -- | -- |
+| Nexus | -- | Yes | -- | -- |
+| Thirdweb | Yes | Yes | -- | -- |

@@ -1,82 +1,79 @@
 # Passkey Server Actions
 
-Actions for managing WebAuthn/passkey credentials through a passkey server. Used with `createPasskeyServerClient`.
+Actions for registering and authenticating WebAuthn credentials against a Pimlico passkey server. They live on the `PasskeyServer` namespace in `permissionless/pimlico`; `PasskeyServerClient.create` attaches them as methods.
 
 ## Import
 
 ```typescript
-import {
-    startRegistration,
-    verifyRegistration,
-    getCredentials,
-} from "permissionless/actions/passkeyServer"
-
-import type {
-    StartRegistrationParameters,
-    StartRegistrationReturnType,
-    VerifyRegistrationParameters,
-    VerifyRegistrationReturnType,
-    GetCredentialsParameters,
-    GetCredentialsReturnType,
-} from "permissionless/actions/passkeyServer"
+import { PasskeyServer } from "permissionless/pimlico"
+import type { PasskeyServer } from "permissionless/pimlico"
+// PasskeyServer.Actions,
+// PasskeyServer.StartRegistrationParameters, PasskeyServer.StartRegistrationReturnType,
+// PasskeyServer.VerifyRegistrationParameters, PasskeyServer.VerifyRegistrationReturnType,
+// PasskeyServer.GetCredentialsParameters, PasskeyServer.GetCredentialsReturnType,
+// PasskeyServer.StartAuthenticationReturnType,
+// PasskeyServer.VerifyAuthenticationParameters, PasskeyServer.VerifyAuthenticationReturnType
 ```
+
+Every action takes a client whose `request` speaks the passkey server RPC; `PasskeyServerClient.create` builds one.
 
 ---
 
 ## Registration Flow
 
-### `startRegistration`
+### `PasskeyServer.startRegistration`
 
-Initiates a WebAuthn credential registration with the passkey server.
+Asks the server for WebAuthn creation options.
 
 **RPC method:** `pks_startRegistration`
 
 ```typescript
-async function startRegistration(
+async function PasskeyServer.startRegistration(
     client: Client,
-    args: StartRegistrationParameters
-): Promise<StartRegistrationReturnType>
+    args?: PasskeyServer.StartRegistrationParameters
+): Promise<PasskeyServer.StartRegistrationReturnType>
 ```
 
 #### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userName` | `string` | Yes | User identifier for the credential |
+| `context` | `Record<string, unknown>` | No | Opaque context forwarded to the server (for example `{ userName }`) |
 
 #### Returns
 
-WebAuthn creation options to pass to the browser's `navigator.credentials.create()` API.
+`WebAuthn.createCredential.Options` (`viem/utils`), ready for `WebAuthn.createCredential` in the browser.
 
 ---
 
-### `verifyRegistration`
+### `PasskeyServer.verifyRegistration`
 
-Completes the registration by verifying the authenticator's response with the passkey server.
+Completes the registration with the created credential.
 
 **RPC method:** `pks_verifyRegistration`
 
 ```typescript
-async function verifyRegistration(
+async function PasskeyServer.verifyRegistration(
     client: Client,
-    args: VerifyRegistrationParameters
-): Promise<VerifyRegistrationReturnType>
+    args: PasskeyServer.VerifyRegistrationParameters
+): Promise<PasskeyServer.VerifyRegistrationReturnType>
 ```
 
 #### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `credential` | `object` | Yes | Authenticator response from `navigator.credentials.create()` |
+| `credential` | `WebAuthn.P256Credential` | Yes | Result of `WebAuthn.createCredential` |
+| `context` | `unknown` | Yes | Context forwarded to the server |
 
 #### Returns
 
 ```typescript
 {
-    success: boolean,
-    id: string,
-    publicKey: Hex,
-    userName: string,
+    success: boolean
+    id: string
+    publicKey: Hex
+    userName: string
 }
 ```
 
@@ -84,62 +81,97 @@ async function verifyRegistration(
 
 ## Credential Management
 
-### `getCredentials`
-
-Retrieves all registered credentials for a user.
+### `PasskeyServer.getCredentials`
 
 **RPC method:** `pks_getCredentials`
 
 ```typescript
-async function getCredentials(
+async function PasskeyServer.getCredentials(
     client: Client,
-    args: GetCredentialsParameters
-): Promise<GetCredentialsReturnType>
+    args?: PasskeyServer.GetCredentialsParameters
+): Promise<PasskeyServer.GetCredentialsReturnType>
 ```
 
-#### Returns
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `context` | `Record<string, unknown>` | No | Context forwarded to the server |
 
-```typescript
-{ id: string, publicKey: Hex }[]
-```
+Returns `{ id: string, publicKey: Hex }[]`.
 
 ---
 
 ## Authentication Flow
 
-The passkey server also supports authentication via `startAuthentication` and `verifyAuthentication` methods (available via the decorator, not exported standalone):
+### `PasskeyServer.startAuthentication`
 
-- **`startAuthentication`** (`pks_startAuthentication`) -- Gets authentication challenge options
-- **`verifyAuthentication`** (`pks_verifyAuthentication`) -- Verifies the authenticator's response
+**RPC method:** `pks_startAuthentication`
+
+```typescript
+async function PasskeyServer.startAuthentication(
+    client: Client
+): Promise<PasskeyServer.StartAuthenticationReturnType>
+```
+
+Returns `{ challenge: string, rpId: string, uuid: string, userVerification?: string }` for `navigator.credentials.get`.
+
+### `PasskeyServer.verifyAuthentication`
+
+**RPC method:** `pks_verifyAuthentication`
+
+```typescript
+async function PasskeyServer.verifyAuthentication(
+    client: Client,
+    args: PasskeyServer.VerifyAuthenticationParameters
+): Promise<PasskeyServer.VerifyAuthenticationReturnType>
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `raw` | The `PublicKeyCredential` returned by `navigator.credentials.get` (`id`, `rawId`, `authenticatorAttachment`, `response`, `getClientExtensionResults`, `type`) | Yes | Assertion to verify |
+| `uuid` | `string` | Yes | The `uuid` returned by `startAuthentication` |
+
+Returns `{ success, id, publicKey, userName }`.
+
+---
+
+## Errors
+
+- `InvalidPasskeyServerResponseError` -- a server response failed validation; `metaMessages` names the method and reason
+- `InvalidPasskeyCredentialError` -- `verifyAuthentication` with a response lacking `authenticatorData` or `signature`
+- `PasskeyAttestationUnsupportedError` -- `verifyRegistration` when the browser cannot expose the public key algorithm or authenticator data
 
 ## Example Flow
 
 ```typescript
-import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
 import { http } from "viem"
+import { WebAuthn } from "viem/utils"
+import { PasskeyServerClient } from "permissionless/pimlico"
 
-const passkeyClient = createPasskeyServerClient({
-    transport: http("https://passkey-server.example.com"),
+const passkeyClient = PasskeyServerClient.create({
+    transport: http("https://passkey-server.example.com")
 })
 
 // 1. Start registration
 const options = await passkeyClient.startRegistration({
-    userName: "alice@example.com",
+    context: { userName: "alice@example.com" }
 })
 
-// 2. Browser creates credential (user interaction required)
-const credential = await navigator.credentials.create({
-    publicKey: options,
-})
+// 2. Browser creates the credential (user interaction)
+const credential = await WebAuthn.createCredential(options)
 
-// 3. Verify with server
-const result = await passkeyClient.verifyRegistration({
+// 3. Verify with the server
+const { id, publicKey } = await passkeyClient.verifyRegistration({
     credential,
+    context: { userName: "alice@example.com" }
 })
 
-console.log("Registered:", result.success)
-console.log("Public key:", result.publicKey)
-
-// 4. Use the public key to create a Safe account with WebAuthn
-// (see Safe account documentation for WebAuthn owner setup)
+// 4. Later: list credentials
+const credentials = await passkeyClient.getCredentials({
+    context: { userName: "alice@example.com" }
+})
 ```
+
+## Migrating from 0.x
+
+- The `actions/passkeyServer` subpath -> the `PasskeyServer` namespace in `permissionless/pimlico`.
+- `startAuthentication` and `verifyAuthentication` are exported standalone now (0.x had them on the decorator only).

@@ -58,7 +58,7 @@ Every `SmartAccount` returned by `from` has these methods:
 | Account | Constructor | EntryPoint | Default EP | ERC-7579 | EIP-7702 | ERC-1271 |
 |---------|-------------|------------|------------|----------|----------|----------|
 | [Simple](./simple-smart-account.md) | `SimpleSmartAccount.from` | 0.6, 0.7, 0.8, 0.9 | 0.8 | No | No | No |
-| [Simple (7702)](./simple-smart-account-7702.md) | `SimpleSmartAccount.from` with `eip7702: true` | 0.8, 0.9 | 0.8 | No | Yes | No |
+| [Simple (EIP-7702 mode)](./simple-smart-account.md#eip-7702-mode) | `SimpleSmartAccount.from` with `eip7702: true` | 0.8, 0.9 | 0.8 | No | Yes | No |
 | [Safe](./safe-smart-account.md) | `SafeSmartAccount.from` | 0.6, 0.7 | 0.7 | Yes (with `erc7579LaunchpadAddress`) | No | Yes |
 | [Kernel](./kernel-smart-account.md) | `KernelSmartAccount.from` | 0.6, 0.7 | 0.7 | Yes (v0.3.x) | Yes (`eip7702: true`, Kernel 0.3.3 on 0.7) | Yes |
 | [Light](./light-smart-account.md) | `LightSmartAccount.from` | 0.6, 0.7 | 0.7 | No | No | Yes |
@@ -69,7 +69,7 @@ Every `SmartAccount` returned by `from` has these methods:
 
 ## Import
 
-All account namespaces are exported from the package root; the 0.x `permissionless/accounts` subpath is gone (see the [export map](../architecture/02-export-map.md)):
+All account namespaces are exported from the package root; the 0.x `accounts` subpath is gone (see the [export map](../architecture/02-export-map.md)):
 
 ```typescript
 import {

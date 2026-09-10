@@ -1,77 +1,70 @@
 # SmartAccountClient
 
-The `SmartAccountClient` is the primary client for sending transactions from a smart account via a bundler. It wraps a bundler transport and a smart account, providing a high-level API identical to viem's wallet client.
+`SmartAccountClient` wraps a bundler transport and a smart account. It is a viem 3 `BundlerClient` with permissionless's smart-account actions (`sendTransaction`, `sendCalls`, `signMessage`, …) on top, so it reads like a wallet client.
 
 ## Import
 
 ```typescript
-import { createSmartAccountClient } from "permissionless"
-// or
-import { createSmartAccountClient, smartAccountActions } from "permissionless/clients"
-
-import type {
-    SmartAccountClient,
-    SmartAccountClientConfig,
-    SmartAccountActions,
-} from "permissionless"
+import { SmartAccountClient, smartAccountActions } from "permissionless"
+import type { SmartAccountClient } from "permissionless"
+// SmartAccountClient.Client, SmartAccountClient.Config, SmartAccountClient.Actions,
+// SmartAccountClient.PrepareUserOperationHook
 ```
 
-## `createSmartAccountClient`
+## `SmartAccountClient.create`
 
 ```typescript
-function createSmartAccountClient<
-    transport extends Transport,
-    chain extends Chain | undefined = undefined,
-    account extends SmartAccount | undefined = undefined,
-    client extends Client | undefined = undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
->(
-    parameters: SmartAccountClientConfig<transport, chain, account, client, rpcSchema>
-): SmartAccountClient<transport, chain, account, client, rpcSchema>
+function SmartAccountClient.create(
+    parameters: SmartAccountClient.Config
+): SmartAccountClient.Client
 ```
 
-### Config Parameters
+Generic over the transport, chain, account, execution client and extra RPC schema; all five are inferred from `parameters`.
+
+### Config
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `bundlerTransport` | `Transport` | Yes | -- | Transport to the bundler RPC |
-| `account` | `SmartAccount` | No | -- | Smart account to use |
-| `chain` | `Chain` | No | Inferred from `client` | Chain for the client |
-| `client` | `Client` | No | -- | Underlying execution RPC client (for on-chain reads) |
-| `paymaster` | `true \| { getPaymasterData?, getPaymasterStubData? }` | No | -- | Paymaster configuration |
-| `paymasterContext` | `unknown` | No | -- | Context passed to paymaster calls |
-| `userOperation` | `{ estimateFeesPerGas?, prepareUserOperation? }` | No | -- | UserOperation customization hooks |
-| `key` | `string` | No | `"bundler"` | Client identifier key |
-| `name` | `string` | No | `"Bundler Client"` | Client display name |
+| `bundlerTransport` | `Transport.Transport` | Yes | -- | Transport to the bundler RPC |
+| `account` | `SmartAccount.SmartAccount` | No | -- | Smart account to send from |
+| `chain` | `Chain.Chain` | No | Inferred from `client` | Chain |
+| `client` | `Client.Client` | No | -- | Execution RPC client for on-chain reads |
+| `paymaster` | `true \| PaymasterClient.Client \| PimlicoClient.Client \| { getData?, getStubData? }` | No | -- | Paymaster (see below) |
+| `paymasterContext` | `unknown` | No | -- | Context passed to the paymaster calls |
+| `userOperation.estimateFeesPerGas` | `({ account, bundlerClient, userOperation }) => Promise<{ maxFeePerGas, maxPriorityFeePerGas }>` | No | viem default | Fee estimation hook |
+| `userOperation.prepareUserOperation` | `SmartAccountClient.PrepareUserOperationHook` | No | -- | Replaces `userOperation.prepare` (see below) |
+| `key` | `string` | No | `"bundler"` | Client key |
+| `name` | `string` | No | `"Bundler Client"` | Client name |
 | `cacheTime` | `number` | No | viem default | Cache duration in ms |
 | `pollingInterval` | `number` | No | viem default | Polling interval in ms |
-| `rpcSchema` | `RpcSchema` | No | -- | Additional RPC methods |
+| `schema` | `RpcSchema.Generic` | No | -- | Extra typed RPC methods |
 
 ### `paymaster` Option
 
-Three paymaster modes:
-
 ```typescript
-// 1. No paymaster (user pays gas in ETH)
+// 1. No paymaster: the account pays gas in ETH
 paymaster: undefined
 
-// 2. Bundler acts as paymaster (same URL handles both)
+// 2. The bundler URL also serves pm_* methods
 paymaster: true
 
-// 3. Custom paymaster functions
+// 3. A paymaster client (PimlicoClient.create or viem's PaymasterClient.create)
+paymaster: pimlicoClient
+
+// 4. Custom functions
 paymaster: {
-    getPaymasterData: async (userOperation) => ({
+    getData: async (userOperation) => ({
         paymaster: "0x...",
         paymasterData: "0x...",
         paymasterVerificationGasLimit: 100000n,
-        paymasterPostOpGasLimit: 50000n,
+        paymasterPostOpGasLimit: 50000n
     }),
-    getPaymasterStubData: async (userOperation) => ({
+    getStubData: async (userOperation) => ({
         paymaster: "0x...",
         paymasterData: "0x...",
         paymasterVerificationGasLimit: 100000n,
-        paymasterPostOpGasLimit: 50000n,
-    }),
+        paymasterPostOpGasLimit: 50000n
+    })
 }
 ```
 
@@ -79,35 +72,34 @@ paymaster: {
 
 ```typescript
 userOperation: {
-    // Custom gas price estimation
     estimateFeesPerGas: async ({ account, bundlerClient, userOperation }) => ({
         maxFeePerGas: 30000000000n,
-        maxPriorityFeePerGas: 1000000000n,
+        maxPriorityFeePerGas: 1000000000n
     }),
-    // Custom UserOperation preparation (e.g., for ERC-20 paymaster)
-    prepareUserOperation: async (client, parameters) => {
-        // Modify UserOperation before signing
-        return { ...parameters, /* modifications */ }
-    },
+    prepareUserOperation: Erc20Paymaster.prepareUserOperation(pimlicoClient)
 }
 ```
 
+`PrepareUserOperationHook` is `(client: BundlerClient.Client, parameters: Actions.userOperation.prepare.Options) => Promise<Actions.userOperation.prepare.ReturnType>` (`Actions` from `viem/erc4337`). When set, the client's `userOperation.prepare` and `userOperation.send` run through it before signing. `Erc20Paymaster.prepareUserOperation` from `permissionless/pimlico` is the shipped hook.
+
 ### Return Type
 
-`SmartAccountClient` is a viem `Client` with:
-- **`BundlerActions`** -- `sendUserOperation`, `estimateUserOperationGas`, `getUserOperationByHash`, `getUserOperationReceipt`, `getSupportedEntryPoints`, `prepareUserOperation`, `waitForUserOperationReceipt`
-- **`SmartAccountActions`** -- `sendTransaction`, `signMessage`, `signTypedData`, `writeContract`, `sendCalls`, `getCallsStatus`
-- Extra properties: `client`, `paymaster`, `paymasterContext`, `userOperation`
+`SmartAccountClient.Client` is a viem `BundlerClient.Client` with:
+
+- viem's account-abstraction actions: `userOperation.prepare`, `userOperation.estimateGas`, `userOperation.send`, `userOperation.get`, `userOperation.getReceipt`, `userOperation.waitForReceipt`
+- `SmartAccountClient.Actions`: `sendTransaction`, `sendCalls`, `getCallsStatus`, `signMessage`, `signTypedData`, `writeContract`
+- properties `account`, `client`, `paymaster`, `paymasterContext`
 
 ## `smartAccountActions` Decorator
 
-The decorator that adds smart account actions to any bundler client:
+Adds the smart-account actions to any viem bundler client:
 
 ```typescript
-import { smartAccountActions } from "permissionless/clients"
+import { http } from "viem"
+import { BundlerClient } from "viem/erc4337"
+import { smartAccountActions } from "permissionless"
 
-const client = createClient({ transport: http(bundlerUrl) })
-    .extend(bundlerActions)
+const client = BundlerClient.create({ account, transport: http(bundlerUrl) })
     .extend(smartAccountActions)
 ```
 
@@ -115,101 +107,79 @@ const client = createClient({ transport: http(bundlerUrl) })
 
 | Method | Parameters | Returns | Description |
 |--------|-----------|---------|-------------|
-| `sendTransaction` | `SendTransactionParameters` | `Hash` | Send transaction via UserOp |
-| `signMessage` | `{ message }` | `Hex` | EIP-191 message signature |
-| `signTypedData` | `{ domain, types, primaryType, message }` | `Hex` | EIP-712 typed data signature |
-| `writeContract` | `WriteContractParameters` | `Hash` | Contract write via UserOp |
-| `sendCalls` | `{ calls: { to, value, data }[] }` | `{ id: Hash }` | Batch calls via UserOp |
-| `getCallsStatus` | `{ id: Hash }` | `GetCallsStatusReturnType` | Check batch call status |
+| `sendTransaction` | `{ to, value?, data?, account?, authorization? }` | `Hash` | Send one call as a UserOperation, wait for inclusion |
+| `sendCalls` | `{ calls: { to, value?, data? }[], account? }` | `{ id: Hash }` | Send a batch as a UserOperation |
+| `getCallsStatus` | `{ id: Hash }` | `GetCallsStatusReturnType` | Status of a batch (`receipts: []` while pending) |
+| `signMessage` | `{ message }` | `Hex` | EIP-191 message signature via the account's ERC-1271 scheme |
+| `signTypedData` | `{ domain, types, primaryType, message }` | `Hex` | EIP-712 typed data signature via the account's ERC-1271 scheme |
+| `writeContract` | `{ address, abi, functionName, args, value? }` | `Hash` | Contract write as a UserOperation |
+
+See [Smart Account Actions](../actions/smart-account-actions.md).
 
 ## Examples
 
 ### Basic Usage
 
 ```typescript
-import { createPublicClient, http } from "viem"
+import { Account, Client, http } from "viem"
 import { sepolia } from "viem/chains"
-import { privateKeyToAccount } from "viem/accounts"
-import { toSimpleSmartAccount } from "permissionless/accounts"
-import { createSmartAccountClient } from "permissionless"
+import { SimpleSmartAccount, SmartAccountClient } from "permissionless"
 
-const publicClient = createPublicClient({
+const publicClient = Client.create({
     chain: sepolia,
-    transport: http("https://rpc.sepolia.org"),
+    transport: http("https://rpc.sepolia.org")
 })
 
-const account = await toSimpleSmartAccount({
+const account = await SimpleSmartAccount.from({
     client: publicClient,
-    owner: privateKeyToAccount("0x..."),
+    owner: Account.fromPrivateKey("0x...")
 })
 
-const smartAccountClient = createSmartAccountClient({
+const smartAccountClient = SmartAccountClient.create({
     account,
     chain: sepolia,
     bundlerTransport: http("https://bundler.example.com"),
-    client: publicClient,
+    client: publicClient
 })
 
 const hash = await smartAccountClient.sendTransaction({
     to: "0x...",
     value: 0n,
-    data: "0x",
+    data: "0x"
 })
 ```
 
 ### With Pimlico Paymaster
 
 ```typescript
-import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { PimlicoClient } from "permissionless/pimlico"
 
-const pimlicoClient = createPimlicoClient({
-    transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"),
-})
+const pimlicoUrl = "https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"
 
-const smartAccountClient = createSmartAccountClient({
+const pimlicoClient = PimlicoClient.create({ transport: http(pimlicoUrl) })
+
+const smartAccountClient = SmartAccountClient.create({
     account,
     chain: sepolia,
-    bundlerTransport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"),
-    paymaster: pimlicoClient,
+    bundlerTransport: http(pimlicoUrl),
+    paymaster: pimlicoClient
 })
 ```
 
-### With Custom Gas Estimation
+### With Custom Fee Estimation
 
 ```typescript
-const smartAccountClient = createSmartAccountClient({
+const smartAccountClient = SmartAccountClient.create({
     account,
     chain: sepolia,
-    bundlerTransport: http(bundlerUrl),
+    bundlerTransport: http(pimlicoUrl),
     userOperation: {
-        estimateFeesPerGas: async ({ account, bundlerClient, userOperation }) => {
-            return {
-                maxFeePerGas: 50000000000n,
-                maxPriorityFeePerGas: 2000000000n,
-            }
-        },
-    },
+        estimateFeesPerGas: async () =>
+            (await pimlicoClient.getUserOperationGasPrice()).fast
+    }
 })
 ```
 
 ## Internal Implementation
 
-When `prepareUserOperation` is provided, the client applies a double `.extend(bundlerActions)` pattern to ensure the custom preparation hook overrides viem's default:
-
-```typescript
-client
-    .extend(bundlerActions)
-    .extend((client) => ({
-        prepareUserOperation: (args) => customPrepareUserOp(client, args),
-    }))
-    .extend(bundlerActions)
-    .extend((client) => ({
-        prepareUserOperation: (args) => customPrepareUserOp(client, args),
-    }))
-    .extend(smartAccountActions)
-```
-
-Without `prepareUserOperation`, the simpler chain is used:
-```typescript
-client.extend(bundlerActions).extend(smartAccountActions)
-```
+`create` builds a viem `BundlerClient` from the config (`transport: bundlerTransport`, `paymaster`, `userOperation.estimateFeesPerGas`). Without `prepareUserOperation` it extends that client with `smartAccountActions`. With the hook it first overrides `userOperation.prepare` (delegating to the hook) and `userOperation.send` (hook, then viem's `userOperation.send` with the prepared request), then applies `smartAccountActions`.

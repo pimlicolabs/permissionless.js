@@ -1,55 +1,54 @@
 # PasskeyServerClient
 
-The `PasskeyServerClient` provides methods for interacting with a WebAuthn/passkey server for credential registration and authentication.
+`PasskeyServerClient` is a viem 3 `Client` against a Pimlico passkey server with the `PasskeyServer` actions (registration, authentication, credential lookup) attached.
 
 ## Import
 
 ```typescript
-import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
-import type {
-    PasskeyServerClient,
-    PasskeyServerClientConfig,
-} from "permissionless/clients/passkeyServer"
+import { PasskeyServerClient } from "permissionless/pimlico"
+import type { PasskeyServerClient } from "permissionless/pimlico"
+// PasskeyServerClient.Client, PasskeyServerClient.Config, PasskeyServerClient.Schema
 ```
 
-## `createPasskeyServerClient`
+## `PasskeyServerClient.create`
 
 ```typescript
-function createPasskeyServerClient<
-    rpcSchema extends RpcSchema | undefined = undefined
->(
-    parameters: PasskeyServerClientConfig<rpcSchema>
-): PasskeyServerClient<rpcSchema>
+function PasskeyServerClient.create(
+    parameters: PasskeyServerClient.Config
+): PasskeyServerClient.Client
 ```
 
-### Config Parameters
+Generic over the extra RPC schema.
+
+### Config
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `transport` | `Transport` | Yes | -- | Transport to the passkey server |
-| `chain` | `Chain` | No | -- | Chain |
-| `account` | `Account` | No | -- | Account |
+| `transport` | `Transport.Transport` | Yes | -- | Transport to the passkey server |
+| `chain` | `Chain.Chain` | No | -- | Chain |
+| `account` | `Account.Account` | No | -- | Account |
 | `key` | `string` | No | `"public"` | Client key |
 | `name` | `string` | No | `"Passkey Server Client"` | Client name |
 | `cacheTime` | `number` | No | viem default | Cache duration |
 | `pollingInterval` | `number` | No | viem default | Polling interval |
-| `rpcSchema` | `RpcSchema` | No | -- | Additional RPC methods |
+| `schema` | `RpcSchema.Generic` | No | -- | Extra typed RPC methods |
 
 ### Return Type
 
-`PasskeyServerClient` is a viem `Client` with `PasskeyServerActions`:
-- `startRegistration` -- Begin WebAuthn credential registration
-- `verifyRegistration` -- Complete registration with authenticator response
-- `getCredentials` -- List registered credentials
-- `startAuthentication` -- Begin authentication challenge
-- `verifyAuthentication` -- Complete authentication
+`PasskeyServerClient.Client` is a viem `Client` (type `"passkeyServerClient"`) with `PasskeyServer.Actions`:
 
-See [Passkey Server Actions](../actions/passkey-server-actions.md) for details on each method.
+- `startRegistration({ context? })` -- WebAuthn creation options
+- `verifyRegistration({ credential, context })` -- complete registration
+- `getCredentials({ context? })` -- registered credentials
+- `startAuthentication()` -- authentication challenge
+- `verifyAuthentication({ raw, uuid })` -- complete authentication
+
+See [Passkey Server Actions](../actions/passkey-server-actions.md).
 
 ### Internal Implementation
 
 ```typescript
-createClient({ ...parameters })
+Client.create({ ...parameters, key, name, type: "passkeyServerClient" })
     .extend(passkeyServerActions)
 ```
 
@@ -57,19 +56,21 @@ createClient({ ...parameters })
 
 ```typescript
 import { http } from "viem"
-import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
+import { WebAuthn } from "viem/utils"
+import { PasskeyServerClient } from "permissionless/pimlico"
 
-const passkeyClient = createPasskeyServerClient({
-    transport: http("https://passkey-server.example.com"),
+const passkeyClient = PasskeyServerClient.create({
+    transport: http("https://passkey-server.example.com")
 })
 
-// Register a new passkey
-const registrationOptions = await passkeyClient.startRegistration({
-    userName: "alice",
+const options = await passkeyClient.startRegistration({
+    context: { userName: "alice" }
 })
 
-// After user completes WebAuthn ceremony:
+const credential = await WebAuthn.createCredential(options)
+
 const result = await passkeyClient.verifyRegistration({
-    credential: authenticatorResponse,
+    credential,
+    context: { userName: "alice" }
 })
 ```

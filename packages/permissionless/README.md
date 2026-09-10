@@ -14,7 +14,7 @@ with bundlers and paymasters, and leveraging custom signers.
 - **High-Level Smart Account Support**: We support a high-level API for
   deploying and managing smart accounts, including some of the most popular
   implementations ([Safe](https://safe.global), [Kernel](https://zerodev.app),
-  [Biconomy](https://biconomy.io), etc.)
+  [Nexus](https://biconomy.io), etc.)
 - **Bundler Support**: We support all bundler actions following
   [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
 - **Gas Sponsorship**: We support paymaster actions to allow you to easily
@@ -69,35 +69,36 @@ Node.js 20 or later and TypeScript 5.9 or later.
 ## Quick Start
 
 ```typescript
-// Import the required modules.
-import { createSmartAccountClient } from "permissionless";
-import { createPaymasterClient } from "viem/account-abstraction";
-import { sepolia } from "viem/chains";
-import { http } from "viem";
+import { Account, Client, http } from "viem"
+import { sepolia } from "viem/chains"
+import { SimpleSmartAccount, SmartAccountClient } from "permissionless"
+import { PimlicoClient } from "permissionless/pimlico"
 
-const paymaster = createPaymasterClient({
-  transport: http(`https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`)
+const pimlicoUrl = `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`
+
+// Bundler + paymaster in one client
+const pimlicoClient = PimlicoClient.create({ transport: http(pimlicoUrl) })
+
+// The smart account (computes the counterfactual address)
+const account = await SimpleSmartAccount.from({
+  client: Client.create({ chain: sepolia, transport: http() }),
+  owner: Account.fromPrivateKey("0x...")
 })
 
-const account = toSimpleSmartAccount<entryPointVersion>({
-  client: getPublicClient(anvilRpc),
-  owner: privateKeyToAccount(generatePrivateKey())
-})
-
-// Create the required clients.
-const bundlerClient = createSmartAccountClient({
+// Bundler client with smart account actions; gas sponsored by Pimlico
+const smartAccountClient = SmartAccountClient.create({
   account,
-  paymaster, 
   chain: sepolia,
-  bundlerTransport: http(
-    `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`,
-  ), // Use any bundler url
-});
+  bundlerTransport: http(pimlicoUrl),
+  paymaster: pimlicoClient
+})
 
-// Consume bundler, paymaster, and smart account actions!
-const userOperationReceipt = await bundlerClient.getUserOperationReceipt({
-  hash: "0x5faea6a3af76292c2b23468bbea96ef63fb31360848be195748437f0a79106c8",
-});
+// Prepares, signs and submits a UserOperation, then waits for the receipt
+const hash = await smartAccountClient.sendTransaction({
+  to: "0x...",
+  value: 0n,
+  data: "0x"
+})
 ```
 
 ## Contributors

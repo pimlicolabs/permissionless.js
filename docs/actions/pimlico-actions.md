@@ -1,60 +1,57 @@
 # Pimlico Actions
 
-Pimlico-specific actions for interacting with Pimlico's bundler and paymaster APIs.
+Actions for Pimlico's bundler and paymaster RPC. They live on the `Pimlico` namespace in `permissionless/pimlico`; `pimlicoActions({ entryPoint })` attaches them (plus the ERC-20 paymaster helpers) to a client, and `PimlicoClient.create` does that for you.
 
 ## Import
 
 ```typescript
-import {
-    pimlicoActions,
-    getUserOperationGasPrice,
-    getUserOperationStatus,
-    sponsorUserOperation,
-    validateSponsorshipPolicies,
-    getTokenQuotes,
-    sendCompressedUserOperation,
-} from "permissionless/actions/pimlico"
+import { Pimlico, pimlicoActions } from "permissionless/pimlico"
+import type { Pimlico } from "permissionless/pimlico"
+// Pimlico.Actions, Pimlico.GetUserOperationGasPriceReturnType,
+// Pimlico.GetUserOperationStatusParameters, Pimlico.GetUserOperationStatusReturnType,
+// Pimlico.SponsorUserOperationParameters, Pimlico.SponsorUserOperationReturnType,
+// Pimlico.ValidateSponsorshipPoliciesParameters, Pimlico.ValidateSponsorshipPolicies
 ```
 
 ## `pimlicoActions` Decorator
 
-Factory that creates a decorator adding all Pimlico methods to a client:
-
 ```typescript
-const decorator = pimlicoActions({
-    entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-    },
-})
+import { Client, http } from "viem"
+import { EntryPoint } from "viem/erc4337"
+import { pimlicoActions } from "permissionless/pimlico"
 
-const client = createClient({ transport: http(pimlicoUrl) })
-    .extend(decorator)
+const client = Client.create({ transport: http(pimlicoUrl) }).extend(
+    pimlicoActions({
+        entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
+    })
+)
 ```
+
+Methods added: `getUserOperationGasPrice`, `getUserOperationStatus`, `sponsorUserOperation`, `validateSponsorshipPolicies`, `getTokenQuotes`, `estimateErc20PaymasterCost`. The decorator supplies the EntryPoint from its config, so the method forms drop `entryPoint` / `entryPointAddress`.
 
 ---
 
-## `getUserOperationGasPrice`
+## `Pimlico.getUserOperationGasPrice`
 
-Gets gas price recommendations from Pimlico at three speed tiers.
+Gas price recommendations at three speed tiers.
 
 **RPC method:** `pimlico_getUserOperationGasPrice`
 
 ### Signature
 
 ```typescript
-async function getUserOperationGasPrice(
+async function Pimlico.getUserOperationGasPrice(
     client: Client
-): Promise<GetUserOperationGasPriceReturnType>
+): Promise<Pimlico.GetUserOperationGasPriceReturnType>
 ```
 
 ### Returns
 
 ```typescript
 {
-    slow: { maxFeePerGas: bigint, maxPriorityFeePerGas: bigint },
-    standard: { maxFeePerGas: bigint, maxPriorityFeePerGas: bigint },
-    fast: { maxFeePerGas: bigint, maxPriorityFeePerGas: bigint },
+    slow: { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
+    standard: { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
+    fast: { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
 }
 ```
 
@@ -62,100 +59,99 @@ async function getUserOperationGasPrice(
 
 ```typescript
 const gasPrice = await pimlicoClient.getUserOperationGasPrice()
-console.log("Standard gas price:", gasPrice.standard.maxFeePerGas)
+gasPrice.standard.maxFeePerGas
 ```
 
 ---
 
-## `getUserOperationStatus`
+## `Pimlico.getUserOperationStatus`
 
-Checks the current status of a submitted UserOperation.
+Status of a submitted UserOperation.
 
 **RPC method:** `pimlico_getUserOperationStatus`
 
 ### Signature
 
 ```typescript
-async function getUserOperationStatus(
+async function Pimlico.getUserOperationStatus(
     client: Client,
-    args: GetUserOperationStatusParameters
-): Promise<GetUserOperationStatusReturnType>
+    args: Pimlico.GetUserOperationStatusParameters
+): Promise<Pimlico.GetUserOperationStatusReturnType>
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `hash` | `Hash` | Yes | UserOperation hash |
+| `hash` | `Hex` | Yes | UserOperation hash |
 
 ### Returns
 
 ```typescript
 {
-    status: "not_found" | "not_submitted" | "submitted" | "rejected" | "reverted" | "included" | "failed",
-    transactionHash: Hash | null,
+    status: "not_found" | "not_submitted" | "submitted" | "rejected" | "reverted" | "included" | "failed"
+    transactionHash: Hex | null
 }
 ```
 
 ### Example
 
 ```typescript
-const status = await pimlicoClient.getUserOperationStatus({
-    hash: "0x...",
+const { status, transactionHash } = await pimlicoClient.getUserOperationStatus({
+    hash: "0x..."
 })
-
-if (status.status === "included") {
-    console.log("Included in tx:", status.transactionHash)
-}
 ```
 
 ---
 
-## `sponsorUserOperation`
+## `Pimlico.sponsorUserOperation`
 
-Requests Pimlico to sponsor a UserOperation (pay its gas fees).
+Asks Pimlico to sponsor a UserOperation. `SmartAccountClient.create({ paymaster: pimlicoClient })` sponsors automatically through viem's paymaster flow (`pm_getPaymasterStubData`, `pm_getPaymasterData`); this is the manual form.
 
 **RPC method:** `pm_sponsorUserOperation`
 
 ### Signature
 
 ```typescript
-async function sponsorUserOperation(
+async function Pimlico.sponsorUserOperation<entryPointVersion extends EntryPoint.Version>(
     client: Client,
-    args: PimlicoSponsorUserOperationParameters
-): Promise<SponsorUserOperationReturnType>
+    args: Pimlico.SponsorUserOperationParameters<entryPointVersion>
+): Promise<Pimlico.SponsorUserOperationReturnType<entryPointVersion>>
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userOperation` | `UserOperation` | Yes | The UserOperation to sponsor |
-| `entryPoint` | `Address` | Yes | EntryPoint address |
-| `sponsorshipPolicyId` | `string` | No | Specific policy to use |
+| `userOperation` | `UserOperation.UserOperation<entryPointVersion>` with the gas limits optional | Yes | The UserOperation to sponsor |
+| `entryPoint` | `{ address: Address, version: EntryPoint.Version }` | Yes (standalone only) | EntryPoint |
+| `sponsorshipPolicyId` | `string` | No | Sponsorship policy to apply |
+| `paymasterContext` | `unknown` | No | Context forwarded to the paymaster |
 
 ### Returns
 
-For EntryPoint 0.7/0.8:
+EntryPoint 0.7, 0.8, 0.9:
+
 ```typescript
 {
-    paymaster: Address,
-    paymasterData: Hex,
-    paymasterVerificationGasLimit: bigint,
-    paymasterPostOpGasLimit: bigint,
-    callGasLimit: bigint,
-    verificationGasLimit: bigint,
-    preVerificationGas: bigint,
+    callGasLimit: bigint
+    verificationGasLimit: bigint
+    preVerificationGas: bigint
+    paymaster: Address
+    paymasterVerificationGasLimit: bigint
+    paymasterPostOpGasLimit: bigint
+    paymasterData: Hex
 }
 ```
 
-For EntryPoint 0.6:
+EntryPoint 0.6:
+
 ```typescript
 {
-    paymasterAndData: Hex,
-    callGasLimit: bigint,
-    verificationGasLimit: bigint,
-    preVerificationGas: bigint,
+    callGasLimit: bigint
+    verificationGasLimit: bigint
+    preVerificationGas: bigint
+    paymasterAndData: Hex
 }
 ```
 
@@ -164,106 +160,58 @@ For EntryPoint 0.6:
 ```typescript
 const sponsorship = await pimlicoClient.sponsorUserOperation({
     userOperation,
-    entryPoint: entryPoint07Address,
+    sponsorshipPolicyId: "sp_..."
 })
 ```
 
 ---
 
-## `validateSponsorshipPolicies`
+## `Pimlico.validateSponsorshipPolicies`
 
-Validates which sponsorship policies apply to a UserOperation.
+Which of the given sponsorship policies would sponsor a UserOperation.
 
 **RPC method:** `pm_validateSponsorshipPolicies`
 
 ### Signature
 
 ```typescript
-async function validateSponsorshipPolicies(
+async function Pimlico.validateSponsorshipPolicies(
     client: Client,
-    args: ValidateSponsorshipPoliciesParameters
-): Promise<ValidateSponsorshipPolicies>
+    args: Pimlico.ValidateSponsorshipPoliciesParameters
+): Promise<Pimlico.ValidateSponsorshipPolicies[]>
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `userOperation` | `UserOperation` | Yes | The UserOperation to validate |
-| `entryPoint` | `Address` | Yes | EntryPoint address |
-| `sponsorshipPolicyIds` | `string[]` | Yes | Policy IDs to check |
+| `userOperation` | `UserOperation.UserOperation` | Yes | The UserOperation to check |
+| `entryPointAddress` | `Address` | Yes (standalone only) | EntryPoint address |
+| `sponsorshipPolicyIds` | `string[]` | Yes | Policies to check |
 
 ### Returns
 
-Array of valid sponsorship policies with metadata.
-
----
-
-## `getTokenQuotes`
-
-Gets ERC-20 paymaster token quotes -- exchange rates for paying gas in tokens.
-
-**RPC method:** `pimlico_getTokenQuotes`
-
-### Signature
-
 ```typescript
-async function getTokenQuotes(
-    client: Client,
-    args: GetTokenQuotesParameters
-): Promise<GetTokenQuotesReturnType>
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `tokens` | `Address[]` | Yes | ERC-20 token addresses to quote |
-| `chain` | `Chain` | No | Target chain |
-| `entryPointAddress` | `Address` | No | EntryPoint address |
-
-### Returns
-
-Array of token quote objects with exchange rates, paymaster addresses, and required amounts.
-
----
-
-## `estimateErc20PaymasterCost`
-
-Estimates the cost of using an ERC-20 token paymaster for a UserOperation.
-
-### Signature
-
-```typescript
-async function estimateErc20PaymasterCost(
-    client: Client,
-    args: EstimateErc20PaymasterCostParameters
-): Promise<EstimateErc20PaymasterCostReturnType>
+{
+    sponsorshipPolicyId: string
+    data: {
+        name: string | null
+        author: string | null
+        icon: string | null
+        description: string | null
+    }
+}[]
 ```
 
 ---
 
-## `sendCompressedUserOperation`
+## ERC-20 paymaster methods
 
-> **Deprecated:** This method is deprecated and may be removed in future versions.
+`getTokenQuotes` and `estimateErc20PaymasterCost` on the decorator call `Erc20Paymaster.getTokenQuotes` and `Erc20Paymaster.estimateCost`. See [ERC-20 Paymaster](./erc20-paymaster.md).
 
-Sends a compressed UserOperation to reduce calldata costs on L2s.
+## Migrating from 0.x
 
-**RPC method:** `pimlico_sendCompressedUserOperation`
-
-### Signature
-
-```typescript
-async function sendCompressedUserOperation(
-    client: Client,
-    args: SendCompressedUserOperationParameters
-): Promise<Hash>
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `compressedUserOperation` | `Hex` | Yes | Compressed UserOp data |
-| `inflatorAddress` | `Address` | Yes | Inflator contract address |
-| `entryPoint` | `Address` | Yes | EntryPoint address |
+- The `actions/pimlico` subpath -> the `Pimlico` namespace in `permissionless/pimlico`.
+- `PimlicoSponsorUserOperationParameters` -> `Pimlico.SponsorUserOperationParameters`.
+- `getTokenQuotes` and `estimateErc20PaymasterCost` moved to `Erc20Paymaster` (`getTokenQuotes`, `estimateCost`); the decorator methods keep their names.
+- `sendCompressedUserOperation` (`pimlico_sendCompressedUserOperation`) is removed.

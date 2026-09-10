@@ -1,30 +1,29 @@
 # Clients
 
-permissionless provides three client types, each built on viem's `Client` with specific decorators for different use cases.
+permissionless provides three client namespaces, each a viem 3 `Client` with a decorator applied. `create` builds the client; `Client` and `Config` are its types.
 
 ## Client Types
 
-| Client | Factory | Purpose |
-|--------|---------|---------|
-| [SmartAccountClient](./smart-account-client.md) | `createSmartAccountClient` | Send transactions via smart accounts through a bundler |
-| [PimlicoClient](./pimlico-client.md) | `createPimlicoClient` | Interact with Pimlico's bundler and paymaster APIs |
-| [PasskeyServerClient](./passkey-server-client.md) | `createPasskeyServerClient` | Manage WebAuthn/passkey credentials |
+| Client | Constructor | Entrypoint | Purpose |
+|--------|-------------|------------|---------|
+| [SmartAccountClient](./smart-account-client.md) | `SmartAccountClient.create` | `permissionless` | Send UserOperations from a smart account through a bundler |
+| [PimlicoClient](./pimlico-client.md) | `PimlicoClient.create` | `permissionless/pimlico` | Pimlico bundler and paymaster APIs |
+| [PasskeyServerClient](./passkey-server-client.md) | `PasskeyServerClient.create` | `permissionless/pimlico` | WebAuthn/passkey credentials on a passkey server |
 
 ## The Decorator Pattern
 
-permissionless uses viem's `.extend()` pattern to add functionality to clients. A decorator is a function that takes a client and returns an object of additional methods:
+permissionless uses viem's `.extend()` pattern to add methods to clients. A decorator is a function that takes a client and returns an object of methods:
 
 ```typescript
-// A decorator factory creates a decorator
+import { Client, http } from "viem"
+
 const myDecorator = (config) => (client) => ({
-    myMethod: (args) => doSomething(client, args),
+    myMethod: (args) => doSomething(client, args)
 })
 
-// Applied via .extend()
-const client = createClient({ transport: http(url) })
+const client = Client.create({ transport: http(url) })
     .extend(myDecorator({ setting: true }))
 
-// Now client.myMethod() is available
 await client.myMethod({ ... })
 ```
 
@@ -32,12 +31,14 @@ await client.myMethod({ ... })
 
 | Decorator | Import | Methods Added |
 |-----------|--------|---------------|
-| `smartAccountActions` | `permissionless/clients` | `sendTransaction`, `signMessage`, `signTypedData`, `writeContract`, `sendCalls`, `getCallsStatus` |
-| `pimlicoActions({ entryPoint })` | `permissionless/actions/pimlico` | `getUserOperationGasPrice`, `getUserOperationStatus`, `sponsorUserOperation`, `validateSponsorshipPolicies`, `getTokenQuotes`, `estimateErc20PaymasterCost`, `sendCompressedUserOperation` |
-| `erc7579Actions()` | `permissionless/actions/erc7579` | `accountId`, `installModule`, `installModules`, `isModuleInstalled`, `supportsModule`, `supportsExecutionMode`, `uninstallModule`, `uninstallModules` |
+| `smartAccountActions` | `permissionless` | `sendTransaction`, `sendCalls`, `getCallsStatus`, `signMessage`, `signTypedData`, `writeContract` |
+| `erc7579Actions()` | `permissionless` | `accountId`, `installModule`, `installModules`, `isModuleInstalled`, `supportsModule`, `supportsExecutionMode`, `uninstallModule`, `uninstallModules` |
+| `pimlicoActions({ entryPoint })` | `permissionless/pimlico` | `getUserOperationGasPrice`, `getUserOperationStatus`, `sponsorUserOperation`, `validateSponsorshipPolicies`, `getTokenQuotes`, `estimateErc20PaymasterCost` |
+
+`smartAccountActions` is a plain decorator; `erc7579Actions` and `pimlicoActions` are factories that return one.
 
 ## When to Use Which Client
 
-- **SmartAccountClient** -- For sending transactions from a smart account. This is what most users need.
-- **PimlicoClient** -- For interacting with Pimlico-specific APIs (gas price, sponsorship, token quotes). Can also be passed as the `paymaster` option to `createSmartAccountClient`.
-- **PasskeyServerClient** -- For managing WebAuthn credentials via a passkey server.
+- **SmartAccountClient** -- sending transactions from a smart account. This is what most users need.
+- **PimlicoClient** -- Pimlico-specific APIs (gas price, sponsorship, token quotes). Passing it as `paymaster` to `SmartAccountClient.create` sponsors every UserOperation through Pimlico.
+- **PasskeyServerClient** -- registering and authenticating WebAuthn credentials against a passkey server.

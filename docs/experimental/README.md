@@ -1,11 +1,5 @@
 # Experimental Features
 
-> **Stability Warning:** Experimental features may change or be removed in future versions without following semver. Use them with caution in production.
+`permissionless/experimental` is an empty module in 1.0. Anything exported from it in a future release is exempt from semver; nothing else in the package is.
 
-Experimental features are available under the `permissionless/experimental/*` subpath exports.
-
-## Current Experimental Features
-
-| Feature | Import | Description |
-|---------|--------|-------------|
-| [ERC-20 Paymaster](./erc20-paymaster.md) | `permissionless/experimental/pimlico` | Pay gas fees with ERC-20 tokens via Pimlico |
+The 0.x `experimental/pimlico` ERC-20 paymaster hook graduated: it is `Erc20Paymaster.prepareUserOperation` in `permissionless/pimlico`. See [ERC-20 Paymaster](../actions/erc20-paymaster.md).

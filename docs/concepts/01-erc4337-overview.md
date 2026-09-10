@@ -1,141 +1,138 @@
 # ERC-4337 Overview
 
-[ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) is the Account Abstraction standard for Ethereum. It introduces smart contract wallets (smart accounts) that can be controlled by arbitrary verification logic instead of a single private key. This document maps ERC-4337 concepts to their permissionless library counterparts.
+[ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) is the Account Abstraction standard for Ethereum. It introduces smart contract wallets (smart accounts) controlled by arbitrary verification logic instead of a single private key. This document maps ERC-4337 concepts to their permissionless counterparts.
 
 ## Core Concepts
 
 ### UserOperation
 
-A **UserOperation** is the ERC-4337 equivalent of a transaction. Instead of sending a transaction directly, users submit UserOperations to a bundler, which packages them into a regular transaction targeting the EntryPoint contract.
+A **UserOperation** is the ERC-4337 equivalent of a transaction. Users submit UserOperations to a bundler, which packages them into a regular transaction targeting the EntryPoint contract.
 
 **In permissionless:**
-- The `UserOperation` type comes from `viem/account-abstraction`, parameterized by EntryPoint version: `UserOperation<"0.6" | "0.7" | "0.8">`
-- You rarely construct UserOperations manually -- `createSmartAccountClient` handles it when you call `sendTransaction()` or `sendCalls()`
-- Utility functions for working with raw UserOperations: `getPackedUserOperation()`, `getRequiredPrefund()`
+- The type is viem's `UserOperation.UserOperation<"0.6" | "0.7" | "0.8" | "0.9">` from `viem/erc4337`
+- You rarely build one by hand: `SmartAccountClient.create` does it when you call `sendTransaction()` or `sendCalls()`
+- `getRequiredPrefund` computes the deposit a UserOperation needs
 
 ### EntryPoint
 
-The **EntryPoint** is an on-chain singleton contract that validates and executes UserOperations. Three versions exist:
+The **EntryPoint** is an on-chain singleton that validates and executes UserOperations. Four versions exist:
 
-| Version | Status | Library Constant |
-|---------|--------|-----------------|
-| 0.6 | Legacy | `entryPoint06Abi` (from viem) |
-| 0.7 | Current default | `entryPoint07Address`, `entryPoint07Abi` (from viem) |
-| 0.8 | Latest (EIP-7702) | `entryPoint08Address`, `entryPoint08Abi` (from viem) |
+| Version | Status | viem constants (`viem/erc4337`) |
+|---------|--------|---------------------------------|
+| 0.6 | Legacy | `EntryPoint.addressV06`, `EntryPoint.abiV06` |
+| 0.7 | Default for Safe, Kernel, Light, Thirdweb, Nexus, Etherspot | `EntryPoint.addressV07`, `EntryPoint.abiV07` |
+| 0.8 | Default for Simple; EIP-712 UserOperation signing | `EntryPoint.addressV08`, `EntryPoint.abiV08` |
+| 0.9 | Simple only (no default factory) | `EntryPoint.addressV09`, `EntryPoint.abiV09` |
 
 **In permissionless:**
-- Most functions accept an optional `entryPoint` parameter: `{ address: Address, version: "0.6" | "0.7" | "0.8" }`
-- When omitted, defaults to EntryPoint 0.7
-- See [EntryPoint Versions](./02-entrypoint-versions.md) for detailed differences
+- Account constructors take an optional `entryPoint`: the version shorthand (`"0.7"`) or `{ address, version }`
+- The default is per account (see the [accounts table](../accounts/README.md#account-summary)); `PimlicoClient.create` defaults to 0.7
+- See [EntryPoint Versions](./02-entrypoint-versions.md)
 
 ### Bundler
 
-A **bundler** collects UserOperations from users, validates them, and submits them to the EntryPoint contract in a bundle transaction.
+A **bundler** collects UserOperations, validates them, and submits them to the EntryPoint in a bundle transaction.
 
 **In permissionless:**
-- The bundler URL is the `bundlerTransport` in `createSmartAccountClient()`:
+- The bundler URL is the `bundlerTransport` of `SmartAccountClient.create()`:
   ```typescript
-  const client = createSmartAccountClient({
+  const client = SmartAccountClient.create({
       account,
-      bundlerTransport: http("https://bundler.example.com"),
+      bundlerTransport: http("https://bundler.example.com")
   })
   ```
-- Bundler RPC methods are available via viem's `BundlerActions`:
-  - `sendUserOperation` -- submit a UserOp to the bundler
-  - `estimateUserOperationGas` -- estimate gas for a UserOp
-  - `getUserOperationByHash` -- look up a UserOp by hash
-  - `getUserOperationReceipt` -- get the receipt of an executed UserOp
-  - `getSupportedEntryPoints` -- list EntryPoint versions the bundler supports
+- Bundler RPC methods are viem's `BundlerClient` actions on `client.userOperation`:
+  - `prepare` -- build the UserOperation (nonce, factory data, gas, paymaster, stub signature)
+  - `estimateGas` -- `eth_estimateUserOperationGas`
+  - `send` -- `eth_sendUserOperation`
+  - `get` / `getReceipt` -- look up a UserOperation or its receipt by hash
+  - `waitForReceipt` -- poll until it is included
 
 ### Paymaster
 
-A **paymaster** is a contract that sponsors gas fees for UserOperations. It can pay fees entirely (verifying paymaster) or accept ERC-20 tokens instead of ETH.
+A **paymaster** is a contract that sponsors gas for UserOperations, either entirely (verifying paymaster) or against ERC-20 tokens.
 
 **In permissionless:**
-- Paymaster integration via the `paymaster` option on `createSmartAccountClient()`:
+- The `paymaster` option of `SmartAccountClient.create()`:
   ```typescript
-  const client = createSmartAccountClient({
+  const client = SmartAccountClient.create({
       account,
       bundlerTransport: http(bundlerUrl),
-      // Simple: bundler also acts as paymaster
+      // the bundler URL also serves pm_* methods
       paymaster: true,
-      // Or custom paymaster functions:
+      // or a paymaster client, e.g. PimlicoClient.create(...)
+      paymaster: pimlicoClient,
+      // or custom functions
       paymaster: {
-          getPaymasterData: async (userOperation) => { /* ... */ },
-          getPaymasterStubData: async (userOperation) => { /* ... */ },
-      },
+          getData: async (userOperation) => { /* ... */ },
+          getStubData: async (userOperation) => { /* ... */ }
+      }
   })
   ```
-- Pimlico-specific paymaster actions: `sponsorUserOperation()`, `getTokenQuotes()`, `validateSponsorshipPolicies()`
-- Experimental ERC-20 paymaster: `prepareUserOperationForErc20Paymaster()`
+- Pimlico paymaster actions: `Pimlico.sponsorUserOperation`, `Pimlico.validateSponsorshipPolicies`
+- ERC-20 gas payment: `Erc20Paymaster.prepareUserOperation`, `Erc20Paymaster.getTokenQuotes`, `Erc20Paymaster.estimateCost`
 
 ### Smart Account
 
-A **smart account** (or smart contract wallet) is a contract that can validate UserOperations. Unlike EOAs, smart accounts can implement arbitrary logic: multi-sig, session keys, social recovery, passkeys, etc.
+A **smart account** is a contract that validates UserOperations. Unlike an EOA, it can implement any logic: multi-sig, session keys, social recovery, passkeys.
 
 **In permissionless:**
-- The `SmartAccount` type comes from `viem/account-abstraction`
-- Created by factory functions: `toSimpleSmartAccount()`, `toSafeSmartAccount()`, `toKernelSmartAccount()`, etc.
-- Each factory returns a `SmartAccount` with these methods:
-  - `getAddress()` -- counterfactual address (works before deployment)
-  - `encodeCalls(calls)` -- encode calls into account-specific calldata
-  - `decodeCalls(data)` -- decode calldata back to calls
-  - `getNonce()` -- get current nonce from EntryPoint
+- The type is viem's `SmartAccount.SmartAccount` from `viem/erc4337`
+- Accounts are built with `<X>SmartAccount.from()`: `SimpleSmartAccount.from`, `SafeSmartAccount.from`, `KernelSmartAccount.from`, …
+- Each account exposes:
+  - `address` -- counterfactual address (known before deployment)
+  - `encodeCalls(calls)` / `decodeCalls(data)` -- account-specific execution calldata
+  - `getNonce({ key? })` -- current nonce from the EntryPoint
   - `getStubSignature()` -- dummy signature for gas estimation
-  - `sign(hash)` -- sign a hash
-  - `signMessage(message)` -- EIP-191 message signature
-  - `signTypedData(typedData)` -- EIP-712 typed data signature
+  - `sign({ hash })`, `signMessage(message)`, `signTypedData(typedData)` -- ERC-1271 signatures
   - `signUserOperation(userOperation)` -- sign a UserOperation
+  - `getFactoryArgs()` -- `{ factory, factoryData }` until deployed
+  - `isDeployed()` -- whether the address has code
 
 ### Factory
 
-A **factory** deploys smart account contracts on first use. The first UserOperation from a new account includes factory data that triggers deployment.
+A **factory** deploys the account contract on first use. The first UserOperation carries factory data that triggers the deployment.
 
 **In permissionless:**
-- Each `to*SmartAccount()` factory configures the factory internally
-- The `getFactoryArgs()` method returns `{ factory: Address, factoryData: Hex }` for the first UserOp
-- After deployment, `getFactoryArgs()` returns `undefined`
-- Most account types have default factory addresses; custom ones can be passed via `factoryAddress`
+- Each account constructor configures its factory; most have defaults, overridable with `factoryAddress`
+- `getFactoryArgs()` returns `{ factory, factoryData }` for the first UserOperation and `{ factory: undefined, factoryData: undefined }` once deployed
+- EIP-7702 accounts have no factory: the owner EOA is delegated instead (see [EIP-7702 Delegation](./04-eip-7702.md))
 
 ### Nonce
 
-ERC-4337 uses a **2D nonce** system with a `key` (24 bytes) and `sequence` (8 bytes). The key allows parallel nonce lanes -- multiple in-flight UserOperations that don't block each other.
+ERC-4337 uses a **2D nonce**: a 192-bit `key` and a 64-bit `sequence`. Different keys are independent lanes, so UserOperations on different keys do not block each other.
 
 **In permissionless:**
-- `encodeNonce({ key, sequence })` -- packs key and sequence into a single `bigint`: `(key << 64) + sequence`
-- `decodeNonce(nonce)` -- unpacks a `bigint` back to `{ key, sequence }`
-- The `nonceKey` parameter on smart account factories sets the default nonce key
+- `Nonce.encode({ key, sequence })` packs a nonce (`(key << 64) + sequence`); `Nonce.decode(nonce)` unpacks it
+- Every account's `getNonce({ key })` uses the per-call `key`, then the constructor's `nonceKey`, then `0n`
 
 ## UserOperation Lifecycle
 
-The full lifecycle of a UserOperation, from creation to on-chain execution:
-
 ```
-1. Prepare
-   ├── Get counterfactual address (getAddress)
+1. Prepare (userOperation.prepare)
+   ├── Counterfactual address (account.address)
    ├── Encode calls into calldata (encodeCalls)
-   ├── Get nonce from EntryPoint (getNonce)
-   └── Get factory data if not deployed (getFactoryArgs)
+   ├── Read the nonce from the EntryPoint (getNonce)
+   └── Factory data if not deployed (getFactoryArgs)
 
 2. Estimate Gas
-   ├── Get stub signature for estimation (getStubSignature)
-   ├── Get paymaster stub data if sponsored (getPaymasterStubData)
-   └── Call estimateUserOperationGas on bundler
+   ├── Stub signature (getStubSignature)
+   ├── Stub paymaster data if sponsored (paymaster.getStubData)
+   └── eth_estimateUserOperationGas (userOperation.estimateGas)
 
-3. Get Paymaster Data (if sponsored)
-   └── Call getPaymasterData with final gas values
+3. Paymaster Data (if sponsored)
+   └── paymaster.getData with the final gas values
 
 4. Sign
-   └── Call signUserOperation (owner signs the UserOp hash)
+   └── signUserOperation (the owner signs the UserOperation hash or typed data)
 
-5. Send to Bundler
-   └── Call eth_sendUserOperation on bundler RPC
+5. Send
+   └── eth_sendUserOperation (userOperation.send)
 
-6. Wait for Inclusion
-   ├── Bundler bundles the UserOp into a transaction
-   ├── Transaction submitted to mempool
-   ├── EntryPoint validates and executes
-   └── Poll getUserOperationReceipt for the result
+6. Inclusion
+   ├── The bundler bundles the UserOperation into a transaction
+   ├── The EntryPoint validates and executes it
+   └── userOperation.waitForReceipt polls for the receipt
 ```
 
-When using `createSmartAccountClient`, steps 1-6 are handled automatically by `sendTransaction()` or `sendCalls()`. You only provide the calls you want to execute.
+`SmartAccountClient`'s `sendTransaction()` and `sendCalls()` run all six steps; you only provide the calls.

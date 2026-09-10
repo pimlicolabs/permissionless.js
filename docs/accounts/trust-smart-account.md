@@ -61,7 +61,7 @@ const account = await TrustSmartAccount.from({
 
 ## Migrating from 0.x
 
-- `toTrustSmartAccount` -> `TrustSmartAccount.from`, imported from `permissionless` (the `permissionless/accounts` subpath is gone).
+- The 0.x factory function -> `TrustSmartAccount.from`, imported from `permissionless` (the `accounts` subpath is gone).
 - `entryPoint` is optional; omitting it derives the same address as the explicit 0.6 form did in 0.x.
 - `ToTrustSmartAccountParameters` / `ToTrustSmartAccountReturnType` / `TrustSmartAccountImplementation` -> `TrustSmartAccount.Parameters` / `.ReturnType` / `.Implementation`.
 - When neither the call nor the constructor supplies a nonce key, the key is `0n` (0.x fell through to viem's timestamp-derived key). Pass `getNonce({ key })` or `nonceKey` for parallel nonces.

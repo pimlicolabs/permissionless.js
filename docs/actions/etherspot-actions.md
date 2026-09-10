@@ -1,49 +1,55 @@
 # Etherspot Actions
 
-Etherspot-specific bundler actions for gas price estimation.
+Etherspot (Skandha) bundler actions. They live on the `Etherspot` namespace in `permissionless/etherspot`.
 
 ## Import
 
 ```typescript
-import { getUserOperationGasPrice } from "permissionless/actions/etherspot"
-import type { GetGasPriceResponseReturnType } from "permissionless/actions/etherspot"
+import { Etherspot } from "permissionless/etherspot"
+import type { Etherspot } from "permissionless/etherspot"
+// Etherspot.GetUserOperationGasPriceReturnType, Etherspot.Schema
 ```
 
 ---
 
-## `getUserOperationGasPrice`
+## `Etherspot.getUserOperationGasPrice`
 
-Gets gas price recommendations from the Etherspot (Skandha) bundler.
+Gets the gas price recommendation from the Skandha bundler.
 
 **RPC method:** `skandha_getGasPrice`
 
 ### Signature
 
 ```typescript
-async function getUserOperationGasPrice(
+async function Etherspot.getUserOperationGasPrice(
     client: Client
-): Promise<GetGasPriceResponseReturnType>
+): Promise<Etherspot.GetUserOperationGasPriceReturnType>
 ```
 
 ### Returns
 
 ```typescript
 {
-    maxFeePerGas: bigint,
-    maxPriorityFeePerGas: bigint,
+    maxFeePerGas: bigint
+    maxPriorityFeePerGas: bigint
 }
 ```
 
 ### Example
 
 ```typescript
-import { createClient, http } from "viem"
-import { getUserOperationGasPrice } from "permissionless/actions/etherspot"
+import { Client, http } from "viem"
+import { Etherspot } from "permissionless/etherspot"
 
-const client = createClient({
-    transport: http("https://skandha.etherspot.io/..."),
+const client = Client.create({
+    transport: http("https://skandha.etherspot.io/...")
 })
 
-const gasPrice = await getUserOperationGasPrice(client)
-console.log("Max fee:", gasPrice.maxFeePerGas)
+const gasPrice = await Etherspot.getUserOperationGasPrice(client)
+gasPrice.maxFeePerGas
 ```
+
+## Migrating from 0.x
+
+- The `actions/etherspot` subpath -> the `Etherspot` namespace in `permissionless/etherspot`.
+- `GetGasPriceResponseReturnType` -> `Etherspot.GetUserOperationGasPriceReturnType`; the RPC schema type is `Etherspot.Schema`.

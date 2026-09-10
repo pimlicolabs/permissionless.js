@@ -144,8 +144,7 @@ packages/permissionless/
 │   ├── pimlico/       ← 5 tests (gas price, status, sponsor, quotes, …)
 │   ├── public/        ← 2 tests (getAccountNonce, getSenderAddress)
 │   └── smartAccount/  ← 5 tests (sendTransaction, sendCalls, signMessage, …)
-├── experimental/pimlico/utils/
-│   └── prepareUserOperationForErc20Paymaster.test.ts
+├── actions/erc20Paymaster/  ← 5 tests (quotes, cost, overrides, prepare hook)
 └── utils/             ← 10 tests (nonce enc/dec, hashing, overrides, etc.)
 ```
 
@@ -158,7 +157,8 @@ Non-exhaustive — see `packages/permissionless/**/*.test.ts` for the full set.
 | Directory / file                          | Purpose                                                                 |
 | ----------------------------------------- | ----------------------------------------------------------------------- |
 | `src/testWithRpc.ts`                      | The `testWithRpc` fixture — shared per-worker rig, per-test reset, `createAutoBundleTransport`. |
-| `src/utils.ts`                            | All viem/Pimlico/smart-account helpers. Re-read this often.             |
+| `src/utils.ts`                            | Client helpers (`getPublicClient`, `getBundlerClient`, `getPimlicoClient`, …) and the `getCoreSmartAccounts()` matrix. |
+| `src/accounts/<x>.ts`                     | One file per account: its rig helper (`getSafeClient`, …) and matrix entries. |
 | `src/types.ts`                            | `AAParamType<entryPointVersion>`.                                       |
 | `mock-aa-infra/alto/instance.ts`          | `alto(...)` prool instance factory.                                     |
 | `mock-aa-infra/alto/index.ts`             | `setupContracts(rpc)` — deploys ~everything via the deterministic deployer. |

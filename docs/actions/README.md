@@ -1,47 +1,45 @@
 # Actions
 
-Actions are functions that interact with smart accounts, bundlers, and paymasters. They can be used standalone or via client decorators.
+Actions are functions that take a client as their first argument. Provider-specific actions live on a namespace; the matching decorator adds them as methods to a client via `.extend()`.
 
 ## Action Categories
 
-| Category | Import | Description |
-|----------|--------|-------------|
-| [Public](./public-actions.md) | `permissionless/actions` | Read-only actions: get nonce, get sender address |
-| [Smart Account](./smart-account-actions.md) | `permissionless/actions/smartAccount` | Send transactions, sign messages via smart accounts |
-| [Pimlico](./pimlico-actions.md) | `permissionless/actions/pimlico` | Pimlico bundler/paymaster: gas price, sponsorship |
-| [ERC-7579](./erc7579-actions.md) | `permissionless/actions/erc7579` | Module management: install, uninstall, query |
-| [Etherspot](./etherspot-actions.md) | `permissionless/actions/etherspot` | Etherspot bundler: gas price |
-| [Passkey Server](./passkey-server-actions.md) | `permissionless/actions/passkeyServer` | WebAuthn registration and authentication |
+| Category | Symbols | Entrypoint | Decorator |
+|----------|---------|------------|-----------|
+| [Public](./public-actions.md) | `getAccountNonce`, `getSenderAddress` | `permissionless` | -- |
+| [Smart Account](./smart-account-actions.md) | `sendTransaction`, `signMessage`, `signTypedData`, `writeContract` | `permissionless` | `smartAccountActions` (also adds `sendCalls`, `getCallsStatus`) |
+| [ERC-7579](./erc7579-actions.md) | `Erc7579.*` | `permissionless` | `erc7579Actions()` |
+| [Pimlico](./pimlico-actions.md) | `Pimlico.*` | `permissionless/pimlico` | `pimlicoActions({ entryPoint })` |
+| [ERC-20 Paymaster](./erc20-paymaster.md) | `Erc20Paymaster.*` | `permissionless/pimlico` | `getTokenQuotes` and `estimateErc20PaymasterCost` ride `pimlicoActions` |
+| [Etherspot](./etherspot-actions.md) | `Etherspot.getUserOperationGasPrice` | `permissionless/etherspot` | -- |
+| [Passkey Server](./passkey-server-actions.md) | `PasskeyServer.*` | `permissionless/pimlico` | built into `PasskeyServerClient.create` |
 
 ## Standalone vs Decorator Usage
-
-Actions can be called directly (standalone) or via a client decorator:
 
 ### Standalone
 
 ```typescript
-import { getAccountNonce } from "permissionless/actions"
+import { EntryPoint } from "viem/erc4337"
+import { getAccountNonce } from "permissionless"
 
 const nonce = await getAccountNonce(publicClient, {
     address: "0x...",
-    entryPointAddress: entryPoint07Address,
+    entryPointAddress: EntryPoint.addressV07
 })
 ```
 
 ### Via Decorator
 
 ```typescript
-import { erc7579Actions } from "permissionless/actions/erc7579"
+import { erc7579Actions, SmartAccountClient } from "permissionless"
 
-const client = createSmartAccountClient({ ... })
-    .extend(erc7579Actions())
+const client = SmartAccountClient.create({ ... }).extend(erc7579Actions())
 
-// Now available as a method on the client
 const installed = await client.isModuleInstalled({
     type: "validator",
     address: "0x...",
-    context: "0x",
+    context: "0x"
 })
 ```
 
-Smart account actions (`sendTransaction`, `signMessage`, etc.) are automatically included in `createSmartAccountClient` -- no manual `.extend()` needed.
+Smart account actions are part of `SmartAccountClient.create`; no `.extend()` is needed for them.

@@ -73,7 +73,7 @@ const account = await ThirdwebSmartAccount.from({
 
 ## Migrating from 0.x
 
-- `toThirdwebSmartAccount` -> `ThirdwebSmartAccount.from`, imported from `permissionless` (the `permissionless/accounts/thirdweb` subpath is gone).
+- The 0.x factory function -> `ThirdwebSmartAccount.from`, imported from `permissionless` (the `accounts/thirdweb` subpath is gone).
 - `ToThirdwebSmartAccountParameters` / `ToThirdwebSmartAccountReturnType` / `ThirdwebSmartAccountImplementation` -> `ThirdwebSmartAccount.Parameters` / `.ReturnType` / `.Implementation`.
 - `entryPoint` takes the `"0.7"` shorthand and is optional; `version` is optional. Omitting either derives the address the explicit 0.x form did.
 - When neither the call nor the constructor supplies a nonce key, the key is `0n` (0.x fell through to viem's timestamp-derived key). Pass `getNonce({ key })` or `nonceKey` for parallel nonces.

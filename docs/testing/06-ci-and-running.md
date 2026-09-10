@@ -189,7 +189,7 @@ The shared rig registers a `process.on("beforeExit")` handler to stop all instan
 Most likely `setupContracts` assumes a clean slate (fresh nonces on Anvil's account 0, etc.), and the forked chain has a different state for that account. Check whether the failing test:
 
 - Uses `getAnvilWalletClient({ addressIndex: 0 })` and expects a specific starting nonce.
-- Relies on a factory's *counterfactual* address matching the one `toXxxSmartAccount` computes — the factory must exist on the forked chain.
+- Relies on a factory's *counterfactual* address matching the one `<X>SmartAccount.from` computes — the factory must exist on the forked chain.
 
 ### Coverage report is missing
 

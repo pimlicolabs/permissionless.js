@@ -1,6 +1,6 @@
 # Export Map
 
-This document is the complete inventory of every entrypoint in the `permissionless` package. Each entry maps to a conditional export in `package.json` serving TypeScript declarations (`_types/`) and ES modules (`_esm/`); the package is ESM-only. The 23 subpaths of 0.x collapsed into five public entrypoints plus the `./_types/*` escape hatch (spec §4, see below); the 0.x deep paths (`permissionless/accounts`, `permissionless/actions/pimlico`, `permissionless/clients/pimlico`, …) and their per-directory proxy `package.json` files are gone.
+This document is the complete inventory of every entrypoint in the `permissionless` package. Each entry maps to a conditional export in `package.json` serving TypeScript declarations (`_types/`) and ES modules (`_esm/`); the package is ESM-only. The 23 subpaths of 0.x collapsed into five public entrypoints plus the `./_types/*` escape hatch (spec §4, see below); the 0.x deep paths (`accounts`, `actions/pimlico`, `clients/pimlico`, …) and their per-directory proxy `package.json` files are gone.
 
 ## Entrypoints
 
@@ -44,7 +44,7 @@ Root types: `GetAccountNonceParams`, `GetSenderAddressParams`, `GetRequiredPrefu
 | Member | Kind |
 |---|---|
 | `create(config)` | function |
-| `Client<transport, chain, account, client, rpcSchema>` | type (inline-mapped, variance-annotated — #500) |
+| `Client<…>` | type (five type parameters; inline-mapped, variance-annotated — #500) |
 | `Config<…>` | type |
 | `Actions<chain, account>` | type (the `smartAccountActions()` decorator shape) |
 | `PrepareUserOperationHook` | type |
