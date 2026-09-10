@@ -1,0 +1,11 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # the 1.0 accounting regression was −8.57 %; 1 % fails a real drop
+        # without tripping on run-to-run noise in the e2e rig.
+        threshold: 1%
+
+comment:
+  behavior: default

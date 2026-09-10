@@ -49,14 +49,14 @@ jobs:
       - run: bun run build
       - run: echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
       - run: bun run test:ci
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
 ```
 
 Key points:
 
 - **Node 22.2.0** is used in CI; local dev with a different Node should match this for parity.
 - `.env.test` is **generated in-workflow** with `VITE_FORK_RPC_URL` from a GitHub secret. When the secret is unset, the value is empty and `setupContracts` runs normally. When set, Anvil forks that URL and `setupContracts` is skipped ([see fork mode](#fork-mode)).
-- Coverage is uploaded to Codecov via `codecov-action@v3`.
+- Coverage is uploaded to Codecov via `codecov-action@v5`, gated by `codecov.yml` at the repo root ([see below](#coverage-accounting)).
 - Timeout: 60 minutes.
 
 ### The disabled sharded test job
@@ -73,6 +73,40 @@ Loaded by Vitest via `loadEnv("test", process.cwd())` (`vitest.config.ts:29`), w
 | `CI`                     | `vitest.config.ts:10`                        | Switches coverage reporter to `lcov` only.                                               |
 
 Other `VITE_*` vars (`VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_NETWORK_TRANSPORT_MODE`, `VITE_BATCH_MULTICALL`, `VITE_ANVIL_FORK_URL`) appear in `verify.yml` but are only consumed by the disabled sharded job. They have no effect in the active `testWithRpc` fixture.
+
+## Coverage accounting
+
+`--coverage` runs the v8 provider with `all: true`, so every file matched by
+`coverage.include` (`**/permissionless/**`) counts, whether a test touched it or
+not. `coverage.exclude` mirrors the negations in `packages/permissionless/package.json`
+`files` — that list *is* the definition of shipped code:
+
+| Excluded                                          | Why                                                        |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| `**/*.test.ts`, `**/*.bench.ts`, `**/setupTests.ts` | tests, not shipped                                        |
+| `**/*.test-d.ts`                                  | type tests: checked by `tsc`, never executed, so they would sit at 0 % |
+| `**/*.config.ts`                                  | `vitest.config.ts` itself                                  |
+| `**/permissionless-test/**`                       | the anvil rig                                              |
+| `**/_cjs/**`, `**/_esm/**`, `**/_types/**`        | build output                                               |
+
+Anything else under `packages/permissionless` is in the denominator, including
+`accounts/<x>/index.ts` and `errors/*.ts` — those are real modules that ship.
+
+The 18 `*.test-d.ts` files landed in 1.0 without a matching exclude and cost
+16.8 points of project coverage on their own (1,595 lines at 0 %), which is what
+`codecov.yml` now guards: `coverage.status.project.default` is `target: auto`
+with a `threshold` of 1 %, so a regression of that shape fails the check while
+rig noise does not.
+
+Codecov reads `coverage/lcov.info` (repo root — Vitest's `root` is the
+current working directory, not the config file's directory). To see the same
+numbers locally, add the reporters back:
+
+```bash
+CI=true ./node_modules/.bin/vitest run -c packages/permissionless/vitest.config.ts \
+  --coverage --coverage.reporter=text --coverage.reporter=lcov \
+  --pool=forks --no-file-parallelism
+```
 
 ## Fork mode
 
