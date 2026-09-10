@@ -157,7 +157,7 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
         getAddress,
         getFactoryArgs: () => ({ factory: metaFactoryAddress, factoryData }),
         getStubSignature: () => stubSignature,
-        sign: ({ hash }) => signMessage({ message: hash }),
+        sign: ({ hash }) => signMessage({ message: { raw: hash } }),
         signMessage,
         signTypedData: async (typedData) =>
             withValidator(await owner.signTypedData(typedData)),

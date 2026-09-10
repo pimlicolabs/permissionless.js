@@ -3,6 +3,7 @@ import {
     Abi,
     AbiFunction,
     Address,
+    Hash,
     Hex,
     PersonalMessage,
     Secp256k1
@@ -18,6 +19,7 @@ import { encodeNonce } from "../../utils/encodeNonce"
 import * as NexusSmartAccount from "./index"
 
 const validator = "0x00000004171351c442B202678c48D8AB5B321E8f"
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
 const nexusNonce = (key: bigint) =>
     encodeNonce({
         key: Hex.toBigInt(
@@ -96,32 +98,46 @@ describe("NexusSmartAccount.from", () => {
             })
         })
         const client = getPublicClient(rpc.anvilRpc)
+        const { account } = smartClient
+        const verifyHash = async () =>
+            expect(
+                await client.verifyHash({
+                    address: account.address,
+                    hash,
+                    signature: await account.sign({ hash })
+                })
+            ).toBe(true)
+        await verifyHash()
 
         for (const _ of [0, 1]) {
-            const hash = await smartClient.userOperation.send({
-                calls: [{ to: Address.zero, value: 0n }]
-            })
             const receipt = await smartClient.userOperation.waitForReceipt({
-                hash
+                hash: await smartClient.userOperation.send({
+                    calls: [{ to: Address.zero, value: 0n }]
+                })
             })
             expect(receipt.success).toBe(true)
         }
-        expect(await smartClient.account.isDeployed()).toBe(true)
+        expect(await account.isDeployed()).toBe(true)
+        await verifyHash()
 
         const message = "slowly and steadily burning the private keys"
-        const signature = await smartClient.account.signMessage({ message })
-        expect(
-            await client.contract.read({
-                address: smartClient.account.address,
-                abi: Abi.from([
-                    "function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)"
-                ]),
-                functionName: "isValidSignature",
-                args: [
-                    PersonalMessage.getSignPayload(Hex.fromString(message)),
-                    signature
-                ]
-            })
-        ).toBe("0x1626ba7e")
+        for (const [digest, signature] of [
+            [
+                PersonalMessage.getSignPayload(Hex.fromString(message)),
+                await account.signMessage({ message })
+            ],
+            [hash, await account.sign({ hash })]
+        ] as const) {
+            expect(
+                await client.contract.read({
+                    address: account.address,
+                    abi: Abi.from([
+                        "function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)"
+                    ]),
+                    functionName: "isValidSignature",
+                    args: [digest, signature]
+                })
+            ).toBe("0x1626ba7e")
+        }
     })
 })

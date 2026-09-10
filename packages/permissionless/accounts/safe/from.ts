@@ -1239,23 +1239,13 @@ export async function from<
             ? Hex.concat(Address.zero, signature)
             : signature
 
-    const signMessage = async ({
-        message
-    }: {
-        message: Account.SignableMessage
-    }) => {
+    const signSafeMessage = async (
+        message: Hex.Hex,
+        method: "eth_sign" | "eth_signTypedData"
+    ) => {
         assertCanSign()
-
-        const messageHash = TypedData.getSignPayload(
-            await toSafeMessageTypedData(
-                PersonalMessage.getSignPayload(
-                    typeof message === "string"
-                        ? Hex.fromString(message)
-                        : message.raw
-                )
-            )
-        )
-
+        const typedData = await toSafeMessageTypedData(message)
+        const hash = TypedData.getSignPayload(typedData)
         const signatures = await Promise.all(
             localOwners.map(async (localOwner) => {
                 if (isWebAuthnAccount(localOwner)) {
@@ -1267,7 +1257,7 @@ export async function from<
                         dynamic: true,
                         data: await getWebAuthnSignature({
                             owner: localOwner,
-                            hash: messageHash
+                            hash
                         })
                     }
                 }
@@ -1275,15 +1265,16 @@ export async function from<
                     signer: localOwner.address,
                     dynamic: false,
                     data: adjustVInSignature(
-                        "eth_sign",
-                        await localOwner.signMessage({
-                            message: { raw: messageHash }
-                        })
+                        method,
+                        method === "eth_sign"
+                            ? await localOwner.signMessage({
+                                  message: { raw: hash }
+                              })
+                            : await localOwner.signTypedData(typedData)
                     )
                 }
             })
         )
-
         return wrapSignature(concatSignatures(signatures))
     }
 
@@ -1488,50 +1479,26 @@ export async function from<
                 [0, 0, concatSignatures(signatures)]
             )
         },
-        sign: ({ hash }) => signMessage({ message: hash }),
-        signMessage,
-        async signTypedData(typedData) {
-            assertCanSign()
-
-            const safeMessageTypedData = await toSafeMessageTypedData(
+        sign: ({ hash }) => signSafeMessage(hash, "eth_sign"),
+        signMessage: ({ message }) =>
+            signSafeMessage(
+                PersonalMessage.getSignPayload(
+                    typeof message === "string"
+                        ? Hex.fromString(message)
+                        : message.raw
+                ),
+                "eth_sign"
+            ),
+        signTypedData: (typedData) =>
+            signSafeMessage(
                 TypedData.getSignPayload(
                     typedData as TypedData.encode.Value<
                         TypedData.TypedData,
                         string
                     >
-                )
-            )
-
-            const signatures = await Promise.all(
-                localOwners.map(async (localOwner) => {
-                    if (isWebAuthnAccount(localOwner)) {
-                        if (!safeWebAuthnSharedSignerAddress) {
-                            throw new SafeWebAuthnSharedSignerAddressMissingError()
-                        }
-                        return {
-                            signer: safeWebAuthnSharedSignerAddress,
-                            dynamic: true,
-                            data: await getWebAuthnSignature({
-                                owner: localOwner,
-                                hash: TypedData.getSignPayload(
-                                    safeMessageTypedData
-                                )
-                            })
-                        }
-                    }
-                    return {
-                        signer: localOwner.address,
-                        dynamic: false,
-                        data: adjustVInSignature(
-                            "eth_signTypedData",
-                            await localOwner.signTypedData(safeMessageTypedData)
-                        )
-                    }
-                })
-            )
-
-            return wrapSignature(concatSignatures(signatures))
-        },
+                ),
+                "eth_signTypedData"
+            ),
         async signUserOperation(parameters) {
             const { chainId = await getChainId(), ...userOperation } =
                 parameters

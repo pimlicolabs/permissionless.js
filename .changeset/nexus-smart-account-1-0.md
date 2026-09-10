@@ -26,4 +26,5 @@ const account = await NexusSmartAccount.from({ // [!code ++]
 - New `nonceKey` parameter. The nonce key resolves as per-call `key`, then `nonceKey`, then `0n`; 0.x used viem's timestamp-derived key when no per-call key was given.
 - Attesters are sorted byte-wise before encoding, as in 0.4.0. Counterfactual addresses are unchanged.
 - Types: `ToNexusSmartAccountParameters` → `NexusSmartAccount.Parameters`, `ToNexusSmartAccountReturnType` → `NexusSmartAccount.ReturnType`, `NexusSmartAccountImplementation` → `NexusSmartAccount.Implementation`; new `NexusSmartAccount.Version`.
+- `sign({ hash })` now produces a verifier-compatible ERC-1271 signature: the raw 32-byte hash goes through the account's replay-safe wrapper, so `client.verifyHash` accepts it (0.x signed the hash's hex string, which no verifier accepted).
 - The `permissionless/accounts/nexus` subpath is removed.

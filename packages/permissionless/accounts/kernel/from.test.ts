@@ -1,7 +1,7 @@
 import { Account } from "viem"
 import { anvil } from "viem/chains"
 import { EntryPoint } from "viem/erc4337"
-import { Secp256k1, Solidity } from "viem/utils"
+import { Hash, Hex, Secp256k1, Solidity } from "viem/utils"
 import { describe, expect } from "vitest"
 import { getKernelClient } from "../../../permissionless-test/src/accounts/kernel"
 import {
@@ -31,6 +31,7 @@ const ecdsaValidator = {
     "0.3.0-beta": "0x8104e3Ad430EA6d354d013A6789fDFc71E671c43"
 } as const
 const kernel033Logic = "0xd6CEDDe84be40893d153Be9d467CD6aD37875b28"
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
 
 const fixture = (params: CounterfactualAddressParams["kernel"]) => {
     const key = (value: object) =>
@@ -289,39 +290,42 @@ describe("KernelSmartAccount.from", () => {
                 })
                 const publicClient = getPublicClient(rpc.anvilRpc)
                 const message = "slowly and steadily burning the private keys"
-                expect(
-                    await publicClient.verifyMessage({
-                        address: account.address,
-                        message,
-                        signature: await account.signMessage({ message })
-                    })
-                ).toBe(true)
+                const verify = async () => {
+                    expect(
+                        await publicClient.verifyMessage({
+                            address: account.address,
+                            message,
+                            signature: await account.signMessage({ message })
+                        })
+                    ).toBe(true)
+                    expect(
+                        await publicClient.typedData.verify({
+                            address: account.address,
+                            signature: await account.signTypedData(typedData),
+                            ...typedData
+                        })
+                    ).toBe(true)
+                    expect(
+                        await publicClient.verifyHash({
+                            address: account.address,
+                            hash,
+                            signature: await account.sign({ hash })
+                        })
+                    ).toBe(true)
+                }
+                await verify()
                 for (const _ of [0, 1]) {
-                    const hash = await client.sendTransaction({
-                        to: zeroAddress,
-                        value: 0n,
-                        data: "0x"
-                    })
                     const receipt = await publicClient.transaction.getReceipt({
-                        hash
+                        hash: await client.sendTransaction({
+                            to: zeroAddress,
+                            value: 0n,
+                            data: "0x"
+                        })
                     })
                     expect(receipt.status).toBe("success")
                 }
                 expect(await account.isDeployed()).toBe(true)
-                expect(
-                    await publicClient.verifyMessage({
-                        address: account.address,
-                        message,
-                        signature: await account.signMessage({ message })
-                    })
-                ).toBe(true)
-                expect(
-                    await publicClient.typedData.verify({
-                        address: account.address,
-                        signature: await account.signTypedData(typedData),
-                        ...typedData
-                    })
-                ).toBe(true)
+                await verify()
             }
         )
     }
@@ -376,6 +380,13 @@ describe("KernelSmartAccount.from", () => {
                     address: account.address,
                     signature: await account.signTypedData(typedData),
                     ...typedData
+                })
+            ).toBe(true)
+            expect(
+                await publicClient.verifyHash({
+                    address: account.address,
+                    hash,
+                    signature: await account.sign({ hash })
                 })
             ).toBe(true)
         }

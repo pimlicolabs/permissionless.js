@@ -1,6 +1,13 @@
 import { Account, Actions, Client, http } from "viem"
 import { EntryPoint } from "viem/erc4337"
-import { Address, Hex, PersonalMessage, Secp256k1, TypedData } from "viem/utils"
+import {
+    Address,
+    Hash,
+    Hex,
+    PersonalMessage,
+    Secp256k1,
+    TypedData
+} from "viem/utils"
 import { describe, expect, test } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -31,6 +38,7 @@ const typedData = {
     primaryType: "Mail",
     message: { contents: "hello" }
 } as const
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
 
 describe("TrustSmartAccount", () => {
     test("encodeCalls / decodeCalls round-trip", async () => {
@@ -111,19 +119,29 @@ describe("TrustSmartAccount", () => {
             })
             expect(account.entryPoint.address).toBe(EntryPoint.addressV06)
             expect(await account.isDeployed()).toBe(false)
+            const verifyHash = async () =>
+                expect(
+                    await publicClient.verifyHash({
+                        address: account.address,
+                        hash,
+                        signature: await account.sign({ hash })
+                    })
+                ).toBe(true)
+            await verifyHash()
 
             const smartAccountClient = getBundlerClient({
                 account,
                 ...rpc,
                 entryPoint: { version: "0.6" }
             })
-            const hash = await smartAccountClient.sendTransaction({
+            const transactionHash = await smartAccountClient.sendTransaction({
                 to: Address.zero,
                 value: 0n,
                 data: "0x"
             })
-            expect(hash).toMatch(/^0x[0-9a-f]{64}$/)
+            expect(transactionHash).toMatch(/^0x[0-9a-f]{64}$/)
             expect(await account.isDeployed()).toBe(true)
+            await verifyHash()
 
             const message = "hello trust"
             const messageHash = PersonalMessage.getSignPayload(
@@ -132,7 +150,8 @@ describe("TrustSmartAccount", () => {
             const typedDataHash = TypedData.getSignPayload(typedData)
             for (const [digest, signature] of [
                 [messageHash, await account.signMessage({ message })],
-                [typedDataHash, await account.signTypedData(typedData)]
+                [typedDataHash, await account.signTypedData(typedData)],
+                [hash, await account.sign({ hash })]
             ] as const) {
                 expect(
                     await Actions.contract.read(publicClient, {

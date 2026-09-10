@@ -1,16 +1,33 @@
 import { Account, Client, http } from "viem"
 import { anvil } from "viem/chains"
 import { EntryPoint } from "viem/erc4337"
-import { Secp256k1 } from "viem/utils"
+import { Hash, Hex, Secp256k1 } from "viem/utils"
 import { describe, expect, test } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import { getPublicClient } from "../../../permissionless-test/src/utils"
-import { SimpleAccountFactoryAddressRequiredError } from "../../errors/simple.js"
+import {
+    SimpleAccountErc1271UnsupportedError,
+    SimpleAccountFactoryAddressRequiredError
+} from "../../errors/simple.js"
 import * as SimpleSmartAccount from "./index.js"
 
 const owner = () => Account.fromPrivateKey(Secp256k1.randomPrivateKey())
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
 
 describe("SimpleSmartAccount.from", () => {
+    testWithRpc(
+        "sign throws SimpleAccountErc1271UnsupportedError",
+        async ({ rpc }) => {
+            const account = await SimpleSmartAccount.from({
+                client: getPublicClient(rpc.anvilRpc),
+                owner: owner()
+            })
+            await expect(account.sign({ hash })).rejects.toThrow(
+                SimpleAccountErc1271UnsupportedError
+            )
+        }
+    )
+
     testWithRpc("nonce key: args.key ?? nonceKey ?? 0n", async ({ rpc }) => {
         const client = getPublicClient(rpc.anvilRpc)
         const account = await SimpleSmartAccount.from({

@@ -165,7 +165,7 @@ export async function from(parameters: Parameters): Promise<ReturnType> {
             return stubSignature
         },
         sign({ hash }) {
-            return signMessage({ message: hash })
+            return signHash(hash)
         },
         signMessage,
         signTypedData(typedData) {

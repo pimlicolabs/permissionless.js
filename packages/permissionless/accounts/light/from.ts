@@ -67,28 +67,11 @@ const factoryAddresses = {
     "1.1.0": "0x00004EC70002a32400f8ae005A26081065620D20",
     "2.0.0": "0x0000000000400CdFef5E2714E63d8040b700BC24"
 } as const
+const domainVersions = { "1.1.0": "1", "2.0.0": "2" } as const
 
 const stubSignature =
     "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
 const eoaSignatureType = "0x00"
-
-const signWith1271WrapperV1 = (
-    signer: Account.Local,
-    chainId: number,
-    accountAddress: Address.Address,
-    hashedMessage: Hex.Hex
-) =>
-    signer.signTypedData({
-        domain: {
-            chainId,
-            name: "LightAccount",
-            verifyingContract: accountAddress,
-            version: "1"
-        },
-        types: { LightAccountMessage: [{ name: "message", type: "bytes" }] },
-        primaryType: "LightAccountMessage",
-        message: { message: hashedMessage }
-    })
 
 export async function from<entryPointVersion extends "0.6" | "0.7" = "0.7">(
     parameters: Parameters<entryPointVersion>
@@ -143,22 +126,21 @@ export async function from<entryPointVersion extends "0.6" | "0.7" = "0.7">(
         return address
     }
 
-    const signMessage = async ({
-        message
-    }: {
-        message: Account.SignableMessage
-    }) =>
+    const signHash = async (hash: Hex.Hex) =>
         wrapSignature(
-            await signWith1271WrapperV1(
-                localOwner,
-                await getChainId(),
-                await getAddress(),
-                PersonalMessage.getSignPayload(
-                    typeof message === "string"
-                        ? Hex.fromString(message)
-                        : message.raw
-                )
-            )
+            await localOwner.signTypedData({
+                domain: {
+                    chainId: await getChainId(),
+                    name: "LightAccount",
+                    verifyingContract: await getAddress(),
+                    version: domainVersions[version]
+                },
+                types: {
+                    LightAccountMessage: [{ name: "message", type: "bytes" }]
+                },
+                primaryType: "LightAccountMessage",
+                message: { message: hash }
+            })
         )
 
     const account = await SmartAccount.from({
@@ -198,18 +180,17 @@ export async function from<entryPointVersion extends "0.6" | "0.7" = "0.7">(
         getAddress,
         getFactoryArgs,
         getStubSignature: () => wrapSignature(stubSignature),
-        sign: ({ hash }) => signMessage({ message: hash }),
-        signMessage,
-        async signTypedData(typedData) {
-            return wrapSignature(
-                await signWith1271WrapperV1(
-                    localOwner,
-                    await getChainId(),
-                    await getAddress(),
-                    TypedData.getSignPayload(typedData)
+        sign: ({ hash }) => signHash(hash),
+        signMessage: ({ message }) =>
+            signHash(
+                PersonalMessage.getSignPayload(
+                    typeof message === "string"
+                        ? Hex.fromString(message)
+                        : message.raw
                 )
-            )
-        },
+            ),
+        signTypedData: (typedData) =>
+            signHash(TypedData.getSignPayload(typedData)),
         async signUserOperation(parameters) {
             const { chainId = await getChainId(), ...userOperation } =
                 parameters

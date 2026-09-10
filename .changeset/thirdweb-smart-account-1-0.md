@@ -16,3 +16,5 @@ const account = await ThirdwebSmartAccount.from({ // [!code ++]
     version: "1.5.20" // [!code --]
 })
 ```
+
+`sign({ hash })` now produces a verifier-compatible ERC-1271 signature: the raw 32-byte hash goes through the account's replay-safe wrapper, so `client.verifyHash` accepts it (0.x signed the hash's hex string, which no verifier accepted).

@@ -2,8 +2,7 @@ import type { Account } from "viem"
 import type { WebAuthnAccount } from "viem/erc4337"
 import { type Address, type Hex, TypedData } from "viem/utils"
 import type { Version } from "../version.js"
-import { signMessage, toKernelTypedData } from "./signMessage.js"
-import { wrapMessageHash } from "./wrapMessageHash.js"
+import { signHash } from "./signHash.js"
 
 export type SignTypedDataParameters = {
     typedData: TypedData.Definition
@@ -24,19 +23,12 @@ export async function signTypedData({
 }: SignTypedDataParameters): Promise<Hex.Hex> {
     if ((version === "0.2.1" || version === "0.2.2") && owner.type === "local")
         return owner.signTypedData(typedData)
-    const hash = TypedData.getSignPayload(typedData)
-    if (eip7702 && owner.type === "local")
-        return owner.signTypedData(
-            toKernelTypedData({ hash, address, version, chainId })
-        )
-    const wrapped = wrapMessageHash({ hash, address, version, chainId })
-    if (owner.type === "webAuthn")
-        return signMessage({
-            message: { raw: wrapped },
-            owner,
-            address,
-            version,
-            chainId
-        })
-    return owner.signMessage({ message: { raw: wrapped } })
+    return signHash({
+        hash: TypedData.getSignPayload(typedData),
+        owner,
+        address,
+        version,
+        chainId,
+        eip7702
+    })
 }

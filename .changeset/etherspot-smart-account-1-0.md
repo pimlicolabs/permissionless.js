@@ -30,3 +30,4 @@ const account = await EtherspotSmartAccount.from({
 - `entryPoint` is optional and typed 0.7-only: pass `"0.7"` or `{ address, version: "0.7" }`. 0.x typed `"0.6" | "0.7"` but always built a 0.7 account. Counterfactual addresses are unchanged.
 - Per-call nonce keys are honoured. `getNonce({ key })` wins over the constructor `nonceKey`, which wins over `0n`; 0.x ignored the per-call key. Keys above `65535` (the 2-byte user key field) throw `EtherspotNonceKeyOverflowError`.
 - Types: `ToEtherspotSmartAccountParameters` → `EtherspotSmartAccount.Parameters`, `ToEtherspotSmartAccountReturnType` → `EtherspotSmartAccount.ReturnType`, `EtherspotSmartAccountImplementation` → `EtherspotSmartAccount.Implementation`.
+- `sign({ hash })` now produces a verifier-compatible ERC-1271 signature: the owner signs the raw 32-byte hash, so `client.verifyHash` accepts it (0.x signed the hash's hex string, which no verifier accepted).

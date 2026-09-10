@@ -1,6 +1,6 @@
 import { Account, type Client } from "viem"
 import { EntryPoint } from "viem/erc4337"
-import { Abi, AbiFunction, Address, Solidity } from "viem/utils"
+import { Abi, AbiFunction, Address, Hash, Hex, Solidity } from "viem/utils"
 import { describe, expect } from "vitest"
 import { erc20Address } from "../../../mock-paymaster/helpers/erc20-utils"
 import {
@@ -12,7 +12,10 @@ import {
     getBundlerClient,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import { SafeEntryPointVersionUnsupportedError } from "../../errors/safe"
+import {
+    SafeEntryPointVersionUnsupportedError,
+    SafeErc7579VersionUnsupportedError
+} from "../../errors/safe"
 import { decodeNonce } from "../../utils/decodeNonce"
 import * as SafeSmartAccount from "./index"
 
@@ -36,6 +39,47 @@ const erc7579 = {
         "0x7579011aB74c46090561ea277Ba79D510c6C00ff" as const,
     attesters: ["0x000000333034E9f539ce08819E12c1b8Cb29084d" as const],
     attestersThreshold: 1
+}
+
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
+const typedData = {
+    domain: {
+        name: "Ether Mail",
+        version: "1",
+        chainId: 31337,
+        verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+    },
+    types: { Mail: [{ name: "contents", type: "string" }] },
+    primaryType: "Mail",
+    message: { contents: "Hello, Bob!" }
+} as const
+
+const expectSignaturesVerify = async (
+    client: ReturnType<typeof getPublicClient>,
+    account: SafeSmartAccount.ReturnType<"0.6" | "0.7">
+) => {
+    const message = "slowly and steadily burning the private keys"
+    expect(
+        await client.verifyMessage({
+            address: account.address,
+            message,
+            signature: await account.signMessage({ message })
+        })
+    ).toBe(true)
+    expect(
+        await client.typedData.verify({
+            ...typedData,
+            address: account.address,
+            signature: await account.signTypedData(typedData)
+        })
+    ).toBe(true)
+    expect(
+        await client.verifyHash({
+            address: account.address,
+            hash,
+            signature: await account.sign({ hash })
+        })
+    ).toBe(true)
 }
 
 const pinnedDefault = loadCounterfactualAddressFixture("safe").find(
@@ -194,6 +238,83 @@ describe("SafeSmartAccount.from", () => {
                     entryPoint: "0.6"
                 })
             ).rejects.toBeInstanceOf(SafeEntryPointVersionUnsupportedError)
+        }
+    )
+
+    for (const version of ["1.4.1", "1.5.0"] as const) {
+        testWithRpc(
+            `signMessage, signTypedData and sign verify through ERC-1271 on Safe ${version} before and after deployment`,
+            async ({ rpc }) => {
+                const client = getPublicClient(rpc.anvilRpc)
+                const account = await SafeSmartAccount.from({
+                    client,
+                    owners: [Account.random()],
+                    version
+                })
+                await expectSignaturesVerify(client, account)
+                const smartAccountClient = getBundlerClient({
+                    account,
+                    entryPoint: { version: "0.7" },
+                    ...rpc
+                })
+                const receipt =
+                    await smartAccountClient.userOperation.waitForReceipt({
+                        hash: await smartAccountClient.userOperation.send({
+                            calls: [approve(1n)]
+                        })
+                    })
+                expect(receipt.success).toBe(true)
+                expect(await account.isDeployed()).toBe(true)
+                await expectSignaturesVerify(client, account)
+            }
+        )
+    }
+
+    testWithRpc(
+        "a 3-of-3 Safe verifies signatures through ERC-6492 before deployment",
+        async ({ rpc }) => {
+            const client = getPublicClient(rpc.anvilRpc)
+            const account = await SafeSmartAccount.from({
+                client,
+                owners: [Account.random(), Account.random(), Account.random()],
+                entryPoint: "0.6"
+            })
+            await expectSignaturesVerify(client, account)
+        }
+    )
+
+    testWithRpc(
+        "Safe 7579 verifies signatures through ERC-1271 once deployed; Safe 1.5.0 refuses to sign with ERC-7579",
+        async ({ rpc }) => {
+            const client = getPublicClient(rpc.anvilRpc)
+            const account = await SafeSmartAccount.from({
+                client,
+                owners: [Account.random()],
+                ...erc7579
+            })
+            const smartAccountClient = getBundlerClient({
+                account,
+                entryPoint: { version: "0.7" },
+                ...rpc
+            })
+            const receipt =
+                await smartAccountClient.userOperation.waitForReceipt({
+                    hash: await smartAccountClient.userOperation.send({
+                        calls: [approve(1n)]
+                    })
+                })
+            expect(receipt.success).toBe(true)
+            await expectSignaturesVerify(client, account)
+
+            const unsupported = await SafeSmartAccount.from({
+                client,
+                owners: [Account.random()],
+                version: "1.5.0",
+                ...erc7579
+            })
+            await expect(unsupported.sign({ hash })).rejects.toThrow(
+                SafeErc7579VersionUnsupportedError
+            )
         }
     )
 
