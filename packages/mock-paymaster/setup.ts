@@ -1,4 +1,4 @@
-import { Contract } from "viem"
+import { Client, Contract, http, testActions } from "viem"
 import { type Address, Hex, Value } from "viem/utils"
 import {
     constants,
@@ -31,6 +31,13 @@ export const deployPaymasters = async ({
 }) => {
     const walletClient = await getPaymasterUtilityWallet(anvilRpc)
     const publicClient = await getPublicClient(anvilRpc)
+    const anvilClient = Client.create({ transport: http(anvilRpc) }).extend(
+        testActions({ mode: "anvil" })
+    )
+    const seal = async (hash: Hex.Hex) => {
+        await publicClient.transaction.waitForReceipt({ hash })
+        await anvilClient.block.mine({ blocks: 1 })
+    }
 
     let nonce = await publicClient.address.getTransactionCount({
         address: walletClient.account.address
@@ -53,7 +60,7 @@ export const deployPaymasters = async ({
             ),
             nonce: nonce++
         })
-        await publicClient.transaction.waitForReceipt({ hash })
+        await seal(hash)
     }
 
     // Deploy singleton paymaster 07 if not already deployed.
@@ -69,7 +76,7 @@ export const deployPaymasters = async ({
             ),
             nonce: nonce++
         })
-        await publicClient.transaction.waitForReceipt({ hash })
+        await seal(hash)
     }
 
     // Deploy singleton paymaster 08 if not already deployed.
@@ -85,7 +92,7 @@ export const deployPaymasters = async ({
             ),
             nonce: nonce++
         })
-        await publicClient.transaction.waitForReceipt({ hash })
+        await seal(hash)
     }
 
     const depositAmount = Value.fromEther("50")

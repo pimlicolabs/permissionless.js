@@ -7,7 +7,8 @@ import { getSimpleClient } from "../../../permissionless-test/src/accounts/simpl
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getAnvilWalletClient,
-    getPublicClient
+    getPublicClient,
+    sealTransaction
 } from "../../../permissionless-test/src/utils"
 import * as SmartAccountClient from "../smartAccount/index"
 import * as PimlicoClient from "./index"
@@ -34,8 +35,8 @@ describe("PimlicoClient", () => {
                 ...rpc,
                 entryPoint: { version: "0.7" }
             })
-            const publicClient = getPublicClient(rpc.anvilRpc)
-            await Actions.transaction.waitForReceipt(publicClient, {
+            await sealTransaction({
+                anvilRpc: rpc.anvilRpc,
                 hash: await Actions.transaction.send(
                     getAnvilWalletClient({ addressIndex: 0, ...rpc }),
                     { to: account.address, value: Value.fromEther("1") }

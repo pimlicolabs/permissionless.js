@@ -15,7 +15,8 @@ import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getAnvilWalletClient,
     getBundlerClient,
-    getPublicClient
+    getPublicClient,
+    sealTransaction
 } from "../../../permissionless-test/src/utils"
 import * as SafeSmartAccount from "./index"
 
@@ -392,7 +393,8 @@ describe("safe setupTransactions gate (spec §10)", () => {
                 addressIndex: 0,
                 anvilRpc: rpc.anvilRpc
             })
-            await Actions.transaction.waitForReceipt(client, {
+            await sealTransaction({
+                anvilRpc: rpc.anvilRpc,
                 hash: await deployer.contract.write({
                     abi: createProxyWithNonceAbi,
                     address: factory,

@@ -6,10 +6,12 @@ import {
     http,
     publicActions,
     type Transport,
+    testActions,
     walletActions
 } from "viem"
 import { anvil } from "viem/chains"
 import { EntryPoint, PaymasterClient, type SmartAccount } from "viem/erc4337"
+import type { Hex } from "viem/utils"
 import * as PimlicoClient from "../../permissionless/clients/pimlico"
 import * as SmartAccountClient from "../../permissionless/clients/smartAccount"
 import { etherspotSmartAccounts } from "./accounts/etherspot.js"
@@ -193,6 +195,30 @@ export const getPimlicoClient = <entryPointVersion extends EntryPoint.Version>({
         transport: http(altoRpc),
         pollingInterval: 100
     })
+}
+
+export const getAnvilTestClient = (anvilRpc: string) =>
+    Client.create({ chain: anvil, transport: http(anvilRpc) })
+        .extend(testActions({ mode: "anvil" }))
+        .extend(publicActions())
+
+export const sealTransaction = async ({
+    anvilRpc,
+    hash
+}: {
+    anvilRpc: string
+    hash: Hex.Hex
+}) => {
+    const client = getAnvilTestClient(anvilRpc)
+    await client.block.mine({ blocks: 1 })
+    for (let i = 0; i < 64; i++) {
+        if ((await client.txpool.getStatus()).pending === 0) break
+        await client.block.mine({ blocks: 1 })
+    }
+    const receipt = await client.transaction.getReceipt({ hash })
+    if (receipt.status !== "success")
+        throw new Error(`${hash} ${receipt.status}`)
+    return receipt
 }
 
 export const getPublicClient = (anvilRpc: string) => {
