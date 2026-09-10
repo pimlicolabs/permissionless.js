@@ -23,7 +23,7 @@ const account = await KernelSmartAccount.from({ // [!code ++]
 
 - `owner` is singular; the `[owner]` tuple is gone, and the parameter shape no longer changes in EIP-7702 mode.
 - `entryPoint` is optional and accepts a version shorthand; it defaults to `0.7`. `version` keeps its derived defaults (`0.3.0-beta` on 0.7, `0.2.2` on 0.6, `0.3.3` with `eip7702: true`); a version the EntryPoint does not support throws `KernelUnsupportedVersionError`.
-- `to7702KernelSmartAccount` is removed: pass `eip7702: true` to `KernelSmartAccount.from`. You still own the authorization lifecycle.
+- `to7702KernelSmartAccount` is removed: pass `eip7702: true` to `KernelSmartAccount.from`. You still own the authorization lifecycle. `accountLogicAddress` is now `implementation`, the same name as on `SimpleSmartAccount.from`.
 - `toEcdsaKernelSmartAccount`, its `ecdsaValidatorAddress` alias and its types are removed: the ECDSA validator is the default of `KernelSmartAccount.from`, and it derives the same addresses.
 - The automatic vulnerable-validator migration inside `encodeCalls` is removed. Migrate affected accounts on permissionless 0.x first, then upgrade.
 - Nonce keys resolve as per-call `key`, then the constructor `nonceKey`, then `0n` (0.x ignored per-call keys). Kernel v3 still packs the key into its 2-byte user-key field and throws `KernelNonceKeyTooLargeError` above `maxUint16`.

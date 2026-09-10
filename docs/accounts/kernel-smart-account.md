@@ -32,7 +32,7 @@ async function from<
 | `eip7702` | `boolean` | No | `false` | Use the owner EOA as the account, delegated to the Kernel implementation |
 | `factoryAddress` | `Address` | No | Version-specific | Factory contract |
 | `metaFactoryAddress` | `Address` | No | Version-specific | Meta-factory for delegated deploys (v0.3.x) |
-| `accountLogicAddress` | `Address` | No | Version-specific | Account implementation |
+| `implementation` | `Address` | No | Version-specific | Account implementation; the delegate with `eip7702` |
 | `validatorAddress` | `Address` | No | Version-specific | Root validator; ECDSA by default, WebAuthn for WebAuthn owners |
 | `index` | `bigint` | No | `0n` | Salt for deterministic address |
 | `address` | `Address` | No | Computed | Override counterfactual address |

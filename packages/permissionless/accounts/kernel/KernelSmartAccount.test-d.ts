@@ -77,7 +77,7 @@ describe("KernelSmartAccount", () => {
             useMetaFactory: "optional",
             factoryAddress: address,
             metaFactoryAddress: address,
-            accountLogicAddress: address,
+            implementation: address,
             address
         })
         KernelSmartAccount.from({

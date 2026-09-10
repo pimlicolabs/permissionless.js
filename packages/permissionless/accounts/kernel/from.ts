@@ -64,12 +64,12 @@ export type Parameters<
     entryPointVersion extends EntryPointVersion = "0.7",
     eip7702 extends boolean = false
 > = {
-    accountLogicAddress?: Address.Address | undefined
     address?: Address.Address | undefined
     client: Client.Client
     eip7702?: eip7702 | undefined
     entryPoint?: EntryPointParameter<entryPointVersion> | undefined
     factoryAddress?: Address.Address | undefined
+    implementation?: Address.Address | undefined
     index?: bigint | undefined
     metaFactoryAddress?: Address.Address | undefined
     nonceKey?: bigint | undefined
@@ -292,8 +292,7 @@ export async function from<
             : defaults.ECDSA_VALIDATOR)
     if (!validatorAddress)
         throw new KernelValidatorAddressRequiredError({ version })
-    const accountLogicAddress =
-        parameters.accountLogicAddress ?? defaults.ACCOUNT_LOGIC
+    const implementation = parameters.implementation ?? defaults.ACCOUNT_LOGIC
     const factoryAddress = parameters.factoryAddress ?? defaults.FACTORY_ADDRESS
     const metaFactoryAddress =
         parameters.metaFactoryAddress ??
@@ -313,7 +312,7 @@ export async function from<
                 factoryData: AbiFunction.encodeData(
                     createAccountAbi,
                     "createAccount",
-                    [accountLogicAddress, initializationData, index]
+                    [implementation, initializationData, index]
                 )
             }
         if (!useMetaFactory)
@@ -399,11 +398,11 @@ export async function from<
     const account = await SmartAccount.from({
         client,
         entryPoint,
-        extend: eip7702 ? { implementation: accountLogicAddress } : undefined,
+        extend: eip7702 ? { implementation } : undefined,
         authorization: eip7702
             ? {
                   account: owner as Account.PrivateKey,
-                  address: accountLogicAddress
+                  address: implementation
               }
             : undefined,
         getAddress: () => accountAddress,
