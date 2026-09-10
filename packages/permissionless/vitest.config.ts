@@ -41,8 +41,14 @@ export default defineConfig({
             provider: "v8",
             reporter: process.env.CI ? ["lcov"] : ["text", "json", "html"],
             include: ["**/permissionless/**"],
+            // package.json `files` defines shipped code; everything it
+            // negates is out of the denominator, the build output with it.
             exclude: [
                 "**/*.test.ts",
+                "**/*.test-d.ts",
+                "**/*.bench.ts",
+                "**/setupTests.ts",
+                "**/*.config.ts",
                 "**/permissionless-test/**",
                 "**/_cjs/**",
                 "**/_esm/**",
