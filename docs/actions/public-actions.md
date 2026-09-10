@@ -5,8 +5,8 @@ Public actions are read-only functions that interact with the EntryPoint contrac
 ## Import
 
 ```typescript
-import { getAccountNonce, getSenderAddress, InvalidEntryPointError } from "permissionless/actions"
-import type { GetAccountNonceParams, GetSenderAddressParams } from "permissionless/actions"
+import { getAccountNonce, getSenderAddress, InvalidEntryPointError } from "permissionless"
+import type { GetAccountNonceParams, GetSenderAddressParams } from "permissionless"
 ```
 
 ---
@@ -41,8 +41,8 @@ async function getAccountNonce(
 ```typescript
 import { createPublicClient, http } from "viem"
 import { sepolia } from "viem/chains"
-import { getAccountNonce } from "permissionless/actions"
-import { entryPoint07Address } from "viem/account-abstraction"
+import { getAccountNonce } from "permissionless"
+import { EntryPoint } from "viem/erc4337"
 
 const publicClient = createPublicClient({
     chain: sepolia,
@@ -51,7 +51,7 @@ const publicClient = createPublicClient({
 
 const nonce = await getAccountNonce(publicClient, {
     address: "0x1234...",
-    entryPointAddress: entryPoint07Address,
+    entryPointAddress: EntryPoint.addressV07,
 })
 
 console.log("Current nonce:", nonce)
@@ -62,7 +62,7 @@ console.log("Current nonce:", nonce)
 ```typescript
 const nonce = await getAccountNonce(publicClient, {
     address: "0x1234...",
-    entryPointAddress: entryPoint07Address,
+    entryPointAddress: EntryPoint.addressV07,
     key: 1n, // Use nonce lane 1
 })
 ```
@@ -107,18 +107,20 @@ Accepts one of two parameter shapes:
 
 ### Errors
 
-- **`InvalidEntryPointError`** -- Thrown when the simulation fails (invalid init code, wrong EntryPoint, etc.)
+- **`InitCodeRequiredError`** -- Neither `initCode` nor `factory` + `factoryData` was given
+- **`InvalidEntryPointError`** -- `entryPointAddress` is not an EntryPoint (the helper call did not revert with `SenderAddressResult`)
+- **`SenderAddressNotFoundError`** -- The helper call returned no data
 
 ### Example
 
 ```typescript
-import { getSenderAddress } from "permissionless/actions"
-import { entryPoint07Address } from "viem/account-abstraction"
+import { getSenderAddress } from "permissionless"
+import { EntryPoint } from "viem/erc4337"
 
 const address = await getSenderAddress(publicClient, {
     factory: "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985",
     factoryData: "0x...",
-    entryPointAddress: entryPoint07Address,
+    entryPointAddress: EntryPoint.addressV07,
 })
 
 console.log("Counterfactual address:", address)
@@ -128,10 +130,10 @@ console.log("Counterfactual address:", address)
 
 ## `InvalidEntryPointError`
 
-Error class thrown by `getSenderAddress` when the sender address cannot be computed.
+Thrown by `getSenderAddress` when `entryPointAddress` does not behave like an EntryPoint. The original viem `call` error is attached as `cause`.
 
 ```typescript
-import { InvalidEntryPointError } from "permissionless/actions"
+import { InvalidEntryPointError } from "permissionless"
 
 try {
     const address = await getSenderAddress(client, params)

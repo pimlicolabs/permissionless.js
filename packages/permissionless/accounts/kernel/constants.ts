@@ -8,7 +8,8 @@ export const VALIDATOR_TYPE = {
     PERMISSION: "0x02",
     EIP7702: "0x00"
 } as const
-export enum VALIDATOR_MODE {
-    DEFAULT = "0x00",
-    ENABLE = "0x01"
-}
+
+export const VALIDATOR_MODE = {
+    DEFAULT: "0x00",
+    ENABLE: "0x01"
+} as const

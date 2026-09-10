@@ -1,74 +1,73 @@
 # PimlicoClient
 
-The `PimlicoClient` provides access to Pimlico's bundler and paymaster APIs, including gas price estimation, UserOperation sponsorship, and ERC-20 paymaster token quotes.
+`PimlicoClient` is a viem 3 `BundlerClient` against Pimlico's RPC with the Pimlico actions (gas price, sponsorship, policies, token quotes) and a `paymaster` decorator, so the same client can be passed as `paymaster` to `SmartAccountClient.create`.
 
 ## Import
 
 ```typescript
-import { createPimlicoClient } from "permissionless/clients/pimlico"
-import type { PimlicoClient, PimlicoClientConfig } from "permissionless/clients/pimlico"
+import { PimlicoClient, pimlicoActions } from "permissionless/pimlico"
+import type { PimlicoClient } from "permissionless/pimlico"
+// PimlicoClient.Client, PimlicoClient.Config, PimlicoClient.Schema
 ```
 
-## `createPimlicoClient`
+## `PimlicoClient.create`
 
 ```typescript
-function createPimlicoClient<
-    entryPointVersion extends EntryPointVersion = "0.7",
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = undefined,
-    account extends SmartAccount | undefined = SmartAccount | undefined,
-    rpcSchema extends RpcSchema | undefined = undefined
->(
-    parameters: PimlicoClientConfig<entryPointVersion, transport, chain, account, rpcSchema>
-): PimlicoClient<entryPointVersion, transport, chain, account, client, rpcSchema>
+function PimlicoClient.create(
+    parameters: PimlicoClient.Config
+): PimlicoClient.Client
 ```
 
-### Config Parameters
+Generic over the EntryPoint version (default `"0.7"`), transport, chain, account and extra RPC schema.
+
+### Config
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `transport` | `Transport` | Yes | -- | Transport to Pimlico's RPC |
-| `entryPoint` | `{ address: Address, version: EntryPointVersion }` | No | `{ address: entryPoint07Address, version: "0.7" }` | EntryPoint configuration |
-| `chain` | `Chain` | No | -- | Chain |
-| `account` | `SmartAccount` | No | -- | Optional account |
+| `transport` | `Transport.Transport` | Yes | -- | Transport to Pimlico's RPC |
+| `entryPoint` | `{ address: Address, version: EntryPoint.Version }` | No | `{ address: EntryPoint.addressV07, version: "0.7" }` | EntryPoint the Pimlico actions target |
+| `chain` | `Chain.Chain` | No | -- | Chain |
+| `account` | `SmartAccount.SmartAccount` | No | -- | Account for the bundler actions |
 | `key` | `string` | No | `"public"` | Client key |
 | `name` | `string` | No | `"Pimlico Bundler Client"` | Client name |
 | `cacheTime` | `number` | No | viem default | Cache duration |
 | `pollingInterval` | `number` | No | viem default | Polling interval |
-| `rpcSchema` | `RpcSchema` | No | -- | Additional RPC methods |
+| `schema` | `RpcSchema.Generic` | No | -- | Extra typed RPC methods |
 
 ### Return Type
 
-`PimlicoClient` is a viem `Client` with:
-- **`BundlerActions`** -- All standard bundler methods
-- **`PaymasterActions`** -- `getPaymasterData`, `getPaymasterStubData`
-- **`PimlicoActions`** -- See [Pimlico Actions](../actions/pimlico-actions.md)
+`PimlicoClient.Client` is a viem `BundlerClient.Client` with:
+
+- viem's account-abstraction actions: `userOperation.prepare`, `userOperation.estimateGas`, `userOperation.send`, `userOperation.get`, `userOperation.getReceipt`, `userOperation.waitForReceipt`
+- viem's paymaster decorator: `paymaster.getData`, `paymaster.getStubData` (`pm_getPaymasterData`, `pm_getPaymasterStubData`)
+- `Pimlico.Actions`: `getUserOperationGasPrice`, `getUserOperationStatus`, `sponsorUserOperation`, `validateSponsorshipPolicies`, `getTokenQuotes`, `estimateErc20PaymasterCost` -- see [Pimlico Actions](../actions/pimlico-actions.md) and [ERC-20 Paymaster](../actions/erc20-paymaster.md)
+
+Sending through `pimlicoClient.userOperation.send` does not sponsor by itself (no `pm_*` calls). To sponsor, pass the client as `paymaster` to `SmartAccountClient.create`.
 
 ### Internal Implementation
 
 ```typescript
-createClient({ ...parameters })
-    .extend(bundlerActions)
-    .extend(paymasterActions)
-    .extend(pimlicoActions({ entryPoint }))
+Object.assign(
+    BundlerClient.create({ ...rest, key, name }).extend(pimlicoActions({ entryPoint })),
+    { paymaster: { getData, getStubData } }
+)
 ```
 
 ## `pimlicoActions` Decorator
 
-The decorator factory that adds Pimlico-specific methods:
+The factory that adds the Pimlico methods to any viem client:
 
 ```typescript
-import { pimlicoActions } from "permissionless/actions/pimlico"
+import { Client, http } from "viem"
+import { EntryPoint } from "viem/erc4337"
+import { pimlicoActions } from "permissionless/pimlico"
 
-const decorator = pimlicoActions({
-    entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-    },
-})
+const client = Client.create({ transport: http(pimlicoUrl) }).extend(
+    pimlicoActions({
+        entryPoint: { address: EntryPoint.addressV07, version: "0.7" }
+    })
+)
 ```
-
-See [Pimlico Actions](../actions/pimlico-actions.md) for all available methods.
 
 ## Examples
 
@@ -76,40 +75,36 @@ See [Pimlico Actions](../actions/pimlico-actions.md) for all available methods.
 
 ```typescript
 import { http } from "viem"
-import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { PimlicoClient } from "permissionless/pimlico"
 
-const pimlicoClient = createPimlicoClient({
-    transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"),
+const pimlicoClient = PimlicoClient.create({
+    transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY")
 })
 
-// Get gas price recommendations
 const gasPrice = await pimlicoClient.getUserOperationGasPrice()
-console.log(gasPrice.standard.maxFeePerGas)
+gasPrice.standard.maxFeePerGas
 ```
 
 ### As Paymaster for SmartAccountClient
 
 ```typescript
-import { createSmartAccountClient } from "permissionless"
+import { SmartAccountClient } from "permissionless"
 
-const smartAccountClient = createSmartAccountClient({
+const smartAccountClient = SmartAccountClient.create({
     account,
     chain: sepolia,
     bundlerTransport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"),
-    paymaster: pimlicoClient,
+    paymaster: pimlicoClient
 })
 ```
 
-### With Specific EntryPoint
+### With a Specific EntryPoint
 
 ```typescript
-import { entryPoint07Address } from "viem/account-abstraction"
+import { EntryPoint } from "viem/erc4337"
 
-const pimlicoClient = createPimlicoClient({
+const pimlicoClient = PimlicoClient.create({
     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_KEY"),
-    entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-    },
+    entryPoint: { address: EntryPoint.addressV06, version: "0.6" }
 })
 ```

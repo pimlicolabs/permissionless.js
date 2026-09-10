@@ -1,13 +1,16 @@
-import type {
-    Chain,
-    Client,
-    SignMessageParameters,
-    SignMessageReturnType,
-    Transport
-} from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
-import { parseAccount } from "viem/utils"
+import type { Account, Chain } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import type { Hex } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+
+export type SignMessageParameters<
+    account extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
+> = GetSmartAccountParameter<account> & {
+    message: Account.SignableMessage
+}
 
 /**
  * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
@@ -26,48 +29,22 @@ import { AccountNotFoundError } from "../../errors/index.js"
  * @returns The signed message. {@link SignMessageReturnType}
  *
  * @example
- * import { createWalletClient, custom } from 'viem'
- * import { mainnet } from 'viem/chains'
- * import { signMessage } from 'viem/wallet'
+ * import { signMessage } from "permissionless"
  *
- * const client = createWalletClient({
- *   chain: mainnet,
- *   transport: custom(window.ethereum),
- * })
- * const signature = await signMessage(client, {
- *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
- *   message: 'hello world',
- * })
- *
- * @example
- * // Account Hoisting
- * import { createWalletClient, custom } from 'viem'
- * import { privateKeyToAccount } from 'viem/accounts'
- * import { mainnet } from 'viem/chains'
- * import { signMessage } from 'viem/wallet'
- *
- * const client = createWalletClient({
- *   account: privateKeyToAccount('0x…'),
- *   chain: mainnet,
- *   transport: custom(window.ethereum),
- * })
- * const signature = await signMessage(client, {
- *   message: 'hello world',
- * })
+ * const signature = await signMessage(smartAccountClient, { message: "hello world" })
  */
-export async function signMessage<TAccount extends SmartAccount | undefined>(
-    client: Client<Transport, Chain | undefined, TAccount>,
+export async function signMessage<
+    TAccount extends SmartAccount.SmartAccount | undefined
+>(
+    client: BundlerClient.Client<Chain.Chain | undefined, TAccount>,
     {
         account: account_ = client.account,
         message
     }: SignMessageParameters<TAccount>
-): Promise<SignMessageReturnType> {
-    if (!account_)
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/signMessage"
-        })
+): Promise<Hex.Hex> {
+    if (!account_) throw new AccountNotFoundError()
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
 
     return account.signMessage({ message })
 }

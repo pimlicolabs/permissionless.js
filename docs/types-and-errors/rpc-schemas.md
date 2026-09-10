@@ -1,76 +1,72 @@
 # RPC Schemas
 
-RPC schemas define the JSON-RPC methods available for each provider client. They extend viem's typed RPC system.
+Each provider client types its JSON-RPC methods with a viem `RpcSchema`. The schema types are exported as `Schema` on the client namespace (or, for Etherspot, the action namespace).
 
-## PimlicoRpcSchema
+| Schema | Export | Used by |
+|--------|--------|---------|
+| Pimlico | `PimlicoClient.Schema<entryPointVersion>` (`permissionless/pimlico`) | `PimlicoClient.create`, `pimlicoActions` |
+| Etherspot | `Etherspot.Schema` (`permissionless/etherspot`) | `Etherspot.getUserOperationGasPrice` |
+| Passkey server | `PasskeyServerClient.Schema` (`permissionless/pimlico`) | `PasskeyServerClient.create` |
 
-Defined in `types/pimlico.ts`. Used by `PimlicoClient`.
+## `PimlicoClient.Schema`
 
-### Methods
+Defined in `types/pimlico.ts`.
 
 | RPC Method | Parameters | Returns |
 |-----------|-----------|---------|
-| `pimlico_getUserOperationGasPrice` | `[]` | `{ slow, standard, fast }` with `{ maxFeePerGas, maxPriorityFeePerGas }` per tier |
-| `pimlico_getUserOperationStatus` | `[Hash]` | `{ status: string, transactionHash: Hash \| null }` |
-| `pimlico_sendCompressedUserOperation` | `[Hex, Address, Address]` | `Hash` |
-| `pm_sponsorUserOperation` | `[UserOperation, Address, context?]` | Paymaster data (version-dependent) |
-| `pm_validateSponsorshipPolicies` | `[UserOperation, Address, string[]]` | Policy validation results |
-| `pimlico_getTokenQuotes` | `[{ tokens, ... }]` | Token quote data |
+| `pimlico_getUserOperationGasPrice` | none | `{ slow, standard, fast }`, each `{ maxFeePerGas, maxPriorityFeePerGas }` |
+| `pimlico_getUserOperationStatus` | `[hash]` | `{ status, transactionHash }` |
+| `pm_sponsorUserOperation` | `[userOperation, entryPoint, { sponsorshipPolicyId? }?]` | Paymaster fields and gas limits; `paymasterAndData` on 0.6, `paymaster` + `paymasterData` + gas limits on 0.7+ |
+| `pm_validateSponsorshipPolicies` | `[userOperation, entryPoint, sponsorshipPolicyIds]` | `{ sponsorshipPolicyId, data: { name, author, icon, description } }[]` |
+| `pimlico_getTokenQuotes` | `[{ tokens }, entryPoint, chainId]` | `{ quotes: { paymaster, token, postOpGas, exchangeRate, exchangeRateNativeToUsd, balanceSlot?, allowanceSlot? }[] }` |
 
-### Status Values for `pimlico_getUserOperationStatus`
+`pimlico_sendCompressedUserOperation` was removed in 1.0.
+
+### Status values for `pimlico_getUserOperationStatus`
 
 | Status | Description |
 |--------|-------------|
-| `"not_found"` | UserOp not known to the bundler |
+| `"not_found"` | UserOperation not known to the bundler |
 | `"not_submitted"` | Received but not yet submitted |
-| `"submitted"` | Submitted to mempool |
-| `"rejected"` | Rejected by bundler |
+| `"submitted"` | Submitted to the mempool |
+| `"rejected"` | Rejected by the bundler |
 | `"reverted"` | Executed but reverted |
-| `"included"` | Successfully included in a block |
-| `"failed"` | Failed for other reasons |
+| `"included"` | Included in a block |
+| `"failed"` | Failed for another reason |
 
 ---
 
-## EtherspotBundlerRpcSchema
+## `Etherspot.Schema`
 
-Defined in `types/etherspot.ts`. Used by Etherspot bundler clients.
-
-### Methods
+Defined in `types/etherspot.ts`.
 
 | RPC Method | Parameters | Returns |
 |-----------|-----------|---------|
-| `skandha_getGasPrice` | `[]` | `{ maxFeePerGas, maxPriorityFeePerGas }` |
+| `skandha_getGasPrice` | none | `{ maxFeePerGas, maxPriorityFeePerGas }` |
 
 ---
 
-## PasskeyServerRpcSchema
+## `PasskeyServerClient.Schema`
 
-Defined in `types/passkeyServer.ts`. Used by `PasskeyServerClient`.
-
-### Methods
+Defined in `types/passkeyServer.ts`.
 
 | RPC Method | Parameters | Returns |
 |-----------|-----------|---------|
-| `pks_startRegistration` | `[{ userName }]` | WebAuthn creation options |
-| `pks_verifyRegistration` | `[{ credential }]` | `{ success, id, publicKey, userName }` |
-| `pks_getCredentials` | `[params]` | `{ id, publicKey }[]` |
-| `pks_startAuthentication` | `[params]` | WebAuthn authentication options |
-| `pks_verifyAuthentication` | `[params]` | `{ success, id, publicKey, userName }` |
+| `pks_startRegistration` | `[context]` | WebAuthn creation options (`rp`, `user`, `challenge`, `attestation`, …) |
+| `pks_verifyRegistration` | `[credential, context]` | `{ success, id, publicKey, userName }` |
+| `pks_getCredentials` | `[context]` | `{ id, publicKey }[]` |
+| `pks_startAuthentication` | none | `{ challenge, rpId, uuid, timeout?, userVerification? }` |
+| `pks_verifyAuthentication` | `[credential, context]` | `{ success, id, publicKey, userName }` |
 
-## Usage with Custom Clients
+## Typed requests
 
-RPC schemas enable TypeScript type checking for custom RPC calls:
+The clients expose the typed `request` directly:
 
 ```typescript
-import type { PimlicoRpcSchema } from "permissionless/types/pimlico"
-
-const client = createClient<Transport, Chain, Account, PimlicoRpcSchema>({
-    transport: http(pimlicoUrl),
+const gasPrice = await pimlicoClient.request({
+    method: "pimlico_getUserOperationGasPrice"
 })
-
-// TypeScript knows the return type
-const result = await client.request({
-    method: "pimlico_getUserOperationGasPrice",
-})
-// result is typed as { slow, standard, fast }
+// { slow, standard, fast } with hex quantities
 ```
+
+`SmartAccountClient.Config`, `PimlicoClient.Config` and `PasskeyServerClient.Config` take viem 3's `schema` option to add methods of your own.

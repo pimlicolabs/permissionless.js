@@ -1,29 +1,33 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+    "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
     "files": {
-        "ignore": [
-            "node_modules",
-            "**/node_modules",
-            "cache",
-            "coverage",
-            "tsconfig.json",
-            "tsconfig.*.json",
-            "_cjs",
-            "_esm",
-            "_types",
-            "bun.lockb",
-            "temp.ts"
+        "includes": [
+            "**",
+            "!**/node_modules",
+            "!**/cache",
+            "!**/coverage",
+            "!**/tsconfig.json",
+            "!**/tsconfig.*.json",
+            "!**/_cjs",
+            "!**/_esm",
+            "!**/_types",
+            "!**/bun.lockb",
+            "!**/temp.ts"
         ]
     },
-    "organizeImports": {
-        "enabled": true
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
     },
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true,
+            "preset": "recommended",
             "suspicious": {
-                "noExplicitAny": "warn"
+                "noExplicitAny": "error"
             },
             "style": {
                 "noUnusedTemplateLiteral": "warn"
@@ -42,5 +46,17 @@
             "semicolons": "asNeeded",
             "trailingCommas": "none"
         }
-    }
+    },
+    "overrides": [
+        {
+            "includes": ["**/*.test.ts", "**/*.test-d.ts"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        }
+    ]
 }

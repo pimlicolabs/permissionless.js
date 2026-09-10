@@ -1,0 +1,19 @@
+{
+    // The package's own *.test-d.ts files (copied into ./test-d by the workflow) against the installed tarball. They
+    // import "permissionless" and "permissionless/pimlico", so the exports map decides what gets checked. Same flags
+    // as the repo's tsconfig.base.json; skipLibCheck stays on because vitest's own typings are not under test here.
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "noErrorTruncation": true,
+        "types": []
+    },
+    "include": ["test-d/**/*.test-d.ts"]
+}

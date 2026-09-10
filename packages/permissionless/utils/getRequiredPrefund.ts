@@ -1,34 +1,37 @@
-import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
+import type { EntryPoint, UserOperation } from "viem/erc4337"
 
-export type GetRequiredPrefundReturnType<
-    entryPointVersion extends EntryPointVersion = "0.7"
+export type GetRequiredPrefundParameters<
+    entryPointVersion extends EntryPoint.Version = "0.7"
 > = {
-    userOperation: UserOperation<entryPointVersion>
+    userOperation: UserOperation.UserOperation<entryPointVersion>
     entryPointVersion: entryPointVersion
 }
 
+export type GetRequiredPrefundReturnType = bigint
+
 /**
+ * Returns the minimum required funds in the sender's smart account to execute the user operation.
  *
- * Returns the minimum required funds in the senders's smart account to execute the user operation.
- *
- * @param arags: {userOperation} as {@link UserOperation}
- * @returns requiredPrefund as {@link bigint}
+ * @param parameters {@link GetRequiredPrefundParameters}
+ * @returns requiredPrefund {@link GetRequiredPrefundReturnType}
  *
  * @example
- * import { getRequiredPrefund } from "permissionless/utils"
+ * import { getRequiredPrefund } from "permissionless"
  *
  * const requiredPrefund = getRequiredPrefund({
- *     userOperation
+ *     userOperation,
+ *     entryPointVersion: "0.7"
  * })
  */
 export const getRequiredPrefund = <
-    entryPointVersion extends EntryPointVersion
+    entryPointVersion extends EntryPoint.Version
 >({
     userOperation,
     entryPointVersion
-}: GetRequiredPrefundReturnType<entryPointVersion>): bigint => {
+}: GetRequiredPrefundParameters<entryPointVersion>): GetRequiredPrefundReturnType => {
     if (entryPointVersion === "0.6") {
-        const userOperationVersion0_6 = userOperation as UserOperation<"0.6">
+        const userOperationVersion0_6 =
+            userOperation as UserOperation.UserOperation<"0.6">
         const multiplier =
             (userOperationVersion0_6.paymasterAndData?.length ?? 0) > 2
                 ? BigInt(3)
@@ -43,7 +46,9 @@ export const getRequiredPrefund = <
         )
     }
 
-    const userOperationV07 = userOperation as UserOperation<"0.7" | "0.8">
+    const userOperationV07 = userOperation as UserOperation.UserOperation<
+        "0.7" | "0.8" | "0.9"
+    >
 
     const requiredGas =
         userOperationV07.verificationGasLimit +

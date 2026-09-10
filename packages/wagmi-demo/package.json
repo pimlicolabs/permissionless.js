@@ -12,5 +12,8 @@
     "dependencies": {
         "permissionless": "workspace:packages/permissionless",
         "@permissionless/wagmi": "workspace:packages/wagmi"
+    },
+    "devDependencies": {
+        "viem": "2.44.4"
     }
 }

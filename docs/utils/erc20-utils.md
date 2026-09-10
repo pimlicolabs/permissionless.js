@@ -1,113 +1,91 @@
 # ERC-20 Utilities
 
-State override utilities for simulating ERC-20 token balances and allowances during gas estimation. These are used with viem's `stateOverride` parameter to simulate token states without requiring actual tokens.
+State overrides that let gas estimation succeed before the account holds or has approved the token. They live on the `Erc20Paymaster` namespace in `permissionless/pimlico`, next to the [ERC-20 paymaster actions](../actions/erc20-paymaster.md).
 
 ## Import
 
 ```typescript
-import { erc20AllowanceOverride, erc20BalanceOverride } from "permissionless/utils"
-import type {
-    Erc20AllowanceOverrideParameters,
-    Erc20BalanceOverrideParameters,
-} from "permissionless/utils"
+import { Erc20Paymaster } from "permissionless/pimlico"
+import type { Erc20Paymaster } from "permissionless/pimlico"
+// Erc20Paymaster.BalanceOverrideParameters, Erc20Paymaster.AllowanceOverrideParameters
 ```
 
 ---
 
-## `erc20AllowanceOverride`
+## `Erc20Paymaster.balanceOverride`
 
-Creates a state override that simulates maximum ERC-20 token allowance for a spender. Useful for gas estimation when the actual approval hasn't been executed yet.
+Simulates an ERC-20 balance for `owner`.
 
 ### Signature
 
 ```typescript
-function erc20AllowanceOverride(
-    args: Erc20AllowanceOverrideParameters
-): StateOverride
+function Erc20Paymaster.balanceOverride(
+    args: Erc20Paymaster.BalanceOverrideParameters
+): StateOverrides.StateOverrides
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `token` | `Address` | Yes | -- | ERC-20 token contract address |
-| `owner` | `Address` | Yes | -- | Token owner address |
-| `spender` | `Address` | Yes | -- | Spender to grant allowance to |
-| `slot` | `bigint` | Yes | -- | Storage slot for the allowance mapping |
-| `amount` | `bigint` | No | `maxUint256` | Allowance amount to simulate |
+| `token` | `Address` | Yes | -- | ERC-20 token contract |
+| `owner` | `Address` | Yes | -- | Account whose balance is simulated |
+| `slot` | `bigint` | Yes | -- | Storage slot of the token's balance mapping |
+| `balance` | `bigint` | No | A large sentinel | Simulated balance |
 
 ### Returns
 
-`StateOverride` -- A viem state override object to pass to `eth_call` or gas estimation.
+A viem `StateOverrides.StateOverrides` object keyed by `token`, whose `stateDiff` sets the balance slot for `owner` (`keccak256(abi.encode(owner, slot))`).
 
 ### Example
 
 ```typescript
-import { erc20AllowanceOverride } from "permissionless/utils"
-
-const override = erc20AllowanceOverride({
-    token: "0xUsdcAddress...",
-    owner: "0xSmartAccount...",
-    spender: "0xPaymaster...",
-    slot: 1n, // USDC allowance mapping slot
+const stateOverride = Erc20Paymaster.balanceOverride({
+    token: "0xUsdc...",
+    owner: account.address,
+    slot: 9n
 })
 ```
 
 ---
 
-## `erc20BalanceOverride`
+## `Erc20Paymaster.allowanceOverride`
 
-Creates a state override that simulates an ERC-20 token balance. Useful for gas estimation when the account doesn't hold the required tokens yet.
+Simulates an ERC-20 allowance from `owner` to `spender`.
 
 ### Signature
 
 ```typescript
-function erc20BalanceOverride(
-    args: Erc20BalanceOverrideParameters
-): StateOverride
+function Erc20Paymaster.allowanceOverride(
+    args: Erc20Paymaster.AllowanceOverrideParameters
+): StateOverrides.StateOverrides
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `token` | `Address` | Yes | -- | ERC-20 token contract address |
-| `owner` | `Address` | Yes | -- | Account to give balance to |
-| `slot` | `bigint` | Yes | -- | Storage slot for the balance mapping |
-| `amount` | `bigint` | No | `maxUint256` | Balance amount to simulate |
+| `token` | `Address` | Yes | -- | ERC-20 token contract |
+| `owner` | `Address` | Yes | -- | Token owner |
+| `spender` | `Address` | Yes | -- | Spender granted the allowance |
+| `slot` | `bigint` | Yes | -- | Storage slot of the token's allowance mapping |
+| `amount` | `bigint` | No | `2n ** 255n - 1n` | Simulated allowance |
 
 ### Returns
 
-`StateOverride` -- A viem state override object.
+A viem `StateOverrides.StateOverrides` object keyed by `token`, whose `stateDiff` sets the allowance slot for `owner` and `spender`.
 
 ### Example
 
 ```typescript
-import { erc20BalanceOverride } from "permissionless/utils"
-
-const override = erc20BalanceOverride({
-    token: "0xUsdcAddress...",
-    owner: "0xSmartAccount...",
-    slot: 0n, // USDC balance mapping slot
+const stateOverride = Erc20Paymaster.allowanceOverride({
+    token: "0xUsdc...",
+    owner: account.address,
+    spender: paymaster,
+    slot: 10n
 })
 ```
 
-## Usage with Gas Estimation
+## Usage
 
-Both overrides are typically combined when estimating gas for ERC-20 paymaster operations:
-
-```typescript
-const overrides = [
-    erc20BalanceOverride({
-        token: usdcAddress,
-        owner: accountAddress,
-        slot: 0n,
-    }),
-    erc20AllowanceOverride({
-        token: usdcAddress,
-        owner: accountAddress,
-        spender: paymasterAddress,
-        slot: 1n,
-    }),
-]
-```
+Pass the result as `stateOverride` to `userOperation.prepare` or `userOperation.estimateGas`. When combining both overrides for the same token, merge their `stateDiff` entries, as `Erc20Paymaster.prepareUserOperation` does. Pimlico's `pimlico_getTokenQuotes` response carries `balanceSlot` and `allowanceSlot` for supported tokens.

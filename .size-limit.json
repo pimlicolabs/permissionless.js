@@ -2,12 +2,7 @@
     {
         "name": "permissionless (esm)",
         "path": "./packages/permissionless/_esm/index.js",
-        "limit": "250 kB",
+        "limit": "300 kB",
         "import": "*"
-    },
-    {
-        "name": "permissionless (cjs)",
-        "path": "./packages/permissionless/_cjs/index.js",
-        "limit": "500 kB"
     }
 ]

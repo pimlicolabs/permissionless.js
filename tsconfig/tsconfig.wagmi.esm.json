@@ -1,8 +1,10 @@
 {
-    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
     "extends": "./tsconfig.wagmi.json",
     "compilerOptions": {
         "module": "ESNext",
         "outDir": "../packages/wagmi/_esm",
+        "declaration": true,
+        "declarationMap": true,
+        "declarationDir": "../packages/wagmi/_types"
     }
 }

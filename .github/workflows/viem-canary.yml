@@ -1,0 +1,122 @@
+name: viem canary
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    name: viem@${{ matrix.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: [latest, next]
+    env:
+      TAG: ${{ matrix.tag }}
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          install-foundry: 'true'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Resolve viem@${{ matrix.tag }} against the peer range
+        id: viem
+        run: |
+          version=$(npm view "viem@$TAG" version)
+          range=$(jq -r '.peerDependencies.viem' packages/permissionless/package.json)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "range=$range" >> "$GITHUB_OUTPUT"
+          npm install --prefix "$RUNNER_TEMP/semver" semver@7 > /dev/null
+          if "$RUNNER_TEMP/semver/node_modules/.bin/semver" -p -r "$range" "$version" > /dev/null; then
+            echo "in_range=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "in_range=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::viem@$TAG is $version, outside the peer range $range; leg skipped"
+          fi
+
+      - name: Install viem ${{ steps.viem.outputs.version }}
+        if: steps.viem.outputs.in_range == 'true'
+        run: |
+          bun add -d --ignore-scripts "viem@${{ steps.viem.outputs.version }}"
+          node -p "'installed viem ' + require('./node_modules/viem/package.json').version"
+
+      - name: Build
+        id: build
+        if: steps.viem.outputs.in_range == 'true'
+        continue-on-error: true
+        run: bun run build
+
+      - name: Create .env file
+        if: steps.viem.outputs.in_range == 'true'
+        run: echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
+
+      - name: Test
+        id: test
+        if: steps.viem.outputs.in_range == 'true' && steps.build.outcome == 'success'
+        continue-on-error: true
+        run: bun run test:ci-no-coverage
+
+      - name: Type tests
+        id: types
+        if: steps.viem.outputs.in_range == 'true' && steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          if jq -e '.scripts["test:types"]' package.json > /dev/null; then
+            bun run test:types
+          else
+            echo "::notice::no test:types script yet (ticket 20)"
+          fi
+
+      - name: File or close the canary issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ steps.viem.outputs.version }}
+          RANGE: ${{ steps.viem.outputs.range }}
+          IN_RANGE: ${{ steps.viem.outputs.in_range }}
+          BUILD: ${{ steps.build.outcome }}
+          TEST: ${{ steps.test.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="viem canary: $TAG failing"
+          failed=""
+          [ "$BUILD" = failure ] && failed="$failed build"
+          [ "$TEST" = failure ] && failed="$failed test:ci-no-coverage"
+          [ "$TYPES" = failure ] && failed="$failed test:types"
+          gh label create viem-canary --force --color B60205 --description "nightly viem@latest / viem@next canary" > /dev/null
+          existing=$(gh issue list --label viem-canary --state open --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -n "$failed" ]; then
+            body=$(printf 'viem@%s = %s (peer range %s)\nRun: %s\nFailing:%s' "$TAG" "$VERSION" "$RANGE" "$RUN_URL" "$failed")
+            if [ -n "$existing" ]; then
+              gh issue edit "$existing" --body "$body"
+            else
+              gh issue create --title "$title" --label viem-canary --body "$body"
+            fi
+            exit 1
+          fi
+          [ -z "$existing" ] && exit 0
+          if [ "$IN_RANGE" = true ] && [ "$BUILD" = success ] && [ "$TEST" = success ] && [ "$TYPES" = success ]; then
+            gh issue close "$existing" --comment "Green again on viem@$TAG = $VERSION: $RUN_URL"
+          elif [ "$IN_RANGE" = false ]; then
+            gh issue close "$existing" --comment "viem@$TAG is now $VERSION, outside the peer range $RANGE; leg skipped: $RUN_URL"
+          fi

@@ -1,12 +1,12 @@
-import { encodeAbiParameters, encodePacked, isHash, zeroAddress } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { Account } from "viem"
+import { AbiParameters, Address, Secp256k1 } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
-import { erc7579Actions } from "../erc7579"
+import { erc7579Actions } from "../../clients/decorators/erc7579"
 import { installModule } from "./installModule"
 
 describe.each(getCoreSmartAccounts())(
@@ -19,9 +19,9 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey = generatePrivateKey()
+                const privateKey = Secp256k1.randomPrivateKey()
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClientWithoutExtend =
                     await getErc7579SmartAccountClient({
@@ -38,7 +38,7 @@ describe.each(getCoreSmartAccounts())(
                     erc7579Actions()
                 )
 
-                const moduleData = encodePacked(
+                const moduleData = AbiParameters.encodePacked(
                     ["address"],
                     [smartClient.account.address]
                 )
@@ -48,11 +48,11 @@ describe.each(getCoreSmartAccounts())(
                     type: "executor",
                     address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     initData: name.startsWith("Kernel 7579")
-                        ? encodePacked(
+                        ? AbiParameters.encodePacked(
                               ["address", "bytes"],
                               [
-                                  zeroAddress,
-                                  encodeAbiParameters(
+                                  Address.zero,
+                                  AbiParameters.encode(
                                       [{ type: "bytes" }, { type: "bytes" }],
                                       [moduleData, "0x"]
                                   )
@@ -60,21 +60,25 @@ describe.each(getCoreSmartAccounts())(
                           )
                         : moduleData,
                     authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
                 })
 
-                expect(isHash(opHash)).toBe(true)
+                expect(opHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const userOperationReceipt =
-                    await smartClient.waitForUserOperationReceipt({
+                    await smartClient.userOperation.waitForReceipt({
                         hash: opHash,
                         timeout: 100000
                     })
@@ -85,7 +89,7 @@ describe.each(getCoreSmartAccounts())(
                     userOperationReceipt?.receipt.transactionHash
                 ).toBeTruthy()
 
-                const receipt = await smartClient.getUserOperationReceipt({
+                const receipt = await smartClient.userOperation.getReceipt({
                     hash: opHash
                 })
 
@@ -109,9 +113,9 @@ describe.each(getCoreSmartAccounts())(
                     throw new Error("getErc7579SmartAccountClient not defined")
                 }
 
-                const privateKey = generatePrivateKey()
+                const privateKey = Secp256k1.randomPrivateKey()
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClientWithoutExtend =
                     await getErc7579SmartAccountClient({
@@ -128,7 +132,7 @@ describe.each(getCoreSmartAccounts())(
                     erc7579Actions()
                 )
 
-                const userOpHash = await smartClient.sendUserOperation({
+                const userOpHash = await smartClient.userOperation.send({
                     calls: [
                         {
                             to: smartClient.account.address,
@@ -142,22 +146,26 @@ describe.each(getCoreSmartAccounts())(
                         }
                     ],
                     authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
                 })
 
-                await smartClient.waitForUserOperationReceipt({
+                await smartClient.userOperation.waitForReceipt({
                     hash: userOpHash
                 })
 
-                const moduleData = encodePacked(
+                const moduleData = AbiParameters.encodePacked(
                     ["address"],
                     [smartClient.account.address]
                 )
@@ -167,11 +175,11 @@ describe.each(getCoreSmartAccounts())(
                     type: "executor",
                     address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
                     context: name.startsWith("Kernel 7579")
-                        ? encodePacked(
+                        ? AbiParameters.encodePacked(
                               ["address", "bytes"],
                               [
-                                  zeroAddress,
-                                  encodeAbiParameters(
+                                  Address.zero,
+                                  AbiParameters.encode(
                                       [{ type: "bytes" }, { type: "bytes" }],
                                       [moduleData, "0x"]
                                   )
@@ -180,10 +188,10 @@ describe.each(getCoreSmartAccounts())(
                         : moduleData
                 })
 
-                expect(isHash(opHash)).toBe(true)
+                expect(opHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
                 const userOperationReceipt =
-                    await smartClient.waitForUserOperationReceipt({
+                    await smartClient.userOperation.waitForReceipt({
                         hash: opHash,
                         timeout: 100000
                     })
@@ -193,7 +201,7 @@ describe.each(getCoreSmartAccounts())(
                     userOperationReceipt?.receipt.transactionHash
                 ).toBeTruthy()
 
-                const receipt = await smartClient.getUserOperationReceipt({
+                const receipt = await smartClient.userOperation.getReceipt({
                     hash: opHash
                 })
 

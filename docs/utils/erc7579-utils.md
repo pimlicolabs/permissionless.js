@@ -1,162 +1,146 @@
 # ERC-7579 Utilities
 
-Encoding and decoding utilities for ERC-7579 modular smart account calls and module management.
+Encoding and decoding for ERC-7579 execution calldata and module management. They live on the `Erc7579` namespace next to the [ERC-7579 actions](../actions/erc7579-actions.md).
 
 ## Import
 
 ```typescript
-import {
-    encode7579Calls,
-    decode7579Calls,
-    encodeInstallModule,
-    encodeUninstallModule,
-} from "permissionless/utils"
-
-import type {
-    EncodeCallDataParams,
-    DecodeCallDataReturnType,
-    EncodeInstallModuleParameters,
-    EncodeUninstallModuleParameters,
-} from "permissionless/utils"
+import { Erc7579 } from "permissionless"
+import type { Erc7579 } from "permissionless"
+// Erc7579.EncodeCallsParameters, Erc7579.DecodeCallsReturnType,
+// Erc7579.EncodeInstallModuleParameters, Erc7579.EncodeUninstallModuleParameters,
+// Erc7579.CallType, Erc7579.ExecutionMode, Erc7579.ModuleType
 ```
 
 ---
 
-## `encode7579Calls`
+## `Erc7579.encodeCalls`
 
-Encodes calls into the ERC-7579 execute format, including the execution mode byte.
+Encodes calls as `execute(bytes32 execMode, bytes executionCalldata)`.
 
 ### Signature
 
 ```typescript
-function encode7579Calls(args: EncodeCallDataParams): Hex
+function Erc7579.encodeCalls<callType extends Erc7579.CallType>(
+    args: Erc7579.EncodeCallsParameters<callType>
+): Hex
 ```
 
 ### Parameters
 
-The function accepts different parameter shapes based on the call type:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `mode` | `Erc7579.ExecutionMode<callType>` | Yes | Execution mode (below) |
+| `callData` | `{ to: Address, value?: bigint, data?: Hex }[]` | Yes | Calls to execute |
 
-**Single call:**
 ```typescript
-{
-    mode: { type: "call", revertOnError?: boolean, selector?: Hex, context?: Hex },
-    callData: [{ to: Address, value: bigint, data: Hex }]
+type CallType = "call" | "batchcall" | "delegatecall"
+
+type ExecutionMode<callType extends CallType> = {
+    type: callType
+    revertOnError?: boolean
+    selector?: Hex
+    context?: Hex
 }
 ```
 
-**Batch call:**
-```typescript
-{
-    mode: { type: "batchcall", revertOnError?: boolean, selector?: Hex, context?: Hex },
-    callData: [{ to: Address, value: bigint, data: Hex }, ...]
-}
-```
+A single call is packed as `target ‖ value ‖ callData`; several calls require `type: "batchcall"` and are ABI-encoded as `(address target, uint256 value, bytes callData)[]`.
 
-**Delegate call:**
-```typescript
-{
-    mode: { type: "delegatecall", revertOnError?: boolean, selector?: Hex, context?: Hex },
-    callData: [{ to: Address, value: bigint, data: Hex }]
-}
-```
+### Errors
 
-### Mode Bytes
-
-| Type | Byte Value |
-|------|-----------|
-| `"call"` | `0x00` |
-| `"batchcall"` | `0x01` |
-| `"delegatecall"` | `0xff` |
+- `EmptyCallsError` -- empty `callData`
+- `Erc7579InvalidExecutionModeError` -- several calls with a mode other than `batchcall`
 
 ### Example
 
 ```typescript
-import { encode7579Calls } from "permissionless/utils"
-
-const calldata = encode7579Calls({
-    mode: { type: "batchcall" },
+const data = Erc7579.encodeCalls({
+    mode: { type: "batchcall", revertOnError: false, selector: "0x", context: "0x" },
     callData: [
         { to: "0xA...", value: 0n, data: "0x" },
-        { to: "0xB...", value: 1000n, data: "0x1234" },
-    ],
+        { to: "0xB...", value: 1000n, data: "0x1234" }
+    ]
 })
 ```
 
 ---
 
-## `decode7579Calls`
+## `Erc7579.decodeCalls`
 
-Decodes ERC-7579 execute calldata back into mode and individual calls.
+Decodes `execute` calldata back into its mode and calls.
 
 ### Signature
 
 ```typescript
-function decode7579Calls(callData: Hex): DecodeCallDataReturnType
+function Erc7579.decodeCalls(callData: Hex): Erc7579.DecodeCallsReturnType
 ```
 
 ### Returns
 
 ```typescript
-type DecodeCallDataReturnType = {
-    mode: "call" | "batchcall" | "delegatecall",
-    calls: { to: Address, value: bigint, data: Hex }[]
+{
+    mode: Erc7579.ExecutionMode<Erc7579.CallType>
+    callData: { to: Address; value?: bigint; data?: Hex }[]
 }
 ```
 
-### Example
-
-```typescript
-import { decode7579Calls } from "permissionless/utils"
-
-const decoded = decode7579Calls("0x...")
-console.log(decoded.mode) // "batchcall"
-console.log(decoded.calls) // [{ to: "0xA...", value: 0n, data: "0x" }, ...]
-```
+Throws `Erc7579InvalidCallTypeError` on an unknown call-type byte.
 
 ---
 
-## `encodeInstallModule`
+## `Erc7579.encodeInstallModule`
 
-Encodes a call to `installModule(uint256 moduleType, address module, bytes initData)` for ERC-7579 accounts.
+Builds the `installModule(uint256 moduleTypeId, address module, bytes initData)` call(s) for an account.
 
 ### Signature
 
 ```typescript
-function encodeInstallModule(args: EncodeInstallModuleParameters): Hex
+function Erc7579.encodeInstallModule(
+    args: Erc7579.EncodeInstallModuleParameters
+): { to: Address; value: bigint; data: Hex }[]
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `type` | `ModuleType` | Yes | Module type (`"validator"`, `"executor"`, `"fallback"`, `"hook"`) |
-| `address` | `Address` | Yes | Module contract address |
-| `context` | `Hex` | Yes | Initialization data |
+| `account` | `SmartAccount.SmartAccount` | Yes | The account installing the modules (calls target `account.address`) |
+| `modules` | `{ type: ModuleType, address: Address, context: Hex }` or `{ type, address, initData: Hex }`, single or array | Yes | Modules to install |
+
+```typescript
+type ModuleType = "validator" | "executor" | "fallback" | "hook"
+```
 
 ### Returns
 
-`Hex` -- ABI-encoded calldata for the `installModule` function.
+One call per module, ready for `sendCalls` or the account's `encodeCalls`. Throws `AccountNotFoundError` without `account`.
 
 ---
 
-## `encodeUninstallModule`
+## `Erc7579.encodeUninstallModule`
 
-Encodes a call to `uninstallModule(uint256 moduleType, address module, bytes deInitData)`.
+Builds the `uninstallModule(uint256 moduleTypeId, address module, bytes deInitData)` call(s).
 
 ### Signature
 
 ```typescript
-function encodeUninstallModule(args: EncodeUninstallModuleParameters): Hex
+function Erc7579.encodeUninstallModule(
+    args: Erc7579.EncodeUninstallModuleParameters
+): { to: Address; value: bigint; data: Hex }[]
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `type` | `ModuleType` | Yes | Module type |
-| `address` | `Address` | Yes | Module contract address |
-| `context` | `Hex` | Yes | De-initialization data |
+| `account` | `SmartAccount.SmartAccount` | Yes | The account uninstalling the modules |
+| `modules` | `{ type: ModuleType, address: Address, context: Hex }` or `{ type, address, deInitData: Hex }`, single or array | Yes | Modules to uninstall |
 
 ### Returns
 
-`Hex` -- ABI-encoded calldata for the `uninstallModule` function.
+One call per module. Throws `AccountNotFoundError` without `account`.
+
+## Migrating from 0.x
+
+- `encode7579Calls` / `decode7579Calls` / `encodeInstallModule` / `encodeUninstallModule` from the `utils` subpath -> `Erc7579.encodeCalls` / `decodeCalls` / `encodeInstallModule` / `encodeUninstallModule`.
+- `EncodeCallDataParams` -> `Erc7579.EncodeCallsParameters`; `DecodeCallDataReturnType` -> `Erc7579.DecodeCallsReturnType`.

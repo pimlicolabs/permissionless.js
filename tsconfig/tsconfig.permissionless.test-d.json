@@ -1,0 +1,6 @@
+{
+    // Type tests only (vitest typecheck): vitest copies this file verbatim, so `include` must name the
+    // *.test-d.ts files itself.
+    "extends": "./tsconfig.permissionless.test.json",
+    "include": ["../packages/permissionless/**/*.test-d.ts"]
+}

@@ -1,15 +1,8 @@
-import type {
-    Account,
-    Address,
-    Chain,
-    Client,
-    Hex,
-    OneOf,
-    PartialBy,
-    Transport
-} from "viem"
-import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
+import type { Client, Transport } from "viem"
+import type { EntryPoint, UserOperation } from "viem/erc4337"
+import type { Address, Hex } from "viem/utils"
 import type { PimlicoRpcSchema } from "../../types/pimlico.js"
+import type { OneOf, PartialBy } from "../../types/utils.js"
 import { deepHexlify } from "../../utils/deepHexlify.js"
 
 type PaymasterContext = {
@@ -19,13 +12,13 @@ type PaymasterContext = {
     [key: string]: unknown
 }
 
-export type PimlicoSponsorUserOperationParameters<
-    entryPointVersion extends EntryPointVersion
+export type SponsorUserOperationParameters<
+    entryPointVersion extends EntryPoint.Version
 > = {
     userOperation: OneOf<
         | (entryPointVersion extends "0.6"
               ? PartialBy<
-                    UserOperation<"0.6">,
+                    UserOperation.UserOperation<"0.6">,
                     | "callGasLimit"
                     | "preVerificationGas"
                     | "verificationGasLimit"
@@ -33,7 +26,27 @@ export type PimlicoSponsorUserOperationParameters<
               : never)
         | (entryPointVersion extends "0.7"
               ? PartialBy<
-                    UserOperation<"0.7">,
+                    UserOperation.UserOperation<"0.7">,
+                    | "callGasLimit"
+                    | "preVerificationGas"
+                    | "verificationGasLimit"
+                    | "paymasterVerificationGasLimit"
+                    | "paymasterPostOpGasLimit"
+                >
+              : never)
+        | (entryPointVersion extends "0.8"
+              ? PartialBy<
+                    UserOperation.UserOperation<"0.8">,
+                    | "callGasLimit"
+                    | "preVerificationGas"
+                    | "verificationGasLimit"
+                    | "paymasterVerificationGasLimit"
+                    | "paymasterPostOpGasLimit"
+                >
+              : never)
+        | (entryPointVersion extends "0.9"
+              ? PartialBy<
+                    UserOperation.UserOperation<"0.9">,
                     | "callGasLimit"
                     | "preVerificationGas"
                     | "verificationGasLimit"
@@ -43,7 +56,7 @@ export type PimlicoSponsorUserOperationParameters<
               : never)
     >
     entryPoint: {
-        address: Address
+        address: Address.Address
         version: entryPointVersion
     }
     sponsorshipPolicyId?: string
@@ -51,39 +64,34 @@ export type PimlicoSponsorUserOperationParameters<
 }
 
 export type SponsorUserOperationReturnType<
-    entryPointVersion extends EntryPointVersion = "0.7"
+    entryPointVersion extends EntryPoint.Version = "0.7"
 > = OneOf<
     | (entryPointVersion extends "0.6"
           ? {
                 callGasLimit: bigint
                 verificationGasLimit: bigint
                 preVerificationGas: bigint
-                paymasterAndData: Hex
+                paymasterAndData: Hex.Hex
             }
           : never)
-    | (entryPointVersion extends "0.7"
+    | (entryPointVersion extends "0.7" | "0.8" | "0.9"
           ? {
                 callGasLimit: bigint
                 verificationGasLimit: bigint
                 preVerificationGas: bigint
-                paymaster: Address
+                paymaster: Address.Address
                 paymasterVerificationGasLimit: bigint
                 paymasterPostOpGasLimit: bigint
-                paymasterData: Hex
+                paymasterData: Hex.Hex
             }
           : never)
 >
 
 export const sponsorUserOperation = async <
-    entryPointVersion extends EntryPointVersion = EntryPointVersion
+    entryPointVersion extends EntryPoint.Version = EntryPoint.Version
 >(
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PimlicoRpcSchema<entryPointVersion>
-    >,
-    args: PimlicoSponsorUserOperationParameters<entryPointVersion>
+    client: Pick<Client.Client, "request">,
+    args: SponsorUserOperationParameters<entryPointVersion>
 ): Promise<SponsorUserOperationReturnType<entryPointVersion>> => {
     const { sponsorshipPolicyId, paymasterContext, userOperation, entryPoint } =
         args
@@ -96,7 +104,10 @@ export const sponsorUserOperation = async <
                   sponsorshipPolicyId
               }
 
-    const response = await client.request({
+    const request = client.request as Transport.RequestFn<
+        PimlicoRpcSchema<entryPointVersion>
+    >
+    const response = await request({
         method: "pm_sponsorUserOperation",
         params: finalPaymasterContext
             ? [
@@ -109,10 +120,10 @@ export const sponsorUserOperation = async <
 
     if (entryPoint.version === "0.6") {
         const responseV06 = response as {
-            paymasterAndData: Hex
-            preVerificationGas: Hex
-            verificationGasLimit: Hex
-            callGasLimit: Hex
+            paymasterAndData: Hex.Hex
+            preVerificationGas: Hex.Hex
+            verificationGasLimit: Hex.Hex
+            callGasLimit: Hex.Hex
             paymaster?: never
             paymasterVerificationGasLimit?: never
             paymasterPostOpGasLimit?: never
@@ -127,13 +138,13 @@ export const sponsorUserOperation = async <
     }
 
     const responseV07 = response as {
-        preVerificationGas: Hex
-        verificationGasLimit: Hex
-        callGasLimit: Hex
-        paymaster: Address
-        paymasterVerificationGasLimit: Hex
-        paymasterPostOpGasLimit: Hex
-        paymasterData: Hex
+        preVerificationGas: Hex.Hex
+        verificationGasLimit: Hex.Hex
+        callGasLimit: Hex.Hex
+        paymaster: Address.Address
+        paymasterVerificationGasLimit: Hex.Hex
+        paymasterPostOpGasLimit: Hex.Hex
+        paymasterData: Hex.Hex
         paymasterAndData?: never
     }
 

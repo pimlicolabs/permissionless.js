@@ -14,7 +14,7 @@ with bundlers and paymasters, and leveraging custom signers.
 - **High-Level Smart Account Support**: We support a high-level API for
   deploying and managing smart accounts, including some of the most popular
   implementations ([Safe](https://safe.global), [Kernel](https://zerodev.app),
-  [Biconomy](https://biconomy.io), etc.)
+  [Nexus](https://biconomy.io), etc.)
 - **Bundler Support**: We support all bundler actions following
   [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337#rpc-methods-eth-namespace).
 - **Gas Sponsorship**: We support paymaster actions to allow you to easily
@@ -50,56 +50,55 @@ bun install viem permissionless
 yarn add viem permissionless
 ```
 
-### Optional Dependencies
+## viem compatibility
 
-For WebAuthn functionality (passkeys), you'll also need to install the `ox` package:
+permissionless follows viem: the supported range is the `viem` peer range in
+[`package.json`](./package.json), `^3.0.0` at GA, floored at the stable release
+GA was validated against. The floor rises only when a change needs an upstream
+fix, never to chase viem releases. During the `1.0.0-next.N` prereleases the
+peer is `^3.0.0-next.M`, the viem prerelease each was validated against.
 
-```bash
-npm install ox
-```
+Every PR runs the suite against the locked viem version. A nightly canary runs
+it against `viem@latest` and `viem@next` and files an issue labelled
+[`viem-canary`](https://github.com/pimlicolabs/permissionless.js/issues?q=label%3Aviem-canary)
+when either breaks. Every changelog entry states the exact viem version it was
+validated against. No compatibility matrix beyond that is published.
 
-```bash
-bun install ox
-```
-
-```bash
-yarn add ox
-```
-
-**Note**: The `ox` package is optional and only required if you plan to use WebAuthn/passkey features. The library will throw a helpful error message if you try to use WebAuthn functionality without installing `ox`.
+Node.js 20 or later and TypeScript 5.9 or later.
 
 ## Quick Start
 
 ```typescript
-// Import the required modules.
-import { createSmartAccountClient } from "permissionless";
-import { createPaymasterClient } from "viem/account-abstraction";
-import { sepolia } from "viem/chains";
-import { http } from "viem";
+import { Account, Client, http } from "viem"
+import { sepolia } from "viem/chains"
+import { SimpleSmartAccount, SmartAccountClient } from "permissionless"
+import { PimlicoClient } from "permissionless/pimlico"
 
-const paymaster = createPaymasterClient({
-  transport: http(`https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`)
+const pimlicoUrl = `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`
+
+// Bundler + paymaster in one client
+const pimlicoClient = PimlicoClient.create({ transport: http(pimlicoUrl) })
+
+// The smart account (computes the counterfactual address)
+const account = await SimpleSmartAccount.from({
+  client: Client.create({ chain: sepolia, transport: http() }),
+  owner: Account.fromPrivateKey("0x...")
 })
 
-const account = toSimpleSmartAccount<entryPointVersion>({
-  client: getPublicClient(anvilRpc),
-  owner: privateKeyToAccount(generatePrivateKey())
-})
-
-// Create the required clients.
-const bundlerClient = createSmartAccountClient({
+// Bundler client with smart account actions; gas sponsored by Pimlico
+const smartAccountClient = SmartAccountClient.create({
   account,
-  paymaster, 
   chain: sepolia,
-  bundlerTransport: http(
-    `https://api.pimlico.io/v2/sepolia/rpc?apikey=${pimlicoApiKey}`,
-  ), // Use any bundler url
-});
+  bundlerTransport: http(pimlicoUrl),
+  paymaster: pimlicoClient
+})
 
-// Consume bundler, paymaster, and smart account actions!
-const userOperationReceipt = await bundlerClient.getUserOperationReceipt({
-  hash: "0x5faea6a3af76292c2b23468bbea96ef63fb31360848be195748437f0a79106c8",
-});
+// Prepares, signs and submits a UserOperation, then waits for the receipt
+const hash = await smartAccountClient.sendTransaction({
+  to: "0x...",
+  value: 0n,
+  data: "0x"
+})
 ```
 
 ## Contributors
@@ -112,6 +111,8 @@ Build permissionless.js locally with:
 ```bash
 bun run build
 ```
+
+The test rig (`bun run test`) needs Foundry ≥ 1.8 (`anvil`); CI runs 1.8.1.
 
 ## License
 

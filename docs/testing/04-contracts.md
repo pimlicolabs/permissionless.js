@@ -111,7 +111,7 @@ The authoritative list with every address is in `verifyDeployed(client, [...])` 
 Each `*_CREATECALL` constant is literally a hex string: `<salt (32 bytes)><initcode>`. These aren't re-derived from Solidity source at test time — they are checked-in pre-computed values. Benefits:
 
 - **Hermetic.** Tests don't need `forge build` / `solc` available on the developer's machine.
-- **Deterministic addresses.** Because both salt and initcode are frozen, every test run produces the same contract addresses. Viem clients and generated `entryPoint06Address` / `entryPoint07Address` / `entryPoint08Address` constants from `viem/account-abstraction` match.
+- **Deterministic addresses.** Because both salt and initcode are frozen, every test run produces the same contract addresses. viem's `EntryPoint.addressV06` / `EntryPoint.addressV07` / `EntryPoint.addressV08` constants (`viem/erc4337`) match.
 - **Fast.** ~80 `sendTransaction` calls against a local Anvil complete in a couple of seconds.
 
 Downside: updating a contract means regenerating its creation-call bytes. There is (at time of writing) no in-repo script to regenerate them — new creation-calls are produced outside the repo and checked in as hex.

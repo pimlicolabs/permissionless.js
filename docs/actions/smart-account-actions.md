@@ -2,12 +2,12 @@
 
 Smart account actions convert high-level operations (send transaction, sign message) into UserOperations and submit them to a bundler.
 
-These actions are automatically available on `SmartAccountClient` via the `smartAccountActions` decorator. They can also be imported standalone from `permissionless/actions/smartAccount`.
+These actions are available on `SmartAccountClient` via the `smartAccountActions` decorator. `sendTransaction`, `signMessage`, `signTypedData` and `writeContract` are also exported standalone from the package root; `sendCalls` and `getCallsStatus` come with the decorator only.
 
 ## Import
 
 ```typescript
-import { sendTransaction, signMessage, signTypedData, writeContract } from "permissionless/actions/smartAccount"
+import { sendTransaction, signMessage, signTypedData, writeContract } from "permissionless"
 ```
 
 ---

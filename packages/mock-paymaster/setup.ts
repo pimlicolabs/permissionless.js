@@ -1,4 +1,5 @@
-import { type Address, concat, getContract, parseEther } from "viem"
+import { Client, Contract, http, testActions } from "viem"
+import { type Address, Hex, Value } from "viem/utils"
 import {
     constants,
     getSingletonPaymaster06Address,
@@ -26,12 +27,19 @@ export const deployPaymasters = async ({
     paymasterSigner
 }: {
     anvilRpc: string
-    paymasterSigner: Address
+    paymasterSigner: Address.Address
 }) => {
     const walletClient = await getPaymasterUtilityWallet(anvilRpc)
     const publicClient = await getPublicClient(anvilRpc)
+    const anvilClient = Client.create({ transport: http(anvilRpc) }).extend(
+        testActions({ mode: "anvil" })
+    )
+    const seal = async (hash: Hex.Hex) => {
+        await publicClient.transaction.waitForReceipt({ hash })
+        await anvilClient.block.mine({ blocks: 1 })
+    }
 
-    let nonce = await publicClient.getTransactionCount({
+    let nonce = await publicClient.address.getTransactionCount({
         address: walletClient.account.address
     })
 
@@ -40,60 +48,60 @@ export const deployPaymasters = async ({
     const paymaster08Address = getSingletonPaymaster08Address(paymasterSigner)
 
     // Deploy singleton paymaster 06 if not already deployed.
-    const paymaster06Code = await publicClient.getCode({
+    const paymaster06Code = await publicClient.address.getCode({
         address: paymaster06Address
     })
     if (!paymaster06Code) {
-        const hash = await walletClient.sendTransaction({
+        const hash = await walletClient.transaction.send({
             to: constants.deterministicDeployer,
-            data: concat([
+            data: Hex.concat(
                 constants.create2Salt,
                 getSingletonPaymaster06InitCode(paymasterSigner)
-            ]),
+            ),
             nonce: nonce++
         })
-        await publicClient.waitForTransactionReceipt({ hash })
+        await seal(hash)
     }
 
     // Deploy singleton paymaster 07 if not already deployed.
-    const paymaster07Code = await publicClient.getCode({
+    const paymaster07Code = await publicClient.address.getCode({
         address: paymaster07Address
     })
     if (!paymaster07Code) {
-        const hash = await walletClient.sendTransaction({
+        const hash = await walletClient.transaction.send({
             to: constants.deterministicDeployer,
-            data: concat([
+            data: Hex.concat(
                 constants.create2Salt,
                 getSingletonPaymaster07InitCode(paymasterSigner)
-            ]),
+            ),
             nonce: nonce++
         })
-        await publicClient.waitForTransactionReceipt({ hash })
+        await seal(hash)
     }
 
     // Deploy singleton paymaster 08 if not already deployed.
-    const paymaster08Code = await publicClient.getCode({
+    const paymaster08Code = await publicClient.address.getCode({
         address: paymaster08Address
     })
     if (!paymaster08Code) {
-        const hash = await walletClient.sendTransaction({
+        const hash = await walletClient.transaction.send({
             to: constants.deterministicDeployer,
-            data: concat([
+            data: Hex.concat(
                 constants.create2Salt,
                 getSingletonPaymaster08InitCode(paymasterSigner)
-            ]),
+            ),
             nonce: nonce++
         })
-        await publicClient.waitForTransactionReceipt({ hash })
+        await seal(hash)
     }
 
-    const depositAmount = parseEther("50")
+    const depositAmount = Value.fromEther("50")
 
     // Initialize contract instances and fund if needed.
     // Only check deposit balance if the contract was already deployed.
 
     // Fund paymaster 06 if balance is less than deposit amount.
-    const singletonPaymaster06 = getContract({
+    const singletonPaymaster06 = Contract.from({
         address: paymaster06Address,
         abi: singletonPaymaster06Abi,
         client: walletClient
@@ -107,7 +115,7 @@ export const deployPaymasters = async ({
     }
 
     // Fund paymaster 07 if balance is less than deposit amount.
-    const singletonPaymaster07 = getContract({
+    const singletonPaymaster07 = Contract.from({
         address: paymaster07Address,
         abi: singletonPaymaster07Abi,
         client: walletClient
@@ -121,7 +129,7 @@ export const deployPaymasters = async ({
     }
 
     // Fund paymaster 08 if balance is less than deposit amount.
-    const singletonPaymaster08 = getContract({
+    const singletonPaymaster08 = Contract.from({
         address: paymaster08Address,
         abi: singletonPaymaster08Abi,
         client: walletClient
@@ -138,12 +146,15 @@ export const deployPaymasters = async ({
 export const deployErc20Token = async (anvilRpc: string) => {
     const publicClient = await getPublicClient(anvilRpc)
 
-    if ((await publicClient.getCode({ address: erc20Address })) === undefined) {
+    if (
+        (await publicClient.address.getCode({ address: erc20Address })) ===
+        undefined
+    ) {
         const walletClient = await getPaymasterUtilityWallet(anvilRpc)
 
-        await walletClient.sendTransaction({
+        await walletClient.transaction.send({
             to: "0x4e59b44847b379578588920ca78fbf26c0b4956c",
-            data: concat([create2Salt, erc20Bytecode])
+            data: Hex.concat(create2Salt, erc20Bytecode)
         })
     }
 }
@@ -153,7 +164,7 @@ export const setup = async ({
     paymasterSigner
 }: {
     anvilRpc: string
-    paymasterSigner: Address
+    paymasterSigner: Address.Address
 }) => {
     await deployPaymasters({
         anvilRpc,

@@ -133,9 +133,9 @@ The mock paymaster's initial `setup()` deposits 50 ETH per EntryPoint, which can
 
 ```ts
 const paymasterAddresses = [
-    { entryPoint: entryPoint06Address, paymaster: getSingletonPaymaster06Address(signerAddress) },
-    { entryPoint: entryPoint07Address, paymaster: getSingletonPaymaster07Address(signerAddress) },
-    { entryPoint: entryPoint08Address, paymaster: getSingletonPaymaster08Address(signerAddress) }
+    { entryPoint: EntryPoint.addressV06, paymaster: getSingletonPaymaster06Address(signerAddress) },
+    { entryPoint: EntryPoint.addressV07, paymaster: getSingletonPaymaster07Address(signerAddress) },
+    { entryPoint: EntryPoint.addressV08, paymaster: getSingletonPaymaster08Address(signerAddress) }
 ]
 for (const { entryPoint, paymaster: pm } of paymasterAddresses) {
     await walletClient.writeContract({

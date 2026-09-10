@@ -1,4 +1,4 @@
-import type { Address } from "viem"
+import type { Address } from "viem/utils"
 
 /**
  * Sorts addresses in ascending byte-wise (code unit) order, independent of
@@ -7,7 +7,9 @@ import type { Address } from "viem"
  * da_DK the "aa" digraph sorts after "z"), which would make CREATE2
  * counterfactual address derivation non-deterministic across hosts.
  */
-export const sortAddresses = (addresses: Address[]): Address[] =>
+export const sortAddresses = (
+    addresses: Address.Address[]
+): Address.Address[] =>
     [...addresses].sort((left, right) => {
         const leftAddress = left.toLowerCase()
         const rightAddress = right.toLowerCase()

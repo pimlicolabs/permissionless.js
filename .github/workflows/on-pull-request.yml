@@ -47,9 +47,13 @@ jobs:
         run: bun run build
 
   package-types:
-    name: Package types (node10 + bundler consumers)
+    name: Package types (TypeScript ${{ matrix.typescript-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript-version: ['5.9.3', '6.0.3', '7.0.2']
 
     steps:
       - name: Clone repository
@@ -63,30 +67,65 @@ jobs:
           node-version: "22"
 
       - name: Build permissionless
-        run: bun run build:permissionless:tsgo
+        run: bun run build:permissionless
 
       - name: Pack tarball into fixture
         working-directory: packages/permissionless
         run: npm pack --pack-destination ../../.github/fixtures/type-consumer
 
-      - name: Install fixture dependencies
+      - name: Copy type tests into fixture
+        run: |
+          rsync -a --prune-empty-dirs \
+            --exclude node_modules --exclude _esm --exclude _types \
+            --include '*/' --include '*.test-d.ts' --exclude '*' \
+            packages/permissionless/ .github/fixtures/type-consumer/test-d/
+
+      - name: Install fixture dependencies (TypeScript ${{ matrix.typescript-version }})
         working-directory: .github/fixtures/type-consumer
         run: |
           npm install --no-package-lock
-          npm install --no-package-lock --no-save ./permissionless-*.tgz
+          npm install --no-package-lock --no-save typescript@${{ matrix.typescript-version }} ./permissionless-*.tgz
+          npx tsc --version
 
       - name: Type-check as a node10 consumer
+        # TypeScript 7 removed node10; 6 keeps it behind ignoreDeprecations.
+        if: matrix.typescript-version != '7.0.2'
         working-directory: .github/fixtures/type-consumer
-        run: npx tsc -p tsconfig.node10.json
+        run: npx tsc -p tsconfig.node10.json ${{ startsWith(matrix.typescript-version, '6.') && '--ignoreDeprecations 6.0' || '' }}
+
+      - name: Type-check as a node16 consumer
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.node16.json
+
+      - name: Type-check as a nodenext consumer
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.nodenext.json
 
       - name: Type-check as a bundler consumer
         working-directory: .github/fixtures/type-consumer
         run: npx tsc -p tsconfig.bundler.json
 
-      - name: Lint package publishing metadata (advisory)
+      - name: Run the type tests against the tarball
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.test-d.json
+
+      - name: Declaration probe (TS2742 / TS2883)
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.declaration.json
+
+      - name: Declaration probe, extended clients (./_types/* escape hatch)
+        working-directory: .github/fixtures/type-consumer
+        run: npx tsc -p tsconfig.declaration.extend.json
+
+      - name: Lint package publishing metadata
+        if: matrix.typescript-version == '7.0.2'
         working-directory: packages/permissionless
-        continue-on-error: true
         run: npx --yes publint --strict
+
+      - name: Check published types resolve (ESM-only profile)
+        if: matrix.typescript-version == '7.0.2'
+        working-directory: packages/permissionless
+        run: npx --yes @arethetypeswrong/cli --pack . --profile esm-only
 
   docker-e2e:
     name: E2E-Coverage

@@ -1,0 +1,33 @@
+{
+    // Type-checks the test suite (*.test.ts, *.test-d.ts, the anvil rig) with the repo compiler. Tests import the
+    // package by its public entrypoints; `paths` routes those to the sources so the build output is not required.
+    "extends": "./tsconfig.base.json",
+    "include": [
+        "../packages/permissionless/**/*.test.ts",
+        "../packages/permissionless/**/*.test-d.ts",
+        "../packages/permissionless-test/src/**/*.ts"
+    ],
+    "exclude": [
+        "../packages/permissionless/_esm",
+        "../packages/permissionless/_types"
+    ],
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "noEmit": true,
+        "types": ["bun-types", "vite/client"],
+        "paths": {
+            "permissionless": ["../packages/permissionless/index.ts"],
+            "permissionless/pimlico": [
+                "../packages/permissionless/pimlico/index.ts"
+            ],
+            "permissionless/etherspot": [
+                "../packages/permissionless/etherspot/index.ts"
+            ],
+            "permissionless/experimental": [
+                "../packages/permissionless/experimental/index.ts"
+            ],
+            "@pimlico/mock-paymaster": ["../packages/mock-paymaster/index.ts"]
+        }
+    }
+}

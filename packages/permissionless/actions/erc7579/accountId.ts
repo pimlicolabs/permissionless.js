@@ -1,21 +1,29 @@
-import {
-    type Chain,
-    type Client,
-    ContractFunctionExecutionError,
-    type Transport,
-    decodeFunctionResult,
-    encodeFunctionData
-} from "viem"
-import type {
-    GetSmartAccountParameter,
-    SmartAccount
-} from "viem/account-abstraction"
-import { call, readContract } from "viem/actions"
-import { getAction } from "viem/utils"
+import { Actions, type Chain, ContractError } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import { AbiFunction, type Address } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { GetSmartAccountParameter } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 
-export async function accountId<TSmartAccount extends SmartAccount | undefined>(
-    client: Client<Transport, Chain | undefined, TSmartAccount>,
+const abi = [
+    {
+        name: "accountId",
+        type: "function",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+            {
+                type: "string",
+                name: "accountImplementationId"
+            }
+        ]
+    }
+] as const
+
+export async function accountId<
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
+>(
+    client: BundlerClient.Client<Chain.Chain | undefined, TSmartAccount>,
     args?: GetSmartAccountParameter<TSmartAccount>
 ): Promise<string> {
     let account_ = client.account
@@ -25,67 +33,45 @@ export async function accountId<TSmartAccount extends SmartAccount | undefined>(
     }
 
     if (!account_) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/sendTransaction"
-        })
+        throw new AccountNotFoundError()
     }
 
-    const account = account_ as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
 
     const publicClient = account.client
-
-    const abi = [
-        {
-            name: "accountId",
-            type: "function",
-            stateMutability: "view",
-            inputs: [],
-            outputs: [
-                {
-                    type: "string",
-                    name: "accountImplementationId"
-                }
-            ]
-        }
-    ] as const
 
     try {
         return await getAction(
             publicClient,
-            readContract,
-            "readContract"
+            Actions.contract.read,
+            "contract.read"
         )({
             abi,
             functionName: "accountId",
             address: await account.getAddress()
         })
     } catch (error) {
-        if (error instanceof ContractFunctionExecutionError) {
+        if (error instanceof ContractError.ContractFunctionExecutionError) {
             const { factory, factoryData } = await account.getFactoryArgs()
 
             const result = await getAction(
                 publicClient,
-                call,
+                Actions.call,
                 "call"
             )({
-                factory: factory,
+                factory: factory as Address.Address | undefined,
                 factoryData: factoryData,
                 to: account.address,
-                data: encodeFunctionData({
-                    abi,
+                data: AbiFunction.encodeData(abi, "accountId")
+            })
+
+            if (!result?.data) {
+                throw new ContractError.ContractFunctionZeroDataError({
                     functionName: "accountId"
                 })
-            })
-
-            if (!result || !result.data) {
-                throw new Error("accountId result is empty")
             }
 
-            return decodeFunctionResult({
-                abi,
-                functionName: "accountId",
-                data: result.data
-            })
+            return AbiFunction.decodeResult(abi, "accountId", result.data)
         }
 
         throw error

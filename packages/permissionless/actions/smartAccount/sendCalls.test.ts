@@ -1,6 +1,6 @@
-import { type Hex, zeroAddress } from "viem"
-import { waitForUserOperationReceipt } from "viem/account-abstraction"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { Account } from "viem"
+import { Actions } from "viem/erc4337"
+import { Address, type Hex, Secp256k1 } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -18,7 +18,7 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV08,
         isEip7702Compliant
     }) => {
-        const privateKey = generatePrivateKey()
+        const privateKey = Secp256k1.randomPrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "sendCalls_v06",
             async ({ rpc }) => {
@@ -34,7 +34,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -44,16 +44,19 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toBeTruthy()
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash as Hex
-                })
+                const receipt = await Actions.userOperation.waitForReceipt(
+                    smartClient,
+                    {
+                        hash: userOpHash as Hex.Hex
+                    }
+                )
 
                 expect(receipt).toBeTruthy()
                 expect(receipt.success).toBe(true)
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const txReceipt = await publicClient.getTransactionReceipt({
+                const txReceipt = await publicClient.transaction.getReceipt({
                     hash: receipt.receipt.transactionHash
                 })
 
@@ -77,17 +80,17 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         },
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x1234",
                             value: 0n
                         },
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x5678",
                             value: 0n
                         }
@@ -97,16 +100,19 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toBeTruthy()
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash as Hex
-                })
+                const receipt = await Actions.userOperation.waitForReceipt(
+                    smartClient,
+                    {
+                        hash: userOpHash as Hex.Hex
+                    }
+                )
 
                 expect(receipt).toBeTruthy()
                 expect(receipt.success).toBe(true)
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const txReceipt = await publicClient.getTransactionReceipt({
+                const txReceipt = await publicClient.transaction.getReceipt({
                     hash: receipt.receipt.transactionHash
                 })
 
@@ -120,7 +126,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -135,19 +141,23 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
                     ],
                     authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
                 })
@@ -155,14 +165,17 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toBeTruthy()
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash as Hex
-                })
+                const receipt = await Actions.userOperation.waitForReceipt(
+                    smartClient,
+                    {
+                        hash: userOpHash as Hex.Hex
+                    }
+                )
 
                 expect(receipt).toBeTruthy()
                 expect(receipt.success).toBe(true)
 
-                const txReceipt = await publicClient.getTransactionReceipt({
+                const txReceipt = await publicClient.transaction.getReceipt({
                     hash: receipt.receipt.transactionHash
                 })
 
@@ -173,7 +186,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -183,10 +196,10 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash2).toBeTruthy()
                 expect(userOpHash2).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt2 = await waitForUserOperationReceipt(
+                const receipt2 = await Actions.userOperation.waitForReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2 as Hex
+                        hash: userOpHash2 as Hex.Hex
                     }
                 )
 
@@ -200,7 +213,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -213,19 +226,22 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const authorization = isEip7702Compliant
-                    ? await privateKeyAccount.signAuthorization({
-                          address: (smartClient.account as any).implementation,
+                    ? await privateKeyAccount.signAuthorization?.({
+                          address: (smartClient.account as any).authorization
+                              .address,
                           chainId: smartClient.chain.id,
-                          nonce: await publicClient.getTransactionCount({
-                              address: smartClient.account.address
-                          })
+                          nonce: BigInt(
+                              await publicClient.address.getTransactionCount({
+                                  address: smartClient.account.address
+                              })
+                          )
                       })
                     : undefined
 
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -236,14 +252,17 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash).toBeTruthy()
                 expect(userOpHash).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt = await waitForUserOperationReceipt(smartClient, {
-                    hash: userOpHash as Hex
-                })
+                const receipt = await Actions.userOperation.waitForReceipt(
+                    smartClient,
+                    {
+                        hash: userOpHash as Hex.Hex
+                    }
+                )
 
                 expect(receipt).toBeTruthy()
                 expect(receipt.success).toBe(true)
 
-                const txReceipt = await publicClient.getTransactionReceipt({
+                const txReceipt = await publicClient.transaction.getReceipt({
                     hash: receipt.receipt.transactionHash
                 })
 
@@ -254,7 +273,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -264,10 +283,10 @@ describe.each(getCoreSmartAccounts())(
                 expect(userOpHash2).toBeTruthy()
                 expect(userOpHash2).toMatch(/^0x[a-fA-F0-9]{64}$/)
 
-                const receipt2 = await waitForUserOperationReceipt(
+                const receipt2 = await Actions.userOperation.waitForReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2 as Hex
+                        hash: userOpHash2 as Hex.Hex
                     }
                 )
 
@@ -293,7 +312,7 @@ describe.each(getCoreSmartAccounts())(
                     const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
-                                to: zeroAddress,
+                                to: Address.zero,
                                 data: "0x",
                                 value: 0n
                             }
@@ -302,10 +321,10 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(userOpHash).toBeTruthy()
 
-                    const receipt = await waitForUserOperationReceipt(
+                    const receipt = await Actions.userOperation.waitForReceipt(
                         smartClient,
                         {
-                            hash: userOpHash as Hex
+                            hash: userOpHash as Hex.Hex
                         }
                     )
 
@@ -314,9 +333,11 @@ describe.each(getCoreSmartAccounts())(
 
                     const publicClient = getPublicClient(anvilRpc)
 
-                    const txReceipt = await publicClient.getTransactionReceipt({
-                        hash: receipt.receipt.transactionHash
-                    })
+                    const txReceipt = await publicClient.transaction.getReceipt(
+                        {
+                            hash: receipt.receipt.transactionHash
+                        }
+                    )
 
                     expect(txReceipt).toBeTruthy()
                     expect(txReceipt.status).toBe("success")
@@ -334,7 +355,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -343,10 +364,10 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash2).toBeTruthy()
 
-                const receipt2 = await waitForUserOperationReceipt(
+                const receipt2 = await Actions.userOperation.waitForReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2 as Hex
+                        hash: userOpHash2 as Hex.Hex
                     }
                 )
 
@@ -355,7 +376,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const txReceipt2 = await publicClient.getTransactionReceipt({
+                const txReceipt2 = await publicClient.transaction.getReceipt({
                     hash: receipt2.receipt.transactionHash
                 })
 
@@ -370,7 +391,7 @@ describe.each(getCoreSmartAccounts())(
                 const { anvilRpc } = rpc
 
                 await (async () => {
-                    const privateKeyAccount = privateKeyToAccount(privateKey)
+                    const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                     const smartClient = await getSmartAccountClient({
                         entryPoint: {
@@ -383,20 +404,24 @@ describe.each(getCoreSmartAccounts())(
                     const publicClient = getPublicClient(anvilRpc)
 
                     const authorization = isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
 
                     const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
-                                to: zeroAddress,
+                                to: Address.zero,
                                 data: "0x",
                                 value: 0n
                             }
@@ -406,19 +431,21 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(userOpHash).toBeTruthy()
 
-                    const receipt = await waitForUserOperationReceipt(
+                    const receipt = await Actions.userOperation.waitForReceipt(
                         smartClient,
                         {
-                            hash: userOpHash as Hex
+                            hash: userOpHash as Hex.Hex
                         }
                     )
 
                     expect(receipt).toBeTruthy()
                     expect(receipt.success).toBe(true)
 
-                    const txReceipt = await publicClient.getTransactionReceipt({
-                        hash: receipt.receipt.transactionHash
-                    })
+                    const txReceipt = await publicClient.transaction.getReceipt(
+                        {
+                            hash: receipt.receipt.transactionHash
+                        }
+                    )
 
                     expect(txReceipt).toBeTruthy()
                     expect(txReceipt.status).toBe("success")
@@ -435,7 +462,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -444,10 +471,10 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash2).toBeTruthy()
 
-                const receipt2 = await waitForUserOperationReceipt(
+                const receipt2 = await Actions.userOperation.waitForReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2 as Hex
+                        hash: userOpHash2 as Hex.Hex
                     }
                 )
 
@@ -456,7 +483,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const txReceipt2 = await publicClient.getTransactionReceipt({
+                const txReceipt2 = await publicClient.transaction.getReceipt({
                     hash: receipt2.receipt.transactionHash
                 })
 
@@ -470,7 +497,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 await (async () => {
                     const smartClient = await getSmartAccountClient({
@@ -484,20 +511,24 @@ describe.each(getCoreSmartAccounts())(
                     const publicClient = getPublicClient(anvilRpc)
 
                     const authorization = isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
 
                     const { id: userOpHash } = await sendCalls(smartClient, {
                         calls: [
                             {
-                                to: zeroAddress,
+                                to: Address.zero,
                                 data: "0x",
                                 value: 0n
                             }
@@ -507,19 +538,21 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(userOpHash).toBeTruthy()
 
-                    const receipt = await waitForUserOperationReceipt(
+                    const receipt = await Actions.userOperation.waitForReceipt(
                         smartClient,
                         {
-                            hash: userOpHash as Hex
+                            hash: userOpHash as Hex.Hex
                         }
                     )
 
                     expect(receipt).toBeTruthy()
                     expect(receipt.success).toBe(true)
 
-                    const txReceipt = await publicClient.getTransactionReceipt({
-                        hash: receipt.receipt.transactionHash
-                    })
+                    const txReceipt = await publicClient.transaction.getReceipt(
+                        {
+                            hash: receipt.receipt.transactionHash
+                        }
+                    )
 
                     expect(txReceipt).toBeTruthy()
                     expect(txReceipt.status).toBe("success")
@@ -536,7 +569,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash2 } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -545,10 +578,10 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash2).toBeTruthy()
 
-                const receipt2 = await waitForUserOperationReceipt(
+                const receipt2 = await Actions.userOperation.waitForReceipt(
                     smartClient,
                     {
-                        hash: userOpHash2 as Hex
+                        hash: userOpHash2 as Hex.Hex
                     }
                 )
 
@@ -557,7 +590,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const txReceipt2 = await publicClient.getTransactionReceipt({
+                const txReceipt2 = await publicClient.transaction.getReceipt({
                     hash: receipt2.receipt.transactionHash
                 })
 

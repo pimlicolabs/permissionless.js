@@ -1,6 +1,0 @@
-{
-    "type": "module",
-    "types": "../../_types/accounts/etherspot/index.d.ts",
-    "module": "../../_esm/accounts/etherspot/index.js",
-    "main": "../../_cjs/accounts/etherspot/index.js"
-}

@@ -1,59 +1,42 @@
-import type {
-    Address,
-    Chain,
-    Client,
-    Hex,
-    SignedAuthorization,
-    Transport
-} from "viem"
+import type { Chain } from "viem"
 import {
-    type PaymasterActions,
-    type SmartAccount,
-    sendUserOperation
-} from "viem/account-abstraction"
-import { getAction, parseAccount } from "viem/utils"
+    type BundlerClient,
+    Actions as Erc4337Actions,
+    type SmartAccount
+} from "viem/erc4337"
+import type { Address, Authorization, Hex } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
+import type { Paymaster } from "../../types/utils.js"
 import {
     type EncodeInstallModuleParameters,
     encodeInstallModule
 } from "../../utils/encodeInstallModule.js"
+import { getAction } from "../../utils/getAction.js"
 
 export type InstallModulesParameters<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
 > = EncodeInstallModuleParameters<TSmartAccount> & {
-    authorization?: SignedAuthorization<number> | undefined
+    authorization?: Authorization.Signed | undefined
     maxFeePerGas?: bigint
     maxPriorityFeePerGas?: bigint
     nonce?: bigint
     calls?: readonly {
-        to: Address
+        to: Address.Address
         value?: bigint | undefined
-        data?: Hex | undefined
+        data?: Hex.Hex | undefined
     }[]
-    paymaster?:
-        | Address
-        | true
-        | {
-              /** Retrieves paymaster-related User Operation properties to be used for sending the User Operation. */
-              getPaymasterData?:
-                  | PaymasterActions["getPaymasterData"]
-                  | undefined
-              /** Retrieves paymaster-related User Operation properties to be used for gas estimation. */
-              getPaymasterStubData?:
-                  | PaymasterActions["getPaymasterStubData"]
-                  | undefined
-          }
-        | undefined
-    /** Paymaster context to pass to `getPaymasterData` and `getPaymasterStubData` calls. */
+    /** Paymaster address, Bundler support, or Paymaster hooks. */
+    paymaster?: Address.Address | Paymaster | undefined
+    /** Paymaster context to pass to `getData` and `getStubData` calls. */
     paymasterContext?: unknown | undefined
 }
 
 export async function installModules<
-    TSmartAccount extends SmartAccount | undefined
+    TSmartAccount extends SmartAccount.SmartAccount | undefined
 >(
-    client: Client<Transport, Chain | undefined, TSmartAccount>,
+    client: BundlerClient.Client<Chain.Chain | undefined, TSmartAccount>,
     parameters: InstallModulesParameters<TSmartAccount>
-): Promise<Hex> {
+): Promise<Hex.Hex> {
     const {
         account: account_ = client.account,
         maxFeePerGas,
@@ -67,16 +50,14 @@ export async function installModules<
     } = parameters
 
     if (!account_) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/sendTransaction"
-        })
+        throw new AccountNotFoundError()
     }
 
-    const account = parseAccount(account_) as SmartAccount
+    const account = account_ as SmartAccount.SmartAccount
     return getAction(
         client,
-        sendUserOperation,
-        "sendUserOperation"
+        Erc4337Actions.userOperation.send,
+        "userOperation.send"
     )({
         calls: [
             ...encodeInstallModule({
@@ -85,7 +66,7 @@ export async function installModules<
             }),
             ...(calls ?? [])
         ],
-        paymaster,
+        paymaster: paymaster as BundlerClient.Paymaster | undefined,
         paymasterContext,
         maxFeePerGas,
         maxPriorityFeePerGas,

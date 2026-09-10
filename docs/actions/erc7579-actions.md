@@ -5,41 +5,25 @@ ERC-7579 actions manage modular smart account modules: install, uninstall, and q
 ## Import
 
 ```typescript
-import {
-    erc7579Actions,
-    accountId,
-    installModule,
-    installModules,
-    uninstallModule,
-    uninstallModules,
-    isModuleInstalled,
-    supportsModule,
-    supportsExecutionMode,
-} from "permissionless/actions/erc7579"
-
-import type {
-    Erc7579Actions,
-    InstallModuleParameters,
-    InstallModulesParameters,
-    UninstallModuleParameters,
-    UninstallModulesParameters,
-    IsModuleInstalledParameters,
-    SupportsModuleParameters,
-    SupportsExecutionModeParameters,
-    ModuleType,
-    CallType,
-    ExecutionMode,
-} from "permissionless/actions/erc7579"
+import { Erc7579, erc7579Actions } from "permissionless"
+import type { Erc7579 } from "permissionless"
+// Erc7579.Actions, Erc7579.InstallModuleParameters, Erc7579.InstallModulesParameters,
+// Erc7579.UninstallModuleParameters, Erc7579.UninstallModulesParameters,
+// Erc7579.IsModuleInstalledParameters, Erc7579.SupportsModuleParameters,
+// Erc7579.SupportsExecutionModeParameters, Erc7579.ModuleType, Erc7579.CallType,
+// Erc7579.ExecutionMode
 ```
+
+The actions below are `Erc7579.accountId`, `Erc7579.installModule`, … when called standalone. The namespace also carries the encoding helpers `encodeCalls`, `decodeCalls`, `encodeInstallModule` and `encodeUninstallModule` (see [ERC-7579 Utils](../utils/erc7579-utils.md)).
 
 ## `erc7579Actions` Decorator
 
 Factory returning a decorator that adds all ERC-7579 methods to a client:
 
 ```typescript
-import { erc7579Actions } from "permissionless/actions/erc7579"
+import { erc7579Actions, SmartAccountClient } from "permissionless"
 
-const client = createSmartAccountClient({ ... })
+const client = SmartAccountClient.create({ ... })
     .extend(erc7579Actions())
 ```
 

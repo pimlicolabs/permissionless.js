@@ -1,28 +1,25 @@
-import type {
-    Abi,
-    Chain,
-    Client,
-    ContractFunctionArgs,
-    ContractFunctionName,
-    GetCallsStatusReturnType,
-    Hash,
-    SendCallsReturnType,
-    SendTransactionParameters,
-    Transport,
-    TypedData,
-    WriteContractParameters
-} from "viem"
-import type { SmartAccount } from "viem/account-abstraction"
+import type { Actions, Chain, Client } from "viem"
+import type { BundlerClient, SmartAccount } from "viem/erc4337"
+import type { Abi, Hex, TypedData } from "viem/utils"
 import { getCallsStatus } from "../../actions/smartAccount/getCallsStatus.js"
 import { sendCalls } from "../../actions/smartAccount/sendCalls.js"
 import { sendTransaction } from "../../actions/smartAccount/sendTransaction.js"
 import { signMessage } from "../../actions/smartAccount/signMessage.js"
 import { signTypedData } from "../../actions/smartAccount/signTypedData.js"
-import { writeContract } from "../../actions/smartAccount/writeContract.js"
+import {
+    type WriteContractParameters,
+    writeContract
+} from "../../actions/smartAccount/writeContract.js"
+import type {
+    ContractFunctionArgs,
+    ContractFunctionName
+} from "../../types/utils.js"
 
 export type SmartAccountActions<
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TChain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
 > = {
     /**
      * Creates, signs, and sends a new transaction to the network.
@@ -38,38 +35,25 @@ export type SmartAccountActions<
      * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link SendTransactionReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
+     * import { http } from "viem"
+     * import { sepolia } from "viem/chains"
+     * import { SmartAccountClient } from "permissionless"
      *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
+     * const smartAccountClient = SmartAccountClient.create({
+     *     account,
+     *     chain: sepolia,
+     *     bundlerTransport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
      * })
-     * const hash = await client.sendTransaction({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const hash = await client.sendTransaction({
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
+     * const hash = await smartAccountClient.sendTransaction({
+     *     to: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+     *     value: 1000000000000000000n
      * })
      */
     sendTransaction: <
-        TChainOverride extends Chain | undefined = undefined,
-        accountOverride extends SmartAccount | undefined = undefined,
+        TChainOverride extends Chain.Chain | undefined = undefined,
+        accountOverride extends
+            | SmartAccount.SmartAccount
+            | undefined = undefined,
         calls extends readonly unknown[] = readonly unknown[]
     >(
         args: Parameters<
@@ -81,7 +65,7 @@ export type SmartAccountActions<
                 calls
             >
         >[1]
-    ) => Promise<Hash>
+    ) => Promise<Hex.Hex>
     /**
      * Calculates an Ethereum-specific signature in [EIP-191 format](https://eips.ethereum.org/EIPS/eip-191): `keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))`.
      *
@@ -98,32 +82,7 @@ export type SmartAccountActions<
      * @returns The signed message. {@link SignMessageReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const signature = await client.signMessage({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   message: 'hello world',
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const signature = await client.signMessage({
-     *   message: 'hello world',
-     * })
+     * const signature = await smartAccountClient.signMessage({ message: "hello world" })
      */
     signMessage: (
         args: Parameters<typeof signMessage<TSmartAccount>>[1]
@@ -141,92 +100,35 @@ export type SmartAccountActions<
      * @returns The signed data. {@link SignTypedDataReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const signature = await client.signTypedData({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   domain: {
-     *     name: 'Ether Mail',
-     *     version: '1',
-     *     chainId: 1,
-     *     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-     *   },
-     *   types: {
-     *     Person: [
-     *       { name: 'name', type: 'string' },
-     *       { name: 'wallet', type: 'address' },
-     *     ],
-     *     Mail: [
-     *       { name: 'from', type: 'Person' },
-     *       { name: 'to', type: 'Person' },
-     *       { name: 'contents', type: 'string' },
-     *     ],
-     *   },
-     *   primaryType: 'Mail',
-     *   message: {
-     *     from: {
-     *       name: 'Cow',
-     *       wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+     * const signature = await smartAccountClient.signTypedData({
+     *     domain: {
+     *         name: "Ether Mail",
+     *         version: "1",
+     *         chainId: 1,
+     *         verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
      *     },
-     *     to: {
-     *       name: 'Bob',
-     *       wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+     *     types: {
+     *         Person: [
+     *             { name: "name", type: "string" },
+     *             { name: "wallet", type: "address" }
+     *         ],
+     *         Mail: [
+     *             { name: "from", type: "Person" },
+     *             { name: "to", type: "Person" },
+     *             { name: "contents", type: "string" }
+     *         ]
      *     },
-     *     contents: 'Hello, Bob!',
-     *   },
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const signature = await client.signTypedData({
-     *   domain: {
-     *     name: 'Ether Mail',
-     *     version: '1',
-     *     chainId: 1,
-     *     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-     *   },
-     *   types: {
-     *     Person: [
-     *       { name: 'name', type: 'string' },
-     *       { name: 'wallet', type: 'address' },
-     *     ],
-     *     Mail: [
-     *       { name: 'from', type: 'Person' },
-     *       { name: 'to', type: 'Person' },
-     *       { name: 'contents', type: 'string' },
-     *     ],
-     *   },
-     *   primaryType: 'Mail',
-     *   message: {
-     *     from: {
-     *       name: 'Cow',
-     *       wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-     *     },
-     *     to: {
-     *       name: 'Bob',
-     *       wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-     *     },
-     *     contents: 'Hello, Bob!',
-     *   },
+     *     primaryType: "Mail",
+     *     message: {
+     *         from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
+     *         to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
+     *         contents: "Hello, Bob!"
+     *     }
      * })
      */
     signTypedData: <
-        const TTypedData extends TypedData | { [key: string]: unknown },
-        TPrimaryType extends string
+        const TTypedData extends TypedData.TypedData | Record<string, unknown>,
+        TPrimaryType extends keyof TTypedData | "EIP712Domain"
     >(
         args: Parameters<
             typeof signTypedData<TTypedData, TPrimaryType, TSmartAccount>
@@ -251,39 +153,17 @@ export type SmartAccountActions<
      * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms.html#hash). {@link WriteContractReturnType}
      *
      * @example
-     * import { createWalletClient, custom, parseAbi } from 'viem'
-     * import { mainnet } from 'viem/chains'
+     * import { Abi } from "viem/utils"
      *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
+     * const hash = await smartAccountClient.writeContract({
+     *     address: "0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2",
+     *     abi: Abi.from(["function mint(uint32 tokenId) nonpayable"]),
+     *     functionName: "mint",
+     *     args: [69420]
      * })
-     * const hash = await client.writeContract({
-     *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-     *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-     *   functionName: 'mint',
-     *   args: [69420],
-     * })
-     *
-     * @example
-     * // With Validation
-     * import { createWalletClient, custom, parseAbi } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const { request } = await client.simulateContract({
-     *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-     *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-     *   functionName: 'mint',
-     *   args: [69420],
-     * }
-     * const hash = await client.writeContract(request)
      */
     writeContract: <
-        const TAbi extends Abi | readonly unknown[],
+        const TAbi extends Abi.Abi | readonly unknown[],
         TFunctionName extends ContractFunctionName<
             TAbi,
             "nonpayable" | "payable"
@@ -293,7 +173,7 @@ export type SmartAccountActions<
             "nonpayable" | "payable",
             TFunctionName
         > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
-        TChainOverride extends Chain | undefined = undefined
+        TChainOverride extends Chain.Chain | undefined = undefined
     >(
         args: WriteContractParameters<
             TAbi,
@@ -314,8 +194,10 @@ export type SmartAccountActions<
         >
     >
     sendCalls: <
-        TChainOverride extends Chain | undefined = undefined,
-        accountOverride extends SmartAccount | undefined = undefined,
+        TChainOverride extends Chain.Chain | undefined = undefined,
+        accountOverride extends
+            | SmartAccount.SmartAccount
+            | undefined = undefined,
         calls extends readonly unknown[] = readonly unknown[]
     >(
         args: Parameters<
@@ -327,23 +209,31 @@ export type SmartAccountActions<
                 calls
             >
         >[1]
-    ) => Promise<SendCallsReturnType>
+    ) => Promise<Actions.wallet.sendCalls.ReturnType>
     getCallsStatus: (
         args: Parameters<typeof getCallsStatus<TSmartAccount, TChain>>[1]
-    ) => Promise<GetCallsStatusReturnType>
+    ) => Promise<Actions.wallet.getCallsStatus.ReturnType>
 }
 
 export function smartAccountActions<
-    TChain extends Chain | undefined = Chain | undefined,
-    TSmartAccount extends SmartAccount | undefined = SmartAccount | undefined
+    TChain extends Chain.Chain | undefined = Chain.Chain | undefined,
+    TSmartAccount extends SmartAccount.SmartAccount | undefined =
+        | SmartAccount.SmartAccount
+        | undefined
 >(
-    client: Client<Transport, TChain, TSmartAccount>
+    client_: Pick<Client.Client, "request"> & {
+        account: TSmartAccount
+        chain: TChain
+    }
 ): SmartAccountActions<TChain, TSmartAccount> {
+    const client = client_ as BundlerClient.Client<TChain, TSmartAccount>
     return {
+        // biome-ignore lint/suspicious/noExplicitAny: calls generic widens to readonly unknown[] at the action
         sendTransaction: (args) => sendTransaction(client, args as any),
         signMessage: (args) => signMessage(client, args),
         signTypedData: (args) => signTypedData(client, args),
         writeContract: (args) => writeContract(client, args),
+        // biome-ignore lint/suspicious/noExplicitAny: calls generic widens to readonly unknown[] at the action
         sendCalls: (args) => sendCalls(client, args as any),
         getCallsStatus: (args) => getCallsStatus(client, args)
     }

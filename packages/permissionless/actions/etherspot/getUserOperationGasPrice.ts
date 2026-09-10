@@ -1,7 +1,7 @@
-import type { Account, Chain, Client, Transport } from "viem"
+import type { Client, Transport } from "viem"
 import type { EtherspotBundlerRpcSchema } from "../../types/etherspot.js"
 
-export type GetGasPriceResponseReturnType = {
+export type GetUserOperationGasPriceReturnType = {
     maxFeePerGas: bigint
     maxPriorityFeePerGas: bigint
 }
@@ -9,20 +9,16 @@ export type GetGasPriceResponseReturnType = {
 /**
  * Returns the live gas prices that you can use to send a user operation.
  *
- * @param client that you created using viem's createClient whose transport url is pointing to the Etherspot's bundler.
+ * @param client viem client whose transport points at Etherspot's RPC.
  * @returns maxFeePerGas & maxPriorityFeePerGas
  */
 export const getUserOperationGasPrice = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        EtherspotBundlerRpcSchema
-    >
-): Promise<GetGasPriceResponseReturnType> => {
-    const gasPrice = await client.request({
-        method: "skandha_getGasPrice",
-        params: []
+    client: Pick<Client.Client, "request">
+): Promise<GetUserOperationGasPriceReturnType> => {
+    const request =
+        client.request as Transport.RequestFn<EtherspotBundlerRpcSchema>
+    const gasPrice = await request({
+        method: "skandha_getGasPrice"
     })
 
     return {

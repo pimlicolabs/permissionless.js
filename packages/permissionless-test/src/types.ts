@@ -1,12 +1,12 @@
-import type { Hex } from "viem"
-import type { EntryPointVersion } from "viem/account-abstraction"
+import type { EntryPoint } from "viem/erc4337"
+import type { Hex } from "viem/utils"
 
-export type AAParamType<entryPointVersion extends EntryPointVersion> = {
+export type AAParamType<entryPointVersion extends EntryPoint.Version> = {
     entryPoint: {
         version: entryPointVersion
     }
     anvilRpc: string
     altoRpc: string
     paymasterRpc: string
-    privateKey?: Hex
+    privateKey?: Hex.Hex
 }

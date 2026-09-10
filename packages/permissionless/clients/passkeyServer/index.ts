@@ -1,44 +1,46 @@
-import type {
-    Account,
-    Chain,
-    Client,
-    ClientConfig,
-    Prettify,
-    RpcSchema,
-    Transport
+import {
+    type Account,
+    type Chain,
+    type Transport,
+    Client as viem_Client
 } from "viem"
-import { createClient } from "viem"
+import type { RpcSchema } from "viem/utils"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
+import type { Prettify } from "../../types/utils.js"
 import {
     type PasskeyServerActions,
     passkeyServerActions
 } from "../decorators/passkeyServer.js"
 
-type PasskeyServerClientInner<rpcSchema extends RpcSchema | undefined> = Client<
-    Transport,
-    Chain | undefined,
-    Account | undefined,
-    rpcSchema extends RpcSchema
-        ? [...PasskeyServerRpcSchema, ...rpcSchema]
-        : [...PasskeyServerRpcSchema],
-    PasskeyServerActions
->
+export type { PasskeyServerRpcSchema as Schema } from "../../types/passkeyServer.js"
 
-export type PasskeyServerClient<
-    rpcSchema extends RpcSchema | undefined = undefined
+type ClientInner<rpcSchema extends RpcSchema.Generic | undefined> =
+    viem_Client.Client<
+        Chain.Chain | undefined,
+        Account.Account | undefined,
+        Transport.Transport,
+        undefined,
+        | PasskeyServerRpcSchema
+        | (rpcSchema extends RpcSchema.Generic ? rpcSchema : never),
+        PasskeyServerActions
+    >
+
+export type Client<
+    rpcSchema extends RpcSchema.Generic | undefined = undefined
 > = {
-    [key in keyof PasskeyServerClientInner<rpcSchema>]: PasskeyServerClientInner<rpcSchema>[key]
+    [key in keyof ClientInner<rpcSchema>]: ClientInner<rpcSchema>[key]
 }
 
-export type PasskeyServerClientConfig<
-    rpcSchema extends RpcSchema | undefined = undefined
+export type Config<
+    rpcSchema extends RpcSchema.Generic | undefined = undefined
 > = Prettify<
     Pick<
-        ClientConfig<
-            Transport,
-            Chain | undefined,
-            Account | undefined,
-            rpcSchema
+        viem_Client.create.Options<
+            Chain.Chain | undefined,
+            Account.Account | undefined,
+            Transport.Transport,
+            undefined,
+            rpcSchema extends RpcSchema.Generic ? rpcSchema : never
         >,
         | "account"
         | "cacheTime"
@@ -46,26 +48,24 @@ export type PasskeyServerClientConfig<
         | "key"
         | "name"
         | "pollingInterval"
-        | "rpcSchema"
+        | "schema"
         | "transport"
     >
 >
 
-export function createPasskeyServerClient<
-    rpcSchema extends RpcSchema | undefined = undefined
->(
-    parameters: PasskeyServerClientConfig<rpcSchema>
-): PasskeyServerClient<rpcSchema>
+export function create<
+    rpcSchema extends RpcSchema.Generic | undefined = undefined
+>(parameters: Config<rpcSchema>): Client<rpcSchema>
 
-export function createPasskeyServerClient(
-    parameters: PasskeyServerClientConfig
-): PasskeyServerClient {
+export function create(parameters: Config): Client {
     const { key = "public", name = "Passkey Server Client" } = parameters
 
-    return createClient({
-        ...parameters,
-        key,
-        name,
-        type: "passkeyServerClient"
-    }).extend(passkeyServerActions)
+    return viem_Client
+        .create({
+            ...parameters,
+            key,
+            name,
+            type: "passkeyServerClient"
+        })
+        .extend(passkeyServerActions) as unknown as Client
 }

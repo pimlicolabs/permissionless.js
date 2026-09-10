@@ -1,10 +1,10 @@
-import type { Address, Client } from "viem"
-import { readContract } from "viem/actions"
-import { getAction } from "viem/utils"
+import { Actions, type Client } from "viem"
+import type { Address } from "viem/utils"
+import { getAction } from "../../utils/getAction.js"
 
 export type GetAccountNonceParams = {
-    address: Address
-    entryPointAddress: Address
+    address: Address.Address
+    entryPointAddress: Address.Address
     key?: bigint
 }
 
@@ -13,37 +13,35 @@ export type GetAccountNonceParams = {
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getAccountNonce
  *
- * @param client {@link client} that you created using viem's createPublicClient.
+ * @param client viem client.
  * @param args {@link GetAccountNonceParams} address, entryPoint & key
  * @returns bigint nonce
  *
  * @example
- * import { createPublicClient } from "viem"
- * import { getAccountNonce } from "permissionless/actions"
+ * import { Client, http } from "viem"
+ * import { sepolia } from "viem/chains"
+ * import { EntryPoint } from "viem/erc4337"
+ * import { getAccountNonce } from "permissionless"
  *
- * const client = createPublicClient({
- *      chain: goerli,
- *      transport: http("https://goerli.infura.io/v3/your-infura-key")
- * })
+ * const client = Client.create({ chain: sepolia, transport: http() })
  *
  * const nonce = await getAccountNonce(client, {
- *      address,
- *      entryPoint,
- *      key
+ *     address,
+ *     entryPointAddress: EntryPoint.addressV07,
+ *     key
  * })
- *
- * // Return 0n
+ * // 0n
  */
 export const getAccountNonce = async (
-    client: Client,
+    client: Client.Client,
     args: GetAccountNonceParams
 ): Promise<bigint> => {
     const { address, entryPointAddress, key = BigInt(0) } = args
 
     return await getAction(
         client,
-        readContract,
-        "readContract"
+        Actions.contract.read,
+        "contract.read"
     )({
         address: entryPointAddress,
         abi: [

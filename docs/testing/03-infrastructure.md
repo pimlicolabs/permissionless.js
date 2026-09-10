@@ -70,9 +70,9 @@ The shared rig constructs Alto with:
 ```ts
 const altoInstance = alto({
     entrypoints: [
-        entryPoint06Address,
-        entryPoint07Address,
-        entryPoint08Address
+        EntryPoint.addressV06,
+        EntryPoint.addressV07,
+        EntryPoint.addressV08
     ],
     rpcUrl: anvilRpc,
     executorPrivateKeys: [anvilPrivateKey],

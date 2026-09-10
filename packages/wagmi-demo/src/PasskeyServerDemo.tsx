@@ -1,6 +1,6 @@
 import {
-    type SmartAccountClient,
-    createSmartAccountClient
+    createSmartAccountClient,
+    type SmartAccountClient
 } from "permissionless"
 import {
     type ToKernelSmartAccountReturnType,
@@ -11,13 +11,13 @@ import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { getOxExports } from "permissionless/utils"
 import * as React from "react"
 import {
-    http,
     type Chain,
-    type Hex,
-    type Transport,
     createPublicClient,
     getAddress,
-    parseEther
+    type Hex,
+    http,
+    parseEther,
+    type Transport
 } from "viem"
 import {
     createWebAuthnCredential,

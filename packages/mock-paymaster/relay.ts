@@ -1,26 +1,8 @@
 import * as util from "node:util"
 import type { FastifyReply, FastifyRequest } from "fastify"
-import {
-    http,
-    type Account,
-    type Address,
-    BaseError,
-    type Chain,
-    type PublicClient,
-    type RpcRequestError,
-    type Transport,
-    type WalletClient,
-    getAddress,
-    toHex
-} from "viem"
-import {
-    type BundlerClient,
-    type UserOperation,
-    createBundlerClient,
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address
-} from "viem/account-abstraction"
+import { type Chain, Errors, http } from "viem"
+import { BundlerClient, EntryPoint, type UserOperation } from "viem/erc4337"
+import { Address, Hex } from "viem/utils"
 import { fromZodError } from "zod-validation-error"
 import {
     getSingletonPaymaster06Address,
@@ -32,25 +14,33 @@ import { erc20Address } from "./helpers/erc20-utils.js"
 import {
     InternalBundlerError,
     type JsonRpcSchema,
-    RpcError,
-    ValidationErrors,
     jsonRpcSchema,
+    type PaymasterContext,
     pimlicoGetTokenQuotesSchema,
     pmGetPaymasterData,
     pmGetPaymasterStubDataParamsSchema,
-    pmSponsorUserOperationParamsSchema
+    pmSponsorUserOperationParamsSchema,
+    RpcError,
+    ValidationErrors
 } from "./helpers/schema.js"
 import {
-    type PaymasterMode,
     getChain,
     getPublicClient,
     isTokenSupported,
-    maxBigInt
+    maxBigInt,
+    type PaymasterMode,
+    type PublicClient,
+    type WalletClient
 } from "./helpers/utils.js"
 import {
     getDummyPaymasterData,
     getSignedPaymasterData
 } from "./singletonPaymasters.js"
+
+const createBundlerClient = (chain: Chain.Chain, altoRpc: string) =>
+    BundlerClient.create({ chain, transport: http(altoRpc) })
+
+type Bundler = ReturnType<typeof createBundlerClient>
 
 const handlePmSponsor = async ({
     entryPoint,
@@ -62,21 +52,21 @@ const handlePmSponsor = async ({
     paymasterSigner,
     estimateGas
 }: {
-    entryPoint: Address
-    userOperation: UserOperation
+    entryPoint: Address.Address
+    userOperation: UserOperation.UserOperation
     paymasterMode: PaymasterMode
-    bundler: BundlerClient
-    paymaster: Address
+    bundler: Bundler
+    paymaster: Address.Address
     publicClient: PublicClient
-    paymasterSigner: WalletClient<Transport, Chain, Account>
+    paymasterSigner: WalletClient
     estimateGas: boolean
 }) => {
-    const is06 = entryPoint === entryPoint06Address
+    const is06 = entryPoint === EntryPoint.addressV06
 
     let sponsoredUserOp = {
         ...userOperation,
         ...getDummyPaymasterData({ is06, paymaster, paymasterMode })
-    } as UserOperation
+    } as UserOperation.UserOperation
 
     // User provided gasLimits
     const callGasLimit = userOperation.callGasLimit
@@ -85,15 +75,17 @@ const handlePmSponsor = async ({
 
     if (estimateGas) {
         try {
-            const gasEstimates = await bundler.estimateUserOperationGas({
+            const gasEstimates = await bundler.userOperation.estimateGas({
                 ...sponsoredUserOp,
                 entryPointAddress: entryPoint
-            })
+            } as unknown as Parameters<
+                typeof bundler.userOperation.estimateGas
+            >[0])
 
             sponsoredUserOp = {
                 ...sponsoredUserOp,
                 ...gasEstimates
-            } as UserOperation
+            } as UserOperation.UserOperation
 
             sponsoredUserOp.callGasLimit = maxBigInt(
                 gasEstimates.callGasLimit,
@@ -108,9 +100,9 @@ const handlePmSponsor = async ({
                 verificationGasLimit
             )
         } catch (e: unknown) {
-            if (!(e instanceof BaseError)) throw new InternalBundlerError()
-            const err = e.walk() as RpcRequestError
-            throw err
+            if (!(e instanceof Errors.BaseError))
+                throw new InternalBundlerError()
+            throw e.walk()
         }
     } else if (
         userOperation.preVerificationGas === 1n ||
@@ -124,15 +116,17 @@ const handlePmSponsor = async ({
     }
 
     const result = {
-        preVerificationGas: toHex(sponsoredUserOp.preVerificationGas),
-        callGasLimit: toHex(sponsoredUserOp.callGasLimit),
-        paymasterVerificationGasLimit: toHex(
+        preVerificationGas: Hex.fromNumber(sponsoredUserOp.preVerificationGas),
+        callGasLimit: Hex.fromNumber(sponsoredUserOp.callGasLimit),
+        paymasterVerificationGasLimit: Hex.fromNumber(
             sponsoredUserOp.paymasterVerificationGasLimit || 0
         ),
-        paymasterPostOpGasLimit: toHex(
+        paymasterPostOpGasLimit: Hex.fromNumber(
             sponsoredUserOp.paymasterPostOpGasLimit || 0
         ),
-        verificationGasLimit: toHex(sponsoredUserOp.verificationGasLimit || 0),
+        verificationGasLimit: Hex.fromNumber(
+            sponsoredUserOp.verificationGasLimit || 0
+        ),
         ...(await getSignedPaymasterData({
             publicClient,
             signer: paymasterSigner,
@@ -145,11 +139,11 @@ const handlePmSponsor = async ({
     return result
 }
 
-const validateEntryPoint = (entryPoint: Address) => {
+const validateEntryPoint = (entryPoint: Address.Address) => {
     if (
-        entryPoint !== entryPoint06Address &&
-        entryPoint !== entryPoint07Address &&
-        entryPoint !== entryPoint08Address
+        entryPoint !== EntryPoint.addressV06 &&
+        entryPoint !== EntryPoint.addressV07 &&
+        entryPoint !== EntryPoint.addressV08
     ) {
         throw new RpcError(
             "EntryPoint not supported",
@@ -164,8 +158,8 @@ const handleMethod = async ({
     publicClient,
     bundlerClient
 }: {
-    bundlerClient: BundlerClient
-    paymasterSigner: WalletClient<Transport, Chain, Account>
+    bundlerClient: Bundler
+    paymasterSigner: WalletClient
     publicClient: PublicClient
     parsedBody: JsonRpcSchema
 }) => {
@@ -175,13 +169,13 @@ const handleMethod = async ({
         getSingletonPaymaster08Address(paymasterSigner.account.address)
     ]
 
-    const epToPaymaster: Record<Address, Address> = {
-        [entryPoint06Address]: paymaster06,
-        [entryPoint07Address]: paymaster07,
-        [entryPoint08Address]: paymaster08
+    const epToPaymaster: Record<Address.Address, Address.Address> = {
+        [EntryPoint.addressV06]: paymaster06,
+        [EntryPoint.addressV07]: paymaster07,
+        [EntryPoint.addressV08]: paymaster08
     }
 
-    const getPaymaster = (entryPoint: Address): Address => {
+    const getPaymaster = (entryPoint: Address.Address): Address.Address => {
         const paymaster = epToPaymaster[entryPoint]
         if (paymaster === undefined) {
             throw new RpcError(
@@ -191,6 +185,11 @@ const handleMethod = async ({
         }
         return paymaster
     }
+
+    const request = bundlerClient.request as (args: {
+        method: string
+        params?: unknown
+    }) => Promise<unknown>
 
     if (parsedBody.method === "pm_sponsorUserOperation") {
         const params = pmSponsorUserOperationParamsSchema.safeParse(
@@ -241,13 +240,13 @@ const handleMethod = async ({
             icon: sponsorshipIcon
         }
 
-        const is06 = entryPoint === entryPoint06Address
+        const is06 = entryPoint === EntryPoint.addressV06
 
         const dummyPaymasterGas = is06
             ? {}
             : {
-                  paymasterVerificationGasLimit: toHex(50_000n),
-                  paymasterPostOpGasLimit: toHex(100_000n)
+                  paymasterVerificationGasLimit: Hex.fromNumber(50_000n),
+                  paymasterPostOpGasLimit: Hex.fromNumber(100_000n)
               }
 
         return {
@@ -277,7 +276,7 @@ const handleMethod = async ({
 
         return await getSignedPaymasterData({
             signer: paymasterSigner,
-            userOp: userOperation as UserOperation,
+            userOp: userOperation as UserOperation.UserOperation,
             paymasterMode: getPaymasterMode(data),
             paymaster: getPaymaster(entryPoint),
             publicClient
@@ -312,7 +311,7 @@ const handleMethod = async ({
         const { tokens } = context
 
         const quotes = {
-            [getAddress("0xffffffffffffffffffffffffffffffffffffffff")]: {
+            [Address.checksum("0xffffffffffffffffffffffffffffffffffffffff")]: {
                 exchangeRateNativeToUsd: "0x1a2b3c4d5e6f7890abcdef",
                 exchangeRate: "0x3a7b9c8d6e5f4321",
                 balanceSlot: "0x0",
@@ -341,27 +340,26 @@ const handleMethod = async ({
 
     // If boosted userOp, forward to bundler's boost_sendUserOperation method.
     if (parsedBody.method === "eth_sendUserOperation") {
-        const userOp = parsedBody.params[0] as any
+        const userOp = parsedBody.params[0] as {
+            maxFeePerGas?: string
+            maxPriorityFeePerGas?: string
+        }
 
         const isBoosted =
             userOp.maxFeePerGas === "0x0" &&
             userOp.maxPriorityFeePerGas === "0x0"
 
         if (isBoosted) {
-            return await bundlerClient.request({
-                // @ts-ignore
+            return await request({
                 method: "boost_sendUserOperation",
-                // @ts-ignore
                 params: parsedBody.params
             })
         }
     }
 
     // Forward all other requests to the bundler
-    return await bundlerClient.request({
-        // @ts-ignore
+    return await request({
         method: parsedBody.method,
-        // @ts-ignore
         params: parsedBody.params ?? []
     })
 }
@@ -369,7 +367,7 @@ const handleMethod = async ({
 export const createRpcHandler: (params: {
     altoRpc: string
     anvilRpc: string
-    paymasterSigner: WalletClient<Transport, Chain, Account>
+    paymasterSigner: WalletClient
 }) => (
     request: FastifyRequest,
     _reply: FastifyReply
@@ -381,10 +379,10 @@ export const createRpcHandler: (params: {
 }> = ({ altoRpc, anvilRpc, paymasterSigner }) => {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
         const publicClient = await getPublicClient(anvilRpc)
-        const bundlerClient = createBundlerClient({
-            chain: await getChain(anvilRpc),
-            transport: http(altoRpc)
-        })
+        const bundlerClient = createBundlerClient(
+            await getChain(anvilRpc),
+            altoRpc
+        )
 
         const body = request.body
         const parsedBody = jsonRpcSchema.safeParse(body)
@@ -411,14 +409,12 @@ export const createRpcHandler: (params: {
         } catch (err: unknown) {
             console.log(`JSON.stringify(err): ${util.inspect(err)}`)
 
-            const error = {
-                // biome-ignore lint/suspicious/noExplicitAny:
-                message: (err as any).message,
-                // biome-ignore lint/suspicious/noExplicitAny:
-                data: (err as any).data,
-                // biome-ignore lint/suspicious/noExplicitAny:
-                code: (err as any).code ?? -32603
+            const { message, data, code } = err as {
+                message: string
+                data?: unknown
+                code?: number
             }
+            const error = { message, data, code: code ?? -32603 }
 
             return {
                 jsonrpc: "2.0",
@@ -429,7 +425,7 @@ export const createRpcHandler: (params: {
     }
 }
 
-const getPaymasterMode = (data: any): PaymasterMode => {
+const getPaymasterMode = (data: PaymasterContext): PaymasterMode => {
     if (data !== null && "token" in data) {
         isTokenSupported(data.token)
         return { mode: "erc20", token: data.token }

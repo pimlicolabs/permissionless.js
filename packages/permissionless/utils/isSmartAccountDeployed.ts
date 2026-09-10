@@ -1,11 +1,11 @@
-import type { Address, Client } from "viem"
-import { getCode } from "viem/actions"
+import { Actions, type Client } from "viem"
+import type { Address } from "viem/utils"
 
 export const isSmartAccountDeployed = async (
-    client: Client,
-    address: Address
+    client: Client.Client,
+    address: Address.Address
 ): Promise<boolean> => {
-    const contractCode = await getCode(client, {
+    const contractCode = await Actions.address.getCode(client, {
         address: address
     })
 

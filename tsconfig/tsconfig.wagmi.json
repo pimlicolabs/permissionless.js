@@ -1,10 +1,12 @@
 {
-    // This file is used to compile the for cjs and esm (see package.json build scripts). It should exclude all test files.
+    // This file is used to compile for esm (see package.json build scripts). It should exclude all test files.
     "extends": "./tsconfig.base.json",
     "include": [
         "../packages/wagmi"
     ],
     "exclude": [
+        "../packages/wagmi/_esm",
+        "../packages/wagmi/_types",
         "../packages/wagmi/node_modules",
         "../packages/wagmi/**/*.test.ts",
         "../packages/wagmi/**/*.test-d.ts",

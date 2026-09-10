@@ -1,20 +1,11 @@
+/// <reference types="vite/client" />
 import { paymaster } from "@pimlico/mock-paymaster"
 import getPort from "get-port"
 import { anvil } from "prool/instances"
-import {
-    http,
-    createTestClient,
-    createWalletClient,
-    custom,
-    parseEther
-} from "viem"
-import {
-    entryPoint06Address,
-    entryPoint07Address,
-    entryPoint08Address
-} from "viem/account-abstraction"
-import { privateKeyToAccount } from "viem/accounts"
-import { foundry } from "viem/chains"
+import { Account, Client, custom, http, testActions, walletActions } from "viem"
+import { anvil as anvilChain } from "viem/chains"
+import { EntryPoint } from "viem/erc4337"
+import { Value } from "viem/utils"
 import { test } from "vitest"
 import {
     getSingletonPaymaster06Address,
@@ -27,7 +18,7 @@ import { alto } from "../mock-aa-infra/alto/instance"
 const anvilPrivateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
-const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as string | undefined
+const forkUrl = import.meta.env.VITE_FORK_RPC_URL as string | undefined
 
 /**
  * Creates a bundler transport that automatically calls
@@ -35,12 +26,11 @@ const forkUrl = (import.meta as any).env.VITE_FORK_RPC_URL as string | undefined
  * This makes bundling deterministic and near-instant.
  */
 function createAutoBundleTransport(altoRpc: string, anvilRpc: string) {
-    const baseTransport = http(altoRpc)
+    const transport = http(altoRpc).setup({ chain: anvilChain })
 
     return custom({
         async request({ method, params }) {
-            const transport = baseTransport({ chain: foundry })
-            const result = await transport.request({ method, params } as any)
+            const result = await transport.request({ method, params })
 
             // After a user op is submitted, immediately bundle + mine
             if (method === "eth_sendUserOperation") {
@@ -55,12 +45,11 @@ function createAutoBundleTransport(altoRpc: string, anvilRpc: string) {
                     })
                 })
                 // Mine a block so the bundle tx is included
-                const testClient = createTestClient({
-                    mode: "anvil",
-                    chain: foundry,
+                const testClient = Client.create({
+                    chain: anvilChain,
                     transport: http(anvilRpc)
-                })
-                await testClient.mine({ blocks: 1 })
+                }).extend(testActions({ mode: "anvil" }))
+                await testClient.block.mine({ blocks: 1 })
             }
 
             return result
@@ -96,13 +85,13 @@ async function getSharedRig(): Promise<SharedRig> {
 
         const anvilInstance = forkUrl
             ? anvil({
-                  chainId: foundry.id,
+                  chainId: anvilChain.id,
                   port: anvilPort,
                   hardfork: "Prague",
                   forkUrl
               })
             : anvil({
-                  chainId: foundry.id,
+                  chainId: anvilChain.id,
                   hardfork: "Prague",
                   port: anvilPort
               })
@@ -115,9 +104,9 @@ async function getSharedRig(): Promise<SharedRig> {
 
         const altoInstance = alto({
             entrypoints: [
-                entryPoint06Address,
-                entryPoint07Address,
-                entryPoint08Address
+                EntryPoint.addressV06,
+                EntryPoint.addressV07,
+                EntryPoint.addressV08
             ],
             rpcUrl: anvilRpc,
             executorPrivateKeys: [anvilPrivateKey],
@@ -138,14 +127,14 @@ async function getSharedRig(): Promise<SharedRig> {
         await paymasterInstance.start()
 
         // Top up paymaster deposits so they don't run out across many tests
-        const paymasterSignerAddress = privateKeyToAccount(
+        const paymasterSignerAddress = Account.fromPrivateKey(
             "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         ).address
-        const walletClient = createWalletClient({
-            chain: foundry,
-            account: privateKeyToAccount(anvilPrivateKey),
+        const walletClient = Client.create({
+            chain: anvilChain,
+            account: Account.fromPrivateKey(anvilPrivateKey),
             transport: http(anvilRpc)
-        })
+        }).extend(walletActions())
         const depositToAbi = [
             {
                 name: "depositTo",
@@ -157,31 +146,31 @@ async function getSharedRig(): Promise<SharedRig> {
         ] as const
         const paymasterAddresses = [
             {
-                entryPoint: entryPoint06Address,
+                entryPoint: EntryPoint.addressV06,
                 paymaster: getSingletonPaymaster06Address(
                     paymasterSignerAddress
                 )
             },
             {
-                entryPoint: entryPoint07Address,
+                entryPoint: EntryPoint.addressV07,
                 paymaster: getSingletonPaymaster07Address(
                     paymasterSignerAddress
                 )
             },
             {
-                entryPoint: entryPoint08Address,
+                entryPoint: EntryPoint.addressV08,
                 paymaster: getSingletonPaymaster08Address(
                     paymasterSignerAddress
                 )
             }
         ]
         for (const { entryPoint, paymaster: pm } of paymasterAddresses) {
-            await walletClient.writeContract({
+            await walletClient.contract.write({
                 address: entryPoint,
                 abi: depositToAbi,
                 functionName: "depositTo",
                 args: [pm],
-                value: parseEther("1000")
+                value: Value.fromEther("1000")
             })
         }
 
@@ -239,15 +228,14 @@ export const testWithRpc = test.extend<{
         // Reset base fee to prevent inflation from accumulated mined blocks.
         // Without this, base fee grows with each non-empty block across tests,
         // causing "AA31 paymaster deposit too low" errors.
-        const testClient = createTestClient({
-            mode: "anvil",
-            chain: foundry,
+        const testClient = Client.create({
+            chain: anvilChain,
             transport: http(rig.anvilRpc)
-        })
-        await testClient.setNextBlockBaseFeePerGas({
+        }).extend(testActions({ mode: "anvil" }))
+        await testClient.block.setNextBaseFeePerGas({
             baseFeePerGas: 1000000000n
         })
-        await testClient.mine({ blocks: 1 })
+        await testClient.block.mine({ blocks: 1 })
 
         await use({
             anvilRpc: rig.anvilRpc,

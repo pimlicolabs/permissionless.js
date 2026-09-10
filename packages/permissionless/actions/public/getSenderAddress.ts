@@ -1,17 +1,12 @@
+import { Actions, type Client, type Errors, RpcError } from "viem"
+import { AbiConstructor, AbiParameters, type Address, Hex } from "viem/utils"
 import {
-    type Address,
-    BaseError,
-    type Client,
-    type Hex,
-    type OneOf,
-    type Prettify,
-    concat,
-    decodeAbiParameters,
-    encodeDeployData
-} from "viem"
-
-import { call } from "viem/actions"
-import { getAction } from "viem/utils"
+    InitCodeRequiredError,
+    InvalidEntryPointError,
+    SenderAddressNotFoundError
+} from "../../errors/entryPoint.js"
+import type { OneOf, Prettify } from "../../types/utils.js"
+import { getAction } from "../../utils/getAction.js"
 
 // https://github.com/pimlicolabs/contracts/blob/80277d0de609e6b5fb4cedeeb1fb9a023caed59f/src/GetSenderAddressHelper.sol
 const GetSenderAddressHelperByteCode =
@@ -34,96 +29,83 @@ const GetSenderAddressHelperAbi = [
         stateMutability: "payable",
         type: "constructor"
     }
-]
+] as const
 
 export type GetSenderAddressParams = OneOf<
     | {
-          initCode: Hex
-          entryPointAddress: Address
+          initCode: Hex.Hex
+          entryPointAddress: Address.Address
           factory?: never
           factoryData?: never
       }
     | {
-          entryPointAddress: Address
-          factory: Address
-          factoryData: Hex
+          entryPointAddress: Address.Address
+          factory: Address.Address
+          factoryData: Hex.Hex
           initCode?: never
       }
 >
-
-export class InvalidEntryPointError extends BaseError {
-    override name = "InvalidEntryPointError"
-
-    constructor({
-        cause,
-        entryPointAddress
-    }: { cause?: BaseError; entryPointAddress?: Address } = {}) {
-        super(
-            `The entry point address (\`entryPoint\`${
-                entryPointAddress ? ` = ${entryPointAddress}` : ""
-            }) is not a valid entry point. getSenderAddress did not revert with a SenderAddressResult error.`,
-            {
-                cause
-            }
-        )
-    }
-}
 
 /**
  * Returns the address of the account that will be deployed with the given init code.
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getSenderAddress
  *
- * @param client {@link Client} that you created using viem's createPublicClient.
+ * @param client viem client.
  * @param args {@link GetSenderAddressParams} initCode & entryPoint
  * @returns Sender's Address
  *
  * @example
- * import { createPublicClient } from "viem"
- * import { getSenderAddress } from "permissionless/actions"
+ * import { Client, http } from "viem"
+ * import { sepolia } from "viem/chains"
+ * import { EntryPoint } from "viem/erc4337"
+ * import { getSenderAddress } from "permissionless"
  *
- * const publicClient = createPublicClient({
- *      chain: goerli,
- *      transport: http("https://goerli.infura.io/v3/your-infura-key")
+ * const client = Client.create({ chain: sepolia, transport: http() })
+ *
+ * const senderAddress = await getSenderAddress(client, {
+ *     factory,
+ *     factoryData,
+ *     entryPointAddress: EntryPoint.addressV07
  * })
- *
- * const senderAddress = await getSenderAddress(publicClient, {
- *      initCode,
- *      entryPoint
- * })
- *
- * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
+ * // "0x7a88a206ba40b37a8c07a2b5688cf8b287318b63"
  */
 export const getSenderAddress = async (
-    client: Client,
+    client: Client.Client,
     args: Prettify<GetSenderAddressParams>
-): Promise<Address> => {
+): Promise<Address.Address> => {
     const { initCode, entryPointAddress, factory, factoryData } = args
 
-    if (!initCode && !factory && !factoryData) {
-        throw new Error(
-            "Either `initCode` or `factory` and `factoryData` must be provided"
-        )
-    }
+    if (!initCode && !factory && !factoryData) throw new InitCodeRequiredError()
 
     const formattedInitCode =
-        initCode || concat([factory as Hex, factoryData as Hex])
+        initCode || Hex.concat(factory as Hex.Hex, factoryData as Hex.Hex)
 
     const { data } = await getAction(
         client,
-        call,
+        Actions.call,
         "call"
     )({
-        data: encodeDeployData({
-            abi: GetSenderAddressHelperAbi,
-            bytecode: GetSenderAddressHelperByteCode,
-            args: [entryPointAddress, formattedInitCode]
-        })
+        data: AbiConstructor.encode(
+            AbiConstructor.fromAbi(GetSenderAddressHelperAbi),
+            {
+                bytecode: GetSenderAddressHelperByteCode,
+                args: [entryPointAddress, formattedInitCode]
+            }
+        )
+    }).catch((error: Errors.BaseError) => {
+        const reverted = error.walk?.(
+            (cause) => cause instanceof RpcError.ExecutionRevertedError
+        ) as RpcError.ExecutionRevertedError | null | undefined
+        if (reverted?.details?.includes("getSenderAddress"))
+            throw new InvalidEntryPointError({
+                cause: error,
+                entryPointAddress
+            })
+        throw error
     })
 
-    if (!data) {
-        throw new Error("Failed to get sender address")
-    }
+    if (!data) throw new SenderAddressNotFoundError({ entryPointAddress })
 
-    return decodeAbiParameters([{ type: "address" }], data)[0]
+    return AbiParameters.decode([{ type: "address" }], data)[0]
 }

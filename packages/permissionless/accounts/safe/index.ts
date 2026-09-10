@@ -1,14 +1,11 @@
-import { signUserOperation } from "./signUserOperation.js"
-import { toSafeSmartAccount } from "./toSafeSmartAccount.js"
-
-export const SafeSmartAccount = {
-    toSafeSmartAccount,
+export {
+    from,
+    type Implementation,
+    type Parameters,
+    type ReturnType,
+    type Version
+} from "./from.js"
+export {
+    type SignUserOperationParameters,
     signUserOperation
-}
-
-export type {
-    SafeSmartAccountImplementation,
-    SafeVersion,
-    ToSafeSmartAccountParameters,
-    ToSafeSmartAccountReturnType
-} from "./toSafeSmartAccount.js"
+} from "./signUserOperation.js"

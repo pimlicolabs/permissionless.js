@@ -1,7 +1,8 @@
 import { resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import { defineInstance, toArgs } from "prool"
 import { execa } from "prool/processes"
-import type { Hex } from "viem"
+import type { Hex } from "viem/utils"
 
 export type AltoParameters = {
     /**
@@ -19,7 +20,7 @@ export type AltoParameters = {
     /**
      * Address of the `BundleBulker` contract.
      */
-    bundleBulkerAddress?: Hex | undefined
+    bundleBulkerAddress?: Hex.Hex | undefined
     /**
      * Set if the bundler bundle user operations automatically or only when calling `debug_bundler_sendBundleNow`.
      * @default "auto"
@@ -54,15 +55,15 @@ export type AltoParameters = {
     /**
      * EntryPoint contract addresses.
      */
-    entrypoints: readonly Hex[]
+    entrypoints: readonly Hex.Hex[]
     /**
      * Address of the EntryPoint simulations contract.
      */
-    entrypointSimulationContract?: Hex | undefined
+    entrypointSimulationContract?: Hex.Hex | undefined
     /**
      * Private keys of the executor accounts.
      */
-    executorPrivateKeys?: readonly Hex[]
+    executorPrivateKeys?: readonly Hex.Hex[]
     /**
      * Interval to refill the signer balance (seconds).
      * @default 1200
@@ -184,7 +185,7 @@ export type AltoParameters = {
     /**
      * Address of the `PerOpInflator` contract.
      */
-    perOpInflatorAddress?: Hex | undefined
+    perOpInflatorAddress?: Hex.Hex | undefined
     /**
      * Polling interval for querying for new blocks (ms).
      * @default 1000
@@ -262,7 +263,7 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
                 if (args.binary) return [args.binary]
                 const libPath =
                     "resolve" in import.meta
-                        ? import.meta.resolve("@pimlico/alto").split("file:")[1]
+                        ? fileURLToPath(import.meta.resolve("@pimlico/alto"))
                         : require.resolve("@pimlico/alto")
                 return ["node", resolve(libPath, "../cli/alto.js")]
             })()
@@ -272,7 +273,7 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
                 {
                     ...options,
                     // Resolve when the process is listening via a "Server listening at" message.
-                    resolver({ process, reject, resolve }) {
+                    resolver({ process, resolve }) {
                         process.stdout.on("data", (data) => {
                             const message = data.toString()
                             if (message.includes("Server listening at"))

@@ -1,5 +1,5 @@
-import { type Hex, zeroAddress } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { Account } from "viem"
+import { Address, type Hex, Secp256k1 } from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -18,12 +18,10 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV08,
         isEip7702Compliant
     }) => {
-        const privateKey = generatePrivateKey()
+        const privateKey = Secp256k1.randomPrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "getCallsStatus_v06",
             async ({ rpc }) => {
-                const { anvilRpc } = rpc
-
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
                         version: "0.6"
@@ -34,7 +32,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -43,8 +41,8 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash).toBeTruthy()
 
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash as Hex
+                await smartClient.userOperation.waitForReceipt({
+                    hash: userOpHash as Hex.Hex
                 })
 
                 const status = await getCallsStatus(smartClient, {
@@ -60,7 +58,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(status.statusCode).toBe(200)
                 expect(status.receipts).toBeDefined()
                 expect(status.receipts?.length).toBeGreaterThan(0)
-                expect(status.receipts?.[0].status).toBe("success")
+                expect(status.receipts?.[0]?.status).toBe("success")
             }
         )
 
@@ -77,7 +75,7 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -106,7 +104,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -121,27 +119,31 @@ describe.each(getCoreSmartAccounts())(
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
                     ],
                     authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
                 })
 
                 expect(userOpHash).toBeTruthy()
 
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash as Hex
+                await smartClient.userOperation.waitForReceipt({
+                    hash: userOpHash as Hex.Hex
                 })
 
                 const status = await getCallsStatus(smartClient, {
@@ -157,7 +159,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(status.statusCode).toBe(200)
                 expect(status.receipts).toBeDefined()
                 expect(status.receipts?.length).toBeGreaterThan(0)
-                expect(status.receipts?.[0].status).toBe("success")
+                expect(status.receipts?.[0]?.status).toBe("success")
             }
         )
 
@@ -166,7 +168,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -179,19 +181,22 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const authorization = isEip7702Compliant
-                    ? await privateKeyAccount.signAuthorization({
-                          address: (smartClient.account as any).implementation,
+                    ? await privateKeyAccount.signAuthorization?.({
+                          address: (smartClient.account as any).authorization
+                              .address,
                           chainId: smartClient.chain.id,
-                          nonce: await publicClient.getTransactionCount({
-                              address: smartClient.account.address
-                          })
+                          nonce: BigInt(
+                              await publicClient.address.getTransactionCount({
+                                  address: smartClient.account.address
+                              })
+                          )
                       })
                     : undefined
 
                 const { id: userOpHash } = await sendCalls(smartClient, {
                     calls: [
                         {
-                            to: zeroAddress,
+                            to: Address.zero,
                             data: "0x",
                             value: 0n
                         }
@@ -201,8 +206,8 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(userOpHash).toBeTruthy()
 
-                await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash as Hex
+                await smartClient.userOperation.waitForReceipt({
+                    hash: userOpHash as Hex.Hex
                 })
 
                 const status = await getCallsStatus(smartClient, {
@@ -218,7 +223,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(status.statusCode).toBe(200)
                 expect(status.receipts).toBeDefined()
                 expect(status.receipts?.length).toBeGreaterThan(0)
-                expect(status.receipts?.[0].status).toBe("success")
+                expect(status.receipts?.[0]?.status).toBe("success")
             }
         )
 
@@ -246,7 +251,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(status.atomic).toBe(true)
                 expect(status.status).toBe("pending")
                 expect(status.statusCode).toBe(100)
-                expect(status.receipts).toBeUndefined()
+                expect(status.receipts).toEqual([])
             }
         )
     }

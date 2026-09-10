@@ -7,13 +7,13 @@ import type {
 } from "@tanstack/react-query"
 import {
     type Config,
+    ConnectorNotConnectedError,
+    getConnectorClient,
     type ResolvedRegister,
     type WaitForTransactionReceiptErrorType,
     type WaitForTransactionReceiptReturnType,
-    getConnectorClient,
     waitForTransactionReceipt
 } from "@wagmi/core"
-import { ConnectorNotConnectedError } from "@wagmi/core"
 import type {
     GetCallsStatusData,
     GetCallsStatusErrorType,
@@ -23,27 +23,27 @@ import type {
 import type { WaitForTransactionReceiptData } from "@wagmi/core/query"
 import {
     type Hash,
+    isHash,
     type Prettify,
+    stringify,
     WaitForTransactionReceiptTimeoutError,
     type WalletCapabilities,
-    type WalletSendCallsParameters,
-    isHash,
-    stringify
+    type WalletSendCallsParameters
 } from "viem"
 import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
 import {
     type GetCallsStatusReturnType,
-    type ShowCallsStatusErrorType,
-    getCallsStatus
+    getCallsStatus,
+    type ShowCallsStatusErrorType
 } from "viem/experimental"
 import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
     type UseQueryParameters,
     type UseQueryReturnType,
+    useQuery,
     type WaitForTransactionReceiptOptions,
-    type WaitForTransactionReceiptQueryFnData,
-    useQuery
+    type WaitForTransactionReceiptQueryFnData
 } from "wagmi/query"
 import { observe } from "../utils/observe.js"
 import { useAvailableCapabilities } from "./useAvailableCapabilities.js"

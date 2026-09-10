@@ -1,20 +1,15 @@
 import {
+    Account,
+    Actions,
+    Client,
     http,
-    type Address,
-    type PublicClient,
-    createPublicClient,
-    createTestClient,
-    createWalletClient,
-    parseEther
+    publicActions,
+    testActions,
+    walletActions
 } from "viem"
-import { mnemonicToAccount } from "viem/accounts"
-import { sendTransaction } from "viem/actions"
-import { foundry } from "viem/chains"
+import { anvil } from "viem/chains"
+import { type Address, Value } from "viem/utils"
 import {
-    BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
-    BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-    BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
-    BICONOMY_FACTORY_CREATECALL,
     BICONOMY_SINGLETON_FACTORY_BYTECODE,
     ENTRY_POINT_V06_CREATECALL,
     ENTRY_POINT_V07_CREATECALL,
@@ -89,632 +84,558 @@ const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
 const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
 
-const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
+const verifyDeployed = async (
+    client: Client.Client,
+    mine: () => Promise<unknown>,
+    addresses: Address.Address[]
+) => {
     for (const address of addresses) {
-        const bytecode = await client.getCode({
-            address
-        })
-
-        if (bytecode === undefined) {
-            console.log(`CONTRACT ${address} NOT DEPLOYED!!!`)
-            process.exit(1)
+        for (let attempt = 1; ; attempt++) {
+            if (await Actions.address.getCode(client, { address })) {
+                if (attempt > 1) {
+                    console.log(
+                        `CONTRACT ${address} visible after ${attempt} getCode attempts`
+                    )
+                }
+                break
+            }
+            if (attempt === 10) {
+                console.log(`CONTRACT ${address} NOT DEPLOYED!!!`)
+                process.exit(1)
+            }
+            await mine()
+            await new Promise((resolve) => setTimeout(resolve, 100))
         }
     }
 }
 
 export const setupContracts = async (rpc: string) => {
-    const walletClient = createWalletClient({
-        account: mnemonicToAccount(
+    const walletClient = Client.create({
+        account: Account.fromMnemonic(
             "test test test test test test test test test test test junk"
         ),
-        chain: foundry,
+        chain: anvil,
         transport: http(rpc)
-    })
+    }).extend(walletActions())
 
-    const anvilClient = createTestClient({
-        transport: http(rpc),
-        mode: "anvil"
-    })
-
-    const client = createPublicClient({
+    const anvilClient = Client.create({
         transport: http(rpc)
-    })
+    }).extend(testActions({ mode: "anvil" }))
 
-    let nonce = await client.getTransactionCount({
-        address: walletClient.account.address
-    })
+    const client = Client.create({
+        transport: http(rpc)
+    }).extend(publicActions())
 
-    await anvilClient.setCode({
+    const drain = async () => {
+        for (let i = 0; i < 64; i++) {
+            if ((await anvilClient.txpool.getStatus()).pending === 0) return
+            await anvilClient.block.mine({ blocks: 1 })
+        }
+    }
+
+    const send = async (
+        args: Parameters<typeof Actions.transaction.send>[1]
+    ) => {
+        const hash = await Actions.transaction.send(walletClient, args)
+        await drain()
+        const { status } = await client.transaction.getReceipt({ hash })
+        if (status !== "success")
+            throw new Error(`${hash} to ${args.to} ${status}`)
+    }
+
+    await anvilClient.address.setCode({
         address: SAFE_SINGLETON_FACTORY,
         bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
     })
 
-    const deployHashes = await Promise.all([
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ENTRY_POINT_V08_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SIMPLE_ACCOUNT_IMPLEMENTATION_V08_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ENTRY_POINT_V07_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ENTRY_POINT_V06_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_V06_MODULE_SETUP_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_V06_MODULE_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_V07_MODULE_SETUP_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: SAFE_V07_MODULE_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_ACCOUNT_V2_3_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_ACCOUNT_V2_4_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_ACCOUNT_V2_1_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V06_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_META_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_1_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_1_WEB_AUTHN_VALIDATOR_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_2_ACCOUNT_V3_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_2_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_3_ACCOUNT_V3_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: KERNEL_V07_V3_3_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_FACTORY_V06_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_ACCOUNT_FACET_CREATE_CALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: TRUST_DEFAULT_FALLBACK_HANDLER,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_SCHEMA_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_RESOLVER_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_SCHEMA_PROXY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_REGISTRY_RESOLVER_PROXY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_ONE_FIVE_PROXY_CONTRACT,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_ONE_FIVE_SINGLETON_ADDRESS,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_ONE_FIVE_SEND_ADDRESS,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: THIRDWEB_FACTORY_V06_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: THIRDWEB_FACTORY_V07_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: NEXUS_BOOTSTRAP_LIB_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-    ])
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ENTRY_POINT_V08_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SIMPLE_ACCOUNT_FACTORY_V08_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SIMPLE_ACCOUNT_IMPLEMENTATION_V08_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ENTRY_POINT_V07_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SIMPLE_ACCOUNT_FACTORY_V07_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ENTRY_POINT_V06_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SIMPLE_ACCOUNT_FACTORY_V06_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SAFE_V06_MODULE_SETUP_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SAFE_V06_MODULE_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SAFE_V07_MODULE_SETUP_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: SAFE_V07_MODULE_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_REGISTRY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_ECDSA_VALIDATOR_V2_2_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_ACCOUNT_V2_2_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_ACCOUNT_V2_3_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_ACCOUNT_V2_4_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_ACCOUNT_V2_1_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V06_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_ECDSA_VALIDATOR_V3_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_ACCOUNT_V3_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_META_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_1_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_1_ECDSA_VALIDATOR_V3_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_1_ACCOUNT_V3_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_1_WEB_AUTHN_VALIDATOR_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_2_ACCOUNT_V3_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_2_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_3_ACCOUNT_V3_LOGIC_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: KERNEL_V07_V3_3_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_FACTORY_V06_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_SECP256K1_VERIFICATION_FACET_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_ACCOUNT_FACET_CREATE_CALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DIAMOND_CUT_FACET_CREATE_CALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_TOKEN_RECEIVER_FACET_CREATE_CALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DIAMOND_LOUPE_FACET_CREATE_CALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: TRUST_DEFAULT_FALLBACK_HANDLER,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_REGISTRY_SCHEMA_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_REGISTRY_RESOLVER_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_REGISTRY_SCHEMA_PROXY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_REGISTRY_RESOLVER_PROXY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_ONE_FIVE_PROXY_CONTRACT,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_ONE_FIVE_SINGLETON_ADDRESS,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_ONE_FIVE_SEND_ADDRESS,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_ONE_FIVE_MULTI_SEND_ADDRESS,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: THIRDWEB_FACTORY_V06_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: THIRDWEB_FACTORY_V07_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: NEXUS_BOOTSTRAP_LIB_CREATECALL,
+        gas: 15_000_000n
+    })
 
-    await Promise.all([
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_PROXY_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_SINGLETON_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_MULTI_SEND_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ETHERSPOT_WALLET_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ETHERSPOT_IMPLEMENTATION,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ETHERSPOT_BOOTSTRAP_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: DETERMINISTIC_DEPLOYER,
-            data: ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_MODULE_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: SAFE_SINGLETON_FACTORY,
-            data: SAFE_7579_LAUNCHPAD_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-    ])
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_PROXY_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_SINGLETON_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_MULTI_SEND_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_MULTI_SEND_CALL_ONLY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ETHERSPOT_WALLET_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ETHERSPOT_IMPLEMENTATION,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ETHERSPOT_BOOTSTRAP_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: DETERMINISTIC_DEPLOYER,
+        data: ETHERSPOT_MULTIPLE_OWNER_ECDSA_VALIDATOR_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_MODULE_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: SAFE_SINGLETON_FACTORY,
+        data: SAFE_7579_LAUNCHPAD_CREATECALL,
+        gas: 15_000_000n
+    })
 
-    await anvilClient.setCode({
+    await anvilClient.address.setCode({
         address: BICONOMY_SINGLETON_FACTORY,
         bytecode: BICONOMY_SINGLETON_FACTORY_BYTECODE
     })
 
-    await Promise.all([
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_ECDSA_OWNERSHIP_REGISTRY_MODULE_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_ACCOUNT_V2_LOGIC_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: BICONOMY_DEFAULT_FALLBACK_HANDLER_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_K1_VALIDATOR_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_ACCOUNT_IMPLEMENTATION_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        }),
-        walletClient.sendTransaction({
-            to: BICONOMY_SINGLETON_FACTORY,
-            data: NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
-            gas: 15_000_000n,
-            nonce: nonce++
-        })
-    ])
-
-    await Promise.all(
-        deployHashes.map((hash) =>
-            client.waitForTransactionReceipt({ hash, pollingInterval: 50 })
-        )
-    )
-
-    const rhinestoneAttester = "0x000000333034E9f539ce08819E12c1b8Cb29084d"
-    await anvilClient.setBalance({
-        address: rhinestoneAttester,
-        value: parseEther("100")
+    await send({
+        to: BICONOMY_SINGLETON_FACTORY,
+        data: NEXUS_K1_VALIDATOR_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: BICONOMY_SINGLETON_FACTORY,
+        data: NEXUS_K1_VALIDATOR_FACTORY_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: BICONOMY_SINGLETON_FACTORY,
+        data: NEXUS_ACCOUNT_IMPLEMENTATION_CREATECALL,
+        gas: 15_000_000n
+    })
+    await send({
+        to: BICONOMY_SINGLETON_FACTORY,
+        data: NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
+        gas: 15_000_000n
     })
 
-    await anvilClient.impersonateAccount({
+    const rhinestoneAttester = "0x000000333034E9f539ce08819E12c1b8Cb29084d"
+    await anvilClient.address.setBalance({
+        address: rhinestoneAttester,
+        value: Value.fromEther("100")
+    })
+
+    await anvilClient.address.impersonate({
         address: rhinestoneAttester
     })
 
     // register schema
-    await sendTransaction(walletClient, {
+    await send({
         account: rhinestoneAttester,
         to: SAFE_7579_REGISTRY,
         data: "0x1d4d9810000000000000000000000000000000000000000000000000000000000000004000000000000000000000000086430e19d7d204807bbb8cda997bb57b7ee785dd000000000000000000000000000000000000000000000000000000000000024628656e756d20455243373537394d6f64756c655479706520284e6f6e652c56616c696461746f722c4578656375746f722c46616c6c6261636b2c486f6f6b292c737472756374204d6f64756c6554797065417474726962757465732028455243373537394d6f64756c6554797065206d6f64756c65547970652c627974657320656e636f64656441747472696275746573292c737472756374204d6f64756c6541747472696275746573202861646472657373206d6f64756c65416464726573732c6279746573207061636b6564417474726962757465732c4d6f64756c6554797065417474726962757465735b5d2074797065417474726962757465732c6279746573207061636b656445787465726e616c446570656e64656e6379292c656e756d205369676e61747572655479706520284e6f6e652c534543503235364b312c45524331323731292c7374727563742041756469746f722028737472696e67206e616d652c737472696e67207572692c737472696e675b5d20617574686f7273292c737472756374205369676e617475726520285369676e61747572655479706520736967547970652c61646472657373207369676e65722c6279746573207369676e6174757265446174612c627974657333322068617368292c73747275637420417564697453756d6d6172792028737472696e67207469746c652c41756469746f722061756469746f722c4d6f64756c6541747472696275746573206d6f64756c65417474726962757465732c5369676e6174757265207369676e617475726529290000000000000000000000000000000000000000000000000000"
     })
 
     // regsiter resolver
-    await sendTransaction(walletClient, {
+    await send({
         account: rhinestoneAttester,
         to: SAFE_7579_REGISTRY,
         data: "0x9f3e1b53000000000000000000000000f0f468571e764664c93308504642af941d9f77f1"
     })
 
-    await anvilClient.stopImpersonatingAccount({
+    await anvilClient.address.stopImpersonating({
         address: rhinestoneAttester
     })
 
     // deploy module
-    await sendTransaction(walletClient, {
+    await send({
         to: SAFE_7579_REGISTRY,
         data: ERC_7579_TEST_MODULE_CREATECALL
     })
 
-    await anvilClient.impersonateAccount({
+    await anvilClient.address.impersonate({
         address: rhinestoneAttester
     })
 
     // attest to module
-    await sendTransaction(walletClient, {
+    await send({
         account: rhinestoneAttester,
         to: SAFE_7579_REGISTRY,
         data: "0x945e364193d46fcca4ef7d66a413c7bde08bb1ff14bacbd04c4069bb24cd7c21729d7bf100000000000000000000000000000000000000000000000000000000000000400000000000000000000000004fd8d57b94966982b62e9588c27b4171b55e835400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000094000000000000000000000000000000000000000000000000000000000000008a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000003a0000000000000000000000000000000000000000000000000000000000000078000000000000000000000000000000000000000000000000000000000000000104f776e61626c6556616c696461746f7200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000001041636b656520426c6f636b636861696e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001168747470733a2f2f61636b65652e78797a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000012c5a074c49b70c3a16e20c5a06f6e736bc3bd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000124d696368616c2050c599657672c3a174696c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d4e616f6b6920596f736869646100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f4a616e2050c599657672c3a174696c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000184a6f736566204761747465726d617965722c2050682e442e00000000000000000000000000000000000000004fd8d57b94966982b62e9588c27b4171b55e835400000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000038000000000000000000000000000000000000000000000000000000000000003c0000000000000000000000000000000000000000000000000000000000000000b0101010101000000010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000005010100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a1e8f5d6ccd82f2a2ac4ca5df4d51c71e48a54d5000000000000000000000000000000000000000000000000000000000000008022d5e995295e4d3b8bd198dc4ed6381026e7520b1bc156174254b97f3662ebbc000000000000000000000000000000000000000000000000000000000000004113d756b32e6788c67a57e3e445e05f0629f0e6f1f0f8af95d8995fd7586fcde03c9589572c75141fe7041c8ca63eab97c8743e98b7c2582dd9382619b23a84dd010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"
     })
 
-    await anvilClient.stopImpersonatingAccount({
+    await anvilClient.address.stopImpersonating({
         address: rhinestoneAttester
     })
 
     // ==== SETUP KERNEL V0.6 CONTRACTS ==== //
     const kernelFactoryOwner = "0x9775137314fE595c943712B0b336327dfa80aE8A"
-    await anvilClient.setBalance({
+    await anvilClient.address.setBalance({
         address: kernelFactoryOwner,
-        value: parseEther("100")
+        value: Value.fromEther("100")
     })
 
-    await anvilClient.impersonateAccount({
+    await anvilClient.address.impersonate({
         address: kernelFactoryOwner
     })
 
     // register 0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
         data: "0xbb30a9740000000000000000000000000da6a956b9488ed4dd761e59f52fdc6c8068e6b50000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
     })
 
     // register 0xf048AD83CB2dfd6037A43902a2A5Be04e53cd2Eb
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
         data: "0xbb30a974000000000000000000000000f048ad83cb2dfd6037a43902a2a5be04e53cd2eb0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
     })
 
     // register 0xD3F582F6B4814E989Ee8E96bc3175320B5A540ab
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
         data: "0xbb30a974000000000000000000000000d3f582f6b4814e989ee8e96bc3175320b5a540ab0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
     })
 
     // register 0xd3082872F8B06073A021b4602e022d5A070d7cfC
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0x5de4839a76cf55d0c90e2061ef4386d962E15ae3" /* kernel factory v0.6 */,
         data: "0xbb30a974000000000000000000000000d3082872f8b06073a021b4602e022d5a070d7cfc0000000000000000000000000000000000000000000000000000000000000001" /* setImplementation(address _implementation,bool _allow) */
     })
 
     // register 0x6723b44Abeec4E71eBE3232BD5B455805baDD22f
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
         data: "0x6e7dbabb0000000000000000000000006723b44abeec4e71ebe3232bd5b455805badd22f0000000000000000000000000000000000000000000000000000000000000001"
     })
 
     // register 0xaac5D4240AF87249B3f71BC8E4A2cae074A3E419
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
         data: "0x6e7dbabb000000000000000000000000aac5D4240AF87249B3f71BC8E4A2cae074A3E4190000000000000000000000000000000000000000000000000000000000000001"
     })
 
     // register 0x7a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
         data: "0x6e7dbabb0000000000000000000000007a1dBAB750f12a90EB1B60D2Ae3aD17D4D81EfFe0000000000000000000000000000000000000000000000000000000000000001"
     })
 
     // register 0xE30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
         data: "0x6e7dbabb000000000000000000000000E30c76Dc9eCF1c19F6Fec070674E1b4eFfE069FA0000000000000000000000000000000000000000000000000000000000000001"
     })
 
     // register 0x2577507b78c2008Ff367261CB6285d44ba5eF2E9
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
         data: "0x6e7dbabb0000000000000000000000002577507b78c2008Ff367261CB6285d44ba5eF2E90000000000000000000000000000000000000000000000000000000000000001"
     })
 
-    await sendTransaction(walletClient, {
+    await send({
         account: kernelFactoryOwner,
         to: "0xd703aaE79538628d27099B8c4f621bE4CCd142d5" /* kernel factory v0.7 */,
-        data: "0xc7e55f3e0000000000000000000000000000000071727de22e5e9d8baf0edac6f37da0320000000000000000000000000000000000000000000000000000000000015180"
+        data: "0xc7e55f3e0000000000000000000000000000000071727de22e5e9d8baf0edac6f37da0320000000000000000000000000000000000000000000000000000000000015180",
+        value: Value.fromEther("1")
     })
 
-    await anvilClient.stopImpersonatingAccount({
+    await anvilClient.address.stopImpersonating({
         address: kernelFactoryOwner
     })
 
     // ==== SETUP ALCHEMY LIGHT ACCOUNT CONTRACTS ==== //
     const alchemyLightClientOwner = "0xDdF32240B4ca3184De7EC8f0D5Aba27dEc8B7A5C"
-    await anvilClient.setBalance({
+    await anvilClient.address.setBalance({
         address: alchemyLightClientOwner,
-        value: parseEther("100")
+        value: Value.fromEther("100")
     })
 
-    await anvilClient.impersonateAccount({
+    await anvilClient.address.impersonate({
         address: alchemyLightClientOwner
     })
 
-    await sendTransaction(walletClient, {
+    await send({
         account: alchemyLightClientOwner,
         to: "0x0000000000400CdFef5E2714E63d8040b700BC24" /* light account v2.0.0 factory */,
         data: "0xfbb1c3d40000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000016345785d8a0000",
-        value: parseEther("0.1")
+        value: Value.fromEther("0.1")
     })
 
-    await anvilClient.stopImpersonatingAccount({
+    await anvilClient.address.stopImpersonating({
         address: alchemyLightClientOwner
     })
 
-    await verifyDeployed(client, [
+    console.log(
+        `txpool before verifyDeployed: ${JSON.stringify(await anvilClient.txpool.getStatus())}`
+    )
+    await verifyDeployed(client, () => anvilClient.block.mine({ blocks: 1 }), [
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
         "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
         "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
@@ -740,10 +661,6 @@ export const setupContracts = async (rpc: string) => {
         "0x000000000069E2a187AEFFb852bF3cCdC95151B2", // Safe 7579 Registry
         "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", // EntryPoint 0.6
         "0x9406Cc6185a346906296840746125a0E44976454", // Simple Account Factory 0.6
-        "0x0000001c5b32F37F5beA87BDD5374eB2aC54eA8e", // Biconomy ECDSA Ownership Registry Module
-        "0x0000002512019Dafb59528B82CB92D3c5D2423ac", // Biconomy Account Logic V0.2
-        "0x000000a56Aaca3e9a4C479ea6b6CD0DbcB6634F5", // Biconomy Factory Address
-        "0x0bBa6d96BD616BedC6BFaa341742FD43c60b83C1", // Biconomy Default Fallback Handler
         "0xf048AD83CB2dfd6037A43902a2A5Be04e53cd2Eb", // Kernel 0.2.1 Account Logic
         "0xd9AB5096a832b9ce79914329DAEE236f8Eea0390", // Kernel v0.2.2 ECDSA Validator
         "0x0DA6a956B9488eD4dd761E59f52FDc6c8068E6B5", // Kernel v0.2.2 Account Logic

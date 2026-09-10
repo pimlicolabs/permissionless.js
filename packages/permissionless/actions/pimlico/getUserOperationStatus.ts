@@ -1,11 +1,12 @@
-import type { Account, Chain, Client, Hash, Transport } from "viem"
+import type { Client, Transport } from "viem"
+import type { Hex } from "viem/utils"
 import type {
     PimlicoRpcSchema,
     PimlicoUserOperationStatus
 } from "../../types/pimlico.js"
 
 export type GetUserOperationStatusParameters = {
-    hash: Hash
+    hash: Hex.Hex
 }
 
 export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
@@ -15,34 +16,27 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
  *
- * @param client {@link PimlicoClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client viem client whose transport points at Pimlico's RPC.
  * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
  * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
  *
  *
  * @example
- * import { createClient } from "viem"
- * import { getUserOperationStatus } from "permissionless/actions/pimlico"
- * import { pimlicoBundlerActions } from 'permissionless/actions/pimlico'
+ * import { Client, http } from "viem"
+ * import { Pimlico } from "permissionless/pimlico"
  *
- * const bundlerClient = createClient({
- *      chain: goerli,
- *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
- * }).extend(pimlicoBundlerActions)
+ * const client = Client.create({
+ *     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
+ * })
  *
- * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
- *
+ * await Pimlico.getUserOperationStatus(client, { hash: userOpHash })
  */
 export const getUserOperationStatus = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PimlicoRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     { hash }: GetUserOperationStatusParameters
 ): Promise<GetUserOperationStatusReturnType> => {
-    return client.request({
+    const request = client.request as Transport.RequestFn<PimlicoRpcSchema>
+    return request({
         method: "pimlico_getUserOperationStatus",
         params: [hash]
     })

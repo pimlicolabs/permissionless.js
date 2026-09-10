@@ -1,7 +1,11 @@
-// import { Base64 } from "ox"
-import type { Account, Chain, Client, Hex, Transport } from "viem"
+import type { Client, Transport } from "viem"
+import type { Hex } from "viem/utils"
+import {
+    InvalidPasskeyCredentialError,
+    InvalidPasskeyServerResponseError
+} from "../../errors/passkeyServer.js"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
+import * as Base64 from "../../utils/base64.js"
 
 export type VerifyAuthenticationParameters = {
     raw: {
@@ -23,21 +27,17 @@ export type VerifyAuthenticationParameters = {
 export type VerifyAuthenticationReturnType = {
     success: boolean
     id: string
-    publicKey: Hex
+    publicKey: Hex.Hex
     userName: string
 }
 
 export const verifyAuthentication = async (
-    client: Client<
-        Transport,
-        Chain | undefined,
-        Account | undefined,
-        PasskeyServerRpcSchema
-    >,
+    client: Pick<Client.Client, "request">,
     args: VerifyAuthenticationParameters
 ): Promise<VerifyAuthenticationReturnType> => {
     const { raw, uuid } = args
-    const { Base64 } = await getOxExports()
+    const request =
+        client.request as Transport.RequestFn<PasskeyServerRpcSchema>
 
     let responseAuthenticatorData: string
 
@@ -49,7 +49,7 @@ export const verifyAuthentication = async (
             }
         )
     } else {
-        throw new Error("authenticatorData not found in the signature")
+        throw new InvalidPasskeyCredentialError({ field: "authenticatorData" })
     }
 
     let signature: string
@@ -62,7 +62,7 @@ export const verifyAuthentication = async (
             }
         )
     } else {
-        throw new Error("signature not found in the signature")
+        throw new InvalidPasskeyCredentialError({ field: "signature" })
     }
 
     let userHandle: string | undefined
@@ -76,7 +76,7 @@ export const verifyAuthentication = async (
         )
     }
 
-    const serverResponse = await client.request(
+    const serverResponse = await request(
         {
             method: "pks_verifyAuthentication",
             params: [
@@ -119,24 +119,21 @@ export const verifyAuthentication = async (
     const publicKey = serverResponse?.publicKey
     const userName = serverResponse?.userName
 
-    if (typeof id !== "string") {
-        throw new Error("Invalid passkey id returned from server")
-    }
-
-    if (typeof publicKey !== "string" || !publicKey.startsWith("0x")) {
-        throw new Error(
-            "Invalid public key returned from server - must be hex string starting with 0x"
-        )
-    }
-
-    if (typeof userName !== "string") {
-        throw new Error("Invalid user name returned from server")
-    }
+    const invalid = (reason: string) =>
+        new InvalidPasskeyServerResponseError({
+            method: "pks_verifyAuthentication",
+            reason
+        })
+    if (typeof id !== "string") throw invalid("`id` must be a string.")
+    if (typeof publicKey !== "string" || !publicKey.startsWith("0x"))
+        throw invalid("`publicKey` must be a 0x-prefixed hex string.")
+    if (typeof userName !== "string")
+        throw invalid("`userName` must be a string.")
 
     return {
         success,
         id,
-        publicKey: publicKey as Hex,
+        publicKey: publicKey as Hex.Hex,
         userName
     }
 }

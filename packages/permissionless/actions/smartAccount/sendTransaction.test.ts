@@ -1,11 +1,13 @@
-import { zeroAddress } from "viem"
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
-import { describe, expect } from "vitest"
+import { Account } from "viem"
+import { Address, Secp256k1 } from "viem/utils"
+import { describe, expect, test } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
+import { AccountNotFoundError } from "../../errors/account"
+import { TransactionToRequiredError } from "../../errors/smartAccount"
 import { sendTransaction } from "./sendTransaction"
 
 describe.each(getCoreSmartAccounts())(
@@ -17,7 +19,7 @@ describe.each(getCoreSmartAccounts())(
         supportsEntryPointV08,
         isEip7702Compliant
     }) => {
-        const privateKey = generatePrivateKey()
+        const privateKey = Secp256k1.randomPrivateKey()
         testWithRpc.skipIf(!supportsEntryPointV06)(
             "sendTransaction_v06",
             async ({ rpc }) => {
@@ -31,7 +33,7 @@ describe.each(getCoreSmartAccounts())(
                 })
 
                 const transactionHash = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
@@ -40,7 +42,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const publicClient = getPublicClient(anvilRpc)
 
-                const receipt = await publicClient.getTransactionReceipt({
+                const receipt = await publicClient.transaction.getReceipt({
                     hash: transactionHash
                 })
 
@@ -51,14 +53,14 @@ describe.each(getCoreSmartAccounts())(
                 // -- second transaction after deployment
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -73,7 +75,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -86,24 +88,28 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const transactionHash = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n,
                     authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
                 })
 
                 expect(transactionHash).toBeTruthy()
 
-                const receipt = await publicClient.getTransactionReceipt({
+                const receipt = await publicClient.transaction.getReceipt({
                     hash: transactionHash
                 })
 
@@ -112,7 +118,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt.status).toBe("success")
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
@@ -121,7 +127,7 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -136,7 +142,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 const smartClient = await getSmartAccountClient({
                     entryPoint: {
@@ -149,17 +155,20 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const authorization = isEip7702Compliant
-                    ? await privateKeyAccount.signAuthorization({
-                          address: (smartClient.account as any).implementation,
+                    ? await privateKeyAccount.signAuthorization?.({
+                          address: (smartClient.account as any).authorization
+                              .address,
                           chainId: smartClient.chain.id,
-                          nonce: await publicClient.getTransactionCount({
-                              address: smartClient.account.address
-                          })
+                          nonce: BigInt(
+                              await publicClient.address.getTransactionCount({
+                                  address: smartClient.account.address
+                              })
+                          )
                       })
                     : undefined
 
                 const transactionHash = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n,
                     authorization
@@ -167,7 +176,7 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(transactionHash).toBeTruthy()
 
-                const receipt = await publicClient.getTransactionReceipt({
+                const receipt = await publicClient.transaction.getReceipt({
                     hash: transactionHash
                 })
 
@@ -176,7 +185,7 @@ describe.each(getCoreSmartAccounts())(
                 expect(receipt.status).toBe("success")
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
@@ -185,7 +194,7 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -210,7 +219,7 @@ describe.each(getCoreSmartAccounts())(
                     })
 
                     const transactionHash = await sendTransaction(smartClient, {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: "0x",
                         value: 0n
                     })
@@ -219,7 +228,7 @@ describe.each(getCoreSmartAccounts())(
 
                     const publicClient = getPublicClient(anvilRpc)
 
-                    const receipt = await publicClient.getTransactionReceipt({
+                    const receipt = await publicClient.transaction.getReceipt({
                         hash: transactionHash
                     })
 
@@ -240,14 +249,14 @@ describe.each(getCoreSmartAccounts())(
 
                 // -- second transaction after deployment
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -263,7 +272,7 @@ describe.each(getCoreSmartAccounts())(
                 const { anvilRpc } = rpc
 
                 await (async () => {
-                    const privateKeyAccount = privateKeyToAccount(privateKey)
+                    const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                     const smartClient = await getSmartAccountClient({
                         entryPoint: {
@@ -276,18 +285,22 @@ describe.each(getCoreSmartAccounts())(
                     const publicClient = getPublicClient(anvilRpc)
 
                     const authorization = isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
 
                     const transactionHash = await sendTransaction(smartClient, {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: "0x",
                         value: 0n,
                         authorization
@@ -295,7 +308,7 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(transactionHash).toBeTruthy()
 
-                    const receipt = await publicClient.getTransactionReceipt({
+                    const receipt = await publicClient.transaction.getReceipt({
                         hash: transactionHash
                     })
 
@@ -315,7 +328,7 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
@@ -324,7 +337,7 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -339,7 +352,7 @@ describe.each(getCoreSmartAccounts())(
             async ({ rpc }) => {
                 const { anvilRpc } = rpc
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+                const privateKeyAccount = Account.fromPrivateKey(privateKey)
 
                 await (async () => {
                     const smartClient = await getSmartAccountClient({
@@ -353,18 +366,22 @@ describe.each(getCoreSmartAccounts())(
                     const publicClient = getPublicClient(anvilRpc)
 
                     const authorization = isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
+                        ? await privateKeyAccount.signAuthorization?.({
                               address: (smartClient.account as any)
-                                  .implementation,
+                                  .authorization.address,
                               chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+                              nonce: BigInt(
+                                  await publicClient.address.getTransactionCount(
+                                      {
+                                          address: smartClient.account.address
+                                      }
+                                  )
+                              )
                           })
                         : undefined
 
                     const transactionHash = await sendTransaction(smartClient, {
-                        to: zeroAddress,
+                        to: Address.zero,
                         data: "0x",
                         value: 0n,
                         authorization
@@ -372,7 +389,7 @@ describe.each(getCoreSmartAccounts())(
 
                     expect(transactionHash).toBeTruthy()
 
-                    const receipt = await publicClient.getTransactionReceipt({
+                    const receipt = await publicClient.transaction.getReceipt({
                         hash: transactionHash
                     })
 
@@ -392,7 +409,7 @@ describe.each(getCoreSmartAccounts())(
                 const publicClient = getPublicClient(anvilRpc)
 
                 const transactionHash2 = await sendTransaction(smartClient, {
-                    to: zeroAddress,
+                    to: Address.zero,
                     data: "0x",
                     value: 0n
                 })
@@ -401,7 +418,7 @@ describe.each(getCoreSmartAccounts())(
 
                 expect(transactionHash2).toBeTruthy()
 
-                const receipt2 = await publicClient.getTransactionReceipt({
+                const receipt2 = await publicClient.transaction.getReceipt({
                     hash: transactionHash2
                 })
 
@@ -412,3 +429,19 @@ describe.each(getCoreSmartAccounts())(
         )
     }
 )
+
+describe("sendTransaction errors", () => {
+    const to = "0x0000000000000000000000000000000000000001"
+
+    test("rejects with AccountNotFoundError without an account", async () => {
+        await expect(
+            sendTransaction({ account: undefined } as any, { to } as any)
+        ).rejects.toThrow(AccountNotFoundError)
+    })
+
+    test("rejects with TransactionToRequiredError without `to`", async () => {
+        await expect(
+            sendTransaction({ account: {} } as any, { to: undefined } as any)
+        ).rejects.toThrow(TransactionToRequiredError)
+    })
+})

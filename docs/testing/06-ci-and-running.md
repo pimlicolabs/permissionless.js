@@ -18,6 +18,8 @@ From `package.json:92–94`:
 | `bun run test:ci-no-coverage` | Quick full CI-style run locally | one-shot | none                       | `--pool=forks`  |
 | `bun run test:ci`        | What CI runs          | one-shot            | lcov only                   | `--pool=forks`  |
 
+Two more scripts cover types: `bun run test:types` runs the `*.test-d.ts` files through vitest's typecheck mode (checker: the repo's TypeScript 7 `tsc` binary, tsconfig `tsconfig/tsconfig.permissionless.test-d.json`), and `bun run typecheck` runs `tsc -p tsconfig/tsconfig.permissionless.test.json` (the repo compiler, TypeScript 7) over every `*.test.ts`, `*.test-d.ts` and the anvil rig. Both tsconfigs route the `permissionless*` entrypoints to the sources with `paths`, so the type tests import the package the way consumers do; CI's `package-types` job (see `docs/architecture/03-build-system.md`) runs the same files against the packed tarball on TypeScript 5.9.3, 6.0.3 and 7.0.2. The `Verify` workflow's `types` job runs both scripts on that matrix.
+
 Why `--pool=forks`? The default Vitest pool uses worker **threads**; `forks` uses worker **processes**. Because each worker spawns multiple child processes (Anvil, Alto, Fastify) shared across tests and relies on `prool` signal handling, process-pool isolation is safer and more reliable, at the cost of slightly higher memory usage.
 
 The `CI=true &&` prefix in the CI scripts sets the environment variable so `vitest.config.ts:10` picks the lcov-only reporter:
@@ -47,19 +49,19 @@ jobs:
       - run: bun run build
       - run: echo "VITE_FORK_RPC_URL=${{ secrets.VITE_FORK_RPC_URL }}" > .env.test
       - run: bun run test:ci
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
 ```
 
 Key points:
 
 - **Node 22.2.0** is used in CI; local dev with a different Node should match this for parity.
 - `.env.test` is **generated in-workflow** with `VITE_FORK_RPC_URL` from a GitHub secret. When the secret is unset, the value is empty and `setupContracts` runs normally. When set, Anvil forks that URL and `setupContracts` is skipped ([see fork mode](#fork-mode)).
-- Coverage is uploaded to Codecov via `codecov-action@v3`.
+- Coverage is uploaded to Codecov via `codecov-action@v5`, gated by `codecov.yml` at the repo root ([see below](#coverage-accounting)).
 - Timeout: 60 minutes.
 
 ### The disabled sharded test job
 
-`.github/workflows/verify.yml:77–114` defines a matrix-sharded `test` job (3 shards × 2 transport modes × `nick-fields/retry@v2` with 3 attempts). It's **disabled** by `if: false` at `verify.yml:78` and doesn't currently run. It references `VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_ANVIL_FORK_URL`, `VITE_BATCH_MULTICALL`, and `VITE_NETWORK_TRANSPORT_MODE` env vars — but because the job is gated off, these are not live right now. If re-enabled, see the workflow file for the exact env-var names.
+`.github/workflows/verify.yml` defines a matrix-sharded `test` job (3 shards × 2 transport modes × `nick-fields/retry@v2` with 3 attempts). It's **disabled** by `if: false` and doesn't currently run (the `types` job in the same file is live). It references `VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_ANVIL_FORK_URL`, `VITE_BATCH_MULTICALL`, and `VITE_NETWORK_TRANSPORT_MODE` env vars — but because the job is gated off, these are not live right now. If re-enabled, see the workflow file for the exact env-var names.
 
 ## Environment variables
 
@@ -71,6 +73,40 @@ Loaded by Vitest via `loadEnv("test", process.cwd())` (`vitest.config.ts:29`), w
 | `CI`                     | `vitest.config.ts:10`                        | Switches coverage reporter to `lcov` only.                                               |
 
 Other `VITE_*` vars (`VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_NETWORK_TRANSPORT_MODE`, `VITE_BATCH_MULTICALL`, `VITE_ANVIL_FORK_URL`) appear in `verify.yml` but are only consumed by the disabled sharded job. They have no effect in the active `testWithRpc` fixture.
+
+## Coverage accounting
+
+`--coverage` runs the v8 provider with `all: true`, so every file matched by
+`coverage.include` (`**/permissionless/**`) counts, whether a test touched it or
+not. `coverage.exclude` mirrors the negations in `packages/permissionless/package.json`
+`files` — that list *is* the definition of shipped code:
+
+| Excluded                                          | Why                                                        |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| `**/*.test.ts`, `**/*.bench.ts`, `**/setupTests.ts` | tests, not shipped                                        |
+| `**/*.test-d.ts`                                  | type tests: checked by `tsc`, never executed, so they would sit at 0 % |
+| `**/*.config.ts`                                  | `vitest.config.ts` itself                                  |
+| `**/permissionless-test/**`                       | the anvil rig                                              |
+| `**/_cjs/**`, `**/_esm/**`, `**/_types/**`        | build output                                               |
+
+Anything else under `packages/permissionless` is in the denominator, including
+`accounts/<x>/index.ts` and `errors/*.ts` — those are real modules that ship.
+
+The 18 `*.test-d.ts` files landed in 1.0 without a matching exclude and cost
+16.8 points of project coverage on their own (1,595 lines at 0 %), which is what
+`codecov.yml` now guards: `coverage.status.project.default` is `target: auto`
+with a `threshold` of 1 %, so a regression of that shape fails the check while
+rig noise does not.
+
+Codecov reads `coverage/lcov.info` (repo root — Vitest's `root` is the
+current working directory, not the config file's directory). To see the same
+numbers locally, add the reporters back:
+
+```bash
+CI=true ./node_modules/.bin/vitest run -c packages/permissionless/vitest.config.ts \
+  --coverage --coverage.reporter=text --coverage.reporter=lcov \
+  --pool=forks --no-file-parallelism
+```
 
 ## Fork mode
 
@@ -187,7 +223,7 @@ The shared rig registers a `process.on("beforeExit")` handler to stop all instan
 Most likely `setupContracts` assumes a clean slate (fresh nonces on Anvil's account 0, etc.), and the forked chain has a different state for that account. Check whether the failing test:
 
 - Uses `getAnvilWalletClient({ addressIndex: 0 })` and expects a specific starting nonce.
-- Relies on a factory's *counterfactual* address matching the one `toXxxSmartAccount` computes — the factory must exist on the forked chain.
+- Relies on a factory's *counterfactual* address matching the one `<X>SmartAccount.from` computes — the factory must exist on the forked chain.
 
 ### Coverage report is missing
 

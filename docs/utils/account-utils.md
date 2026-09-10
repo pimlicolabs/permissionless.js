@@ -1,130 +1,61 @@
 # Account Utilities
 
-Helper functions for working with smart accounts: deployment checks, owner normalization, and address extraction.
-
 ## Import
 
 ```typescript
-import {
-    isSmartAccountDeployed,
-    toOwner,
-    getAddressFromInitCodeOrPaymasterAndData,
-} from "permissionless/utils"
+import { Owner } from "permissionless"
 ```
 
 ---
 
-## `isSmartAccountDeployed`
+## `Owner.from`
 
-Checks if a smart account contract is deployed at the given address by calling `getCode`.
+Normalises the owner types every account constructor accepts into a viem `Account.Local`. Account constructors call it internally.
 
 ### Signature
 
 ```typescript
-async function isSmartAccountDeployed(
-    client: Client,
-    address: Address
-): Promise<boolean>
+async function Owner.from(args: {
+    owner: EthereumProvider | WalletClient | Account.Local
+    address?: Address
+}): Promise<Account.Local>
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `client` | `Client` | Yes | viem client for on-chain reads |
-| `address` | `Address` | Yes | Smart account address to check |
-
-### Returns
-
-`boolean` -- `true` if bytecode exists at the address, `false` otherwise.
-
-### Example
-
-```typescript
-import { isSmartAccountDeployed } from "permissionless/utils"
-
-const deployed = await isSmartAccountDeployed(publicClient, "0x1234...")
-
-if (!deployed) {
-    console.log("Account not yet deployed -- first UserOp will deploy it")
-}
-```
-
----
-
-## `toOwner`
-
-Normalizes different owner types into a unified `LocalAccount`. Smart account factories call this internally to support multiple owner input types.
-
-### Signature
-
-```typescript
-async function toOwner(args: {
-    owner: EthereumProvider | WalletClient | LocalAccount,
-    address?: Address,
-}): Promise<LocalAccount>
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `owner` | `EthereumProvider \| WalletClient \| LocalAccount` | Yes | Owner in any supported format |
-| `address` | `Address` | No | Override the account address |
+| `owner` | `Account.Local \| WalletClient \| EthereumProvider` | Yes | Owner in any supported form |
+| `address` | `Address` | No | Account to use for a provider owner (skips `eth_requestAccounts`) |
 
 ### Supported Owner Types
 
-| Input Type | Conversion |
-|-----------|------------|
-| `LocalAccount` | Returned as-is |
-| `WalletClient` | Extracts the account, converts to local signing |
-| `EthereumProvider` (EIP-1193) | Creates a JSON-RPC account from `eth_requestAccounts` |
+| Input | Result |
+|-------|--------|
+| `Account.Local` | Returned as-is |
+| Wallet client (`Client.Client<Chain, Account>`) | Wrapped: `signMessage` and `signTypedData` go through the client; `sign` (raw hash) throws `OwnerSignUnsupportedError` |
+| `EthereumProvider` (an object with an EIP-1193 `request`) | The address comes from `eth_requestAccounts` (falling back to `eth_accounts`) unless `address` is given, then wrapped like a wallet client |
+
+### Errors
+
+- `OwnerAddressRequiredError` -- the provider returned no accounts and `address` was not given
+- `OwnerSignUnsupportedError` -- `sign` on a wallet-client or provider owner (they cannot sign raw hashes)
 
 ### Example
 
 ```typescript
-import { toOwner } from "permissionless/utils"
+import { Account } from "viem"
+import { Owner } from "permissionless"
 
-// From a private key account (no-op, returned as-is)
-const owner1 = await toOwner({ owner: privateKeyToAccount("0x...") })
-
-// From a wallet client
-const owner2 = await toOwner({ owner: walletClient })
-
-// From an EIP-1193 provider
-const owner3 = await toOwner({ owner: window.ethereum })
+const owner1 = await Owner.from({ owner: Account.fromPrivateKey("0x...") })
+const owner2 = await Owner.from({ owner: walletClient })
+const owner3 = await Owner.from({ owner: window.ethereum })
 ```
 
 ---
 
-## `getAddressFromInitCodeOrPaymasterAndData`
+## Removed in 1.0
 
-Extracts the first 20 bytes (an address) from packed init code or paymaster data. In EntryPoint 0.6, the factory address and paymaster address are the first 20 bytes of the combined `initCode` and `paymasterAndData` fields respectively.
-
-### Signature
-
-```typescript
-function getAddressFromInitCodeOrPaymasterAndData(data: Hex): Address
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `data` | `Hex` | Yes | Packed data (initCode or paymasterAndData) |
-
-### Returns
-
-`Address` -- The first 20 bytes interpreted as an address.
-
-### Example
-
-```typescript
-import { getAddressFromInitCodeOrPaymasterAndData } from "permissionless/utils"
-
-// Extract factory address from EntryPoint 0.6 initCode
-const factoryAddress = getAddressFromInitCodeOrPaymasterAndData(
-    "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985abcdef..."
-)
-// => "0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985"
-```
+- `isSmartAccountDeployed` -- use `account.isDeployed()` on any viem `SmartAccount`.
+- `getAddressFromInitCodeOrPaymasterAndData` -- the first 20 bytes of an EntryPoint 0.6 `initCode` / `paymasterAndData` are the factory / paymaster address; slice them yourself.
+- `toOwner` -- renamed to `Owner.from`.

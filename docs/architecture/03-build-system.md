@@ -1,15 +1,13 @@
 # Build System
 
-The permissionless monorepo uses TypeScript compilation (no bundler) to produce three output formats per package: CommonJS, ES Modules, and TypeScript declaration files.
+The permissionless monorepo uses TypeScript compilation (no bundler) to produce two outputs per package: ES modules and TypeScript declaration files. Packages are ESM-only.
 
 ## Tooling
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| TypeScript | ^5.2.2 | Type checking and compilation |
-| tsgo | @typescript/native-preview ^7.0.0 | Fast native TypeScript compiler (used for default builds) |
-| tsc-alias | ^1.8.8 | Resolves full paths in ESM and types output (adds `.js` extensions) |
-| Biome | ^1.0.0 | Linter and formatter (replaces ESLint/Prettier) |
+| TypeScript | 7.0.2 (exact) | Native compiler; `tsc` builds every output |
+| Biome | 2.5.12 | Linter and formatter (replaces ESLint/Prettier) |
 | Vitest | ^2.1.5 | Test runner with coverage-v8 |
 | Changesets | ^2.26.2 | Version management and changelog generation |
 | size-limit | ^9.0.0 | Bundle size tracking |
@@ -18,11 +16,10 @@ The permissionless monorepo uses TypeScript compilation (no bundler) to produce 
 
 ## Build Pipeline
 
-Each package produces three output directories:
+Each package produces two output directories:
 
 ```
 packages/permissionless/
-  _cjs/      CommonJS output (module: commonjs, moduleResolution: Node)
   _esm/      ES Module output (module: NodeNext, moduleResolution: NodeNext)
   _types/    TypeScript declaration files (.d.ts)
 ```
@@ -30,28 +27,19 @@ packages/permissionless/
 ### Build Commands
 
 ```bash
-# Default build (cleans then runs build:ci)
+# Default build: the three package builds in parallel (each cleans its own output first)
 bun run build
 
-# CI build (all 8 tsgo compilations sequentially, no clean step)
-# Runs sequentially because CI runners have limited vCPUs (2 on GitHub Actions)
+# CI build: same three builds, sequential (2-vCPU runners)
 bun run build:ci
 
-# Size-only build (only permissionless CJS + ESM for size-limit checks)
+# Per-package builds (ESM + types in one tsc run)
+bun run build:permissionless
+bun run build:wagmi
+bun run build:mock-paymaster
+
+# Size job entry point (permissionless only)
 bun run build:size
-
-# Standard tsc build (all packages, sequential)
-bun run build:tsc
-
-# Individual package builds (using tsc)
-bun run build:permissionless      # CJS + ESM + types
-bun run build:wagmi               # ESM + types (no CJS)
-bun run build:mock-paymaster      # CJS + ESM + types
-
-# Individual package builds (using tsgo, parallel within package)
-bun run build:permissionless:tsgo
-bun run build:wagmi:tsgo
-bun run build:mock-paymaster:tsgo
 
 # Clean generated output
 bun run clean
@@ -59,41 +47,9 @@ bun run clean
 
 ### Build Scripts Architecture
 
-The `build` script delegates to `build:ci` after cleaning:
+Each per-package script is `clean:<pkg>` followed by one `tsc --project` run that emits `_esm/` and `_types/` together (a separate declaration-only run would type-check the same program twice for identical output). `build` runs the three package scripts in parallel and propagates the first failure (`wait $pid` per job; a bare `wait` would swallow it). `build:ci` runs them sequentially because GitHub Actions runners have 2 vCPUs.
 
-```
-build = clean + build:ci
-```
-
-`build:ci` runs all 8 tsgo compilations **sequentially** in a single command chain:
-1. permissionless CJS → permissionless ESM (+ tsc-alias) → permissionless types (+ tsc-alias)
-2. wagmi ESM (+ tsc-alias) → wagmi types (+ tsc-alias)
-3. mock-paymaster CJS → mock-paymaster ESM (+ tsc-alias) → mock-paymaster types (+ tsc-alias)
-
-Sequential execution is intentional: GitHub Actions runners have only 2 vCPUs, so running 8 parallel CPU-bound tsgo processes causes cache thrashing and is slower than sequential.
-
-The per-package `:tsgo` scripts still use parallel execution (via bash `&` + `wait`) for local development on machines with more cores.
-
-### Per-Format Build Steps
-
-Each format follows the same pattern:
-
-1. **Compile** with tsc (or tsgo) using format-specific tsconfig
-2. **Resolve paths** with tsc-alias (ESM and types only — adds `.js` extensions for Node ESM compatibility; CJS doesn't need this since `require()` resolves without extensions)
-3. **Inject package.json** into output directory to mark the module type
-
-Example for CJS (no tsc-alias needed):
-```bash
-tsgo --project ./tsconfig/tsconfig.permissionless.cjs.json \
-  && printf '{"type":"commonjs"}' > ./packages/permissionless/_cjs/package.json
-```
-
-Example for ESM (tsc-alias adds .js extensions):
-```bash
-tsgo --project ./tsconfig/tsconfig.permissionless.esm.json \
-  && tsc-alias -p ./tsconfig/tsconfig.permissionless.esm.json \
-  && printf '{"type":"module","sideEffects":false}' > ./packages/permissionless/_esm/package.json
-```
+`tsc` does everything: sources already carry `.js` specifiers, so nothing rewrites paths after emit, and the package-level `"type": "module"` makes `_esm/` ESM without a nested `package.json`.
 
 ## TypeScript Configuration
 
@@ -102,9 +58,7 @@ tsgo --project ./tsconfig/tsconfig.permissionless.esm.json \
 ```
 tsconfig/tsconfig.base.json                    # Shared compiler options
   tsconfig/tsconfig.permissionless.json        # Package-specific (include/exclude, rootDir)
-    tsconfig/tsconfig.permissionless.esm.json  # ESM: module=NodeNext, outDir=_esm
-    tsconfig/tsconfig.permissionless.cjs.json  # CJS: module=commonjs, outDir=_cjs
-    tsconfig/tsconfig.permissionless.types.json # Types: emitDeclarationOnly, outDir=_types
+    tsconfig/tsconfig.permissionless.esm.json  # module=NodeNext, outDir=_esm, declarationDir=_types
 ```
 
 ### Key Compiler Options (from `tsconfig.base.json`)
@@ -113,35 +67,28 @@ tsconfig/tsconfig.base.json                    # Shared compiler options
 |--------|-------|-----------|
 | `target` | `ES2021` | Node 16+ support |
 | `lib` | `["ES2022", "DOM"]` | Error `.cause`, `fetch` types |
+| `types` | `[]` | No ambient globals (TS 7 default, made explicit) |
 | `strict` | `true` | Full strict mode |
 | `verbatimModuleSyntax` | `true` | Enforces explicit `import type` |
-| `importHelpers` | `true` | Validates no helper injection needed |
-| `esModuleInterop` | `false` | No synthetic default imports |
 | `noUnusedLocals` | `true` | Catches dead code |
 | `noUnusedParameters` | `true` | Catches unused function parameters |
 | `skipLibCheck` | `true` | Faster compilation |
-
-### CJS-Specific Overrides
-
-The CJS build adds:
-- `module: "commonjs"`, `moduleResolution: "Node"` -- CommonJS output
-- `removeComments: true` -- Strips comments to reduce bundle size
-- `verbatimModuleSyntax: false` -- Required for CJS compatibility (can't use `import type` syntax in CJS output)
 
 ## CI/CD
 
 ### PR Workflow
 
-All four jobs run **in parallel** with no dependencies:
+All five jobs run **in parallel** with no dependencies:
 
 ```
-┌────────┐  ┌────────┐  ┌──────────────┐  ┌──────┐
-│  Lint  │  │ Build  │  │ E2E-Coverage │  │ Size │
-└────────┘  └────────┘  └──────────────┘  └──────┘
+┌────────┐  ┌────────┐  ┌───────────────┐  ┌──────────────┐  ┌──────┐
+│  Lint  │  │ Build  │  │ Package types │  │ E2E-Coverage │  │ Size │
+└────────┘  └────────┘  └───────────────┘  └──────────────┘  └──────┘
 ```
 
 - **Lint** — formats and lints code, auto-commits fixes
-- **Build** — runs `build:ci` to verify compilation
+- **Build** — runs `bun run build` to verify compilation
+- **Package types** — a TypeScript `{5.9.3, 6.0.3, 7.0.2}` matrix: packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and (≤ 6) node10 consumers, runs the `*.test-d.ts` suite against the emitted `.d.ts`, and emits declarations for a module of inferred permissionless values (the TS2742/TS2883 probe, including `.extend()`ed clients, whose inferred types tsc names through the `./_types/*` export row); `publint --strict` and `attw --pack --profile esm-only` gate the manifest on the 7.0.2 leg (see the fixture README)
 - **E2E-Coverage** — runs tests with coverage (no build needed — vitest resolves workspace packages from source via aliases)
 - **Size** — runs `size-limit-action` to compare bundle sizes against base branch
 
@@ -154,28 +101,33 @@ Foundry is only installed when `install-foundry: 'true'` is passed (E2E job only
 ### Main Branch Workflow
 
 Three parallel jobs: **Changesets** (version PRs), **Release** (npm publish), **Canary** (branch-tagged canary releases).
+The Canary job is guarded with `if: github.ref == 'refs/heads/main'`, so a `workflow_dispatch` from another branch never publishes a branch-named dist-tag.
+
+### viem Canary Workflow
+
+`viem-canary.yml` runs nightly (and on `workflow_dispatch`) with a `latest` / `next` matrix: it resolves the tag, skips the leg when the version is outside the package's viem peer range, otherwise `bun add -d viem@<version>` at the root, `bun run build`, `test:ci-no-coverage` (foundry + `VITE_FORK_RPC_URL`), and `test:types` once that script exists. Failing steps continue, then the last step files or updates one issue titled `viem canary: <tag> failing` (label `viem-canary`) and closes it when the leg is green again. Schedules only fire from the default branch.
 
 ## Package Exports
 
-The `package.json` uses conditional exports to serve the correct format:
+The `package.json` uses conditional exports; every entry is `{ types, default }`:
 
 ```json
 {
   "exports": {
     ".": {
       "types": "./_types/index.d.ts",
-      "import": "./_esm/index.js",
-      "default": "./_cjs/index.js"
+      "default": "./_esm/index.js"
     }
   }
 }
 ```
 
 - **`types`** -- TypeScript picks up `.d.ts` files from `_types/`
-- **`import`** -- ESM bundlers and Node with `"type": "module"` use `_esm/`
-- **`default`** -- CommonJS `require()` falls back to `_cjs/`
+- **`default`** -- everything else (`import`, bundlers, Node `require(esm)`) uses `_esm/`
 
-See [Export Map](./02-export-map.md) for the complete list of 14 subpath exports.
+`typesVersions["*"]` mirrors each subpath to its `.d.ts` for `moduleResolution: node10` consumers, and each subpath directory ships a proxy `package.json` pointing at `_types`/`_esm` for resolvers that ignore `exports`.
+
+See [Export Map](./02-export-map.md) for the complete list of subpath exports.
 
 ## Linting & Formatting
 
@@ -223,9 +175,8 @@ Configuration (`.changeset/config.json`):
 | Entry | Format | Limit |
 |-------|--------|-------|
 | `permissionless` | ESM | 250 kB |
-| `permissionless` | CJS | 500 kB |
 
-The `build:size` script builds only the permissionless CJS + ESM targets needed for size checking (skips wagmi, mock-paymaster, and types).
+The `build:size` script builds only the permissionless package (skips wagmi and mock-paymaster).
 
 Checked via `bun run size-limit` locally, or via `size-limit-action` in CI.
 
@@ -249,13 +200,12 @@ To add a new subpath export (e.g., `permissionless/foo`):
 
 1. Create the source file(s) under `packages/permissionless/foo/`
 2. Create a barrel file at `packages/permissionless/foo/index.ts`
-3. Add the export to `packages/permissionless/package.json`:
+3. Add the export to `packages/permissionless/package.json`, plus a `typesVersions["*"]` entry (`"foo": ["./_types/foo/index.d.ts"]`) and a proxy `packages/permissionless/foo/package.json`:
    ```json
    "./foo": {
      "types": "./_types/foo/index.d.ts",
-     "import": "./_esm/foo/index.js",
-     "default": "./_cjs/foo/index.js"
+     "default": "./_esm/foo/index.js"
    }
    ```
-4. Rebuild: `bun run build:permissionless`
-5. Verify the export resolves correctly in both ESM and CJS consumers
+4. Add the subpath to `.github/fixtures/type-consumer/consumer.ts`
+5. Rebuild: `bun run build:permissionless`, then `npx publint --strict` in the package
