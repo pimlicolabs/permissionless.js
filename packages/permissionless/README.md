@@ -111,6 +111,8 @@ Build permissionless.js locally with:
 bun run build
 ```
 
+The test rig (`bun run test`) needs Foundry ≥ 1.8 (`anvil`); CI runs 1.8.1.
+
 ## License
 
 Distributed under an MIT License. See [LICENSE](LICENSE) for more information.
