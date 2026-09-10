@@ -90,16 +90,25 @@ const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
 
 const verifyDeployed = async (
     client: Client.Client,
+    mine: () => Promise<unknown>,
     addresses: Address.Address[]
 ) => {
     for (const address of addresses) {
-        const bytecode = await Actions.address.getCode(client, {
-            address
-        })
-
-        if (bytecode === undefined) {
-            console.log(`CONTRACT ${address} NOT DEPLOYED!!!`)
-            process.exit(1)
+        for (let attempt = 1; ; attempt++) {
+            if (await Actions.address.getCode(client, { address })) {
+                if (attempt > 1) {
+                    console.log(
+                        `CONTRACT ${address} visible after ${attempt} getCode attempts`
+                    )
+                }
+                break
+            }
+            if (attempt === 10) {
+                console.log(`CONTRACT ${address} NOT DEPLOYED!!!`)
+                process.exit(1)
+            }
+            await mine()
+            await new Promise((resolve) => setTimeout(resolve, 100))
         }
     }
 }
@@ -728,7 +737,7 @@ export const setupContracts = async (rpc: string) => {
         address: alchemyLightClientOwner
     })
 
-    await verifyDeployed(client, [
+    await verifyDeployed(client, () => anvilClient.block.mine({ blocks: 1 }), [
         "0x4e59b44847b379578588920ca78fbf26c0b4956c", // Determinstic deployer
         "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
         "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
