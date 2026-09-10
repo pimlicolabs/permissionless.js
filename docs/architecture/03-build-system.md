@@ -89,7 +89,7 @@ All five jobs run **in parallel** with no dependencies:
 
 - **Lint** — formats and lints code, auto-commits fixes
 - **Build** — runs `bun run build` to verify compilation
-- **Package types** — a TypeScript `{5.9.3, 6.0.3, 7.0.2}` matrix: packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and (≤ 6) node10 consumers, runs the `*.test-d.ts` suite against the emitted `.d.ts`, and emits declarations for a module of inferred permissionless values (the TS2742/TS2883 probe; the extended-client half is a known failure kept `continue-on-error` until the `./_types/*` decision); `publint --strict` and `attw --pack --profile esm-only` gate the manifest on the 7.0.2 leg (see the fixture README)
+- **Package types** — a TypeScript `{5.9.3, 6.0.3, 7.0.2}` matrix: packs `permissionless`, installs the tarball into `.github/fixtures/type-consumer` and type-checks it as bundler, node16, nodenext and (≤ 6) node10 consumers, runs the `*.test-d.ts` suite against the emitted `.d.ts`, and emits declarations for a module of inferred permissionless values (the TS2742/TS2883 probe, including `.extend()`ed clients, whose inferred types tsc names through the `./_types/*` export row); `publint --strict` and `attw --pack --profile esm-only` gate the manifest on the 7.0.2 leg (see the fixture README)
 - **E2E-Coverage** — runs tests with coverage (no build needed — vitest resolves workspace packages from source via aliases)
 - **Size** — runs `size-limit-action` to compare bundle sizes against base branch
 

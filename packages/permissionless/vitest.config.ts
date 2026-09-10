@@ -14,12 +14,13 @@ const unportedAccounts = readdirSync(accountsDir, { withFileTypes: true })
     .map((d) => `**/accounts/${d.name}/**`)
 
 // The smoke test imports the package by its public entrypoints; each maps to
-// the source behind the same package.json exports entry.
+// the source behind the same package.json exports entry. The `./_types/*`
+// escape hatch is not an entrypoint.
 const { exports } = JSON.parse(
     readFileSync(join(__dirname, "package.json"), "utf8")
 ) as { exports: Record<string, string | { default: string }> }
 const entrypoints = Object.entries(exports).flatMap(([subpath, entry]) =>
-    typeof entry === "object"
+    typeof entry === "object" && !subpath.includes("*")
         ? [
               {
                   find: new RegExp(`^permissionless${subpath.slice(1)}$`),

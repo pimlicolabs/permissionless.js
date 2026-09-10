@@ -113,8 +113,7 @@ jobs:
         working-directory: .github/fixtures/type-consumer
         run: npx tsc -p tsconfig.declaration.json
 
-      - name: Declaration probe, extended clients (known failure, ./_types/* decision pending)
-        continue-on-error: true
+      - name: Declaration probe, extended clients (./_types/* escape hatch)
         working-directory: .github/fixtures/type-consumer
         run: npx tsc -p tsconfig.declaration.extend.json
 

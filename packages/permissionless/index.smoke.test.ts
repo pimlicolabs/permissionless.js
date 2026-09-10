@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import * as permissionless from "permissionless"
 import {
     Erc7579,
@@ -34,6 +35,10 @@ import { describe, expect, expectTypeOf, test } from "vitest"
 
 const keys = (module: object) => Object.keys(module).sort()
 
+const { exports: exportMap } = JSON.parse(
+    readFileSync(new URL("./package.json", import.meta.url), "utf8")
+) as { exports: Record<string, unknown> }
+
 const accountNamespaces = [
     "EtherspotSmartAccount",
     "KernelSmartAccount",
@@ -60,6 +65,21 @@ const namespaces = [
 ]
 
 describe("permissionless", () => {
+    test("export map: five public entrypoints + the ./_types/* escape hatch", () => {
+        expect(Object.keys(exportMap)).toEqual([
+            ".",
+            "./pimlico",
+            "./etherspot",
+            "./experimental",
+            "./package.json",
+            "./_types/*"
+        ])
+        expect(exportMap["./_types/*"]).toEqual({
+            types: "./_types/*.d.ts",
+            default: "./_esm/*.js"
+        })
+    })
+
     test("root exports", () => {
         expect(
             keys(permissionless).filter((k) => !k.endsWith("Error"))

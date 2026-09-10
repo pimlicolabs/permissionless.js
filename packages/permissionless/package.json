@@ -47,7 +47,11 @@
             "types": "./_types/experimental/index.d.ts",
             "default": "./_esm/experimental/index.js"
         },
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+        "./_types/*": {
+            "types": "./_types/*.d.ts",
+            "default": "./_esm/*.js"
+        }
     },
     "typesVersions": {
         "*": {

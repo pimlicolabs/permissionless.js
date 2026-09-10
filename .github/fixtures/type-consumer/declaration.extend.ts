@@ -1,9 +1,8 @@
-// Known to fail on TypeScript 5.9 / 6.0 / 7.0 (TS2742 / TS2883): `.extend()`
-// copies the action bag structurally, so the emitter has to spell out method
-// parameter types that live in files the exports map does not reach
+// `.extend()` copies the action bag structurally, so the emitter has to spell
+// out method parameter types that live in files no entrypoint reaches
 // (actions/smartAccount/*, actions/erc7579/*, actions/pimlico/*, types/utils).
-// viem closes the same gap with a `./_types/*` export; the decision for
-// permissionless is ticket 20's open question.
+// The `./_types/*` export lets tsc name them as `permissionless/_types/<path>`;
+// without it this file fails TS2742 (TS 5/6) / TS2883 (TS 7).
 import {
     erc7579Actions,
     SafeSmartAccount,
