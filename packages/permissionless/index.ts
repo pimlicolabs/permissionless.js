@@ -6,6 +6,7 @@ export { smartAccountActions } from "./clients/decorators/smartAccount.js"
 export * as SmartAccountClient from "./clients/smartAccount/index.js"
 export * from "./errors/index.js"
 export {
+    type GetRequiredPrefundParameters,
     type GetRequiredPrefundReturnType,
     getRequiredPrefund
 } from "./utils/getRequiredPrefund.js"

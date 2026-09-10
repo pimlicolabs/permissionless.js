@@ -4,7 +4,7 @@
 
 ```typescript
 import { getRequiredPrefund } from "permissionless"
-import type { GetRequiredPrefundReturnType } from "permissionless"
+import type { GetRequiredPrefundParameters, GetRequiredPrefundReturnType } from "permissionless"
 ```
 
 ---
@@ -16,13 +16,12 @@ Minimum amount the sender (or its paymaster) must have deposited in the EntryPoi
 ### Signature
 
 ```typescript
-function getRequiredPrefund<entryPointVersion extends EntryPoint.Version>(args: {
-    userOperation: UserOperation.UserOperation<entryPointVersion>
-    entryPointVersion: entryPointVersion
-}): bigint
+function getRequiredPrefund<entryPointVersion extends EntryPoint.Version>(
+    parameters: GetRequiredPrefundParameters<entryPointVersion>
+): GetRequiredPrefundReturnType
 ```
 
-`GetRequiredPrefundReturnType<entryPointVersion>` is the type of `args`; the name predates 1.0.
+`GetRequiredPrefundParameters<entryPointVersion>` is `{ userOperation: UserOperation.UserOperation<entryPointVersion>; entryPointVersion }`; `GetRequiredPrefundReturnType` is `bigint`.
 
 ### Parameters
 

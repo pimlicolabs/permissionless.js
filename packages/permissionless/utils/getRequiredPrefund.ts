@@ -1,18 +1,19 @@
 import type { EntryPoint, UserOperation } from "viem/erc4337"
 
-export type GetRequiredPrefundReturnType<
+export type GetRequiredPrefundParameters<
     entryPointVersion extends EntryPoint.Version = "0.7"
 > = {
     userOperation: UserOperation.UserOperation<entryPointVersion>
     entryPointVersion: entryPointVersion
 }
 
+export type GetRequiredPrefundReturnType = bigint
+
 /**
+ * Returns the minimum required funds in the sender's smart account to execute the user operation.
  *
- * Returns the minimum required funds in the senders's smart account to execute the user operation.
- *
- * @param arags: {userOperation} as {@link UserOperation}
- * @returns requiredPrefund as {@link bigint}
+ * @param parameters {@link GetRequiredPrefundParameters}
+ * @returns requiredPrefund {@link GetRequiredPrefundReturnType}
  *
  * @example
  * import { getRequiredPrefund } from "permissionless/utils"
@@ -26,7 +27,7 @@ export const getRequiredPrefund = <
 >({
     userOperation,
     entryPointVersion
-}: GetRequiredPrefundReturnType<entryPointVersion>): bigint => {
+}: GetRequiredPrefundParameters<entryPointVersion>): GetRequiredPrefundReturnType => {
     if (entryPointVersion === "0.6") {
         const userOperationVersion0_6 =
             userOperation as UserOperation.UserOperation<"0.6">

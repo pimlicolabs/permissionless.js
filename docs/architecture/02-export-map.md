@@ -37,7 +37,7 @@ import { SafeSmartAccount, SmartAccountClient, Erc7579, Nonce, Owner } from "per
 | `Owner` | namespace | `utils/owner.ts` |
 | `*Error` classes (see [errors](../types-and-errors/errors.md)) | class | `errors/<module>.ts` via the flat `errors/index.ts` |
 
-Root types: `GetAccountNonceParams`, `GetSenderAddressParams`, `GetRequiredPrefundReturnType`.
+Root types: `GetAccountNonceParams`, `GetSenderAddressParams`, `GetRequiredPrefundParameters`, `GetRequiredPrefundReturnType`.
 
 ### `SmartAccountClient`
 

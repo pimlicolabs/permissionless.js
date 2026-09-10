@@ -191,7 +191,8 @@ describe("permissionless", () => {
         expectTypeOf<SmartAccountClient.PrepareUserOperationHook>().not.toBeAny()
         expectTypeOf<permissionless.GetAccountNonceParams>().not.toBeAny()
         expectTypeOf<permissionless.GetSenderAddressParams>().not.toBeAny()
-        expectTypeOf<permissionless.GetRequiredPrefundReturnType>().not.toBeAny()
+        expectTypeOf<permissionless.GetRequiredPrefundParameters>().not.toBeAny()
+        expectTypeOf<permissionless.GetRequiredPrefundReturnType>().toEqualTypeOf<bigint>()
 
         expectTypeOf<Erc7579.Actions<SmartAccount.SmartAccount>>().not.toBeAny()
         expectTypeOf<Erc7579.CallType>().toEqualTypeOf<
