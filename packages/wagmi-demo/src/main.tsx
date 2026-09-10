@@ -5,8 +5,9 @@ import React, { useEffect } from "react"
 import ReactDOM from "react-dom/client"
 import {
     WagmiProvider,
-    useAccount,
     useConnect,
+    useConnection,
+    useConnectors,
     useDisconnect,
     useWalletClient
 } from "wagmi"
@@ -15,7 +16,7 @@ import App from "./App.tsx"
 import { capabilities, config } from "./wagmi.ts"
 
 import "./index.css"
-import { http, type Transport, getClient } from "@wagmi/core"
+import { http, type Transport, getPublicClient } from "@wagmi/core"
 import {
     type SafeSmartAccountImplementation,
     toSafeSmartAccount
@@ -49,11 +50,12 @@ function Temp() {
             Chain,
             SmartAccount<SafeSmartAccountImplementation>
         > | null>(null)
-    const account = useAccount()
-    const { connectors, connect, status, error } = useConnect()
-    const { disconnect } = useDisconnect()
+    const account = useConnection()
+    const { mutate: connect, status, error } = useConnect()
+    const connectors = useConnectors()
+    const { mutate: disconnect } = useDisconnect()
     const { data: walletClient } = useWalletClient()
-    const publicClient = getClient(config)
+    const publicClient = getPublicClient(config)
 
     useEffect(() => {
         if (account.status !== "connected") {
@@ -204,7 +206,7 @@ function Main() {
     console.log({ path })
 
     React.useEffect(() => {
-        const handlePopState = (event: PopStateEvent) => {
+        const handlePopState = (_event: PopStateEvent) => {
             console.log("popstate event fired", window.location.pathname)
             setPath(window.location.pathname)
         }

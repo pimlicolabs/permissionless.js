@@ -7,6 +7,7 @@ import type {
 } from "@tanstack/react-query"
 import {
     type Config,
+    type GetCallsStatusErrorType,
     type ResolvedRegister,
     type WaitForTransactionReceiptErrorType,
     type WaitForTransactionReceiptReturnType,
@@ -16,26 +17,26 @@ import {
 import { ConnectorNotConnectedError } from "@wagmi/core"
 import type {
     GetCallsStatusData,
-    GetCallsStatusErrorType,
     GetCallsStatusOptions,
-    GetCallsStatusQueryFnData
-} from "@wagmi/core/experimental"
-import type { WaitForTransactionReceiptData } from "@wagmi/core/query"
+    GetCallsStatusQueryFnData,
+    WaitForTransactionReceiptData
+} from "@wagmi/core/query"
 import {
+    type Capabilities,
     type Hash,
     type Prettify,
     WaitForTransactionReceiptTimeoutError,
-    type WalletCapabilities,
     type WalletSendCallsParameters,
     isHash,
     stringify
 } from "viem"
-import { getTransactionReceipt, watchBlockNumber } from "viem/actions"
 import {
     type GetCallsStatusReturnType,
     type ShowCallsStatusErrorType,
-    getCallsStatus
-} from "viem/experimental"
+    getCallsStatus,
+    getTransactionReceipt,
+    watchBlockNumber
+} from "viem/actions"
 import { getAction } from "viem/utils"
 import { useChainId, useConfig } from "wagmi"
 import {
@@ -63,9 +64,18 @@ export function waitForTransactionReceiptQueryKey<
         "hash" | "onReplaced"
     > & {
         id?: string
-        capabilities?: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
+        capabilities?: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
     } = {}
-) {
+): readonly [
+    "waitForTransactionReceipt",
+    Omit<
+        WaitForTransactionReceiptOptions<config, chainId>,
+        "hash" | "onReplaced"
+    > & {
+        id?: string
+        capabilities?: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
+    }
+] {
     const { ...rest } = options
     return ["waitForTransactionReceipt", filterQueryOptions(rest)] as const
 }
@@ -311,7 +321,7 @@ function waitForTransactionReceiptQueryOptions<
         "hash" | "onReplaced"
     > & {
         id?: string
-        capabilities?: WalletSendCallsParameters<WalletCapabilities>[number]["capabilities"]
+        capabilities?: WalletSendCallsParameters<Capabilities>[number]["capabilities"]
     }
 ) {
     return {

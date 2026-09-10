@@ -3,12 +3,13 @@ import {
     useWaitForTransactionReceipt
 } from "@permissionless/wagmi"
 import { useCallback } from "react"
-import { useAccount, useConnect, useDisconnect } from "wagmi"
+import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi"
 
 function App() {
-    const account = useAccount()
-    const { connectors, connect, status, error } = useConnect()
-    const { disconnect } = useDisconnect()
+    const account = useConnection()
+    const { mutate: connect, status, error } = useConnect()
+    const connectors = useConnectors()
+    const { mutate: disconnect } = useDisconnect()
 
     const {
         sendTransaction,

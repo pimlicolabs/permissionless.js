@@ -10,7 +10,7 @@ export const config = createConfig({
     connectors: [
         coinbaseWallet({
             appName: "Pimlico Test",
-            preference: "smartWalletOnly"
+            preference: { options: "smartWalletOnly" }
         })
     ],
     transports: {
