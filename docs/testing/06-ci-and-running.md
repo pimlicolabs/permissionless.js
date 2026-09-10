@@ -18,6 +18,8 @@ From `package.json:92–94`:
 | `bun run test:ci-no-coverage` | Quick full CI-style run locally | one-shot | none                       | `--pool=forks`  |
 | `bun run test:ci`        | What CI runs          | one-shot            | lcov only                   | `--pool=forks`  |
 
+Two more scripts cover types: `bun run test:types` runs the `*.test-d.ts` files through vitest's typecheck mode (checker: the repo's TypeScript 7 `tsc` binary, tsconfig `tsconfig/tsconfig.permissionless.test-d.json`), and `bun run typecheck` runs `tsc -p tsconfig/tsconfig.permissionless.test.json` (the repo compiler, TypeScript 7) over every `*.test.ts`, `*.test-d.ts` and the anvil rig. Both tsconfigs route the `permissionless*` entrypoints to the sources with `paths`, so the type tests import the package the way consumers do; CI's `package-types` job (see `docs/architecture/03-build-system.md`) runs the same files against the packed tarball on TypeScript 5.9.3, 6.0.3 and 7.0.2. The `Verify` workflow's `types` job runs both scripts on that matrix.
+
 Why `--pool=forks`? The default Vitest pool uses worker **threads**; `forks` uses worker **processes**. Because each worker spawns multiple child processes (Anvil, Alto, Fastify) shared across tests and relies on `prool` signal handling, process-pool isolation is safer and more reliable, at the cost of slightly higher memory usage.
 
 The `CI=true &&` prefix in the CI scripts sets the environment variable so `vitest.config.ts:10` picks the lcov-only reporter:
@@ -59,7 +61,7 @@ Key points:
 
 ### The disabled sharded test job
 
-`.github/workflows/verify.yml:77–114` defines a matrix-sharded `test` job (3 shards × 2 transport modes × `nick-fields/retry@v2` with 3 attempts). It's **disabled** by `if: false` at `verify.yml:78` and doesn't currently run. It references `VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_ANVIL_FORK_URL`, `VITE_BATCH_MULTICALL`, and `VITE_NETWORK_TRANSPORT_MODE` env vars — but because the job is gated off, these are not live right now. If re-enabled, see the workflow file for the exact env-var names.
+`.github/workflows/verify.yml` defines a matrix-sharded `test` job (3 shards × 2 transport modes × `nick-fields/retry@v2` with 3 attempts). It's **disabled** by `if: false` and doesn't currently run (the `types` job in the same file is live). It references `VITE_ANVIL_BLOCK_NUMBER`, `VITE_ANVIL_BLOCK_TIME`, `VITE_ANVIL_FORK_URL`, `VITE_BATCH_MULTICALL`, and `VITE_NETWORK_TRANSPORT_MODE` env vars — but because the job is gated off, these are not live right now. If re-enabled, see the workflow file for the exact env-var names.
 
 ## Environment variables
 

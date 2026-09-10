@@ -1,0 +1,5 @@
+{
+    // The extended-client half of the declaration probe; see declaration.extend.ts.
+    "extends": "./tsconfig.declaration.json",
+    "files": ["declaration.extend.ts"]
+}

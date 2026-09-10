@@ -34,6 +34,26 @@ export type SponsorUserOperationParameters<
                     | "paymasterPostOpGasLimit"
                 >
               : never)
+        | (entryPointVersion extends "0.8"
+              ? PartialBy<
+                    UserOperation.UserOperation<"0.8">,
+                    | "callGasLimit"
+                    | "preVerificationGas"
+                    | "verificationGasLimit"
+                    | "paymasterVerificationGasLimit"
+                    | "paymasterPostOpGasLimit"
+                >
+              : never)
+        | (entryPointVersion extends "0.9"
+              ? PartialBy<
+                    UserOperation.UserOperation<"0.9">,
+                    | "callGasLimit"
+                    | "preVerificationGas"
+                    | "verificationGasLimit"
+                    | "paymasterVerificationGasLimit"
+                    | "paymasterPostOpGasLimit"
+                >
+              : never)
     >
     entryPoint: {
         address: Address.Address
@@ -54,7 +74,7 @@ export type SponsorUserOperationReturnType<
                 paymasterAndData: Hex.Hex
             }
           : never)
-    | (entryPointVersion extends "0.7"
+    | (entryPointVersion extends "0.7" | "0.8" | "0.9"
           ? {
                 callGasLimit: bigint
                 verificationGasLimit: bigint

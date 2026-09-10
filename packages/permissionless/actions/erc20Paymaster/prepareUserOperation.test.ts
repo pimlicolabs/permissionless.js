@@ -62,9 +62,8 @@ describe.each(getCoreSmartAccounts())(
                     paymaster: pimlicoClient,
                     chain: anvil,
                     userOperation: {
-                        prepareUserOperation: prepareUserOperation(
-                            pimlicoClient
-                        ) as SmartAccountClient.PrepareUserOperationHook
+                        prepareUserOperation:
+                            prepareUserOperation(pimlicoClient)
                     },
                     bundlerTransport: createAutoBundleTransport(
                         rpc.altoRpc,
@@ -161,9 +160,8 @@ describe.each(getCoreSmartAccounts())(
                     paymaster: pimlicoClient,
                     chain: anvil,
                     userOperation: {
-                        prepareUserOperation: prepareUserOperation(
-                            pimlicoClient
-                        ) as SmartAccountClient.PrepareUserOperationHook
+                        prepareUserOperation:
+                            prepareUserOperation(pimlicoClient)
                     },
                     bundlerTransport: createAutoBundleTransport(
                         rpc.altoRpc,
@@ -274,9 +272,8 @@ describe.each(getCoreSmartAccounts())(
                     paymaster: pimlicoClient,
                     chain: anvil,
                     userOperation: {
-                        prepareUserOperation: prepareUserOperation(
-                            pimlicoClient
-                        ) as SmartAccountClient.PrepareUserOperationHook
+                        prepareUserOperation:
+                            prepareUserOperation(pimlicoClient)
                     },
                     bundlerTransport: createAutoBundleTransport(
                         rpc.altoRpc,
@@ -392,7 +389,7 @@ describe.each(getCoreSmartAccounts())(
                             {
                                 balanceOverride: true
                             }
-                        ) as SmartAccountClient.PrepareUserOperationHook
+                        )
                     },
                     bundlerTransport: createAutoBundleTransport(
                         rpc.altoRpc,
@@ -508,7 +505,7 @@ describe.each(getCoreSmartAccounts())(
                             {
                                 balanceOverride: true
                             }
-                        ) as SmartAccountClient.PrepareUserOperationHook
+                        )
                     },
                     bundlerTransport: createAutoBundleTransport(
                         rpc.altoRpc,

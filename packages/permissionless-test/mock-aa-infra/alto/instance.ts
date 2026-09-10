@@ -1,4 +1,5 @@
 import { resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import { defineInstance, toArgs } from "prool"
 import { execa } from "prool/processes"
 import type { Hex } from "viem/utils"
@@ -262,7 +263,7 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
                 if (args.binary) return [args.binary]
                 const libPath =
                     "resolve" in import.meta
-                        ? import.meta.resolve("@pimlico/alto").split("file:")[1]
+                        ? fileURLToPath(import.meta.resolve("@pimlico/alto"))
                         : require.resolve("@pimlico/alto")
                 return ["node", resolve(libPath, "../cli/alto.js")]
             })()
