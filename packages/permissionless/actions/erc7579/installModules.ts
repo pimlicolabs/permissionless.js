@@ -50,9 +50,7 @@ export async function installModules<
     } = parameters
 
     if (!account_) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/sendTransaction"
-        })
+        throw new AccountNotFoundError()
     }
 
     const account = account_ as SmartAccount.SmartAccount

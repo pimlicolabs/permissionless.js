@@ -131,9 +131,7 @@ export async function signTypedData<
         types: types_
     } = parameters as SignTypedDataParameters
     if (!account_) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/signMessage"
-        })
+        throw new AccountNotFoundError()
     }
 
     const account = account_ as SmartAccount.SmartAccount

@@ -57,9 +57,7 @@ export function encodeUninstallModule<
     const account = parameters.account as SmartAccount.SmartAccount
 
     if (!account) {
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/sendTransaction"
-        })
+        throw new AccountNotFoundError()
     }
 
     const modules = Array.isArray(parameters.modules)

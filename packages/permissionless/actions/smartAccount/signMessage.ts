@@ -67,10 +67,7 @@ export async function signMessage<
         message
     }: SignMessageParameters<TAccount>
 ): Promise<Hex.Hex> {
-    if (!account_)
-        throw new AccountNotFoundError({
-            docsPath: "/docs/actions/wallet/signMessage"
-        })
+    if (!account_) throw new AccountNotFoundError()
 
     const account = account_ as SmartAccount.SmartAccount
 
