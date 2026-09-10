@@ -7,10 +7,7 @@ import {
     getBundlerClient,
     getPimlicoClient
 } from "../../../permissionless-test/src/utils"
-import {
-    type SponsorUserOperationReturnType,
-    sponsorUserOperation
-} from "./sponsorUserOperation"
+import { sponsorUserOperation } from "./sponsorUserOperation"
 
 describe("sponsorUserOperation", () => {
     testWithRpc("sponsorUserOperation_V06", async ({ rpc }) => {
@@ -197,13 +194,13 @@ describe("sponsorUserOperation", () => {
             altoRpc: paymasterRpc
         })
 
-        const sponsorResult = (await sponsorUserOperation(paymasterClient, {
+        const sponsorResult = await sponsorUserOperation(paymasterClient, {
             userOperation: preparedUserOp,
             entryPoint: {
                 address: EntryPoint.addressV08,
                 version: "0.8"
             }
-        } as any)) as SponsorUserOperationReturnType<"0.7">
+        })
 
         const finalUserOp = {
             ...preparedUserOp,

@@ -1,0 +1,17 @@
+{
+    // Declaration probe (viem's environments/tsc/declaration): emitting .d.ts for a module that exports inferred
+    // permissionless values fails with TS2742 (TS 5/6) or TS2883 (TS 7) when an inferred type can only be named
+    // through a path the package does not export.
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "strict": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "declaration-out",
+        "skipLibCheck": true,
+        "types": []
+    },
+    "files": ["declaration.ts"]
+}

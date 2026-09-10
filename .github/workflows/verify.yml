@@ -43,14 +43,16 @@ jobs:
         run: bun run build
 
   types:
-    if: false
-    name: Types
+    name: Types (TypeScript ${{ matrix.typescript-version }})
     needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        typescript-version: ['5.0.4', 'latest']
+        typescript-version: ['5.9.3', '6.0.3', '7.0.2']
+    env:
+      TSC: ${{ runner.temp }}/typescript/node_modules/.bin/tsc
 
     steps:
       - name: Clone repository
@@ -59,19 +61,16 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
 
-      - run: bun i -d typescript@${{ matrix.typescript-version }}
-
-      - name: Build contracts
-        shell: bash
-        run: bun run contracts:build
+      - name: Install TypeScript ${{ matrix.typescript-version }}
+        run: |
+          npm install --no-package-lock --prefix "$RUNNER_TEMP/typescript" typescript@${{ matrix.typescript-version }}
+          "$TSC" --version
 
       - name: Check types
-        run: bun run typecheck
+        run: '"$TSC" -p tsconfig/tsconfig.permissionless.test.json'
 
       - name: Test types
-        run: bun run test:typecheck
-        env:
-          VITE_ANVIL_BLOCK_NUMBER: ${{ vars.VITE_ANVIL_BLOCK_NUMBER }}
+        run: bun run test:types --typecheck.checker="$TSC"
 
   test:
     if: false
