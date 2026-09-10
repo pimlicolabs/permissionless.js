@@ -39,35 +39,11 @@ export type SendTransactionParameters<
  * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash.
  *
  * @example
- * import { createWalletClient, custom } from 'viem'
- * import { mainnet } from 'viem/chains'
- * import { sendTransaction } from 'viem/wallet'
+ * import { sendTransaction } from "permissionless"
  *
- * const client = createWalletClient({
- *   chain: mainnet,
- *   transport: custom(window.ethereum),
- * })
- * const hash = await sendTransaction(client, {
- *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
- *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
- *   value: 1000000000000000000n,
- * })
- *
- * @example
- * // Account Hoisting
- * import { createWalletClient, http } from 'viem'
- * import { privateKeyToAccount } from 'viem/accounts'
- * import { mainnet } from 'viem/chains'
- * import { sendTransaction } from 'viem/wallet'
- *
- * const client = createWalletClient({
- *   account: privateKeyToAccount('0x…'),
- *   chain: mainnet,
- *   transport: http(),
- * })
- * const hash = await sendTransaction(client, {
- *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
- *   value: 1000000000000000000n,
+ * const hash = await sendTransaction(smartAccountClient, {
+ *     to: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+ *     value: 1000000000000000000n
  * })
  */
 export async function sendTransaction<

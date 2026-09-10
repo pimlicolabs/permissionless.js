@@ -16,10 +16,11 @@ export type GetRequiredPrefundReturnType = bigint
  * @returns requiredPrefund {@link GetRequiredPrefundReturnType}
  *
  * @example
- * import { getRequiredPrefund } from "permissionless/utils"
+ * import { getRequiredPrefund } from "permissionless"
  *
  * const requiredPrefund = getRequiredPrefund({
- *     userOperation
+ *     userOperation,
+ *     entryPointVersion: "0.7"
  * })
  */
 export const getRequiredPrefund = <

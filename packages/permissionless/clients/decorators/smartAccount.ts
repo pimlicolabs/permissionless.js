@@ -35,33 +35,18 @@ export type SmartAccountActions<
      * @returns The [Transaction](https://viem.sh/docs/glossary/terms.html#transaction) hash. {@link SendTransactionReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
+     * import { http } from "viem"
+     * import { sepolia } from "viem/chains"
+     * import { SmartAccountClient } from "permissionless"
      *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
+     * const smartAccountClient = SmartAccountClient.create({
+     *     account,
+     *     chain: sepolia,
+     *     bundlerTransport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
      * })
-     * const hash = await client.sendTransaction({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const hash = await client.sendTransaction({
-     *   to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-     *   value: 1000000000000000000n,
+     * const hash = await smartAccountClient.sendTransaction({
+     *     to: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+     *     value: 1000000000000000000n
      * })
      */
     sendTransaction: <
@@ -97,32 +82,7 @@ export type SmartAccountActions<
      * @returns The signed message. {@link SignMessageReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const signature = await client.signMessage({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   message: 'hello world',
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const signature = await client.signMessage({
-     *   message: 'hello world',
-     * })
+     * const signature = await smartAccountClient.signMessage({ message: "hello world" })
      */
     signMessage: (
         args: Parameters<typeof signMessage<TSmartAccount>>[1]
@@ -140,87 +100,30 @@ export type SmartAccountActions<
      * @returns The signed data. {@link SignTypedDataReturnType}
      *
      * @example
-     * import { createWalletClient, custom } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const signature = await client.signTypedData({
-     *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
-     *   domain: {
-     *     name: 'Ether Mail',
-     *     version: '1',
-     *     chainId: 1,
-     *     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-     *   },
-     *   types: {
-     *     Person: [
-     *       { name: 'name', type: 'string' },
-     *       { name: 'wallet', type: 'address' },
-     *     ],
-     *     Mail: [
-     *       { name: 'from', type: 'Person' },
-     *       { name: 'to', type: 'Person' },
-     *       { name: 'contents', type: 'string' },
-     *     ],
-     *   },
-     *   primaryType: 'Mail',
-     *   message: {
-     *     from: {
-     *       name: 'Cow',
-     *       wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+     * const signature = await smartAccountClient.signTypedData({
+     *     domain: {
+     *         name: "Ether Mail",
+     *         version: "1",
+     *         chainId: 1,
+     *         verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
      *     },
-     *     to: {
-     *       name: 'Bob',
-     *       wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+     *     types: {
+     *         Person: [
+     *             { name: "name", type: "string" },
+     *             { name: "wallet", type: "address" }
+     *         ],
+     *         Mail: [
+     *             { name: "from", type: "Person" },
+     *             { name: "to", type: "Person" },
+     *             { name: "contents", type: "string" }
+     *         ]
      *     },
-     *     contents: 'Hello, Bob!',
-     *   },
-     * })
-     *
-     * @example
-     * // Account Hoisting
-     * import { createWalletClient, http } from 'viem'
-     * import { privateKeyToAccount } from 'viem/accounts'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   account: privateKeyToAccount('0x…'),
-     *   chain: mainnet,
-     *   transport: http(),
-     * })
-     * const signature = await client.signTypedData({
-     *   domain: {
-     *     name: 'Ether Mail',
-     *     version: '1',
-     *     chainId: 1,
-     *     verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-     *   },
-     *   types: {
-     *     Person: [
-     *       { name: 'name', type: 'string' },
-     *       { name: 'wallet', type: 'address' },
-     *     ],
-     *     Mail: [
-     *       { name: 'from', type: 'Person' },
-     *       { name: 'to', type: 'Person' },
-     *       { name: 'contents', type: 'string' },
-     *     ],
-     *   },
-     *   primaryType: 'Mail',
-     *   message: {
-     *     from: {
-     *       name: 'Cow',
-     *       wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-     *     },
-     *     to: {
-     *       name: 'Bob',
-     *       wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-     *     },
-     *     contents: 'Hello, Bob!',
-     *   },
+     *     primaryType: "Mail",
+     *     message: {
+     *         from: { name: "Cow", wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826" },
+     *         to: { name: "Bob", wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB" },
+     *         contents: "Hello, Bob!"
+     *     }
      * })
      */
     signTypedData: <
@@ -250,36 +153,14 @@ export type SmartAccountActions<
      * @returns A [Transaction Hash](https://viem.sh/docs/glossary/terms.html#hash). {@link WriteContractReturnType}
      *
      * @example
-     * import { createWalletClient, custom, parseAbi } from 'viem'
-     * import { mainnet } from 'viem/chains'
+     * import { Abi } from "viem/utils"
      *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
+     * const hash = await smartAccountClient.writeContract({
+     *     address: "0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2",
+     *     abi: Abi.from(["function mint(uint32 tokenId) nonpayable"]),
+     *     functionName: "mint",
+     *     args: [69420]
      * })
-     * const hash = await client.writeContract({
-     *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-     *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-     *   functionName: 'mint',
-     *   args: [69420],
-     * })
-     *
-     * @example
-     * // With Validation
-     * import { createWalletClient, custom, parseAbi } from 'viem'
-     * import { mainnet } from 'viem/chains'
-     *
-     * const client = createWalletClient({
-     *   chain: mainnet,
-     *   transport: custom(window.ethereum),
-     * })
-     * const { request } = await client.simulateContract({
-     *   address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-     *   abi: parseAbi(['function mint(uint32 tokenId) nonpayable']),
-     *   functionName: 'mint',
-     *   args: [69420],
-     * }
-     * const hash = await client.writeContract(request)
      */
     writeContract: <
         const TAbi extends Abi.Abi | readonly unknown[],

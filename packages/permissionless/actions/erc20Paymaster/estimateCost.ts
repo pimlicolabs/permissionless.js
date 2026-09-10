@@ -29,7 +29,7 @@ export type EstimateCostParameters<
 /**
  * Returns all related fields to calculate the potential cost of a userOperation in ERC-20 tokens.
  *
- *  * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ *  * @param client viem client whose transport points at Pimlico's RPC.
  * @returns quotes, see {@link EstimateCostReturnType}
  *
  */

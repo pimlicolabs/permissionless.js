@@ -29,34 +29,9 @@ export type SignMessageParameters<
  * @returns The signed message. {@link SignMessageReturnType}
  *
  * @example
- * import { createWalletClient, custom } from 'viem'
- * import { mainnet } from 'viem/chains'
- * import { signMessage } from 'viem/wallet'
+ * import { signMessage } from "permissionless"
  *
- * const client = createWalletClient({
- *   chain: mainnet,
- *   transport: custom(window.ethereum),
- * })
- * const signature = await signMessage(client, {
- *   account: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
- *   message: 'hello world',
- * })
- *
- * @example
- * // Account Hoisting
- * import { createWalletClient, custom } from 'viem'
- * import { privateKeyToAccount } from 'viem/accounts'
- * import { mainnet } from 'viem/chains'
- * import { signMessage } from 'viem/wallet'
- *
- * const client = createWalletClient({
- *   account: privateKeyToAccount('0x…'),
- *   chain: mainnet,
- *   transport: custom(window.ethereum),
- * })
- * const signature = await signMessage(client, {
- *   message: 'hello world',
- * })
+ * const signature = await signMessage(smartAccountClient, { message: "hello world" })
  */
 export async function signMessage<
     TAccount extends SmartAccount.SmartAccount | undefined

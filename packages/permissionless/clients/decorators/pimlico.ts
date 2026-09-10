@@ -46,16 +46,14 @@ export type PimlicoActions<
      * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas {@link GetUserOperationGasPriceReturnType}
      *
      * @example
+     * import { http } from "viem"
+     * import { PimlicoClient } from "permissionless/pimlico"
      *
-     * import { createClient } from "viem"
-     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
+     * const pimlicoClient = PimlicoClient.create({
+     *     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
+     * })
      *
-     * const bundlerClient = createClient({
-     *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
-     * }).extend(pimlicoBundlerActions)
-     *
-     * await bundlerClient.getUserOperationGasPrice()
+     * await pimlicoClient.getUserOperationGasPrice()
      */
     getUserOperationGasPrice: () => Promise<
         Prettify<GetUserOperationGasPriceReturnType>
@@ -69,15 +67,14 @@ export type PimlicoActions<
      * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
      *
      * @example
-     * import { createClient } from "viem"
-     * import { pimlicoBundlerActions } from "permissionless/actions/pimlico"
+     * import { http } from "viem"
+     * import { PimlicoClient } from "permissionless/pimlico"
      *
-     * const bundlerClient = createClient({
-     *      chain: goerli,
-     *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
-     * }).extend(pimlicoBundlerActions)
+     * const pimlicoClient = PimlicoClient.create({
+     *     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
+     * })
      *
-     * await bundlerClient.getUserOperationStatus({ hash: userOpHash })
+     * await pimlicoClient.getUserOperationStatus({ hash: userOpHash })
      */
     getUserOperationStatus: (
         args: Prettify<GetUserOperationStatusParameters>

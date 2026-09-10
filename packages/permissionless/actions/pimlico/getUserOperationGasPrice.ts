@@ -21,21 +21,19 @@ export type GetUserOperationGasPriceReturnType = {
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-actions/getUserOperationGasPrice
  *
- * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client viem client whose transport points at Pimlico's RPC.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
  *
  *
  * @example
- * import { createClient } from "viem"
- * import { getUserOperationGasPrice } from "permissionless/actions/pimlico"
+ * import { Client, http } from "viem"
+ * import { Pimlico } from "permissionless/pimlico"
  *
- * const bundlerClient = createClient({
- *      chain: goerli,
- *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
+ * const client = Client.create({
+ *     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
  * })
  *
- * await getUserOperationGasPrice(bundlerClient)
- *
+ * await Pimlico.getUserOperationGasPrice(client)
  */
 export const getUserOperationGasPrice = async (
     client: Pick<Client.Client, "request">

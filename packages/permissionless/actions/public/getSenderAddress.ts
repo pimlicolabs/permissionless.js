@@ -51,25 +51,24 @@ export type GetSenderAddressParams = OneOf<
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/public-actions/getSenderAddress
  *
- * @param client {@link Client} that you created using viem's createPublicClient.
+ * @param client viem client.
  * @param args {@link GetSenderAddressParams} initCode & entryPoint
  * @returns Sender's Address
  *
  * @example
- * import { createPublicClient } from "viem"
- * import { getSenderAddress } from "permissionless/actions"
+ * import { Client, http } from "viem"
+ * import { sepolia } from "viem/chains"
+ * import { EntryPoint } from "viem/erc4337"
+ * import { getSenderAddress } from "permissionless"
  *
- * const publicClient = createPublicClient({
- *      chain: goerli,
- *      transport: http("https://goerli.infura.io/v3/your-infura-key")
+ * const client = Client.create({ chain: sepolia, transport: http() })
+ *
+ * const senderAddress = await getSenderAddress(client, {
+ *     factory,
+ *     factoryData,
+ *     entryPointAddress: EntryPoint.addressV07
  * })
- *
- * const senderAddress = await getSenderAddress(publicClient, {
- *      initCode,
- *      entryPoint
- * })
- *
- * // Return '0x7a88a206ba40b37a8c07a2b5688cf8b287318b63'
+ * // "0x7a88a206ba40b37a8c07a2b5688cf8b287318b63"
  */
 export const getSenderAddress = async (
     client: Client.Client,

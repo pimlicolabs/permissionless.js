@@ -16,23 +16,20 @@ export type GetUserOperationStatusReturnType = PimlicoUserOperationStatus
  *
  * - Docs: https://docs.pimlico.io/permissionless/reference/pimlico-bundler-actions/getUserOperationStatus
  *
- * @param client {@link PimlicoClient} that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client viem client whose transport points at Pimlico's RPC.
  * @param hash {@link Hash} UserOpHash that you must have received from sendUserOperation.
  * @returns status & transaction hash if included {@link GetUserOperationStatusReturnType}
  *
  *
  * @example
- * import { createClient } from "viem"
- * import { getUserOperationStatus } from "permissionless/actions/pimlico"
- * import { pimlicoBundlerActions } from 'permissionless/actions/pimlico'
+ * import { Client, http } from "viem"
+ * import { Pimlico } from "permissionless/pimlico"
  *
- * const bundlerClient = createClient({
- *      chain: goerli,
- *      transport: http("https://api.pimlico.io/v2/goerli/rpc?apikey=YOUR_API_KEY_HERE")
- * }).extend(pimlicoBundlerActions)
+ * const client = Client.create({
+ *     transport: http("https://api.pimlico.io/v2/sepolia/rpc?apikey=YOUR_API_KEY_HERE")
+ * })
  *
- * await getUserOperationStatus(bundlerClient, { hash: userOpHash })
- *
+ * await Pimlico.getUserOperationStatus(client, { hash: userOpHash })
  */
 export const getUserOperationStatus = async (
     client: Pick<Client.Client, "request">,

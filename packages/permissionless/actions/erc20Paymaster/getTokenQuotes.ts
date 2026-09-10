@@ -26,7 +26,7 @@ export type GetTokenQuotesReturnType = {
  *
  * - Docs: https://docs.pimlico.io/references/paymaster/erc20-paymaster/endpoints/pimlico_getTokenQuotes
  *
- * @param client that you created using viem's createClient whose transport url is pointing to the Pimlico's bundler.
+ * @param client viem client whose transport points at Pimlico's RPC.
  * @returns slow, standard & fast values for maxFeePerGas & maxPriorityFeePerGas
  * @returns quotes, see {@link GetTokenQuotesReturnType}
  *
