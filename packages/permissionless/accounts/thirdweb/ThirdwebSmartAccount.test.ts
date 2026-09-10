@@ -1,6 +1,12 @@
 import { Account } from "viem"
 import { EntryPoint } from "viem/erc4337"
-import { type Address, Secp256k1, SignatureErc6492 } from "viem/utils"
+import {
+    type Address,
+    Hash,
+    Hex,
+    Secp256k1,
+    SignatureErc6492
+} from "viem/utils"
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
@@ -45,6 +51,7 @@ const typedData = {
 } as const
 
 const randomOwner = () => Account.fromPrivateKey(Secp256k1.randomPrivateKey())
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
 
 describe("ThirdwebSmartAccount", () => {
     testWithRpc("defaults to EntryPoint 0.7 and 1.5.20", async ({ rpc }) => {
@@ -152,6 +159,13 @@ describe("ThirdwebSmartAccount", () => {
                         signature: await account.signMessage({
                             message: "hello"
                         })
+                    })
+                ).toBe(true)
+                expect(
+                    await client.verifyHash({
+                        address: account.address,
+                        hash,
+                        signature: await account.sign({ hash })
                     })
                 ).toBe(true)
             }

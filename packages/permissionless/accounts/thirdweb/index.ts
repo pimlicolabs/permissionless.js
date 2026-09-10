@@ -190,7 +190,7 @@ export async function from<entryPointVersion extends EntryPointVersion = "0.7">(
             return stubSignature
         },
         sign({ hash }) {
-            return signMessage({ message: hash })
+            return signAccountMessage(hash)
         },
         signMessage,
         async signTypedData(typedData) {

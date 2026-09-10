@@ -28,4 +28,6 @@ const account = await LightSmartAccount.from({ // [!code ++]
 - Nonce keys resolve as per-call `key`, then the constructor `nonceKey`, then `0n` (0.x let the constructor value win).
 - Types moved into the namespace: `ToLightSmartAccountParameters` → `LightSmartAccount.Parameters`, `ToLightSmartAccountReturnType` → `LightSmartAccount.ReturnType`, `LightSmartAccountImplementation` → `LightSmartAccount.Implementation`, `LightAccountVersion` → `LightSmartAccount.Version`.
 - `encodeCalls([])` throws the shared `EmptyCallsError` instead of a plain `Error`.
+- 2.0.0 signatures now verify on-chain: `signMessage`, `signTypedData` and `sign` use LightAccount v2's EIP-712 domain version `"2"` (0.x applied the v1 domain, so every 2.0.0 signature failed `isValidSignature`).
+- `sign({ hash })` now produces a verifier-compatible ERC-1271 signature: the raw 32-byte hash goes through the account's replay-safe wrapper, so `client.verifyHash` accepts it (0.x signed the hash's hex string, which no verifier accepted).
 - Counterfactual addresses are unchanged for every explicit `entryPoint` + `version` pair.

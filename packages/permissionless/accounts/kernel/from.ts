@@ -41,9 +41,11 @@ import { encodeCallData } from "./utils/encodeCallData.js"
 import { getNonceKeyWithEncoding } from "./utils/getNonceKey.js"
 import { isWebAuthnAccount } from "./utils/isWebAuthnAccount.js"
 import {
-    signMessage,
+    signHash,
+    signWebAuthn,
     webAuthnSignatureParameters
-} from "./utils/signMessage.js"
+} from "./utils/signHash.js"
+import { signMessage } from "./utils/signMessage.js"
 import { signTypedData } from "./utils/signTypedData.js"
 import {
     type EntryPointVersion,
@@ -386,17 +388,13 @@ export async function from<
                   signature
               )
 
-    const signMessage_ = async (message: Account.SignableMessage) =>
-        wrapSignature(
-            await signMessage({
-                owner,
-                message,
-                address: accountAddress,
-                version,
-                chainId: await getChainId(),
-                eip7702
-            })
-        )
+    const signer = async () => ({
+        owner,
+        address: accountAddress,
+        version,
+        chainId: await getChainId(),
+        eip7702
+    })
 
     const account = await SmartAccount.from({
         client,
@@ -418,20 +416,17 @@ export async function from<
             if (owner.type === "webAuthn") return webAuthnStubSignature
             return DUMMY_ECDSA_SIGNATURE
         },
-        sign: ({ hash }) => signMessage_(hash),
-        signMessage: ({ message }) => signMessage_(message),
-        async signTypedData(typedData) {
-            return wrapSignature(
+        sign: async ({ hash }) =>
+            wrapSignature(await signHash({ hash, ...(await signer()) })),
+        signMessage: async ({ message }) =>
+            wrapSignature(await signMessage({ message, ...(await signer()) })),
+        signTypedData: async (typedData) =>
+            wrapSignature(
                 await signTypedData({
-                    owner,
                     typedData: typedData as TypedData.Definition,
-                    address: accountAddress,
-                    version,
-                    chainId: await getChainId(),
-                    eip7702
+                    ...(await signer())
                 })
-            )
-        },
+            ),
         async signUserOperation(parameters) {
             const { chainId = await getChainId(), ...userOperation } =
                 parameters
@@ -449,13 +444,7 @@ export async function from<
             )
             const signature =
                 owner.type === "webAuthn"
-                    ? await signMessage({
-                          owner,
-                          message: { raw: hash },
-                          address: accountAddress,
-                          version,
-                          chainId
-                      })
+                    ? await signWebAuthn(owner, hash)
                     : await owner.signMessage({ message: { raw: hash } })
             return isKernelV2(version)
                 ? Hex.concat(ROOT_MODE_KERNEL_V2, signature)

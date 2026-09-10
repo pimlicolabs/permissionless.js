@@ -1,5 +1,6 @@
 import { Account } from "viem"
 import { EntryPoint } from "viem/erc4337"
+import { Hash, Hex } from "viem/utils"
 import { describe, expect } from "vitest"
 import { getLightAccountClient } from "../../../permissionless-test/src/accounts/light"
 import {
@@ -17,6 +18,18 @@ import { LightSmartAccountUnsupportedVersionError } from "../../errors/light"
 import * as LightSmartAccount from "./index"
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
+const hash = Hash.keccak256(Hex.fromString("permissionless"))
+const typedData = {
+    domain: {
+        name: "Ether Mail",
+        version: "1",
+        chainId: 31337,
+        verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+    },
+    types: { Mail: [{ name: "contents", type: "string" }] },
+    primaryType: "Mail",
+    message: { contents: "Hello, Bob!" }
+} as const
 
 const fixture = (entryPoint: "0.6" | "0.7") => {
     const entry = loadCounterfactualAddressFixture("light").find(
@@ -151,24 +164,59 @@ describe("LightSmartAccount.from", () => {
         )
     }
 
-    testWithRpc(
-        "signMessage verifies through ERC-1271 on 1.1.0",
-        async ({ rpc }) => {
-            const client = getPublicClient(rpc.anvilRpc)
-            const account = await LightSmartAccount.from({
-                client,
-                entryPoint: "0.6",
-                owner: Account.random()
-            })
-            const message = "slowly and steadily burning the private keys"
-            const signature = await account.signMessage({ message })
-            expect(
-                await client.verifyMessage({
-                    address: account.address,
-                    message,
-                    signature
+    for (const [entryPoint, version] of [
+        ["0.6", "1.1.0"],
+        ["0.7", "2.0.0"]
+    ] as const) {
+        testWithRpc(
+            `signMessage, signTypedData and sign verify through ERC-1271 on ${version} before and after deployment`,
+            async ({ rpc }) => {
+                const client = getPublicClient(rpc.anvilRpc)
+                const account = await LightSmartAccount.from({
+                    client,
+                    entryPoint,
+                    owner: Account.random()
                 })
-            ).toBe(true)
-        }
-    )
+                const message = "slowly and steadily burning the private keys"
+                const verify = async () => {
+                    expect(
+                        await client.verifyMessage({
+                            address: account.address,
+                            message,
+                            signature: await account.signMessage({ message })
+                        })
+                    ).toBe(true)
+                    expect(
+                        await client.typedData.verify({
+                            ...typedData,
+                            address: account.address,
+                            signature: await account.signTypedData(typedData)
+                        })
+                    ).toBe(true)
+                    expect(
+                        await client.verifyHash({
+                            address: account.address,
+                            hash,
+                            signature: await account.sign({ hash })
+                        })
+                    ).toBe(true)
+                }
+                await verify()
+                const bundlerClient = getBundlerClient({
+                    account,
+                    entryPoint: { version: entryPoint },
+                    ...rpc
+                })
+                const receipt =
+                    await bundlerClient.userOperation.waitForReceipt({
+                        hash: await bundlerClient.userOperation.send({
+                            calls: [{ to: zeroAddress, value: 0n }]
+                        })
+                    })
+                expect(receipt.success).toBe(true)
+                expect(await account.isDeployed()).toBe(true)
+                await verify()
+            }
+        )
+    }
 })
