@@ -5,7 +5,10 @@ import * as errors from "./index"
 const address = "0x0000000000000000000000000000000000000001"
 const cause = new Error("cause")
 
-const table: [new (...args: any[]) => Errors.BaseError, unknown[]][] = [
+const table: [
+    new (...args: any[]) => Errors.BaseError<Error | undefined>,
+    unknown[]
+][] = [
     [errors.AccountNotFoundError, []],
     [errors.EmptyCallsError, []],
     [errors.InvalidEntryPointError, [{ cause, entryPointAddress: address }]],

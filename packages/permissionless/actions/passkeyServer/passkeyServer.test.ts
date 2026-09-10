@@ -1,3 +1,4 @@
+import type { Client } from "viem"
 import { describe, expect, test } from "vitest"
 import {
     InvalidPasskeyCredentialError,
@@ -9,7 +10,10 @@ import { startRegistration } from "./startRegistration"
 import { verifyAuthentication } from "./verifyAuthentication"
 import { verifyRegistration } from "./verifyRegistration"
 
-const server = (response: unknown) => ({ request: async () => response })
+const server = (response: unknown): Pick<Client.Client, "request"> => ({
+    // canned pks_* result; the actions only call `request`
+    request: (async () => response) as unknown as Client.Client["request"]
+})
 const bytes = new Uint8Array([1, 2, 3]).buffer
 const raw = {
     id: "id",
