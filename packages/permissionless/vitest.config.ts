@@ -1,17 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { loadEnv } from "vite"
 import { defineConfig } from "vitest/config"
-
-// Accounts still carrying an UNPORTED.md marker (viem 3 port in flight) are kept out of the run.
-const accountsDir = join(__dirname, "accounts")
-const unportedAccounts = readdirSync(accountsDir, { withFileTypes: true })
-    .filter(
-        (d) =>
-            d.isDirectory() &&
-            existsSync(join(accountsDir, d.name, "UNPORTED.md"))
-    )
-    .map((d) => `**/accounts/${d.name}/**`)
 
 // The smoke test imports the package by its public entrypoints; each maps to
 // the source behind the same package.json exports entry.
@@ -51,14 +41,11 @@ export default defineConfig({
             reporter: process.env.CI ? ["lcov"] : ["text", "json", "html"],
             include: ["**/permissionless/**"],
             exclude: [
-                "**/errors/utils.ts",
                 "**/*.test.ts",
                 "**/permissionless-test/**",
                 "**/_cjs/**",
                 "**/_esm/**",
-                "**/_types/**",
-                "**/permissionless/accounts/index.ts",
-                "**/permissionless/accounts/*/index.ts"
+                "**/_types/**"
             ]
         },
         sequence: {
@@ -84,7 +71,7 @@ export default defineConfig({
             ),
             include: [join(__dirname, "./**/*.test-d.ts")]
         },
-        exclude: ["**/node_modules/**", ...unportedAccounts],
+        exclude: ["**/node_modules/**"],
         env: loadEnv("test", process.cwd())
     }
 })
