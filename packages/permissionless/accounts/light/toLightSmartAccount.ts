@@ -97,18 +97,36 @@ export type ToLightSmartAccountParameters<
     nonceKey?: bigint
 }
 
-async function signWith1271WrapperV1(
+/**
+ * EIP-712 domain version used by LightAccount's ERC-1271 replay-safe hash.
+ * LightAccount v1.1.0 hardcodes "1"; v2.0.0 reports "2" via `eip712Domain()`.
+ */
+const getDomainVersion = (
+    lightAccountVersion: LightAccountVersion<"0.6" | "0.7">
+): "1" | "2" => {
+    switch (lightAccountVersion) {
+        case "1.1.0":
+            return "1"
+        case "2.0.0":
+            return "2"
+        default:
+            throw new Error("Unknown Light Account version")
+    }
+}
+
+async function signWith1271Wrapper(
     signer: LocalAccount,
     chainId: number,
     accountAddress: Address,
-    hashedMessage: Hex
+    hashedMessage: Hex,
+    domainVersion: "1" | "2"
 ): Promise<Hex> {
     return signer.signTypedData({
         domain: {
             chainId: Number(chainId),
             name: "LightAccount",
             verifyingContract: accountAddress,
-            version: "1"
+            version: domainVersion
         },
         types: {
             LightAccountMessage: [{ name: "message", type: "bytes" }]
@@ -437,11 +455,12 @@ export async function toLightSmartAccount<
             return this.signMessage({ message: hash })
         },
         async signMessage({ message }) {
-            const signature = await signWith1271WrapperV1(
+            const signature = await signWith1271Wrapper(
                 localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
-                hashMessage(message)
+                hashMessage(message),
+                getDomainVersion(version)
             )
 
             switch (version) {
@@ -454,11 +473,12 @@ export async function toLightSmartAccount<
             }
         },
         async signTypedData(typedData) {
-            const signature = await signWith1271WrapperV1(
+            const signature = await signWith1271Wrapper(
                 localOwner,
                 await getMemoizedChainId(),
                 await this.getAddress(),
-                hashTypedData(typedData)
+                hashTypedData(typedData),
+                getDomainVersion(version)
             )
 
             switch (version) {
