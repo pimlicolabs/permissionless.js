@@ -130,10 +130,16 @@ describe.each(getCoreSmartAccounts())(
                         args: [zeroAddress, 1000000000000000000n]
                     })
 
+                    const erc20ApproveData = encodeFunctionData({
+                        abi: erc20Abi,
+                        functionName: "approve",
+                        args: [zeroAddress, 500000000000000000n]
+                    })
+
                     const callData = await smartClient.account.encodeCalls([
                         {
                             to: zeroAddress,
-                            data: "0x",
+                            data: erc20ApproveData,
                             value: 0n
                         },
                         {
@@ -151,7 +157,7 @@ describe.each(getCoreSmartAccounts())(
                         await smartClient.account.decodeCalls(callData)
 
                     expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n },
+                        { to: zeroAddress, data: erc20ApproveData, value: 0n },
                         {
                             to: zeroAddress,
                             data: erc20TransactionData,
@@ -297,10 +303,16 @@ describe.each(getCoreSmartAccounts())(
                     args: [zeroAddress, 1000000000000000000n]
                 })
 
+                const erc20ApproveData = encodeFunctionData({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [zeroAddress, 500000000000000000n]
+                })
+
                 const callData = await smartClient.account.encodeCalls([
                     {
                         to: zeroAddress,
-                        data: "0x",
+                        data: erc20ApproveData,
                         value: 0n
                     },
                     {
@@ -317,7 +329,7 @@ describe.each(getCoreSmartAccounts())(
                 const decoded = await smartClient.account.decodeCalls(callData)
 
                 expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
+                    { to: zeroAddress, data: erc20ApproveData, value: 0n },
                     { to: zeroAddress, data: erc20TransactionData, value: 10n }
                 ])
 
@@ -458,10 +470,16 @@ describe.each(getCoreSmartAccounts())(
                     args: [zeroAddress, 1000000000000000000n]
                 })
 
+                const erc20ApproveData = encodeFunctionData({
+                    abi: erc20Abi,
+                    functionName: "approve",
+                    args: [zeroAddress, 500000000000000000n]
+                })
+
                 const callData = await smartClient.account.encodeCalls([
                     {
                         to: zeroAddress,
-                        data: "0x",
+                        data: erc20ApproveData,
                         value: 0n
                     },
                     {
@@ -478,7 +496,7 @@ describe.each(getCoreSmartAccounts())(
                 const decoded = await smartClient.account.decodeCalls(callData)
 
                 expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
+                    { to: zeroAddress, data: erc20ApproveData, value: 0n },
                     { to: zeroAddress, data: erc20TransactionData, value: 10n }
                 ])
 

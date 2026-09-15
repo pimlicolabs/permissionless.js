@@ -1757,9 +1757,9 @@ export async function toSafeSmartAccount<
                     )
                     position += 32
 
+                    // uint256 byte length of the inner call's data
                     const dataLength = Number(
-                        BigInt(slice(dataToDecode, position, position + 32)) *
-                            BigInt(2)
+                        BigInt(slice(dataToDecode, position, position + 32))
                     )
 
                     position += 32
