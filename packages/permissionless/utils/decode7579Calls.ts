@@ -53,8 +53,8 @@ export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
 
     const callType = slice(mode, 0, 1) // First byte
     const revertOnError = slice(mode, 1, 2) // Second byte
-    const selector = slice(mode, 3, 7) as Hex // bytes 5-8
-    const context = slice(mode, 7) as Hex // bytes 9-32
+    const selector = slice(mode, 6, 10) as Hex
+    const context = slice(mode, 10) as Hex
 
     let type: CallType
     switch (BigInt(callType)) {
