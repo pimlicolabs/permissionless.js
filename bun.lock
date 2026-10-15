@@ -57,7 +57,7 @@
     },
     "packages/permissionless": {
       "name": "permissionless",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "dependencies": {
         "ox": "^1.8.8",
       },
