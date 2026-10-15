@@ -1,3 +1,4 @@
+import { Base64 } from "ox"
 import {
     type Account,
     type Chain,
@@ -6,7 +7,6 @@ import {
     toHex
 } from "viem"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
 
 export type StartAuthenticationReturnType = {
     challenge: string
@@ -29,9 +29,7 @@ export const startAuthentication = async (
     })
 
     return {
-        challenge: toHex(
-            (await getOxExports()).Base64.toBytes(response.challenge)
-        ),
+        challenge: toHex(Base64.toBytes(response.challenge)),
         rpId: response.rpId,
         userVerification: response.userVerification,
         uuid: response.uuid

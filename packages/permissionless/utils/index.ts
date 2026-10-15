@@ -39,6 +39,3 @@ export {
     type Erc20BalanceOverrideParameters,
     erc20BalanceOverride
 } from "./erc20BalanceOverride.js"
-
-// Export ox utilities
-export { getOxExports, hasOxModule } from "./ox.js"

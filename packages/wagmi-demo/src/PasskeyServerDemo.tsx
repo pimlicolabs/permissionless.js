@@ -1,3 +1,4 @@
+import { WebAuthnP256 } from "ox"
 import {
     type SmartAccountClient,
     createSmartAccountClient
@@ -8,7 +9,6 @@ import {
 } from "permissionless/accounts"
 import { createPasskeyServerClient } from "permissionless/clients/passkeyServer"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
-import { getOxExports } from "permissionless/utils"
 import * as React from "react"
 import {
     http,
@@ -154,7 +154,6 @@ export function PasskeyServerDemo() {
     const loginCredential = async () => {
         const credentials = await passkeyServerClient.startAuthentication()
 
-        const { WebAuthnP256 } = await getOxExports()
         const response = await WebAuthnP256.sign(credentials)
 
         const verifiedCredential =

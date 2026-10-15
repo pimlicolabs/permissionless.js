@@ -141,13 +141,10 @@
             "default": "./_cjs/experimental/pimlico/index.js"
         }
     },
-    "peerDependencies": {
-        "viem": "^2.44.4",
-        "ox": "^0.11.3"
+    "dependencies": {
+        "ox": "^1.8.8"
     },
-    "peerDependenciesMeta": {
-        "ox": {
-            "optional": true
-        }
+    "peerDependencies": {
+        "viem": "^2.44.4"
     }
 }

@@ -1,3 +1,4 @@
+import { Base64, PublicKey } from "ox"
 import {
     type Account,
     type Address,
@@ -38,7 +39,6 @@ import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { encodeInstallModule } from "../../utils/encodeInstallModule.js"
 import { encodeUninstallModule } from "../../utils/encodeUninstallModule.js"
-import { getOxExports } from "../../utils/ox.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import { KernelInitAbi } from "./abi/KernelAccountAbi.js"
 import {
@@ -321,11 +321,8 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
     }
 
     if (isWebAuthnAccount(owner)) {
-        const { PublicKey, Hex, Base64 } = await getOxExports()
         const parsedPublicKey = PublicKey.fromHex(owner.publicKey)
-        const authenticatorIdHash = keccak256(
-            Hex.fromBytes(Base64.toBytes(owner.id))
-        )
+        const authenticatorIdHash = keccak256(Base64.toBytes(owner.id))
 
         return encodeAbiParameters(
             [
@@ -344,8 +341,8 @@ const getValidatorData = async (owner: WebAuthnAccount | LocalAccount) => {
             ],
             [
                 {
-                    x: parsedPublicKey.x,
-                    y: parsedPublicKey.y
+                    x: BigInt(parsedPublicKey.x),
+                    y: BigInt(parsedPublicKey.y)
                 },
                 authenticatorIdHash
             ]
