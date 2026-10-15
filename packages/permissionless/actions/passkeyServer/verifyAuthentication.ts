@@ -1,7 +1,6 @@
-// import { Base64 } from "ox"
+import { Base64 } from "ox"
 import type { Account, Chain, Client, Hex, Transport } from "viem"
 import type { PasskeyServerRpcSchema } from "../../types/passkeyServer.js"
-import { getOxExports } from "../../utils/ox.js"
 
 export type VerifyAuthenticationParameters = {
     raw: {
@@ -37,7 +36,6 @@ export const verifyAuthentication = async (
     args: VerifyAuthenticationParameters
 ): Promise<VerifyAuthenticationReturnType> => {
     const { raw, uuid } = args
-    const { Base64 } = await getOxExports()
 
     let responseAuthenticatorData: string
 

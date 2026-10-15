@@ -1,3 +1,4 @@
+import { PublicKey } from "ox"
 import {
     type Account,
     type Address,
@@ -47,7 +48,6 @@ import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { decode7579Calls } from "../../utils/decode7579Calls.js"
 import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
-import { getOxExports } from "../../utils/ox.js"
 import { sortAddresses } from "../../utils/sortAddresses.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
 import {
@@ -875,7 +875,6 @@ const getInitializerCode = async ({
         safeWebAuthnSharedSignerAddress &&
         safeP256VerifierAddress
     ) {
-        const { PublicKey } = await getOxExports()
         const parsedPublicKey = PublicKey.fromHex(webAuthnOwner.publicKey)
 
         multiCalls.push({
@@ -885,8 +884,8 @@ const getInitializerCode = async ({
                 functionName: "configure",
                 args: [
                     {
-                        x: parsedPublicKey.x,
-                        y: parsedPublicKey.y,
+                        x: BigInt(parsedPublicKey.x),
+                        y: BigInt(parsedPublicKey.y),
                         verifiers: BigInt(safeP256VerifierAddress)
                     }
                 ]
