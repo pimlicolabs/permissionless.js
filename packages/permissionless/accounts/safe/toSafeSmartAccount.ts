@@ -19,15 +19,13 @@ import {
     encodeAbiParameters,
     encodeFunctionData,
     encodePacked,
-    getAddress,
     getContractAddress,
     hashMessage,
     hashTypedData,
     hexToBigInt,
+    isAddressEqual,
     keccak256,
     pad,
-    size,
-    slice,
     toBytes,
     toHex,
     zeroAddress
@@ -50,6 +48,7 @@ import { encode7579Calls } from "../../utils/encode7579Calls.js"
 import { isSmartAccountDeployed } from "../../utils/isSmartAccountDeployed.js"
 import { sortAddresses } from "../../utils/sortAddresses.js"
 import { type EthereumProvider, toOwner } from "../../utils/toOwner.js"
+import { decodeMultiSend, encodeMultiSend } from "./multiSend.js"
 import {
     concatSignatures,
     getWebAuthnSignature,
@@ -57,22 +56,6 @@ import {
 } from "./signUserOperation.js"
 
 export type SafeVersion = "1.4.1" | "1.5.0"
-
-const multiSendAbi = [
-    {
-        inputs: [
-            {
-                internalType: "bytes",
-                name: "transactions",
-                type: "bytes"
-            }
-        ],
-        name: "multiSend",
-        outputs: [],
-        stateMutability: "payable",
-        type: "function"
-    }
-] as const
 
 const initSafe7579Abi = [
     {
@@ -562,49 +545,6 @@ const generateSafeMessageMessage = <
     return hashTypedData(
         message as TypedDataDefinition<TTypedData, TPrimaryType>
     )
-}
-
-const encodeInternalTransaction = (tx: {
-    to: Address
-    data: Address
-    value: bigint
-    operation: 0 | 1
-}): string => {
-    const encoded = encodePacked(
-        // uint8 = 1 byte for operation
-        // address = 20 bytes for to address
-        // uint256 = 32 bytes for value
-        // uint256 = 32 bytes for data length
-        // bytes = dynamic length for data
-        ["uint8", "address", "uint256", "uint256", "bytes"],
-        [
-            tx.operation,
-            tx.to,
-            tx.value,
-            BigInt(tx.data.slice(2).length / 2),
-            tx.data
-        ]
-    )
-    return encoded.slice(2)
-}
-
-const encodeMultiSend = (
-    txs: {
-        to: Address
-        data: Address
-        value: bigint
-        operation: 0 | 1
-    }[]
-): Hex => {
-    const data: Hex = `0x${txs
-        .map((tx) => encodeInternalTransaction(tx))
-        .join("")}`
-
-    return encodeFunctionData({
-        abi: multiSendAbi,
-        functionName: "multiSend",
-        args: [data]
-    })
 }
 
 const get7579LaunchPadInitData = ({
@@ -1722,61 +1662,29 @@ export async function toSafeSmartAccount<
                 data: callData
             })
 
-            const to = decoded.args[0]
-            const value = decoded.args[1]
-            const data = decoded.args[2]
+            const [to, value, data, operation] = decoded.args
 
-            if (to === multiSendCallOnlyAddress) {
-                const decodedMultiSend = decodeFunctionData({
-                    abi: multiSendAbi,
-                    data: data
-                })
-
-                const dataToDecode = decodedMultiSend.args[0]
-                const transactions: {
-                    to: Address
-                    value: bigint
-                    data: Hex
-                }[] = []
-
-                let position = 0
-                const dataLength = size(dataToDecode)
-
-                while (position < dataLength) {
-                    // skip the operation type
-                    position += 1
-
-                    const to = getAddress(
-                        slice(dataToDecode, position, position + 20)
-                    )
-                    position += 20
-
-                    const value = BigInt(
-                        slice(dataToDecode, position, position + 32)
-                    )
-                    position += 32
-
-                    const dataLength = Number(
-                        BigInt(slice(dataToDecode, position, position + 32)) *
-                            BigInt(2)
-                    )
-
-                    position += 32
-
-                    const data = slice(
-                        dataToDecode,
-                        position,
-                        position + dataLength
-                    )
-                    position += dataLength
-
-                    transactions.push({ to, value, data })
-                }
-
-                return transactions
+            if (operation === 0) {
+                return [{ to, value, data }]
             }
 
-            return [{ to, value, data }]
+            // encodeCalls only uses delegatecall to batch calls through MultiSendCallOnly
+            if (!isAddressEqual(to, multiSendCallOnlyAddress)) {
+                throw new Error(
+                    `Cannot decode a delegatecall to ${to}: only MultiSendCallOnly batches are supported`
+                )
+            }
+
+            return decodeMultiSend(data).map((tx) => {
+                // MultiSendCallOnly reverts on inner delegatecalls
+                if (tx.operation !== 0) {
+                    throw new Error(
+                        "Cannot decode a MultiSendCallOnly batch containing a delegatecall"
+                    )
+                }
+
+                return { to: tx.to, value: tx.value, data: tx.data }
+            })
         },
         async getNonce(args) {
             return getAccountNonce(client, {
