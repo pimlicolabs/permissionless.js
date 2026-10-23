@@ -63,7 +63,7 @@ describe.each(["0.7", "0.8"] as const)(
         })
 
         testWithRpc(
-            "throws execution_reverted when the call reverts",
+            "returns the receipt when the call reverts",
             async ({ rpc }) => {
                 const smartAccountClient = getBundlerClient({
                     account: await getSimpleAccountClient({
@@ -73,35 +73,25 @@ describe.each(["0.7", "0.8"] as const)(
                     entryPoint: { version },
                     ...rpc
                 })
-                const reverting = {
-                    // The EntryPoint has no fallback, so unknown selectors revert.
-                    calls: [
-                        {
-                            to: smartAccountClient.account.entryPoint.address,
-                            data: "0xdeadbeef" as const,
-                            value: 0n
-                        }
-                    ],
-                    // Skip estimation, which would fail on the revert.
-                    callGasLimit: 100_000n,
-                    verificationGasLimit: 1_000_000n,
-                    preVerificationGas: 100_000n
-                }
-
-                const error = await sendUserOperationSync(
-                    smartAccountClient,
-                    reverting
-                ).catch((e) => e)
-
-                expect(error).toBeInstanceOf(SendUserOperationSyncError)
-                expect(error.kind).toBe("execution_reverted")
-                expect(error.canResend).toBe(false)
-                expect(error.receipt.success).toBe(false)
-
                 const receipt = await sendUserOperationSync(
                     smartAccountClient,
-                    { ...reverting, throwOnReceiptRevert: false }
+                    {
+                        // The EntryPoint has no fallback, so unknown selectors revert.
+                        calls: [
+                            {
+                                to: smartAccountClient.account.entryPoint
+                                    .address,
+                                data: "0xdeadbeef",
+                                value: 0n
+                            }
+                        ],
+                        // Skip estimation, which would fail on the revert.
+                        callGasLimit: 100_000n,
+                        verificationGasLimit: 1_000_000n,
+                        preVerificationGas: 100_000n
+                    }
                 )
+
                 expect(receipt.success).toBe(false)
             }
         )
