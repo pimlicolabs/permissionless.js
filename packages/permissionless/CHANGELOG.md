@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.5.2
+
+### Patch Changes
+
+- 50bf75182af40619fb2f1b4dd468d25a03da8e65: Added `sendUserOperationSync` to `pimlicoActions`, so a smart account client extended with `pimlicoActions` can call `smartAccountClient.sendUserOperationSync(...)`.
+
 ## 0.5.1
 
 ### Patch Changes
