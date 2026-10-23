@@ -32,7 +32,7 @@ export type SendUserOperationSyncParameters<
     /**
      * How long (ms) to poll for the receipt when the bundler's response doesn't
      * say whether the user operation was included.
-     * @default 10_000
+     * @default client.transport.timeout ?? 10_000
      */
     timeout?: number | undefined
     /**
@@ -124,7 +124,7 @@ export async function sendUserOperationSync<
 ): Promise<SendUserOperationSyncReturnType> {
     const {
         account: account_ = client.account,
-        timeout = 10_000,
+        timeout = client.transport.timeout ?? 10_000,
         pollingInterval = client.pollingInterval,
         ...rest
     } = parameters

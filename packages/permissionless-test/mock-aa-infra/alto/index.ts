@@ -553,6 +553,11 @@ export const setupContracts = async (rpc: string) => {
         })
     ])
 
+    // anvil >= 1.8 mines one block per burst and leaves the rest pending.
+    while ((await anvilClient.getTxpoolStatus()).pending > 0) {
+        await anvilClient.mine({ blocks: 1 })
+    }
+
     await Promise.all(
         deployHashes.map((hash) =>
             client.waitForTransactionReceipt({ hash, pollingInterval: 50 })

@@ -68,6 +68,20 @@ function createAutoBundleTransport(altoRpc: string, anvilRpc: string) {
     })
 }
 
+// anvil >= 1.8 mines one block per burst and can leave the rest pending until
+// the next tx, so receipt waits and pimlico_sendUserOperationNow (which doesn't
+// mine) can hang behind them. Seal everything before handing the rig out.
+async function drainTxpool(anvilRpc: string): Promise<void> {
+    const testClient = createTestClient({
+        mode: "anvil",
+        chain: foundry,
+        transport: http(anvilRpc)
+    })
+    while ((await testClient.getTxpoolStatus()).pending > 0) {
+        await testClient.mine({ blocks: 1 })
+    }
+}
+
 // Shared anvil + alto + paymaster per worker.
 // Each test uses a fresh smart account (unique private key), so on-chain state
 // from previous tests doesn't interfere. We just clear alto's mempool between tests.
@@ -112,6 +126,7 @@ async function getSharedRig(): Promise<SharedRig> {
         if (!forkUrl) {
             await setupContracts(anvilRpc)
         }
+        await drainTxpool(anvilRpc)
 
         const altoInstance = alto({
             entrypoints: [
@@ -185,6 +200,8 @@ async function getSharedRig(): Promise<SharedRig> {
                 value: parseEther("1000")
             })
         }
+
+        await drainTxpool(anvilRpc)
 
         return {
             anvilRpc,
