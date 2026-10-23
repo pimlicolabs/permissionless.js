@@ -1,3 +1,4 @@
+import { createRequire } from "node:module"
 import { resolve } from "node:path"
 import { defineInstance, toArgs } from "prool"
 import { execa } from "prool/processes"
@@ -265,10 +266,11 @@ export const alto = defineInstance((parameters?: AltoParameters) => {
         async start({ port = args.port ?? 3000 }, options) {
             const binary = (() => {
                 if (args.binary) return [args.binary]
-                const libPath =
-                    "resolve" in import.meta
-                        ? import.meta.resolve("@pimlico/alto").split("file:")[1]
-                        : require.resolve("@pimlico/alto")
+                // Vitest's module runner does not implement import.meta.resolve,
+                // so resolve the package entry through a CommonJS resolver.
+                const libPath = createRequire(import.meta.url).resolve(
+                    "@pimlico/alto"
+                )
                 return ["node", resolve(libPath, "../cli/alto.js")]
             })()
 
