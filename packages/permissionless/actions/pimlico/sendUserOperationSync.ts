@@ -48,8 +48,11 @@ export type SendUserOperationSyncReturnType = UserOperationReceipt
 export type SendUserOperationSyncErrorKind =
     /** Rejected before sending (invalid fields, gas limits, simulation). Nothing was sent. */
     | "rejected"
-    /** The bundle landed but reverted. The user operation didn't execute and its nonce is unused. */
-    | "bundlerError"
+    /**
+     * The bundle landed but reverted, so it didn't execute the user operation.
+     * Another bundler may have included it first: check `getUserOperationReceipt` before resending.
+     */
+    | "bundle_reverted"
     /** May have been sent, but no receipt before `timeout`. Keep polling `getUserOperationReceipt`. */
     | "pending"
     /** The bundler couldn't send the bundle and no receipt showed up before `timeout`. */
@@ -64,29 +67,32 @@ export class SendUserOperationSyncError extends BaseError {
     constructor({
         cause,
         kind,
+        message: message_,
         userOperationHash
     }: {
         cause?: BaseError | Error | undefined
         kind: SendUserOperationSyncErrorKind
+        /** Overrides the default message, e.g. with the bundler's. */
+        message?: string | undefined
         userOperationHash: Hash
     }) {
         const message = {
             rejected: "User operation was rejected by the bundler.",
-            bundlerError:
+            bundle_reverted:
                 "Bundle transaction reverted onchain. The user operation was not executed.",
             pending:
                 "User operation may have been sent but is not included yet. Poll `getUserOperationReceipt` instead of resending.",
             not_found:
                 "Bundler couldn't send the user operation and no receipt was found."
         }[kind]
-        super(message, {
+        super(message_ || message, {
             cause,
             metaMessages: [`User operation hash: ${userOperationHash}`],
             name: "SendUserOperationSyncError"
         })
         this.kind = kind
         this.userOperationHash = userOperationHash
-        this.canResend = kind === "bundlerError" || kind === "not_found"
+        this.canResend = kind === "bundle_reverted" || kind === "not_found"
     }
 }
 
@@ -233,7 +239,8 @@ export async function sendUserOperationSync<
     if (rpcError?.code === -32521) {
         throw new SendUserOperationSyncError({
             cause: error,
-            kind: "bundlerError",
+            kind: "bundle_reverted",
+            message: rpcError.details,
             userOperationHash
         })
     }
