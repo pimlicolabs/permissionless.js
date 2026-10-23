@@ -8,6 +8,7 @@ import {
     getSimpleAccountClient
 } from "../../../permissionless-test/src/utils"
 import { createSmartAccountClient } from "../../clients/createSmartAccountClient"
+import { pimlicoActions } from "../../clients/decorators/pimlico"
 import {
     SendUserOperationSyncError,
     sendUserOperationSync
@@ -40,6 +41,32 @@ describe.each(["0.7", "0.8"] as const)(
                 receipt.receipt.transactionHash
             )
         })
+
+        testWithRpc(
+            "returns the receipt through pimlicoActions",
+            async ({ rpc }) => {
+                const bundlerClient = getBundlerClient({
+                    account: await getSimpleAccountClient({
+                        ...rpc,
+                        entryPoint: { version }
+                    }),
+                    entryPoint: { version },
+                    ...rpc
+                })
+                const smartAccountClient = bundlerClient.extend(
+                    pimlicoActions({
+                        entryPoint: bundlerClient.account.entryPoint
+                    })
+                )
+
+                const receipt = await smartAccountClient.sendUserOperationSync({
+                    calls: [{ to: zeroAddress, data: "0x", value: 0n }]
+                })
+
+                expect(receipt.success).toBe(true)
+                expect(receipt.sender).toBe(smartAccountClient.account.address)
+            }
+        )
 
         testWithRpc("throws rejected on an invalid nonce", async ({ rpc }) => {
             const smartAccountClient = getBundlerClient({
