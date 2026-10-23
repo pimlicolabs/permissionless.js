@@ -13,7 +13,6 @@ export default defineConfig({
     },
     test: {
         coverage: {
-            all: true,
             provider: "v8",
             reporter: process.env.CI ? ["lcov"] : ["text", "json", "html"],
             include: ["**/permissionless/**"],
