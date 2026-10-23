@@ -42,7 +42,7 @@ type PimlicoClientInner<
         : [...BundlerRpcSchema, ...PimlicoRpcSchema],
     BundlerActions<account> &
         PaymasterActions &
-        PimlicoActions<chain, entryPointVersion>
+        PimlicoActions<chain, entryPointVersion, account>
 >
 
 // Variance annotations referred from viem:

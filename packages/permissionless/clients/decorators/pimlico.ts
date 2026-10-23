@@ -1,5 +1,5 @@
 import type { Address, Chain, Client, Hash, Prettify, Transport } from "viem"
-import type { EntryPointVersion } from "viem/account-abstraction"
+import type { EntryPointVersion, SmartAccount } from "viem/account-abstraction"
 import {
     type EstimateErc20PaymasterCostParameters,
     type EstimateErc20PaymasterCostReturnType,
@@ -25,6 +25,11 @@ import {
     validateSponsorshipPolicies
 } from "../../actions/pimlico/index.js"
 import {
+    type SendUserOperationSyncParameters,
+    type SendUserOperationSyncReturnType,
+    sendUserOperationSync
+} from "../../actions/pimlico/sendUserOperationSync.js"
+import {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation
@@ -32,7 +37,8 @@ import {
 
 export type PimlicoActions<
     TChain extends Chain | undefined,
-    entryPointVersion extends EntryPointVersion = EntryPointVersion
+    entryPointVersion extends EntryPointVersion = EntryPointVersion,
+    account extends SmartAccount | undefined = SmartAccount | undefined
 > = {
     /**
      * Returns the live gas prices that you can use to send a user operation.
@@ -108,6 +114,35 @@ export type PimlicoActions<
             Omit<SendCompressedUserOperationParameters, "entryPointAddress">
         >
     ) => Promise<Hash>
+    /**
+     * Sends a user operation in its own bundle via `pimlico_sendUserOperationNow`
+     * and returns its receipt, without waiting for the mempool.
+     *
+     * - Docs: https://docs.pimlico.io/references/permissionless/reference/pimlico-actions/sendUserOperationSync
+     *
+     * @param args {@link SendUserOperationSyncParameters}
+     * @returns The user operation receipt. {@link SendUserOperationSyncReturnType}
+     *
+     * @example
+     * import { createSmartAccountClient } from "permissionless"
+     * import { pimlicoActions } from "permissionless/actions/pimlico"
+     *
+     * const smartAccountClient = createSmartAccountClient({
+     *     account,
+     *     chain,
+     *     bundlerTransport: http(pimlicoUrl)
+     * }).extend(pimlicoActions({ entryPoint }))
+     *
+     * const receipt = await smartAccountClient.sendUserOperationSync({
+     *     calls: [{ to: "0x...", value: 0n, data: "0x" }]
+     * })
+     */
+    sendUserOperationSync: <
+        const calls extends readonly unknown[],
+        accountOverride extends SmartAccount | undefined = undefined
+    >(
+        args: SendUserOperationSyncParameters<account, accountOverride, calls>
+    ) => Promise<SendUserOperationSyncReturnType>
     sponsorUserOperation: (
         args: Omit<
             PimlicoSponsorUserOperationParameters<entryPointVersion>,
@@ -151,10 +186,11 @@ export const pimlicoActions =
     }) =>
     <
         TTransport extends Transport,
-        TChain extends Chain | undefined = Chain | undefined
+        TChain extends Chain | undefined = Chain | undefined,
+        TAccount extends SmartAccount | undefined = SmartAccount | undefined
     >(
-        client: Client<TTransport, TChain>
-    ): PimlicoActions<TChain, entryPointVersion> => ({
+        client: Client<TTransport, TChain, TAccount>
+    ): PimlicoActions<TChain, entryPointVersion, TAccount> => ({
         getUserOperationGasPrice: async () => getUserOperationGasPrice(client),
         getUserOperationStatus: async (
             args: GetUserOperationStatusParameters
@@ -164,6 +200,8 @@ export const pimlicoActions =
                 ...args,
                 entryPointAddress: entryPoint.address
             }),
+        sendUserOperationSync: async (args) =>
+            sendUserOperationSync(client, args),
         sponsorUserOperation: async (args) =>
             sponsorUserOperation(client, {
                 ...args,
