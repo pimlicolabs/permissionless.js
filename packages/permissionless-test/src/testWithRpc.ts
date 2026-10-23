@@ -124,7 +124,8 @@ async function getSharedRig(): Promise<SharedRig> {
             safeMode: false,
             port: altoPort,
             utilityPrivateKey: anvilPrivateKey,
-            enableDebugEndpoints: true
+            enableDebugEndpoints: true,
+            enableInstantBundlingEndpoint: true
         })
 
         await altoInstance.start()

@@ -21,6 +21,14 @@ export {
 } from "./sendCompressedUserOperation.js"
 
 export {
+    type SendUserOperationSyncErrorKind,
+    type SendUserOperationSyncParameters,
+    type SendUserOperationSyncReturnType,
+    SendUserOperationSyncError,
+    sendUserOperationSync
+} from "./sendUserOperationSync.js"
+
+export {
     type PimlicoSponsorUserOperationParameters,
     type SponsorUserOperationReturnType,
     sponsorUserOperation

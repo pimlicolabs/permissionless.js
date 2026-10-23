@@ -1,0 +1,65 @@
+import { zeroAddress } from "viem"
+import { describe, expect } from "vitest"
+import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
+import {
+    getBundlerClient,
+    getSimpleAccountClient
+} from "../../../permissionless-test/src/utils"
+import {
+    SendUserOperationSyncError,
+    sendUserOperationSync
+} from "./sendUserOperationSync"
+
+describe.each(["0.7", "0.8"] as const)(
+    "sendUserOperationSync %s",
+    (version) => {
+        testWithRpc("returns the receipt", async ({ rpc }) => {
+            const smartAccountClient = getBundlerClient({
+                account: await getSimpleAccountClient({
+                    ...rpc,
+                    entryPoint: { version }
+                }),
+                entryPoint: { version },
+                ...rpc
+            })
+
+            const receipt = await sendUserOperationSync(smartAccountClient, {
+                calls: [{ to: zeroAddress, data: "0x", value: 0n }]
+            })
+
+            expect(receipt.success).toBe(true)
+            expect(receipt.sender).toBe(smartAccountClient.account.address)
+
+            const fetched = await smartAccountClient.getUserOperationReceipt({
+                hash: receipt.userOpHash
+            })
+            expect(fetched.receipt.transactionHash).toBe(
+                receipt.receipt.transactionHash
+            )
+        })
+
+        testWithRpc("throws rejected on an invalid nonce", async ({ rpc }) => {
+            const smartAccountClient = getBundlerClient({
+                account: await getSimpleAccountClient({
+                    ...rpc,
+                    entryPoint: { version }
+                }),
+                entryPoint: { version },
+                ...rpc
+            })
+
+            const error = await sendUserOperationSync(smartAccountClient, {
+                calls: [{ to: zeroAddress, data: "0x", value: 0n }],
+                nonce: 5n,
+                // Skip estimation so the bundler, not the estimator, rejects it.
+                callGasLimit: 100_000n,
+                verificationGasLimit: 500_000n,
+                preVerificationGas: 100_000n
+            }).catch((e) => e)
+
+            expect(error).toBeInstanceOf(SendUserOperationSyncError)
+            expect(error.kind).toBe("rejected")
+            expect(error.canResend).toBe(false)
+        })
+    }
+)
