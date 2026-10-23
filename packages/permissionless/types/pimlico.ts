@@ -1,5 +1,10 @@
 import type { Address, Hash, Hex, OneOf, PartialBy } from "viem"
-import type { EntryPointVersion, UserOperation } from "viem/account-abstraction"
+import type {
+    EntryPointVersion,
+    RpcUserOperation,
+    RpcUserOperationReceipt,
+    UserOperation
+} from "viem/account-abstraction"
 
 type PimlicoUserOperationGasPriceWithBigIntAsHex = {
     slow: {
@@ -61,6 +66,11 @@ export type PimlicoRpcSchema<
             entryPoint: Address
         ]
         ReturnType: Hash
+    },
+    {
+        Method: "pimlico_sendUserOperationNow"
+        Parameters: [userOperation: RpcUserOperation, entryPoint: Address]
+        ReturnType: RpcUserOperationReceipt
     },
     {
         Method: "pm_sponsorUserOperation"

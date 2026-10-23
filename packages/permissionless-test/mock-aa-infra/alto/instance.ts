@@ -47,6 +47,11 @@ export type AltoParameters = {
      */
     enableDebugEndpoints?: boolean | undefined
     /**
+     * Enable the `pimlico_sendUserOperationNow` endpoint.
+     * @default false
+     */
+    enableInstantBundlingEndpoint?: boolean | undefined
+    /**
      * Include user ops with the same sender in the single bundle.
      * @default true
      */
