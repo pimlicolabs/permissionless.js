@@ -1,5 +1,11 @@
 # permissionless
 
+## 0.5.1
+
+### Patch Changes
+
+- d4dc348141974be21a9314bb8d6ff0c159b54963: Added `sendUserOperationSync` to `permissionless/actions/pimlico`. It prepares, signs and sends a user operation with `pimlico_sendUserOperationNow` and returns its receipt. If the outcome is unclear it polls for the receipt, and otherwise throws a `SendUserOperationSyncError` whose `kind` and `canResend` say what happened and whether resending is safe.
+
 ## 0.5.0
 
 ### Minor Changes
