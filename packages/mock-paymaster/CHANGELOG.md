@@ -1,5 +1,11 @@
 # @pimlico/mock-paymaster
 
+## 0.0.9
+
+### Patch Changes
+
+- 64d7f69ac7d8f7b6793447a8b8e232b6244cb24e: Upgraded `fastify` to v5, `@fastify/cors` to v11, `zod` to v4 and `zod-validation-error` to v4 to address security advisories. Fastify v5 requires Node.js 20 or later.
+
 ## 0.0.8
 
 ### Patch Changes
