@@ -8,6 +8,7 @@ import {
 } from "viem"
 import {
     type PrepareUserOperationParameters,
+    type RpcUserOperationReceipt,
     type SendUserOperationParameters,
     type SmartAccount,
     type UserOperation,
@@ -30,8 +31,8 @@ export type SendUserOperationSyncParameters<
     calls extends readonly unknown[] = readonly unknown[]
 > = SendUserOperationParameters<account, accountOverride, calls> & {
     /**
-     * How long (ms) to poll for the receipt when the bundler's response doesn't
-     * say whether the user operation was included.
+     * Time (ms) from sending the user operation to having its receipt, covering
+     * the bundler call and any receipt polling.
      * @default client.transport.timeout ?? 10_000
      */
     timeout?: number | undefined
@@ -40,6 +41,12 @@ export type SendUserOperationSyncParameters<
      * @default client.pollingInterval
      */
     pollingInterval?: number | undefined
+    /**
+     * Whether to throw if the user operation was included but its execution
+     * reverted (`receipt.success === false`).
+     * @default true
+     */
+    throwOnReceiptRevert?: boolean | undefined
 }
 
 export type SendUserOperationSyncReturnType = UserOperationReceipt
@@ -49,34 +56,42 @@ export type SendUserOperationSyncErrorKind =
     | "rejected"
     /** The bundle landed but reverted. The user operation didn't execute and its nonce is unused. */
     | "reverted"
-    /** Sent, but not included before `timeout`. Keep polling `getUserOperationReceipt`. */
+    /** Included, but its execution reverted inside the account. The nonce is used. */
+    | "execution_reverted"
+    /** May have been sent, but no receipt before `timeout`. Keep polling `getUserOperationReceipt`. */
     | "pending"
-    /** No receipt before `timeout`, and the bundler never confirmed it was sent. */
+    /** The bundler couldn't send the bundle and no receipt showed up before `timeout`. */
     | "not_found"
 
 export class SendUserOperationSyncError extends BaseError {
     readonly kind: SendUserOperationSyncErrorKind
     readonly userOperationHash: Hash
+    /** Set when `kind` is `execution_reverted`. */
+    readonly receipt: UserOperationReceipt | undefined
     /** Whether sending the same user operation again is safe. */
     readonly canResend: boolean
 
     constructor({
         cause,
         kind,
+        receipt,
         userOperationHash
     }: {
         cause?: BaseError | Error | undefined
         kind: SendUserOperationSyncErrorKind
+        receipt?: UserOperationReceipt | undefined
         userOperationHash: Hash
     }) {
         const message = {
             rejected: "User operation was rejected by the bundler.",
             reverted:
                 "Bundle transaction reverted onchain. The user operation was not executed.",
+            execution_reverted:
+                "User operation was included but its execution reverted.",
             pending:
-                "User operation was sent but is not included yet. Poll `getUserOperationReceipt` instead of resending.",
+                "User operation may have been sent but is not included yet. Poll `getUserOperationReceipt` instead of resending.",
             not_found:
-                "User operation receipt not found and the bundler didn't confirm it was sent."
+                "Bundler couldn't send the user operation and no receipt was found."
         }[kind]
         super(message, {
             cause,
@@ -85,21 +100,21 @@ export class SendUserOperationSyncError extends BaseError {
         })
         this.kind = kind
         this.userOperationHash = userOperationHash
+        this.receipt = receipt
         this.canResend = kind === "reverted" || kind === "not_found"
     }
 }
+
+const deadlineExceeded = Symbol("deadlineExceeded")
 
 /**
  * Sends a user operation in its own bundle via `pimlico_sendUserOperationNow`
  * and returns its receipt, without waiting for the mempool.
  *
- * Never resends on its own. If the outcome is unclear (timeout, internal error),
- * it polls for the receipt for up to `timeout` ms. Otherwise it throws a
- * {@link SendUserOperationSyncError} whose `kind` says what happened and whose
- * `canResend` says whether sending the same user operation again is safe.
- *
- * The returned receipt can have `success: false` if the call reverted inside
- * the account; its nonce is then used.
+ * Never resends on its own. Sending and any receipt polling must finish within
+ * `timeout` ms. Otherwise it throws a {@link SendUserOperationSyncError} whose
+ * `kind` says what happened and whose `canResend` says whether sending the same
+ * user operation again is safe.
  *
  * - Docs: https://docs.pimlico.io/references/bundler/endpoints/pimlico_sendUserOperationNow
  *
@@ -126,6 +141,7 @@ export async function sendUserOperationSync<
         account: account_ = client.account,
         timeout = client.transport.timeout ?? 10_000,
         pollingInterval = client.pollingInterval,
+        throwOnReceiptRevert = true,
         ...rest
     } = parameters
 
@@ -156,42 +172,77 @@ export async function sendUserOperationSync<
         userOperation
     })
 
+    const deadline = Date.now() + timeout
+
+    // Resolves to `deadlineExceeded` if `promise` hasn't settled by the deadline.
+    const beforeDeadline = <T>(promise: Promise<T>) => {
+        let timer: ReturnType<typeof setTimeout> | undefined
+        return Promise.race([
+            promise,
+            new Promise<typeof deadlineExceeded>((resolve) => {
+                timer = setTimeout(
+                    () => resolve(deadlineExceeded),
+                    Math.max(deadline - Date.now(), 0)
+                )
+            })
+        ]).finally(() => clearTimeout(timer))
+    }
+
     const waitForReceipt = async () => {
-        const deadline = Date.now() + timeout
         while (Date.now() < deadline) {
-            try {
-                return await getAction(
+            const receipt = await beforeDeadline(
+                getAction(
                     client,
                     getUserOperationReceipt,
                     "getUserOperationReceipt"
                 )({ hash: userOperationHash })
-            } catch {}
-            await new Promise((resolve) => setTimeout(resolve, pollingInterval))
+            ).catch(() => null)
+            if (receipt === deadlineExceeded) return null
+            if (receipt) return receipt
+            await beforeDeadline(
+                new Promise((resolve) => setTimeout(resolve, pollingInterval))
+            )
         }
         return null
     }
 
-    try {
-        const receipt = await (
-            client as Client<
-                Transport,
-                Chain | undefined,
-                account,
-                PimlicoRpcSchema
-            >
-        ).request(
-            {
-                method: "pimlico_sendUserOperationNow",
-                params: [
-                    formatUserOperationRequest(userOperation),
-                    entryPointAddress
-                ]
-            },
-            { retryCount: 0 }
-        )
-        return formatUserOperationReceipt(receipt)
-    } catch (err) {
-        const error = err as Error
+    const send = async (): Promise<UserOperationReceipt> => {
+        let error: Error
+        try {
+            const receipt = await beforeDeadline(
+                (
+                    client as Client<
+                        Transport,
+                        Chain | undefined,
+                        account,
+                        PimlicoRpcSchema
+                    >
+                ).request(
+                    {
+                        method: "pimlico_sendUserOperationNow",
+                        params: [
+                            formatUserOperationRequest(userOperation),
+                            entryPointAddress
+                        ]
+                    },
+                    { retryCount: 0 }
+                )
+            )
+            if (receipt !== deadlineExceeded) {
+                return formatUserOperationReceipt(
+                    receipt as RpcUserOperationReceipt
+                )
+            }
+            // No answer before the deadline: it may have been sent.
+            throw new SendUserOperationSyncError({
+                kind: "pending",
+                userOperationHash
+            })
+        } catch (err) {
+            if (err instanceof SendUserOperationSyncError) throw err
+            error = err as Error
+        }
+
         const rpcError =
             error instanceof BaseError
                 ? (error.walk(
@@ -208,18 +259,7 @@ export async function sendUserOperationSync<
             })
         }
 
-        // Sent but not included before the bundler's deadline: wait, don't resend.
-        if (data?.transactionHash) {
-            const receipt = await waitForReceipt()
-            if (receipt) return receipt
-            throw new SendUserOperationSyncError({
-                cause: error,
-                kind: "pending",
-                userOperationHash
-            })
-        }
-
-        if (rpcError && rpcError.code !== -32603) {
+        if (rpcError && !data?.transactionHash && rpcError.code !== -32603) {
             const calls = (parameters as { calls?: unknown }).calls
             throw new SendUserOperationSyncError({
                 cause: getUserOperationError(
@@ -234,13 +274,28 @@ export async function sendUserOperationSync<
             })
         }
 
-        // Internal error or no answer at all: it may have been sent.
+        // Sent but not included yet, internal error, or no answer at all:
+        // poll until the deadline, never resend.
         const receipt = await waitForReceipt()
         if (receipt) return receipt
         throw new SendUserOperationSyncError({
             cause: error,
-            kind: "not_found",
+            // Only -32603 without a transaction hash means it wasn't sent.
+            kind:
+                rpcError?.code === -32603 && !data?.transactionHash
+                    ? "not_found"
+                    : "pending",
             userOperationHash
         })
     }
+
+    const receipt = await send()
+    if (throwOnReceiptRevert && !receipt.success) {
+        throw new SendUserOperationSyncError({
+            kind: "execution_reverted",
+            receipt,
+            userOperationHash
+        })
+    }
+    return receipt
 }
