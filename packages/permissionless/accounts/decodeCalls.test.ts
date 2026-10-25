@@ -1,4 +1,6 @@
 import {
+    type Address,
+    type Hex,
     decodeFunctionData,
     encodeFunctionData,
     erc20Abi,
@@ -7,6 +9,43 @@ import {
 import { describe, expect } from "vitest"
 import { testWithRpc } from "../../permissionless-test/src/testWithRpc"
 import { getCoreSmartAccounts } from "../../permissionless-test/src/utils"
+
+const erc20TransactionData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: "transfer",
+    args: [zeroAddress, 1000000000000000000n]
+})
+
+const erc20ApproveData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: "approve",
+    args: [zeroAddress, 500000000000000000n]
+})
+
+// Distinct targets, more than two calls, and empty data both in the middle
+// and at the end of the batch
+const multipleCalls: { to: Address; data: Hex; value: bigint }[] = [
+    {
+        to: "0x1111111111111111111111111111111111111111",
+        data: erc20ApproveData,
+        value: 0n
+    },
+    {
+        to: "0x2222222222222222222222222222222222222222",
+        data: "0x",
+        value: 0n
+    },
+    {
+        to: "0x3333333333333333333333333333333333333333",
+        data: erc20TransactionData,
+        value: 10n
+    },
+    {
+        to: "0x4444444444444444444444444444444444444444",
+        data: "0x",
+        value: 0n
+    }
+]
 
 describe.each(getCoreSmartAccounts())(
     "decodeCalls $name",
@@ -61,12 +100,6 @@ describe.each(getCoreSmartAccounts())(
                             version: "0.6"
                         },
                         ...rpc
-                    })
-
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
                     })
 
                     const callData = await smartClient.account.encodeCalls([
@@ -124,24 +157,8 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
-
-                    const callData = await smartClient.account.encodeCalls([
-                        {
-                            to: zeroAddress,
-                            data: "0x",
-                            value: 0n
-                        },
-                        {
-                            to: zeroAddress,
-                            data: erc20TransactionData,
-                            value: 10n
-                        }
-                    ])
+                    const callData =
+                        await smartClient.account.encodeCalls(multipleCalls)
 
                     if (!smartClient.account.decodeCalls) {
                         throw new Error("decodeCalls is not supported")
@@ -150,14 +167,11 @@ describe.each(getCoreSmartAccounts())(
                     const decoded =
                         await smartClient.account.decodeCalls(callData)
 
-                    expect(decoded).toEqual([
-                        { to: zeroAddress, data: "0x", value: 0n },
-                        {
-                            to: zeroAddress,
-                            data: erc20TransactionData,
-                            value: name === "Simple" ? 0n : 10n
-                        }
-                    ])
+                    expect(decoded).toEqual(
+                        multipleCalls.map((call) =>
+                            name === "Simple" ? { ...call, value: 0n } : call
+                        )
+                    )
 
                     const decodeErc20TransactionData = decodeFunctionData({
                         abi: erc20Abi,
@@ -232,12 +246,6 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
-
                     const callData = await smartClient.account.encodeCalls([
                         {
                             to: zeroAddress,
@@ -291,24 +299,8 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const erc20TransactionData = encodeFunctionData({
-                    abi: erc20Abi,
-                    functionName: "transfer",
-                    args: [zeroAddress, 1000000000000000000n]
-                })
-
-                const callData = await smartClient.account.encodeCalls([
-                    {
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    },
-                    {
-                        to: zeroAddress,
-                        data: erc20TransactionData,
-                        value: 10n
-                    }
-                ])
+                const callData =
+                    await smartClient.account.encodeCalls(multipleCalls)
 
                 if (!smartClient.account.decodeCalls) {
                     throw new Error("decodeCalls is not supported")
@@ -316,10 +308,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const decoded = await smartClient.account.decodeCalls(callData)
 
-                expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
-                    { to: zeroAddress, data: erc20TransactionData, value: 10n }
-                ])
+                expect(decoded).toEqual(multipleCalls)
 
                 const decodeErc20TransactionData = decodeFunctionData({
                     abi: erc20Abi,
@@ -393,12 +382,6 @@ describe.each(getCoreSmartAccounts())(
                         ...rpc
                     })
 
-                    const erc20TransactionData = encodeFunctionData({
-                        abi: erc20Abi,
-                        functionName: "transfer",
-                        args: [zeroAddress, 1000000000000000000n]
-                    })
-
                     const callData = await smartClient.account.encodeCalls([
                         {
                             to: zeroAddress,
@@ -452,24 +435,8 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                const erc20TransactionData = encodeFunctionData({
-                    abi: erc20Abi,
-                    functionName: "transfer",
-                    args: [zeroAddress, 1000000000000000000n]
-                })
-
-                const callData = await smartClient.account.encodeCalls([
-                    {
-                        to: zeroAddress,
-                        data: "0x",
-                        value: 0n
-                    },
-                    {
-                        to: zeroAddress,
-                        data: erc20TransactionData,
-                        value: 10n
-                    }
-                ])
+                const callData =
+                    await smartClient.account.encodeCalls(multipleCalls)
 
                 if (!smartClient.account.decodeCalls) {
                     throw new Error("decodeCalls is not supported")
@@ -477,10 +444,7 @@ describe.each(getCoreSmartAccounts())(
 
                 const decoded = await smartClient.account.decodeCalls(callData)
 
-                expect(decoded).toEqual([
-                    { to: zeroAddress, data: "0x", value: 0n },
-                    { to: zeroAddress, data: erc20TransactionData, value: 10n }
-                ])
+                expect(decoded).toEqual(multipleCalls)
 
                 const decodeErc20TransactionData = decodeFunctionData({
                     abi: erc20Abi,
