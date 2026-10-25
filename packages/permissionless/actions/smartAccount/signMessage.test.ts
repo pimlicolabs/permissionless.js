@@ -111,11 +111,6 @@ describe.each(getCoreSmartAccounts())(
                     ...rpc
                 })
 
-                if (name === "LightAccount 2.0.0") {
-                    // LightAccount 2.0.0 doesn't support EIP-1271
-                    return
-                }
-
                 if (
                     name.includes("Safe 7579") ||
                     name.includes("Kernel 0.3.3 + EIP-7702")
@@ -185,11 +180,6 @@ describe.each(getCoreSmartAccounts())(
                     },
                     ...rpc
                 })
-
-                if (name === "LightAccount 2.0.0") {
-                    // LightAccount 2.0.0 doesn't support EIP-1271
-                    return
-                }
 
                 if (name.includes("Safe 7579")) {
                     // Due to 7579 launchpad, we can't verify the signature before deploying the account.
