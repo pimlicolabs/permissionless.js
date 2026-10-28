@@ -35,6 +35,9 @@ export {
 } from "./etherspot/toEtherspotSmartAccount.js"
 
 export {
+    type DynamicOwner,
+    type RegularOwner,
+    type SafeOwner,
     type SafeSmartAccountImplementation,
     type SafeVersion,
     type ToSafeSmartAccountParameters,
