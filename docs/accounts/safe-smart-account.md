@@ -46,6 +46,7 @@ async function toSafeSmartAccount<
 | `entryPoint` | `{ address: Address, version: "0.6" \| "0.7" }` | No | `"0.7"` | EntryPoint to use |
 | `safe4337ModuleAddress` | `Address` | No | Version-specific | 4337 module address |
 | `erc7579LaunchpadAddress` | `Address` | No | undefined | ERC-7579 launchpad (enables module support) |
+| `erc7579Version` | `"legacy" \| "v1"` | No | `"legacy"` | Match the supplied Safe7579 launchpad and adapter contract ABIs |
 | `safeProxyFactoryAddress` | `Address` | No | Version-specific | Proxy factory |
 | `safeSingletonAddress` | `Address` | No | Version-specific | Safe singleton |
 | `safeWebAuthnSharedSignerAddress` | `Address` | No | Version-specific | WebAuthn signer |
@@ -62,6 +63,15 @@ async function toSafeSmartAccount<
 | `useMultiSendForSetup` | `boolean` | No | `false` | Use MultiSend for account setup (avoids skipping MultiSend setup for single transactions) |
 
 ## SafeVersion
+
+For Safe7579 v1 contracts, set `erc7579Version: "v1"` together with the
+matching `erc7579LaunchpadAddress` and `safe4337ModuleAddress`. This selects the
+typed module initializer and combined module list used by v1 for both factory
+address derivation and the first user operation. Omit this option for legacy
+contracts: existing initializer bytes and counterfactual addresses are preserved.
+Here `"v1"` identifies the ABI used by the deployed launchpad
+`0x75798463024Bda64D83c94A64Bc7D7eaB41300eF` and adapter
+`0x7579f2ad53b01c3d8779fe17928e0d48885b0003`, rather than a Git release tag.
 
 ```typescript
 type SafeVersion = "1.4.1" | "1.5.0"
