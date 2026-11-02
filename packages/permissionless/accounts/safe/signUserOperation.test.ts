@@ -272,4 +272,62 @@ describe("signUserOperation", () => {
         expect(receipt).toBeTruthy()
         expect(receipt.success).toBeTruthy()
     })
+
+    testWithRpc("signUserOperation_V07 1-of-2 threshold", async ({ rpc }) => {
+        const owners = [
+            privateKeyToAccount(generatePrivateKey()),
+            privateKeyToAccount(generatePrivateKey())
+        ]
+
+        const safeAccountClient = getBundlerClient({
+            account: await getSafeClient({
+                ...rpc,
+                entryPoint: {
+                    version: "0.7"
+                },
+                owners: owners.map((owner) => toAccount(owner.address)),
+                threshold: 1n
+            }),
+            entryPoint: {
+                version: "0.7"
+            },
+            ...rpc
+        })
+
+        const unSignedUserOperation =
+            await safeAccountClient.prepareUserOperation({
+                calls: [
+                    {
+                        to: safeAccountClient.account.address,
+                        data: "0x"
+                    }
+                ]
+            })
+
+        // threshold is 1, so a single owner signature must be enough
+        const signature = await signUserOperation({
+            version: "1.4.1",
+            entryPoint: {
+                address: entryPoint07Address,
+                version: "0.7"
+            },
+            chainId: foundry.id,
+            owners: owners.map((owner) => toAccount(owner.address)),
+            threshold: 1n,
+            account: owners[0],
+            ...unSignedUserOperation
+        })
+
+        const userOpHash = await safeAccountClient.sendUserOperation({
+            ...unSignedUserOperation,
+            signature
+        })
+
+        const receipt = await safeAccountClient.waitForUserOperationReceipt({
+            hash: userOpHash
+        })
+
+        expect(receipt).toBeTruthy()
+        expect(receipt.success).toBeTruthy()
+    })
 })

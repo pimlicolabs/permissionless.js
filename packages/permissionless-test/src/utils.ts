@@ -403,11 +403,13 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
     erc7579,
     privateKey,
     owners,
+    threshold,
     onchainIdentifier,
     version
 }: {
     erc7579?: boolean
     owners?: Account[]
+    threshold?: bigint
     onchainIdentifier?: Hex
     version?: SafeVersion
 } & AAParamType<entryPointVersion>): Promise<
@@ -429,6 +431,7 @@ export const getSafeClient = async <entryPointVersion extends "0.6" | "0.7">({
             privateKeyToAccount(privateKey ?? generatePrivateKey())
         ],
         version: version ?? "1.4.1",
+        threshold,
         saltNonce: 420n,
         safe4337ModuleAddress: erc7579
             ? "0x7579EE8307284F293B1927136486880611F20002"
