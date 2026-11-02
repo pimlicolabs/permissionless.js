@@ -130,6 +130,7 @@ export async function signUserOperation(
             version: "0.6" | "0.7"
         }
         owners: (Account | WebAuthnAccount)[]
+        threshold?: bigint
         account: OneOf<
             | EthereumProvider
             | WalletClient<Transport, Chain | undefined, Account>
@@ -152,6 +153,7 @@ export async function signUserOperation(
         safe4337ModuleAddress: _safe4337ModuleAddress,
         version,
         owners,
+        threshold = BigInt(owners.length),
         signatures: existingSignatures,
         account,
         ...userOperation
@@ -303,7 +305,7 @@ export async function signUserOperation(
         }
     ]
 
-    if (signatures.length !== owners.length) {
+    if (BigInt(signatures.length) < threshold) {
         return encodeAbiParameters(
             [
                 {

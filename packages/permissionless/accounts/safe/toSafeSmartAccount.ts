@@ -1991,12 +1991,13 @@ export async function toSafeSmartAccount<
 
             let signatures: Hex | undefined = undefined
 
-            for (const owner of localOwners) {
+            for (const owner of localOwners.slice(0, Number(threshold))) {
                 signatures = await signUserOperation({
                     ...userOperation,
                     version,
                     entryPoint,
                     owners: localOwners,
+                    threshold,
                     account: owner,
                     chainId,
                     signatures,
