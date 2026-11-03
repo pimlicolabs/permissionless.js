@@ -104,11 +104,15 @@ export function encode7579Calls<callType extends CallType>({
         functionName: "execute",
         args: [
             encodeExecutionMode(mode),
-            concatHex([
-                call.to,
-                toHex(call.value ?? 0n, { size: 32 }),
-                call.data ?? "0x"
-            ])
+            // ERC-7579 single delegatecall execution data is
+            // `target ++ callData`, with no value word.
+            mode?.type === "delegatecall"
+                ? concatHex([call.to, call.data ?? "0x"])
+                : concatHex([
+                      call.to,
+                      toHex(call.value ?? 0n, { size: 32 }),
+                      call.data ?? "0x"
+                  ])
         ]
     })
 }

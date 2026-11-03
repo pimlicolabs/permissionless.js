@@ -113,6 +113,23 @@ export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
         }
     }
 
+    // Delegatecall - calldata is encoded as concatenated (to, data)
+    if (decodedMode.type === "delegatecall") {
+        return {
+            mode: decodedMode,
+            callData: [
+                {
+                    to: getAddress(slice(executionCalldata, 0, 20)),
+                    value: 0n,
+                    data:
+                        size(executionCalldata) > 20
+                            ? slice(executionCalldata, 20)
+                            : "0x"
+                }
+            ]
+        }
+    }
+
     // Single call - calldata is encoded as concatenated (to, value, data)
     const to = getAddress(slice(executionCalldata, 0, 20)) // 20 bytes address with 0x prefix
     const value = BigInt(slice(executionCalldata, 20, 52)) // 32 bytes value
