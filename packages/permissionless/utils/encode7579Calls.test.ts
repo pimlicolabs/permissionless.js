@@ -1,4 +1,6 @@
+import { decodeFunctionData, parseAbi } from "viem"
 import { describe, expect, test } from "vitest"
+import { decode7579Calls } from "./decode7579Calls"
 import { encode7579Calls } from "./encode7579Calls"
 
 describe("encode7579Calls", () => {
@@ -65,5 +67,43 @@ describe("encode7579Calls", () => {
                 ]
             })
         }).toThrowError("batchcall calldata")
+    })
+
+    test("delegatecall has no value word", async () => {
+        const callData = encode7579Calls({
+            mode: {
+                type: "delegatecall"
+            },
+            callData: [
+                {
+                    to: "0x1234567890123456789012345678901234567890",
+                    value: BigInt(0),
+                    data: "0xdeadbeef"
+                }
+            ]
+        })
+
+        const { args } = decodeFunctionData({
+            abi: parseAbi([
+                "function execute(bytes32 execMode, bytes executionCalldata)"
+            ]),
+            data: callData
+        })
+
+        expect(args[0]).toBe(
+            "0xff00000000000000000000000000000000000000000000000000000000000000"
+        )
+        // ERC-7579 delegatecall: target (20 bytes) ++ callData
+        expect(args[1]).toBe(
+            "0x1234567890123456789012345678901234567890deadbeef"
+        )
+
+        expect(decode7579Calls(callData).callData).toEqual([
+            {
+                to: "0x1234567890123456789012345678901234567890",
+                value: BigInt(0),
+                data: "0xdeadbeef"
+            }
+        ])
     })
 })
