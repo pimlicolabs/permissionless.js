@@ -237,7 +237,7 @@ async function supportsExecutionMode(
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `type` | `CallType` | Yes | Execution mode type |
-| `revertOnError` | `boolean` | No | Revert behavior |
+| `revertOnError` | `boolean` | No | `true` (default) reverts the whole execution if a call fails (execType `0x00`), `false` uses try mode (execType `0x01`) |
 | `selector` | `Hex` | No | Function selector |
 | `context` | `Hex` | No | Additional context |
 | `account` | `SmartAccount` | No | Override client's account |

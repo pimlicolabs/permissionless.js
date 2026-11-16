@@ -282,7 +282,7 @@ export async function toEtherspotSmartAccount<entryPointVersion extends "0.7">(
             return encode7579Calls({
                 mode: {
                     type: calls.length > 1 ? "batchcall" : "call",
-                    revertOnError: false,
+                    revertOnError: true,
                     selector: "0x",
                     context: "0x"
                 },

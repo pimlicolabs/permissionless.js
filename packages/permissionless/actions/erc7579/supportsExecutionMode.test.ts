@@ -25,7 +25,7 @@ describe.each(getCoreSmartAccounts())(
                     await supportsExecutionMode(smartClient, {
                         account: smartClient.account,
                         type: "batchcall",
-                        revertOnError: false,
+                        revertOnError: true,
                         selector: "0x0",
                         context: "0x"
                     })
@@ -43,7 +43,7 @@ describe.each(getCoreSmartAccounts())(
                     await supportsExecutionMode(smartClient, {
                         account: smartClient.account,
                         type: "batchcall",
-                        revertOnError: false,
+                        revertOnError: true,
                         selector: "0x0",
                         context: "0x"
                     })
@@ -90,7 +90,7 @@ describe.each(getCoreSmartAccounts())(
                     await supportsExecutionMode(smartClient, {
                         account: smartClient.account,
                         type: "batchcall",
-                        revertOnError: false,
+                        revertOnError: true,
                         selector: "0x0",
                         context: "0x"
                     })

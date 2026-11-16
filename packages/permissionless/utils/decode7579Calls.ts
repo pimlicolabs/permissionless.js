@@ -73,7 +73,7 @@ export function decode7579Calls(callData: Hex): DecodeCallDataReturnType {
 
     const decodedMode: ExecutionMode<CallType> = {
         type,
-        revertOnError: BigInt(revertOnError) === BigInt(1),
+        revertOnError: BigInt(revertOnError) === BigInt(0),
         selector,
         context
     }

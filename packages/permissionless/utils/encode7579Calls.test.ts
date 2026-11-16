@@ -1,4 +1,6 @@
+import { slice } from "viem"
 import { describe, expect, test } from "vitest"
+import { decode7579Calls } from "./decode7579Calls"
 import { encode7579Calls } from "./encode7579Calls"
 
 describe("encode7579Calls", () => {
@@ -66,4 +68,34 @@ describe("encode7579Calls", () => {
             })
         }).toThrowError("batchcall calldata")
     })
+
+    // ERC-7579 execType: 0x00 = default (revert on failure), 0x01 = try.
+    test.each([
+        { revertOnError: undefined, execType: "0x00" },
+        { revertOnError: true, execType: "0x00" },
+        { revertOnError: false, execType: "0x01" }
+    ])(
+        "revertOnError $revertOnError encodes execType $execType",
+        ({ revertOnError, execType }) => {
+            const callData = encode7579Calls({
+                mode: {
+                    type: "call",
+                    revertOnError
+                },
+                callData: [
+                    {
+                        to: "0x1234567890123456789012345678901234567890",
+                        value: BigInt(0),
+                        data: "0x"
+                    }
+                ]
+            })
+
+            // 4-byte selector, then callType (1 byte) and execType (1 byte).
+            expect(slice(callData, 5, 6)).toBe(execType)
+            expect(decode7579Calls(callData).mode.revertOnError).toBe(
+                revertOnError ?? true
+            )
+        }
+    )
 })
