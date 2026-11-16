@@ -68,6 +68,13 @@ The function accepts different parameter shapes based on the call type:
 | `"batchcall"` | `0x01` |
 | `"delegatecall"` | `0xff` |
 
+**execType (second byte):**
+
+| `revertOnError` | execType byte |
+|------|-----------|
+| `true` or omitted | `0x00` (default, a failed call reverts the whole execution) |
+| `false` | `0x01` (try, a failed call does not revert) |
+
 ### Example
 
 ```typescript

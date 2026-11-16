@@ -53,7 +53,9 @@ export function encodeExecutionMode<callType extends CallType>({
         ["bytes1", "bytes1", "bytes4", "bytes4", "bytes22"],
         [
             toHex(toBytes(getCallType(type), { size: 1 })),
-            toHex(toBytes(revertOnError ? "0x01" : "0x00", { size: 1 })),
+            toHex(
+                toBytes((revertOnError ?? true) ? "0x00" : "0x01", { size: 1 })
+            ),
             toHex(toBytes("0x0", { size: 4 })),
             toHex(toBytes(selector ?? "0x", { size: 4 })),
             toHex(toBytes(context ?? "0x", { size: 22 }))

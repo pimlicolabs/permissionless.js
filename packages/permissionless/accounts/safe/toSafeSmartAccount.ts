@@ -1639,7 +1639,7 @@ export async function toSafeSmartAccount<
                                         type: hasMultipleCalls
                                             ? "batchcall"
                                             : "call",
-                                        revertOnError: false,
+                                        revertOnError: true,
                                         selector: "0x",
                                         context: "0x"
                                     },
@@ -1653,7 +1653,7 @@ export async function toSafeSmartAccount<
                 return encode7579Calls({
                     mode: {
                         type: hasMultipleCalls ? "batchcall" : "call",
-                        revertOnError: false,
+                        revertOnError: true,
                         selector: "0x",
                         context: "0x"
                     },

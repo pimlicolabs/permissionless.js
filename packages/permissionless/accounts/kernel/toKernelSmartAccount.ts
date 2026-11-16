@@ -817,7 +817,7 @@ export async function toKernelSmartAccount<
                     return encode7579Calls({
                         mode: {
                             type: "delegatecall",
-                            revertOnError: false,
+                            revertOnError: true,
                             selector: "0x",
                             context: "0x"
                         },
