@@ -14,6 +14,31 @@ import {
 import { getAction, parseAccount } from "viem/utils"
 import { AccountNotFoundError } from "../../errors/index.js"
 
+// ─── DACS-Standard Guardrail (§9.5.7 & §14.4) ─────────────────────────────
+export interface DacsMandateMeta {
+    dacsMandate?: string
+    dacsSessionId?: string
+    dacsMaxAmount?: bigint | string | number
+}
+
+export function assertDacsSpendMandate(
+    requestedValue: bigint,
+    meta?: DacsMandateMeta
+): void {
+    if (!meta || (!meta.dacsMandate && !meta.dacsSessionId)) {
+        return
+    }
+
+    if (meta.dacsMaxAmount !== undefined) {
+        const ceiling = BigInt(meta.dacsMaxAmount)
+        if (requestedValue > ceiling) {
+            throw new Error(
+                `[DACS-Standard §9.5.7] ERC-4337 UserOperation aborted: requested spend (${requestedValue.toString()}) exceeds authorized mandate ceiling (${ceiling.toString()}).`
+            )
+        }
+    }
+}
+
 /**
  * Creates, signs, and sends a new transaction to the network.
  * This function also allows you to sponsor this transaction if sender is a smartAccount
@@ -68,9 +93,11 @@ export async function sendTransaction<
     calls extends readonly unknown[] = readonly unknown[]
 >(
     client: Client<Transport, chain, account>,
-    args:
+    args: (
         | SendTransactionParameters<chain, account, chainOverride>
         | SendUserOperationParameters<account, accountOverride, calls>
+    ) &
+        DacsMandateMeta
 ): Promise<Hash> {
     let userOpHash: Hash
 
@@ -95,6 +122,11 @@ export async function sendTransaction<
 
         if (!to) throw new Error("Missing to address")
 
+        const txValue = value || BigInt(0)
+
+        // DACS-Standard (§9.5.7) Pre-Flight Mandate Enforcement
+        assertDacsSpendMandate(txValue, args)
+
         userOpHash = await getAction(
             client,
             sendUserOperation,
@@ -104,7 +136,7 @@ export async function sendTransaction<
             calls: [
                 {
                     to,
-                    value: value || BigInt(0),
+                    value: txValue,
                     data: data || "0x"
                 }
             ],
@@ -114,6 +146,18 @@ export async function sendTransaction<
             nonce: nonce ? BigInt(nonce) : undefined
         })
     } else {
+        const callsList = (args as { calls?: readonly { value?: bigint }[] })
+            .calls
+        const totalValue = Array.isArray(callsList)
+            ? callsList.reduce(
+                  (sum, call) => sum + (call?.value ?? BigInt(0)),
+                  BigInt(0)
+              )
+            : BigInt(0)
+
+        // DACS-Standard (§9.5.7) Pre-Flight Mandate Enforcement for batched calls
+        assertDacsSpendMandate(totalValue, args)
+
         userOpHash = await getAction(
             client,
             sendUserOperation,
